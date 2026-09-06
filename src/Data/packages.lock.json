@@ -14,6 +14,9 @@
         "resolved": "2.0.4",
         "contentHash": "iiawN8l6QBzLZTK2BQRyq/1XmvDONghjvXoDhkkQgPTG8bRIsmIxJV1+Lc75fviNgMnjAE3wxReVJAF7P1hkoQ=="
       },
+      "wahu.learning": {
+        "type": "Project"
+      },
       "wahu.platform": {
         "type": "Project"
       }

@@ -19,8 +19,12 @@
         "dependencies": {
           "SourceGear.sqlite3": "[3.53.4, )",
           "System.Data.SQLite": "[2.0.4, )",
+          "WAHU.Learning": "[1.0.0, )",
           "WAHU.Platform": "[1.0.0, )"
         }
+      },
+      "wahu.learning": {
+        "type": "Project"
       },
       "wahu.platform": {
         "type": "Project"
