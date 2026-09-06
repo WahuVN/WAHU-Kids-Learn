@@ -1,0 +1,12 @@
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration><Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProjectGuid>{BC9F3A15-56E5-43B4-9548-6D4582B73913}</ProjectGuid><OutputType>Exe</OutputType><RootNamespace>WAHU.BehaviorRuntimeSmoke</RootNamespace><AssemblyName>WAHU.BehaviorRuntimeSmoke</AssemblyName><TargetFrameworkVersion>v4.8</TargetFrameworkVersion><FileAlignment>512</FileAlignment><Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' "><DebugSymbols>true</DebugSymbols><DebugType>full</DebugType><Optimize>false</Optimize><OutputPath>bin\Debug\</OutputPath><DefineConstants>DEBUG;TRACE</DefineConstants><PlatformTarget>x86</PlatformTarget></PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' "><DebugType>pdbonly</DebugType><Optimize>true</Optimize><OutputPath>bin\Release\</OutputPath><DefineConstants>TRACE</DefineConstants><PlatformTarget>x86</PlatformTarget></PropertyGroup>
+  <ItemGroup><Reference Include="System" /><Reference Include="System.Core" /></ItemGroup>
+  <ItemGroup><Compile Include="Program.cs" /></ItemGroup>
+  <ItemGroup><ProjectReference Include="..\..\src\Learning\WAHU.Learning.csproj"><Project>{9C1A840E-D70F-4B48-91C0-4CDA6C4E2F01}</Project><Name>WAHU.Learning</Name></ProjectReference></ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

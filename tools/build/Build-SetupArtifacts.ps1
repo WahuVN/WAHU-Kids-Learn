@@ -29,22 +29,28 @@ $msbuild = Find-FirstExisting @(
 )
 if (-not $msbuild) { throw 'Không tìm thấy MSBuild.' }
 
-Write-Host "[1/8] Restore + rebuild solution net48/x86 bằng $msbuild"
+Write-Host "[1/9] Restore + rebuild solution net48/x86 bằng $msbuild"
 & $msbuild 'WAHUKidsLearn.sln' /restore /m /t:Rebuild "/p:Configuration=$Configuration" /p:Platform=x86 /v:minimal /nologo
 if ($LASTEXITCODE -ne 0) { throw "MSBuild fail: $LASTEXITCODE" }
 
 $preflightSmoke = Join-Path $root "tests\SetupPreflightSmoke\bin\$Configuration\WAHU.SetupPreflight.Smoke.exe"
+$behaviorSmoke = Join-Path $root "tests\BehaviorRuntimeSmoke\bin\$Configuration\WAHU.BehaviorRuntimeSmoke.exe"
 $sqliteSmoke = Join-Path $root "tests\SQLiteRuntimeSmoke\bin\$Configuration\WAHU.SQLiteRuntimeSmoke.exe"
 $schemaSource = Join-Path $root 'data\schema\001_initial.sql'
 Require-File $preflightSmoke
+Require-File $behaviorSmoke
 Require-File $sqliteSmoke
 Require-File $schemaSource
 
-Write-Host '[2/8] Setup preflight smoke'
+Write-Host '[2/9] Setup preflight smoke'
 & $preflightSmoke
 if ($LASTEXITCODE -ne 0) { throw "SetupPreflight smoke fail: $LASTEXITCODE" }
 
-Write-Host '[3/8] SQLite/Data smoke + backup/restore integration'
+Write-Host '[3/9] Behavior runtime smoke'
+& $behaviorSmoke
+if ($LASTEXITCODE -ne 0) { throw "Behavior runtime smoke fail: $LASTEXITCODE" }
+
+Write-Host '[4/9] SQLite/Data smoke + backup/restore integration'
 & $sqliteSmoke $schemaSource
 if ($LASTEXITCODE -ne 0) { throw "SQLite runtime smoke fail: $LASTEXITCODE" }
 
@@ -52,13 +58,14 @@ $publish = Join-Path $root 'build\win7_x86\publish'
 if (Test-Path $publish) { Remove-Item -LiteralPath $publish -Recurse -Force }
 New-Item -ItemType Directory -Force -Path $publish | Out-Null
 
-Write-Host '[4/8] Stage publish tree'
+Write-Host '[5/9] Stage publish tree'
 $appOut = Join-Path $root "src\App\bin\$Configuration"
 $preOut = Join-Path $root "tools\setup_preflight\bin\$Configuration"
 $runtimeFiles = @(
     'WAHUKidsLearn.exe',
     'WAHUKidsLearn.exe.config',
     'WAHU.Platform.dll',
+    'WAHU.Learning.dll',
     'WAHU.Data.dll',
     'System.Data.SQLite.dll',
     'e_sqlite3.dll'
@@ -89,11 +96,11 @@ Copy-Item 'assets\verified_vectors' (Join-Path $publish 'assets') -Recurse -Forc
 Copy-Item 'data\schema\*.sql' (Join-Path $publish 'data\schema') -Force
 
 # Hard deployment guards: these must be in the actual staged installer payload.
-foreach ($name in @('WAHU.Data.dll','System.Data.SQLite.dll','e_sqlite3.dll','data\schema\001_initial.sql','data\schema\002_attempt_immutability.sql')) {
+foreach ($name in @('WAHU.Learning.dll','WAHU.Data.dll','System.Data.SQLite.dll','e_sqlite3.dll','data\schema\001_initial.sql','data\schema\002_attempt_immutability.sql')) {
     Require-File (Join-Path $publish $name)
 }
 
-Write-Host '[5/8] Validate staged JSON + run staged preflight'
+Write-Host '[6/9] Validate staged JSON + run staged preflight'
 Get-ChildItem -LiteralPath $publish -Recurse -Filter *.json -File | ForEach-Object {
     $null = Get-Content -Raw -LiteralPath $_.FullName | ConvertFrom-Json
 }
@@ -102,7 +109,7 @@ $reportPath = Join-Path $root 'build\preflight-publish.json'
 if ($LASTEXITCODE -ne 0) { throw "Staged preflight fail: $LASTEXITCODE" }
 $null = Get-Content -Raw -LiteralPath $reportPath | ConvertFrom-Json
 
-Write-Host '[6/8] Generate reproducible hashes + dev release manifest'
+Write-Host '[7/9] Generate reproducible hashes + dev release manifest'
 $hashPath = Join-Path $root 'build\win7_x86\SHA256SUMS.txt'
 $lines = Get-ChildItem -LiteralPath $publish -Recurse -File | Sort-Object FullName | ForEach-Object {
     $rel = $_.FullName.Substring($publish.Length).TrimStart('\')
@@ -164,7 +171,9 @@ $manifest = [ordered]@{
     }
     gates = [ordered]@{
         preflight_smoke = 'PASS'
-        preflight_smoke_assertions = 34
+        preflight_smoke_assertions = 35
+        behavior_runtime_smoke = 'PASS'
+        behavior_runtime_smoke_assertions = 15
         sqlite_runtime_smoke = 'PASS'
         backup_restore_smoke = 'PASS'
         staged_payload_guard = 'PASS'
@@ -185,7 +194,7 @@ $manifestPath = Join-Path $root 'build\win7_x86\release_manifest_dev.json'
 $manifest | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $manifestPath -Encoding UTF8
 $null = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
 
-Write-Host '[7/8] Installer compiler discovery'
+Write-Host '[8/9] Installer compiler discovery'
 $iscc = Find-FirstExisting @(
     "$env:LOCALAPPDATA\Programs\Inno Setup 7\ISCC.exe",
     'C:\Program Files\Inno Setup 7\ISCC.exe',
@@ -197,7 +206,7 @@ if ($CompileInstaller -or $RequireInstaller) {
         if ($RequireInstaller) { throw 'Không tìm thấy ISCC.exe.' }
         Write-Warning 'ISCC.exe chưa có; bỏ qua compile installer.'
     } else {
-        Write-Host "[8/8] Compile installer bằng $iscc"
+        Write-Host "[9/9] Compile installer bằng $iscc"
         & $iscc "/DAppVersion=$AppVersion" 'setup\installer\WAHU_Kids_Learn.iss'
         if ($LASTEXITCODE -ne 0) { throw "Inno Setup compile fail: $LASTEXITCODE" }
         Require-File $installerPath
@@ -206,7 +215,7 @@ if ($CompileInstaller -or $RequireInstaller) {
         Write-Host "INSTALLER_SHA256=$installerHash"
     }
 } else {
-    Write-Host '[8/8] Installer compile chưa được yêu cầu.'
+    Write-Host '[9/9] Installer compile chưa được yêu cầu.'
 }
 
 Write-Host "BUILD_SETUP_ARTIFACTS_PASS publish=$publish"
