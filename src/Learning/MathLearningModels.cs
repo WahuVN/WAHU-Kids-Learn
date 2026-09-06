@@ -38,6 +38,10 @@ namespace WAHU.Learning
         public IList<int> Choices { get; set; }
         public string AnswerKind { get; set; }
         public string CorrectAnswerText { get; set; }
+        public IList<string> AcceptedAnswers { get; set; }
+        public double NumericTolerance { get; set; }
+        public string ExpectedUnit { get; set; }
+        public IList<string> AcceptedUnits { get; set; }
         public IList<string> ChoiceTexts { get; set; }
         public string IllustrationData { get; set; }
         public string Representation { get; set; }
@@ -72,11 +76,7 @@ namespace WAHU.Learning
 
         public bool IsCorrectAnswer(string answer)
         {
-            if (UsesTextChoices)
-                return string.Equals((answer ?? string.Empty).Trim(), (CorrectAnswerText ?? string.Empty).Trim(), StringComparison.Ordinal);
-            int parsed;
-            return int.TryParse(answer, System.Globalization.NumberStyles.Integer,
-                System.Globalization.CultureInfo.InvariantCulture, out parsed) && parsed == CorrectAnswer;
+            return MathAnswerValidator.IsCorrect(this, answer);
         }
     }
 

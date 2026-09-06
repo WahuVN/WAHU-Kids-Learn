@@ -189,9 +189,12 @@ namespace WAHU.Learning
             }
 
             int numeric;
-            if (!int.TryParse(answer, System.Globalization.NumberStyles.Integer,
-                System.Globalization.CultureInfo.InvariantCulture, out numeric))
-                return New("INPUT_FORMAT_ERROR", 0.90, "numeric_question_received_non_numeric_answer");
+            if (!MathAnswerValidator.TryParseInteger(answer, out numeric))
+            {
+                if (MathAnswerValidator.IsWellFormedNumericAnswer(answer))
+                    return New("UNKNOWN", 0.40, "well_formed_numeric_answer_not_equal_to_expected_integer");
+                return New("INPUT_FORMAT_ERROR", 0.90, "numeric_question_received_malformed_answer");
+            }
             var difference = Math.Abs(question.CorrectAnswer - numeric);
             if (question.TemplateId == "add_within_1000_one_carry" && (difference == 10 || difference == 100))
                 return New("CARRY_MISSING", 0.78, "answer_matches_common_missing_carry_offset");
