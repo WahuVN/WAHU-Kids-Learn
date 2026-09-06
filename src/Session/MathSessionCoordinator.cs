@@ -37,6 +37,8 @@ namespace WAHU.Session
         private readonly List<string> _recentTemplates = new List<string>();
         private readonly List<string> _recentSkills = new List<string>();
         private readonly HashSet<string> _distinctSkills = new HashSet<string>(StringComparer.Ordinal);
+        private readonly Dictionary<string, MathSkillMasteryChange> _masteryChanges =
+            new Dictionary<string, MathSkillMasteryChange>(StringComparer.Ordinal);
         private readonly object _submitGate = new object();
 
         private IList<MathTemplateRef> _templates;
@@ -420,6 +422,7 @@ namespace WAHU.Session
             else
             {
                 _skills[question.SkillId] = Apply(current, mastery, answeredUtc, review.DueAtUtc, isCorrect);
+                ApplyMasteryChange(question.SkillId, mastery.ScoreBefore, mastery.ScoreAfter);
                 AddRecent(_recentTemplates, question.TemplateId);
                 AddRecent(_recentSkills, question.SkillId);
                 _distinctSkills.Add(question.SkillId);
@@ -467,9 +470,16 @@ namespace WAHU.Session
             {
                 { "attempts", summary.Attempts }, { "correct", summary.Correct }, { "hinted_correct", summary.HintedCorrect },
                 { "wrong", summary.Wrong }, { "distinct_skills", summary.DistinctSkills }, { "subject", "math" },
-                { "session_mode", _sessionMode }
+                { "session_mode", _sessionMode }, { "mastery_changes", summary.MasteryChanges ?? new List<MathSkillMasteryChange>() },
+                { "improved_skill_count", summary.ImprovedSkillCount }
             };
             if (!string.IsNullOrWhiteSpace(_targetLessonId)) summaryData["target_lesson_id"] = _targetLessonId;
+            if (summary.TargetSkillMasteryDelta.HasValue)
+            {
+                summaryData["target_skill_mastery_before"] = summary.TargetSkillMasteryBefore;
+                summaryData["target_skill_mastery_after"] = summary.TargetSkillMasteryAfter;
+                summaryData["target_skill_mastery_delta"] = summary.TargetSkillMasteryDelta;
+            }
             var behaviorJson = _json.Serialize(new Dictionary<string, object> { { "final_state", summary.FinalBehaviorState.ToString() } });
 
             if (string.Equals(_sessionMode, "lesson", StringComparison.Ordinal) && _targetLesson != null &&
@@ -488,6 +498,7 @@ namespace WAHU.Session
                 _lessonProgressStore.CompleteActiveSession(
                     _session.SessionId, _profile.ChildId, _targetLesson.Id, _targetLesson.SkillId,
                     _correct, _targetQuestionCount, _json.Serialize(summaryData), behaviorJson, ended);
+                PopulateNextLesson(summary);
             }
             else
             {
@@ -703,6 +714,7 @@ namespace WAHU.Session
             _recentTemplates.Clear();
             _recentSkills.Clear();
             _distinctSkills.Clear();
+            _masteryChanges.Clear();
             _attempts = 0;
             _correct = 0;
             _hintedCorrect = 0;
@@ -725,6 +737,13 @@ namespace WAHU.Session
                 AddRecent(_recentSkills, attempt.SkillId);
                 var templateId = TemplateIdFromQuestionId(attempt.QuestionId);
                 if (!string.IsNullOrWhiteSpace(templateId)) AddRecent(_recentTemplates, templateId);
+                if (attempt.MasteryScoreAfter.HasValue)
+                {
+                    var reconstructedDelta = attempt.MasteryScoreAfter.Value - attempt.MasteryScoreBefore;
+                    if (attempt.MasteryDelta.HasValue && Math.Abs(attempt.MasteryDelta.Value - reconstructedDelta) > 0.0000001)
+                        throw new InvalidDataException("Persisted Math mastery event delta is inconsistent with score_before/score_after.");
+                    ApplyMasteryChange(attempt.SkillId, attempt.MasteryScoreBefore, attempt.MasteryScoreAfter.Value);
+                }
 
                 _lastBehavior = _behavior.Observe(new BehaviorObservation
                 {
@@ -848,6 +867,20 @@ namespace WAHU.Session
 
         private MathSessionSummary BuildSummary(DateTime? ended)
         {
+            var masteryChanges = _masteryChanges.Values
+                .OrderBy(x => x.SkillId, StringComparer.Ordinal)
+                .Select(x => new MathSkillMasteryChange
+                {
+                    SkillId = x.SkillId,
+                    ScoreBefore = x.ScoreBefore,
+                    ScoreAfter = x.ScoreAfter,
+                    Delta = x.Delta
+                })
+                .ToList();
+            MathSkillMasteryChange targetMastery = null;
+            if (_targetLesson != null)
+                _masteryChanges.TryGetValue(_targetLesson.SkillId, out targetMastery);
+
             return new MathSessionSummary
             {
                 Attempts = _attempts,
@@ -863,8 +896,44 @@ namespace WAHU.Session
                 LessonCompleted = false,
                 LessonScorePercent = string.Equals(_sessionMode, "lesson", StringComparison.Ordinal) && _attempts > 0
                     ? (double?)(100.0 * _correct / _attempts) : null,
-                LessonBestScorePercent = null
+                LessonBestScorePercent = null,
+                MasteryChanges = masteryChanges,
+                ImprovedSkillCount = masteryChanges.Count(x => x.Delta > 0.000000001),
+                TargetSkillMasteryBefore = targetMastery == null ? null : (double?)targetMastery.ScoreBefore,
+                TargetSkillMasteryAfter = targetMastery == null ? null : (double?)targetMastery.ScoreAfter,
+                TargetSkillMasteryDelta = targetMastery == null ? null : (double?)targetMastery.Delta
             };
+        }
+
+        private void ApplyMasteryChange(string skillId, double scoreBefore, double scoreAfter)
+        {
+            if (string.IsNullOrWhiteSpace(skillId)) return;
+            MathSkillMasteryChange existing;
+            if (!_masteryChanges.TryGetValue(skillId, out existing) || existing == null)
+            {
+                existing = new MathSkillMasteryChange
+                {
+                    SkillId = skillId,
+                    ScoreBefore = scoreBefore,
+                    ScoreAfter = scoreAfter
+                };
+                _masteryChanges[skillId] = existing;
+            }
+            else
+            {
+                existing.ScoreAfter = scoreAfter;
+            }
+            existing.Delta = existing.ScoreAfter - existing.ScoreBefore;
+        }
+
+        private void PopulateNextLesson(MathSessionSummary summary)
+        {
+            if (summary == null || !summary.LessonCompleted || _profile == null || _targetLesson == null) return;
+            var next = new MathLessonProgressService(_database, ContentSiblingPath("lesson_catalog_v1.json"))
+                .GetNextLessonAccess(_profile.ChildId, _targetLesson.Id);
+            if (next == null || !next.IsUnlocked) return;
+            summary.NextLessonId = next.LessonId;
+            summary.NextLessonTitleVi = next.TitleVi;
         }
 
         private static SkillSnapshot Apply(SkillSnapshot current, MasteryUpdate update, DateTime now, DateTime due, bool success)

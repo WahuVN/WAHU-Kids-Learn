@@ -114,6 +114,21 @@ Engine publish first-class lesson contract, không để UI tự suy đoán:
 
 AI3 có thể dùng contract này để render “Luyện bài này”, lock state và result score; không tự tính unlock threshold hoặc lesson score.
 
+## 2026-09-07 — Advanced result contract (AI2)
+
+Result summary được mở rộng bằng dữ liệu học thật, không thêm điểm thưởng giả:
+
+- `MasteryChanges`: danh sách per-skill `{ SkillId, ScoreBefore, ScoreAfter, Delta }`; với nhiều attempt cùng skill, `ScoreBefore` là trước attempt đầu tiên và `ScoreAfter` là sau attempt cuối cùng của session.
+- `ImprovedSkillCount`: số skill có delta dương.
+- Targeted lesson publish shortcut `TargetSkillMasteryBefore`, `TargetSkillMasteryAfter`, `TargetSkillMasteryDelta` cho đúng skill của lesson.
+- Suspend/resume reconstruct mastery change từ committed `attempt` + `mastery_event`; không tin cache/in-memory counter.
+- Khi reconstruct, engine kiểm `mastery_event.delta == score_after - score_before`; dữ liệu persisted mâu thuẫn bị reject thay vì hiển thị delta sai.
+- `NextLessonId` + `NextLessonTitleVi` chỉ được publish sau khi targeted lesson đã durable-complete và **bài liền kế trong thứ tự curriculum đang unlocked**.
+- Nếu bài liền kế còn locked hoặc đã ở bài cuối, `NextLessonId/Title` để `null`; UI không tự nhảy qua lesson khóa để tìm một lesson khác.
+- Numeric XP **không được publish** ở wave này vì product chưa có rule first-class; garden reward hiện tại vẫn là reward contract riêng.
+
+AI3 có thể dùng các field trên trực tiếp cho result screen; không tự tính mastery delta hoặc “bài tiếp theo”.
+
 ## Contract còn chưa chốt
 
 Các mục sau chưa được UI/content tự invent cho tới khi AI2 publish contract:
@@ -122,7 +137,7 @@ Các mục sau chưa được UI/content tự invent cho tới khi AI2 publish c
 - skip policy;
 - first-try / retry / hint scoring;
 - numeric XP nếu product thật sự cần;
-- mastery-delta summary / daily streak first-class contract.
+- daily streak first-class contract.
 
 ## Coordination rules
 

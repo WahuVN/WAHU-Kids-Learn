@@ -20,7 +20,7 @@ Branch: `main`
 
 - `tests/MathEngineRuntimeSmoke`: PASS — **47 assertions**.
 - `tests/MathDataEngineRuntimeSmoke`: PASS — **35 assertions**.
-- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **92 assertions** (authored bank + targeted lesson + prerequisite unlock + exact resume).
+- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **99 assertions** (authored bank + targeted lesson + prerequisite unlock + exact resume + mastery delta + next lesson).
 - `tests/SQLiteRuntimeSmoke`: PASS — **166 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
 - `tests/LearningSessionRuntimeSmoke`: PASS — **794 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
 - PowerShell release/build scripts: schema V4 payload/bootstrap expectations đã cập nhật; parse/build gate PASS.
@@ -68,13 +68,15 @@ Branch: `main`
 - lesson completion/progress: PASS first-class persistence — `started_count`, `completed_count`, last/best score.
 - lesson score: PASS first-class cho targeted session; score = correct / authored target count × 100, persisted cùng transaction session completion.
 - lesson prerequisite unlock: PASS first-class — prerequisite được thỏa bởi completed targeted lesson; legacy `STABLE` skill được công nhận để không khóa ngược dữ liệu cũ.
-- numeric XP / daily streak / mastery-delta summary: chưa có first-class contract; UI không tự invent.
+- mastery-delta result: PASS first-class — per-skill before/after/delta được reconstruct từ committed mastery events, kể cả sau suspend/resume; targeted result có shortcut cho target skill.
+- next lesson result: PASS first-class — chỉ publish bài liền kế trong curriculum sau durable completion và chỉ khi bài đó unlocked.
+- numeric XP / daily streak: chưa có first-class contract; UI không tự invent.
 
 ## Known edge cases
 
 PASS: `0`, số âm, số rất lớn, decimal, fraction, malformed, empty, divide-by-zero, unit, expression safety, duplicate event, same-payload replay, conflict payload, app close giữa lesson, exact resume, stale cached open question, corrupted cached question, V1/V2/V3/V4 migration, locked lesson direct-start, targeted suspend/resume, prerequisite completion → unlock.
 
-Còn phải làm: retry semantics, hint/first-try scoring semantics, skip policy nếu product cho phép, numeric XP/mastery-delta summary nếu product cần, stale-state/concurrency regression mở rộng và network/write-failure behavior ở integration boundary. Lesson-target/completion/score/prerequisite unlock contract đã đóng ở schema V4.
+Còn phải làm: retry semantics, hint/first-try scoring semantics, skip policy nếu product cho phép, numeric XP/daily streak nếu product cần, stale-state/concurrency regression mở rộng và network/write-failure behavior ở integration boundary. Lesson-target/completion/score/prerequisite unlock + mastery-delta/next-lesson result contract đã đóng.
 
 ## Commits
 
@@ -83,7 +85,8 @@ Còn phải làm: retry semantics, hint/first-try scoring semantics, skip policy
 - `a1d5146` — `feat(toán): lưu trạng thái phiên học để tiếp tục` — pushed.
 - `beb0c0e` — `feat(toán): tiếp tục chính xác phiên học sau khi đóng app` — pushed.
 - `a5119d4` — `feat(toán): nạp ngân hàng 201 câu theo bài học` — pushed.
-- schema V4 + targeted lesson/prerequisite unlock — đang chốt selective commit hiện tại.
+- `656a94b` — `feat(toán): thêm phiên học theo bài và mở khóa prerequisite` — pushed.
+- mastery-delta + next-lesson advanced result contract — đang chốt selective commit hiện tại.
 
 ## Blocker / coordination
 

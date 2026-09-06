@@ -97,16 +97,23 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
         private static void TestTargetedLessonUnlockAndResume(string root, string schemaPath, string templatePath, string lessonCatalogPath)
         {
             var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
-            var dependent = catalog.Lessons.FirstOrDefault(lesson =>
+            MathLessonDescriptor prerequisite = null;
+            MathLessonDescriptor dependent = null;
+            for (var i = 1; i < catalog.Lessons.Count; i++)
             {
-                var prerequisites = lesson.PrerequisiteSkills ?? new List<string>();
-                if (prerequisites.Count != 1) return false;
-                var prerequisiteLesson = catalog.FindLessonBySkill(prerequisites[0]);
-                return prerequisiteLesson != null &&
-                       (prerequisiteLesson.PrerequisiteSkills == null || prerequisiteLesson.PrerequisiteSkills.Count == 0);
-            });
-            A(dependent != null, "targeted_test_has_simple_prerequisite_edge");
-            var prerequisite = catalog.FindLessonBySkill(dependent.PrerequisiteSkills[0]);
+                var prior = catalog.Lessons[i - 1];
+                var candidate = catalog.Lessons[i];
+                var prerequisites = candidate.PrerequisiteSkills ?? new List<string>();
+                if (prerequisites.Count == 1 &&
+                    string.Equals(prerequisites[0], prior.SkillId, StringComparison.Ordinal) &&
+                    (prior.PrerequisiteSkills == null || prior.PrerequisiteSkills.Count == 0))
+                {
+                    prerequisite = prior;
+                    dependent = candidate;
+                    break;
+                }
+            }
+            A(dependent != null, "targeted_test_has_adjacent_simple_prerequisite_edge");
             A(prerequisite != null, "targeted_test_resolves_prerequisite_lesson");
 
             var database = NewDatabase(Path.Combine(root, "targeted-lesson.db"), schemaPath);
@@ -173,6 +180,15 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                     "targeted_resume_restores_mode_and_lesson");
                 A(started.CompletedQuestionCount == 1 && started.RestoredOpenQuestion,
                     "targeted_resume_rebuilds_progress_and_open_question");
+                var resumedSummary = resumed.Summary;
+                A(resumedSummary.MasteryChanges != null && resumedSummary.MasteryChanges.Count == 1,
+                    "targeted_resume_reconstructs_mastery_change_from_durable_events");
+                var resumedMastery = resumedSummary.MasteryChanges.Single(x => x.SkillId == prerequisite.SkillId);
+                A(resumedMastery.ScoreAfter > resumedMastery.ScoreBefore && resumedMastery.Delta > 0,
+                    "targeted_resume_mastery_change_keeps_first_before_and_latest_after");
+                A(resumedSummary.TargetSkillMasteryDelta.HasValue &&
+                  Math.Abs(resumedSummary.TargetSkillMasteryDelta.Value - resumedMastery.Delta) < 0.0000001,
+                    "targeted_resume_publishes_target_skill_mastery_delta");
 
                 var q2 = resumed.NextQuestion();
                 A(q2.QuestionId == openQuestionId && q2.ContentQuestionId == prerequisite.PracticeSets.Medium[0],
@@ -192,6 +208,18 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                     "targeted_completion_reports_numeric_score");
                 A(summary.LessonBestScorePercent.HasValue && Math.Abs(summary.LessonBestScorePercent.Value - 100.0) < 0.0001,
                     "targeted_completion_reports_best_score");
+                A(summary.MasteryChanges != null && summary.MasteryChanges.Count == 1 && summary.ImprovedSkillCount == 1,
+                    "targeted_completion_reports_one_improved_target_skill");
+                var targetMastery = summary.MasteryChanges.Single(x => x.SkillId == prerequisite.SkillId);
+                A(targetMastery.ScoreAfter > targetMastery.ScoreBefore &&
+                  Math.Abs(targetMastery.Delta - (targetMastery.ScoreAfter - targetMastery.ScoreBefore)) < 0.0000001,
+                    "targeted_completion_reports_durable_mastery_before_after_delta");
+                A(summary.TargetSkillMasteryBefore.HasValue && summary.TargetSkillMasteryAfter.HasValue &&
+                  summary.TargetSkillMasteryDelta.HasValue &&
+                  Math.Abs(summary.TargetSkillMasteryDelta.Value - targetMastery.Delta) < 0.0000001,
+                    "targeted_completion_publishes_target_mastery_shortcut");
+                A(summary.NextLessonId == dependent.Id && summary.NextLessonTitleVi == dependent.TitleVi,
+                    "targeted_completion_publishes_unlocked_immediate_next_lesson");
             }
 
             var stored = new MathLessonProgressStore(database).LoadOne(profile.ChildId, prerequisite.Id);

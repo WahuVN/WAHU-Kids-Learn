@@ -74,6 +74,28 @@ namespace WAHU.Session
                 .ToList();
         }
 
+        public MathLessonAccessSnapshot GetNextLessonAccess(string childId, string lessonId)
+        {
+            if (string.IsNullOrWhiteSpace(childId)) throw new ArgumentException("childId");
+            if (string.IsNullOrWhiteSpace(lessonId)) throw new ArgumentException("lessonId");
+            var lessons = _catalog.Lessons ?? new List<MathLessonDescriptor>();
+            var currentIndex = -1;
+            for (var i = 0; i < lessons.Count; i++)
+            {
+                if (string.Equals(lessons[i].Id, lessonId, StringComparison.Ordinal))
+                {
+                    currentIndex = i;
+                    break;
+                }
+            }
+            if (currentIndex < 0) throw new ArgumentOutOfRangeException("lessonId", "Unknown Math lesson: " + lessonId);
+            if (currentIndex + 1 >= lessons.Count) return null;
+
+            var progress = _store.Load(childId);
+            var skills = _sessions.LoadSkillSnapshots(childId, "math");
+            return BuildAccess(lessons[currentIndex + 1], progress, skills);
+        }
+
         private MathLessonAccessSnapshot BuildAccess(
             MathLessonDescriptor lesson,
             IDictionary<string, MathLessonProgressRecord> progress,

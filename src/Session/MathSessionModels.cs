@@ -38,6 +38,14 @@ namespace WAHU.Session
         public int TargetQuestionCount { get; set; }
     }
 
+    public sealed class MathSkillMasteryChange
+    {
+        public string SkillId { get; set; }
+        public double ScoreBefore { get; set; }
+        public double ScoreAfter { get; set; }
+        public double Delta { get; set; }
+    }
+
     public sealed class MathSessionSummary
     {
         public int Attempts { get; set; }
@@ -58,5 +66,12 @@ namespace WAHU.Session
         public bool LessonCompleted { get; set; }
         public double? LessonScorePercent { get; set; }
         public double? LessonBestScorePercent { get; set; }
+        public IList<MathSkillMasteryChange> MasteryChanges { get; set; }
+        public int ImprovedSkillCount { get; set; }
+        public double? TargetSkillMasteryBefore { get; set; }
+        public double? TargetSkillMasteryAfter { get; set; }
+        public double? TargetSkillMasteryDelta { get; set; }
+        public string NextLessonId { get; set; }
+        public string NextLessonTitleVi { get; set; }
     }
 }

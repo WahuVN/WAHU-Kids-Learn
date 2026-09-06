@@ -33,6 +33,8 @@ namespace WAHU.Data
         public string Representation { get; set; }
         public DateTime AnsweredAtUtc { get; set; }
         public double MasteryScoreBefore { get; set; }
+        public double? MasteryScoreAfter { get; set; }
+        public double? MasteryDelta { get; set; }
         public string ErrorType { get; set; }
     }
 
@@ -215,6 +217,8 @@ WHERE session_id=@session AND question_id=@question AND attempt_index=@attemptIn
                 command.CommandText = @"SELECT a.id,a.question_id,a.skill_id,a.is_correct,a.response_ms,a.hint_level,
 a.representation,a.answered_at_utc,
 COALESCE((SELECT m.score_before FROM mastery_event m WHERE m.attempt_id=a.id ORDER BY m.created_at_utc ASC LIMIT 1),0.25),
+(SELECT m.score_after FROM mastery_event m WHERE m.attempt_id=a.id ORDER BY m.created_at_utc ASC LIMIT 1),
+(SELECT m.delta FROM mastery_event m WHERE m.attempt_id=a.id ORDER BY m.created_at_utc ASC LIMIT 1),
 (SELECT e.error_type FROM error_event e WHERE e.attempt_id=a.id ORDER BY e.created_at_utc ASC LIMIT 1)
 FROM attempt a
 WHERE a.session_id=@session AND a.subject='math' AND a.answered_at_utc IS NOT NULL
@@ -235,7 +239,9 @@ ORDER BY a.answered_at_utc ASC,a.started_at_utc ASC,a.id ASC;";
                             Representation = NullableText(reader[6]),
                             AnsweredAtUtc = ReadUtc(reader[7]),
                             MasteryScoreBefore = Convert.ToDouble(reader[8], CultureInfo.InvariantCulture),
-                            ErrorType = NullableText(reader[9])
+                            MasteryScoreAfter = NullableDouble(reader[9]),
+                            MasteryDelta = NullableDouble(reader[10]),
+                            ErrorType = NullableText(reader[11])
                         });
                     }
                 }
@@ -275,6 +281,13 @@ WHERE session_id=@session;";
         private static string NullableText(object value)
         {
             return value == null || value == DBNull.Value ? null : Text(value);
+        }
+
+        private static double? NullableDouble(object value)
+        {
+            return value == null || value == DBNull.Value
+                ? (double?)null
+                : Convert.ToDouble(value, CultureInfo.InvariantCulture);
         }
 
         private static string Text(object value)
