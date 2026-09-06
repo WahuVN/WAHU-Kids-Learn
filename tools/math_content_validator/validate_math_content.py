@@ -4,11 +4,13 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import difflib
 import json
 import re
 import sys
 from collections import Counter, defaultdict
+from fractions import Fraction
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -18,7 +20,9 @@ DEFAULT_QUESTIONS = ROOT / "content_packs" / "math_grade2_v1" / "question_bank_v
 
 ID_RE = re.compile(r"^[a-z0-9][a-z0-9_]{2,127}$")
 DIFFICULTIES = {"basic", "medium", "application"}
-ANSWER_KINDS = {"numeric_input", "multiple_choice"}
+ENGINE_ANSWER_KINDS = {"integer", "interaction_integer", "number", "decimal", "fraction", "text", "unit", "expression"}
+GRADE2_USED_ANSWER_KINDS = {"integer", "interaction_integer", "text", "unit", "expression"}
+QUESTION_TYPES = {"numeric_input", "multiple_choice", "true_false", "expression_input", "unit_input", "interactive_measurement", "word_problem"}
 
 
 def load_json(path: Path, errors: list[str]) -> dict:
@@ -64,6 +68,69 @@ def normalize_prompt(text: str) -> str:
     text = re.sub(r"\d+", "#", text)
     text = re.sub(r"[^\w#]+", " ", text, flags=re.UNICODE)
     return re.sub(r"\s+", " ", text).strip()
+
+
+def eval_restricted_expression(text: str) -> Fraction:
+    """Evaluate only numeric + - * / and parentheses, mirroring the engine's fail-closed contract."""
+    if not isinstance(text, str) or not text.strip() or len(text) > 256:
+        raise ValueError("empty_or_too_long")
+    normalized = text.replace("×", "*").replace("÷", "/").replace("−", "-").replace("–", "-")
+    tree = ast.parse(normalized, mode="eval")
+    seen = 0
+
+    def walk(node: ast.AST, depth: int = 0) -> Fraction:
+        nonlocal seen
+        seen += 1
+        if seen > 96 or depth > 16:
+            raise ValueError("expression_complexity")
+        if isinstance(node, ast.Expression):
+            return walk(node.body, depth + 1)
+        if isinstance(node, ast.Constant) and type(node.value) in (int, float):
+            if isinstance(node.value, float):
+                return Fraction(str(node.value))
+            return Fraction(node.value, 1)
+        if isinstance(node, ast.UnaryOp) and isinstance(node.op, (ast.UAdd, ast.USub)):
+            value = walk(node.operand, depth + 1)
+            return value if isinstance(node.op, ast.UAdd) else -value
+        if isinstance(node, ast.BinOp) and isinstance(node.op, (ast.Add, ast.Sub, ast.Mult, ast.Div)):
+            left = walk(node.left, depth + 1)
+            right = walk(node.right, depth + 1)
+            if isinstance(node.op, ast.Add):
+                return left + right
+            if isinstance(node.op, ast.Sub):
+                return left - right
+            if isinstance(node.op, ast.Mult):
+                return left * right
+            if right == 0:
+                raise ZeroDivisionError("division_by_zero")
+            return left / right
+        raise ValueError(f"unsupported_expression_node:{type(node).__name__}")
+
+    return walk(tree)
+
+
+def parse_unit_answer(text: str) -> tuple[Fraction, str]:
+    if not isinstance(text, str):
+        raise ValueError("unit_answer_not_text")
+    match = re.fullmatch(r"\s*([+-]?\d+(?:[.,]\d+)?)\s+(.+?)\s*", text)
+    if not match:
+        raise ValueError("unit_answer_malformed")
+    number_text = match.group(1).replace(",", ".")
+    number = Fraction(number_text)
+    unit = re.sub(r"\s+", " ", match.group(2).strip().lower()).rstrip(".")
+    if not unit:
+        raise ValueError("unit_missing")
+    return number, unit
+
+
+def validate_numeric_range(validation: dict, value: Fraction, where: str, errors: list[str]) -> None:
+    minimum = validation.get("numeric_min")
+    maximum = validation.get("numeric_max")
+    if type(minimum) is not int or type(maximum) is not int or minimum > maximum:
+        errors.append(f"invalid_numeric_range:{where}:{minimum!r}:{maximum!r}")
+        return
+    if value < minimum or value > maximum:
+        errors.append(f"numeric_answer_out_of_range:{where}:{value}:{minimum}:{maximum}")
 
 
 def find_cycle(graph: dict[str, list[str]]) -> list[str] | None:
@@ -313,39 +380,114 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
         hints = required_list(q, "hints_vi", where, errors, 2)
         if len(hints) < 2 or any(not isinstance(x, str) or not x.strip() for x in hints):
             errors.append(f"invalid_hints:{where}")
-        tags = required_list(q, "tags", where, errors, 3)
+        question_type = required_text(q, "question_type", where, errors)
+        if question_type not in QUESTION_TYPES:
+            errors.append(f"unsupported_question_type:{where}:{question_type!r}")
+        tags = required_list(q, "tags", where, errors, 5)
         if skill and skill.lower() not in tags:
             errors.append(f"missing_skill_tag:{where}:{skill.lower()}")
+        if question_type and question_type not in tags:
+            errors.append(f"missing_question_type_tag:{where}:{question_type}")
         if q.get("status") != "CHILD_READY":
             errors.append(f"question_not_child_ready:{where}")
 
         kind = q.get("answer_kind")
-        if kind not in ANSWER_KINDS:
+        if kind not in ENGINE_ANSWER_KINDS:
             errors.append(f"unsupported_answer_kind:{where}:{kind!r}")
             continue
+        if kind not in GRADE2_USED_ANSWER_KINDS:
+            errors.append(f"answer_kind_outside_grade2_baseline:{where}:{kind}")
+        if kind not in tags:
+            errors.append(f"missing_answer_kind_tag:{where}:{kind}")
         accepted = q.get("accepted_answers")
         if not isinstance(accepted, list) or not accepted or any(not isinstance(x, str) or not x.strip() for x in accepted):
             errors.append(f"missing_accepted_answer:{where}")
+            accepted = []
         validation = q.get("validation")
         if not isinstance(validation, dict):
             errors.append(f"missing_validation:{where}")
             validation = {}
 
-        if kind == "numeric_input":
+        if kind in {"integer", "interaction_integer"}:
             answer = q.get("correct_answer")
             if type(answer) is not int:
                 errors.append(f"numeric_answer_not_integer:{where}:{answer!r}")
-            minimum = validation.get("numeric_min")
-            maximum = validation.get("numeric_max")
-            if type(minimum) is not int or type(maximum) is not int or minimum > maximum:
-                errors.append(f"invalid_numeric_range:{where}:{minimum!r}:{maximum!r}")
-            elif type(answer) is int and not (minimum <= answer <= maximum):
-                errors.append(f"numeric_answer_out_of_range:{where}:{answer}:{minimum}:{maximum}")
+            else:
+                validate_numeric_range(validation, Fraction(answer, 1), where, errors)
+                if str(answer) not in accepted:
+                    errors.append(f"numeric_answer_not_accepted:{where}:{answer}")
             if validation.get("integer_required") is not True:
                 errors.append(f"numeric_integer_required_missing:{where}")
-            if isinstance(accepted, list) and type(answer) is int and str(answer) not in accepted:
-                errors.append(f"numeric_answer_not_accepted:{where}:{answer}")
-        elif kind == "multiple_choice":
+            if kind == "interaction_integer" and question_type != "interactive_measurement":
+                errors.append(f"interaction_question_type_mismatch:{where}:{question_type}")
+            if kind == "integer" and question_type not in {"numeric_input", "word_problem"}:
+                errors.append(f"integer_question_type_mismatch:{where}:{question_type}")
+
+        elif kind == "expression":
+            if question_type != "expression_input":
+                errors.append(f"expression_question_type_mismatch:{where}:{question_type}")
+            expression = q.get("correct_answer")
+            if validation.get("expression_syntax") != "restricted_numeric_arithmetic":
+                errors.append(f"expression_syntax_metadata_invalid:{where}")
+            expected = validation.get("expected_numeric")
+            if type(expected) is not int:
+                errors.append(f"expression_expected_numeric_invalid:{where}:{expected!r}")
+                expected_fraction = None
+            else:
+                expected_fraction = Fraction(expected, 1)
+                validate_numeric_range(validation, expected_fraction, where, errors)
+            try:
+                actual_fraction = eval_restricted_expression(expression)
+            except ZeroDivisionError:
+                errors.append(f"expression_division_by_zero:{where}")
+                actual_fraction = None
+            except (SyntaxError, ValueError, TypeError) as exc:
+                errors.append(f"malformed_expression:{where}:{type(exc).__name__}")
+                actual_fraction = None
+            if actual_fraction is not None and expected_fraction is not None and actual_fraction != expected_fraction:
+                errors.append(f"expression_answer_mismatch:{where}:{actual_fraction}:{expected_fraction}")
+            for accepted_answer in accepted:
+                try:
+                    parsed = eval_restricted_expression(accepted_answer)
+                except (SyntaxError, ValueError, TypeError, ZeroDivisionError):
+                    errors.append(f"malformed_accepted_expression:{where}:{accepted_answer!r}")
+                    continue
+                if expected_fraction is not None and parsed != expected_fraction:
+                    errors.append(f"accepted_expression_not_equivalent:{where}:{accepted_answer!r}")
+
+        elif kind == "unit":
+            if question_type != "unit_input":
+                errors.append(f"unit_question_type_mismatch:{where}:{question_type}")
+            expected_unit = required_text(q, "expected_unit", where, errors).lower().rstrip(".")
+            accepted_units = q.get("accepted_units")
+            if not isinstance(accepted_units, list) or not accepted_units or any(not isinstance(x, str) or not x.strip() for x in accepted_units):
+                errors.append(f"invalid_accepted_units:{where}")
+                accepted_units = []
+            normalized_units = {re.sub(r"\s+", " ", x.strip().lower()).rstrip(".") for x in accepted_units if isinstance(x, str)}
+            if expected_unit and expected_unit not in normalized_units:
+                errors.append(f"expected_unit_not_accepted:{where}:{expected_unit}")
+            expected = validation.get("expected_numeric")
+            if type(expected) is not int:
+                errors.append(f"unit_expected_numeric_invalid:{where}:{expected!r}")
+                expected_fraction = None
+            else:
+                expected_fraction = Fraction(expected, 1)
+                validate_numeric_range(validation, expected_fraction, where, errors)
+            try:
+                number, unit = parse_unit_answer(q.get("correct_answer"))
+            except (ValueError, ZeroDivisionError) as exc:
+                errors.append(f"malformed_unit_answer:{where}:{type(exc).__name__}")
+            else:
+                if expected_fraction is not None and number != expected_fraction:
+                    errors.append(f"unit_numeric_mismatch:{where}:{number}:{expected_fraction}")
+                if unit not in normalized_units:
+                    errors.append(f"unit_not_accepted:{where}:{unit}")
+            if q.get("correct_answer") not in accepted:
+                errors.append(f"unit_correct_answer_not_accepted:{where}")
+
+        elif kind == "text":
+            if question_type not in {"multiple_choice", "true_false"}:
+                errors.append(f"text_question_type_mismatch:{where}:{question_type}")
             choices = q.get("choices")
             if not isinstance(choices, list) or not (2 <= len(choices) <= 5):
                 errors.append(f"invalid_choice_count:{where}")
@@ -364,17 +506,21 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
                 errors.append(f"duplicate_choice_id:{where}")
             if len(choice_texts) != len(set(choice_texts)):
                 errors.append(f"duplicate_choice_text:{where}")
-            correct = q.get("correct_answer")
-            if correct not in choice_ids:
-                errors.append(f"correct_choice_missing:{where}:{correct!r}")
-            else:
-                correct_text = choice_texts[choice_ids.index(correct)]
-                if not isinstance(accepted, list) or correct_text not in accepted:
-                    errors.append(f"correct_choice_text_not_accepted:{where}:{correct_text}")
+            correct_id = q.get("correct_choice_id")
+            correct_text = q.get("correct_answer")
+            if correct_id not in choice_ids:
+                errors.append(f"correct_choice_missing:{where}:{correct_id!r}")
+            elif correct_text != choice_texts[choice_ids.index(correct_id)]:
+                errors.append(f"correct_choice_text_mismatch:{where}:{correct_id}:{correct_text!r}")
+            if correct_text not in accepted:
+                errors.append(f"correct_choice_text_not_accepted:{where}:{correct_text}")
             if validation.get("single_correct") is not True:
                 errors.append(f"mc_single_correct_missing:{where}")
             if validation.get("choice_count") != len(choices):
                 errors.append(f"mc_choice_count_metadata_mismatch:{where}")
+            if question_type == "true_false":
+                if len(choices) != 2 or set(choice_texts) != {"Đúng", "Sai"}:
+                    errors.append(f"true_false_choices_invalid:{where}:{choice_texts!r}")
 
     for skill in baseline_skill_set:
         if question_counts_by_skill[skill] < 3:
@@ -429,6 +575,23 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             locations = [where for x, where in all_ids if x == value]
             errors.append(f"duplicate_id:{value}:{count}:{'|'.join(locations)}")
 
+    # Bank contract must match the engine contract while Grade-2 content uses only in-scope kinds.
+    declared_engine_kinds = bank.get("supported_answer_kinds")
+    if not isinstance(declared_engine_kinds, list) or set(declared_engine_kinds) != ENGINE_ANSWER_KINDS:
+        errors.append(f"bank_supported_answer_kinds_mismatch:{declared_engine_kinds!r}")
+    actual_answer_kinds = {q.get("answer_kind") for q in questions if isinstance(q, dict)}
+    declared_used_kinds = bank.get("grade2_used_answer_kinds")
+    if not isinstance(declared_used_kinds, list) or set(declared_used_kinds) != actual_answer_kinds:
+        errors.append(f"bank_used_answer_kinds_mismatch:{declared_used_kinds!r}:{sorted(actual_answer_kinds)}")
+    actual_question_types = {q.get("question_type") for q in questions if isinstance(q, dict)}
+    declared_question_types = bank.get("question_types")
+    if not isinstance(declared_question_types, list) or set(declared_question_types) != actual_question_types:
+        errors.append(f"bank_question_types_mismatch:{declared_question_types!r}:{sorted(actual_question_types)}")
+    required_grade2_types = {"numeric_input", "multiple_choice", "true_false", "expression_input", "unit_input", "interactive_measurement", "word_problem"}
+    missing_grade2_types = sorted(required_grade2_types - actual_question_types)
+    if missing_grade2_types:
+        errors.append("missing_required_grade2_question_types:" + ",".join(missing_grade2_types))
+
     metrics = {
         "baseline_skills": len(baseline_skill_set),
         "chapters": len(chapters),
@@ -438,6 +601,7 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
         "valid_questions": len(questions) if not errors else max(0, len(questions) - sum(1 for e in errors if e.startswith("question["))),
         "difficulty_counts": dict(sorted(question_counts_by_difficulty.items())),
         "answer_kind_counts": dict(sorted(Counter(q.get("answer_kind") for q in questions if isinstance(q, dict)).items())),
+        "question_type_counts": dict(sorted(Counter(q.get("question_type") for q in questions if isinstance(q, dict)).items())),
     }
     return errors, metrics
 

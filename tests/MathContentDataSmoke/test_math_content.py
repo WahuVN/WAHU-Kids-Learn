@@ -94,26 +94,40 @@ class MathContentDataSmoke(unittest.TestCase):
                 self.assertTrue(q["prompt_vi"].strip())
                 self.assertTrue(q["explanation_vi"].strip())
                 self.assertGreaterEqual(len(q["hints_vi"]), 2)
-                self.assertGreaterEqual(len(q["tags"]), 3)
+                self.assertGreaterEqual(len(q["tags"]), 5)
+                self.assertIn(q["question_type"], q["tags"])
+                self.assertIn(q["answer_kind"], q["tags"])
                 self.assertTrue(q["accepted_answers"])
-                if q["answer_kind"] == "numeric_input":
+                kind = q["answer_kind"]
+                if kind in {"integer", "interaction_integer"}:
                     self.assertIs(type(q["correct_answer"]), int)
                     lo = q["validation"]["numeric_min"]
                     hi = q["validation"]["numeric_max"]
                     self.assertLessEqual(lo, q["correct_answer"])
                     self.assertLessEqual(q["correct_answer"], hi)
                     self.assertIn(str(q["correct_answer"]), q["accepted_answers"])
-                elif q["answer_kind"] == "multiple_choice":
+                elif kind == "text":
                     choices = q["choices"]
                     ids = [c["id"] for c in choices]
-                    self.assertIn(q["correct_answer"], ids)
+                    self.assertIn(q["correct_choice_id"], ids)
                     self.assertEqual(len(ids), len(set(ids)))
                     self.assertEqual(len(choices), len({c["text"] for c in choices}))
                     self.assertTrue(all(c["rationale_vi"].strip() for c in choices))
-                    correct_text = next(c["text"] for c in choices if c["id"] == q["correct_answer"])
+                    correct_text = next(c["text"] for c in choices if c["id"] == q["correct_choice_id"])
+                    self.assertEqual(correct_text, q["correct_answer"])
                     self.assertIn(correct_text, q["accepted_answers"])
+                elif kind == "expression":
+                    expected = validator.Fraction(q["validation"]["expected_numeric"], 1)
+                    self.assertEqual(expected, validator.eval_restricted_expression(q["correct_answer"]))
+                    for accepted in q["accepted_answers"]:
+                        self.assertEqual(expected, validator.eval_restricted_expression(accepted))
+                elif kind == "unit":
+                    number, unit = validator.parse_unit_answer(q["correct_answer"])
+                    self.assertEqual(validator.Fraction(q["validation"]["expected_numeric"], 1), number)
+                    self.assertIn(unit, {x.lower().rstrip(".") for x in q["accepted_units"]})
+                    self.assertIn(q["expected_unit"], q["accepted_units"])
                 else:
-                    self.fail(f"unsupported answer_kind: {q['answer_kind']}")
+                    self.fail(f"out-of-grade answer_kind: {kind}")
 
     def test_no_orphan_question_and_every_question_referenced_once(self):
         refs = []
@@ -145,9 +159,19 @@ class MathContentDataSmoke(unittest.TestCase):
 
     def test_required_answer_kinds_only(self):
         kinds = Counter(q["answer_kind"] for q in self.questions)
-        self.assertEqual({"numeric_input", "multiple_choice"}, set(kinds))
-        self.assertGreater(kinds["numeric_input"], 0)
-        self.assertGreater(kinds["multiple_choice"], 0)
+        self.assertEqual({"integer", "interaction_integer", "text", "unit", "expression"}, set(kinds))
+        self.assertGreater(kinds["integer"], 0)
+        self.assertGreater(kinds["text"], 0)
+        self.assertGreater(kinds["interaction_integer"], 0)
+        self.assertGreater(kinds["unit"], 0)
+        self.assertGreater(kinds["expression"], 0)
+        self.assertTrue(set(kinds).issubset(set(self.bank["supported_answer_kinds"])))
+
+        question_types = Counter(q["question_type"] for q in self.questions)
+        required_types = {"numeric_input", "multiple_choice", "true_false", "expression_input", "unit_input", "interactive_measurement", "word_problem"}
+        self.assertEqual(required_types, set(question_types))
+        self.assertEqual(required_types, set(self.bank["question_types"]))
+        self.assertTrue(all(question_types[x] > 0 for x in required_types))
 
 
 if __name__ == "__main__":

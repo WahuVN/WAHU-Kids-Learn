@@ -6,8 +6,30 @@
   "curriculum_id": "vn_moet_math_grade2_tt32_2018",
   "language": "vi",
   "supported_answer_kinds": [
+    "integer",
+    "interaction_integer",
+    "number",
+    "decimal",
+    "fraction",
+    "text",
+    "unit",
+    "expression"
+  ],
+  "grade2_used_answer_kinds": [
+    "expression",
+    "integer",
+    "interaction_integer",
+    "text",
+    "unit"
+  ],
+  "question_types": [
+    "expression_input",
+    "interactive_measurement",
+    "multiple_choice",
     "numeric_input",
-    "multiple_choice"
+    "true_false",
+    "unit_input",
+    "word_problem"
   ],
   "questions": [
     {
@@ -15,8 +37,9 @@
       "lesson_id": "m2_ls_num_count_read_write_0_1000",
       "skill_id": "NUM_COUNT_READ_WRITE_0_1000",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "Số gồm 5 trăm, 0 chục và 7 đơn vị là số nào?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 507,
       "accepted_answers": [
         "507"
@@ -29,7 +52,9 @@
       "tags": [
         "num_count_read_write_0_1000",
         "numbers",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -43,9 +68,10 @@
       "lesson_id": "m2_ls_num_count_read_write_0_1000",
       "skill_id": "NUM_COUNT_READ_WRITE_0_1000",
       "difficulty": "medium",
+      "question_type": "multiple_choice",
       "prompt_vi": "Cách đọc đúng của số 420 là gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "bốn trăm hai mươi",
       "accepted_answers": [
         "bốn trăm hai mươi"
       ],
@@ -57,13 +83,16 @@
       "tags": [
         "num_count_read_write_0_1000",
         "numbers",
-        "medium"
+        "medium",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -92,8 +121,9 @@
       "lesson_id": "m2_ls_num_count_read_write_0_1000",
       "skill_id": "NUM_COUNT_READ_WRITE_0_1000",
       "difficulty": "application",
+      "question_type": "numeric_input",
       "prompt_vi": "Một thẻ số có 7 trăm, 3 chục và 4 đơn vị. Viết số trên thẻ.",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 734,
       "accepted_answers": [
         "734"
@@ -106,7 +136,9 @@
       "tags": [
         "num_count_read_write_0_1000",
         "numbers",
-        "application"
+        "application",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -120,9 +152,10 @@
       "lesson_id": "m2_ls_num_full_hundreds_recognize",
       "skill_id": "NUM_FULL_HUNDREDS_RECOGNIZE",
       "difficulty": "basic",
+      "question_type": "multiple_choice",
       "prompt_vi": "Số nào là số tròn trăm?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "600",
       "accepted_answers": [
         "600"
       ],
@@ -134,13 +167,16 @@
       "tags": [
         "num_full_hundreds_recognize",
         "numbers",
-        "basic"
+        "basic",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -169,13 +205,14 @@
       "lesson_id": "m2_ls_num_full_hundreds_recognize",
       "skill_id": "NUM_FULL_HUNDREDS_RECOGNIZE",
       "difficulty": "medium",
-      "prompt_vi": "9 trăm viết thành số là bao nhiêu?",
-      "answer_kind": "numeric_input",
-      "correct_answer": 900,
+      "question_type": "true_false",
+      "prompt_vi": "700 là một số tròn trăm.",
+      "answer_kind": "text",
+      "correct_answer": "Đúng",
       "accepted_answers": [
-        "900"
+        "Đúng"
       ],
-      "explanation_vi": "9 nhóm một trăm là 9 × 100 = 900.",
+      "explanation_vi": "700 có hàng chục và hàng đơn vị đều bằng 0 nên đây là số tròn trăm.",
       "hints_vi": [
         "Nhớ kiến thức: Số có dạng n00 trong phạm vi 1000, với hàng chục và đơn vị bằng 0.",
         "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
@@ -183,23 +220,38 @@
       "tags": [
         "num_full_hundreds_recognize",
         "numbers",
-        "medium"
+        "medium",
+        "true_false",
+        "text"
       ],
       "validation": {
-        "integer_required": true,
-        "numeric_min": 0,
-        "numeric_max": 1000
+        "choice_count": 2,
+        "single_correct": true
       },
-      "status": "CHILD_READY"
+      "status": "CHILD_READY",
+      "correct_choice_id": "a",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Đúng",
+          "rationale_vi": "700 có hàng chục và hàng đơn vị đều bằng 0 nên đây là số tròn trăm."
+        },
+        {
+          "id": "b",
+          "text": "Sai",
+          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+        }
+      ]
     },
     {
       "id": "m2_q_num_full_hundreds_recognize_03",
       "lesson_id": "m2_ls_num_full_hundreds_recognize",
       "skill_id": "NUM_FULL_HUNDREDS_RECOGNIZE",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "Trong các số 700, 750, 705, 570, số nào gồm đúng 7 trăm đầy đủ?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "700",
       "accepted_answers": [
         "700"
       ],
@@ -211,13 +263,16 @@
       "tags": [
         "num_full_hundreds_recognize",
         "numbers",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -246,8 +301,9 @@
       "lesson_id": "m2_ls_num_predecessor_successor",
       "skill_id": "NUM_PREDECESSOR_SUCCESSOR",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "Số liền trước của 500 là số nào?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 499,
       "accepted_answers": [
         "499"
@@ -260,7 +316,9 @@
       "tags": [
         "num_predecessor_successor",
         "numbers",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -274,8 +332,9 @@
       "lesson_id": "m2_ls_num_predecessor_successor",
       "skill_id": "NUM_PREDECESSOR_SUCCESSOR",
       "difficulty": "medium",
+      "question_type": "numeric_input",
       "prompt_vi": "Số liền sau của 999 là số nào?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 1000,
       "accepted_answers": [
         "1000"
@@ -288,7 +347,9 @@
       "tags": [
         "num_predecessor_successor",
         "numbers",
-        "medium"
+        "medium",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -302,8 +363,9 @@
       "lesson_id": "m2_ls_num_predecessor_successor",
       "skill_id": "NUM_PREDECESSOR_SUCCESSOR",
       "difficulty": "application",
+      "question_type": "numeric_input",
       "prompt_vi": "Điền số còn thiếu: 398, 399, __, 401.",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 400,
       "accepted_answers": [
         "400"
@@ -316,7 +378,9 @@
       "tags": [
         "num_predecessor_successor",
         "numbers",
-        "application"
+        "application",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -330,8 +394,9 @@
       "lesson_id": "m2_ls_place_value_hundreds_tens_ones",
       "skill_id": "PLACE_VALUE_HUNDREDS_TENS_ONES",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "Trong số 684, chữ số 6 có giá trị là bao nhiêu?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 600,
       "accepted_answers": [
         "600"
@@ -344,7 +409,9 @@
       "tags": [
         "place_value_hundreds_tens_ones",
         "numbers",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -358,8 +425,9 @@
       "lesson_id": "m2_ls_place_value_hundreds_tens_ones",
       "skill_id": "PLACE_VALUE_HUNDREDS_TENS_ONES",
       "difficulty": "medium",
+      "question_type": "numeric_input",
       "prompt_vi": "Trong số 572, chữ số hàng chục là chữ số nào?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 7,
       "accepted_answers": [
         "7"
@@ -372,7 +440,9 @@
       "tags": [
         "place_value_hundreds_tens_ones",
         "numbers",
-        "medium"
+        "medium",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -386,8 +456,9 @@
       "lesson_id": "m2_ls_place_value_hundreds_tens_ones",
       "skill_id": "PLACE_VALUE_HUNDREDS_TENS_ONES",
       "difficulty": "application",
+      "question_type": "numeric_input",
       "prompt_vi": "Số có 4 trăm, 0 chục và 9 đơn vị là số nào?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 409,
       "accepted_answers": [
         "409"
@@ -400,7 +471,9 @@
       "tags": [
         "place_value_hundreds_tens_ones",
         "numbers",
-        "application"
+        "application",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -414,9 +487,10 @@
       "lesson_id": "m2_ls_num_expanded_form_hto",
       "skill_id": "NUM_EXPANDED_FORM_HTO",
       "difficulty": "basic",
+      "question_type": "multiple_choice",
       "prompt_vi": "Dạng khai triển đúng của 352 là gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "300 + 50 + 2",
       "accepted_answers": [
         "300 + 50 + 2"
       ],
@@ -428,13 +502,16 @@
       "tags": [
         "num_expanded_form_hto",
         "numbers",
-        "basic"
+        "basic",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -463,8 +540,9 @@
       "lesson_id": "m2_ls_num_expanded_form_hto",
       "skill_id": "NUM_EXPANDED_FORM_HTO",
       "difficulty": "medium",
+      "question_type": "numeric_input",
       "prompt_vi": "Số nào bằng 600 + 20 + 7?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 627,
       "accepted_answers": [
         "627"
@@ -477,7 +555,9 @@
       "tags": [
         "num_expanded_form_hto",
         "numbers",
-        "medium"
+        "medium",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -491,9 +571,10 @@
       "lesson_id": "m2_ls_num_expanded_form_hto",
       "skill_id": "NUM_EXPANDED_FORM_HTO",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "Dạng khai triển đúng của 908 là gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "900 + 0 + 8",
       "accepted_answers": [
         "900 + 0 + 8"
       ],
@@ -505,13 +586,16 @@
       "tags": [
         "num_expanded_form_hto",
         "numbers",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -540,8 +624,9 @@
       "lesson_id": "m2_ls_number_ray_fill",
       "skill_id": "NUMBER_RAY_FILL",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "Trên tia số có các vạch 200, 300, __, 500. Số còn thiếu là gì?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 400,
       "accepted_answers": [
         "400"
@@ -554,7 +639,9 @@
       "tags": [
         "number_ray_fill",
         "numbers",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -568,8 +655,9 @@
       "lesson_id": "m2_ls_number_ray_fill",
       "skill_id": "NUMBER_RAY_FILL",
       "difficulty": "medium",
+      "question_type": "numeric_input",
       "prompt_vi": "Trên tia số: 650, 700, __, 800. Mỗi bước bằng nhau. Số còn thiếu là gì?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 750,
       "accepted_answers": [
         "750"
@@ -582,7 +670,9 @@
       "tags": [
         "number_ray_fill",
         "numbers",
-        "medium"
+        "medium",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -596,8 +686,9 @@
       "lesson_id": "m2_ls_number_ray_fill",
       "skill_id": "NUMBER_RAY_FILL",
       "difficulty": "application",
+      "question_type": "numeric_input",
       "prompt_vi": "Tia số bắt đầu 0, 100, 200, 300, 400, 500, __. Điền số tiếp theo.",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 600,
       "accepted_answers": [
         "600"
@@ -610,7 +701,9 @@
       "tags": [
         "number_ray_fill",
         "numbers",
-        "application"
+        "application",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -624,9 +717,10 @@
       "lesson_id": "m2_ls_num_compare_0_1000",
       "skill_id": "NUM_COMPARE_0_1000",
       "difficulty": "basic",
+      "question_type": "multiple_choice",
       "prompt_vi": "Điền dấu đúng: 608 __ 680",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "<",
       "accepted_answers": [
         "<"
       ],
@@ -638,13 +732,16 @@
       "tags": [
         "num_compare_0_1000",
         "numbers",
-        "basic"
+        "basic",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -673,9 +770,10 @@
       "lesson_id": "m2_ls_num_compare_0_1000",
       "skill_id": "NUM_COMPARE_0_1000",
       "difficulty": "medium",
+      "question_type": "multiple_choice",
       "prompt_vi": "Điền dấu đúng: 945 __ 925",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": ">",
       "accepted_answers": [
         ">"
       ],
@@ -687,13 +785,16 @@
       "tags": [
         "num_compare_0_1000",
         "numbers",
-        "medium"
+        "medium",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -722,9 +823,10 @@
       "lesson_id": "m2_ls_num_compare_0_1000",
       "skill_id": "NUM_COMPARE_0_1000",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "Bạn An có 399 thẻ, bạn Bình có 403 thẻ. So sánh 399 và 403.",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "399 < 403",
       "accepted_answers": [
         "399 < 403"
       ],
@@ -736,13 +838,16 @@
       "tags": [
         "num_compare_0_1000",
         "numbers",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -771,8 +876,9 @@
       "lesson_id": "m2_ls_num_min_max_up_to_4",
       "skill_id": "NUM_MIN_MAX_UP_TO_4",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "Số bé nhất trong nhóm 407, 470, 704, 740 là số nào?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 407,
       "accepted_answers": [
         "407"
@@ -785,7 +891,9 @@
       "tags": [
         "num_min_max_up_to_4",
         "numbers",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -799,8 +907,9 @@
       "lesson_id": "m2_ls_num_min_max_up_to_4",
       "skill_id": "NUM_MIN_MAX_UP_TO_4",
       "difficulty": "medium",
+      "question_type": "numeric_input",
       "prompt_vi": "Số lớn nhất trong nhóm 125, 512, 251, 215 là số nào?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 512,
       "accepted_answers": [
         "512"
@@ -813,7 +922,9 @@
       "tags": [
         "num_min_max_up_to_4",
         "numbers",
-        "medium"
+        "medium",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -827,8 +938,9 @@
       "lesson_id": "m2_ls_num_min_max_up_to_4",
       "skill_id": "NUM_MIN_MAX_UP_TO_4",
       "difficulty": "application",
+      "question_type": "numeric_input",
       "prompt_vi": "Bốn thẻ ghi 999, 909, 990, 900. Thẻ lớn nhất ghi số nào?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 999,
       "accepted_answers": [
         "999"
@@ -841,7 +953,9 @@
       "tags": [
         "num_min_max_up_to_4",
         "numbers",
-        "application"
+        "application",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -855,9 +969,10 @@
       "lesson_id": "m2_ls_num_sort_up_to_4",
       "skill_id": "NUM_SORT_UP_TO_4",
       "difficulty": "basic",
+      "question_type": "multiple_choice",
       "prompt_vi": "Sắp xếp tăng dần 320, 302, 230, 203.",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "203, 230, 302, 320",
       "accepted_answers": [
         "203, 230, 302, 320"
       ],
@@ -869,13 +984,16 @@
       "tags": [
         "num_sort_up_to_4",
         "numbers",
-        "basic"
+        "basic",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -904,9 +1022,10 @@
       "lesson_id": "m2_ls_num_sort_up_to_4",
       "skill_id": "NUM_SORT_UP_TO_4",
       "difficulty": "medium",
+      "question_type": "multiple_choice",
       "prompt_vi": "Sắp xếp giảm dần 450, 405, 540, 504.",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "540, 504, 450, 405",
       "accepted_answers": [
         "540, 504, 450, 405"
       ],
@@ -918,13 +1037,16 @@
       "tags": [
         "num_sort_up_to_4",
         "numbers",
-        "medium"
+        "medium",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -953,9 +1075,10 @@
       "lesson_id": "m2_ls_num_sort_up_to_4",
       "skill_id": "NUM_SORT_UP_TO_4",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "Bốn số 111, 101, 110, 100 được xếp từ bé đến lớn theo thứ tự nào?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "100, 101, 110, 111",
       "accepted_answers": [
         "100, 101, 110, 111"
       ],
@@ -967,13 +1090,16 @@
       "tags": [
         "num_sort_up_to_4",
         "numbers",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -1002,8 +1128,9 @@
       "lesson_id": "m2_ls_estimate_objects_by_tens",
       "skill_id": "ESTIMATE_OBJECTS_BY_TENS",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "Có 6 nhóm, mỗi nhóm khoảng 10 que tính. Ước lượng có khoảng bao nhiêu que?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 60,
       "accepted_answers": [
         "60"
@@ -1016,7 +1143,9 @@
       "tags": [
         "estimate_objects_by_tens",
         "numbers",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -1030,8 +1159,9 @@
       "lesson_id": "m2_ls_estimate_objects_by_tens",
       "skill_id": "ESTIMATE_OBJECTS_BY_TENS",
       "difficulty": "medium",
+      "question_type": "numeric_input",
       "prompt_vi": "Một hộp được nhìn thấy khoảng 8 chục viên bi. Ước lượng số viên bi là bao nhiêu?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 80,
       "accepted_answers": [
         "80"
@@ -1044,7 +1174,9 @@
       "tags": [
         "estimate_objects_by_tens",
         "numbers",
-        "medium"
+        "medium",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -1058,9 +1190,10 @@
       "lesson_id": "m2_ls_estimate_objects_by_tens",
       "skill_id": "ESTIMATE_OBJECTS_BY_TENS",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "Một khay có khoảng 73 hạt. Nếu chỉ ước lượng theo chục gần nhất, chọn số nào hợp lý nhất?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "khoảng 70",
       "accepted_answers": [
         "khoảng 70"
       ],
@@ -1072,13 +1205,16 @@
       "tags": [
         "estimate_objects_by_tens",
         "numbers",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -1107,9 +1243,10 @@
       "lesson_id": "m2_ls_add_components_recognize",
       "skill_id": "ADD_COMPONENTS_RECOGNIZE",
       "difficulty": "basic",
+      "question_type": "multiple_choice",
       "prompt_vi": "Trong 23 + 15 = 38, số 23 được gọi là gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "số hạng",
       "accepted_answers": [
         "số hạng"
       ],
@@ -1121,13 +1258,16 @@
       "tags": [
         "add_components_recognize",
         "addition_subtraction",
-        "basic"
+        "basic",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -1156,9 +1296,10 @@
       "lesson_id": "m2_ls_add_components_recognize",
       "skill_id": "ADD_COMPONENTS_RECOGNIZE",
       "difficulty": "medium",
+      "question_type": "multiple_choice",
       "prompt_vi": "Trong 41 + 8 = 49, số 49 được gọi là gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "tổng",
       "accepted_answers": [
         "tổng"
       ],
@@ -1170,13 +1311,16 @@
       "tags": [
         "add_components_recognize",
         "addition_subtraction",
-        "medium"
+        "medium",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -1205,9 +1349,10 @@
       "lesson_id": "m2_ls_add_components_recognize",
       "skill_id": "ADD_COMPONENTS_RECOGNIZE",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "Phép cộng 120 + 230 = 350 có hai số hạng là cặp nào?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "120 và 230",
       "accepted_answers": [
         "120 và 230"
       ],
@@ -1219,13 +1364,16 @@
       "tags": [
         "add_components_recognize",
         "addition_subtraction",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -1254,9 +1402,10 @@
       "lesson_id": "m2_ls_sub_components_recognize",
       "skill_id": "SUB_COMPONENTS_RECOGNIZE",
       "difficulty": "basic",
+      "question_type": "multiple_choice",
       "prompt_vi": "Trong 50 - 12 = 38, số 50 được gọi là gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "số bị trừ",
       "accepted_answers": [
         "số bị trừ"
       ],
@@ -1268,13 +1417,16 @@
       "tags": [
         "sub_components_recognize",
         "addition_subtraction",
-        "basic"
+        "basic",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -1303,9 +1455,10 @@
       "lesson_id": "m2_ls_sub_components_recognize",
       "skill_id": "SUB_COMPONENTS_RECOGNIZE",
       "difficulty": "medium",
+      "question_type": "multiple_choice",
       "prompt_vi": "Trong 72 - 20 = 52, số 20 được gọi là gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "số trừ",
       "accepted_answers": [
         "số trừ"
       ],
@@ -1317,13 +1470,16 @@
       "tags": [
         "sub_components_recognize",
         "addition_subtraction",
-        "medium"
+        "medium",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -1352,9 +1508,10 @@
       "lesson_id": "m2_ls_sub_components_recognize",
       "skill_id": "SUB_COMPONENTS_RECOGNIZE",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "Trong 90 - 35 = 55, số 55 là gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "hiệu",
       "accepted_answers": [
         "hiệu"
       ],
@@ -1366,13 +1523,16 @@
       "tags": [
         "sub_components_recognize",
         "addition_subtraction",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -1401,8 +1561,9 @@
       "lesson_id": "m2_ls_add_within_1000_no_carry",
       "skill_id": "ADD_WITHIN_1000_NO_CARRY",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "Tính 243 + 125.",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 368,
       "accepted_answers": [
         "368"
@@ -1415,7 +1576,9 @@
       "tags": [
         "add_within_1000_no_carry",
         "addition_subtraction",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -1429,8 +1592,9 @@
       "lesson_id": "m2_ls_add_within_1000_no_carry",
       "skill_id": "ADD_WITHIN_1000_NO_CARRY",
       "difficulty": "medium",
+      "question_type": "numeric_input",
       "prompt_vi": "Tính 410 + 230.",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 640,
       "accepted_answers": [
         "640"
@@ -1443,7 +1607,9 @@
       "tags": [
         "add_within_1000_no_carry",
         "addition_subtraction",
-        "medium"
+        "medium",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -1457,8 +1623,9 @@
       "lesson_id": "m2_ls_add_within_1000_no_carry",
       "skill_id": "ADD_WITHIN_1000_NO_CARRY",
       "difficulty": "application",
+      "question_type": "numeric_input",
       "prompt_vi": "Thư viện có 324 sách truyện và 253 sách khoa học. Có tất cả bao nhiêu quyển?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 577,
       "accepted_answers": [
         "577"
@@ -1471,7 +1638,9 @@
       "tags": [
         "add_within_1000_no_carry",
         "addition_subtraction",
-        "application"
+        "application",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -1485,8 +1654,9 @@
       "lesson_id": "m2_ls_add_within_1000_one_carry_max",
       "skill_id": "ADD_WITHIN_1000_ONE_CARRY_MAX",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "Tính 246 + 137.",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 383,
       "accepted_answers": [
         "383"
@@ -1499,7 +1669,9 @@
       "tags": [
         "add_within_1000_one_carry_max",
         "addition_subtraction",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -1513,8 +1685,9 @@
       "lesson_id": "m2_ls_add_within_1000_one_carry_max",
       "skill_id": "ADD_WITHIN_1000_ONE_CARRY_MAX",
       "difficulty": "medium",
+      "question_type": "numeric_input",
       "prompt_vi": "Tính 358 + 124.",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 482,
       "accepted_answers": [
         "482"
@@ -1527,7 +1700,9 @@
       "tags": [
         "add_within_1000_one_carry_max",
         "addition_subtraction",
-        "medium"
+        "medium",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -1541,8 +1716,9 @@
       "lesson_id": "m2_ls_add_within_1000_one_carry_max",
       "skill_id": "ADD_WITHIN_1000_ONE_CARRY_MAX",
       "difficulty": "application",
+      "question_type": "numeric_input",
       "prompt_vi": "Kho A có 465 hộp, nhập thêm 217 hộp. Có tất cả bao nhiêu hộp?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 682,
       "accepted_answers": [
         "682"
@@ -1555,7 +1731,9 @@
       "tags": [
         "add_within_1000_one_carry_max",
         "addition_subtraction",
-        "application"
+        "application",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -1569,8 +1747,9 @@
       "lesson_id": "m2_ls_sub_within_1000_no_borrow",
       "skill_id": "SUB_WITHIN_1000_NO_BORROW",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "Tính 786 - 234.",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 552,
       "accepted_answers": [
         "552"
@@ -1583,7 +1762,9 @@
       "tags": [
         "sub_within_1000_no_borrow",
         "addition_subtraction",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -1597,8 +1778,9 @@
       "lesson_id": "m2_ls_sub_within_1000_no_borrow",
       "skill_id": "SUB_WITHIN_1000_NO_BORROW",
       "difficulty": "medium",
+      "question_type": "numeric_input",
       "prompt_vi": "Tính 900 - 400.",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 500,
       "accepted_answers": [
         "500"
@@ -1611,7 +1793,9 @@
       "tags": [
         "sub_within_1000_no_borrow",
         "addition_subtraction",
-        "medium"
+        "medium",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -1625,8 +1809,9 @@
       "lesson_id": "m2_ls_sub_within_1000_no_borrow",
       "skill_id": "SUB_WITHIN_1000_NO_BORROW",
       "difficulty": "application",
+      "question_type": "numeric_input",
       "prompt_vi": "Kho có 654 hộp, chuyển đi 321 hộp. Còn lại bao nhiêu hộp?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 333,
       "accepted_answers": [
         "333"
@@ -1639,7 +1824,9 @@
       "tags": [
         "sub_within_1000_no_borrow",
         "addition_subtraction",
-        "application"
+        "application",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -1653,8 +1840,9 @@
       "lesson_id": "m2_ls_sub_within_1000_one_borrow_max",
       "skill_id": "SUB_WITHIN_1000_ONE_BORROW_MAX",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "Tính 352 - 138.",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 214,
       "accepted_answers": [
         "214"
@@ -1667,7 +1855,9 @@
       "tags": [
         "sub_within_1000_one_borrow_max",
         "addition_subtraction",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -1681,8 +1871,9 @@
       "lesson_id": "m2_ls_sub_within_1000_one_borrow_max",
       "skill_id": "SUB_WITHIN_1000_ONE_BORROW_MAX",
       "difficulty": "medium",
+      "question_type": "numeric_input",
       "prompt_vi": "Tính 641 - 223.",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 418,
       "accepted_answers": [
         "418"
@@ -1695,7 +1886,9 @@
       "tags": [
         "sub_within_1000_one_borrow_max",
         "addition_subtraction",
-        "medium"
+        "medium",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -1709,8 +1902,9 @@
       "lesson_id": "m2_ls_sub_within_1000_one_borrow_max",
       "skill_id": "SUB_WITHIN_1000_ONE_BORROW_MAX",
       "difficulty": "application",
+      "question_type": "numeric_input",
       "prompt_vi": "Một cửa hàng có 730 chai, bán 412 chai. Còn lại bao nhiêu chai?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 318,
       "accepted_answers": [
         "318"
@@ -1723,7 +1917,9 @@
       "tags": [
         "sub_within_1000_one_borrow_max",
         "addition_subtraction",
-        "application"
+        "application",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -1737,8 +1933,9 @@
       "lesson_id": "m2_ls_add_sub_two_operators_left_to_right",
       "skill_id": "ADD_SUB_TWO_OPERATORS_LEFT_TO_RIGHT",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "Tính từ trái sang phải: 50 + 20 - 10.",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 60,
       "accepted_answers": [
         "60"
@@ -1751,7 +1948,9 @@
       "tags": [
         "add_sub_two_operators_left_to_right",
         "addition_subtraction",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -1765,9 +1964,10 @@
       "lesson_id": "m2_ls_add_sub_two_operators_left_to_right",
       "skill_id": "ADD_SUB_TWO_OPERATORS_LEFT_TO_RIGHT",
       "difficulty": "medium",
-      "prompt_vi": "Tính từ trái sang phải: 100 - 30 + 5.",
-      "answer_kind": "numeric_input",
-      "correct_answer": 75,
+      "question_type": "expression_input",
+      "prompt_vi": "Tính 100 - 30 + 5. Có thể nhập kết quả hoặc một biểu thức số tương đương.",
+      "answer_kind": "expression",
+      "correct_answer": "100 - 30 + 5",
       "accepted_answers": [
         "75"
       ],
@@ -1779,10 +1979,21 @@
       "tags": [
         "add_sub_two_operators_left_to_right",
         "addition_subtraction",
-        "medium"
+        "medium",
+        "expression_input",
+        "expression"
       ],
       "validation": {
-        "integer_required": true,
+        "expression_syntax": "restricted_numeric_arithmetic",
+        "allowed_operators": [
+          "+",
+          "-",
+          "*",
+          "/",
+          "(",
+          ")"
+        ],
+        "expected_numeric": 75,
         "numeric_min": 0,
         "numeric_max": 1000
       },
@@ -1793,8 +2004,9 @@
       "lesson_id": "m2_ls_add_sub_two_operators_left_to_right",
       "skill_id": "ADD_SUB_TWO_OPERATORS_LEFT_TO_RIGHT",
       "difficulty": "application",
+      "question_type": "numeric_input",
       "prompt_vi": "Một hộp có 200 thẻ, thêm 150 thẻ rồi lấy ra 100 thẻ. Còn bao nhiêu thẻ?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 250,
       "accepted_answers": [
         "250"
@@ -1807,7 +2019,9 @@
       "tags": [
         "add_sub_two_operators_left_to_right",
         "addition_subtraction",
-        "application"
+        "application",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -1821,8 +2035,9 @@
       "lesson_id": "m2_ls_mental_add_sub_within_20",
       "skill_id": "MENTAL_ADD_SUB_WITHIN_20",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "Tính nhẩm 8 + 7.",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 15,
       "accepted_answers": [
         "15"
@@ -1835,7 +2050,9 @@
       "tags": [
         "mental_add_sub_within_20",
         "addition_subtraction",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -1849,8 +2066,9 @@
       "lesson_id": "m2_ls_mental_add_sub_within_20",
       "skill_id": "MENTAL_ADD_SUB_WITHIN_20",
       "difficulty": "medium",
+      "question_type": "numeric_input",
       "prompt_vi": "Tính nhẩm 17 - 9.",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 8,
       "accepted_answers": [
         "8"
@@ -1863,7 +2081,9 @@
       "tags": [
         "mental_add_sub_within_20",
         "addition_subtraction",
-        "medium"
+        "medium",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -1877,8 +2097,9 @@
       "lesson_id": "m2_ls_mental_add_sub_within_20",
       "skill_id": "MENTAL_ADD_SUB_WITHIN_20",
       "difficulty": "application",
+      "question_type": "numeric_input",
       "prompt_vi": "Mai có 12 nhãn dán, được cho thêm 5 nhãn. Mai có bao nhiêu nhãn?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 17,
       "accepted_answers": [
         "17"
@@ -1891,7 +2112,9 @@
       "tags": [
         "mental_add_sub_within_20",
         "addition_subtraction",
-        "application"
+        "application",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -1905,8 +2128,9 @@
       "lesson_id": "m2_ls_mental_add_sub_round_tens_hundreds_1000",
       "skill_id": "MENTAL_ADD_SUB_ROUND_TENS_HUNDREDS_1000",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "Tính nhẩm 30 + 40.",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 70,
       "accepted_answers": [
         "70"
@@ -1919,7 +2143,9 @@
       "tags": [
         "mental_add_sub_round_tens_hundreds_1000",
         "addition_subtraction",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -1933,8 +2159,9 @@
       "lesson_id": "m2_ls_mental_add_sub_round_tens_hundreds_1000",
       "skill_id": "MENTAL_ADD_SUB_ROUND_TENS_HUNDREDS_1000",
       "difficulty": "medium",
+      "question_type": "numeric_input",
       "prompt_vi": "Tính nhẩm 500 - 200.",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 300,
       "accepted_answers": [
         "300"
@@ -1947,7 +2174,9 @@
       "tags": [
         "mental_add_sub_round_tens_hundreds_1000",
         "addition_subtraction",
-        "medium"
+        "medium",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -1961,8 +2190,9 @@
       "lesson_id": "m2_ls_mental_add_sub_round_tens_hundreds_1000",
       "skill_id": "MENTAL_ADD_SUB_ROUND_TENS_HUNDREDS_1000",
       "difficulty": "application",
+      "question_type": "numeric_input",
       "prompt_vi": "Một kho có 300 hộp, nhận thêm 400 hộp. Tính nhẩm tổng số hộp.",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 700,
       "accepted_answers": [
         "700"
@@ -1975,7 +2205,9 @@
       "tags": [
         "mental_add_sub_round_tens_hundreds_1000",
         "addition_subtraction",
-        "application"
+        "application",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -1989,9 +2221,10 @@
       "lesson_id": "m2_ls_multiplication_meaning",
       "skill_id": "MULTIPLICATION_MEANING",
       "difficulty": "basic",
+      "question_type": "multiple_choice",
       "prompt_vi": "Có 3 nhóm, mỗi nhóm 2 chấm. Phép cộng lặp lại nào đúng?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "2 + 2 + 2",
       "accepted_answers": [
         "2 + 2 + 2"
       ],
@@ -2003,13 +2236,16 @@
       "tags": [
         "multiplication_meaning",
         "multiplication_division",
-        "basic"
+        "basic",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -2038,8 +2274,9 @@
       "lesson_id": "m2_ls_multiplication_meaning",
       "skill_id": "MULTIPLICATION_MEANING",
       "difficulty": "medium",
+      "question_type": "numeric_input",
       "prompt_vi": "5 nhóm, mỗi nhóm 2 vật có tất cả bao nhiêu vật?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 10,
       "accepted_answers": [
         "10"
@@ -2052,7 +2289,9 @@
       "tags": [
         "multiplication_meaning",
         "multiplication_division",
-        "medium"
+        "medium",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -2066,8 +2305,9 @@
       "lesson_id": "m2_ls_multiplication_meaning",
       "skill_id": "MULTIPLICATION_MEANING",
       "difficulty": "application",
+      "question_type": "numeric_input",
       "prompt_vi": "Có 4 túi, mỗi túi 5 viên bi. Có tất cả bao nhiêu viên?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 20,
       "accepted_answers": [
         "20"
@@ -2080,7 +2320,9 @@
       "tags": [
         "multiplication_meaning",
         "multiplication_division",
-        "application"
+        "application",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -2094,8 +2336,9 @@
       "lesson_id": "m2_ls_division_meaning",
       "skill_id": "DIVISION_MEANING",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "Có 10 chiếc bánh chia đều cho 2 bạn. Mỗi bạn được bao nhiêu chiếc?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 5,
       "accepted_answers": [
         "5"
@@ -2108,7 +2351,9 @@
       "tags": [
         "division_meaning",
         "multiplication_division",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -2122,8 +2367,9 @@
       "lesson_id": "m2_ls_division_meaning",
       "skill_id": "DIVISION_MEANING",
       "difficulty": "medium",
+      "question_type": "numeric_input",
       "prompt_vi": "15 bông hoa xếp thành các nhóm 5 bông. Có bao nhiêu nhóm?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 3,
       "accepted_answers": [
         "3"
@@ -2136,7 +2382,9 @@
       "tags": [
         "division_meaning",
         "multiplication_division",
-        "medium"
+        "medium",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -2150,8 +2398,9 @@
       "lesson_id": "m2_ls_division_meaning",
       "skill_id": "DIVISION_MEANING",
       "difficulty": "application",
+      "question_type": "numeric_input",
       "prompt_vi": "20 thẻ chia đều vào 5 hộp. Mỗi hộp có bao nhiêu thẻ?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 4,
       "accepted_answers": [
         "4"
@@ -2164,7 +2413,9 @@
       "tags": [
         "division_meaning",
         "multiplication_division",
-        "application"
+        "application",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -2178,9 +2429,10 @@
       "lesson_id": "m2_ls_multiplication_components",
       "skill_id": "MULTIPLICATION_COMPONENTS",
       "difficulty": "basic",
+      "question_type": "multiple_choice",
       "prompt_vi": "Trong 2 × 5 = 10, số 2 được gọi là gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "thừa số",
       "accepted_answers": [
         "thừa số"
       ],
@@ -2192,13 +2444,16 @@
       "tags": [
         "multiplication_components",
         "multiplication_division",
-        "basic"
+        "basic",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -2227,9 +2482,10 @@
       "lesson_id": "m2_ls_multiplication_components",
       "skill_id": "MULTIPLICATION_COMPONENTS",
       "difficulty": "medium",
+      "question_type": "multiple_choice",
       "prompt_vi": "Trong 5 × 6 = 30, số 30 là gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "tích",
       "accepted_answers": [
         "tích"
       ],
@@ -2241,13 +2497,16 @@
       "tags": [
         "multiplication_components",
         "multiplication_division",
-        "medium"
+        "medium",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -2276,9 +2535,10 @@
       "lesson_id": "m2_ls_multiplication_components",
       "skill_id": "MULTIPLICATION_COMPONENTS",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "Trong 2 × 8 = 16, hai thừa số là cặp nào?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "2 và 8",
       "accepted_answers": [
         "2 và 8"
       ],
@@ -2290,13 +2550,16 @@
       "tags": [
         "multiplication_components",
         "multiplication_division",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -2325,9 +2588,10 @@
       "lesson_id": "m2_ls_division_components",
       "skill_id": "DIVISION_COMPONENTS",
       "difficulty": "basic",
+      "question_type": "multiple_choice",
       "prompt_vi": "Trong 10 : 2 = 5, số 10 là gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "số bị chia",
       "accepted_answers": [
         "số bị chia"
       ],
@@ -2339,13 +2603,16 @@
       "tags": [
         "division_components",
         "multiplication_division",
-        "basic"
+        "basic",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -2374,9 +2641,10 @@
       "lesson_id": "m2_ls_division_components",
       "skill_id": "DIVISION_COMPONENTS",
       "difficulty": "medium",
+      "question_type": "multiple_choice",
       "prompt_vi": "Trong 20 : 5 = 4, số 5 là gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "số chia",
       "accepted_answers": [
         "số chia"
       ],
@@ -2388,13 +2656,16 @@
       "tags": [
         "division_components",
         "multiplication_division",
-        "medium"
+        "medium",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -2423,9 +2694,10 @@
       "lesson_id": "m2_ls_division_components",
       "skill_id": "DIVISION_COMPONENTS",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "Trong 18 : 2 = 9, số 9 là gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "thương",
       "accepted_answers": [
         "thương"
       ],
@@ -2437,13 +2709,16 @@
       "tags": [
         "division_components",
         "multiplication_division",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -2472,8 +2747,9 @@
       "lesson_id": "m2_ls_times_table_2",
       "skill_id": "TIMES_TABLE_2",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "Tính 2 × 6.",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 12,
       "accepted_answers": [
         "12"
@@ -2486,7 +2762,9 @@
       "tags": [
         "times_table_2",
         "multiplication_division",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -2500,8 +2778,9 @@
       "lesson_id": "m2_ls_times_table_2",
       "skill_id": "TIMES_TABLE_2",
       "difficulty": "medium",
+      "question_type": "numeric_input",
       "prompt_vi": "Tính 2 × 9.",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 18,
       "accepted_answers": [
         "18"
@@ -2514,7 +2793,9 @@
       "tags": [
         "times_table_2",
         "multiplication_division",
-        "medium"
+        "medium",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -2528,8 +2809,9 @@
       "lesson_id": "m2_ls_times_table_2",
       "skill_id": "TIMES_TABLE_2",
       "difficulty": "application",
+      "question_type": "numeric_input",
       "prompt_vi": "Có 7 đôi tất. Mỗi đôi có 2 chiếc. Có tất cả bao nhiêu chiếc tất?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 14,
       "accepted_answers": [
         "14"
@@ -2542,7 +2824,9 @@
       "tags": [
         "times_table_2",
         "multiplication_division",
-        "application"
+        "application",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -2556,8 +2840,9 @@
       "lesson_id": "m2_ls_times_table_5",
       "skill_id": "TIMES_TABLE_5",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "Tính 5 × 4.",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 20,
       "accepted_answers": [
         "20"
@@ -2570,7 +2855,9 @@
       "tags": [
         "times_table_5",
         "multiplication_division",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -2584,8 +2871,9 @@
       "lesson_id": "m2_ls_times_table_5",
       "skill_id": "TIMES_TABLE_5",
       "difficulty": "medium",
+      "question_type": "numeric_input",
       "prompt_vi": "Tính 5 × 8.",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 40,
       "accepted_answers": [
         "40"
@@ -2598,7 +2886,9 @@
       "tags": [
         "times_table_5",
         "multiplication_division",
-        "medium"
+        "medium",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -2612,8 +2902,9 @@
       "lesson_id": "m2_ls_times_table_5",
       "skill_id": "TIMES_TABLE_5",
       "difficulty": "application",
+      "question_type": "numeric_input",
       "prompt_vi": "Có 6 gói, mỗi gói 5 bút. Có tất cả bao nhiêu bút?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 30,
       "accepted_answers": [
         "30"
@@ -2626,7 +2917,9 @@
       "tags": [
         "times_table_5",
         "multiplication_division",
-        "application"
+        "application",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -2640,8 +2933,9 @@
       "lesson_id": "m2_ls_divide_table_2",
       "skill_id": "DIVIDE_TABLE_2",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "Tính 16 : 2.",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 8,
       "accepted_answers": [
         "8"
@@ -2654,7 +2948,9 @@
       "tags": [
         "divide_table_2",
         "multiplication_division",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -2668,8 +2964,9 @@
       "lesson_id": "m2_ls_divide_table_2",
       "skill_id": "DIVIDE_TABLE_2",
       "difficulty": "medium",
+      "question_type": "numeric_input",
       "prompt_vi": "Tính 20 : 2.",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 10,
       "accepted_answers": [
         "10"
@@ -2682,7 +2979,9 @@
       "tags": [
         "divide_table_2",
         "multiplication_division",
-        "medium"
+        "medium",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -2696,8 +2995,9 @@
       "lesson_id": "m2_ls_divide_table_2",
       "skill_id": "DIVIDE_TABLE_2",
       "difficulty": "application",
+      "question_type": "numeric_input",
       "prompt_vi": "18 chiếc bánh chia đều cho 2 bạn. Mỗi bạn được bao nhiêu chiếc?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 9,
       "accepted_answers": [
         "9"
@@ -2710,7 +3010,9 @@
       "tags": [
         "divide_table_2",
         "multiplication_division",
-        "application"
+        "application",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -2724,8 +3026,9 @@
       "lesson_id": "m2_ls_divide_table_5",
       "skill_id": "DIVIDE_TABLE_5",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "Tính 25 : 5.",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 5,
       "accepted_answers": [
         "5"
@@ -2738,7 +3041,9 @@
       "tags": [
         "divide_table_5",
         "multiplication_division",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -2752,8 +3057,9 @@
       "lesson_id": "m2_ls_divide_table_5",
       "skill_id": "DIVIDE_TABLE_5",
       "difficulty": "medium",
+      "question_type": "numeric_input",
       "prompt_vi": "Tính 40 : 5.",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 8,
       "accepted_answers": [
         "8"
@@ -2766,7 +3072,9 @@
       "tags": [
         "divide_table_5",
         "multiplication_division",
-        "medium"
+        "medium",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -2780,8 +3088,9 @@
       "lesson_id": "m2_ls_divide_table_5",
       "skill_id": "DIVIDE_TABLE_5",
       "difficulty": "application",
+      "question_type": "numeric_input",
       "prompt_vi": "50 viên bi xếp vào các túi, mỗi túi 5 viên. Cần bao nhiêu túi?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 10,
       "accepted_answers": [
         "10"
@@ -2794,7 +3103,9 @@
       "tags": [
         "divide_table_5",
         "multiplication_division",
-        "application"
+        "application",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -2808,9 +3119,10 @@
       "lesson_id": "m2_ls_operation_meaning_from_visual",
       "skill_id": "OPERATION_MEANING_FROM_VISUAL",
       "difficulty": "basic",
+      "question_type": "multiple_choice",
       "prompt_vi": "Hai nhóm 4 chấm được gộp lại. Phép tính nào mô tả việc gộp?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "4 + 4",
       "accepted_answers": [
         "4 + 4"
       ],
@@ -2822,13 +3134,16 @@
       "tags": [
         "operation_meaning_from_visual",
         "word_problems",
-        "basic"
+        "basic",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -2857,9 +3172,10 @@
       "lesson_id": "m2_ls_operation_meaning_from_visual",
       "skill_id": "OPERATION_MEANING_FROM_VISUAL",
       "difficulty": "medium",
+      "question_type": "multiple_choice",
       "prompt_vi": "Có 10 chấm, gạch bỏ 3 chấm. Phép tính nào mô tả tình huống?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "10 - 3",
       "accepted_answers": [
         "10 - 3"
       ],
@@ -2871,13 +3187,16 @@
       "tags": [
         "operation_meaning_from_visual",
         "word_problems",
-        "medium"
+        "medium",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -2906,9 +3225,10 @@
       "lesson_id": "m2_ls_operation_meaning_from_visual",
       "skill_id": "OPERATION_MEANING_FROM_VISUAL",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "Có 5 nhóm bằng nhau, mỗi nhóm 2 chấm. Phép tính nào phù hợp nhất?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "5 × 2",
       "accepted_answers": [
         "5 × 2"
       ],
@@ -2920,13 +3240,16 @@
       "tags": [
         "operation_meaning_from_visual",
         "word_problems",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -2955,8 +3278,9 @@
       "lesson_id": "m2_ls_wp_one_step_add_more",
       "skill_id": "WP_ONE_STEP_ADD_MORE",
       "difficulty": "basic",
+      "question_type": "word_problem",
       "prompt_vi": "Lan có 24 bút chì, được cho thêm 13 bút. Lan có tất cả bao nhiêu bút?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 37,
       "accepted_answers": [
         "37"
@@ -2969,7 +3293,9 @@
       "tags": [
         "wp_one_step_add_more",
         "word_problems",
-        "basic"
+        "basic",
+        "word_problem",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -2983,8 +3309,9 @@
       "lesson_id": "m2_ls_wp_one_step_add_more",
       "skill_id": "WP_ONE_STEP_ADD_MORE",
       "difficulty": "medium",
+      "question_type": "word_problem",
       "prompt_vi": "Một giỏ có 125 quả, đặt thêm 243 quả. Giỏ có bao nhiêu quả?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 368,
       "accepted_answers": [
         "368"
@@ -2997,7 +3324,9 @@
       "tags": [
         "wp_one_step_add_more",
         "word_problems",
-        "medium"
+        "medium",
+        "word_problem",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -3011,8 +3340,9 @@
       "lesson_id": "m2_ls_wp_one_step_add_more",
       "skill_id": "WP_ONE_STEP_ADD_MORE",
       "difficulty": "application",
+      "question_type": "word_problem",
       "prompt_vi": "Buổi sáng thư viện nhận 310 sách, buổi chiều nhận thêm 260 sách. Tổng số sách nhận là bao nhiêu?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 570,
       "accepted_answers": [
         "570"
@@ -3025,7 +3355,9 @@
       "tags": [
         "wp_one_step_add_more",
         "word_problems",
-        "application"
+        "application",
+        "word_problem",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -3039,8 +3371,9 @@
       "lesson_id": "m2_ls_wp_one_step_sub_less",
       "skill_id": "WP_ONE_STEP_SUB_LESS",
       "difficulty": "basic",
+      "question_type": "word_problem",
       "prompt_vi": "Có 45 quả bóng, cho đi 12 quả. Còn lại bao nhiêu quả?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 33,
       "accepted_answers": [
         "33"
@@ -3053,7 +3386,9 @@
       "tags": [
         "wp_one_step_sub_less",
         "word_problems",
-        "basic"
+        "basic",
+        "word_problem",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -3067,8 +3402,9 @@
       "lesson_id": "m2_ls_wp_one_step_sub_less",
       "skill_id": "WP_ONE_STEP_SUB_LESS",
       "difficulty": "medium",
+      "question_type": "word_problem",
       "prompt_vi": "Kho có 786 hộp, chuyển đi 234 hộp. Còn bao nhiêu hộp?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 552,
       "accepted_answers": [
         "552"
@@ -3081,7 +3417,9 @@
       "tags": [
         "wp_one_step_sub_less",
         "word_problems",
-        "medium"
+        "medium",
+        "word_problem",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -3095,8 +3433,9 @@
       "lesson_id": "m2_ls_wp_one_step_sub_less",
       "skill_id": "WP_ONE_STEP_SUB_LESS",
       "difficulty": "application",
+      "question_type": "word_problem",
       "prompt_vi": "Một lớp có 40 tờ giấy màu, dùng 18 tờ. Còn bao nhiêu tờ?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 22,
       "accepted_answers": [
         "22"
@@ -3109,7 +3448,9 @@
       "tags": [
         "wp_one_step_sub_less",
         "word_problems",
-        "application"
+        "application",
+        "word_problem",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -3123,8 +3464,9 @@
       "lesson_id": "m2_ls_wp_one_step_more_than",
       "skill_id": "WP_ONE_STEP_MORE_THAN",
       "difficulty": "basic",
+      "question_type": "word_problem",
       "prompt_vi": "An có 25 viên bi. Bình có nhiều hơn An 7 viên. Bình có bao nhiêu viên?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 32,
       "accepted_answers": [
         "32"
@@ -3137,7 +3479,9 @@
       "tags": [
         "wp_one_step_more_than",
         "word_problems",
-        "basic"
+        "basic",
+        "word_problem",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -3151,8 +3495,9 @@
       "lesson_id": "m2_ls_wp_one_step_more_than",
       "skill_id": "WP_ONE_STEP_MORE_THAN",
       "difficulty": "medium",
+      "question_type": "word_problem",
       "prompt_vi": "Cây A cao 120 cm. Cây B cao hơn cây A 30 cm. Cây B cao bao nhiêu cm?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 150,
       "accepted_answers": [
         "150"
@@ -3165,7 +3510,9 @@
       "tags": [
         "wp_one_step_more_than",
         "word_problems",
-        "medium"
+        "medium",
+        "word_problem",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -3180,8 +3527,9 @@
       "lesson_id": "m2_ls_wp_one_step_more_than",
       "skill_id": "WP_ONE_STEP_MORE_THAN",
       "difficulty": "application",
+      "question_type": "word_problem",
       "prompt_vi": "Giỏ đỏ có 240 quả. Giỏ xanh có nhiều hơn 120 quả. Giỏ xanh có bao nhiêu quả?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 360,
       "accepted_answers": [
         "360"
@@ -3194,7 +3542,9 @@
       "tags": [
         "wp_one_step_more_than",
         "word_problems",
-        "application"
+        "application",
+        "word_problem",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -3208,8 +3558,9 @@
       "lesson_id": "m2_ls_wp_one_step_less_than",
       "skill_id": "WP_ONE_STEP_LESS_THAN",
       "difficulty": "basic",
+      "question_type": "word_problem",
       "prompt_vi": "Mai có 30 nhãn dán. Linh có ít hơn Mai 8 nhãn. Linh có bao nhiêu nhãn?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 22,
       "accepted_answers": [
         "22"
@@ -3222,7 +3573,9 @@
       "tags": [
         "wp_one_step_less_than",
         "word_problems",
-        "basic"
+        "basic",
+        "word_problem",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -3236,8 +3589,9 @@
       "lesson_id": "m2_ls_wp_one_step_less_than",
       "skill_id": "WP_ONE_STEP_LESS_THAN",
       "difficulty": "medium",
+      "question_type": "word_problem",
       "prompt_vi": "Dây A dài 90 cm. Dây B ngắn hơn dây A 20 cm. Dây B dài bao nhiêu cm?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 70,
       "accepted_answers": [
         "70"
@@ -3250,7 +3604,9 @@
       "tags": [
         "wp_one_step_less_than",
         "word_problems",
-        "medium"
+        "medium",
+        "word_problem",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -3265,8 +3621,9 @@
       "lesson_id": "m2_ls_wp_one_step_less_than",
       "skill_id": "WP_ONE_STEP_LESS_THAN",
       "difficulty": "application",
+      "question_type": "word_problem",
       "prompt_vi": "Kho lớn có 650 hộp. Kho nhỏ ít hơn 230 hộp. Kho nhỏ có bao nhiêu hộp?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 420,
       "accepted_answers": [
         "420"
@@ -3279,7 +3636,9 @@
       "tags": [
         "wp_one_step_less_than",
         "word_problems",
-        "application"
+        "application",
+        "word_problem",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -3293,8 +3652,9 @@
       "lesson_id": "m2_ls_wp_one_step_multiplication_context",
       "skill_id": "WP_ONE_STEP_MULTIPLICATION_CONTEXT",
       "difficulty": "basic",
+      "question_type": "word_problem",
       "prompt_vi": "Có 6 bàn, mỗi bàn 2 bạn. Có tất cả bao nhiêu bạn?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 12,
       "accepted_answers": [
         "12"
@@ -3307,7 +3667,9 @@
       "tags": [
         "wp_one_step_multiplication_context",
         "word_problems",
-        "basic"
+        "basic",
+        "word_problem",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -3321,8 +3683,9 @@
       "lesson_id": "m2_ls_wp_one_step_multiplication_context",
       "skill_id": "WP_ONE_STEP_MULTIPLICATION_CONTEXT",
       "difficulty": "medium",
+      "question_type": "word_problem",
       "prompt_vi": "Có 4 hộp, mỗi hộp 5 bút. Có bao nhiêu bút?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 20,
       "accepted_answers": [
         "20"
@@ -3335,7 +3698,9 @@
       "tags": [
         "wp_one_step_multiplication_context",
         "word_problems",
-        "medium"
+        "medium",
+        "word_problem",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -3349,8 +3714,9 @@
       "lesson_id": "m2_ls_wp_one_step_multiplication_context",
       "skill_id": "WP_ONE_STEP_MULTIPLICATION_CONTEXT",
       "difficulty": "application",
+      "question_type": "word_problem",
       "prompt_vi": "Một tuần học có 5 ngày, mỗi ngày làm 2 bài luyện. Cả tuần làm bao nhiêu bài?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 10,
       "accepted_answers": [
         "10"
@@ -3363,7 +3729,9 @@
       "tags": [
         "wp_one_step_multiplication_context",
         "word_problems",
-        "application"
+        "application",
+        "word_problem",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -3377,8 +3745,9 @@
       "lesson_id": "m2_ls_wp_one_step_division_context",
       "skill_id": "WP_ONE_STEP_DIVISION_CONTEXT",
       "difficulty": "basic",
+      "question_type": "word_problem",
       "prompt_vi": "Có 14 chiếc bánh chia đều cho 2 đĩa. Mỗi đĩa có bao nhiêu chiếc?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 7,
       "accepted_answers": [
         "7"
@@ -3391,7 +3760,9 @@
       "tags": [
         "wp_one_step_division_context",
         "word_problems",
-        "basic"
+        "basic",
+        "word_problem",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -3405,8 +3776,9 @@
       "lesson_id": "m2_ls_wp_one_step_division_context",
       "skill_id": "WP_ONE_STEP_DIVISION_CONTEXT",
       "difficulty": "medium",
+      "question_type": "word_problem",
       "prompt_vi": "Có 35 bút xếp vào các hộp, mỗi hộp 5 bút. Cần bao nhiêu hộp?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 7,
       "accepted_answers": [
         "7"
@@ -3419,7 +3791,9 @@
       "tags": [
         "wp_one_step_division_context",
         "word_problems",
-        "medium"
+        "medium",
+        "word_problem",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -3433,8 +3807,9 @@
       "lesson_id": "m2_ls_wp_one_step_division_context",
       "skill_id": "WP_ONE_STEP_DIVISION_CONTEXT",
       "difficulty": "application",
+      "question_type": "word_problem",
       "prompt_vi": "20 học sinh chia đều thành 5 nhóm. Mỗi nhóm có bao nhiêu học sinh?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 4,
       "accepted_answers": [
         "4"
@@ -3447,7 +3822,9 @@
       "tags": [
         "wp_one_step_division_context",
         "word_problems",
-        "application"
+        "application",
+        "word_problem",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -3461,9 +3838,10 @@
       "lesson_id": "m2_ls_wp_select_operation_one_step",
       "skill_id": "WP_SELECT_OPERATION_ONE_STEP",
       "difficulty": "basic",
+      "question_type": "multiple_choice",
       "prompt_vi": "Có 36 quả, ăn 9 quả, hỏi còn lại. Chọn phép tính đúng.",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "36 - 9",
       "accepted_answers": [
         "36 - 9"
       ],
@@ -3475,13 +3853,16 @@
       "tags": [
         "wp_select_operation_one_step",
         "word_problems",
-        "basic"
+        "basic",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -3510,9 +3891,10 @@
       "lesson_id": "m2_ls_wp_select_operation_one_step",
       "skill_id": "WP_SELECT_OPERATION_ONE_STEP",
       "difficulty": "medium",
+      "question_type": "multiple_choice",
       "prompt_vi": "Có 5 giỏ, mỗi giỏ 2 quả, hỏi tất cả. Chọn phép tính đúng.",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "5 × 2",
       "accepted_answers": [
         "5 × 2"
       ],
@@ -3524,13 +3906,16 @@
       "tags": [
         "wp_select_operation_one_step",
         "word_problems",
-        "medium"
+        "medium",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -3559,9 +3944,10 @@
       "lesson_id": "m2_ls_wp_select_operation_one_step",
       "skill_id": "WP_SELECT_OPERATION_ONE_STEP",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "Có 30 bút chia đều cho 5 bạn, hỏi mỗi bạn được bao nhiêu. Chọn phép tính đúng.",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "30 : 5",
       "accepted_answers": [
         "30 : 5"
       ],
@@ -3573,13 +3959,16 @@
       "tags": [
         "wp_select_operation_one_step",
         "word_problems",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -3608,9 +3997,10 @@
       "lesson_id": "m2_ls_point_recognize",
       "skill_id": "POINT_RECOGNIZE",
       "difficulty": "basic",
+      "question_type": "multiple_choice",
       "prompt_vi": "Kí hiệu nào phù hợp để đặt tên một điểm?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "A",
       "accepted_answers": [
         "A"
       ],
@@ -3622,13 +4012,16 @@
       "tags": [
         "point_recognize",
         "geometry",
-        "basic"
+        "basic",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -3657,9 +4050,10 @@
       "lesson_id": "m2_ls_point_recognize",
       "skill_id": "POINT_RECOGNIZE",
       "difficulty": "medium",
+      "question_type": "multiple_choice",
       "prompt_vi": "Phát biểu nào đúng về một điểm?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "Điểm biểu diễn một vị trí",
       "accepted_answers": [
         "Điểm biểu diễn một vị trí"
       ],
@@ -3671,13 +4065,16 @@
       "tags": [
         "point_recognize",
         "geometry",
-        "medium"
+        "medium",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -3706,9 +4103,10 @@
       "lesson_id": "m2_ls_point_recognize",
       "skill_id": "POINT_RECOGNIZE",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "Trên hình có ba vị trí được đánh dấu A, B, C. Có bao nhiêu điểm được đặt tên?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "3",
       "accepted_answers": [
         "3"
       ],
@@ -3720,13 +4118,16 @@
       "tags": [
         "point_recognize",
         "geometry",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -3755,9 +4156,10 @@
       "lesson_id": "m2_ls_line_segment_recognize",
       "skill_id": "LINE_SEGMENT_RECOGNIZE",
       "difficulty": "basic",
+      "question_type": "multiple_choice",
       "prompt_vi": "Đoạn thẳng AB có bao nhiêu đầu mút?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "2",
       "accepted_answers": [
         "2"
       ],
@@ -3769,13 +4171,16 @@
       "tags": [
         "line_segment_recognize",
         "geometry",
-        "basic"
+        "basic",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -3804,9 +4209,10 @@
       "lesson_id": "m2_ls_line_segment_recognize",
       "skill_id": "LINE_SEGMENT_RECOGNIZE",
       "difficulty": "medium",
+      "question_type": "multiple_choice",
       "prompt_vi": "Mô tả nào đúng về đoạn thẳng?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "Phần thẳng nối hai đầu mút",
       "accepted_answers": [
         "Phần thẳng nối hai đầu mút"
       ],
@@ -3818,13 +4224,16 @@
       "tags": [
         "line_segment_recognize",
         "geometry",
-        "medium"
+        "medium",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -3853,9 +4262,10 @@
       "lesson_id": "m2_ls_line_segment_recognize",
       "skill_id": "LINE_SEGMENT_RECOGNIZE",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "Nếu nối thẳng điểm M với điểm N, hình nhận được gọi là gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "đoạn thẳng MN",
       "accepted_answers": [
         "đoạn thẳng MN"
       ],
@@ -3867,13 +4277,16 @@
       "tags": [
         "line_segment_recognize",
         "geometry",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -3902,9 +4315,10 @@
       "lesson_id": "m2_ls_curve_recognize",
       "skill_id": "CURVE_RECOGNIZE",
       "difficulty": "basic",
+      "question_type": "multiple_choice",
       "prompt_vi": "Đường nào được gọi là đường cong?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "Đường uốn lượn",
       "accepted_answers": [
         "Đường uốn lượn"
       ],
@@ -3916,13 +4330,16 @@
       "tags": [
         "curve_recognize",
         "geometry",
-        "basic"
+        "basic",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -3951,9 +4368,10 @@
       "lesson_id": "m2_ls_curve_recognize",
       "skill_id": "CURVE_RECOGNIZE",
       "difficulty": "medium",
+      "question_type": "multiple_choice",
       "prompt_vi": "Một nét vẽ hình vòng cung là ví dụ gần nhất của loại đường nào?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "đường cong",
       "accepted_answers": [
         "đường cong"
       ],
@@ -3965,13 +4383,16 @@
       "tags": [
         "curve_recognize",
         "geometry",
-        "medium"
+        "medium",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -4000,9 +4421,10 @@
       "lesson_id": "m2_ls_curve_recognize",
       "skill_id": "CURVE_RECOGNIZE",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "Phát biểu nào đúng?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "Đường cong có thể đổi hướng mềm mại",
       "accepted_answers": [
         "Đường cong có thể đổi hướng mềm mại"
       ],
@@ -4014,13 +4436,16 @@
       "tags": [
         "curve_recognize",
         "geometry",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -4049,9 +4474,10 @@
       "lesson_id": "m2_ls_straight_line_recognize",
       "skill_id": "STRAIGHT_LINE_RECOGNIZE",
       "difficulty": "basic",
+      "question_type": "multiple_choice",
       "prompt_vi": "Đường thẳng khác đoạn thẳng ở điểm nào?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "Có thể kéo dài về hai phía",
       "accepted_answers": [
         "Có thể kéo dài về hai phía"
       ],
@@ -4063,13 +4489,16 @@
       "tags": [
         "straight_line_recognize",
         "geometry",
-        "basic"
+        "basic",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -4098,9 +4527,10 @@
       "lesson_id": "m2_ls_straight_line_recognize",
       "skill_id": "STRAIGHT_LINE_RECOGNIZE",
       "difficulty": "medium",
+      "question_type": "multiple_choice",
       "prompt_vi": "Một nét không uốn cong và có thể kéo dài mãi theo hai hướng là gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "đường thẳng",
       "accepted_answers": [
         "đường thẳng"
       ],
@@ -4112,13 +4542,16 @@
       "tags": [
         "straight_line_recognize",
         "geometry",
-        "medium"
+        "medium",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -4147,9 +4580,10 @@
       "lesson_id": "m2_ls_straight_line_recognize",
       "skill_id": "STRAIGHT_LINE_RECOGNIZE",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "Hai điểm A và B cùng nằm trên một đường thẳng d. Phát biểu nào đúng?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "A và B nằm trên d",
       "accepted_answers": [
         "A và B nằm trên d"
       ],
@@ -4161,13 +4595,16 @@
       "tags": [
         "straight_line_recognize",
         "geometry",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -4196,9 +4633,10 @@
       "lesson_id": "m2_ls_polyline_recognize",
       "skill_id": "POLYLINE_RECOGNIZE",
       "difficulty": "basic",
+      "question_type": "multiple_choice",
       "prompt_vi": "Đường gấp khúc được tạo bởi gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "Nhiều đoạn thẳng nối tiếp",
       "accepted_answers": [
         "Nhiều đoạn thẳng nối tiếp"
       ],
@@ -4210,13 +4648,16 @@
       "tags": [
         "polyline_recognize",
         "geometry",
-        "basic"
+        "basic",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -4245,9 +4686,10 @@
       "lesson_id": "m2_ls_polyline_recognize",
       "skill_id": "POLYLINE_RECOGNIZE",
       "difficulty": "medium",
+      "question_type": "multiple_choice",
       "prompt_vi": "Một đường gồm ba đoạn AB, BC, CD nối tiếp nhau được gọi là gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "đường gấp khúc ABCD",
       "accepted_answers": [
         "đường gấp khúc ABCD"
       ],
@@ -4259,13 +4701,16 @@
       "tags": [
         "polyline_recognize",
         "geometry",
-        "medium"
+        "medium",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -4294,9 +4739,10 @@
       "lesson_id": "m2_ls_polyline_recognize",
       "skill_id": "POLYLINE_RECOGNIZE",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "Đường gấp khúc có 4 đoạn thẳng thì ít nhất có bao nhiêu điểm nối/đầu được nêu theo chuỗi mở?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "5",
       "accepted_answers": [
         "5"
       ],
@@ -4308,13 +4754,16 @@
       "tags": [
         "polyline_recognize",
         "geometry",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -4343,9 +4792,10 @@
       "lesson_id": "m2_ls_three_collinear_points",
       "skill_id": "THREE_COLLINEAR_POINTS",
       "difficulty": "basic",
+      "question_type": "multiple_choice",
       "prompt_vi": "Ba điểm A, B, C cùng nằm trên một đường thẳng. Ta nói ba điểm thế nào?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "thẳng hàng",
       "accepted_answers": [
         "thẳng hàng"
       ],
@@ -4357,13 +4807,16 @@
       "tags": [
         "three_collinear_points",
         "geometry",
-        "basic"
+        "basic",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -4392,9 +4845,10 @@
       "lesson_id": "m2_ls_three_collinear_points",
       "skill_id": "THREE_COLLINEAR_POINTS",
       "difficulty": "medium",
+      "question_type": "multiple_choice",
       "prompt_vi": "A và B nằm trên đường d, C nằm lệch khỏi d. Ba điểm A, B, C có thẳng hàng không?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "không",
       "accepted_answers": [
         "không"
       ],
@@ -4406,13 +4860,16 @@
       "tags": [
         "three_collinear_points",
         "geometry",
-        "medium"
+        "medium",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -4441,9 +4898,10 @@
       "lesson_id": "m2_ls_three_collinear_points",
       "skill_id": "THREE_COLLINEAR_POINTS",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "Muốn kiểm tra ba điểm thẳng hàng, ta cần xem điều gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "Cả ba có cùng nằm trên một đường thẳng",
       "accepted_answers": [
         "Cả ba có cùng nằm trên một đường thẳng"
       ],
@@ -4455,13 +4913,16 @@
       "tags": [
         "three_collinear_points",
         "geometry",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -4490,8 +4951,9 @@
       "lesson_id": "m2_ls_quadrilateral_recognize",
       "skill_id": "QUADRILATERAL_RECOGNIZE",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "Một hình tứ giác có bao nhiêu cạnh?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 4,
       "accepted_answers": [
         "4"
@@ -4504,7 +4966,9 @@
       "tags": [
         "quadrilateral_recognize",
         "geometry",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -4518,9 +4982,10 @@
       "lesson_id": "m2_ls_quadrilateral_recognize",
       "skill_id": "QUADRILATERAL_RECOGNIZE",
       "difficulty": "medium",
+      "question_type": "multiple_choice",
       "prompt_vi": "Hình nào chắc chắn là một tứ giác?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "hình chữ nhật",
       "accepted_answers": [
         "hình chữ nhật"
       ],
@@ -4532,13 +4997,16 @@
       "tags": [
         "quadrilateral_recognize",
         "geometry",
-        "medium"
+        "medium",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -4567,9 +5035,10 @@
       "lesson_id": "m2_ls_quadrilateral_recognize",
       "skill_id": "QUADRILATERAL_RECOGNIZE",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "Một hình kín có đúng 4 cạnh được gọi chung là gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "hình tứ giác",
       "accepted_answers": [
         "hình tứ giác"
       ],
@@ -4581,13 +5050,16 @@
       "tags": [
         "quadrilateral_recognize",
         "geometry",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -4616,9 +5088,10 @@
       "lesson_id": "m2_ls_cylinder_recognize",
       "skill_id": "CYLINDER_RECOGNIZE",
       "difficulty": "basic",
+      "question_type": "multiple_choice",
       "prompt_vi": "Vật nào gần dạng khối trụ nhất?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "lon nước",
       "accepted_answers": [
         "lon nước"
       ],
@@ -4630,13 +5103,16 @@
       "tags": [
         "cylinder_recognize",
         "geometry",
-        "basic"
+        "basic",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -4665,9 +5141,10 @@
       "lesson_id": "m2_ls_cylinder_recognize",
       "skill_id": "CYLINDER_RECOGNIZE",
       "difficulty": "medium",
+      "question_type": "multiple_choice",
       "prompt_vi": "Khối trụ có đặc điểm nào?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "Hai đáy tròn và một mặt cong xung quanh",
       "accepted_answers": [
         "Hai đáy tròn và một mặt cong xung quanh"
       ],
@@ -4679,13 +5156,16 @@
       "tags": [
         "cylinder_recognize",
         "geometry",
-        "medium"
+        "medium",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -4714,9 +5194,10 @@
       "lesson_id": "m2_ls_cylinder_recognize",
       "skill_id": "CYLINDER_RECOGNIZE",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "Một ống hình trụ đứng thẳng, mặt trên và mặt dưới gần hình gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "hình tròn",
       "accepted_answers": [
         "hình tròn"
       ],
@@ -4728,13 +5209,16 @@
       "tags": [
         "cylinder_recognize",
         "geometry",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -4763,9 +5247,10 @@
       "lesson_id": "m2_ls_sphere_recognize",
       "skill_id": "SPHERE_RECOGNIZE",
       "difficulty": "basic",
+      "question_type": "multiple_choice",
       "prompt_vi": "Vật nào gần dạng khối cầu nhất?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "quả bóng",
       "accepted_answers": [
         "quả bóng"
       ],
@@ -4777,13 +5262,16 @@
       "tags": [
         "sphere_recognize",
         "geometry",
-        "basic"
+        "basic",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -4812,9 +5300,10 @@
       "lesson_id": "m2_ls_sphere_recognize",
       "skill_id": "SPHERE_RECOGNIZE",
       "difficulty": "medium",
+      "question_type": "multiple_choice",
       "prompt_vi": "Khối cầu có cạnh hay đỉnh không?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "không",
       "accepted_answers": [
         "không"
       ],
@@ -4826,13 +5315,16 @@
       "tags": [
         "sphere_recognize",
         "geometry",
-        "medium"
+        "medium",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -4861,9 +5353,10 @@
       "lesson_id": "m2_ls_sphere_recognize",
       "skill_id": "SPHERE_RECOGNIZE",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "Mô tả nào phù hợp với khối cầu?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "Tròn đều và không có đáy phẳng",
       "accepted_answers": [
         "Tròn đều và không có đáy phẳng"
       ],
@@ -4875,13 +5368,16 @@
       "tags": [
         "sphere_recognize",
         "geometry",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -4910,8 +5406,9 @@
       "lesson_id": "m2_ls_draw_segment_given_length",
       "skill_id": "DRAW_SEGMENT_GIVEN_LENGTH",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "Trên thước, đặt đầu A ở vạch 2 cm. Muốn AB dài 5 cm và B ở bên phải A, B ở vạch bao nhiêu?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 7,
       "accepted_answers": [
         "7"
@@ -4924,7 +5421,9 @@
       "tags": [
         "draw_segment_given_length",
         "geometry",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -4938,13 +5437,14 @@
       "lesson_id": "m2_ls_draw_segment_given_length",
       "skill_id": "DRAW_SEGMENT_GIVEN_LENGTH",
       "difficulty": "medium",
-      "prompt_vi": "Đầu M ở vạch 1 cm, đầu N ở vạch 9 cm. Độ dài MN là bao nhiêu cm?",
-      "answer_kind": "numeric_input",
+      "question_type": "interactive_measurement",
+      "prompt_vi": "Trên thước cm, chọn hai đầu mút tại vạch 1 và vạch 9. Độ dài đoạn thẳng tạo được là bao nhiêu cm?",
+      "answer_kind": "interaction_integer",
       "correct_answer": 8,
       "accepted_answers": [
         "8"
       ],
-      "explanation_vi": "9 - 1 = 8 cm.",
+      "explanation_vi": "Hai đầu mút cách nhau 9 - 1 = 8 cm.",
       "hints_vi": [
         "Nhớ kiến thức: Độ dài đoạn thẳng bằng hiệu vị trí hai đầu mút trên cùng một thước chia đều.",
         "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
@@ -4952,23 +5452,25 @@
       "tags": [
         "draw_segment_given_length",
         "geometry",
-        "medium"
+        "medium",
+        "interactive_measurement",
+        "interaction_integer"
       ],
       "validation": {
         "integer_required": true,
         "numeric_min": 0,
-        "numeric_max": 1000
+        "numeric_max": 20
       },
-      "status": "CHILD_READY",
-      "answer_unit": "cm"
+      "status": "CHILD_READY"
     },
     {
       "id": "m2_q_draw_segment_given_length_03",
       "lesson_id": "m2_ls_draw_segment_given_length",
       "skill_id": "DRAW_SEGMENT_GIVEN_LENGTH",
       "difficulty": "application",
+      "question_type": "numeric_input",
       "prompt_vi": "Muốn tạo đoạn thẳng dài 6 cm với một đầu ở vạch 3 cm và đầu kia ở bên phải, chọn vạch nào?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 9,
       "accepted_answers": [
         "9"
@@ -4981,7 +5483,9 @@
       "tags": [
         "draw_segment_given_length",
         "geometry",
-        "application"
+        "application",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -4995,9 +5499,10 @@
       "lesson_id": "m2_ls_fold_cut_compose_shapes",
       "skill_id": "FOLD_CUT_COMPOSE_SHAPES",
       "difficulty": "basic",
+      "question_type": "multiple_choice",
       "prompt_vi": "Ghép hai tam giác vuông bằng nhau theo một cạnh phù hợp có thể tạo thành hình nào trong nhiều cách ghép?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "một tứ giác",
       "accepted_answers": [
         "một tứ giác"
       ],
@@ -5009,13 +5514,16 @@
       "tags": [
         "fold_cut_compose_shapes",
         "geometry",
-        "basic"
+        "basic",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -5044,9 +5552,10 @@
       "lesson_id": "m2_ls_fold_cut_compose_shapes",
       "skill_id": "FOLD_CUT_COMPOSE_SHAPES",
       "difficulty": "medium",
+      "question_type": "multiple_choice",
       "prompt_vi": "Khi cắt một tờ giấy hình vuông theo một đường thẳng từ góc này đến góc đối diện, thường thu được bao nhiêu mảnh?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "2",
       "accepted_answers": [
         "2"
       ],
@@ -5058,13 +5567,16 @@
       "tags": [
         "fold_cut_compose_shapes",
         "geometry",
-        "medium"
+        "medium",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -5093,9 +5605,10 @@
       "lesson_id": "m2_ls_fold_cut_compose_shapes",
       "skill_id": "FOLD_CUT_COMPOSE_SHAPES",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "Mục đích của hoạt động ghép hình là gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "Nhận ra có thể tạo hình mới từ các mảnh hình",
       "accepted_answers": [
         "Nhận ra có thể tạo hình mới từ các mảnh hình"
       ],
@@ -5107,13 +5620,16 @@
       "tags": [
         "fold_cut_compose_shapes",
         "geometry",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -5142,9 +5658,10 @@
       "lesson_id": "m2_ls_heavier_lighter",
       "skill_id": "HEAVIER_LIGHTER",
       "difficulty": "basic",
+      "question_type": "multiple_choice",
       "prompt_vi": "Trên cân thăng bằng, đĩa bên trái hạ thấp hơn. Vật bên trái thường thế nào?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "nặng hơn",
       "accepted_answers": [
         "nặng hơn"
       ],
@@ -5156,13 +5673,16 @@
       "tags": [
         "heavier_lighter",
         "measurement",
-        "basic"
+        "basic",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -5191,9 +5711,10 @@
       "lesson_id": "m2_ls_heavier_lighter",
       "skill_id": "HEAVIER_LIGHTER",
       "difficulty": "medium",
+      "question_type": "multiple_choice",
       "prompt_vi": "Nếu vật A nặng hơn vật B thì vật B thế nào so với A?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "nhẹ hơn",
       "accepted_answers": [
         "nhẹ hơn"
       ],
@@ -5205,13 +5726,16 @@
       "tags": [
         "heavier_lighter",
         "measurement",
-        "medium"
+        "medium",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -5240,9 +5764,10 @@
       "lesson_id": "m2_ls_heavier_lighter",
       "skill_id": "HEAVIER_LIGHTER",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "Cân cho hai đĩa ngang bằng. Kết luận phù hợp nhất là gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "Hai bên có khối lượng bằng nhau trong phép cân đó",
       "accepted_answers": [
         "Hai bên có khối lượng bằng nhau trong phép cân đó"
       ],
@@ -5254,13 +5779,16 @@
       "tags": [
         "heavier_lighter",
         "measurement",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -5289,8 +5817,9 @@
       "lesson_id": "m2_ls_mass_kg_read_write",
       "skill_id": "MASS_KG_READ_WRITE",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "Một bao gạo ghi 5 kg. Số đo khối lượng là bao nhiêu kg?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 5,
       "accepted_answers": [
         "5"
@@ -5303,7 +5832,9 @@
       "tags": [
         "mass_kg_read_write",
         "measurement",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -5318,9 +5849,10 @@
       "lesson_id": "m2_ls_mass_kg_read_write",
       "skill_id": "MASS_KG_READ_WRITE",
       "difficulty": "medium",
+      "question_type": "multiple_choice",
       "prompt_vi": "Kí hiệu đúng của kilôgam là gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "kg",
       "accepted_answers": [
         "kg"
       ],
@@ -5332,13 +5864,16 @@
       "tags": [
         "mass_kg_read_write",
         "measurement",
-        "medium"
+        "medium",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -5367,13 +5902,14 @@
       "lesson_id": "m2_ls_mass_kg_read_write",
       "skill_id": "MASS_KG_READ_WRITE",
       "difficulty": "application",
-      "prompt_vi": "Hai túi lần lượt nặng 2 kg và 3 kg. Tổng khối lượng là bao nhiêu kg?",
-      "answer_kind": "numeric_input",
-      "correct_answer": 5,
+      "question_type": "unit_input",
+      "prompt_vi": "Hai túi lần lượt nặng 2 kg và 3 kg. Hãy nhập kết quả kèm đơn vị.",
+      "answer_kind": "unit",
+      "correct_answer": "5 kg",
       "accepted_answers": [
-        "5"
+        "5 kg"
       ],
-      "explanation_vi": "Cùng đơn vị kg nên 2 + 3 = 5 kg.",
+      "explanation_vi": "Cùng đơn vị kg nên 2 kg + 3 kg = 5 kg.",
       "hints_vi": [
         "Nhớ kiến thức: kg là kí hiệu của kilôgam, một đơn vị đo khối lượng thông dụng.",
         "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
@@ -5381,23 +5917,30 @@
       "tags": [
         "mass_kg_read_write",
         "measurement",
-        "application"
+        "application",
+        "unit_input",
+        "unit"
       ],
       "validation": {
-        "integer_required": true,
         "numeric_min": 0,
-        "numeric_max": 1000
+        "numeric_max": 1000,
+        "expected_numeric": 5
       },
       "status": "CHILD_READY",
-      "answer_unit": "kg"
+      "expected_unit": "kg",
+      "accepted_units": [
+        "kg",
+        "kilôgam"
+      ]
     },
     {
       "id": "m2_q_capacity_liter_read_write_01",
       "lesson_id": "m2_ls_capacity_liter_read_write",
       "skill_id": "CAPACITY_LITER_READ_WRITE",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "Một bình ghi 4 l. Dung tích được ghi là bao nhiêu lít?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 4,
       "accepted_answers": [
         "4"
@@ -5410,7 +5953,9 @@
       "tags": [
         "capacity_liter_read_write",
         "measurement",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -5425,9 +5970,10 @@
       "lesson_id": "m2_ls_capacity_liter_read_write",
       "skill_id": "CAPACITY_LITER_READ_WRITE",
       "difficulty": "medium",
+      "question_type": "multiple_choice",
       "prompt_vi": "Kí hiệu nào là đơn vị lít?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "l",
       "accepted_answers": [
         "l"
       ],
@@ -5439,13 +5985,16 @@
       "tags": [
         "capacity_liter_read_write",
         "measurement",
-        "medium"
+        "medium",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -5474,8 +6023,9 @@
       "lesson_id": "m2_ls_capacity_liter_read_write",
       "skill_id": "CAPACITY_LITER_READ_WRITE",
       "difficulty": "application",
+      "question_type": "numeric_input",
       "prompt_vi": "Bình có 7 l nước, rót thêm 2 l. Có tất cả bao nhiêu lít?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 9,
       "accepted_answers": [
         "9"
@@ -5488,7 +6038,9 @@
       "tags": [
         "capacity_liter_read_write",
         "measurement",
-        "application"
+        "application",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -5503,8 +6055,9 @@
       "lesson_id": "m2_ls_length_dm_m_km_recognize_relation",
       "skill_id": "LENGTH_DM_M_KM_RECOGNIZE_RELATION",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "1 m bằng bao nhiêu dm?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 10,
       "accepted_answers": [
         "10"
@@ -5517,7 +6070,9 @@
       "tags": [
         "length_dm_m_km_recognize_relation",
         "measurement",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -5532,8 +6087,9 @@
       "lesson_id": "m2_ls_length_dm_m_km_recognize_relation",
       "skill_id": "LENGTH_DM_M_KM_RECOGNIZE_RELATION",
       "difficulty": "medium",
+      "question_type": "numeric_input",
       "prompt_vi": "1 km bằng bao nhiêu m?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 1000,
       "accepted_answers": [
         "1000"
@@ -5546,7 +6102,9 @@
       "tags": [
         "length_dm_m_km_recognize_relation",
         "measurement",
-        "medium"
+        "medium",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -5561,9 +6119,10 @@
       "lesson_id": "m2_ls_length_dm_m_km_recognize_relation",
       "skill_id": "LENGTH_DM_M_KM_RECOGNIZE_RELATION",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "Đơn vị nào hợp lý hơn để nói quãng đường giữa hai làng?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "km",
       "accepted_answers": [
         "km"
       ],
@@ -5575,13 +6134,16 @@
       "tags": [
         "length_dm_m_km_recognize_relation",
         "measurement",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -5610,8 +6172,9 @@
       "lesson_id": "m2_ls_time_day_24_hours",
       "skill_id": "TIME_DAY_24_HOURS",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "Một ngày đầy đủ có bao nhiêu giờ?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 24,
       "accepted_answers": [
         "24"
@@ -5624,7 +6187,9 @@
       "tags": [
         "time_day_24_hours",
         "measurement",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -5639,8 +6204,9 @@
       "lesson_id": "m2_ls_time_day_24_hours",
       "skill_id": "TIME_DAY_24_HOURS",
       "difficulty": "medium",
+      "question_type": "numeric_input",
       "prompt_vi": "Hai ngày đầy đủ có bao nhiêu giờ?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 48,
       "accepted_answers": [
         "48"
@@ -5653,7 +6219,9 @@
       "tags": [
         "time_day_24_hours",
         "measurement",
-        "medium"
+        "medium",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -5668,9 +6236,10 @@
       "lesson_id": "m2_ls_time_day_24_hours",
       "skill_id": "TIME_DAY_24_HOURS",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "Khoảng thời gian nào đúng bằng một ngày đầy đủ?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "24 giờ",
       "accepted_answers": [
         "24 giờ"
       ],
@@ -5682,13 +6251,16 @@
       "tags": [
         "time_day_24_hours",
         "measurement",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -5717,8 +6289,9 @@
       "lesson_id": "m2_ls_time_hour_60_minutes",
       "skill_id": "TIME_HOUR_60_MINUTES",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "1 giờ bằng bao nhiêu phút?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 60,
       "accepted_answers": [
         "60"
@@ -5731,7 +6304,9 @@
       "tags": [
         "time_hour_60_minutes",
         "measurement",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -5746,8 +6321,9 @@
       "lesson_id": "m2_ls_time_hour_60_minutes",
       "skill_id": "TIME_HOUR_60_MINUTES",
       "difficulty": "medium",
+      "question_type": "numeric_input",
       "prompt_vi": "2 giờ bằng bao nhiêu phút?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 120,
       "accepted_answers": [
         "120"
@@ -5760,7 +6336,9 @@
       "tags": [
         "time_hour_60_minutes",
         "measurement",
-        "medium"
+        "medium",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -5775,9 +6353,10 @@
       "lesson_id": "m2_ls_time_hour_60_minutes",
       "skill_id": "TIME_HOUR_60_MINUTES",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "90 phút dài hơn hay ngắn hơn 1 giờ?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "dài hơn",
       "accepted_answers": [
         "dài hơn"
       ],
@@ -5789,13 +6368,16 @@
       "tags": [
         "time_hour_60_minutes",
         "measurement",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -5824,8 +6406,9 @@
       "lesson_id": "m2_ls_calendar_days_in_month_date",
       "skill_id": "CALENDAR_DAYS_IN_MONTH_DATE",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "Tháng 4 có bao nhiêu ngày?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 30,
       "accepted_answers": [
         "30"
@@ -5838,7 +6421,9 @@
       "tags": [
         "calendar_days_in_month_date",
         "measurement",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -5853,8 +6438,9 @@
       "lesson_id": "m2_ls_calendar_days_in_month_date",
       "skill_id": "CALENDAR_DAYS_IN_MONTH_DATE",
       "difficulty": "medium",
+      "question_type": "numeric_input",
       "prompt_vi": "Tháng 5 có bao nhiêu ngày?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 31,
       "accepted_answers": [
         "31"
@@ -5867,7 +6453,9 @@
       "tags": [
         "calendar_days_in_month_date",
         "measurement",
-        "medium"
+        "medium",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -5882,9 +6470,10 @@
       "lesson_id": "m2_ls_calendar_days_in_month_date",
       "skill_id": "CALENDAR_DAYS_IN_MONTH_DATE",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "Ngày sau ngày 14 tháng 9 là ngày nào?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "15 tháng 9",
       "accepted_answers": [
         "15 tháng 9"
       ],
@@ -5896,13 +6485,16 @@
       "tags": [
         "calendar_days_in_month_date",
         "measurement",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -5931,9 +6523,10 @@
       "lesson_id": "m2_ls_money_vnd_note_recognition",
       "skill_id": "MONEY_VND_NOTE_RECOGNITION",
       "difficulty": "basic",
+      "question_type": "multiple_choice",
       "prompt_vi": "Một tờ tiền học tập có in rõ '10 000 đồng'. Giá trị in trên tờ là gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "10 000 đồng",
       "accepted_answers": [
         "10 000 đồng"
       ],
@@ -5945,13 +6538,16 @@
       "tags": [
         "money_vnd_note_recognition",
         "measurement",
-        "basic"
+        "basic",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -5980,9 +6576,10 @@
       "lesson_id": "m2_ls_money_vnd_note_recognition",
       "skill_id": "MONEY_VND_NOTE_RECOGNITION",
       "difficulty": "medium",
+      "question_type": "multiple_choice",
       "prompt_vi": "Khi nhận biết giá trị một tờ tiền Việt Nam, thông tin nào quan trọng nhất?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "Con số mệnh giá và chữ đồng in trên tờ",
       "accepted_answers": [
         "Con số mệnh giá và chữ đồng in trên tờ"
       ],
@@ -5994,13 +6591,16 @@
       "tags": [
         "money_vnd_note_recognition",
         "measurement",
-        "medium"
+        "medium",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -6029,9 +6629,10 @@
       "lesson_id": "m2_ls_money_vnd_note_recognition",
       "skill_id": "MONEY_VND_NOTE_RECOGNITION",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "Hai thẻ mô phỏng ghi '20 000 đồng' và '10 000 đồng'. Thẻ nào ghi giá trị lớn hơn?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "20 000 đồng",
       "accepted_answers": [
         "20 000 đồng"
       ],
@@ -6043,13 +6644,16 @@
       "tags": [
         "money_vnd_note_recognition",
         "measurement",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -6078,8 +6682,9 @@
       "lesson_id": "m2_ls_measure_with_ruler_cm",
       "skill_id": "MEASURE_WITH_RULER_CM",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "Một đoạn thẳng bắt đầu ở vạch 0 cm và kết thúc ở vạch 8 cm. Dài bao nhiêu cm?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 8,
       "accepted_answers": [
         "8"
@@ -6092,7 +6697,9 @@
       "tags": [
         "measure_with_ruler_cm",
         "measurement",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -6107,8 +6714,9 @@
       "lesson_id": "m2_ls_measure_with_ruler_cm",
       "skill_id": "MEASURE_WITH_RULER_CM",
       "difficulty": "medium",
+      "question_type": "numeric_input",
       "prompt_vi": "Một đoạn bắt đầu ở vạch 3 cm và kết thúc ở vạch 10 cm. Dài bao nhiêu cm?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 7,
       "accepted_answers": [
         "7"
@@ -6121,7 +6729,9 @@
       "tags": [
         "measure_with_ruler_cm",
         "measurement",
-        "medium"
+        "medium",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -6136,8 +6746,9 @@
       "lesson_id": "m2_ls_measure_with_ruler_cm",
       "skill_id": "MEASURE_WITH_RULER_CM",
       "difficulty": "application",
+      "question_type": "numeric_input",
       "prompt_vi": "Bút chì đặt từ vạch 2 cm đến vạch 11 cm. Bút dài bao nhiêu cm?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 9,
       "accepted_answers": [
         "9"
@@ -6150,7 +6761,9 @@
       "tags": [
         "measure_with_ruler_cm",
         "measurement",
-        "application"
+        "application",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -6165,8 +6778,9 @@
       "lesson_id": "m2_ls_measure_with_common_scale",
       "skill_id": "MEASURE_WITH_COMMON_SCALE",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "Một thang đo có các vạch 0, 2, 4, 6, 8. Mỗi vạch tăng bao nhiêu đơn vị?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 2,
       "accepted_answers": [
         "2"
@@ -6179,7 +6793,9 @@
       "tags": [
         "measure_with_common_scale",
         "measurement",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -6193,8 +6809,9 @@
       "lesson_id": "m2_ls_measure_with_common_scale",
       "skill_id": "MEASURE_WITH_COMMON_SCALE",
       "difficulty": "medium",
+      "question_type": "numeric_input",
       "prompt_vi": "Thang đo có vạch 10, 20, 30, __, 50. Điền giá trị vạch thiếu.",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 40,
       "accepted_answers": [
         "40"
@@ -6207,7 +6824,9 @@
       "tags": [
         "measure_with_common_scale",
         "measurement",
-        "medium"
+        "medium",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -6221,8 +6840,9 @@
       "lesson_id": "m2_ls_measure_with_common_scale",
       "skill_id": "MEASURE_WITH_COMMON_SCALE",
       "difficulty": "application",
+      "question_type": "numeric_input",
       "prompt_vi": "Trên thang chia đều, vạch thứ nhất là 0, vạch thứ hai là 5. Vạch thứ tư có giá trị bao nhiêu?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 15,
       "accepted_answers": [
         "15"
@@ -6235,7 +6855,9 @@
       "tags": [
         "measure_with_common_scale",
         "measurement",
-        "application"
+        "application",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -6249,9 +6871,10 @@
       "lesson_id": "m2_ls_clock_minute_hand_at_3_or_6",
       "skill_id": "CLOCK_MINUTE_HAND_AT_3_OR_6",
       "difficulty": "basic",
+      "question_type": "multiple_choice",
       "prompt_vi": "Kim phút chỉ số 3, kim giờ vừa qua số 4. Đồng hồ chỉ thời gian nào?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "4 giờ 15 phút",
       "accepted_answers": [
         "4 giờ 15 phút"
       ],
@@ -6263,13 +6886,16 @@
       "tags": [
         "clock_minute_hand_at_3_or_6",
         "measurement",
-        "basic"
+        "basic",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -6298,9 +6924,10 @@
       "lesson_id": "m2_ls_clock_minute_hand_at_3_or_6",
       "skill_id": "CLOCK_MINUTE_HAND_AT_3_OR_6",
       "difficulty": "medium",
+      "question_type": "multiple_choice",
       "prompt_vi": "Kim phút chỉ số 6, kim giờ ở giữa 7 và 8. Đồng hồ chỉ thời gian nào?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "7 giờ 30 phút",
       "accepted_answers": [
         "7 giờ 30 phút"
       ],
@@ -6312,13 +6939,16 @@
       "tags": [
         "clock_minute_hand_at_3_or_6",
         "measurement",
-        "medium"
+        "medium",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -6347,9 +6977,10 @@
       "lesson_id": "m2_ls_clock_minute_hand_at_3_or_6",
       "skill_id": "CLOCK_MINUTE_HAND_AT_3_OR_6",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "Khi kim phút chỉ số 3 thì số phút là bao nhiêu?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "15 phút",
       "accepted_answers": [
         "15 phút"
       ],
@@ -6361,13 +6992,16 @@
       "tags": [
         "clock_minute_hand_at_3_or_6",
         "measurement",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -6396,8 +7030,9 @@
       "lesson_id": "m2_ls_measurement_convert_calculate_learned_units",
       "skill_id": "MEASUREMENT_CONVERT_CALCULATE_LEARNED_UNITS",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "3 m bằng bao nhiêu dm?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 30,
       "accepted_answers": [
         "30"
@@ -6410,7 +7045,9 @@
       "tags": [
         "measurement_convert_calculate_learned_units",
         "measurement",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -6425,8 +7062,9 @@
       "lesson_id": "m2_ls_measurement_convert_calculate_learned_units",
       "skill_id": "MEASUREMENT_CONVERT_CALCULATE_LEARNED_UNITS",
       "difficulty": "medium",
+      "question_type": "numeric_input",
       "prompt_vi": "2 kg + 3 kg bằng bao nhiêu kg?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 5,
       "accepted_answers": [
         "5"
@@ -6439,7 +7077,9 @@
       "tags": [
         "measurement_convert_calculate_learned_units",
         "measurement",
-        "medium"
+        "medium",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -6454,8 +7094,9 @@
       "lesson_id": "m2_ls_measurement_convert_calculate_learned_units",
       "skill_id": "MEASUREMENT_CONVERT_CALCULATE_LEARNED_UNITS",
       "difficulty": "application",
+      "question_type": "numeric_input",
       "prompt_vi": "5 l - 2 l bằng bao nhiêu lít?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 3,
       "accepted_answers": [
         "3"
@@ -6468,7 +7109,9 @@
       "tags": [
         "measurement_convert_calculate_learned_units",
         "measurement",
-        "application"
+        "application",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -6483,9 +7126,10 @@
       "lesson_id": "m2_ls_measurement_estimate_basic",
       "skill_id": "MEASUREMENT_ESTIMATE_BASIC",
       "difficulty": "basic",
+      "question_type": "multiple_choice",
       "prompt_vi": "Chiều dài một chiếc bút chì hợp lý nhất khoảng bao nhiêu?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "15 cm",
       "accepted_answers": [
         "15 cm"
       ],
@@ -6497,13 +7141,16 @@
       "tags": [
         "measurement_estimate_basic",
         "measurement",
-        "basic"
+        "basic",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -6532,9 +7179,10 @@
       "lesson_id": "m2_ls_measurement_estimate_basic",
       "skill_id": "MEASUREMENT_ESTIMATE_BASIC",
       "difficulty": "medium",
+      "question_type": "multiple_choice",
       "prompt_vi": "Chiều cao một cánh cửa hợp lý nhất gần giá trị nào?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "2 m",
       "accepted_answers": [
         "2 m"
       ],
@@ -6546,13 +7194,16 @@
       "tags": [
         "measurement_estimate_basic",
         "measurement",
-        "medium"
+        "medium",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -6581,9 +7232,10 @@
       "lesson_id": "m2_ls_measurement_estimate_basic",
       "skill_id": "MEASUREMENT_ESTIMATE_BASIC",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "Một thanh tham chiếu dài 10 cm. Một vật nhìn dài khoảng gấp đôi thanh đó. Ước lượng vật dài bao nhiêu?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "20 cm",
       "accepted_answers": [
         "20 cm"
       ],
@@ -6595,13 +7247,16 @@
       "tags": [
         "measurement_estimate_basic",
         "measurement",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -6630,8 +7285,9 @@
       "lesson_id": "m2_ls_polyline_length_sum_segments",
       "skill_id": "POLYLINE_LENGTH_SUM_SEGMENTS",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "Đường gấp khúc có hai đoạn dài 4 cm và 6 cm. Tổng độ dài là bao nhiêu?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 10,
       "accepted_answers": [
         "10"
@@ -6644,7 +7300,9 @@
       "tags": [
         "polyline_length_sum_segments",
         "measurement",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -6659,8 +7317,9 @@
       "lesson_id": "m2_ls_polyline_length_sum_segments",
       "skill_id": "POLYLINE_LENGTH_SUM_SEGMENTS",
       "difficulty": "medium",
+      "question_type": "numeric_input",
       "prompt_vi": "Ba đoạn của đường gấp khúc dài 3 cm, 5 cm và 2 cm. Độ dài cả đường là bao nhiêu?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 10,
       "accepted_answers": [
         "10"
@@ -6673,7 +7332,9 @@
       "tags": [
         "polyline_length_sum_segments",
         "measurement",
-        "medium"
+        "medium",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -6688,8 +7349,9 @@
       "lesson_id": "m2_ls_polyline_length_sum_segments",
       "skill_id": "POLYLINE_LENGTH_SUM_SEGMENTS",
       "difficulty": "application",
+      "question_type": "numeric_input",
       "prompt_vi": "Một đường gấp khúc gồm các đoạn 7 cm, 4 cm, 6 cm. Tổng độ dài là bao nhiêu?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 17,
       "accepted_answers": [
         "17"
@@ -6702,7 +7364,9 @@
       "tags": [
         "polyline_length_sum_segments",
         "measurement",
-        "application"
+        "application",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -6717,8 +7381,9 @@
       "lesson_id": "m2_ls_measurement_real_world_one_step",
       "skill_id": "MEASUREMENT_REAL_WORLD_ONE_STEP",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "Một sợi dây dài 2 m, nối thêm đoạn 3 m. Dây dài tất cả bao nhiêu mét?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 5,
       "accepted_answers": [
         "5"
@@ -6731,7 +7396,9 @@
       "tags": [
         "measurement_real_world_one_step",
         "measurement",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -6746,8 +7413,9 @@
       "lesson_id": "m2_ls_measurement_real_world_one_step",
       "skill_id": "MEASUREMENT_REAL_WORLD_ONE_STEP",
       "difficulty": "medium",
+      "question_type": "numeric_input",
       "prompt_vi": "Bình có 8 l nước, rót ra 3 l. Còn bao nhiêu lít?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 5,
       "accepted_answers": [
         "5"
@@ -6760,7 +7428,9 @@
       "tags": [
         "measurement_real_world_one_step",
         "measurement",
-        "medium"
+        "medium",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -6775,8 +7445,9 @@
       "lesson_id": "m2_ls_measurement_real_world_one_step",
       "skill_id": "MEASUREMENT_REAL_WORLD_ONE_STEP",
       "difficulty": "application",
+      "question_type": "numeric_input",
       "prompt_vi": "Bao A nặng 6 kg, bao B nặng 4 kg. Cả hai nặng bao nhiêu kg?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 10,
       "accepted_answers": [
         "10"
@@ -6789,7 +7460,9 @@
       "tags": [
         "measurement_real_world_one_step",
         "measurement",
-        "application"
+        "application",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -6804,8 +7477,9 @@
       "lesson_id": "m2_ls_data_collect_classify_count",
       "skill_id": "DATA_COLLECT_CLASSIFY_COUNT",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "Có các thẻ: đỏ, xanh, đỏ, vàng, đỏ. Có bao nhiêu thẻ đỏ?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 3,
       "accepted_answers": [
         "3"
@@ -6818,7 +7492,9 @@
       "tags": [
         "data_collect_classify_count",
         "statistics_probability",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -6832,8 +7508,9 @@
       "lesson_id": "m2_ls_data_collect_classify_count",
       "skill_id": "DATA_COLLECT_CLASSIFY_COUNT",
       "difficulty": "medium",
+      "question_type": "numeric_input",
       "prompt_vi": "Danh sách vật: bút, sách, bút, thước, bút, sách. Có bao nhiêu bút?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 3,
       "accepted_answers": [
         "3"
@@ -6846,7 +7523,9 @@
       "tags": [
         "data_collect_classify_count",
         "statistics_probability",
-        "medium"
+        "medium",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -6860,8 +7539,9 @@
       "lesson_id": "m2_ls_data_collect_classify_count",
       "skill_id": "DATA_COLLECT_CLASSIFY_COUNT",
       "difficulty": "application",
+      "question_type": "numeric_input",
       "prompt_vi": "Một lớp ghi loại quả yêu thích: táo, cam, táo, táo, cam, chuối. Có bao nhiêu bạn chọn cam?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 2,
       "accepted_answers": [
         "2"
@@ -6874,7 +7554,9 @@
       "tags": [
         "data_collect_classify_count",
         "statistics_probability",
-        "application"
+        "application",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -6888,8 +7570,9 @@
       "lesson_id": "m2_ls_pictograph_read_describe",
       "skill_id": "PICTOGRAPH_READ_DESCRIBE",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "Biểu đồ tranh có 4 hình ngôi sao cho nhóm A; chú giải 1 hình = 1 bạn. Nhóm A có bao nhiêu bạn?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 4,
       "accepted_answers": [
         "4"
@@ -6902,7 +7585,9 @@
       "tags": [
         "pictograph_read_describe",
         "statistics_probability",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -6916,8 +7601,9 @@
       "lesson_id": "m2_ls_pictograph_read_describe",
       "skill_id": "PICTOGRAPH_READ_DESCRIBE",
       "difficulty": "medium",
+      "question_type": "numeric_input",
       "prompt_vi": "Biểu đồ có 3 hình quả táo; chú giải 1 hình = 2 quả. Có bao nhiêu quả táo?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 6,
       "accepted_answers": [
         "6"
@@ -6930,7 +7616,9 @@
       "tags": [
         "pictograph_read_describe",
         "statistics_probability",
-        "medium"
+        "medium",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -6944,8 +7632,9 @@
       "lesson_id": "m2_ls_pictograph_read_describe",
       "skill_id": "PICTOGRAPH_READ_DESCRIBE",
       "difficulty": "application",
+      "question_type": "numeric_input",
       "prompt_vi": "Một hàng có 5 biểu tượng, chú giải 1 biểu tượng = 2 quyển sách. Hàng đó biểu diễn bao nhiêu quyển?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 10,
       "accepted_answers": [
         "10"
@@ -6958,7 +7647,9 @@
       "tags": [
         "pictograph_read_describe",
         "statistics_probability",
-        "application"
+        "application",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -6972,8 +7663,9 @@
       "lesson_id": "m2_ls_pictograph_simple_inference",
       "skill_id": "PICTOGRAPH_SIMPLE_INFERENCE",
       "difficulty": "basic",
+      "question_type": "numeric_input",
       "prompt_vi": "Biểu đồ: nhóm A có 6 biểu tượng, nhóm B có 4 biểu tượng; 1 biểu tượng = 1 bạn. A nhiều hơn B bao nhiêu bạn?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 2,
       "accepted_answers": [
         "2"
@@ -6986,7 +7678,9 @@
       "tags": [
         "pictograph_simple_inference",
         "statistics_probability",
-        "basic"
+        "basic",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -7000,9 +7694,10 @@
       "lesson_id": "m2_ls_pictograph_simple_inference",
       "skill_id": "PICTOGRAPH_SIMPLE_INFERENCE",
       "difficulty": "medium",
+      "question_type": "multiple_choice",
       "prompt_vi": "Biểu đồ có nhóm Cam 5 biểu tượng, Táo 7 biểu tượng, Chuối 3 biểu tượng; chú giải như nhau. Nhóm nào nhiều nhất?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "Táo",
       "accepted_answers": [
         "Táo"
       ],
@@ -7014,13 +7709,16 @@
       "tags": [
         "pictograph_simple_inference",
         "statistics_probability",
-        "medium"
+        "medium",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -7049,8 +7747,9 @@
       "lesson_id": "m2_ls_pictograph_simple_inference",
       "skill_id": "PICTOGRAPH_SIMPLE_INFERENCE",
       "difficulty": "application",
+      "question_type": "numeric_input",
       "prompt_vi": "Biểu đồ có 2 biểu tượng cho A và 5 biểu tượng cho B; 1 biểu tượng = 2 vật. B nhiều hơn A bao nhiêu vật?",
-      "answer_kind": "numeric_input",
+      "answer_kind": "integer",
       "correct_answer": 6,
       "accepted_answers": [
         "6"
@@ -7063,7 +7762,9 @@
       "tags": [
         "pictograph_simple_inference",
         "statistics_probability",
-        "application"
+        "application",
+        "numeric_input",
+        "integer"
       ],
       "validation": {
         "integer_required": true,
@@ -7077,9 +7778,10 @@
       "lesson_id": "m2_ls_event_possible",
       "skill_id": "EVENT_POSSIBLE",
       "difficulty": "basic",
+      "question_type": "multiple_choice",
       "prompt_vi": "Gieo xúc xắc có các mặt 1 đến 6. Xuất hiện số 4 là sự kiện gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "có thể",
       "accepted_answers": [
         "có thể"
       ],
@@ -7091,13 +7793,16 @@
       "tags": [
         "event_possible",
         "statistics_probability",
-        "basic"
+        "basic",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -7126,9 +7831,10 @@
       "lesson_id": "m2_ls_event_possible",
       "skill_id": "EVENT_POSSIBLE",
       "difficulty": "medium",
+      "question_type": "multiple_choice",
       "prompt_vi": "Trong túi có bóng đỏ và xanh. Lấy ngẫu nhiên một bóng, lấy được bóng đỏ là gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "có thể",
       "accepted_answers": [
         "có thể"
       ],
@@ -7140,13 +7846,16 @@
       "tags": [
         "event_possible",
         "statistics_probability",
-        "medium"
+        "medium",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -7175,9 +7884,10 @@
       "lesson_id": "m2_ls_event_possible",
       "skill_id": "EVENT_POSSIBLE",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "Quay vòng có các số 1, 2, 3. Kim dừng ở số 2 là sự kiện gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "có thể",
       "accepted_answers": [
         "có thể"
       ],
@@ -7189,13 +7899,16 @@
       "tags": [
         "event_possible",
         "statistics_probability",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -7224,9 +7937,10 @@
       "lesson_id": "m2_ls_event_certain",
       "skill_id": "EVENT_CERTAIN",
       "difficulty": "basic",
+      "question_type": "multiple_choice",
       "prompt_vi": "Gieo xúc xắc chuẩn 1 đến 6. Kết quả là một số từ 1 đến 6. Sự kiện này là gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "chắc chắn",
       "accepted_answers": [
         "chắc chắn"
       ],
@@ -7238,13 +7952,16 @@
       "tags": [
         "event_certain",
         "statistics_probability",
-        "basic"
+        "basic",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -7273,9 +7990,10 @@
       "lesson_id": "m2_ls_event_certain",
       "skill_id": "EVENT_CERTAIN",
       "difficulty": "medium",
+      "question_type": "multiple_choice",
       "prompt_vi": "Trong túi chỉ có bóng xanh. Lấy một bóng, bóng lấy ra màu xanh là gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "chắc chắn",
       "accepted_answers": [
         "chắc chắn"
       ],
@@ -7287,13 +8005,16 @@
       "tags": [
         "event_certain",
         "statistics_probability",
-        "medium"
+        "medium",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -7322,9 +8043,10 @@
       "lesson_id": "m2_ls_event_certain",
       "skill_id": "EVENT_CERTAIN",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "Một hộp chỉ chứa thẻ số 2 và 5. Rút một thẻ, số rút được là 2 hoặc 5. Sự kiện gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "chắc chắn",
       "accepted_answers": [
         "chắc chắn"
       ],
@@ -7336,13 +8058,16 @@
       "tags": [
         "event_certain",
         "statistics_probability",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -7371,9 +8096,10 @@
       "lesson_id": "m2_ls_event_impossible",
       "skill_id": "EVENT_IMPOSSIBLE",
       "difficulty": "basic",
+      "question_type": "multiple_choice",
       "prompt_vi": "Gieo xúc xắc chuẩn 1 đến 6. Xuất hiện số 8 là sự kiện gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "không thể",
       "accepted_answers": [
         "không thể"
       ],
@@ -7385,13 +8111,16 @@
       "tags": [
         "event_impossible",
         "statistics_probability",
-        "basic"
+        "basic",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -7420,9 +8149,10 @@
       "lesson_id": "m2_ls_event_impossible",
       "skill_id": "EVENT_IMPOSSIBLE",
       "difficulty": "medium",
+      "question_type": "multiple_choice",
       "prompt_vi": "Trong túi chỉ có bóng đỏ. Lấy một bóng màu xanh là gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "không thể",
       "accepted_answers": [
         "không thể"
       ],
@@ -7434,13 +8164,16 @@
       "tags": [
         "event_impossible",
         "statistics_probability",
-        "medium"
+        "medium",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",
@@ -7469,9 +8202,10 @@
       "lesson_id": "m2_ls_event_impossible",
       "skill_id": "EVENT_IMPOSSIBLE",
       "difficulty": "application",
+      "question_type": "multiple_choice",
       "prompt_vi": "Vòng quay chỉ có các số 1, 2, 3. Kim dừng ở số 5 là sự kiện gì?",
-      "answer_kind": "multiple_choice",
-      "correct_answer": "a",
+      "answer_kind": "text",
+      "correct_answer": "không thể",
       "accepted_answers": [
         "không thể"
       ],
@@ -7483,13 +8217,16 @@
       "tags": [
         "event_impossible",
         "statistics_probability",
-        "application"
+        "application",
+        "multiple_choice",
+        "text"
       ],
       "validation": {
         "choice_count": 4,
         "single_correct": true
       },
       "status": "CHILD_READY",
+      "correct_choice_id": "a",
       "choices": [
         {
           "id": "a",

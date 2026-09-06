@@ -23,9 +23,11 @@ def slug(skill: str) -> str:
 
 
 def nq(prompt: str, answer: int, explanation: str, *, unit: str | None = None,
-       numeric_min: int = 0, numeric_max: int = 1000) -> dict:
+       numeric_min: int = 0, numeric_max: int = 1000,
+       question_type: str = "numeric_input") -> dict:
     q = {
-        "answer_kind": "numeric_input",
+        "question_type": question_type,
+        "answer_kind": "integer",
         "prompt_vi": prompt,
         "correct_answer": answer,
         "accepted_answers": [str(answer)],
@@ -53,14 +55,75 @@ def mc(prompt: str, correct: str, distractors: list[str], explanation: str) -> d
             "rationale_vi": explanation if i == 0 else "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài.",
         })
     return {
-        "answer_kind": "multiple_choice",
+        "question_type": "multiple_choice",
+        "answer_kind": "text",
         "prompt_vi": prompt,
         "choices": choices,
-        "correct_answer": "a",
+        "correct_choice_id": "a",
+        "correct_answer": correct,
         "accepted_answers": [correct],
         "explanation_vi": explanation,
         "validation": {"choice_count": len(choices), "single_correct": True},
     }
+
+
+def tf(prompt: str, correct: bool, explanation: str) -> dict:
+    """Grade-2 true/false is a two-choice text question; engine has no separate bool kind."""
+    correct_text = "Đúng" if correct else "Sai"
+    wrong_text = "Sai" if correct else "Đúng"
+    q = mc(prompt, correct_text, [wrong_text], explanation)
+    q["question_type"] = "true_false"
+    return q
+
+
+def eq(prompt: str, expression: str, answer: int, explanation: str,
+       *, numeric_min: int = 0, numeric_max: int = 1000) -> dict:
+    """Expression input aligned with MathAnswerValidator's restricted arithmetic contract."""
+    return {
+        "question_type": "expression_input",
+        "answer_kind": "expression",
+        "prompt_vi": prompt,
+        "correct_answer": expression,
+        "accepted_answers": [str(answer)],
+        "explanation_vi": explanation,
+        "validation": {
+            "expression_syntax": "restricted_numeric_arithmetic",
+            "allowed_operators": ["+", "-", "*", "/", "(", ")"],
+            "expected_numeric": answer,
+            "numeric_min": numeric_min,
+            "numeric_max": numeric_max,
+        },
+    }
+
+
+def uq(prompt: str, answer: int, unit: str, explanation: str,
+       *, aliases: list[str] | None = None, numeric_min: int = 0,
+       numeric_max: int = 1000) -> dict:
+    aliases = list(aliases or [])
+    return {
+        "question_type": "unit_input",
+        "answer_kind": "unit",
+        "prompt_vi": prompt,
+        "correct_answer": f"{answer} {unit}",
+        "accepted_answers": [f"{answer} {unit}"],
+        "expected_unit": unit,
+        "accepted_units": [unit] + [x for x in aliases if x != unit],
+        "explanation_vi": explanation,
+        "validation": {
+            "numeric_min": numeric_min,
+            "numeric_max": numeric_max,
+            "expected_numeric": answer,
+        },
+    }
+
+
+def iq(prompt: str, answer: int, explanation: str, *, numeric_min: int = 0,
+       numeric_max: int = 1000) -> dict:
+    """Integer answer produced by a direct manipulation / measurement control."""
+    q = nq(prompt, answer, explanation, numeric_min=numeric_min, numeric_max=numeric_max,
+           question_type="interactive_measurement")
+    q["answer_kind"] = "interaction_integer"
+    return q
 
 
 CHAPTERS = [
@@ -179,7 +242,7 @@ Q = {
     ],
     "NUM_FULL_HUNDREDS_RECOGNIZE": [
         mc("Số nào là số tròn trăm?", "600", ["610", "606", "660"], "600 có hàng chục và hàng đơn vị đều bằng 0."),
-        nq("9 trăm viết thành số là bao nhiêu?", 900, "9 nhóm một trăm là 9 × 100 = 900."),
+        tf("700 là một số tròn trăm.", True, "700 có hàng chục và hàng đơn vị đều bằng 0 nên đây là số tròn trăm."),
         mc("Trong các số 700, 750, 705, 570, số nào gồm đúng 7 trăm đầy đủ?", "700", ["750", "705", "570"], "700 có đúng 7 trăm và không có thêm chục hay đơn vị."),
     ],
     "NUM_PREDECESSOR_SUCCESSOR": [
@@ -255,7 +318,7 @@ Q = {
     ],
     "ADD_SUB_TWO_OPERATORS_LEFT_TO_RIGHT": [
         nq("Tính từ trái sang phải: 50 + 20 - 10.", 60, "50 + 20 = 70, rồi 70 - 10 = 60."),
-        nq("Tính từ trái sang phải: 100 - 30 + 5.", 75, "100 - 30 = 70, rồi 70 + 5 = 75."),
+        eq("Tính 100 - 30 + 5. Có thể nhập kết quả hoặc một biểu thức số tương đương.", "100 - 30 + 5", 75, "100 - 30 = 70, rồi 70 + 5 = 75."),
         nq("Một hộp có 200 thẻ, thêm 150 thẻ rồi lấy ra 100 thẻ. Còn bao nhiêu thẻ?", 250, "Từ trái sang phải theo tình huống: 200 + 150 = 350, 350 - 100 = 250."),
     ],
     "MENTAL_ADD_SUB_WITHIN_20": [
@@ -398,7 +461,7 @@ Q = {
     ],
     "DRAW_SEGMENT_GIVEN_LENGTH": [
         nq("Trên thước, đặt đầu A ở vạch 2 cm. Muốn AB dài 5 cm và B ở bên phải A, B ở vạch bao nhiêu?", 7, "Vị trí B = 2 + 5 = 7 cm."),
-        nq("Đầu M ở vạch 1 cm, đầu N ở vạch 9 cm. Độ dài MN là bao nhiêu cm?", 8, "9 - 1 = 8 cm.", unit="cm"),
+        iq("Trên thước cm, chọn hai đầu mút tại vạch 1 và vạch 9. Độ dài đoạn thẳng tạo được là bao nhiêu cm?", 8, "Hai đầu mút cách nhau 9 - 1 = 8 cm.", numeric_max=20),
         nq("Muốn tạo đoạn thẳng dài 6 cm với một đầu ở vạch 3 cm và đầu kia ở bên phải, chọn vạch nào?", 9, "3 + 6 = 9 cm."),
     ],
     "FOLD_CUT_COMPOSE_SHAPES": [
@@ -415,7 +478,7 @@ Q = {
     "MASS_KG_READ_WRITE": [
         nq("Một bao gạo ghi 5 kg. Số đo khối lượng là bao nhiêu kg?", 5, "Con số đi trước đơn vị kg là 5.", unit="kg"),
         mc("Kí hiệu đúng của kilôgam là gì?", "kg", ["km", "l", "cm"], "Kilôgam được kí hiệu là kg."),
-        nq("Hai túi lần lượt nặng 2 kg và 3 kg. Tổng khối lượng là bao nhiêu kg?", 5, "Cùng đơn vị kg nên 2 + 3 = 5 kg.", unit="kg"),
+        uq("Hai túi lần lượt nặng 2 kg và 3 kg. Hãy nhập kết quả kèm đơn vị.", 5, "kg", "Cùng đơn vị kg nên 2 kg + 3 kg = 5 kg.", aliases=["kilôgam"]),
     ],
     "CAPACITY_LITER_READ_WRITE": [
         nq("Một bình ghi 4 l. Dung tích được ghi là bao nhiêu lít?", 4, "Con số đi trước kí hiệu l là 4.", unit="l"),
@@ -550,11 +613,15 @@ def build() -> tuple[dict, dict]:
             for i, (difficulty, spec) in enumerate(zip(DIFFICULTIES, q_specs), 1):
                 qid = f"m2_q_{slug(skill)}_{i:02d}"
                 q_ids.append(qid)
+                question_type = spec["question_type"]
+                if domain_key == "word_problems" and question_type == "numeric_input":
+                    question_type = "word_problem"
                 q = {
                     "id": qid,
                     "lesson_id": lesson_id,
                     "skill_id": skill,
                     "difficulty": difficulty,
+                    "question_type": question_type,
                     "prompt_vi": spec["prompt_vi"],
                     "answer_kind": spec["answer_kind"],
                     "correct_answer": spec["correct_answer"],
@@ -564,14 +631,13 @@ def build() -> tuple[dict, dict]:
                         "Nhớ kiến thức: " + concept_def,
                         "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi.",
                     ],
-                    "tags": [skill.lower(), domain_key, difficulty],
+                    "tags": [skill.lower(), domain_key, difficulty, question_type, spec["answer_kind"]],
                     "validation": spec["validation"],
                     "status": "CHILD_READY",
                 }
-                if "answer_unit" in spec:
-                    q["answer_unit"] = spec["answer_unit"]
-                if "choices" in spec:
-                    q["choices"] = spec["choices"]
+                for optional_key in ("answer_unit", "correct_choice_id", "expected_unit", "accepted_units", "choices"):
+                    if optional_key in spec:
+                        q[optional_key] = spec[optional_key]
                 questions.append(q)
 
             basic = questions[-3]
@@ -628,7 +694,9 @@ def build() -> tuple[dict, dict]:
         "grade": 2,
         "curriculum_id": baseline["curriculum_id"],
         "language": "vi",
-        "supported_answer_kinds": ["numeric_input", "multiple_choice"],
+        "supported_answer_kinds": ["integer", "interaction_integer", "number", "decimal", "fraction", "text", "unit", "expression"],
+        "grade2_used_answer_kinds": sorted({q["answer_kind"] for q in questions}),
+        "question_types": sorted({q["question_type"] for q in questions}),
         "questions": questions,
     }
     return lesson_catalog, question_bank
