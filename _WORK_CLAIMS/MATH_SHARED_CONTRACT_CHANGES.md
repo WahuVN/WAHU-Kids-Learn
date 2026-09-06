@@ -178,6 +178,17 @@ Mastery-bearing Math write phải chống lost-update khi một coordinator/proc
 - Regression khóa cả service-level stale distinct attempt và coordinator-level stale skill snapshot sau khi câu đã mở.
 - Cross-process smoke dùng hai executable worker độc lập, hai SQLite connection/write gate độc lập và cùng expected snapshot; invariant là đúng một distinct write commit, một write bị reject/busy và durable attempt/key/mastery/review chỉ có một chuỗi.
 
+## 2026-09-07 — Write-failure rollback & behavior recovery (AI2)
+
+Answer transaction thất bại phải fail-closed ở cả DB lẫn coordinator memory:
+
+- `AnswerCommitService` tiếp tục commit attempt/key/error/mastery/child_skill/review trong một SQLite transaction; exception ở bất kỳ bước nào phải rollback toàn chain.
+- `MathSessionCoordinator` không được giữ `BehaviorObservation` của một answer chưa durable. Nếu commit ném lỗi, coordinator re-read committed attempts + skill snapshots và rebuild behavior từ durable state trước khi rethrow lỗi gốc.
+- Nếu failed write không tạo attempt durable, câu hiện tại vẫn mở và `attempt_index` được phục hồi từ DB để người học retry cùng intent; counters không được tăng.
+- Nếu durable state cho thấy câu đã được process khác finalize trong lúc local commit fail/conflict, coordinator reconcile về durable counters, bỏ open question stale và checkpoint best-effort.
+- Nếu DB tạm thời không thể đọc lại khi recovery, behavior fallback về conservative `READY`; observation của failed write vẫn không được giữ trong RAM và lỗi commit gốc vẫn là lỗi surfaced cho caller.
+- Regression inject `RAISE(ABORT)` ở `mastery_event` sau khi attempt transaction đã bắt đầu, xác nhận attempt/key/mastery/child_skill/review đều rollback; bỏ fault rồi retry chỉ tạo một durable learning chain và `RecentAttemptCount` không chứa ghost observation.
+
 ## Contract còn chưa chốt
 
 Các mục sau chưa được UI/content tự invent cho tới khi AI2 publish contract:

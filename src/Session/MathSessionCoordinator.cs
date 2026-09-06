@@ -410,8 +410,11 @@ namespace WAHU.Session
             }
             var attemptId = "attempt-" + Guid.NewGuid().ToString("N");
 
-            var commit = _answerCommit.Commit(new AnswerCommitRequest
+            AnswerCommitResult commit;
+            try
             {
+                commit = _answerCommit.Commit(new AnswerCommitRequest
+                {
                 AttemptId = attemptId,
                 SessionId = _session.SessionId,
                 ChildId = _profile.ChildId,
@@ -472,7 +475,13 @@ namespace WAHU.Session
                     Reason = review.Reason,
                     SchedulerVersion = ReviewSchedulerV1.Version
                 }
-            });
+                });
+            }
+            catch
+            {
+                ReconcileAfterFailedAnswerCommit(question);
+                throw;
+            }
 
             // AnswerCommit ở trên là source-of-truth durable. Diagnostics/audit lỗi sau commit
             // không được làm UI nghĩ câu chưa lưu rồi submit lại thành attempt mới.
@@ -887,6 +896,73 @@ namespace WAHU.Session
             if (matches.Count >= MaxAttemptsPerQuestion)
                 throw new InvalidDataException("Persisted Math retry exhausted attempts without a final mastery event.");
             return matches.Count + 1;
+        }
+
+        private void ReconcileAfterFailedAnswerCommit(MathQuestion question)
+        {
+            try
+            {
+                var committedAttempts = _runtime.LoadCommittedAttempts(_session.SessionId);
+                var durableSkills = _sessionService.LoadSkillSnapshots(_profile.ChildId, "math");
+                _skills = durableSkills;
+                var nextAttemptIndex = question == null ? 1 : NextAttemptIndexForQuestion(committedAttempts, question.QuestionId);
+                if (question != null && nextAttemptIndex == 0)
+                {
+                    RebuildFromCommittedAttempts(committedAttempts);
+                    if (string.Equals(_sessionMode, "adaptive", StringComparison.Ordinal) &&
+                        _lastBehavior != null && _lastBehavior.TriggerPrerequisiteRepair)
+                        _forcedRepairTemplateId = RepairTemplateFor(question);
+                    _currentQuestion = null;
+                    _currentSelection = null;
+                    _currentAttemptIndex = 1;
+                    try { _runtime.SaveCheckpoint(_session.SessionId, _generatedQuestionCount, _forcedRepairTemplateId); } catch { }
+                    return;
+                }
+
+                ResetBehaviorFromCommittedAttempts(committedAttempts);
+                _currentAttemptIndex = nextAttemptIndex;
+            }
+            catch
+            {
+                // Never retain the observation that belonged to a failed/non-durable write.
+                // If durable state cannot be re-read, fall back to conservative READY state;
+                // the original commit exception remains the error surfaced to the caller.
+                _behavior = new BehaviorController();
+                _lastBehavior = null;
+            }
+        }
+
+        private void ResetBehaviorFromCommittedAttempts(IList<MathCommittedAttemptSnapshot> attempts)
+        {
+            _behavior = new BehaviorController();
+            _lastBehavior = null;
+            if (attempts == null) return;
+
+            foreach (var attempt in attempts)
+            {
+                var behaviorMastery = attempt.MasteryScoreBefore;
+                if (!attempt.MasteryScoreAfter.HasValue)
+                {
+                    SkillSnapshot pendingSkill;
+                    if (_skills != null && _skills.TryGetValue(attempt.SkillId, out pendingSkill) && pendingSkill != null)
+                        behaviorMastery = pendingSkill.MasteryScore;
+                }
+                _lastBehavior = _behavior.Observe(new BehaviorObservation
+                {
+                    SkillId = attempt.SkillId,
+                    IsCorrect = attempt.IsCorrect,
+                    ResponseMs = Math.Max(0, attempt.ResponseMs),
+                    HintLevel = Math.Max(0, attempt.HintLevel),
+                    UsedMaxHint = attempt.HintLevel >= 2,
+                    RapidWrong = !attempt.IsCorrect && attempt.ResponseMs <= 550,
+                    SkippedOrExited = false,
+                    InputMiss = false,
+                    ErrorType = attempt.ErrorType,
+                    Representation = attempt.Representation,
+                    MasteryScore = Math.Max(0.0, Math.Min(1.0, behaviorMastery)),
+                    SessionElapsedMinutes = Math.Max(0, (attempt.AnsweredAtUtc - _session.StartedAtUtc).TotalMinutes)
+                });
+            }
         }
 
         private void RebuildFromCommittedAttempts(IList<MathCommittedAttemptSnapshot> attempts)

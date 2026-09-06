@@ -35,6 +35,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestRetryWrongFinalizesOnce(root, schemaPath, templatePath);
                 TestStaleCoordinatorCannotAppendAfterTerminalSession(root, schemaPath, templatePath);
                 TestCoordinatorRejectsStaleSkillSnapshot(root, schemaPath, templatePath);
+                TestCommitFailureRollsBackAndRestoresBehavior(root, schemaPath, templatePath);
                 TestResumeOpenQuestionAndComplete(root, schemaPath, templatePath);
                 TestCommittedStaleQuestionIsNotReplayed(root, schemaPath, templatePath);
                 TestCorruptOpenQuestionRecoversWithoutProgressReset(root, schemaPath, templatePath);
@@ -528,6 +529,60 @@ VALUES(@child,@skill,'math',0.61,0.70,3,2,0,0,@now,@now,@due,'LEARNING','mastery
                     "stale_skill_rejection_writes_no_mastery_event");
                 A(Count(database, "SELECT count(*) FROM child_skill WHERE child_id='" + started.ChildId + "' AND skill_id='" + question.SkillId + "' AND attempts_count=3 AND abs(mastery_score-0.61)<0.0000001;") == 1,
                     "stale_skill_rejection_preserves_newer_skill_state");
+            }
+        }
+
+        private static void TestCommitFailureRollsBackAndRestoresBehavior(string root, string schemaPath, string templatePath)
+        {
+            var database = NewDatabase(Path.Combine(root, "commit-failure-rollback.db"), schemaPath);
+            using (var coordinator = new MathSessionCoordinator(database, templatePath, "LOW", 8303, 1))
+            {
+                var started = coordinator.Start("Bé rollback");
+                var question = coordinator.NextQuestion();
+                Exec(database, @"CREATE TRIGGER smoke_fail_math_mastery
+BEFORE INSERT ON mastery_event
+BEGIN
+    SELECT RAISE(ABORT, 'injected_math_commit_failure');
+END;");
+
+                var failed = false;
+                try
+                {
+                    coordinator.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 900);
+                }
+                catch (SQLiteException)
+                {
+                    failed = true;
+                }
+                A(failed, "commit_failure_injected_mastery_write_surfaces_error");
+                A(coordinator.HasOpenQuestion && coordinator.Summary.Attempts == 0 && coordinator.Summary.AnswerAttempts == 0,
+                    "commit_failure_keeps_question_open_and_counters_unadvanced");
+                A(coordinator.NextQuestion().QuestionId == question.QuestionId,
+                    "commit_failure_keeps_same_open_question_for_retry");
+                A(Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + started.SessionId + "';") == 0,
+                    "commit_failure_rolls_back_attempt");
+                A(Count(database, "SELECT count(*) FROM attempt_commit_key WHERE session_id='" + started.SessionId + "';") == 0,
+                    "commit_failure_rolls_back_semantic_key");
+                A(Count(database, "SELECT count(*) FROM mastery_event WHERE child_id='" + started.ChildId + "' AND skill_id='" + question.SkillId + "';") == 0,
+                    "commit_failure_rolls_back_mastery_event");
+                A(Count(database, "SELECT count(*) FROM child_skill WHERE child_id='" + started.ChildId + "' AND skill_id='" + question.SkillId + "';") == 0,
+                    "commit_failure_rolls_back_child_skill");
+                A(Count(database, "SELECT count(*) FROM review_schedule WHERE child_id='" + started.ChildId + "' AND skill_id='" + question.SkillId + "';") == 0,
+                    "commit_failure_rolls_back_review_schedule");
+                A(Count(database, "SELECT count(*) FROM behavior_state_event WHERE session_id='" + started.SessionId + "';") == 0,
+                    "commit_failure_writes_no_behavior_audit");
+
+                Exec(database, "DROP TRIGGER smoke_fail_math_mastery;");
+                var recovered = coordinator.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 950);
+                A(recovered.QuestionCompleted && recovered.IsCorrect && recovered.Behavior != null && recovered.Behavior.RecentAttemptCount == 1,
+                    "commit_failure_retry_commits_once_without_ghost_behavior_observation");
+                A(coordinator.Summary.Attempts == 1 && coordinator.Summary.AnswerAttempts == 1,
+                    "commit_failure_retry_advances_counters_once");
+                A(Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + started.SessionId + "';") == 1 &&
+                  Count(database, "SELECT count(*) FROM attempt_commit_key WHERE session_id='" + started.SessionId + "';") == 1 &&
+                  Count(database, "SELECT count(*) FROM mastery_event WHERE child_id='" + started.ChildId + "' AND skill_id='" + question.SkillId + "';") == 1,
+                    "commit_failure_retry_writes_one_durable_learning_chain");
+                coordinator.Complete();
             }
         }
 
