@@ -25,6 +25,8 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 var repo = FindRepoRoot();
                 var schemaPath = Path.Combine(repo, "data", "schema", "001_initial.sql");
                 var templatePath = Path.Combine(repo, "content_packs", "math_grade2_v1", "verified_templates_v1.json");
+                var questionBankPath = Path.Combine(repo, "content_packs", "math_grade2_v1", "question_bank_v1.json");
+                TestAuthoredQuestionBank(questionBankPath);
                 TestResumeOpenQuestionAndComplete(root, schemaPath, templatePath);
                 TestCommittedStaleQuestionIsNotReplayed(root, schemaPath, templatePath);
                 TestCorruptOpenQuestionRecoversWithoutProgressReset(root, schemaPath, templatePath);
@@ -42,6 +44,51 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
             {
                 try { Directory.Delete(root, true); } catch { }
             }
+        }
+
+        private static void TestAuthoredQuestionBank(string questionBankPath)
+        {
+            var bank = new MathAuthoredQuestionSource().Load(questionBankPath);
+            A(bank != null && bank.Questions != null && bank.Questions.Count == 201, "authored_bank_loads_all_201_questions");
+            A(bank.Questions.Select(x => x.ContentQuestionId).Distinct(StringComparer.Ordinal).Count() == 201,
+                "authored_bank_content_ids_unique");
+            var lessonGroups = bank.Questions.GroupBy(x => x.LessonId, StringComparer.Ordinal).ToList();
+            A(lessonGroups.Count == 67, "authored_bank_covers_67_lessons");
+            A(lessonGroups.All(x => x.Count() == 3), "authored_bank_each_lesson_has_three_questions");
+            A(bank.Questions.All(x => !string.IsNullOrWhiteSpace(x.ContentQuestionId) && !string.IsNullOrWhiteSpace(x.LessonId) &&
+                                      !string.IsNullOrWhiteSpace(x.QuestionType) && !string.IsNullOrWhiteSpace(x.Difficulty)),
+                "authored_bank_maps_traceability_metadata");
+            A(bank.Questions.All(x => x.IsCorrectAnswer(x.CorrectAnswerText)), "authored_bank_every_expected_answer_validates");
+
+            var expression = bank.Questions.Single(x => x.AnswerKind == "expression");
+            A(expression.QuestionType == "expression_input" && expression.DisplayChoices.Count == 0,
+                "authored_expression_stays_input_without_fake_choices");
+            A(expression.IsCorrectAnswer("75"), "authored_expression_accepts_equivalent_numeric_result");
+
+            var unit = bank.Questions.Single(x => x.AnswerKind == "unit");
+            A(unit.QuestionType == "unit_input" && unit.DisplayChoices.Count == 0 && unit.ExpectedUnit == "kg",
+                "authored_unit_maps_expected_unit_without_fake_choices");
+            A(unit.IsCorrectAnswer("5 kilôgam"), "authored_unit_accepts_declared_alias");
+
+            var interaction = bank.Questions.Single(x => x.AnswerKind == "interaction_integer");
+            A(interaction.QuestionType == "interactive_measurement" && interaction.DisplayChoices.Count == 0,
+                "authored_interaction_stays_choice_free");
+            A((interaction.IllustrationData ?? string.Empty).StartsWith("segmentdraw|", StringComparison.Ordinal),
+                "authored_interaction_maps_existing_segment_control_contract");
+
+            var textChoice = bank.Questions.First(x => x.AnswerKind == "text" && x.QuestionType == "multiple_choice");
+            A(textChoice.DisplayChoices.Count >= 2 && textChoice.DisplayChoices.Contains(textChoice.CorrectAnswerText),
+                "authored_text_choice_preserves_declared_options");
+            var numericInput = bank.Questions.First(x => x.QuestionType == "numeric_input");
+            A(numericInput.DisplayChoices.Count == 0, "authored_numeric_input_does_not_generate_choices");
+
+            var authored = bank.Questions[0];
+            var runtimeA = MathAuthoredQuestionSource.CreateRuntimeInstance(authored);
+            var runtimeB = MathAuthoredQuestionSource.CreateRuntimeInstance(authored);
+            A(runtimeA.ContentQuestionId == authored.ContentQuestionId && runtimeB.ContentQuestionId == authored.ContentQuestionId,
+                "authored_runtime_instances_keep_stable_content_id");
+            A(runtimeA.QuestionId != runtimeB.QuestionId && runtimeA.QuestionId.StartsWith(authored.ContentQuestionId + "-", StringComparison.Ordinal),
+                "authored_runtime_question_id_remains_unique_instance_id");
         }
 
         private static void TestResumeOpenQuestionAndComplete(string root, string schemaPath, string templatePath)

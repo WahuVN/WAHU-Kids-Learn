@@ -31,9 +31,14 @@ namespace WAHU.Learning
     public sealed class MathQuestion
     {
         public string QuestionId { get; set; }
+        public string ContentQuestionId { get; set; }
+        public string LessonId { get; set; }
+        public string QuestionType { get; set; }
+        public string Difficulty { get; set; }
         public string TemplateId { get; set; }
         public string SkillId { get; set; }
         public string PromptVi { get; set; }
+        public string ExplanationVi { get; set; }
         public int CorrectAnswer { get; set; }
         public IList<int> Choices { get; set; }
         public string AnswerKind { get; set; }
