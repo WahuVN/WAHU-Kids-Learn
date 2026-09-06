@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
+using System.Text.RegularExpressions;
 using WAHU.Content;
 
 namespace WAHU.ContentRuntimeSmoke
@@ -17,6 +19,7 @@ namespace WAHU.ContentRuntimeSmoke
             try
             {
                 TestBundledPackValidation();
+                TestMathCurriculumBaselineSync();
                 TestSecureImport(root);
                 TestAdversarialArchives(root);
                 Console.WriteLine("CONTENT_RUNTIME_SMOKE_PASS assertions=" + _assertions);
@@ -38,6 +41,20 @@ namespace WAHU.ContentRuntimeSmoke
             Assert(math.Manifest.version == "1.2.0" && english.Manifest.version == "1.0.0", "bundled_versions_explicit");
         }
 
+        private static void TestMathCurriculumBaselineSync()
+        {
+            var projectRoot = FindProjectRoot();
+            var docsText = File.ReadAllText(Path.Combine(projectRoot, "docs", "05_MATH_GRADE2_CURRICULUM.md"));
+            var baselineText = File.ReadAllText(Path.Combine(projectRoot, "curriculum", "math_grade2", "moet_baseline_v1.json"));
+            var ignored = new HashSet<string>(StringComparer.Ordinal) { "BOOK_MAPPED", "SUPPLEMENTARY", "VERIFIED_A" };
+            var missing = new HashSet<string>(StringComparer.Ordinal);
+            foreach (Match match in Regex.Matches(docsText, "`([A-Z][A-Z0-9_]+)`"))
+            {
+                var id = match.Groups[1].Value;
+                if (!ignored.Contains(id) && !baselineText.Contains("\"" + id + "\"")) missing.Add(id);
+            }
+            Assert(missing.Count == 0, "math_machine_baseline_covers_documented_curriculum_ids");
+        }
         private static void TestSecureImport(string root)
         {
             var store = Path.Combine(root, "store");
