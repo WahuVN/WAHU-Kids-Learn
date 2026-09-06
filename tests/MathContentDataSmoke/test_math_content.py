@@ -236,6 +236,22 @@ class MathContentDataSmoke(unittest.TestCase):
                 self.assertIs(type(item["correct_answer"]), int)
                 self.assertIn(str(item["correct_answer"]), item["accepted_answers"])
 
+    def test_correct_choice_positions_are_balanced(self):
+        choice_questions = [x for x in self.questions if x.get("choices")]
+        by_count = {}
+        for item in choice_questions:
+            by_count.setdefault(len(item["choices"]), []).append(item)
+        self.assertEqual({2, 4}, set(by_count))
+        self.assertEqual(3, len(by_count[2]))
+        self.assertEqual(88, len(by_count[4]))
+        for choice_count, items in by_count.items():
+            with self.subTest(choice_count=choice_count):
+                positions = Counter(ord(item["correct_choice_id"]) - ord("a") for item in items)
+                counts = [positions[index] for index in range(choice_count)]
+                self.assertTrue(all(value > 0 for value in counts))
+                self.assertLessEqual(max(counts) - min(counts), 1)
+        self.assertEqual([22, 22, 22, 22], [Counter(x["correct_choice_id"] for x in by_count[4])[key] for key in "abcd"])
+
     def test_multiple_choice_options_are_semantically_distinct(self):
         self.assertEqual("có thể", validator.normalize_choice_text("  CÓ   THỂ "))
         self.assertEqual(validator.Fraction(352, 1), validator.try_eval_numeric_choice("300 + 52"))

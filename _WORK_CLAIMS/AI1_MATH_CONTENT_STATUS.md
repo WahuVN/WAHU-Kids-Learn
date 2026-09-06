@@ -28,7 +28,7 @@ Owner: AI1 — Math Content & Data
   - interactive measurement
   - word problem
 - Semantic validator errors: **0**
-- Math content unittest: **17 / 17 PASS**
+- Math content unittest: **18 / 18 PASS**
 - Pack manifest/hash/listing check on current working tree: **PASS** (`version=1.9.0`, 3 listed files)
 
 ## Curriculum/content completeness
@@ -79,6 +79,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - `answer_unit` display-only metadata sai kind/type hoặc rỗng;
 - invalid MC correct choice / duplicate choices / rationale missing;
 - MCQ trùng nghĩa sau normalize Unicode/case/whitespace hoặc hai biểu thức choice cho cùng giá trị số;
+- vị trí đáp án đúng bị lệch pattern; bank phải phân bố cân bằng theo số lượng choices;
 - invalid true/false shape;
 - mệnh giá tiền Việt Nam bị hard-code khi chưa có source/book mapping;
 - phép nhân/chia mở rộng không thuộc skill quan hệ thời gian `1 ngày = 24 giờ`, `1 giờ = 60 phút`;
@@ -107,10 +108,11 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - skill quan hệ thời gian không mở rộng thành phép nhân/chia ngoài yêu cầu cần đạt;
 - mọi phép nhân/chia literal child-facing nằm trong bảng 2 hoặc 5, kể cả distractor;
 - mọi MCQ có choice khác nhau sau normalize text và không có hai biểu thức choice cùng giá trị số;
+- vị trí đáp án đúng được cân bằng deterministic: 88 câu 4-choice = 22/22/22/22 cho A/B/C/D; 3 true/false = 2/1;
 - 23 câu integer có `answer_unit` giữ đúng contract display-only, không đổi sang unit-input;
 - 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract.
 
-Latest result: **17 tests PASS**.
+Latest result: **18 tests PASS**.
 
 ## Commits / waves
 
@@ -124,6 +126,7 @@ Latest result: **17 tests PASS**.
 - `2ac3027` — `Toán: siết hard guard thời gian và thứ tự prerequisite`
 - `234eafc` — `Toán: khóa phép nhân chia và nhớ mượn theo baseline`
 - `dcedca2` — `Toán: loại ambiguity trong lựa chọn trắc nghiệm`
+- `c20ca91` — `Toán: khóa contract authored session và đơn vị hiển thị`
 
 ## Current blockers outside AI1 content ownership
 

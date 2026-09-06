@@ -450,6 +450,7 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
     question_counts_by_skill = Counter()
     question_counts_by_difficulty = Counter()
     prompts_by_lesson: dict[str, list[tuple[str, str]]] = defaultdict(list)
+    correct_choice_positions_by_count: dict[int, Counter] = defaultdict(Counter)
 
     for i, q in enumerate(questions):
         where = f"question[{i}]"
@@ -655,8 +656,11 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             correct_text = q.get("correct_answer")
             if correct_id not in choice_ids:
                 errors.append(f"correct_choice_missing:{where}:{correct_id!r}")
-            elif correct_text != choice_texts[choice_ids.index(correct_id)]:
-                errors.append(f"correct_choice_text_mismatch:{where}:{correct_id}:{correct_text!r}")
+            else:
+                correct_index = choice_ids.index(correct_id)
+                correct_choice_positions_by_count[len(choice_ids)][correct_index] += 1
+                if correct_text != choice_texts[correct_index]:
+                    errors.append(f"correct_choice_text_mismatch:{where}:{correct_id}:{correct_text!r}")
             if correct_text not in accepted:
                 errors.append(f"correct_choice_text_not_accepted:{where}:{correct_text}")
             if validation.get("single_correct") is not True:
@@ -666,6 +670,14 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             if question_type == "true_false":
                 if len(choices) != 2 or set(choice_texts) != {"Đúng", "Sai"}:
                     errors.append(f"true_false_choices_invalid:{where}:{choice_texts!r}")
+
+    for choice_count, positions in correct_choice_positions_by_count.items():
+        counts = [positions[index] for index in range(choice_count)]
+        total = sum(counts)
+        if total >= choice_count and any(value == 0 for value in counts):
+            errors.append(f"correct_choice_position_missing:{choice_count}:{counts}")
+        if counts and max(counts) - min(counts) > 1:
+            errors.append(f"correct_choice_position_imbalanced:{choice_count}:{counts}")
 
     for skill in baseline_skill_set:
         if question_counts_by_skill[skill] < 3:

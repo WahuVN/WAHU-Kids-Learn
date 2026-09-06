@@ -598,6 +598,7 @@ def build() -> tuple[dict, dict]:
     topic_by_id = {t["id"]: t for t in TOPICS}
     questions = []
     lessons = []
+    choice_position_counts: dict[int, int] = {}
 
     for domain_key, skills in domain_skills.items():
         chapter_id = chapter_by_domain[domain_key]
@@ -635,9 +636,26 @@ def build() -> tuple[dict, dict]:
                     "validation": spec["validation"],
                     "status": "CHILD_READY",
                 }
-                for optional_key in ("answer_unit", "correct_choice_id", "expected_unit", "accepted_units", "choices"):
+                for optional_key in ("answer_unit", "expected_unit", "accepted_units"):
                     if optional_key in spec:
                         q[optional_key] = spec[optional_key]
+                if "choices" in spec:
+                    choices = [dict(choice) for choice in spec["choices"]]
+                    if not choices:
+                        raise SystemExit(f"Choice question has no choices: {qid}")
+                    original_correct_id = spec.get("correct_choice_id")
+                    correct = next((choice for choice in choices if choice.get("id") == original_correct_id), None)
+                    if correct is None:
+                        raise SystemExit(f"Choice question missing correct choice: {qid}")
+                    distractors = [choice for choice in choices if choice is not correct]
+                    count = len(choices)
+                    target = choice_position_counts.get(count, 0) % count
+                    choice_position_counts[count] = choice_position_counts.get(count, 0) + 1
+                    ordered = distractors[:target] + [correct] + distractors[target:]
+                    for index, choice in enumerate(ordered):
+                        choice["id"] = chr(ord("a") + index)
+                    q["choices"] = ordered
+                    q["correct_choice_id"] = ordered[target]["id"]
                 questions.append(q)
 
             basic = questions[-3]
