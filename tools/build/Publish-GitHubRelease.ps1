@@ -97,8 +97,15 @@ Learner data is stored outside the application directory and is preserved across
 
 $assets = @($installer,$installerSha,$portable,$portableSha,$updateManifest)
 $exists = $false
-& gh release view $tag --repo WahuVN/WAHU-Kids-Learn *> $null
-if ($LASTEXITCODE -eq 0) { $exists = $true }
+$previousErrorActionPreference = $ErrorActionPreference
+try {
+    $ErrorActionPreference = 'Continue'
+    & gh release view $tag --repo WahuVN/WAHU-Kids-Learn 1>$null 2>$null
+    $exists = ($LASTEXITCODE -eq 0)
+}
+finally {
+    $ErrorActionPreference = $previousErrorActionPreference
+}
 
 if ($exists) {
     if (-not $ReplaceExistingAssets) { throw "Release $tag đã tồn tại. Dùng -ReplaceExistingAssets nếu chủ động thay asset cùng tag." }
