@@ -20,7 +20,7 @@ Branch: `main`
 
 - `tests/MathEngineRuntimeSmoke`: PASS — **47 assertions**.
 - `tests/MathDataEngineRuntimeSmoke`: PASS — **35 assertions**.
-- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **99 assertions** (authored bank + targeted lesson + prerequisite unlock + exact resume + mastery delta + next lesson).
+- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **111 assertions** (authored bank + targeted lesson + prerequisite unlock + exact resume + mastery delta + next lesson + corrupt authored cursor recovery).
 - `tests/SQLiteRuntimeSmoke`: PASS — **166 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
 - `tests/LearningSessionRuntimeSmoke`: PASS — **794 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
 - PowerShell release/build scripts: schema V4 payload/bootstrap expectations đã cập nhật; parse/build gate PASS.
@@ -35,7 +35,7 @@ Branch: `main`
 - open-question idempotency: PASS — gọi `NextQuestion()` lại khi câu đang mở trả đúng cùng câu, không regenerate.
 - deterministic generation qua restart: PASS — per-question seed = stable hash `(session seed, ordinal, template id)`.
 - stale open question sau committed answer: PASS — phát hiện qua `attempt_commit_key`, không hiển thị/ghi điểm lại.
-- corrupted current-question cache: PASS — chỉ bỏ cache câu mở, giữ committed attempts/mastery/progress.
+- corrupted current-question cache: PASS — chỉ bỏ cache câu mở, giữ committed attempts/mastery/progress; lesson-mode reconcile authored cursor về committed ordinal để không skip câu.
 - double-submit: PASS ở engine lane — coordinator serialize submit + DB semantic idempotency.
 - lesson-targeted session: PASS — constructor nhận `lessonId`, engine lấy đúng authored practice set của lesson theo thứ tự basic → medium → application.
 - prerequisite guard: PASS — lesson bị khóa bị chặn ngay ở coordinator, kể cả caller bypass UI.
@@ -86,7 +86,8 @@ Còn phải làm: retry semantics, hint/first-try scoring semantics, skip policy
 - `beb0c0e` — `feat(toán): tiếp tục chính xác phiên học sau khi đóng app` — pushed.
 - `a5119d4` — `feat(toán): nạp ngân hàng 201 câu theo bài học` — pushed.
 - `656a94b` — `feat(toán): thêm phiên học theo bài và mở khóa prerequisite` — pushed.
-- mastery-delta + next-lesson advanced result contract — đang chốt selective commit hiện tại.
+- `8b32944` — `feat(toán): publish mastery delta và bài tiếp theo` — pushed.
+- Request 007 corrupt authored cursor recovery — regression PASS và được chốt trong wave selective hiện tại.
 
 ## Blocker / coordination
 

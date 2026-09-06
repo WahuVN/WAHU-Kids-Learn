@@ -30,6 +30,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 var lessonCatalogPath = Path.Combine(repo, "content_packs", "math_grade2_v1", "lesson_catalog_v1.json");
                 TestAuthoredQuestionBank(questionBankPath);
                 TestTargetedLessonUnlockAndResume(root, schemaPath, templatePath, lessonCatalogPath);
+                TestTargetedCorruptOpenQuestionReplaysAuthoredOrdinal(root, schemaPath, templatePath, lessonCatalogPath);
                 TestResumeOpenQuestionAndComplete(root, schemaPath, templatePath);
                 TestCommittedStaleQuestionIsNotReplayed(root, schemaPath, templatePath);
                 TestCorruptOpenQuestionRecoversWithoutProgressReset(root, schemaPath, templatePath);
@@ -241,6 +242,66 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 var question = next.NextQuestion();
                 A(question.LessonId == dependent.Id, "newly_unlocked_session_targets_exact_lesson");
                 next.Abort("targeted_cleanup");
+            }
+        }
+
+        private static void TestTargetedCorruptOpenQuestionReplaysAuthoredOrdinal(string root, string schemaPath, string templatePath, string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.Lessons.First(x => (x.PrerequisiteSkills == null || x.PrerequisiteSkills.Count == 0) &&
+                                                     x.PracticeSets != null && x.PracticeSets.TotalCount == 3);
+            var database = NewDatabase(Path.Combine(root, "targeted-corrupt-cache.db"), schemaPath);
+            string sessionId;
+
+            using (var first = new MathSessionCoordinator(database, templatePath, "LOW", 8101, lesson.Id))
+            {
+                var start = first.Start("Bé targeted corrupt");
+                sessionId = start.SessionId;
+                var basic = first.NextQuestion();
+                A(basic.ContentQuestionId == lesson.PracticeSets.Basic[0],
+                    "targeted_corrupt_fixture_starts_with_basic");
+                first.SubmitAnswerAt(basic.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 800);
+
+                var medium = first.NextQuestion();
+                A(medium.ContentQuestionId == lesson.PracticeSets.Medium[0],
+                    "targeted_corrupt_fixture_opens_medium");
+                Exec(database, "UPDATE math_session_runtime SET current_question_json='not-json-at-all' WHERE session_id=@session;",
+                    "@session", sessionId);
+                first.Suspend("simulate_targeted_corrupt_cache");
+            }
+
+            A(Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + sessionId + "';") == 1,
+                "targeted_corrupt_fixture_keeps_one_committed_attempt");
+            A(Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + sessionId +
+                "' AND generated_question_count=2 AND current_question_json='not-json-at-all';") == 1,
+                "targeted_corrupt_fixture_persists_broken_medium_cursor");
+
+            using (var resumed = new MathSessionCoordinator(database, templatePath, "NORMAL", 9999, 9))
+            {
+                var start = resumed.Start("Bé targeted corrupt");
+                A(start.ResumedExistingSession && start.TargetLessonId == lesson.Id,
+                    "targeted_corrupt_resume_keeps_target_lesson");
+                A(start.DiscardedCorruptOpenQuestion && !start.RestoredOpenQuestion && start.CompletedQuestionCount == 1,
+                    "targeted_corrupt_resume_discards_only_open_question");
+                A(Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + sessionId +
+                    "' AND generated_question_count=1 AND current_question_json IS NULL;") == 1,
+                    "targeted_corrupt_resume_rolls_cursor_back_to_committed_ordinal");
+
+                var medium = resumed.NextQuestion();
+                A(medium != null && medium.ContentQuestionId == lesson.PracticeSets.Medium[0],
+                    "targeted_corrupt_resume_replays_medium_not_application");
+                resumed.SubmitAnswerAt(medium.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 850);
+
+                var application = resumed.NextQuestion();
+                A(application != null && application.ContentQuestionId == lesson.PracticeSets.Application[0],
+                    "targeted_corrupt_resume_then_serves_application");
+                resumed.SubmitAnswerAt(application.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 900);
+                A(resumed.Summary.Attempts == 3 && resumed.NextQuestion() == null,
+                    "targeted_corrupt_resume_requires_all_three_authored_attempts");
+
+                var summary = resumed.Complete();
+                A(summary.LessonCompleted && summary.Attempts == 3 && summary.TargetLessonId == lesson.Id,
+                    "targeted_corrupt_resume_completes_only_after_full_authored_set");
             }
         }
 

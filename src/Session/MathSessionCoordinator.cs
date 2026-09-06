@@ -676,6 +676,7 @@ namespace WAHU.Session
                 if (!string.IsNullOrWhiteSpace(runtime.CurrentSelectionJson) || runtime.QuestionStartedAtUtc.HasValue)
                 {
                     discardedCorruptOpenQuestion = true;
+                    ReconcileTargetedGeneratedOrdinalAfterDiscard();
                     try { _runtime.SaveCheckpoint(_session.SessionId, _generatedQuestionCount, _forcedRepairTemplateId); } catch { }
                 }
                 return;
@@ -705,8 +706,15 @@ namespace WAHU.Session
                 _currentQuestion = null;
                 _currentSelection = null;
                 discardedCorruptOpenQuestion = true;
+                ReconcileTargetedGeneratedOrdinalAfterDiscard();
                 try { _runtime.SaveCheckpoint(_session.SessionId, _generatedQuestionCount, _forcedRepairTemplateId); } catch { }
             }
+        }
+
+        private void ReconcileTargetedGeneratedOrdinalAfterDiscard()
+        {
+            if (!string.Equals(_sessionMode, "lesson", StringComparison.Ordinal)) return;
+            _generatedQuestionCount = Math.Max(0, Math.Min(_targetQuestionCount, _attempts));
         }
 
         private void RebuildFromCommittedAttempts(IList<MathCommittedAttemptSnapshot> attempts)

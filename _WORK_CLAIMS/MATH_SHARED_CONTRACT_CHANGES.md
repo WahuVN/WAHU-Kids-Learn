@@ -129,6 +129,17 @@ Result summary được mở rộng bằng dữ liệu học thật, không thê
 
 AI3 có thể dùng các field trên trực tiếp cho result screen; không tự tính mastery delta hoặc “bài tiếp theo”.
 
+## 2026-09-07 — Request 007: corrupt authored cursor recovery (AI2)
+
+Targeted lesson không được bỏ qua authored ordinal khi cache câu đang mở bị hỏng:
+
+- Sau restore, committed attempts vẫn là source-of-truth cho tiến độ lesson.
+- Nếu open-question cache bị thiếu/hỏng và `session_mode=lesson`, engine reconcile `generated_question_count` về số authored attempts đã commit trước khi clear checkpoint.
+- Vì vậy fixture `basic committed → medium opened → medium cache corrupt` phải resume ở đúng **medium**, rồi mới tới application.
+- Lesson chỉ complete khi đủ toàn bộ authored target attempts; corrupt cache không được làm pool hết sớm ở 2/3.
+- Adaptive session giữ behavior recovery cũ; cursor rollback này chỉ áp dụng targeted lesson.
+- Regression `MathSessionPersistenceRuntimeSmoke` khóa cả durable cursor sau reconcile và đúng `ContentQuestionId` medium/application.
+
 ## Contract còn chưa chốt
 
 Các mục sau chưa được UI/content tự invent cho tới khi AI2 publish contract:
