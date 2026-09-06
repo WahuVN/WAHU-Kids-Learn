@@ -36,6 +36,8 @@ namespace WAHU.ChildUiRuntimeSmoke
             TestTypedAnswerInput(appAssembly);
             TestAllAuthoredAnswerSurfaces(appAssembly);
             TestTargetedLessonUiFlow(appAssembly);
+            TestChoiceRetryUiFlow(appAssembly);
+            TestInteractionRetryUiFlow(appAssembly);
             TestInteractiveSegmentAnswer(appAssembly);
             TestBasicControls(appAssembly);
 
@@ -378,6 +380,17 @@ namespace WAHU.ChildUiRuntimeSmoke
             A(restoredText.IndexOf("đúng câu", StringComparison.OrdinalIgnoreCase) >= 0,
                 "math_resume_notice_exact_open_question");
 
+            var retry = Activator.CreateInstance(startType);
+            Set(retry, "ResumedExistingSession", true);
+            Set(retry, "RestoredOpenQuestion", true);
+            Set(retry, "RetryPending", true);
+            Set(retry, "CurrentAttemptIndex", 2);
+            Set(retry, "CompletedQuestionCount", 1);
+            var retryText = (string)method.Invoke(null, new[] { retry });
+            A(retryText.IndexOf("thử lại", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                retryText.IndexOf("gợi ý", StringComparison.OrdinalIgnoreCase) >= 0,
+                "math_resume_notice_retry_pending_same_question");
+
             var corrupt = Activator.CreateInstance(startType);
             Set(corrupt, "ResumedExistingSession", true);
             Set(corrupt, "DiscardedCorruptOpenQuestion", true);
@@ -428,6 +441,7 @@ namespace WAHU.ChildUiRuntimeSmoke
             var summary = Activator.CreateInstance(summaryType);
             Set(summary, "Attempts", 8);
             Set(summary, "Correct", 6);
+            Set(summary, "IndependentCorrect", 4);
             Set(summary, "HintedCorrect", 2);
             Set(summary, "Wrong", 2);
             Set(summary, "DistinctSkills", 4);
@@ -442,6 +456,19 @@ namespace WAHU.ChildUiRuntimeSmoke
             A(performance.IndexOf("Đúng nhờ gợi ý 2", StringComparison.OrdinalIgnoreCase) >= 0 &&
                 performance.IndexOf("Cần luyện lại 2", StringComparison.OrdinalIgnoreCase) >= 0,
                 "math_completion_shows_hinted_and_practice_counts");
+
+            var retrySummary = Activator.CreateInstance(summaryType);
+            Set(retrySummary, "Attempts", 3);
+            Set(retrySummary, "Correct", 3);
+            Set(retrySummary, "IndependentCorrect", 2);
+            Set(retrySummary, "RetriedQuestions", 1);
+            Set(retrySummary, "RetriedCorrect", 1);
+            var retryPerformance = (string)performanceMethod.Invoke(null, new[] { retrySummary });
+            A(retryPerformance.IndexOf("Tự làm đúng 2", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                retryPerformance.IndexOf("Thử lại 1 câu (đúng 1)", StringComparison.OrdinalIgnoreCase) >= 0,
+                "math_completion_uses_first_class_retry_counters");
+            A(retryPerformance.IndexOf("Tự làm đúng 3", StringComparison.OrdinalIgnoreCase) < 0,
+                "math_completion_retry_correct_not_counted_independent");
 
             var support = (string)supportMethod.Invoke(null, new[] { summary });
             A(support.IndexOf("4 kỹ năng", StringComparison.OrdinalIgnoreCase) >= 0 &&
@@ -779,10 +806,36 @@ namespace WAHU.ChildUiRuntimeSmoke
                         if (question.DisplayChoices == null || question.DisplayChoices.Count == 0)
                         {
                             var input = GetField<TextBox>(form, "_typedAnswerBox");
-                            input.Text = question.CorrectAnswerDisplay;
-                            A(GetField<Button>(form, "_typedSubmitButton").Enabled,
-                                "targeted_ui_flow_typed_submit_ready_" + ordinal);
-                            Invoke(form, "SubmitTypedAnswer", "ui_e2e");
+                            if (ordinal == 0)
+                            {
+                                input.Text = "not-a-valid-answer";
+                                A(GetField<Button>(form, "_typedSubmitButton").Enabled,
+                                    "targeted_ui_retry_first_attempt_submit_ready");
+                                Invoke(form, "SubmitTypedAnswer", "ui_e2e_first_try_wrong");
+                                var retryCoordinator = GetField<object>(form, "_coordinator");
+                                var pendingRetrySummary = Get<object>(retryCoordinator, "Summary");
+                                A(GetField<bool>(form, "_retryPending") && Get<int>(pendingRetrySummary, "Attempts") == 0 &&
+                                    Get<int>(pendingRetrySummary, "AnswerAttempts") == 1,
+                                    "targeted_ui_retry_wrong_first_try_does_not_advance_progress");
+                                A(input.Enabled && GetField<Button>(form, "_typedSubmitButton").Enabled &&
+                                    !GetField<Button>(form, "_nextButton").Visible &&
+                                    GetField<Label>(form, "_progressText").Text.IndexOf("thử lại", StringComparison.OrdinalIgnoreCase) >= 0,
+                                    "targeted_ui_retry_keeps_same_typed_question_editable");
+                                input.Text = question.CorrectAnswerDisplay;
+                                Invoke(form, "SubmitTypedAnswer", "ui_e2e_retry_correct");
+                                var finalizedRetrySummary = Get<object>(retryCoordinator, "Summary");
+                                A(!GetField<bool>(form, "_retryPending") && Get<int>(finalizedRetrySummary, "Attempts") == 1 &&
+                                    Get<int>(finalizedRetrySummary, "AnswerAttempts") == 2 && Get<int>(finalizedRetrySummary, "RetriedCorrect") == 1 &&
+                                    Get<int>(finalizedRetrySummary, "IndependentCorrect") == 0,
+                                    "targeted_ui_retry_correct_finalizes_once_as_assisted");
+                            }
+                            else
+                            {
+                                input.Text = question.CorrectAnswerDisplay;
+                                A(GetField<Button>(form, "_typedSubmitButton").Enabled,
+                                    "targeted_ui_flow_typed_submit_ready_" + ordinal);
+                                Invoke(form, "SubmitTypedAnswer", "ui_e2e");
+                            }
                         }
                         else
                         {
@@ -790,7 +843,21 @@ namespace WAHU.ChildUiRuntimeSmoke
                             for (var i = 0; i < question.DisplayChoices.Count; i++)
                                 if (string.Equals(question.DisplayChoices[i], question.CorrectAnswerDisplay, StringComparison.Ordinal)) correctIndex = i;
                             A(correctIndex >= 0, "targeted_ui_flow_choice_correct_index_" + ordinal);
-                            Invoke(form, "SubmitChoice", correctIndex, "ui_e2e");
+                            if (ordinal == 0)
+                            {
+                                var wrongIndex = (correctIndex + 1) % question.DisplayChoices.Count;
+                                Invoke(form, "SubmitChoice", wrongIndex, "ui_e2e_first_try_wrong");
+                                var retryCoordinator = GetField<object>(form, "_coordinator");
+                                var pendingChoiceRetrySummary = Get<object>(retryCoordinator, "Summary");
+                                A(GetField<bool>(form, "_retryPending") && Get<int>(pendingChoiceRetrySummary, "Attempts") == 0 &&
+                                    Get<int>(pendingChoiceRetrySummary, "AnswerAttempts") == 1 && !GetField<Button>(form, "_nextButton").Visible,
+                                    "targeted_ui_retry_choice_wrong_first_try_keeps_question_open");
+                                Invoke(form, "SubmitChoice", correctIndex, "ui_e2e_retry_correct");
+                            }
+                            else
+                            {
+                                Invoke(form, "SubmitChoice", correctIndex, "ui_e2e");
+                            }
                         }
 
                         if (ordinal < 2)
@@ -805,8 +872,12 @@ namespace WAHU.ChildUiRuntimeSmoke
                     A(GetField<bool>(form, "_finished"), "targeted_ui_flow_form_completed");
                     A(GetField<Label>(form, "_prompt").Text == "Hoàn thành bài học",
                         "targeted_ui_flow_result_title_is_lesson");
-                    A(GetField<Label>(form, "_feedback").Text.IndexOf("Điểm bài 100%", StringComparison.OrdinalIgnoreCase) >= 0,
+                    var resultFeedback = GetField<Label>(form, "_feedback").Text;
+                    A(resultFeedback.IndexOf("Điểm bài 100%", StringComparison.OrdinalIgnoreCase) >= 0,
                         "targeted_ui_flow_result_uses_engine_score");
+                    A(resultFeedback.IndexOf("Tự làm đúng 2", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                        resultFeedback.IndexOf("Thử lại 1 câu (đúng 1)", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "targeted_ui_flow_result_preserves_first_try_retry_semantics");
                     var resultSupport = GetField<Label>(form, "_support").Text;
                     A(resultSupport.IndexOf("Mức thành thạo hiện tại", StringComparison.OrdinalIgnoreCase) >= 0 &&
                         resultSupport.IndexOf("tăng thêm", StringComparison.OrdinalIgnoreCase) >= 0,
@@ -854,6 +925,250 @@ namespace WAHU.ChildUiRuntimeSmoke
                 try { Directory.Delete(tempRoot, true); } catch { }
             }
         }
+        private static void TestChoiceRetryUiFlow(Assembly appAssembly)
+        {
+            var repo = Directory.GetCurrentDirectory();
+            var sourceContent = Path.Combine(repo, "content_packs", "math_grade2_v1");
+            var runtimeContent = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "content_packs", "math_grade2_v1");
+            Directory.CreateDirectory(runtimeContent);
+            foreach (var name in new[] { "verified_templates_v1.json", "lesson_catalog_v1.json", "question_bank_v1.json" })
+                File.Copy(Path.Combine(sourceContent, name), Path.Combine(runtimeContent, name), true);
+
+            var catalogPath = Path.Combine(sourceContent, "lesson_catalog_v1.json");
+            var lesson = new MathLessonCatalogSource().Load(catalogPath).FindLesson("m2_ls_point_recognize");
+            A(lesson != null && (lesson.PrerequisiteSkills == null || lesson.PrerequisiteSkills.Count == 0),
+                "choice_retry_fixture_root_lesson_unlocked");
+
+            var tempRoot = Path.Combine(Path.GetTempPath(), "wahu-child-ui-choice-retry-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempRoot);
+            try
+            {
+                var schemaSource = Path.Combine(repo, "data", "schema");
+                var schemaDir = Path.Combine(tempRoot, "schema");
+                Directory.CreateDirectory(schemaDir);
+                foreach (var source in Directory.GetFiles(schemaSource, "*.sql"))
+                    File.Copy(source, Path.Combine(schemaDir, Path.GetFileName(source)), true);
+                var database = new LearningDatabase(Path.Combine(tempRoot, "learning.db"), Path.Combine(schemaDir, "001_initial.sql"));
+                var init = database.Initialize("DELETE");
+                A(init.SchemaVersion == 4 && init.Health.IsHealthy, "choice_retry_database_v4_ready");
+                new LearnerSessionService(database).EnsurePrimaryChild("Bé UI choice retry");
+
+                var ctor = typeof(WAHUKidsLearn.MathLessonForm).GetConstructor(
+                    BindingFlags.Instance | BindingFlags.NonPublic,
+                    null,
+                    new[] { typeof(LearningDatabase), typeof(RuntimePerformanceSettings), typeof(string) },
+                    null);
+                A(ctor != null, "choice_retry_lesson_constructor_available");
+                using (var form = (WAHUKidsLearn.MathLessonForm)ctor.Invoke(new object[]
+                {
+                    database,
+                    new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW },
+                    lesson.Id
+                }))
+                {
+                    Invoke(form, "StartSession");
+                    var question = GetField<MathQuestion>(form, "_question");
+                    A(question != null && question.LessonId == lesson.Id && question.DisplayChoices != null && question.DisplayChoices.Count >= 2,
+                        "choice_retry_first_question_is_choice");
+                    var correctIndex = -1;
+                    for (var i = 0; i < question.DisplayChoices.Count; i++)
+                        if (string.Equals(question.DisplayChoices[i], question.CorrectAnswerDisplay, StringComparison.Ordinal)) correctIndex = i;
+                    A(correctIndex >= 0, "choice_retry_correct_index_resolves");
+                    var wrongIndex = (correctIndex + 1) % question.DisplayChoices.Count;
+                    var buttons = GetField<Array>(form, "_answerButtons");
+
+                    Invoke(form, "SubmitChoice", wrongIndex, "ui_choice_first_try_wrong");
+                    var coordinator = GetField<object>(form, "_coordinator");
+                    var pending = Get<object>(coordinator, "Summary");
+                    A(GetField<bool>(form, "_retryPending") && Get<int>(pending, "Attempts") == 0 &&
+                        Get<int>(pending, "AnswerAttempts") == 1 && !GetField<Button>(form, "_nextButton").Visible,
+                        "choice_retry_wrong_first_try_keeps_same_question_open");
+                    var wrongButton = (Control)buttons.GetValue(wrongIndex);
+                    var correctButton = (Control)buttons.GetValue(correctIndex);
+                    A(Get<object>(wrongButton, "VisualState").ToString() == "Incorrect",
+                        "choice_retry_marks_selected_wrong_choice");
+                    A(wrongButton.Enabled, "choice_retry_reenables_selected_wrong_choice");
+                    A(Get<object>(correctButton, "VisualState").ToString() == "Idle",
+                        "choice_retry_does_not_reveal_correct_choice_before_retry");
+                    A(correctButton.Enabled, "choice_retry_keeps_other_choices_enabled");
+                    A(GetField<Label>(form, "_progressText").Text.IndexOf("thử lại", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "choice_retry_progress_labels_retry_state");
+
+                    Invoke(form, "SubmitChoice", correctIndex, "ui_choice_retry_correct");
+                    var finalized = Get<object>(coordinator, "Summary");
+                    A(!GetField<bool>(form, "_retryPending") && Get<int>(finalized, "Attempts") == 1 &&
+                        Get<int>(finalized, "AnswerAttempts") == 2 && Get<int>(finalized, "RetriedQuestions") == 1 &&
+                        Get<int>(finalized, "RetriedCorrect") == 1 && Get<int>(finalized, "IndependentCorrect") == 0,
+                        "choice_retry_correct_finalizes_once_as_assisted");
+                    A(Get<object>(correctButton, "VisualState").ToString() == "Correct" &&
+                        Get<object>(wrongButton, "VisualState").ToString() == "Muted",
+                        "choice_retry_final_attempt_reveals_correct_choice");
+                    A(!correctButton.Enabled && !wrongButton.Enabled,
+                        "choice_retry_final_attempt_locks_choices");
+
+                    Invoke(coordinator, "Abort", "choice_retry_cleanup");
+                    SetField(form, "_finished", true);
+                }
+            }
+            finally
+            {
+                try { Directory.Delete(tempRoot, true); } catch { }
+            }
+        }
+
+        private static void CompleteTargetedLessonCorrectly(ConstructorInfo ctor, LearningDatabase database, string lessonId, string assertionPrefix)
+        {
+            using (var form = (WAHUKidsLearn.MathLessonForm)ctor.Invoke(new object[]
+            {
+                database,
+                new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW },
+                lessonId
+            }))
+            {
+                Invoke(form, "StartSession");
+                for (var ordinal = 0; ordinal < 3; ordinal++)
+                {
+                    var question = GetField<MathQuestion>(form, "_question");
+                    A(question != null && question.LessonId == lessonId,
+                        assertionPrefix + "_question_" + ordinal);
+                    if (string.Equals(question.AnswerKind, "interaction_integer", StringComparison.Ordinal))
+                    {
+                        var interactive = GetField<Control>(form, "_interactiveAnswer");
+                        Invoke(interactive, "SelectCursor");
+                        Invoke(interactive, "MoveCursor", question.CorrectAnswer);
+                        Invoke(interactive, "SelectCursor");
+                        Invoke(form, "SubmitInteractiveAnswer", assertionPrefix);
+                    }
+                    else if (question.DisplayChoices == null || question.DisplayChoices.Count == 0)
+                    {
+                        var input = GetField<TextBox>(form, "_typedAnswerBox");
+                        input.Text = question.CorrectAnswerDisplay;
+                        Invoke(form, "SubmitTypedAnswer", assertionPrefix);
+                    }
+                    else
+                    {
+                        var correctIndex = -1;
+                        for (var i = 0; i < question.DisplayChoices.Count; i++)
+                            if (string.Equals(question.DisplayChoices[i], question.CorrectAnswerDisplay, StringComparison.Ordinal)) correctIndex = i;
+                        A(correctIndex >= 0, assertionPrefix + "_correct_index_" + ordinal);
+                        Invoke(form, "SubmitChoice", correctIndex, assertionPrefix);
+                    }
+                    Invoke(form, "HandleNextButton");
+                }
+                A(GetField<bool>(form, "_finished"), assertionPrefix + "_completed");
+            }
+        }
+
+        private static void TestInteractionRetryUiFlow(Assembly appAssembly)
+        {
+            var repo = Directory.GetCurrentDirectory();
+            var sourceContent = Path.Combine(repo, "content_packs", "math_grade2_v1");
+            var runtimeContent = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "content_packs", "math_grade2_v1");
+            Directory.CreateDirectory(runtimeContent);
+            foreach (var name in new[] { "verified_templates_v1.json", "lesson_catalog_v1.json", "question_bank_v1.json" })
+                File.Copy(Path.Combine(sourceContent, name), Path.Combine(runtimeContent, name), true);
+
+            var catalog = new MathLessonCatalogSource().Load(Path.Combine(sourceContent, "lesson_catalog_v1.json"));
+            var pointLesson = catalog.FindLesson("m2_ls_point_recognize");
+            var lineLesson = catalog.FindLesson("m2_ls_line_segment_recognize");
+            var segmentLesson = catalog.FindLesson("m2_ls_draw_segment_given_length");
+            A(pointLesson != null && lineLesson != null && segmentLesson != null,
+                "interaction_retry_fixture_lessons_exist");
+            A(lineLesson.PrerequisiteSkills.Contains(pointLesson.SkillId) &&
+                segmentLesson.PrerequisiteSkills.Contains(lineLesson.SkillId),
+                "interaction_retry_fixture_prerequisite_chain");
+
+            var tempRoot = Path.Combine(Path.GetTempPath(), "wahu-child-ui-interaction-retry-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempRoot);
+            try
+            {
+                var schemaSource = Path.Combine(repo, "data", "schema");
+                var schemaDir = Path.Combine(tempRoot, "schema");
+                Directory.CreateDirectory(schemaDir);
+                foreach (var source in Directory.GetFiles(schemaSource, "*.sql"))
+                    File.Copy(source, Path.Combine(schemaDir, Path.GetFileName(source)), true);
+                var database = new LearningDatabase(Path.Combine(tempRoot, "learning.db"), Path.Combine(schemaDir, "001_initial.sql"));
+                var init = database.Initialize("DELETE");
+                A(init.SchemaVersion == 4 && init.Health.IsHealthy, "interaction_retry_database_v4_ready");
+                new LearnerSessionService(database).EnsurePrimaryChild("Bé UI interaction retry");
+
+                var ctor = typeof(WAHUKidsLearn.MathLessonForm).GetConstructor(
+                    BindingFlags.Instance | BindingFlags.NonPublic,
+                    null,
+                    new[] { typeof(LearningDatabase), typeof(RuntimePerformanceSettings), typeof(string) },
+                    null);
+                A(ctor != null, "interaction_retry_lesson_constructor_available");
+
+                CompleteTargetedLessonCorrectly(ctor, database, pointLesson.Id, "interaction_retry_point_prerequisite");
+                CompleteTargetedLessonCorrectly(ctor, database, lineLesson.Id, "interaction_retry_line_prerequisite");
+
+                using (var form = (WAHUKidsLearn.MathLessonForm)ctor.Invoke(new object[]
+                {
+                    database,
+                    new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW },
+                    segmentLesson.Id
+                }))
+                {
+                    Invoke(form, "StartSession");
+                    var basic = GetField<MathQuestion>(form, "_question");
+                    A(basic != null && basic.ContentQuestionId == "m2_q_draw_segment_given_length_01",
+                        "interaction_retry_segment_starts_with_basic");
+                    var basicInput = GetField<TextBox>(form, "_typedAnswerBox");
+                    basicInput.Text = basic.CorrectAnswerDisplay;
+                    Invoke(form, "SubmitTypedAnswer", "interaction_retry_basic");
+                    Invoke(form, "HandleNextButton");
+
+                    var medium = GetField<MathQuestion>(form, "_question");
+                    A(medium != null && medium.ContentQuestionId == "m2_q_draw_segment_given_length_02" &&
+                        string.Equals(medium.AnswerKind, "interaction_integer", StringComparison.Ordinal) &&
+                        medium.IllustrationData.StartsWith("segmentdraw|", StringComparison.Ordinal),
+                        "interaction_retry_medium_is_authored_segment");
+                    var interactive = GetField<Control>(form, "_interactiveAnswer");
+                    var target = medium.CorrectAnswer;
+                    var wrongLength = Math.Max(1, target - 1);
+                    Invoke(interactive, "SelectCursor");
+                    Invoke(interactive, "MoveCursor", wrongLength);
+                    Invoke(interactive, "SelectCursor");
+                    A(Get<int>(interactive, "SelectedLength") == wrongLength,
+                        "interaction_retry_first_segment_is_intentionally_wrong");
+                    Invoke(form, "SubmitInteractiveAnswer", "interaction_first_try_wrong");
+
+                    var coordinator = GetField<object>(form, "_coordinator");
+                    var pending = Get<object>(coordinator, "Summary");
+                    A(GetField<bool>(form, "_retryPending") && Get<int>(pending, "Attempts") == 1 &&
+                        Get<int>(pending, "AnswerAttempts") == 2 && GetField<Button>(form, "_interactiveSubmitButton").Enabled,
+                        "interaction_retry_wrong_first_try_keeps_ruler_editable_without_progress");
+
+                    Invoke(interactive, "SelectCursor");
+                    Invoke(interactive, "MoveCursor", target);
+                    Invoke(interactive, "SelectCursor");
+                    A(Get<int>(interactive, "SelectedLength") == target,
+                        "interaction_retry_child_can_redraw_correct_segment");
+                    Invoke(form, "SubmitInteractiveAnswer", "interaction_retry_correct");
+
+                    var finalized = Get<object>(coordinator, "Summary");
+                    A(!GetField<bool>(form, "_retryPending") && Get<int>(finalized, "Attempts") == 2 &&
+                        Get<int>(finalized, "AnswerAttempts") == 3 && Get<int>(finalized, "RetriedQuestions") == 1 &&
+                        Get<int>(finalized, "RetriedCorrect") == 1 && Get<int>(finalized, "IndependentCorrect") == 1,
+                        "interaction_retry_correct_finalizes_medium_once_as_assisted");
+                    A(!GetField<Button>(form, "_interactiveSubmitButton").Enabled,
+                        "interaction_retry_final_result_disables_submit");
+                    var lockedLength = Get<int>(interactive, "SelectedLength");
+                    Invoke(interactive, "MoveCursor", -1);
+                    Invoke(interactive, "SelectCursor");
+                    A(Get<int>(interactive, "SelectedLength") == lockedLength,
+                        "interaction_retry_final_result_locks_ruler");
+
+                    Invoke(coordinator, "Abort", "interaction_retry_cleanup");
+                    SetField(form, "_finished", true);
+                }
+            }
+            finally
+            {
+                try { Directory.Delete(tempRoot, true); } catch { }
+            }
+        }
+
         private static void TestInteractiveSegmentAnswer(Assembly appAssembly)
         {
             var question = new MathQuestion

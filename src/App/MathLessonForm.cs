@@ -41,6 +41,7 @@ namespace WAHUKidsLearn
         private string _sessionNotice;
         private bool _finished;
         private bool _submitting;
+        private bool _retryPending;
         private bool _completeOnNext;
 
         public MathLessonForm(LearningDatabase database, RuntimePerformanceSettings performance)
@@ -378,6 +379,7 @@ namespace WAHUKidsLearn
                 _targetQuestionCount = Math.Max(1, started.TargetQuestionCount);
                 _progressBar.Maximum = _targetQuestionCount;
                 _progressBar.Value = Math.Min(_targetQuestionCount, Math.Max(0, started.CompletedQuestionCount));
+                _retryPending = started.RetryPending;
                 _sessionNotice = BuildSessionStartNotice(started);
                 ShowNextQuestion();
             }
@@ -413,7 +415,7 @@ namespace WAHUKidsLearn
                 _completeOnNext = false;
                 var summary = _coordinator.Summary;
                 var questionNumber = summary.Attempts + 1;
-                _progressText.Text = "Câu " + questionNumber + " / " + _targetQuestionCount;
+                _progressText.Text = "Câu " + questionNumber + " / " + _targetQuestionCount + (_retryPending ? " · thử lại" : string.Empty);
                 _progressBar.Maximum = _targetQuestionCount;
                 _progressBar.Value = Math.Min(_targetQuestionCount, Math.Max(0, summary.Attempts));
                 ConfigureAnswerInput(_question);
@@ -437,6 +439,8 @@ namespace WAHUKidsLearn
             if (started == null) return null;
             if (started.ResumedExistingSession)
             {
+                if (started.RetryPending && started.RestoredOpenQuestion)
+                    return "Mình tiếp tục lần thử lại của đúng câu này nhé. Con có thể xem gợi ý rồi sửa đáp án.";
                 if (started.RestoredOpenQuestion)
                     return "Mình tiếp tục đúng câu con đang làm dở nhé.";
                 if (started.DiscardedCorruptOpenQuestion)
@@ -583,6 +587,34 @@ namespace WAHUKidsLearn
             _hintButton.Text = "Đã xem đủ gợi ý";
         }
 
+        private MathAnswerOutcome SubmitCurrentAnswer(string answer, string inputMode)
+        {
+            if (_coordinator == null) throw new InvalidOperationException("Math session is not ready.");
+            return _retryPending
+                ? _coordinator.SubmitRetryAnswer(answer, _hintLevel, inputMode)
+                : _coordinator.SubmitAnswerWithRetry(answer, _hintLevel, inputMode);
+        }
+
+        private bool PrepareRetry(MathAnswerOutcome outcome)
+        {
+            if (outcome == null || outcome.QuestionCompleted || !outcome.CanRetry) return false;
+            _retryPending = true;
+            _submitting = false;
+            _feedback.Text = outcome.FeedbackVi;
+            _companion.State = CompanionReactionState.TryAgain;
+            _feedbackCard.CardColor = Color.FromArgb(251, 232, 222);
+            _feedbackCard.BorderColor = Color.FromArgb(236, 202, 187);
+            _feedbackCard.Visible = true;
+            _support.Text = "Con còn một lần thử ở chính câu này. Có thể xem gợi ý rồi sửa đáp án nhé.";
+            _progressText.Text = "Câu " + (outcome.CompletedQuestionCount + 1) + " / " + outcome.TargetQuestionCount + " · thử lại";
+            _progressBar.Value = Math.Min(_progressBar.Maximum, Math.Max(0, outcome.CompletedQuestionCount));
+            _hintButton.Visible = true;
+            _hintButton.Enabled = _hintLevel < 2;
+            _nextButton.Visible = false;
+            _completeOnNext = false;
+            return true;
+        }
+
         private void SubmitTypedAnswer(string inputMode)
         {
             if (_question == null || !UsesTypedAnswer(_question) || _submitting || string.IsNullOrWhiteSpace(_typedAnswerBox.Text)) return;
@@ -592,7 +624,17 @@ namespace WAHUKidsLearn
             _hintButton.Enabled = false;
             try
             {
-                var outcome = _coordinator.SubmitAnswer(_typedAnswerBox.Text.Trim(), _hintLevel, inputMode);
+                var outcome = SubmitCurrentAnswer(_typedAnswerBox.Text.Trim(), inputMode);
+                if (PrepareRetry(outcome))
+                {
+                    _typedAnswerBox.Enabled = true;
+                    _typedSubmitButton.Enabled = !string.IsNullOrWhiteSpace(_typedAnswerBox.Text);
+                    _typedAnswerBox.AccessibleDescription = "Lần thử lại. Sửa đáp án rồi nhấn Enter hoặc nút Kiểm tra đáp án.";
+                    _typedAnswerBox.SelectAll();
+                    _typedAnswerBox.Focus();
+                    return;
+                }
+                _retryPending = false;
                 _feedback.Text = outcome.FeedbackVi;
                 _companion.State = outcome.SuggestPositiveEnd ? CompanionReactionState.Tired :
                     (outcome.IsCorrect ? CompanionReactionState.Correct : CompanionReactionState.TryAgain);
@@ -626,7 +668,14 @@ namespace WAHUKidsLearn
             _hintButton.Enabled = false;
             try
             {
-                var outcome = _coordinator.SubmitAnswer(_interactiveAnswer.SelectedAnswer, _hintLevel, inputMode);
+                var outcome = SubmitCurrentAnswer(_interactiveAnswer.SelectedAnswer, inputMode);
+                if (PrepareRetry(outcome))
+                {
+                    _interactiveSubmitButton.Enabled = _interactiveAnswer.HasAnswer;
+                    _interactiveAnswer.Focus();
+                    return;
+                }
+                _retryPending = false;
                 _interactiveAnswer.ShowResult(outcome.IsCorrect);
                 _feedback.Text = outcome.FeedbackVi;
                 _companion.State = outcome.SuggestPositiveEnd ? CompanionReactionState.Tired :
@@ -665,7 +714,21 @@ namespace WAHUKidsLearn
             try
             {
                 var selected = choices[index];
-                var outcome = _coordinator.SubmitAnswer(selected, _hintLevel, inputMode);
+                var outcome = SubmitCurrentAnswer(selected, inputMode);
+                if (PrepareRetry(outcome))
+                {
+                    for (var i = 0; i < choices.Count && i < _answerButtons.Length; i++)
+                    {
+                        _answerButtons[i].VisualState = i == index
+                            ? AnswerChoiceButton.ChoiceVisualState.Incorrect
+                            : AnswerChoiceButton.ChoiceVisualState.Idle;
+                        _answerButtons[i].BadgeText = i == index ? "×" : (i + 1).ToString();
+                        _answerButtons[i].Enabled = true;
+                    }
+                    _answerButtons[index].Focus();
+                    return;
+                }
+                _retryPending = false;
                 var correctIndex = FindCorrectChoiceIndex();
                 for (var i = 0; i < _answerButtons.Length; i++)
                 {
@@ -753,11 +816,16 @@ namespace WAHUKidsLearn
             if (summary == null) return "Kết quả chưa sẵn sàng. Mình về thư viện Toán nhé.";
             var attempts = Math.Max(0, summary.Attempts);
             var correct = Math.Max(0, Math.Min(attempts, summary.Correct));
+            var independent = Math.Max(0, Math.Min(correct, summary.IndependentCorrect));
             var hinted = Math.Max(0, Math.Min(correct, summary.HintedCorrect));
-            var independent = Math.Max(0, correct - hinted);
+            var retriedQuestions = Math.Max(0, Math.Min(attempts, summary.RetriedQuestions));
+            var retriedCorrect = Math.Max(0, Math.Min(correct, summary.RetriedCorrect));
             var needsPractice = Math.Max(0, Math.Min(Math.Max(0, attempts - correct), summary.Wrong));
             var details = "Đã làm " + attempts + " câu · Tự làm đúng " + independent +
-                " · Đúng nhờ gợi ý " + hinted + " · Cần luyện lại " + needsPractice;
+                " · Đúng nhờ gợi ý " + hinted;
+            if (retriedQuestions > 0)
+                details += " · Thử lại " + retriedQuestions + " câu (đúng " + retriedCorrect + ")";
+            details += " · Cần luyện lại " + needsPractice;
             if (summary.LessonCompleted && summary.LessonScorePercent.HasValue)
             {
                 var score = Math.Max(0, Math.Min(100, Math.Round(summary.LessonScorePercent.Value)));
@@ -903,13 +971,13 @@ namespace WAHUKidsLearn
             if (keyData >= Keys.D1 && keyData <= Keys.D4)
             {
                 var index = (int)keyData - (int)Keys.D1;
-                if (_answerButtons[index].Visible) SubmitChoice(index, "keyboard");
+                if (_answerButtons[index].Visible && _answerButtons[index].Enabled) SubmitChoice(index, "keyboard");
                 return true;
             }
             if (keyData >= Keys.NumPad1 && keyData <= Keys.NumPad4)
             {
                 var index = (int)keyData - (int)Keys.NumPad1;
-                if (_answerButtons[index].Visible) SubmitChoice(index, "keyboard");
+                if (_answerButtons[index].Visible && _answerButtons[index].Enabled) SubmitChoice(index, "keyboard");
                 return true;
             }
             if (keyData == Keys.Enter && _nextButton.Visible && _nextButton.Enabled)

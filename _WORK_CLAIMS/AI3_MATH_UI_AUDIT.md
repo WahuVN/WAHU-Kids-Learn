@@ -35,6 +35,7 @@ Resume flow:
 | Typed answer | DONE | numeric, word problem, expression, unit |
 | Interaction answer | DONE | segment control `interaction_integer` |
 | Hint | DONE | 2 level |
+| Retry cùng câu / first-try | DONE | AI3-008 consume `CanRetry`, `QuestionCompleted`, `RetryPending`, `IndependentCorrect`, `RetriedQuestions`, `RetriedCorrect` |
 | Double submit guard | DONE | `_submitting` + controls disabled |
 | Keyboard | DONE baseline | D1-D4/NumPad, Enter typed/interaction/next, Escape stop |
 | Accessibility | PASS baseline | names/descriptions cho hub, lock, typed/interaction, result |
@@ -167,6 +168,8 @@ Upstream contract: `8b32944`.
 
 ## 9. AI3-007 — full lesson-detail/access sweep
 
+Commit `50fa4c0` — `Toán QA: quét đủ 67 bài học trên hub`.
+
 AI3 thêm regression chọn lần lượt toàn bộ 67 lesson qua `MathHubForm.SelectLessonInCatalog()`.
 
 Mỗi lesson phải thỏa đồng thời:
@@ -179,22 +182,41 @@ Mỗi lesson phải thỏa đồng thời:
 
 Gate này không tự suy luận prerequisite/unlock ở frontend và không mở session 67 lần; nó khóa toàn bộ presentation path + access binding với chi phí test hợp lý.
 
-## 10. Verification gates
+## 10. AI3-008 — retry cùng câu / first-try semantics
 
-Current clean HEAD `7c9a9ea` + đúng 1 file AI3-007:
+Upstream retry contract: `7c9a9ea`.
 
+- First attempt gọi `SubmitAnswerWithRetry`; retry pending gọi `SubmitRetryAnswer`, không gọi API cũ theo kiểu đoán state.
+- Nếu `QuestionCompleted=false` + `CanRetry=true`, UI giữ nguyên `_question`, không tăng progress và không cho chuyển câu.
+- Typed answer mở lại textbox, select-all và giữ Enter-submit.
+- Choice answer chỉ đánh dấu lựa chọn vừa sai; các lựa chọn khác vẫn idle/enabled và không reveal correct answer trước retry.
+- Interaction answer không gọi `ShowResult` ở lần sai đầu, nên thước vẫn chỉnh được; chỉ final retry mới khóa control.
+- `MathSessionStartResult.RetryPending` được presentation khi resume đúng attempt 2.
+- Completion presentation dùng `IndependentCorrect`, `RetriedQuestions`, `RetriedCorrect`; retry-correct không còn bị suy ra nhầm thành independent success.
+- Flow 5 thật cố ý sai câu typed đầu tiên rồi retry đúng: completed count giữ 0 sau first try, final lesson vẫn score 100%, result ghi `Tự làm đúng 2` + `Thử lại 1 câu (đúng 1)`.
+- Choice retry E2E dùng lesson root `m2_ls_point_recognize`, xác nhận first-try sai không reveal đáp án đúng và final retry mới khóa choices.
+- Interaction retry E2E hoàn thành prerequisite chain `POINT_RECOGNIZE → LINE_SEGMENT_RECOGNIZE` qua UI thật, sau đó authored medium `m2_q_draw_segment_given_length_02` sai độ dài → redraw → retry đúng → thước khóa sau final.
+
+## 11. Verification gates
+
+Current clean HEAD `40dc075` + đúng 2 file AI3-008:
+
+- Clean Data SDK x86/net48 source-equivalent build: **PASS — 0 warning / 0 error**.
+- Clean Session SDK x86/net48 source-equivalent build: **PASS — 0 warning / 0 error**.
 - App Release x86 targeted build: **PASS**.
-- ChildUiRuntimeSmoke: **PASS — 1475 assertions**.
-- MathSessionPersistenceRuntimeSmoke: **PASS — 140 assertions**.
-- MathContentDataSmoke: **PASS — 25/25**.
+- ChildUiRuntimeSmoke: **PASS — 1522 assertions**.
+- MathSessionPersistenceRuntimeSmoke: **PASS — 158 assertions**.
+- MathContentDataSmoke: **PASS — 29/29**.
 - `git diff --check`: **PASS**.
 - 67/67 lesson-detail/access sweep: **PASS**.
 - 201/201 authored answer-surface sweep: **PASS**.
-- Request 007 corrupt-medium ordinal recovery có regression chính thức và đã push tại `7f79367`.
-- Retry/first-try scoring contract đã push tại `7c9a9ea`; UI retry chưa consume trong AI3-007 và được tách sang wave kế tiếp.
+- Retry typed/choice/authored-interaction E2E: **PASS**.
+- Request 007 corrupt-medium ordinal recovery có regression chính thức tại `7f79367`.
+- Retry/first-try engine contract `7c9a9ea` đã được AI3-008 consume; current clean engine còn có mastery race regression đến `641b7b4`.
+- Data/Session source không đổi từ clean artifact build `641b7b4` đến content-only HEAD `40dc075`; Child UI/persistence được rerun với content/prerequisite mới.
 - Generated `draw_segment_given_length` vẫn chỉ ở WIP AI2; chưa coi P1-02 CLOSED trước upstream commit.
 
-## 11. Remaining blockers
+## 12. Remaining blockers
 
 ### P1-01 — production Data/SQLite clean build
 
@@ -214,7 +236,7 @@ Static audit tại HEAD:
 - Artifact mới nhất hiện có `0.1.41-dev` là build từ `e299c41`, database schema 2. Publish tree + portable ZIP có verified templates nhưng thiếu lesson catalog, question bank và schema V4; artifact này là **STALE**, không phải release evidence cho Math hiện tại.
 - Request 008 đã mở cho release lane: hard-guard đủ ba Math runtime JSON và rebuild artifact schema V4; sau đó chạy portable/installer upgrade E2E giữ learner DB/lesson progress.
 
-## 12. Next AI3 actions
+## 13. Next AI3 actions
 
 1. Theo dõi release lane đóng Request 008 và production SQLite build blocker; không sửa `tools/build/*` khi đang có owner/WIP khác.
 2. Khi có artifact schema V4 mới, chạy portable/installer Math payload + relaunch/reinstall regression.
