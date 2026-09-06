@@ -533,6 +533,14 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
         if not isinstance(validation, dict):
             errors.append(f"missing_validation:{where}")
             validation = {}
+        if "answer_unit" in q:
+            answer_unit = q.get("answer_unit")
+            if not isinstance(answer_unit, str) or not answer_unit.strip():
+                errors.append(f"invalid_answer_unit:{where}:{answer_unit!r}")
+            elif kind != "integer":
+                errors.append(f"answer_unit_requires_integer_kind:{where}:{kind}")
+            elif question_type not in {"numeric_input", "word_problem"}:
+                errors.append(f"answer_unit_question_type_mismatch:{where}:{question_type}")
 
         if kind in {"integer", "interaction_integer"}:
             answer = q.get("correct_answer")

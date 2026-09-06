@@ -28,7 +28,7 @@ Owner: AI1 — Math Content & Data
   - interactive measurement
   - word problem
 - Semantic validator errors: **0**
-- Math content unittest: **16 / 16 PASS**
+- Math content unittest: **17 / 17 PASS**
 - Pack manifest/hash/listing check on current working tree: **PASS** (`version=1.9.0`, 3 listed files)
 
 ## Curriculum/content completeness
@@ -61,7 +61,7 @@ Static bank phủ **67/67 skill**, kể cả:
   - `FOLD_CUT_COMPOSE_SHAPES`
   - `MONEY_VND_NOTE_RECOGNITION`
 
-Hai skill này **không còn thiếu content**: lesson + curated question đã có và validator PASS. Phần còn lại là runtime integration/engine support vì session hiện vẫn chủ yếu consume `verified_templates_v1.json`; AI1 không sửa generator/selector lớn thuộc AI2.
+Hai skill này **không còn thiếu content**: lesson + curated question đã có và validator PASS. Commit AI2 `a5119d4` đã có loader/runtime mapping cho static bank, nhưng session học thật vẫn đang sinh câu qua `verified_templates_v1.json`; AI1 không sửa generator/selector/session routing lớn thuộc AI2.
 
 ## Validator gates implemented
 
@@ -76,6 +76,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - missing answer / accepted answer;
 - malformed expression / divide by zero / unsupported expression nodes;
 - invalid unit metadata;
+- `answer_unit` display-only metadata sai kind/type hoặc rỗng;
 - invalid MC correct choice / duplicate choices / rationale missing;
 - MCQ trùng nghĩa sau normalize Unicode/case/whitespace hoặc hai biểu thức choice cho cùng giá trị số;
 - invalid true/false shape;
@@ -106,9 +107,10 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - skill quan hệ thời gian không mở rộng thành phép nhân/chia ngoài yêu cầu cần đạt;
 - mọi phép nhân/chia literal child-facing nằm trong bảng 2 hoặc 5, kể cả distractor;
 - mọi MCQ có choice khác nhau sau normalize text và không có hai biểu thức choice cùng giá trị số;
+- 23 câu integer có `answer_unit` giữ đúng contract display-only, không đổi sang unit-input;
 - 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract.
 
-Latest result: **16 tests PASS**.
+Latest result: **17 tests PASS**.
 
 ## Commits / waves
 
@@ -121,13 +123,14 @@ Latest result: **16 tests PASS**.
 - `c7e0b0e` — `Toán: bỏ mệnh giá tiền chưa map nguồn khỏi nội dung`
 - `2ac3027` — `Toán: siết hard guard thời gian và thứ tự prerequisite`
 - `234eafc` — `Toán: khóa phép nhân chia và nhớ mượn theo baseline`
+- `dcedca2` — `Toán: loại ambiguity trong lựa chọn trắc nghiệm`
 
 ## Current blockers outside AI1 content ownership
 
-1. Session runtime chưa consume `question_bank_v1.json`; engine/integration cần map stable content question -> runtime `MathQuestion`.
-2. Chapter/topic/lesson UI đang được AI3 tích hợp từ `lesson_catalog_v1.json`.
-3. Prerequisite/unlock presentation và exact resume là engine/UI contract, không phải content absence.
-4. `verified_templates_v1.json` đang có WIP song song của AI2; AI1 không chèn hai template còn thiếu vào file này trong khi owner engine đang sửa để tránh conflict.
+1. `a5119d4` đã load/map đủ 201 authored questions và smoke x86 hiện PASS **64 assertions**, nhưng `MathSessionCoordinator.NextQuestion()` vẫn chỉ chọn `_templates` rồi gọi `MathQuestionGenerator`; cần đóng Request 005 để static bank đi vào session học thật.
+2. 23 câu integer có `answer_unit` đang được content giữ làm display-only metadata, nhưng `MathAuthoredQuestionSource` chưa preserve field này; cần Request 006 để feedback có thể hiện `8 cm`, `5 kg`, `60 phút` mà vẫn chấm raw integer.
+3. Exact suspend/resume đã có engine + regression và AI3 đã nối UI tiếp tục bài; blocker cũ này đã đóng. Lesson catalog UI cũng đã được AI3 tích hợp, nên phần còn thiếu là handoff từ lesson đã chọn sang authored exercise/session policy.
+4. Legacy generator vẫn chỉ phủ 65/67 skill. Đây không còn là content absence; khi Request 005 hoàn tất, hai skill `FOLD_CUT_COMPOSE_SHAPES` và `MONEY_VND_NOTE_RECOGNITION` đã có static authored exercises để không cần template giả.
 
 ## Lane verdict
 

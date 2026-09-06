@@ -225,6 +225,17 @@ class MathContentDataSmoke(unittest.TestCase):
                 serialized = json.dumps(item, ensure_ascii=False)
                 self.assertEqual([], validator.grade2_operation_scope_violations(serialized))
 
+    def test_integer_answer_unit_is_display_only_metadata(self):
+        unit_questions = [x for x in self.questions if "answer_unit" in x]
+        self.assertEqual(23, len(unit_questions))
+        self.assertEqual({"cm", "kg", "l", "dm", "m", "ngày", "giờ", "phút"}, {x["answer_unit"] for x in unit_questions})
+        for item in unit_questions:
+            with self.subTest(item=item["id"]):
+                self.assertEqual("integer", item["answer_kind"])
+                self.assertIn(item["question_type"], {"numeric_input", "word_problem"})
+                self.assertIs(type(item["correct_answer"]), int)
+                self.assertIn(str(item["correct_answer"]), item["accepted_answers"])
+
     def test_multiple_choice_options_are_semantically_distinct(self):
         self.assertEqual("có thể", validator.normalize_choice_text("  CÓ   THỂ "))
         self.assertEqual(validator.Fraction(352, 1), validator.try_eval_numeric_choice("300 + 52"))

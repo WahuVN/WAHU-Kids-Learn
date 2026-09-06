@@ -34,3 +34,22 @@
 - Regression cần từ AI2: generated `draw_segment_given_length` phải có `AnswerKind == "interaction_integer"`, `DisplayChoices.Count == 0`, và `IsCorrectAnswer()` vẫn chấm numeric đúng.
 - File owner sửa: `src/Learning/MathQuestionGenerator.cs` + engine smoke tương ứng.
 - Owner: AI2 engine. AI3 không sửa generator để tránh conflict ownership.
+
+## Request 005 — Route authored question bank into real Math sessions
+
+- Trạng thái hiện tại: commit `a5119d4` đã nạp/validate đủ `question_bank_v1.json`, map 201 `ContentQuestionId`, 67 lesson × 3 câu và tạo runtime instance; smoke loader/runtime mapping PASS.
+- Khoảng trống integration: `MathLessonForm` vẫn chỉ truyền `verified_templates_v1.json` vào `MathSessionCoordinator`; `Start()` chỉ `LoadTemplates()` và `NextQuestion()` vẫn chọn `_templates` qua `AdaptiveMathSelector` rồi gọi `MathQuestionGenerator`.
+- Contract cần: session phải có đường chọn authored question từ `question_bank_v1.json` theo lesson/skill/difficulty, hoặc một policy hybrid được publish rõ; không được coi "bank loadable" là "bank đang được học".
+- Stable identity: khi dùng authored content, giữ `ContentQuestionId` deterministic cho trace/chống lặp; `QuestionId` tiếp tục là instance ID unique để giữ idempotency attempt hiện tại.
+- Duplicate prevention: trong một session, không phát lại cùng `ContentQuestionId` chỉ vì runtime instance có GUID khác. Resume phải tái tạo recent authored IDs từ dữ liệu durable hoặc metadata có thể suy ra chắc chắn.
+- Regression cần: một session lesson-authored thực tế phải lấy câu có `ContentQuestionId`, không gọi generator cho câu đó, không lặp content ID trước khi dùng hết pool phù hợp, và resume giữ đúng câu đang mở.
+- Owner: AI2 engine/session; AI3 chỉ nối lesson-selection intent vào API session sau khi contract có.
+
+## Request 006 — Preserve `answer_unit` as display metadata without forcing unit input
+
+- Static bank hiện có 23 câu `answer_kind = "integer"` mang `answer_unit` (`cm`, `kg`, `l`, `dm`, `m`, `ngày`, `giờ`, `phút`). Các câu này cố ý cho trẻ nhập số, vì đơn vị đã nêu rõ trong prompt.
+- Loader `MathAuthoredQuestionSource` hiện bỏ qua `answer_unit`; `CorrectAnswerDisplay` vì thế có thể thành `5`, `8`, `60` thay vì `5 kg`, `8 cm`, `60 phút` trong feedback/result.
+- Không đổi hàng loạt các câu này sang `answer_kind = "unit"`: điều đó sẽ thay contract input và bắt trẻ gõ đơn vị, không đúng ý đồ UX hiện tại.
+- Contract cần: thêm/preserve display-only unit metadata (có thể `AnswerUnit` hoặc tương đương), để validator vẫn chấm integer nhưng UI/feedback có thể format đáp án kèm đơn vị. Metadata này phải survive load -> runtime instance -> suspend/resume JSON.
+- Regression cần: authored integer question có `answer_unit = "cm"` vẫn chấp nhận raw answer `8`, không chấp nhận nội dung sai, và outcome/display có thể render `8 cm` mà không thay `AnswerKind`.
+- Owner: AI2 model/session + AI3 presentation.
