@@ -27,7 +27,7 @@ SECURITY_RUNTIME_SMOKE_PASS     = 19 / 19
 AUDIO_RUNTIME_SMOKE_PASS        = 14 / 14
 PERFORMANCE_RUNTIME_SMOKE_PASS  = 13 / 13
 UPDATE_RUNTIME_SMOKE_PASS       = 33 / 33
-UPDATE_LIVE_SMOKE_PASS          = 5 / 5
+UPDATE_LIVE_SMOKE_PASS          = 6 / 6 (final feed/version check)
 SQLITE_RUNTIME_SMOKE_PASS       = 160 / 160
 ```
 
@@ -80,11 +80,13 @@ Helper kiểm lại SHA-256 ngay trước install. Stable production còn chạy
 
 ## PASS — updater apply E2E thật
 
-Đã chạy cross-version bằng chính installed app + staged installer + external helper:
+Đã chạy cross-version bằng chính installed app + staged installer + external helper; ngoài local staging còn có **full live-feed apply** để app cũ tự tải từ GitHub:
 
 ```text
 0.1.21-dev -> 0.1.22-dev = PASS
 0.1.22-dev -> 0.1.23-dev = PASS
+0.1.23-dev -> 0.1.24-dev = PASS (local staging)
+0.1.23-dev -> 0.1.24-dev = PASS (GitHub live feed -> app download -> apply)
 ```
 
 Đã test cả hai preference:
@@ -109,7 +111,7 @@ Mỗi update E2E xác minh:
 
 ## PASS — installer E2E
 
-Candidate gần nhất đã test: `0.1.23-dev`.
+Candidate/release gần nhất đã test: `0.1.24-dev`.
 
 ```text
 install_exit                           = 0
@@ -129,15 +131,15 @@ learner DB/sentinel preserved          = PASS
 startup registry removed uninstall     = PASS
 ```
 
-Installer `0.1.23-dev` test hash:
+Installer `0.1.24-dev` release hash:
 
 ```text
-SHA-256 = 91C79C4A4F37479C11EB2ED088CAF7EB9FA66F8B6C6730E9105DCE9614816262
+SHA-256 = BD83A2567FBDD21D22B63DB2F4E891D93B0D4741C9D78C0B8C632D4CA9A6EA4C
 ```
 
 ## PASS — portable E2E
 
-Candidate gần nhất đã test: `0.1.23-dev`.
+Candidate/release gần nhất đã test: `0.1.24-dev`.
 
 ```text
 first_bootstrap_exit      = 0
@@ -152,7 +154,7 @@ TEST_RESULT               = PASS
 Portable ZIP test hash:
 
 ```text
-SHA-256 = E7497032DF3547D9560803E79A4C86F5F05C9A46A22AC675D29CD04028127D4D
+SHA-256 = 27BFAB6373E3BE929B89DC351BBCD5FFB2C0D3635C72B866B987FCBA50C69FF9
 ```
 
 ## PASS — release / manifest guards
@@ -163,6 +165,10 @@ SHA-256 = E7497032DF3547D9560803E79A4C86F5F05C9A46A22AC675D29CD04028127D4D
 - Publish script từ chối working tree dirty (`REFUSE_RELEASE_DIRTY_TREE`).
 - Publish script yêu cầu HEAD local == `origin/main` trước release.
 - Dev/stable dùng fixed channel feed riêng, không phụ thuộc `releases/latest`.
+
+- Release `v0.1.24-dev` đã được publish thật; 5 asset versioned tải ngược từ GitHub có SHA/bytes khớp local.
+- `update-dev/update-manifest.json` tải ngược từ GitHub khớp `app_version=0.1.24-dev`, installer SHA-256 và bytes.
+- Full live updater E2E: installed `0.1.23-dev` tự check/download feed GitHub và apply `0.1.24-dev` PASS.
 
 ## PASS — production negative gates
 

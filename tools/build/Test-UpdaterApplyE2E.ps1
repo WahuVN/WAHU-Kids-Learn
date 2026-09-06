@@ -4,7 +4,8 @@
     [string]$OldInstallerPath,
     [string]$NewInstallerPath,
     [switch]$CleanOwnedTestData,
-    [switch]$KeepStartupEnabled
+    [switch]$KeepStartupEnabled,
+    [switch]$UseLiveFeed
 )
 
 $ErrorActionPreference = 'Stop'
@@ -114,16 +115,29 @@ try {
         $result.startup_preference_before_update = 'disabled'
     }
 
-    # 3. Stage the new installer through the same production staging service.
-    & $probeExe --stage-local --config-dir (Join-Path $appDir 'config') --app-base $appDir --installer $NewInstallerPath --version $NewVersion
-    Assert ($LASTEXITCODE -eq 0) "stage-local exit $LASTEXITCODE"
+    # 3. Stage the new installer. Local mode uses the production staging service directly;
+    # live mode lets the installed old app fetch the real GitHub channel feed in background.
     $stagedState = Join-Path $dataDir 'updates\staged-update.json'
+    if ($UseLiveFeed) {
+        $liveApp = Start-Process -FilePath $oldApp -PassThru
+        $liveDeadline = [DateTime]::UtcNow.AddSeconds(120)
+        while ([DateTime]::UtcNow -lt $liveDeadline -and -not (Test-Path -LiteralPath $stagedState)) { Start-Sleep -Milliseconds 300 }
+        Assert (Test-Path -LiteralPath $stagedState) 'installed app did not stage update from live GitHub feed'
+        Stop-OwnedAppProcesses
+        $result.staging_source = 'github-live-feed'
+    } else {
+        & $probeExe --stage-local --config-dir (Join-Path $appDir 'config') --app-base $appDir --installer $NewInstallerPath --version $NewVersion
+        Assert ($LASTEXITCODE -eq 0) "stage-local exit $LASTEXITCODE"
+        $result.staging_source = 'local-production-staging-service'
+    }
     Assert (Test-Path -LiteralPath $stagedState) 'staged-update.json missing'
     $stage = Get-Content -Raw -LiteralPath $stagedState | ConvertFrom-Json
     Assert ($stage.app_version -eq $NewVersion) 'staged state version mismatch'
     $stagedInstaller = Join-Path (Join-Path $dataDir 'updates') $stage.installer_relative_path
     Assert (Test-Path -LiteralPath $stagedInstaller) 'staged installer missing before apply'
     $result.staged_installer_sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $stagedInstaller).Hash
+    $expectedNewHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $NewInstallerPath).Hash
+    Assert ($result.staged_installer_sha256 -eq $expectedNewHash) 'staged installer differs from expected new release installer'
 
     # 4. Normal startup detects staged update, creates verified backup, exits, and launches helper.
     $launcher = Start-Process -FilePath $oldApp -PassThru

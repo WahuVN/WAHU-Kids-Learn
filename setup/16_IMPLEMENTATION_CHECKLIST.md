@@ -164,7 +164,7 @@ File này là checklist từ spec → code. Không được đánh dấu DONE ch
 - [x] Reinstall/update preserves learner DB bit-for-bit trong E2E.
 - [x] Uninstall xóa app nhưng giữ learner DB + sentinel trong E2E.
 - [x] Startup-with-Windows task mặc định bật; installer E2E xác nhận HKCU Run được tạo và uninstall xóa sạch.
-- [x] GitHub updater helper được stage trong installer; manifest/staging/tamper smoke PASS; cross-version apply E2E `0.1.21→0.1.22` và `0.1.22→0.1.23` PASS.
+- [x] GitHub updater helper được stage trong installer; manifest/staging/tamper smoke PASS; cross-version local apply và full live GitHub-feed apply `0.1.23→0.1.24` PASS; startup ON/OFF đều được preserve.
 - [ ] Repair mode.
 - [ ] Vietnamese full wizard translation only after vendor/version/license review.
 
@@ -178,7 +178,7 @@ File này là checklist từ spec → code. Không được đánh dấu DONE ch
 - [x] Portable ZIP SHA-256 được sinh; ZIP E2E chạy trực tiếp từ archive extract PASS.
 - [x] Build sinh `update-manifest.json`; publish script khóa repo public, clean tree, origin/main, fixed `update-dev/update-stable` feed và từ chối stable unsigned.
 - [ ] Workstation setup/update matrix PASS; còn Win7 target + signing matrix nên chưa được đánh dấu all PASS.
-- [ ] Win7 target cần test updater HTTPS/TLS thật; workstation live GitHub download/stage đã PASS 5/5.
+- [ ] Win7 target cần test updater HTTPS/TLS thật; workstation live GitHub download/stage 6/6 + full network download/apply E2E đã PASS.
 
 ## Q. Target-PC final gates
 
