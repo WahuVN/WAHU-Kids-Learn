@@ -92,6 +92,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - question type không hợp contract;
 - exact/near duplicate prompt trong cùng lesson;
 - worked example trùng hoặc gần trùng câu practice của chính lesson;
+- worked example có đáp án nhưng solution không chốt lại đáp án tường minh;
 - question không được practice set tham chiếu hoặc bị tham chiếu nhiều lần.
 
 ## Test gates
@@ -118,7 +119,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - 23 câu integer có `answer_unit` giữ đúng contract display-only, không đổi sang unit-input;
 - 4 application regression quan trọng đã được nâng từ single-fact recall sang kết hợp dữ kiện/khái niệm: thành phần phép trừ, thành phần phép chia, ghép hình, đọc đồng hồ;
 - child-facing lesson/question text có **0 internal-engine vocabulary**; metadata kỹ thuật như `application`, `numeric_input`, `deterministic` vẫn được phép;
-- **67/67 worked example unique**, mỗi ví dụ có ít nhất 2 bước giải và **0 exact/near overlap** với 201 câu practice;
+- **67/67 worked example unique**, mỗi ví dụ có ít nhất 2 bước giải, **0 exact/near overlap** với 201 câu practice và 67/67 solution chốt đáp án tường minh;
 - 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract.
 
 Latest result: **23 tests PASS**.
@@ -141,6 +142,7 @@ Latest result: **23 tests PASS**.
 - `719c80b` — `Toán: nâng rationale cho 267 đáp án nhiễu`
 - `ee7079b` — `Toán: nâng progression cho câu vận dụng`
 - `5a31c41` — `Toán: làm sạch ngôn ngữ kỹ thuật khỏi nội dung trẻ em`
+- `9682572` — `Toán: tách ví dụ mẫu khỏi câu luyện`
 
 ## Current blockers outside AI1 content ownership
 

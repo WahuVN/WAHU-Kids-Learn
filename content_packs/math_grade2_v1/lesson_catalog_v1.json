@@ -562,7 +562,7 @@
           "prompt_vi": "Sắp xếp 210, 201, 120 theo thứ tự từ bé đến lớn.",
           "solution_steps_vi": [
             "120 có 1 trăm nên bé nhất.",
-            "Trong 201 và 210, 0 chục < 1 chục nên 201 đứng trước 210."
+            "Trong 201 và 210, 0 chục < 1 chục nên 201 đứng trước 210. Vậy thứ tự là 120, 201, 210."
           ],
           "answer": "120, 201, 210"
         }
@@ -1128,7 +1128,7 @@
           "prompt_vi": "Có 4 nhóm, mỗi nhóm 2 chấm. Viết phép cộng lặp lại và phép nhân tương ứng.",
           "solution_steps_vi": [
             "Có 4 nhóm bằng nhau nên cộng số 2 bốn lần: 2 + 2 + 2 + 2 = 8.",
-            "Viết gọn bằng phép nhân: 4 × 2 = 8."
+            "Vậy phép cộng lặp lại và phép nhân tương ứng là 2 + 2 + 2 + 2 = 8; 4 × 2 = 8."
           ],
           "answer": "2 + 2 + 2 + 2 = 8; 4 × 2 = 8"
         }
@@ -1230,7 +1230,7 @@
           "prompt_vi": "Trong 5 × 3 = 15, các thừa số và tích là những số nào?",
           "solution_steps_vi": [
             "Hai số được nhân là 5 và 3 nên chúng là các thừa số.",
-            "Kết quả 15 được gọi là tích."
+            "Vậy 5 và 3 là thừa số; 15 là tích."
           ],
           "answer": "5 và 3 là thừa số; 15 là tích"
         }
@@ -1281,7 +1281,7 @@
           "prompt_vi": "Trong 20 : 2 = 10, hãy gọi tên ba thành phần.",
           "solution_steps_vi": [
             "20 là lượng được đem chia nên là số bị chia; 2 là số dùng để chia.",
-            "Kết quả 10 được gọi là thương."
+            "Vậy 20 là số bị chia; 2 là số chia; 10 là thương."
           ],
           "answer": "20 là số bị chia; 2 là số chia; 10 là thương"
         }
@@ -2809,7 +2809,7 @@
           "prompt_vi": "Ngày sau ngày 20 tháng 6 là ngày nào?",
           "solution_steps_vi": [
             "Ngày kế tiếp tăng số ngày thêm 1.",
-            "Sau ngày 20 là ngày 21, vẫn trong tháng 6."
+            "Sau ngày 20 là ngày 21, vẫn trong tháng 6. Vậy đáp án là 21 tháng 6."
           ],
           "answer": "21 tháng 6"
         }
@@ -2860,7 +2860,7 @@
           "prompt_vi": "Khi so sánh hai hình tờ tiền, nên đọc thông tin nào trước để biết tờ nào có giá trị lớn hơn?",
           "solution_steps_vi": [
             "Không dựa riêng vào màu sắc hay kích thước.",
-            "Đọc con số mệnh giá cùng đơn vị đồng rồi mới so sánh giá trị."
+            "Để so sánh đúng, cần đọc con số mệnh giá và đơn vị đồng."
           ],
           "answer": "con số mệnh giá và đơn vị đồng"
         }
@@ -3064,7 +3064,7 @@
           "prompt_vi": "4 kg + 1 kg bằng bao nhiêu kilôgam?",
           "solution_steps_vi": [
             "Hai số đo cùng đơn vị kg nên cộng phần số.",
-            "4 + 1 = 5, giữ đơn vị kg."
+            "4 + 1 = 5, giữ đơn vị kg. Vậy kết quả là 5 kg."
           ],
           "answer": "5 kg"
         }

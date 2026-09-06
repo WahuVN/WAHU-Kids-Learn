@@ -253,6 +253,9 @@ class MathContentDataSmoke(unittest.TestCase):
                 self.assertEqual(1, len(examples))
                 example = examples[0]
                 self.assertGreaterEqual(len(example["solution_steps_vi"]), 2)
+                answer_evidence = validator.normalize_prompt_identity(example["answer"])
+                solution_evidence = validator.normalize_prompt_identity(" ".join(example["solution_steps_vi"]))
+                self.assertIn(answer_evidence, solution_evidence)
                 example_prompts.append(example["prompt_vi"])
                 practice_ids = []
                 for difficulty in ("basic", "medium", "application"):

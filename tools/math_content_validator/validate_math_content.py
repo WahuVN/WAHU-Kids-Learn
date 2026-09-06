@@ -432,8 +432,13 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             if x:
                 example_ids.add(x); all_ids.append((x, ewhere))
             required_text(example, "prompt_vi", ewhere, errors)
-            required_text(example, "answer", ewhere, errors)
-            required_list(example, "solution_steps_vi", ewhere, errors)
+            answer = required_text(example, "answer", ewhere, errors)
+            solution_steps = required_list(example, "solution_steps_vi", ewhere, errors)
+            if answer and solution_steps and all(isinstance(step, str) for step in solution_steps):
+                answer_evidence = normalize_prompt_identity(answer)
+                solution_evidence = normalize_prompt_identity(" ".join(solution_steps))
+                if answer_evidence and answer_evidence not in solution_evidence:
+                    errors.append(f"worked_example_answer_not_explicit:{ewhere}:{answer[:80]}")
         prereqs = lesson.get("prerequisite_skills", [])
         if not isinstance(prereqs, list):
             errors.append(f"prerequisite_not_list:{where}")
