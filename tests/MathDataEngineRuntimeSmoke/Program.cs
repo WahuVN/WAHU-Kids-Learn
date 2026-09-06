@@ -20,6 +20,7 @@ namespace WAHU.MathDataEngineRuntimeSmoke
                 var sourceSchema = Path.Combine(repo, "data", "schema");
                 TestFreshV3AndIdempotentCommit(root, sourceSchema);
                 TestTerminalSessionRejectsNewAttemptsButAllowsExactReplay(root, sourceSchema);
+                TestOptimisticSkillStateGuard(root, sourceSchema);
                 TestExistingV1UpgradesToV3WithBackup(root, sourceSchema);
                 TestV3BackfillPreservesLegacyDuplicates(root, sourceSchema);
                 Console.WriteLine("MATH_DATA_ENGINE_RUNTIME_SMOKE_PASS assertions=" + _assertions);
@@ -147,6 +148,79 @@ namespace WAHU.MathDataEngineRuntimeSmoke
                 A(Count(c, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + abortedSession.SessionId + "';") == 0,
                     "terminal_guard_abort_writes_no_mastery");
             }
+        }
+
+        private static void TestOptimisticSkillStateGuard(string root, string sourceSchema)
+        {
+            var schemaDir = Path.Combine(root, "schema-optimistic-skill");
+            CopySchemas(sourceSchema, schemaDir);
+            var database = new LearningDatabase(Path.Combine(root, "optimistic-skill.db"), Path.Combine(schemaDir, "001_initial.sql"));
+            database.Initialize("DELETE");
+            var sessions = new LearnerSessionService(database);
+            var profile = sessions.EnsurePrimaryChild("Bé optimistic guard");
+            var session = sessions.BeginSession(profile.ChildId, "math", "LOW");
+            var service = new AnswerCommitService(database);
+            var now = DateTime.UtcNow;
+
+            var first = BuildRequest(profile.ChildId, session.SessionId, "optimistic-attempt-1", "optimistic-q-1", "12", true, now);
+            first.ExpectedSkillMasteryScore = 0.25;
+            first.ExpectedSkillAttemptsCount = 0;
+            var firstResult = service.Commit(first);
+            A(!firstResult.AlreadyCommitted,
+                "optimistic_guard_accepts_first_learning_write_from_empty_skill_state");
+
+            var stale = BuildRequest(profile.ChildId, session.SessionId, "optimistic-attempt-stale", "optimistic-q-2", "13", false, now.AddSeconds(2));
+            stale.ExpectedSkillMasteryScore = 0.25;
+            stale.ExpectedSkillAttemptsCount = 0;
+            var staleRejected = false;
+            try { service.Commit(stale); }
+            catch (InvalidOperationException) { staleRejected = true; }
+            A(staleRejected,
+                "optimistic_guard_rejects_distinct_attempt_from_stale_skill_snapshot");
+            using (var c = database.OpenConnection())
+            {
+                A(Count(c, "SELECT count(*) FROM attempt WHERE session_id='" + session.SessionId + "';") == 1,
+                    "optimistic_guard_stale_rejection_rolls_back_attempt");
+                A(Count(c, "SELECT count(*) FROM attempt_commit_key WHERE session_id='" + session.SessionId + "' AND question_id='optimistic-q-2';") == 0,
+                    "optimistic_guard_stale_rejection_writes_no_semantic_key");
+                A(Count(c, "SELECT count(*) FROM mastery_event WHERE child_id='" + profile.ChildId + "' AND skill_id='TEST_MATH_SKILL';") == 1,
+                    "optimistic_guard_stale_rejection_writes_no_mastery");
+            }
+
+            var fresh = BuildRequest(profile.ChildId, session.SessionId, "optimistic-attempt-2", "optimistic-q-2", "12", true, now.AddSeconds(4));
+            fresh.ExpectedSkillMasteryScore = 0.35;
+            fresh.ExpectedSkillAttemptsCount = 1;
+            fresh.Mastery.ScoreBefore = 0.35;
+            fresh.Mastery.ScoreAfter = 0.45;
+            fresh.Mastery.Delta = 0.10;
+            fresh.ChildSkill.MasteryScore = 0.45;
+            fresh.ChildSkill.AttemptsCount = 2;
+            fresh.ChildSkill.IndependentSuccessCount = 2;
+            var freshResult = service.Commit(fresh);
+            A(!freshResult.AlreadyCommitted && freshResult.MasteryWritten && freshResult.ChildSkillWritten,
+                "optimistic_guard_accepts_write_from_current_skill_snapshot");
+            using (var c = database.OpenConnection())
+            {
+                A(Count(c, "SELECT count(*) FROM attempt WHERE session_id='" + session.SessionId + "';") == 2,
+                    "optimistic_guard_fresh_write_adds_second_attempt_once");
+                A(Convert.ToInt32(Scalar(c, "SELECT attempts_count FROM child_skill WHERE child_id='" + profile.ChildId + "' AND skill_id='TEST_MATH_SKILL';"), CultureInfo.InvariantCulture) == 2,
+                    "optimistic_guard_fresh_write_advances_skill_attempt_count");
+                A(Math.Abs(Convert.ToDouble(Scalar(c, "SELECT mastery_score FROM child_skill WHERE child_id='" + profile.ChildId + "' AND skill_id='TEST_MATH_SKILL';"), CultureInfo.InvariantCulture) - 0.45) < 0.0000001,
+                    "optimistic_guard_fresh_write_preserves_expected_mastery_chain");
+            }
+
+            var replay = BuildRequest(profile.ChildId, session.SessionId, "optimistic-replay", "optimistic-q-2", "12", true, now.AddSeconds(6));
+            replay.ExpectedSkillMasteryScore = 0.35;
+            replay.ExpectedSkillAttemptsCount = 1;
+            replay.Mastery.ScoreBefore = 0.35;
+            replay.Mastery.ScoreAfter = 0.45;
+            replay.Mastery.Delta = 0.10;
+            replay.ChildSkill.MasteryScore = 0.45;
+            replay.ChildSkill.AttemptsCount = 2;
+            replay.ChildSkill.IndependentSuccessCount = 2;
+            var replayResult = service.Commit(replay);
+            A(replayResult.AlreadyCommitted && replayResult.AttemptId == "optimistic-attempt-2",
+                "optimistic_guard_exact_replay_precedes_stale_state_check");
         }
 
         private static void TestExistingV1UpgradesToV3WithBackup(string root, string sourceSchema)

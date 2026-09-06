@@ -34,6 +34,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestRetryAwareAnswerFlow(root, schemaPath, templatePath);
                 TestRetryWrongFinalizesOnce(root, schemaPath, templatePath);
                 TestStaleCoordinatorCannotAppendAfterTerminalSession(root, schemaPath, templatePath);
+                TestCoordinatorRejectsStaleSkillSnapshot(root, schemaPath, templatePath);
                 TestResumeOpenQuestionAndComplete(root, schemaPath, templatePath);
                 TestCommittedStaleQuestionIsNotReplayed(root, schemaPath, templatePath);
                 TestCorruptOpenQuestionRecoversWithoutProgressReset(root, schemaPath, templatePath);
@@ -483,6 +484,50 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                     "stale_terminal_rejected_submit_writes_no_semantic_key");
                 A(Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + sessionId + "';") == 1,
                     "stale_terminal_rejected_submit_writes_no_extra_mastery");
+            }
+        }
+
+        private static void TestCoordinatorRejectsStaleSkillSnapshot(string root, string schemaPath, string templatePath)
+        {
+            var database = NewDatabase(Path.Combine(root, "stale-skill-snapshot.db"), schemaPath);
+            using (var coordinator = new MathSessionCoordinator(database, templatePath, "LOW", 8302, 1))
+            {
+                var started = coordinator.Start("Bé stale skill");
+                var question = coordinator.NextQuestion();
+                var now = DateTime.UtcNow;
+                Exec(database, @"INSERT INTO child_skill(
+child_id,skill_id,subject,mastery_score,confidence,attempts_count,
+independent_success_count,hinted_success_count,transfer_success_count,last_seen_at_utc,
+last_success_at_utc,next_review_at_utc,learning_state,mastery_engine_version,updated_at_utc)
+VALUES(@child,@skill,'math',0.61,0.70,3,2,0,0,@now,@now,@due,'LEARNING','mastery-v1',@now);",
+                    "@child", started.ChildId,
+                    "@skill", question.SkillId,
+                    "@now", now.ToString("o", CultureInfo.InvariantCulture),
+                    "@due", now.AddDays(1).ToString("o", CultureInfo.InvariantCulture));
+                A(Count(database, "SELECT count(*) FROM child_skill WHERE child_id='" + started.ChildId + "' AND skill_id='" + question.SkillId + "' AND attempts_count=3;") == 1,
+                    "stale_skill_fixture_updates_skill_after_question_open");
+
+                var rejected = false;
+                try
+                {
+                    coordinator.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 900);
+                }
+                catch (InvalidOperationException)
+                {
+                    rejected = true;
+                }
+                A(rejected,
+                    "stale_skill_coordinator_rejects_answer_from_outdated_skill_snapshot");
+                A(coordinator.Summary.Attempts == 0,
+                    "stale_skill_rejection_does_not_advance_completed_question_count");
+                A(Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + started.SessionId + "';") == 0,
+                    "stale_skill_rejection_writes_no_attempt");
+                A(Count(database, "SELECT count(*) FROM attempt_commit_key WHERE session_id='" + started.SessionId + "';") == 0,
+                    "stale_skill_rejection_writes_no_semantic_key");
+                A(Count(database, "SELECT count(*) FROM mastery_event WHERE child_id='" + started.ChildId + "' AND skill_id='" + question.SkillId + "';") == 0,
+                    "stale_skill_rejection_writes_no_mastery_event");
+                A(Count(database, "SELECT count(*) FROM child_skill WHERE child_id='" + started.ChildId + "' AND skill_id='" + question.SkillId + "' AND attempts_count=3 AND abs(mastery_score-0.61)<0.0000001;") == 1,
+                    "stale_skill_rejection_preserves_newer_skill_state");
             }
         }
 

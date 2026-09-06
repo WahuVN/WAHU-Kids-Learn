@@ -430,6 +430,8 @@ namespace WAHU.Session
                 InputMethod = inputMethod,
                 AttemptIndex = attemptIndex,
                 ListenCount = 0,
+                ExpectedSkillMasteryScore = mastery == null ? null : (double?)mastery.ScoreBefore,
+                ExpectedSkillAttemptsCount = mastery == null ? null : (int?)current.AttemptsCount,
                 Error = error == null ? null : new ErrorEventWrite
                 {
                     Id = "error-" + Guid.NewGuid().ToString("N"),

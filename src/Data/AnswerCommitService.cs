@@ -23,6 +23,8 @@ namespace WAHU.Data
         public string InputMethod { get; set; }
         public int AttemptIndex { get; set; }
         public int ListenCount { get; set; }
+        public double? ExpectedSkillMasteryScore { get; set; }
+        public int? ExpectedSkillAttemptsCount { get; set; }
         public ErrorEventWrite Error { get; set; }
         public MasteryEventWrite Mastery { get; set; }
         public ChildSkillWrite ChildSkill { get; set; }
@@ -117,6 +119,7 @@ namespace WAHU.Data
                         return ReplayResult(existing.AttemptId);
                     }
 
+                    EnsureExpectedSkillState(connection, transaction, request);
                     InsertAttempt(connection, transaction, request);
                     InsertAttemptCommitKey(connection, transaction, request);
                     var errorWritten = InsertError(connection, transaction, request);
@@ -250,6 +253,38 @@ WHERE k.session_id=@session AND k.question_id=@question AND k.attempt_index=@att
                 ChildSkillWritten = false,
                 ReviewWritten = false
             };
+        }
+
+        private static void EnsureExpectedSkillState(SQLiteConnection connection, SQLiteTransaction transaction, AnswerCommitRequest request)
+        {
+            if (!request.ExpectedSkillMasteryScore.HasValue && !request.ExpectedSkillAttemptsCount.HasValue) return;
+
+            using (var command = connection.CreateCommand())
+            {
+                command.Transaction = transaction;
+                command.CommandText = @"SELECT mastery_score,attempts_count,subject
+FROM child_skill
+WHERE child_id=@child AND skill_id=@skill;";
+                command.Parameters.AddWithValue("@child", request.ChildId);
+                command.Parameters.AddWithValue("@skill", request.SkillId);
+                using (var reader = command.ExecuteReader())
+                {
+                    if (!reader.Read())
+                    {
+                        if (request.ExpectedSkillAttemptsCount.Value != 0)
+                            throw new InvalidOperationException("Learning state changed before this answer could be committed. Reload the skill snapshot before retrying.");
+                        return;
+                    }
+
+                    var currentScore = Convert.ToDouble(reader[0], System.Globalization.CultureInfo.InvariantCulture);
+                    var currentAttempts = Convert.ToInt32(reader[1], System.Globalization.CultureInfo.InvariantCulture);
+                    var currentSubject = Convert.ToString(reader[2], System.Globalization.CultureInfo.InvariantCulture);
+                    if (!string.Equals(currentSubject, request.Subject, StringComparison.Ordinal) ||
+                        currentAttempts != request.ExpectedSkillAttemptsCount.Value ||
+                        Math.Abs(currentScore - request.ExpectedSkillMasteryScore.Value) > 0.0000001)
+                        throw new InvalidOperationException("Learning state changed before this answer could be committed. Reload the skill snapshot before retrying.");
+                }
+            }
         }
 
         private static void InsertAttemptCommitKey(SQLiteConnection connection, SQLiteTransaction transaction, AnswerCommitRequest request)
@@ -458,6 +493,18 @@ updated_at_utc=excluded.updated_at_utc;";
             if (request.StartedAtUtc == default(DateTime) || request.AnsweredAtUtc == default(DateTime)) throw new ArgumentException("Attempt timestamps are required.");
             if (request.AnsweredAtUtc.ToUniversalTime() < request.StartedAtUtc.ToUniversalTime()) throw new ArgumentException("AnsweredAtUtc cannot precede StartedAtUtc.");
             if (request.ResponseMs < 0 || request.HintLevel < 0 || request.AttemptIndex < 1 || request.ListenCount < 0) throw new ArgumentOutOfRangeException("attempt metrics");
+            if (request.ExpectedSkillMasteryScore.HasValue != request.ExpectedSkillAttemptsCount.HasValue)
+                throw new ArgumentException("Expected skill mastery and attempt count must be supplied together.");
+            if (request.ExpectedSkillMasteryScore.HasValue)
+            {
+                var expectedScore = request.ExpectedSkillMasteryScore.Value;
+                if (double.IsNaN(expectedScore) || double.IsInfinity(expectedScore) || expectedScore < 0.0 || expectedScore > 1.0)
+                    throw new ArgumentOutOfRangeException("ExpectedSkillMasteryScore");
+                if (request.ExpectedSkillAttemptsCount.Value < 0)
+                    throw new ArgumentOutOfRangeException("ExpectedSkillAttemptsCount");
+                if (request.Mastery == null || request.ChildSkill == null)
+                    throw new ArgumentException("Expected skill state is only valid for a mastery-bearing learning write.");
+            }
         }
 
         private static void Require(string value, string name)

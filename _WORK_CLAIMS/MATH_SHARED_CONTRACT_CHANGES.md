@@ -166,6 +166,17 @@ Persistence boundary phải từ chối learning write mới từ coordinator/pr
 - **Exact semantic replay đã commit trước đó vẫn hợp lệ sau terminal state**: service kiểm semantic key trước active-session guard và trả durable attempt cũ, để mất response/retry network không biến thành lỗi giả.
 - Khi hai coordinator cùng giữ một session, coordinator stale không được append câu mới sau khi coordinator còn lại đã complete/abort session.
 
+## 2026-09-07 — Optimistic child-skill state guard (AI2)
+
+Mastery-bearing Math write phải chống lost-update khi một coordinator/process đang chấm từ `child_skill` snapshot đã cũ:
+
+- `AnswerCommitRequest` có cặp expected state opt-in: `ExpectedSkillMasteryScore` + `ExpectedSkillAttemptsCount`; hai field phải đi cùng nhau.
+- Math coordinator gửi đúng score/attempt count đã dùng làm input cho `MasteryEngineV1`; pending retry chưa finalize mastery không gửi expected state này.
+- Sau semantic replay check nhưng **trước khi insert attempt**, persistence đọc `child_skill` trong cùng transaction và so subject + attempts count + mastery score với expected snapshot.
+- Nếu row chưa tồn tại thì chỉ hợp lệ khi expected attempts = 0; nếu state đã đổi, toàn bộ write bị reject trước attempt/key/mastery/review nên không thể ghi đè state mới bằng kết quả tính từ snapshot cũ.
+- Exact semantic replay vẫn được resolve trước optimistic guard; do đó retry của một write đã durable không fail chỉ vì `child_skill` hiện đã tiến lên.
+- Regression khóa cả service-level stale distinct attempt và coordinator-level stale skill snapshot sau khi câu đã mở.
+
 ## Contract còn chưa chốt
 
 Các mục sau chưa được UI/content tự invent cho tới khi AI2 publish contract:
