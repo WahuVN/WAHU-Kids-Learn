@@ -28,7 +28,7 @@ Owner: AI1 — Math Content & Data
   - interactive measurement
   - word problem
 - Semantic validator errors: **0**
-- Math content unittest: **23 / 23 PASS**
+- Math content unittest: **24 / 24 PASS**
 - Pack manifest/hash/listing check on current working tree: **PASS** (`version=1.9.0`, 3 listed files)
 
 ## Curriculum/content completeness
@@ -81,6 +81,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - distractor rationale placeholder/generic hoặc bị tái dùng quá mức;
 - hint cấp 2 placeholder/generic hoặc bị tái dùng quá mức;
 - vocabulary kỹ thuật nội bộ lọt vào field child-facing (`baseline`, `runtime`, `template`, `validator`, ...);
+- mục tiêu học thứ hai generic/placeholder hoặc bị tái dùng quá mức;
 - MCQ trùng nghĩa sau normalize Unicode/case/whitespace hoặc hai biểu thức choice cho cùng giá trị số;
 - vị trí đáp án đúng bị lệch pattern; bank phải phân bố cân bằng theo số lượng choices;
 - invalid true/false shape;
@@ -120,9 +121,10 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - 4 application regression quan trọng đã được nâng từ single-fact recall sang kết hợp dữ kiện/khái niệm: thành phần phép trừ, thành phần phép chia, ghép hình, đọc đồng hồ;
 - child-facing lesson/question text có **0 internal-engine vocabulary**; metadata kỹ thuật như `application`, `numeric_input`, `deterministic` vẫn được phép;
 - **67/67 worked example unique**, mỗi ví dụ có ít nhất 2 bước giải, **0 exact/near overlap** với 201 câu practice và 67/67 solution chốt đáp án tường minh;
+- mục tiêu học thứ hai đạt **67/67 unique**, gắn concept + dạng vận dụng của từng lesson, placeholder chung = 0;
 - 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract.
 
-Latest result: **23 tests PASS**.
+Latest result: **24 tests PASS**.
 
 ## Commits / waves
 
@@ -143,10 +145,11 @@ Latest result: **23 tests PASS**.
 - `ee7079b` — `Toán: nâng progression cho câu vận dụng`
 - `5a31c41` — `Toán: làm sạch ngôn ngữ kỹ thuật khỏi nội dung trẻ em`
 - `9682572` — `Toán: tách ví dụ mẫu khỏi câu luyện`
+- `19538b5` — `Toán: chốt đáp án rõ trong ví dụ mẫu`
 
 ## Current blockers outside AI1 content ownership
 
-1. Request 005 functional path đã được commit end-to-end: engine `656a94b` + UI `1436705`. Targeted lesson dùng authored bank đúng 3 câu, all-201 answer-surface sweep PASS, Child UI **1133 assertions PASS**, Flow 5 prerequisite unlock PASS và persistence **92 assertions PASS**. Release-clean full solution vẫn bị SQLite/toolchain chặn; Request 007 vẫn là recovery edge riêng cần khóa regression.
+1. Request 005 functional path đã được commit end-to-end: engine `656a94b` + UI `1436705`. Targeted lesson dùng authored bank đúng 3 câu, all-201 answer-surface sweep PASS, Child UI **1138 assertions PASS**, Flow 5 prerequisite unlock PASS và persistence **92 assertions PASS**. Release-clean full solution vẫn bị SQLite/toolchain chặn; Request 007 vẫn là recovery edge riêng cần khóa regression.
 2. Request 007 mới: corrupt open-question ở lesson mode có thể giữ `generated_question_count > attempts`, skip câu medium và hết authored pool khi mới đủ 2/3 attempts. Cần regression + cursor reconciliation ở AI2.
 3. Request 006 vẫn mở: 23 câu integer có `answer_unit` được content giữ display-only, nhưng `MathAuthoredQuestionSource`/`MathQuestion` chưa preserve field để feedback hiện `8 cm`, `5 kg`, `60 phút` mà vẫn chấm raw integer.
 4. UI smoke build hiện gặp lỗi reference `System.Data.SQLite` khi build `WAHU.Data.csproj`; targeted persistence smoke không bị lỗi. Đây là build/dependency WIP ngoài AI1, không phải lỗi content.

@@ -22,6 +22,23 @@ def slug(skill: str) -> str:
     return skill.lower()
 
 
+def second_objective(question_types: list[str], concept_name: str) -> str:
+    """Create a lesson-specific second objective from the concept and authored practice surfaces."""
+    concept = concept_name.strip().lower()
+    types = set(question_types)
+    if "interactive_measurement" in types:
+        return f"Vận dụng {concept} để thao tác trên vạch đo và kiểm tra kết quả bằng cách đo lại."
+    if "unit_input" in types:
+        return f"Vận dụng {concept} để tìm số đo trong tình huống mới và ghi đúng đơn vị của kết quả."
+    if "expression_input" in types:
+        return f"Vận dụng {concept} để lập hoặc tính biểu thức đúng thứ tự và tự kiểm tra kết quả."
+    if "word_problem" in types:
+        return f"Vận dụng {concept} để chọn phép tính, giải một bài toán một bước và kiểm tra kết quả theo dữ kiện."
+    if types & {"multiple_choice", "true_false"}:
+        return f"Phân biệt và giải thích đúng {concept} khi gặp một ví dụ hoặc tình huống mới."
+    return f"Vận dụng {concept} với dữ kiện mới, nêu cách tìm kết quả và tự kiểm tra bằng quy tắc đã học."
+
+
 def second_hint(question_type: str, difficulty: str, concept_name: str) -> str:
     """Give a child a concrete next move without revealing the authored answer."""
     concept = concept_name.strip()
@@ -931,6 +948,7 @@ def build() -> tuple[dict, dict]:
                 raise SystemExit(f"Worked example answer missing for {skill}")
             if not isinstance(example["solution_steps_vi"], list) or len(example["solution_steps_vi"]) < 2 or not all(isinstance(x, str) and x.strip() for x in example["solution_steps_vi"]):
                 raise SystemExit(f"Worked example needs at least two solution steps for {skill}")
+            lesson_question_types = [question["question_type"] for question in questions[-3:]]
             lessons.append({
                 "id": lesson_id,
                 "chapter_id": chapter_id,
@@ -940,7 +958,7 @@ def build() -> tuple[dict, dict]:
                 "title_vi": title,
                 "objectives_vi": [
                     "Nhận biết và thực hiện đúng nội dung: " + title.lower() + ".",
-                    "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện.",
+                    second_objective(lesson_question_types, concept_name),
                 ],
                 "explanation_vi": explanation,
                 "concepts": [{

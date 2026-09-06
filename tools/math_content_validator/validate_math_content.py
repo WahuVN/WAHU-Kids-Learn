@@ -33,6 +33,7 @@ GRADE2_MUL_LITERAL_RE = re.compile(r"(?<!\d)(\d+)\s*(?:×|\*)\s*(\d+)(?!\d)")
 GRADE2_DIV_LITERAL_RE = re.compile(r"(?<!\d)(\d+)(?:\s*÷\s*|\s+:\s+)(\d+)(?!\d)")
 NUMERIC_CHOICE_EXPR_RE = re.compile(r"^[\d\s+\-−–*/×÷:().,]+$")
 GENERIC_SECOND_HINT = "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+GENERIC_SECOND_OBJECTIVE = "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
 GENERIC_DISTRACTOR_RATIONALE = "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
 CHILD_FACING_KEYS = {
     "title_vi", "objectives_vi", "explanation_vi", "name_vi", "definition_vi",
@@ -371,6 +372,7 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
     prereq_graph: dict[str, list[str]] = {}
     referenced_question_ids: list[str] = []
     lesson_skill_counts = Counter()
+    second_objective_counts = Counter()
 
     for i, lesson in enumerate(lessons):
         where = f"lesson[{i}]"
@@ -411,8 +413,16 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             errors.append(f"unsourced_money_denomination:{where}")
         if skill in TIME_RELATION_SKILLS and TIME_OUT_OF_SCOPE_ARITH_RE.search(serialized_lesson):
             errors.append(f"out_of_scope_time_arithmetic:{where}")
-        if len(required_list(lesson, "objectives_vi", where, errors, 2)) < 2:
+        objectives = required_list(lesson, "objectives_vi", where, errors, 2)
+        if len(objectives) < 2:
             errors.append(f"insufficient_objectives:{where}")
+        elif not all(isinstance(objective, str) and objective.strip() for objective in objectives):
+            errors.append(f"invalid_objective_text:{where}")
+        else:
+            second_objective = " ".join(objectives[1].split())
+            second_objective_counts[second_objective] += 1
+            if second_objective == GENERIC_SECOND_OBJECTIVE:
+                errors.append(f"generic_second_objective:{where}")
         concepts = required_list(lesson, "concepts", where, errors)
         for j, concept in enumerate(concepts):
             cwhere = f"{where}.concept[{j}]"
@@ -476,6 +486,9 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
     for skill, count in lesson_skill_counts.items():
         if count != 1:
             errors.append(f"lesson_skill_count:{skill}:{count}")
+    for objective_text, count in second_objective_counts.items():
+        if count > 3:
+            errors.append(f"over_reused_second_objective:{count}:{objective_text[:80]}")
 
     cycle = find_cycle(prereq_graph)
     if cycle:

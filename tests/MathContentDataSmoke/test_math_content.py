@@ -70,6 +70,17 @@ class MathContentDataSmoke(unittest.TestCase):
                 self.assertTrue(example["answer"].strip())
                 self.assertGreaterEqual(len(example["solution_steps_vi"]), 1)
 
+    def test_lesson_objectives_are_specific_not_placeholders(self):
+        second_objectives = [lesson["objectives_vi"][1] for lesson in self.lessons]
+        self.assertNotIn(validator.GENERIC_SECOND_OBJECTIVE, second_objectives)
+        counts = Counter(second_objectives)
+        self.assertLessEqual(max(counts.values()), 3)
+        self.assertGreaterEqual(len(counts), 60)
+        for lesson in self.lessons:
+            with self.subTest(lesson=lesson["id"]):
+                concept_name = lesson["concepts"][0]["name_vi"].strip().lower()
+                self.assertIn(concept_name, lesson["objectives_vi"][1].lower())
+
     def test_every_lesson_has_basic_medium_application(self):
         for lesson in self.lessons:
             with self.subTest(lesson=lesson["id"]):
