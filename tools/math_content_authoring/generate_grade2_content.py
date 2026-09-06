@@ -349,7 +349,7 @@ Q = {
     "SUB_COMPONENTS_RECOGNIZE": [
         mc("Trong 50 - 12 = 38, số 50 được gọi là gì?", "số bị trừ", ["số trừ", "hiệu", "tổng"], "50 là số đứng trước dấu trừ nên là số bị trừ."),
         mc("Trong 72 - 20 = 52, số 20 được gọi là gì?", "số trừ", ["số bị trừ", "hiệu", "số hạng"], "20 là lượng được bớt khỏi số bị trừ nên là số trừ."),
-        mc("Trong 90 - 35 = 55, số 55 là gì?", "hiệu", ["số trừ", "số bị trừ", "tích"], "Kết quả của phép trừ gọi là hiệu."),
+        mc("Trong 90 - 35 = 55, cặp 90 và 55 lần lượt được gọi là gì?", "số bị trừ và hiệu", ["số trừ và hiệu", "hiệu và số bị trừ", "số bị trừ và số trừ"], "Trong phép trừ, 90 là số bị trừ còn kết quả 55 là hiệu."),
     ],
     "ADD_WITHIN_1000_NO_CARRY": [
         nq("Tính 243 + 125.", 368, "Cộng từng hàng: 3+5=8, 4+2=6, 2+1=3; được 368."),
@@ -405,7 +405,7 @@ Q = {
     "DIVISION_COMPONENTS": [
         mc("Trong 10 : 2 = 5, số 10 là gì?", "số bị chia", ["số chia", "thương", "tích"], "10 là lượng được đem chia nên là số bị chia."),
         mc("Trong 20 : 5 = 4, số 5 là gì?", "số chia", ["số bị chia", "thương", "số hạng"], "5 là số dùng để chia nên là số chia."),
-        mc("Trong 18 : 2 = 9, số 9 là gì?", "thương", ["số bị chia", "số chia", "tích"], "Kết quả của phép chia gọi là thương."),
+        mc("Trong 18 : 2 = 9, cặp 18 và 9 lần lượt được gọi là gì?", "số bị chia và thương", ["số chia và thương", "thương và số bị chia", "số bị chia và số chia"], "Trong phép chia, 18 là số bị chia còn kết quả 9 là thương."),
     ],
     "TIMES_TABLE_2": [
         nq("Tính 2 × 6.", 12, "Bảng nhân 2: 2 × 6 = 12."),
@@ -522,7 +522,7 @@ Q = {
     "FOLD_CUT_COMPOSE_SHAPES": [
         mc("Ghép hai tam giác vuông bằng nhau theo một cạnh phù hợp có thể tạo thành hình nào trong nhiều cách ghép?", "một tứ giác", ["một điểm", "một khối cầu", "một đường thẳng vô hạn"], "Hai mảnh tam giác có thể ghép cạnh với cạnh để tạo một hình kín bốn cạnh trong cách ghép phù hợp."),
         mc("Khi cắt một tờ giấy hình vuông theo một đường thẳng từ góc này đến góc đối diện, thường thu được bao nhiêu mảnh?", "2", ["1", "3", "4"], "Một đường cắt chéo xuyên hết hình vuông chia tờ giấy thành hai mảnh."),
-        mc("Mục đích của hoạt động ghép hình là gì?", "Nhận ra có thể tạo hình mới từ các mảnh hình", ["Làm thay đổi giá trị số của hình", "Biến mọi hình thành khối cầu", "Bỏ qua cạnh của các mảnh"], "Ghép hình giúp thấy quan hệ giữa các mảnh và hình mới được tạo thành."),
+        mc("Bạn có hai tam giác vuông bằng nhau. Muốn ghép thành một tứ giác kín, cách nào hợp lý nhất?", "Đặt hai cạnh phù hợp sát nhau để hai mảnh không chồng lên nhau", ["Chỉ đặt hai đỉnh chạm nhau rồi để hở cạnh", "Chồng khít hai tam giác lên cùng một vị trí", "Để hai tam giác cách xa nhau"], "Muốn tạo một hình kín mới, cần ghép các cạnh phù hợp sát nhau mà không chồng hai mảnh lên nhau."),
     ],
 
     "HEAVIER_LIGHTER": [
@@ -578,7 +578,7 @@ Q = {
     "CLOCK_MINUTE_HAND_AT_3_OR_6": [
         mc("Kim phút chỉ số 3, kim giờ vừa qua số 4. Đồng hồ chỉ thời gian nào?", "4 giờ 15 phút", ["4 giờ 30 phút", "3 giờ 4 phút", "4 giờ 3 phút"], "Kim phút ở số 3 tương ứng 15 phút; kim giờ ở khoảng sau 4 nên là 4 giờ 15 phút."),
         mc("Kim phút chỉ số 6, kim giờ ở giữa 7 và 8. Đồng hồ chỉ thời gian nào?", "7 giờ 30 phút", ["7 giờ 15 phút", "6 giờ 7 phút", "8 giờ 30 phút"], "Kim phút ở số 6 là 30 phút; kim giờ giữa 7 và 8 là 7 giờ 30 phút."),
-        mc("Khi kim phút chỉ số 3 thì số phút là bao nhiêu?", "15 phút", ["3 phút", "30 phút", "60 phút"], "Mỗi số trên đồng hồ ứng 5 phút; 3 × 5 = 15 phút."),
+        mc("Đồng hồ đang chỉ 5 giờ 15 phút. Kim phút đi tiếp từ số 3 đến số 6, còn kim giờ vẫn nằm giữa 5 và 6. Khi đó đồng hồ chỉ thời gian nào?", "5 giờ 30 phút", ["5 giờ 15 phút", "6 giờ 30 phút", "5 giờ 45 phút"], "Kim phút từ số 3 đến số 6 chuyển từ 15 phút sang 30 phút; kim giờ vẫn trong khoảng sau 5 nên là 5 giờ 30 phút."),
     ],
     "MEASUREMENT_CONVERT_CALCULATE_LEARNED_UNITS": [
         nq("3 m bằng bao nhiêu dm?", 30, "1 m = 10 dm nên 3 m = 30 dm.", unit="dm"),

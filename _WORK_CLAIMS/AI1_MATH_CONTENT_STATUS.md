@@ -28,7 +28,7 @@ Owner: AI1 — Math Content & Data
   - interactive measurement
   - word problem
 - Semantic validator errors: **0**
-- Math content unittest: **20 / 20 PASS**
+- Math content unittest: **21 / 21 PASS**
 - Pack manifest/hash/listing check on current working tree: **PASS** (`version=1.9.0`, 3 listed files)
 
 ## Curriculum/content completeness
@@ -111,12 +111,13 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - mọi phép nhân/chia literal child-facing nằm trong bảng 2 hoặc 5, kể cả distractor;
 - mọi MCQ có choice khác nhau sau normalize text và không có hai biểu thức choice cùng giá trị số;
 - 201/201 hint cấp 2 hiện actionable theo dạng câu + độ khó + concept, không còn placeholder chung;
-- 267 distractor có **253 rationale khác nhau**, max lặp 3 và placeholder chung = 0;
+- 267 distractor có **256 rationale khác nhau**, max lặp 3 và placeholder chung = 0;
 - vị trí đáp án đúng được cân bằng deterministic: 88 câu 4-choice = 22/22/22/22 cho A/B/C/D; 3 true/false = 2/1;
 - 23 câu integer có `answer_unit` giữ đúng contract display-only, không đổi sang unit-input;
+- 4 application regression quan trọng đã được nâng từ single-fact recall sang kết hợp dữ kiện/khái niệm: thành phần phép trừ, thành phần phép chia, ghép hình, đọc đồng hồ;
 - 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract.
 
-Latest result: **20 tests PASS**.
+Latest result: **21 tests PASS**.
 
 ## Commits / waves
 
@@ -133,6 +134,7 @@ Latest result: **20 tests PASS**.
 - `c20ca91` — `Toán: khóa contract authored session và đơn vị hiển thị`
 - `9472d63` — `Toán: cân bằng vị trí đáp án trắc nghiệm`
 - `0bfabc5` — `Toán: nâng chất lượng gợi ý cho 201 câu`
+- `719c80b` — `Toán: nâng rationale cho 267 đáp án nhiễu`
 
 ## Current blockers outside AI1 content ownership
 

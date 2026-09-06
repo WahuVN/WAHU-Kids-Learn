@@ -235,6 +235,22 @@ class MathContentDataSmoke(unittest.TestCase):
             with self.subTest(item=item["id"]):
                 self.assertGreaterEqual(len(item["hints_vi"][1].strip()), 40)
 
+    def test_application_questions_do_not_regress_to_single_fact_recall(self):
+        subtraction = self.question_by_id["m2_q_sub_components_recognize_03"]
+        division = self.question_by_id["m2_q_division_components_03"]
+        folding = self.question_by_id["m2_q_fold_cut_compose_shapes_03"]
+        clock = self.question_by_id["m2_q_clock_minute_hand_at_3_or_6_03"]
+
+        self.assertIn("cặp", subtraction["prompt_vi"].lower())
+        self.assertIn(" và ", subtraction["correct_answer"])
+        self.assertIn("cặp", division["prompt_vi"].lower())
+        self.assertIn(" và ", division["correct_answer"])
+        self.assertIn("muốn ghép", folding["prompt_vi"].lower())
+        self.assertIn("cạnh", folding["correct_answer"].lower())
+        self.assertIn("số 3", clock["prompt_vi"].lower())
+        self.assertIn("số 6", clock["prompt_vi"].lower())
+        self.assertEqual("5 giờ 30 phút", clock["correct_answer"])
+
     def test_distractor_rationales_are_specific_not_placeholders(self):
         rationales = []
         for item in self.questions:

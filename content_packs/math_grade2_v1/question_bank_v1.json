@@ -1509,13 +1509,13 @@
       "skill_id": "SUB_COMPONENTS_RECOGNIZE",
       "difficulty": "application",
       "question_type": "multiple_choice",
-      "prompt_vi": "Trong 90 - 35 = 55, số 55 là gì?",
+      "prompt_vi": "Trong 90 - 35 = 55, cặp 90 và 55 lần lượt được gọi là gì?",
       "answer_kind": "text",
-      "correct_answer": "hiệu",
+      "correct_answer": "số bị trừ và hiệu",
       "accepted_answers": [
-        "hiệu"
+        "số bị trừ và hiệu"
       ],
-      "explanation_vi": "Kết quả của phép trừ gọi là hiệu.",
+      "explanation_vi": "Trong phép trừ, 90 là số bị trừ còn kết quả 55 là hiệu.",
       "hints_vi": [
         "Nhớ kiến thức: Phép trừ gồm số bị trừ, số trừ và kết quả gọi là hiệu.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Số bị trừ, số trừ, hiệu” trước rồi mới chọn phương án khớp kết quả."
@@ -1535,23 +1535,23 @@
       "choices": [
         {
           "id": "a",
-          "text": "số trừ",
-          "rationale_vi": "“số trừ” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Số bị trừ, số trừ, hiệu” rồi thử lại."
+          "text": "số trừ và hiệu",
+          "rationale_vi": "“số trừ và hiệu” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Số bị trừ, số trừ, hiệu” rồi thử lại."
         },
         {
           "id": "b",
-          "text": "hiệu",
-          "rationale_vi": "Kết quả của phép trừ gọi là hiệu."
+          "text": "số bị trừ và hiệu",
+          "rationale_vi": "Trong phép trừ, 90 là số bị trừ còn kết quả 55 là hiệu."
         },
         {
           "id": "c",
-          "text": "số bị trừ",
-          "rationale_vi": "Nếu chọn “số bị trừ”, có ít nhất một bước của “Số bị trừ, số trừ, hiệu” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "text": "hiệu và số bị trừ",
+          "rationale_vi": "Nếu chọn “hiệu và số bị trừ”, có ít nhất một bước của “Số bị trừ, số trừ, hiệu” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
-          "text": "tích",
-          "rationale_vi": "“tích” là phương án nhiễu gần đúng. Tự làm theo “Số bị trừ, số trừ, hiệu” rồi so kết quả với lựa chọn này."
+          "text": "số bị trừ và số trừ",
+          "rationale_vi": "“số bị trừ và số trừ” là phương án nhiễu gần đúng. Tự làm theo “Số bị trừ, số trừ, hiệu” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "b"
@@ -2695,13 +2695,13 @@
       "skill_id": "DIVISION_COMPONENTS",
       "difficulty": "application",
       "question_type": "multiple_choice",
-      "prompt_vi": "Trong 18 : 2 = 9, số 9 là gì?",
+      "prompt_vi": "Trong 18 : 2 = 9, cặp 18 và 9 lần lượt được gọi là gì?",
       "answer_kind": "text",
-      "correct_answer": "thương",
+      "correct_answer": "số bị chia và thương",
       "accepted_answers": [
-        "thương"
+        "số bị chia và thương"
       ],
-      "explanation_vi": "Kết quả của phép chia gọi là thương.",
+      "explanation_vi": "Trong phép chia, 18 là số bị chia còn kết quả 9 là thương.",
       "hints_vi": [
         "Nhớ kiến thức: Phép chia gồm số bị chia, số chia và kết quả gọi là thương.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Số bị chia, số chia, thương” trước rồi mới chọn phương án khớp kết quả."
@@ -2721,23 +2721,23 @@
       "choices": [
         {
           "id": "a",
-          "text": "thương",
-          "rationale_vi": "Kết quả của phép chia gọi là thương."
+          "text": "số bị chia và thương",
+          "rationale_vi": "Trong phép chia, 18 là số bị chia còn kết quả 9 là thương."
         },
         {
           "id": "b",
-          "text": "số bị chia",
-          "rationale_vi": "“số bị chia” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Số bị chia, số chia, thương” rồi thử lại."
+          "text": "số chia và thương",
+          "rationale_vi": "“số chia và thương” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Số bị chia, số chia, thương” rồi thử lại."
         },
         {
           "id": "c",
-          "text": "số chia",
-          "rationale_vi": "Nếu chọn “số chia”, có ít nhất một bước của “Số bị chia, số chia, thương” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "text": "thương và số bị chia",
+          "rationale_vi": "Nếu chọn “thương và số bị chia”, có ít nhất một bước của “Số bị chia, số chia, thương” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
-          "text": "tích",
-          "rationale_vi": "“tích” là phương án nhiễu gần đúng. Tự làm theo “Số bị chia, số chia, thương” rồi so kết quả với lựa chọn này."
+          "text": "số bị chia và số chia",
+          "rationale_vi": "“số bị chia và số chia” là phương án nhiễu gần đúng. Tự làm theo “Số bị chia, số chia, thương” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "a"
@@ -5606,13 +5606,13 @@
       "skill_id": "FOLD_CUT_COMPOSE_SHAPES",
       "difficulty": "application",
       "question_type": "multiple_choice",
-      "prompt_vi": "Mục đích của hoạt động ghép hình là gì?",
+      "prompt_vi": "Bạn có hai tam giác vuông bằng nhau. Muốn ghép thành một tứ giác kín, cách nào hợp lý nhất?",
       "answer_kind": "text",
-      "correct_answer": "Nhận ra có thể tạo hình mới từ các mảnh hình",
+      "correct_answer": "Đặt hai cạnh phù hợp sát nhau để hai mảnh không chồng lên nhau",
       "accepted_answers": [
-        "Nhận ra có thể tạo hình mới từ các mảnh hình"
+        "Đặt hai cạnh phù hợp sát nhau để hai mảnh không chồng lên nhau"
       ],
-      "explanation_vi": "Ghép hình giúp thấy quan hệ giữa các mảnh và hình mới được tạo thành.",
+      "explanation_vi": "Muốn tạo một hình kín mới, cần ghép các cạnh phù hợp sát nhau mà không chồng hai mảnh lên nhau.",
       "hints_vi": [
         "Nhớ kiến thức: Tách một hình thành các phần hoặc ghép các phần để tạo hình mới giúp nhận ra quan hệ giữa các hình.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Ghép và tạo hình” trước rồi mới chọn phương án khớp kết quả."
@@ -5632,23 +5632,23 @@
       "choices": [
         {
           "id": "a",
-          "text": "Làm thay đổi giá trị số của hình",
-          "rationale_vi": "“Làm thay đổi giá trị số của hình” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Ghép và tạo hình” rồi thử lại."
+          "text": "Chỉ đặt hai đỉnh chạm nhau rồi để hở cạnh",
+          "rationale_vi": "“Chỉ đặt hai đỉnh chạm nhau rồi để hở cạnh” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Ghép và tạo hình” rồi thử lại."
         },
         {
           "id": "b",
-          "text": "Biến mọi hình thành khối cầu",
-          "rationale_vi": "Nếu chọn “Biến mọi hình thành khối cầu”, có ít nhất một bước của “Ghép và tạo hình” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "text": "Chồng khít hai tam giác lên cùng một vị trí",
+          "rationale_vi": "Nếu chọn “Chồng khít hai tam giác lên cùng một vị trí”, có ít nhất một bước của “Ghép và tạo hình” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
-          "text": "Bỏ qua cạnh của các mảnh",
-          "rationale_vi": "“Bỏ qua cạnh của các mảnh” là phương án nhiễu gần đúng. Tự làm theo “Ghép và tạo hình” rồi so kết quả với lựa chọn này."
+          "text": "Để hai tam giác cách xa nhau",
+          "rationale_vi": "“Để hai tam giác cách xa nhau” là phương án nhiễu gần đúng. Tự làm theo “Ghép và tạo hình” rồi so kết quả với lựa chọn này."
         },
         {
           "id": "d",
-          "text": "Nhận ra có thể tạo hình mới từ các mảnh hình",
-          "rationale_vi": "Ghép hình giúp thấy quan hệ giữa các mảnh và hình mới được tạo thành."
+          "text": "Đặt hai cạnh phù hợp sát nhau để hai mảnh không chồng lên nhau",
+          "rationale_vi": "Muốn tạo một hình kín mới, cần ghép các cạnh phù hợp sát nhau mà không chồng hai mảnh lên nhau."
         }
       ],
       "correct_choice_id": "d"
@@ -7000,13 +7000,13 @@
       "skill_id": "CLOCK_MINUTE_HAND_AT_3_OR_6",
       "difficulty": "application",
       "question_type": "multiple_choice",
-      "prompt_vi": "Khi kim phút chỉ số 3 thì số phút là bao nhiêu?",
+      "prompt_vi": "Đồng hồ đang chỉ 5 giờ 15 phút. Kim phút đi tiếp từ số 3 đến số 6, còn kim giờ vẫn nằm giữa 5 và 6. Khi đó đồng hồ chỉ thời gian nào?",
       "answer_kind": "text",
-      "correct_answer": "15 phút",
+      "correct_answer": "5 giờ 30 phút",
       "accepted_answers": [
-        "15 phút"
+        "5 giờ 30 phút"
       ],
-      "explanation_vi": "Mỗi số trên đồng hồ ứng 5 phút; 3 × 5 = 15 phút.",
+      "explanation_vi": "Kim phút từ số 3 đến số 6 chuyển từ 15 phút sang 30 phút; kim giờ vẫn trong khoảng sau 5 nên là 5 giờ 30 phút.",
       "hints_vi": [
         "Nhớ kiến thức: Kim phút ở số 3 tương ứng 15 phút; ở số 6 tương ứng 30 phút.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “15 phút và 30 phút trên đồng hồ” trước rồi mới chọn phương án khớp kết quả."
@@ -7026,23 +7026,23 @@
       "choices": [
         {
           "id": "a",
-          "text": "3 phút",
-          "rationale_vi": "“3 phút” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “15 phút và 30 phút trên đồng hồ” rồi thử lại."
+          "text": "5 giờ 15 phút",
+          "rationale_vi": "“5 giờ 15 phút” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “15 phút và 30 phút trên đồng hồ” rồi thử lại."
         },
         {
           "id": "b",
-          "text": "30 phút",
-          "rationale_vi": "Nếu chọn “30 phút”, có ít nhất một bước của “15 phút và 30 phút trên đồng hồ” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "text": "6 giờ 30 phút",
+          "rationale_vi": "Nếu chọn “6 giờ 30 phút”, có ít nhất một bước của “15 phút và 30 phút trên đồng hồ” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
-          "text": "15 phút",
-          "rationale_vi": "Mỗi số trên đồng hồ ứng 5 phút; 3 × 5 = 15 phút."
+          "text": "5 giờ 30 phút",
+          "rationale_vi": "Kim phút từ số 3 đến số 6 chuyển từ 15 phút sang 30 phút; kim giờ vẫn trong khoảng sau 5 nên là 5 giờ 30 phút."
         },
         {
           "id": "d",
-          "text": "60 phút",
-          "rationale_vi": "“60 phút” là phương án nhiễu gần đúng. Tự làm theo “15 phút và 30 phút trên đồng hồ” rồi so kết quả với lựa chọn này."
+          "text": "5 giờ 45 phút",
+          "rationale_vi": "“5 giờ 45 phút” là phương án nhiễu gần đúng. Tự làm theo “15 phút và 30 phút trên đồng hồ” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "c"
