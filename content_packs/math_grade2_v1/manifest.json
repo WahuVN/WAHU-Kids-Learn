@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "pack_id": "math_grade2_verified_templates_v1",
+  "version": "1.0.0",
+  "subject": "math",
+  "grade": 2,
+  "status": "VERIFIED",
+  "content_kind": "generator_templates",
+  "files": [
+    {
+      "path": "verified_templates_v1.json",
+      "sha256": "5D684FBC612DF42D9B94401B69705233CAFA57EDE2D73D8FADB49FC7EE40583B"
+    }
+  ]
+}

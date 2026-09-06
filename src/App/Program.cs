@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Windows.Forms;
+using WAHU.Content;
 using WAHU.Data;
 using WAHU.Platform;
 
@@ -62,7 +63,8 @@ namespace WAHUKidsLearn
                     string databaseError = null;
                     try
                     {
-                        BootstrapRuntime(config, out preflight, out database);
+                        int verifiedContentPackCount;
+                        BootstrapRuntime(config, out preflight, out database, out verifiedContentPackCount);
                     }
                     catch (Exception ex)
                     {
@@ -85,7 +87,8 @@ namespace WAHUKidsLearn
             {
                 PreflightReport preflight;
                 DatabaseBootstrapResult database;
-                BootstrapRuntime(config, out preflight, out database);
+                int verifiedContentPackCount;
+                BootstrapRuntime(config, out preflight, out database, out verifiedContentPackCount);
                 var parent = Path.GetDirectoryName(outPath);
                 if (!string.IsNullOrWhiteSpace(parent)) Directory.CreateDirectory(parent);
                 File.WriteAllLines(outPath, new[]
@@ -114,7 +117,8 @@ namespace WAHUKidsLearn
                     "migration_sha256=" + (database.Migration == null ? "?" : database.Migration.ChecksumSha256),
                     "pre_migration_backup=" + (database.PreMigrationBackup == null ? "none" : database.PreMigrationBackup.MetadataPath),
                     "integrity=" + database.Health.Integrity,
-                    "foreign_key_issues=" + database.Health.ForeignKeyIssues
+                    "foreign_key_issues=" + database.Health.ForeignKeyIssues,
+                    "verified_content_packs=" + verifiedContentPackCount
                 });
                 return database.Health != null && database.Health.IsHealthy ? 0 : 31;
             }
@@ -125,15 +129,33 @@ namespace WAHUKidsLearn
             }
         }
 
-        private static void BootstrapRuntime(RuntimeConfigBundle config, out PreflightReport preflight, out DatabaseBootstrapResult database)
+        private static void BootstrapRuntime(RuntimeConfigBundle config, out PreflightReport preflight, out DatabaseBootstrapResult database, out int verifiedContentPackCount)
         {
             if (config == null) throw new ArgumentNullException("config");
             preflight = PreflightProbe.Collect(Application.ExecutablePath);
             JsonReportWriter.Write(preflight, Path.Combine(config.UserRoot, "diagnostics", "preflight.json"));
 
+            verifiedContentPackCount = ValidateBundledContent();
+
             var schemaPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data", "schema", "001_initial.sql");
             var learningDb = new LearningDatabase(config.DatabasePath, schemaPath);
             database = learningDb.Initialize(config.DatabaseJournalMode, config.BackupsDirectory, config.AppVersion);
+        }
+
+        private static int ValidateBundledContent()
+        {
+            var validator = new ContentPackValidator();
+            var contentRoot = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "content_packs");
+            var required = new[] { "math_grade2_v1", "english_grade2_v1" };
+            var verified = 0;
+            foreach (var directory in required)
+            {
+                var result = validator.ValidateDirectory(Path.Combine(contentRoot, directory), true);
+                if (!result.IsValid || !result.ChildRuntimeAllowed)
+                    throw new InvalidDataException("Bundled content pack invalid: " + directory + " — " + string.Join(";", result.Errors ?? new string[0]));
+                verified++;
+            }
+            return verified;
         }
 
         private static void WriteBootstrapFailure(string outPath, string code, Exception ex)

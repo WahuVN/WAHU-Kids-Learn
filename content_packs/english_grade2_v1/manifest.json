@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "pack_id": "english_grade2_verified_core_v1",
+  "version": "1.0.0",
+  "subject": "english",
+  "grade": 2,
+  "status": "VERIFIED",
+  "content_kind": "verified_core_and_templates",
+  "files": [
+    {
+      "path": "verified_core_v1.json",
+      "sha256": "2C268CE4F2ADDB63EF7E776C7D921EBE1AF250DCCB91E717EA0579997B79FFFE"
+    }
+  ]
+}
