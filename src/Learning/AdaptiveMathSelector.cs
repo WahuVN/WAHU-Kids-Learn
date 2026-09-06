@@ -156,6 +156,9 @@ namespace WAHU.Learning
                 case "measurement_convert_calculate_learned_units":
                 case "measurement_real_world_one_step":
                 case "data_collect_classify_count":
+                case "count_place_value_to_1000":
+                case "read_number_to_1000":
+                case "write_number_to_1000":
                     return true;
                 default:
                     return false;

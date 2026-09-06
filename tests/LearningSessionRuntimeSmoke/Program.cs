@@ -40,7 +40,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
         private static IList<MathTemplateRef> TestVerifiedContentAndCore(string templatePath)
         {
             var descriptors = new MathVerifiedTemplateSource().Load(templatePath);
-            A(descriptors.Count == 65, "verified_template_source_flattens_all_verified_variants");
+            A(descriptors.Count == 68, "verified_template_source_flattens_all_verified_variants");
             A(descriptors.All(x => x.Status == "VERIFIED_A_TEMPLATE"), "template_source_filters_verified_a_only");
             var refs = descriptors.Select(x => new MathTemplateRef
             {
@@ -51,7 +51,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 StatementVi = x.StatementVi,
                 AnswerText = x.AnswerText
             }).Where(AdaptiveMathSelector.IsSupported).ToList();
-            A(refs.Count == 65, "generator_supports_all_sixty_five_verified_runtime_candidates");
+            A(refs.Count == 68, "generator_supports_all_sixty_eight_verified_runtime_candidates");
             var chanceRefs = refs.Where(x => x.TemplateId.StartsWith("possible_certain_impossible_die__", StringComparison.Ordinal)).ToList();
             A(chanceRefs.Count == 3, "compound_probability_template_flattens_three_variants");
             A(chanceRefs.All(x => x.SourceTemplateId == "possible_certain_impossible_die" &&
@@ -95,7 +95,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
             var first = selector.Select(refs, empty, new DateTime(2026, 9, 6, 10, 0, 0, DateTimeKind.Utc), new string[0], new string[0]);
             A(first != null && first.Template != null, "selector_returns_candidate");
             A(first.DifficultyFit >= 0 && first.DifficultyFit <= 1, "selector_difficulty_fit_bounded");
-            A(first.CandidateSummary.Count == 65, "selector_audits_all_candidates");
+            A(first.CandidateSummary.Count == 68, "selector_audits_all_candidates");
 
             var dueSkills = new Dictionary<string, SkillSnapshot>(StringComparer.Ordinal);
             foreach (var r in refs) dueSkills[r.SkillId] = new SkillSnapshot { SkillId = r.SkillId, MasteryScore = 0.20, Confidence = 0.20, AttemptsCount = 1, LearningState = "LEARNING" };
@@ -147,6 +147,8 @@ namespace WAHU.LearningSessionRuntimeSmoke
                     A(ValidateMeasurementFoundationContract(q), "measurement_foundation_contract_" + r.TemplateId);
                 if (IsMeasurementPracticeTemplate(r.TemplateId))
                     A(ValidateMeasurementPracticeContract(q), "measurement_practice_contract_" + r.TemplateId);
+                if (IsNumberReadWriteTemplate(r.TemplateId))
+                    A(ValidateNumberReadWriteContract(q), "number_read_write_contract_" + r.TemplateId);
                 if (r.TemplateId.StartsWith("word_problem_", StringComparison.Ordinal) && r.TemplateId != "word_problem_select_operation_one_step")
                     A(ValidateWordProblemContract(q), "word_problem_relation_contract_" + r.TemplateId);
             }
@@ -279,6 +281,21 @@ namespace WAHU.LearningSessionRuntimeSmoke
             A(classifier.Classify(measurementWordQuestion, "7 m").ErrorType == "MEASUREMENT_WORD_ERROR", "measurement_word_error_classified");
             var classifyQuestion = new MathQuestion { TemplateId = "data_collect_classify_count", CorrectAnswer = 4, AnswerKind = "integer", CorrectAnswerText = "4" };
             A(classifier.Classify(classifyQuestion, "3").ErrorType == "DATA_CLASSIFY_COUNT_ERROR", "data_classify_count_error_classified");
+            var numberReadQuestion = TextQuestion("read_number_to_1000", "bốn trăm bảy mươi hai", new[] { "bốn trăm bảy mươi hai", "bốn trăm hai mươi bảy" });
+            A(classifier.Classify(numberReadQuestion, "bốn trăm hai mươi bảy").ErrorType == "NUMBER_READ_WRITE_ERROR", "number_read_error_classified");
+            var numberWriteQuestion = new MathQuestion { TemplateId = "write_number_to_1000", CorrectAnswer = 472, AnswerKind = "integer", CorrectAnswerText = "472" };
+            A(classifier.Classify(numberWriteQuestion, "427").ErrorType == "NUMBER_READ_WRITE_ERROR", "number_write_error_classified");
+            A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "count_place_value_to_1000" }) == "place_value_decompose_3digit", "count_number_repairs_to_place_value");
+            A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "read_number_to_1000" }) == "place_value_decompose_3digit", "read_number_repairs_to_place_value");
+            A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "write_number_to_1000" }) == "place_value_decompose_3digit", "write_number_repairs_to_place_value");
+            A(NumberWordsForSmoke(0) == "không", "number_words_zero");
+            A(NumberWordsForSmoke(15) == "mười lăm", "number_words_15_lam");
+            A(NumberWordsForSmoke(21) == "hai mươi mốt", "number_words_21_mot");
+            A(NumberWordsForSmoke(24) == "hai mươi tư", "number_words_24_tu");
+            A(NumberWordsForSmoke(25) == "hai mươi lăm", "number_words_25_lam");
+            A(NumberWordsForSmoke(105) == "một trăm linh năm", "number_words_105_linh");
+            A(NumberWordsForSmoke(124) == "một trăm hai mươi tư", "number_words_124_tu");
+            A(NumberWordsForSmoke(1000) == "một nghìn", "number_words_1000");
             A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "measure_with_ruler_cm" }) == "measure_with_common_scale", "ruler_repairs_to_common_scale");
             A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "measure_with_common_scale" }) == "number_ray_fill_1000", "common_scale_repairs_to_number_line");
             A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "measurement_convert_calculate_learned_units" }) == "length_dm_m_km_relation", "measurement_calc_repairs_to_unit_relation");
@@ -331,7 +348,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 adaptiveAudit.Record(new AdaptiveDecisionAuditRequest
                 {
                     Id = "adaptive-" + Guid.NewGuid().ToString("N"), SessionId = session.SessionId, ChildId = profile.ChildId,
-                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.6.0", Question = question, Selection = selection,
+                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.7.0", Question = question, Selection = selection,
                     Behavior = lastBehavior, CreatedAtUtc = DateTime.UtcNow
                 });
 
@@ -358,7 +375,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 answerCommit.Commit(new AnswerCommitRequest
                 {
                     AttemptId = attemptId, SessionId = session.SessionId, ChildId = profile.ChildId,
-                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.6.0", QuestionId = question.QuestionId,
+                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.7.0", QuestionId = question.QuestionId,
                     SkillId = question.SkillId, Subject = "math", StartedAtUtc = answered.AddMilliseconds(-responseMs), AnsweredAtUtc = answered,
                     AnswerJson = Json.Serialize(new Dictionary<string, object> { { "answer", answer } }), IsCorrect = isCorrect,
                     ResponseMs = responseMs, HintLevel = hintLevel, Representation = question.Representation, InputMethod = "mouse",
@@ -535,6 +552,25 @@ VALUES(@child,'DATA_COLLECT_CLASSIFY_COUNT','math',0.57,0.51,@classifyAttempts,2
                 "math_roadmap_groups_data_classify_into_data_and_chance");
             A(roadmapWithPractice.TotalTrackedAttempts == roadmapWithMeasurement.TotalTrackedAttempts + 7,
                 "math_roadmap_total_includes_measurement_practice_and_data_attempts");
+            var numberSenseBeforeReadWrite = roadmapWithPractice.NumberSense.Attempts;
+            var readWriteAttemptsBefore = ReadSkillAttempts(database, profile.ChildId, "NUM_COUNT_READ_WRITE_0_1000");
+            using (var connection = database.OpenConnection())
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = @"INSERT OR REPLACE INTO child_skill
+(child_id,skill_id,subject,mastery_score,confidence,attempts_count,independent_success_count,hinted_success_count,transfer_success_count,learning_state,mastery_engine_version,updated_at_utc)
+VALUES(@child,'NUM_COUNT_READ_WRITE_0_1000','math',0.60,0.54,@attempts,2,1,0,'LEARNING',@engine,@updated);";
+                command.Parameters.AddWithValue("@child", profile.ChildId);
+                command.Parameters.AddWithValue("@attempts", readWriteAttemptsBefore + 3);
+                command.Parameters.AddWithValue("@engine", MasteryEngineV1.Version);
+                command.Parameters.AddWithValue("@updated", DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture));
+                command.ExecuteNonQuery();
+            }
+            var roadmapWithReadWrite = new MathRoadmapService(database).Read(profile.ChildId);
+            A(roadmapWithReadWrite.NumberSense.Attempts == numberSenseBeforeReadWrite + 3,
+                "math_roadmap_groups_number_read_write_into_number_sense");
+            A(roadmapWithReadWrite.TotalTrackedAttempts == roadmapWithPractice.TotalTrackedAttempts + 3,
+                "math_roadmap_total_includes_number_read_write_attempts");
             A(correctCount == 5, "vertical_slice_fixture_correctness_expected");
         }
 
@@ -693,6 +729,8 @@ VALUES(@child,'DATA_COLLECT_CLASSIFY_COUNT','math',0.57,0.51,@classifyAttempts,2
                 throw new Exception("FUZZ_FAIL measurement foundation contract: " + q.TemplateId);
             if (IsMeasurementPracticeTemplate(q.TemplateId) && !ValidateMeasurementPracticeContract(q))
                 throw new Exception("FUZZ_FAIL measurement practice contract: " + q.TemplateId);
+            if (IsNumberReadWriteTemplate(q.TemplateId) && !ValidateNumberReadWriteContract(q))
+                throw new Exception("FUZZ_FAIL number read/write contract: " + q.TemplateId);
             if (q.TemplateId.StartsWith("word_problem_", StringComparison.Ordinal) && q.TemplateId != "word_problem_select_operation_one_step" && !ValidateWordProblemContract(q))
                 throw new Exception("FUZZ_FAIL word problem relation contract: " + q.TemplateId);
         }
@@ -974,6 +1012,46 @@ VALUES(@child,'DATA_COLLECT_CLASSIFY_COUNT','math',0.57,0.51,@classifyAttempts,2
             return value.Length > 0;
         }
 
+        private static bool IsNumberReadWriteTemplate(string templateId)
+        {
+            return templateId == "count_place_value_to_1000" || templateId == "read_number_to_1000" || templateId == "write_number_to_1000";
+        }
+
+        private static bool ValidateNumberReadWriteContract(MathQuestion q)
+        {
+            if (q == null || q.DisplayChoices == null || q.DisplayChoices.Count != 4) return false;
+            var parts = (q.IllustrationData ?? string.Empty).Split('|');
+            if (q.TemplateId == "count_place_value_to_1000")
+            {
+                int h, t, o;
+                return !q.UsesTextChoices && q.Representation == "base10_count" && parts.Length == 4 && parts[0] == "base10count" &&
+                       int.TryParse(parts[1], out h) && int.TryParse(parts[2], out t) && int.TryParse(parts[3], out o) &&
+                       h >= 0 && h <= 9 && t >= 0 && t <= 9 && o >= 0 && o <= 9 && h + t + o > 0 &&
+                       q.CorrectAnswer == h * 100 + t * 10 + o && q.Choices.Count == 4 && q.Choices.All(x => x >= 0 && x <= 1000);
+            }
+            if (q.TemplateId == "read_number_to_1000")
+            {
+                int value;
+                return q.UsesTextChoices && q.Representation == "number_word_card" && parts.Length == 3 && parts[0] == "numberword" && parts[1] == "read" &&
+                       int.TryParse(parts[2], out value) && value >= 0 && value <= 1000 && q.PromptVi.Contains(value.ToString(CultureInfo.InvariantCulture)) &&
+                       q.CorrectAnswerDisplay == NumberWordsForSmoke(value) && q.DisplayChoices.Distinct(StringComparer.Ordinal).Count() == 4;
+            }
+            if (q.TemplateId == "write_number_to_1000")
+            {
+                return !q.UsesTextChoices && q.Representation == "number_word_card" && q.IllustrationData == "numberword|write" &&
+                       q.CorrectAnswer >= 0 && q.CorrectAnswer <= 1000 && q.PromptVi.Contains(NumberWordsForSmoke(q.CorrectAnswer)) &&
+                       q.Choices.Count == 4 && q.Choices.All(x => x >= 0 && x <= 1000);
+            }
+            return false;
+        }
+
+        private static string NumberWordsForSmoke(int value)
+        {
+            var method = typeof(MathQuestionGenerator).GetMethod("NumberToVietnamese", BindingFlags.NonPublic | BindingFlags.Static);
+            if (method == null) throw new Exception("NumberToVietnamese reflection target missing");
+            return method.Invoke(null, new object[] { value }) as string;
+        }
+
         private static bool ValidateWordProblemContract(MathQuestion q)
         {
             if (q == null || q.UsesTextChoices || q.Representation != "word_problem_model") return false;
@@ -1080,6 +1158,8 @@ VALUES(@child,'DATA_COLLECT_CLASSIFY_COUNT','math',0.57,0.51,@classifyAttempts,2
             if (templateId == "measurement_convert_calculate_learned_units") return "measurement_calc";
             if (templateId == "measurement_real_world_one_step") return "measurement_word_model";
             if (templateId == "data_collect_classify_count") return "classify_count";
+            if (templateId == "count_place_value_to_1000") return "base10_count";
+            if (templateId == "read_number_to_1000" || templateId == "write_number_to_1000") return "number_word_card";
             if (templateId == "place_value_decompose_3digit" || templateId == "expanded_form_3digit") return "place_value_blocks";
             if (templateId == "predecessor_successor" || templateId == "compare_two_numbers_1000") return "number_line_1000";
             if (templateId == "mental_add_within_20" || templateId == "mental_sub_within_20") return "number_ray";

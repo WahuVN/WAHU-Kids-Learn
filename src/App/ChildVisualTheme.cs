@@ -248,7 +248,11 @@ namespace WAHUKidsLearn
             if (_question == null || Width < 80 || Height < 40) return;
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             var values = ExtractNumbers(_question.PromptVi);
-            if (_question.Representation == "ruler_cm")
+            if (_question.Representation == "base10_count")
+                DrawBase10Count(e.Graphics);
+            else if (_question.Representation == "number_word_card")
+                DrawNumberWordCard(e.Graphics);
+            else if (_question.Representation == "ruler_cm")
                 DrawRulerCm(e.Graphics);
             else if (_question.Representation == "common_scale")
                 DrawCommonScale(e.Graphics);
@@ -307,6 +311,82 @@ namespace WAHUKidsLearn
                 DrawPlaceValue(e.Graphics, values);
             else if (_question.TemplateId == "polyline_length")
                 DrawPolyline(e.Graphics, values);
+        }
+
+        private void DrawBase10Count(Graphics g)
+        {
+            var parts = (_question.IllustrationData ?? string.Empty).Split('|');
+            int h, t, o;
+            if (parts.Length != 4 || parts[0] != "base10count" || !int.TryParse(parts[1], out h) || !int.TryParse(parts[2], out t) || !int.TryParse(parts[3], out o)) return;
+            var stage = new Rectangle(Width / 2 - 235, 8, 470, Math.Max(92, Height - 16));
+            using (var path = ChildVisualTheme.RoundedRect(stage, 14))
+            using (var fill = new SolidBrush(Color.FromArgb(248, 250, 244)))
+            using (var border = new Pen(Color.FromArgb(213, 221, 207), 1.2f))
+            { g.FillPath(fill, path); g.DrawPath(border, path); }
+            var colW = stage.Width / 3;
+            var labels = new[] { "TRĂM", "CHỤC", "ĐƠN VỊ" };
+            for (var c = 0; c < 3; c++)
+                DrawCentered(g, labels[c], new Rectangle(stage.Left + c * colW, stage.Top + 5, colW, 18), ChildVisualTheme.MutedInk, 7.8f);
+            using (var pen = new Pen(Color.FromArgb(134, 158, 147), 1.4f))
+            using (var fill = new SolidBrush(Color.FromArgb(220, 237, 213)))
+            {
+                for (var i = 0; i < h; i++)
+                {
+                    var x = stage.Left + 18 + (i % 3) * 31;
+                    var y = stage.Top + 30 + (i / 3) * 31;
+                    g.FillRectangle(fill, x, y, 23, 23);
+                    g.DrawRectangle(pen, x, y, 23, 23);
+                    for (var k = 1; k < 5; k++)
+                    { g.DrawLine(pen, x + k * 23 / 5, y, x + k * 23 / 5, y + 23); g.DrawLine(pen, x, y + k * 23 / 5, x + 23, y + k * 23 / 5); }
+                }
+                for (var i = 0; i < t; i++)
+                {
+                    var x = stage.Left + colW + 34 + (i % 5) * 17;
+                    var y = stage.Top + 31 + (i / 5) * 50;
+                    g.FillRectangle(fill, x, y, 10, 43);
+                    g.DrawRectangle(pen, x, y, 10, 43);
+                    for (var k = 1; k < 5; k++) g.DrawLine(pen, x, y + k * 43 / 5, x + 10, y + k * 43 / 5);
+                }
+                for (var i = 0; i < o; i++)
+                {
+                    var x = stage.Left + 2 * colW + 35 + (i % 3) * 28;
+                    var y = stage.Top + 36 + (i / 3) * 28;
+                    g.FillEllipse(fill, x, y, 15, 15);
+                    g.DrawEllipse(pen, x, y, 15, 15);
+                }
+            }
+            if (_hintLevel >= 1)
+                DrawCentered(g, h + " trăm · " + t + " chục · " + o + " đơn vị", new Rectangle(stage.Left, stage.Bottom - 23, stage.Width, 18), ChildVisualTheme.PeachStrong, 8.2f);
+        }
+
+        private void DrawNumberWordCard(Graphics g)
+        {
+            var parts = (_question.IllustrationData ?? string.Empty).Split('|');
+            if (parts.Length < 2 || parts[0] != "numberword") return;
+            var stage = new Rectangle(Width / 2 - 210, Height / 2 - 47, 420, 92);
+            using (var path = ChildVisualTheme.RoundedRect(stage, 18))
+            using (var fill = new SolidBrush(Color.FromArgb(246, 249, 241)))
+            using (var border = new Pen(Color.FromArgb(191, 207, 183), 1.2f))
+            { g.FillPath(fill, path); g.DrawPath(border, path); }
+            if (parts[1] == "read" && parts.Length >= 3)
+            {
+                DrawCentered(g, parts[2], new Rectangle(stage.Left, stage.Top + 8, stage.Width, 46), ChildVisualTheme.Ink, 21f);
+                DrawCentered(g, "ĐỌC SỐ", new Rectangle(stage.Left, stage.Bottom - 29, stage.Width, 18), ChildVisualTheme.MutedInk, 8f);
+            }
+            else
+            {
+                DrawCentered(g, "TỪ CÁCH ĐỌC → VIẾT SỐ", new Rectangle(stage.Left, stage.Top + 8, stage.Width, 22), ChildVisualTheme.Ink, 9f);
+                var colW = stage.Width / 3;
+                var labels = new[] { "TRĂM", "CHỤC", "ĐƠN VỊ" };
+                for (var i = 0; i < 3; i++)
+                {
+                    var rect = new Rectangle(stage.Left + i * colW + 12, stage.Top + 37, colW - 24, 36);
+                    using (var p = ChildVisualTheme.RoundedRect(rect, 10))
+                    using (var b = new SolidBrush(Color.White))
+                    using (var border = new Pen(Color.FromArgb(211, 218, 205), 1f)) { g.FillPath(b, p); g.DrawPath(border, p); }
+                    DrawCentered(g, _hintLevel >= 2 ? labels[i] : "?", rect, _hintLevel >= 2 ? ChildVisualTheme.PeachStrong : ChildVisualTheme.Ink, 9f);
+                }
+            }
         }
 
         private void DrawRulerCm(Graphics g)

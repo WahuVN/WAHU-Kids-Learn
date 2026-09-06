@@ -82,6 +82,9 @@ namespace WAHU.Learning
                     case "measurement_convert_calculate_learned_units": question = MeasurementConvertCalculate(decision.Template); break;
                     case "measurement_real_world_one_step": question = MeasurementRealWorldOneStep(decision.Template); break;
                     case "data_collect_classify_count": question = DataCollectClassifyCount(decision.Template); break;
+                    case "count_place_value_to_1000": question = CountPlaceValueTo1000(decision.Template); break;
+                    case "read_number_to_1000": question = ReadNumberTo1000(decision.Template); break;
+                    case "write_number_to_1000": question = WriteNumberTo1000(decision.Template); break;
                     default: throw new InvalidOperationException("Unsupported VERIFIED math template: " + decision.Template.TemplateId);
                 }
             }
@@ -563,6 +566,127 @@ namespace WAHU.Learning
                 "Phép tính phù hợp là " + total + " : " + divisor + ".");
             question.IllustrationData = "wordshare|" + total + "|" + divisor;
             return question;
+        }
+
+        private MathQuestion CountPlaceValueTo1000(MathTemplateRef template)
+        {
+            var h = _random.Next(0, 10);
+            var t = _random.Next(0, 10);
+            var o = _random.Next(0, 10);
+            if (h == 0 && t == 0 && o == 0) o = 1;
+            var value = h * 100 + t * 10 + o;
+            var distractors = new HashSet<int> { value };
+            foreach (var candidate in new[]
+            {
+                t * 100 + h * 10 + o,
+                h * 100 + o * 10 + t,
+                Math.Min(1000, value + 100),
+                Math.Max(0, value - 100),
+                Math.Min(1000, value + 10),
+                Math.Max(0, value - 10),
+                Math.Min(1000, value + 1),
+                Math.Max(0, value - 1)
+            })
+            {
+                if (candidate >= 0 && candidate <= 1000) distractors.Add(candidate);
+                if (distractors.Count >= 4) break;
+            }
+            for (var candidate = 0; distractors.Count < 4 && candidate <= 1000; candidate++) distractors.Add(candidate);
+            var question = NewNumericQuestion(template,
+                "Quan sát mô hình khối trăm, thanh chục và ô đơn vị. Số nào được biểu diễn?", value,
+                "Đếm riêng số trăm, số chục và số đơn vị.",
+                h + " trăm, " + t + " chục, " + o + " đơn vị.");
+            question.Choices = Shuffle(distractors.Take(4).ToList());
+            question.IllustrationData = "base10count|" + h + "|" + t + "|" + o;
+            return question;
+        }
+
+        private MathQuestion ReadNumberTo1000(MathTemplateRef template)
+        {
+            var value = _random.Next(0, 1001);
+            var correct = NumberToVietnamese(value);
+            var candidates = NearbyNumberCandidates(value);
+            var choices = new List<string> { correct };
+            foreach (var candidate in candidates)
+            {
+                AddUnique(choices, NumberToVietnamese(candidate));
+                if (choices.Count >= 4) break;
+            }
+            var question = NewTextQuestion(template,
+                "Số " + value + " đọc là:", correct, TakeAndShuffle(choices, 4),
+                "Đọc từ hàng trăm đến hàng chục rồi hàng đơn vị.",
+                "Chú ý cách đọc mốt, tư, lăm và linh khi phù hợp.");
+            question.IllustrationData = "numberword|read|" + value;
+            return question;
+        }
+
+        private MathQuestion WriteNumberTo1000(MathTemplateRef template)
+        {
+            var value = _random.Next(0, 1001);
+            var words = NumberToVietnamese(value);
+            var choices = NearbyNumberCandidates(value).Take(3).Concat(new[] { value }).Distinct().Take(4).ToList();
+            while (choices.Count < 4)
+            {
+                var candidate = _random.Next(0, 1001);
+                if (!choices.Contains(candidate)) choices.Add(candidate);
+            }
+            var question = NewNumericQuestion(template,
+                "Viết số: " + words + ".", value,
+                "Tách cách đọc thành hàng trăm, hàng chục và hàng đơn vị.",
+                "Ghép các chữ số đúng theo từng hàng rồi viết số.");
+            question.Choices = Shuffle(choices);
+            question.IllustrationData = "numberword|write";
+            return question;
+        }
+
+        private IList<int> NearbyNumberCandidates(int value)
+        {
+            var values = new List<int>();
+            foreach (var candidate in new[]
+            {
+                value + 1, value - 1, value + 10, value - 10, value + 100, value - 100,
+                (value / 100) * 100 + (value % 10) * 10 + ((value / 10) % 10)
+            })
+            {
+                if (candidate >= 0 && candidate <= 1000 && candidate != value && !values.Contains(candidate)) values.Add(candidate);
+            }
+            for (var candidate = 0; values.Count < 6 && candidate <= 1000; candidate += 7)
+                if (candidate != value && !values.Contains(candidate)) values.Add(candidate);
+            return values;
+        }
+
+        private static string NumberToVietnamese(int value)
+        {
+            if (value < 0 || value > 1000) throw new ArgumentOutOfRangeException("value");
+            if (value == 1000) return "một nghìn";
+            if (value == 0) return "không";
+            var units = new[] { "không", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín" };
+            var hundreds = value / 100;
+            var remainder = value % 100;
+            if (hundreds == 0) return TwoDigitVietnamese(remainder, units);
+            var text = units[hundreds] + " trăm";
+            if (remainder == 0) return text;
+            if (remainder < 10) return text + " linh " + units[remainder];
+            return text + " " + TwoDigitVietnamese(remainder, units);
+        }
+
+        private static string TwoDigitVietnamese(int value, string[] units)
+        {
+            if (value < 10) return units[value];
+            var tens = value / 10;
+            var ones = value % 10;
+            if (tens == 1)
+            {
+                if (ones == 0) return "mười";
+                if (ones == 5) return "mười lăm";
+                return "mười " + units[ones];
+            }
+            var text = units[tens] + " mươi";
+            if (ones == 0) return text;
+            if (ones == 1) return text + " mốt";
+            if (ones == 4) return text + " tư";
+            if (ones == 5) return text + " lăm";
+            return text + " " + units[ones];
         }
 
         private MathQuestion MeasureWithRulerCm(MathTemplateRef template)
@@ -1167,6 +1291,11 @@ namespace WAHU.Learning
                     return "measurement_word_model";
                 case "data_collect_classify_count":
                     return "classify_count";
+                case "count_place_value_to_1000":
+                    return "base10_count";
+                case "read_number_to_1000":
+                case "write_number_to_1000":
+                    return "number_word_card";
                 default:
                     return "symbolic";
             }

@@ -37,6 +37,9 @@ namespace WAHU.ChildUiRuntimeSmoke
         {
             var cases = new[]
             {
+                QV("count_place_value_to_1000", "NUM_COUNT_READ_WRITE_0_1000", "Quan sát mô hình khối trăm, thanh chục và ô đơn vị.", "472", "base10count|4|7|2", "base10_count"),
+                QV("read_number_to_1000", "NUM_COUNT_READ_WRITE_0_1000", "Số 472 đọc là:", "bốn trăm bảy mươi hai", "numberword|read|472", "number_word_card"),
+                QV("write_number_to_1000", "NUM_COUNT_READ_WRITE_0_1000", "Viết số: bốn trăm bảy mươi hai.", "472", "numberword|write", "number_word_card"),
                 QV("measure_with_ruler_cm", "MEASURE_WITH_RULER_CM", "Quan sát thước. Đoạn AB dài bao nhiêu xăng-ti-mét?", "7 cm", "rulercm|2|9", "ruler_cm"),
                 QV("measure_with_common_scale", "MEASURE_WITH_COMMON_SCALE", "Quan sát thang đo. Mũi tên đang chỉ giá trị nào?", "12", "commonscale|0|20|2|12", "common_scale"),
                 QV("measurement_convert_calculate_learned_units", "MEASUREMENT_CONVERT_CALCULATE_LEARNED_UNITS", "3 m bằng bao nhiêu dm?", "30 dm", "unitcalc|convert_m_dm|3|30", "measurement_calc"),

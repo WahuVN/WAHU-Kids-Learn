@@ -707,6 +707,24 @@
                           "skill":  "DATA_COLLECT_CLASSIFY_COUNT",
                           "status":  "VERIFIED_A_TEMPLATE",
                           "prompt_vi":  "Quan sát tập dữ liệu, phân loại theo hình dạng và đếm số phần tử của một nhóm."
+                      },
+                      {
+                          "id":  "count_place_value_to_1000",
+                          "skill":  "NUM_COUNT_READ_WRITE_0_1000",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Đếm mô hình trăm, chục, đơn vị và chọn số được biểu diễn."
+                      },
+                      {
+                          "id":  "read_number_to_1000",
+                          "skill":  "NUM_COUNT_READ_WRITE_0_1000",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Đọc số trong phạm vi 1000."
+                      },
+                      {
+                          "id":  "write_number_to_1000",
+                          "skill":  "NUM_COUNT_READ_WRITE_0_1000",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Viết số trong phạm vi 1000 từ cách đọc bằng chữ."
                       }
                   ]
 }

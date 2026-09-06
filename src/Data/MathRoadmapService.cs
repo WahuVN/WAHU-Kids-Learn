@@ -72,7 +72,7 @@ FROM child_skill WHERE child_id=@child AND subject='math';";
                         if (skill == "PLACE_VALUE_HUNDREDS_TENS_ONES" || skill == "NUM_EXPANDED_FORM_HTO" ||
                             skill == "NUM_PREDECESSOR_SUCCESSOR" || skill == "NUM_COMPARE_0_1000" ||
                             skill == "NUM_FULL_HUNDREDS_RECOGNIZE" || skill == "NUMBER_RAY_FILL" ||
-                            skill == "NUM_MIN_MAX_UP_TO_4" || skill == "NUM_SORT_UP_TO_4")
+                            skill == "NUM_MIN_MAX_UP_TO_4" || skill == "NUM_SORT_UP_TO_4" || skill == "NUM_COUNT_READ_WRITE_0_1000")
                             Add(numberSense, ref numberSenseScore, mastery, attempts);
                         else if (skill == "MENTAL_ADD_SUB_WITHIN_20")
                             Add(mental, ref mentalScore, mastery, attempts);

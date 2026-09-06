@@ -1,7 +1,7 @@
 {
     "schema_version":  1,
     "pack_id":  "math_grade2_verified_templates_v1",
-    "version":  "1.6.0",
+    "version":  "1.7.0",
     "subject":  "math",
     "grade":  2,
     "status":  "VERIFIED",
@@ -9,7 +9,7 @@
     "files":  [
                   {
                       "path":  "verified_templates_v1.json",
-                      "sha256":  "BC3785F6BAEA04BFA20BD8878ED92AFA9D1C89EBBFFE88D076A0B9B4F1435EFE"
+                      "sha256":  "D09B73287810BF10F6718AD787F83752146984A1BE9B4D5C750FCCB5DA72AD9A"
                   }
               ]
 }
