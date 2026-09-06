@@ -197,26 +197,37 @@ Upstream retry contract: `7c9a9ea`.
 - Choice retry E2E dùng lesson root `m2_ls_point_recognize`, xác nhận first-try sai không reveal đáp án đúng và final retry mới khóa choices.
 - Interaction retry E2E hoàn thành prerequisite chain `POINT_RECOGNIZE → LINE_SEGMENT_RECOGNIZE` qua UI thật, sau đó authored medium `m2_q_draw_segment_given_length_02` sai độ dài → redraw → retry đúng → thước khóa sau final.
 
-## 11. Verification gates
+## 11. AI3-009 — exact retry-resume UI regression
 
-Current clean HEAD `40dc075` + đúng 2 file AI3-008:
+Test-only wave khóa presentation/lifecycle khi đóng app đúng lúc đang ở attempt 2:
 
-- Clean Data SDK x86/net48 source-equivalent build: **PASS — 0 warning / 0 error**.
-- Clean Session SDK x86/net48 source-equivalent build: **PASS — 0 warning / 0 error**.
-- App Release x86 targeted build: **PASS**.
-- ChildUiRuntimeSmoke: **PASS — 1522 assertions**.
-- MathSessionPersistenceRuntimeSmoke: **PASS — 158 assertions**.
-- MathContentDataSmoke: **PASS — 29/29**.
+- first form trả lời sai authored choice ở attempt 1 rồi `Suspend` với retry pending;
+- second form mở lại cùng lesson phải restore đúng authored `ContentQuestionId`;
+- `_retryPending=true`, progress label có `thử lại`, support text nói rõ đang tiếp tục lần thử lại của cùng câu;
+- answer choices sau restore vẫn idle/enabled và không reveal đáp án đúng;
+- retry đúng sau resume finalize đúng một question với `Attempts=1`, `AnswerAttempts=2`, `RetriedQuestions=1`, `RetriedCorrect=1`, `IndependentCorrect=0`;
+- test cleanup abort session sau khi đã xác minh durable retry lifecycle.
+
+Clean detached `c08c7cf`: Child UI **1534 assertions PASS**, persistence **171 assertions PASS**, content **30/30 PASS**.
+
+## 12. Verification gates
+
+Current clean HEAD `c08c7cf` + đúng 1 file AI3-009:
+
+- App/Data/Session/Learning/Content source không đổi từ AI3-008 clean artifacts; `c08c7cf` chỉ đổi content data/validator.
+- ChildUiRuntimeSmoke: **PASS — 1534 assertions**.
+- MathSessionPersistenceRuntimeSmoke: **PASS — 171 assertions**.
+- MathContentDataSmoke: **PASS — 30/30**.
 - `git diff --check`: **PASS**.
 - 67/67 lesson-detail/access sweep: **PASS**.
 - 201/201 authored answer-surface sweep: **PASS**.
 - Retry typed/choice/authored-interaction E2E: **PASS**.
+- Exact retry-resume UI E2E: **PASS**.
 - Request 007 corrupt-medium ordinal recovery có regression chính thức tại `7f79367`.
-- Retry/first-try engine contract `7c9a9ea` đã được AI3-008 consume; current clean engine còn có mastery race regression đến `641b7b4`.
-- Data/Session source không đổi từ clean artifact build `641b7b4` đến content-only HEAD `40dc075`; Child UI/persistence được rerun với content/prerequisite mới.
+- Retry/first-try engine contract `7c9a9ea` đã được AI3-008/009 consume; clean persistence suite hiện 171 assertions.
 - Generated `draw_segment_given_length` vẫn chỉ ở WIP AI2; chưa coi P1-02 CLOSED trước upstream commit.
 
-## 12. Remaining blockers
+## 13. Remaining blockers
 
 ### P1-01 — production Data/SQLite clean build
 
@@ -236,7 +247,7 @@ Static audit tại HEAD:
 - Artifact mới nhất hiện có `0.1.41-dev` là build từ `e299c41`, database schema 2. Publish tree + portable ZIP có verified templates nhưng thiếu lesson catalog, question bank và schema V4; artifact này là **STALE**, không phải release evidence cho Math hiện tại.
 - Request 008 đã mở cho release lane: hard-guard đủ ba Math runtime JSON và rebuild artifact schema V4; sau đó chạy portable/installer upgrade E2E giữ learner DB/lesson progress.
 
-## 13. Next AI3 actions
+## 14. Next AI3 actions
 
 1. Theo dõi release lane đóng Request 008 và production SQLite build blocker; không sửa `tools/build/*` khi đang có owner/WIP khác.
 2. Khi có artifact schema V4 mới, chạy portable/installer Math payload + relaunch/reinstall regression.
