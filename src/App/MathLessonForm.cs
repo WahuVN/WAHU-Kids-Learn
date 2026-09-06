@@ -13,10 +13,14 @@ namespace WAHUKidsLearn
     {
         private readonly LearningDatabase _database;
         private readonly RuntimePerformanceSettings _performance;
+        private readonly string _targetLessonId;
         private MathSessionCoordinator _coordinator;
         private MathQuestion _question;
         private readonly AnswerChoiceButton[] _answerButtons = new AnswerChoiceButton[4];
         private TableLayoutPanel _answerGrid;
+        private TableLayoutPanel _typedAnswerLayout;
+        private TextBox _typedAnswerBox;
+        private ChildActionButton _typedSubmitButton;
         private TableLayoutPanel _interactiveAnswerLayout;
         private SegmentDrawingAnswerControl _interactiveAnswer;
         private ChildActionButton _interactiveSubmitButton;
@@ -40,9 +44,15 @@ namespace WAHUKidsLearn
         private bool _completeOnNext;
 
         public MathLessonForm(LearningDatabase database, RuntimePerformanceSettings performance)
+            : this(database, performance, null)
+        {
+        }
+
+        internal MathLessonForm(LearningDatabase database, RuntimePerformanceSettings performance, string targetLessonId)
         {
             _database = database ?? throw new ArgumentNullException("database");
             _performance = performance;
+            _targetLessonId = string.IsNullOrWhiteSpace(targetLessonId) ? null : targetLessonId.Trim();
             Text = "WAHU Kids Learn — Toán lớp 2";
             StartPosition = FormStartPosition.CenterParent;
             MinimumSize = new Size(900, 640);
@@ -199,6 +209,52 @@ namespace WAHUKidsLearn
             }
             var answerHost = new Panel { Dock = DockStyle.Fill, BackColor = Color.Transparent };
             answerHost.Controls.Add(_answerGrid);
+
+            _typedAnswerLayout = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                ColumnCount = 3,
+                RowCount = 2,
+                Padding = new Padding(72, 16, 72, 12),
+                Visible = false
+            };
+            _typedAnswerLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 18));
+            _typedAnswerLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 64));
+            _typedAnswerLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 18));
+            _typedAnswerLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 58));
+            _typedAnswerLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 42));
+            _typedAnswerBox = new TextBox
+            {
+                Dock = DockStyle.Fill,
+                Margin = new Padding(8, 12, 8, 10),
+                Font = ChildVisualTheme.Font(22f, FontStyle.Bold),
+                TextAlign = HorizontalAlignment.Center,
+                MaxLength = 80,
+                AccessibleName = "Nhập đáp án Toán",
+                AccessibleDescription = "Nhập đáp án rồi nhấn Enter hoặc nút Kiểm tra đáp án."
+            };
+            _typedAnswerBox.TextChanged += delegate
+            {
+                if (_typedSubmitButton != null)
+                    _typedSubmitButton.Enabled = !_submitting && !string.IsNullOrWhiteSpace(_typedAnswerBox.Text);
+            };
+            _typedSubmitButton = new ChildActionButton
+            {
+                Dock = DockStyle.Fill,
+                Margin = new Padding(8, 5, 8, 3),
+                Text = "Kiểm tra đáp án",
+                FillColor = ChildVisualTheme.MintStrong,
+                HoverColor = Color.FromArgb(90, 156, 103),
+                PressedColor = Color.FromArgb(75, 139, 88),
+                Font = ChildVisualTheme.Font(10.5f, FontStyle.Bold),
+                Radius = 16,
+                AccessibleName = "Kiểm tra đáp án đã nhập",
+                Enabled = false
+            };
+            _typedSubmitButton.Click += delegate { SubmitTypedAnswer("mouse"); };
+            _typedAnswerLayout.Controls.Add(_typedAnswerBox, 1, 0);
+            _typedAnswerLayout.Controls.Add(_typedSubmitButton, 1, 1);
+            answerHost.Controls.Add(_typedAnswerLayout);
             _interactiveAnswerLayout = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -313,8 +369,12 @@ namespace WAHUKidsLearn
                     "content_packs", "math_grade2_v1", "verified_templates_v1.json");
                 var profile = _performance == null ? "LOW" : _performance.Profile.ToString();
                 var seed = unchecked(Environment.TickCount ^ DateTime.UtcNow.Millisecond ^ GetHashCode());
-                _coordinator = new MathSessionCoordinator(_database, templatePath, profile, seed);
+                _coordinator = string.IsNullOrWhiteSpace(_targetLessonId)
+                    ? new MathSessionCoordinator(_database, templatePath, profile, seed)
+                    : new MathSessionCoordinator(_database, templatePath, profile, seed, _targetLessonId);
                 var started = _coordinator.Start("Bé học");
+                if (string.Equals(started.SessionMode, "lesson", StringComparison.Ordinal) && !string.IsNullOrWhiteSpace(started.TargetLessonTitleVi))
+                    Text = "WAHU Kids Learn — " + started.TargetLessonTitleVi;
                 _targetQuestionCount = Math.Max(1, started.TargetQuestionCount);
                 _progressBar.Maximum = _targetQuestionCount;
                 _progressBar.Value = Math.Min(_targetQuestionCount, Math.Max(0, started.CompletedQuestionCount));
@@ -385,6 +445,8 @@ namespace WAHUKidsLearn
                     ? "Mình tiếp tục buổi Toán đang học dở nhé."
                     : "Buổi Toán trước vẫn còn. Mình tiếp tục từ đây nhé.";
             }
+            if (string.Equals(started.SessionMode, "lesson", StringComparison.Ordinal))
+                return "Bài này có " + Math.Max(1, started.TargetQuestionCount) + " câu luyện tập. Mình làm lần lượt nhé.";
             if (started.RecoveredDanglingSessions > 0)
                 return "Buổi trước đã được lưu an toàn. Mình bắt đầu nhiệm vụ mới nhé.";
             return null;
@@ -395,12 +457,30 @@ namespace WAHUKidsLearn
             return question != null && string.Equals(question.AnswerKind, "interaction_integer", StringComparison.Ordinal);
         }
 
+        private static bool UsesTypedAnswer(MathQuestion question)
+        {
+            if (question == null || UsesInteractiveAnswer(question)) return false;
+            var choices = question.DisplayChoices;
+            return choices == null || choices.Count == 0;
+        }
+
+        private static string TypedAnswerSupport(MathQuestion question)
+        {
+            if (question == null) return "Nhập đáp án rồi bấm Kiểm tra đáp án.";
+            if (string.Equals(question.AnswerKind, "unit", StringComparison.Ordinal))
+                return "Nhập kết quả kèm đơn vị, ví dụ: 5 kg.";
+            if (string.Equals(question.AnswerKind, "expression", StringComparison.Ordinal))
+                return "Nhập kết quả hoặc một biểu thức số tương đương.";
+            return "Nhập đáp án rồi bấm Kiểm tra đáp án.";
+        }
+
         private void ConfigureAnswerInput(MathQuestion question)
         {
             if (question == null) throw new ArgumentNullException("question");
             if (UsesInteractiveAnswer(question))
             {
                 _answerGrid.Visible = false;
+                _typedAnswerLayout.Visible = false;
                 _interactiveAnswerLayout.Visible = true;
                 _interactiveAnswer.SetQuestion(question);
                 _interactiveAnswer.SetHintLevel(0);
@@ -411,11 +491,26 @@ namespace WAHUKidsLearn
                 return;
             }
 
+            if (UsesTypedAnswer(question))
+            {
+                _answerGrid.Visible = false;
+                _interactiveAnswerLayout.Visible = false;
+                _typedAnswerLayout.Visible = true;
+                _typedAnswerBox.Text = string.Empty;
+                _typedAnswerBox.Enabled = true;
+                _typedSubmitButton.Enabled = false;
+                _support.Text = TypedAnswerSupport(question);
+                _typedAnswerBox.AccessibleDescription = _support.Text + " Nhấn Enter để kiểm tra.";
+                _typedAnswerBox.Focus();
+                return;
+            }
+
+            _typedAnswerLayout.Visible = false;
             _interactiveAnswerLayout.Visible = false;
             _answerGrid.Visible = true;
             var displayChoices = question.DisplayChoices;
             if (displayChoices == null || displayChoices.Count < 2 || displayChoices.Count > _answerButtons.Length)
-                throw new InvalidDataException("Math question must expose 2 to 4 display choices.");
+                throw new InvalidDataException("Math choice question must expose 2 to 4 display choices.");
             ConfigureAnswerLayout(displayChoices.Count);
             for (var i = 0; i < _answerButtons.Length; i++)
             {
@@ -488,6 +583,41 @@ namespace WAHUKidsLearn
             _hintButton.Text = "Đã xem đủ gợi ý";
         }
 
+        private void SubmitTypedAnswer(string inputMode)
+        {
+            if (_question == null || !UsesTypedAnswer(_question) || _submitting || string.IsNullOrWhiteSpace(_typedAnswerBox.Text)) return;
+            _submitting = true;
+            _typedAnswerBox.Enabled = false;
+            _typedSubmitButton.Enabled = false;
+            _hintButton.Enabled = false;
+            try
+            {
+                var outcome = _coordinator.SubmitAnswer(_typedAnswerBox.Text.Trim(), _hintLevel, inputMode);
+                _feedback.Text = outcome.FeedbackVi;
+                _companion.State = outcome.SuggestPositiveEnd ? CompanionReactionState.Tired :
+                    (outcome.IsCorrect ? CompanionReactionState.Correct : CompanionReactionState.TryAgain);
+                _feedbackCard.CardColor = outcome.IsCorrect ? Color.FromArgb(226, 242, 224) : Color.FromArgb(251, 232, 222);
+                _feedbackCard.BorderColor = outcome.IsCorrect ? Color.FromArgb(190, 221, 188) : Color.FromArgb(236, 202, 187);
+                _feedbackCard.Visible = true;
+                _support.Text = outcome.IsCorrect
+                    ? "Tốt rồi. Câu trả lời này đã được lưu để lần sau ôn đúng lúc."
+                    : "Đáp án đúng: " + outcome.CorrectAnswerDisplay + ". Câu sau sẽ giúp con luyện tiếp phần này.";
+                _progressText.Text = "Đã làm " + outcome.CompletedQuestionCount + " / " + outcome.TargetQuestionCount;
+                _progressBar.Value = outcome.CompletedQuestionCount;
+                _hintButton.Visible = false;
+                _nextButton.Visible = true;
+                _completeOnNext = outcome.SuggestPositiveEnd || outcome.CompletedQuestionCount >= outcome.TargetQuestionCount;
+                _nextButton.Text = outcome.SuggestPositiveEnd ? "Nghỉ ở đây" :
+                    (outcome.CompletedQuestionCount >= outcome.TargetQuestionCount ? "Xem kết quả" : "Câu tiếp theo");
+                if (outcome.SuggestPositiveEnd)
+                    _support.Text = "Con đã cố gắng đủ cho lúc này. Có thể nghỉ ở đây và học tiếp lần sau.";
+                _nextButton.Focus();
+            }
+            catch
+            {
+                FailCurrentSession("Không thể lưu câu vừa làm. Buổi học sẽ dừng để bảo vệ dữ liệu.");
+            }
+        }
         private void SubmitInteractiveAnswer(string inputMode)
         {
             if (_question == null || !UsesInteractiveAnswer(_question) || _submitting || !_interactiveAnswer.HasAnswer) return;
@@ -626,15 +756,25 @@ namespace WAHUKidsLearn
             var hinted = Math.Max(0, Math.Min(correct, summary.HintedCorrect));
             var independent = Math.Max(0, correct - hinted);
             var needsPractice = Math.Max(0, Math.Min(Math.Max(0, attempts - correct), summary.Wrong));
-            return "Đã làm " + attempts + " câu · Tự làm đúng " + independent +
+            var details = "Đã làm " + attempts + " câu · Tự làm đúng " + independent +
                 " · Đúng nhờ gợi ý " + hinted + " · Cần luyện lại " + needsPractice;
+            if (summary.LessonCompleted && summary.LessonScorePercent.HasValue)
+            {
+                var score = Math.Max(0, Math.Min(100, Math.Round(summary.LessonScorePercent.Value)));
+                var best = summary.LessonBestScorePercent.HasValue
+                    ? Math.Max(0, Math.Min(100, Math.Round(summary.LessonBestScorePercent.Value)))
+                    : score;
+                return "Điểm bài " + score + "% · Tốt nhất " + best + "% · " + details;
+            }
+            return details;
         }
 
         private static string BuildCompletionSupportText(MathSessionSummary summary)
         {
             if (summary == null) return "Các câu đã làm được lưu an toàn. Mình về thư viện Toán nhé.";
             var skills = Math.Max(0, summary.DistinctSkills);
-            var text = "Con đã luyện " + skills + " kỹ năng trong nhiệm vụ này.";
+            var context = string.Equals(summary.SessionMode, "lesson", StringComparison.Ordinal) ? "bài này" : "nhiệm vụ này";
+            var text = "Con đã luyện " + skills + " kỹ năng trong " + context + ".";
             if (summary.GardenGrowthSteps > 0)
                 text += " Khu vườn đã ghi nhận tiến bộ của con.";
             if (!string.IsNullOrWhiteSpace(summary.GardenUnlockMessage))
@@ -654,7 +794,8 @@ namespace WAHUKidsLearn
                 summary == null ? null : summary.NextGardenMilestoneItemId);
             _completionVisual.Visible = true;
             _companion.State = CompanionReactionState.Celebrate;
-            _prompt.Text = "Hoàn thành nhiệm vụ";
+            _prompt.Text = summary != null && string.Equals(summary.SessionMode, "lesson", StringComparison.Ordinal)
+                ? "Hoàn thành bài học" : "Hoàn thành nhiệm vụ";
             _support.Text = BuildCompletionSupportText(summary);
             _support.AccessibleName = "Tóm tắt tiến bộ: " + _support.Text;
             _feedback.Text = BuildCompletionPerformanceText(summary);
@@ -664,6 +805,7 @@ namespace WAHUKidsLearn
             _feedbackCard.Visible = true;
             foreach (var button in _answerButtons) button.Visible = false;
             _answerGrid.Visible = false;
+            _typedAnswerLayout.Visible = false;
             _interactiveAnswerLayout.Visible = false;
             _hintButton.Visible = false;
             _stopButton.Visible = false;
@@ -713,6 +855,7 @@ namespace WAHUKidsLearn
             _feedbackCard.Visible = true;
             foreach (var button in _answerButtons) button.Visible = false;
             _answerGrid.Visible = false;
+            _typedAnswerLayout.Visible = false;
             _interactiveAnswerLayout.Visible = false;
             _hintButton.Visible = false;
             _stopButton.Visible = false;
@@ -730,6 +873,12 @@ namespace WAHUKidsLearn
                 keyData == Keys.Enter && _interactiveSubmitButton.Visible && _interactiveSubmitButton.Enabled)
             {
                 SubmitInteractiveAnswer("keyboard");
+                return true;
+            }
+            if (_question != null && UsesTypedAnswer(_question) && !_submitting &&
+                keyData == Keys.Enter && _typedSubmitButton.Visible && _typedSubmitButton.Enabled)
+            {
+                SubmitTypedAnswer("keyboard");
                 return true;
             }
             if (keyData >= Keys.D1 && keyData <= Keys.D4)

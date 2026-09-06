@@ -4,215 +4,188 @@ Updated: 2026-09-07
 Owner: AI3 — Math UI / QA / Integration
 Project: `D:\APP HOC TAP`
 
-## 1. Flow thực tế đã audit
+## 1. Flow thực tế hiện tại
 
-Flow child hiện tại sau wave AI3-004:
+Adaptive flow:
 
-`Home → Toán lớp 2 → chương → chủ đề/bài → lesson detail → Luyện 8 câu hôm nay → generated question → answer → hint/feedback → next → completion/result → quay lại Math Hub/Home`
+`Home → Toán lớp 2 → Math Hub → Luyện 8 câu hôm nay → answer → hint/feedback → result → Math Hub/Home`.
 
-Resume flow hiện đã có contract thật:
+Targeted lesson flow sau upstream `656a94b` + AI3-005:
 
-`Học một phần → mở câu tiếp theo → Dừng và học tiếp sau / đóng app → Suspend → mở app → Start() resume cùng session → đúng open question → tiếp tục progress cũ`.
+`Home → Toán lớp 2 → chương → bài → theory/example → Luyện 3 câu bài này → authored basic/medium/application → result score → lesson progress persisted → quay lại Hub → prerequisite state refresh`.
 
-Lesson detail dùng data thật AI1. Exercise vẫn là adaptive mission toàn Math, chưa phải target đúng lesson đang xem vì engine chưa publish targeted-session/unlock contract; AI3 không gắn nhãn giả “Luyện bài này”.
+Resume flow:
+
+`Học một phần → dừng/đóng → Suspend → mở lại → same session + same mode/lesson + exact open question → tiếp tục progress cũ`.
 
 ## 2. Inventory UI
 
-| Hạng mục | Trạng thái | Audit thực tế |
+| Hạng mục | Trạng thái | Evidence |
 |---|---|---|
 | Math entry từ Home | DONE | `MainForm` mở `MathHubForm` |
-| Math hub | DONE baseline | 7 chương / 17 chủ đề / 67 bài từ catalog thật |
-| Chapter/topic selection | DONE | Scrollable navigation + selected state |
-| Chapter progress | DONE | số bài đã học + số `STABLE` lấy từ engine state thật |
-| Continue lesson CTA | DONE | chọn lesson active/review gần nhất theo `LastSeenAtUtc`; disabled nếu chưa có progress |
-| Lesson selection | DONE | Lesson cards theo topic, có progress/mastery thật |
-| Theory/objective/concept | DONE baseline | Consume objective, explanation, concepts từ catalog |
-| Worked example | DONE baseline | Prompt + solution steps + answer |
-| Practice metadata | DONE | Hiển thị số câu basic/medium/application từ lesson |
-| Lesson-targeted practice | BLOCKED / contract | Coordinator chưa nhận lesson/skill target first-class |
-| Exercise choice UI | DONE | 2/3/4 choice layout, selected/correct/incorrect/muted states |
-| Hint UI | DONE | 2 level, visual cập nhật theo level |
-| Feedback UI | DONE | Companion + child-safe feedback + correct answer highlight |
-| Interactive answer UI | DONE | generated `interaction_integer` → segment control; no fake choices |
-| Double-submit UI guard | DONE | `_submitting` + disable controls; engine/DB có idempotency riêng |
-| Keyboard choice | DONE | D1-D4, NumPad1-4 |
-| Keyboard/navigation | DONE baseline | Enter/Escape; hub tab focus; interaction arrows/Home/End/Space |
-| Accessibility | PASS baseline | chapter/lesson/continue/mission/result name/description; interaction description động |
-| Result screen | DONE baseline / advanced blocked | durable attempts, independent/hinted/wrong, distinct skills, garden reward + đúng route về Math Hub; score/mastery delta/XP/next lesson chưa có first-class contract |
-| Progress presentation | DONE baseline | Hub đọc `SkillSnapshot`; session dùng target/completed count thật |
-| Mastery presentation | DONE baseline | dùng `LearningState` + `MasteryScore`; UI không tự tính mastery |
-| Locked/unlocked lesson | BLOCKED / contract | catalog có prerequisites nhưng engine chưa publish unlock state/rule first-class |
-| Loading state | PARTIAL | catalog sync load + safe failure; chưa có async loading experience riêng |
-| Error state | DONE baseline | missing/corrupt catalog, corrupt resume cache và fatal exercise đều child-safe |
-| Empty state | DONE baseline | catalog missing → empty state + adaptive mission fallback |
-| Responsive/min window | PASS targeted | 1180×760 và 900×640 layout-tree gate; existing visual smoke 100%/125% |
-| Long prompt/content | PASS baseline | exercise co font; lesson detail scroll/wrap |
-| Resume exact session | DONE | engine exact restore + UI `Suspend`/notice/progress integration |
-| Offline Math | PASS baseline | catalog + DB + generator local |
+| Math Hub | DONE | 7 chương / 17 chủ đề / 67 bài từ catalog thật |
+| Chapter/topic/lesson selection | DONE | Scrollable + selected state + responsive |
+| Theory/objective/concept | DONE baseline | consume catalog AI1 |
+| Worked example | DONE baseline | prompt + solution steps + answer |
+| Lesson-targeted practice | DONE | engine-owned target lesson contract `656a94b` |
+| Locked/unlocked lesson | DONE | `MathLessonAccessSnapshot.IsUnlocked`; UI không tự đoán threshold |
+| Locked lesson theory | DONE | vẫn đọc được; chỉ khóa practice CTA |
+| Prerequisite explanation | DONE | accessible description nêu lesson prerequisite còn thiếu |
+| Choice answer | DONE | 2/3/4 choices, selected/correct/incorrect/muted |
+| Typed answer | DONE | numeric, word problem, expression, unit |
+| Interaction answer | DONE | segment control `interaction_integer` |
+| Hint | DONE | 2 level |
+| Double submit guard | DONE | `_submitting` + controls disabled |
+| Keyboard | DONE baseline | D1-D4/NumPad, Enter typed/interaction/next, Escape stop |
+| Accessibility | PASS baseline | names/descriptions cho hub, lock, typed/interaction, result |
+| Result counters | DONE | attempts, independent/hinted/wrong, distinct skills |
+| Lesson score/best score | DONE | dùng `LessonScorePercent` / `LessonBestScorePercent` |
+| Mastery delta / next lesson | UPSTREAM READY | `8b32944` đã publish; AI3-005 chưa consume, dành cho wave kế tiếp |
+| Numeric XP | NO PRODUCT CONTRACT | UI không tự invent XP |
+| Progress/mastery presentation | DONE baseline | durable engine state |
+| Exact resume | DONE | targeted + adaptive persistence regression |
+| Error/empty state | DONE baseline | missing/corrupt catalog/runtime child-safe |
+| Responsive | PASS targeted | 1180×760, 1080×720, 900×640 + 100/125% visual gates |
 
-## 3. Wave AI3-001 — interactive segment answer
+## 3. AI3-001 — interaction
 
-Commit `c63e110`:
+Commit `c63e110`.
 
-- thước 0..max theo `segmentdraw|target|max`;
-- chọn A/B bằng mouse;
-- keyboard Left/Right, Home/End, Space;
-- selected length = `abs(B-A)` và serialize integer answer;
-- submit chỉ enabled khi có hai đầu mút khác nhau;
-- hint level 1/2;
-- dynamic accessible description;
-- locked correct/incorrect visual;
-- `MathLessonForm` switch theo `AnswerKind == interaction_integer`;
-- Enter submit interaction.
+- Segment 0..max từ `segmentdraw|target|max`.
+- Mouse + keyboard Left/Right/Home/End/Space.
+- Serialize `abs(B-A)`.
+- Hint/result/accessibility.
+- UI smoke dùng direct `MathQuestion` interaction contract; generation/finalization thuộc AI2 engine smoke, tránh cross-owner test coupling.
 
-Upstream `9e275de` đã đóng generator contract. Regression AI3 hiện dùng **generator thật**, không dựng tay question:
+## 4. AI3-002 — Hub/content
 
-- `AnswerKind == interaction_integer`;
-- `DisplayChoices.Count == 0`;
-- `segmentdraw|...` tồn tại;
-- generated target được chọn trên control và serialize đúng.
+Commit `11d7914`.
 
-Generated interaction E2E: **PASS**.
+- Catalog thật: chapter/topic/lesson/concept/worked example/practice/prerequisite.
+- Safe missing/corrupt catalog.
+- Progress/mastery từ `LearnerSessionService`, không fake frontend.
 
-## 4. Wave AI3-002 — Math Hub + lesson content
+## 5. AI3-003 — continue/resume
 
-Commit `11d7914`:
+Commit `2d2813c`.
 
-`MathLessonCatalogSource`:
+- Continue target dựa trên durable `SkillSnapshot`.
+- `TargetQuestionCount` / `CompletedQuestionCount` từ session start result.
+- Stop và window close dùng `Suspend`.
+- Exact open question resume + corrupt-cache child-safe messaging.
 
-- parse schema/subject/language;
-- đọc chapter/topic/lesson/concept/worked example/practice/prerequisite;
-- validate unique IDs/skills;
-- validate topic→chapter, lesson→topic/chapter, prerequisite references;
-- fail-closed nếu content bắt buộc thiếu hoặc lesson không `CHILD_READY`.
+## 6. AI3-004 — result baseline
 
-`MathHubForm` baseline:
+Commit `37f0b97`; route regression `b6a1ce4`.
 
-- chapter/topic/lesson từ catalog thật;
-- detail: mục tiêu, kiến thức, concept, example steps, answer, practice count, prerequisite;
-- progress/mastery từ `LearnerSessionService.LoadSkillSnapshots()`;
-- state `Chưa học` / `Đang học` / `Cần ôn` / `Đã vững` từ engine;
-- review date từ `NextReviewAtUtc`;
-- corrupt/missing catalog không crash;
-- adaptive mission vẫn khả dụng;
-- Escape về Home, tab-focus actions;
-- 900×640 scroll/layout PASS.
+- Result dùng counters durable.
+- Counter display bounded fail-safe.
+- Garden reward consume summary thật.
+- `Về thư viện Toán` đúng modal route.
 
-## 5. Wave AI3-003 — continue progress + resume integration
+## 7. AI3-005 — targeted lesson / prerequisite / typed authored input
 
-Commit `2d2813c` — `Toán UI: hoàn thiện tiếp tục bài và resume phiên học`.
+### Hub/access
 
-### Math Hub
+- Load access bằng `MathLessonProgressService.GetAllAccess()`.
+- Lesson state ưu tiên first-class lesson progress:
+  - locked;
+  - started/chưa hoàn thành;
+  - completed + best score.
+- `Luyện 3 câu bài này` chỉ enabled khi `IsUnlocked`.
+- Locked CTA không làm theory biến mất.
+- Missing prerequisite được resolve thành title lesson và đưa vào accessible description.
+- Sau targeted/adaptive practice, refresh skill + lesson access + chapter/detail state.
 
-- chapter button trình bày số bài học, số đã học và số `STABLE` từ `SkillSnapshot` thật;
-- `FindContinueLesson()` ưu tiên lesson đã attempt nhưng chưa `STABLE`, chọn gần nhất theo `LastSeenAtUtc`;
-- nếu tất cả đã stable thì dùng lesson đã học gần nhất;
-- CTA “Tiếp tục bài đang học” disabled khi chưa có evidence;
-- CTA mở đúng chapter + lesson target;
-- sau adaptive mission, `PopulateChapters()` + continue state được refresh để không hiển thị progress cũ.
+### Targeted lesson form
 
-### Math Lesson resume UX
+- Internal ctor nhận `targetLessonId`.
+- Dùng `MathSessionCoordinator(database, templatePath, profile, seed, lessonId)`.
+- Session mode `lesson` hiển thị lesson title và engine-owned target question count.
+- Completion targeted hiển thị `Hoàn thành bài học`.
+- Score và best score lấy trực tiếp từ `MathSessionSummary`.
 
-Upstream resume contract đã commit `a1d5146`, `beb0c0e`, regression `a36c4cb`.
+### Typed-answer surface
 
-AI3 consume:
+Blocker phát hiện khi audit authored bank: 201 câu có **109 câu choice-free** mà UI cũ chỉ hỗ trợ choice/segment, nên targeted practice sẽ fatal.
 
-- `_targetQuestionCount` lấy từ `MathSessionStartResult.TargetQuestionCount`, không hard-code 8 khi resume;
-- progress bar/value lấy `CompletedQuestionCount` và `Summary.Attempts` thật;
-- restored open question → “Mình tiếp tục đúng câu con đang làm dở nhé.”;
-- corrupt open cache → thông báo phần đã làm vẫn an toàn và tiếp tục bằng câu mới;
-- resumed session không có open question → child-safe continue notice;
-- stop button đổi thành `Dừng và học tiếp sau`;
-- `RequestStop()` gọi `Suspend("child_requested_stop")`;
-- `OnFormClosing()` gọi `Suspend("lesson_window_closed")`;
-- fatal runtime path vẫn dùng `Abort` vì đó là fail-closed error, không phải UX “học tiếp sau”.
+AI3-005 thêm typed answer cho:
 
-### Exact resume regression
+- `numeric_input` / integer;
+- `word_problem` choice-free;
+- `expression_input` / expression;
+- `unit_input` / unit.
 
-Resume regression vẫn được giữ trong MathSessionPersistenceRuntimeSmoke; full smoke hiện **64 assertions PASS** sau khi AI2 bổ sung authored-bank coverage, gồm các gate resume cũ:
+Behavior:
 
-- suspend leaves session active/unended;
-- no reward on suspend;
-- same session id after restart;
-- persisted target overrides constructor target;
-- committed count reconstructed;
-- exact open question id/content restored;
-- `NextQuestion()` idempotent while open;
-- stale already-committed cached question không replay;
-- corrupt open question cache chỉ bị bỏ cache, không reset attempt/progress;
-- deterministic next question across restart;
-- completed reward exactly once.
+- empty input → submit disabled;
+- nhập text → submit enabled;
+- Enter submit;
+- raw answer string gửi thẳng engine, UI không normalize toán học;
+- expression/unit có guidance riêng;
+- incorrect feedback dùng `CorrectAnswerDisplay` engine;
+- hint/progress/next/result dùng cùng lifecycle với choice/interaction.
 
-AI3 UI regression kiểm thêm resume notice + stop-button semantics.
+### 201-question UI sweep
 
-## 6. Wave AI3-004 — result baseline bằng dữ liệu durable
+`ChildUiRuntimeSmoke` nạp authored bank thật và gọi `ConfigureAnswerInput()` cho toàn bộ 201 câu.
 
-- `BuildCompletionPerformanceText()` chỉ consume `MathSessionSummary` và hiển thị:
-  - tổng câu đã làm;
-  - tự làm đúng = correct - hinted correct;
-  - đúng nhờ gợi ý;
-  - cần luyện lại = wrong, bounded theo attempts/correct để fail-safe.
-- `BuildCompletionSupportText()` hiển thị distinct skills + garden progress/unlock message thật.
-- Không có numeric score/XP/mastery delta tự tính ở UI.
-- `_feedback` và `_support` có accessible summary sau completion.
-- CTA kết quả đổi thành `Về thư viện Toán`, đúng route thực tế về `MathHubForm`.
-- Fatal-state CTA dùng cùng route label để không nói sai là vào khu vườn.
-- Regression result kiểm cả normal summary và inconsistent counters.
-- ChildUiRuntimeSmoke hiện **674 assertions PASS**.
+PASS distribution:
 
-## 7. Remaining P1 integration blockers
+- **109 typed**;
+- **91 choice**;
+- **1 interaction**;
+- tổng **201/201 renderable**.
 
-### P1-01 — lesson target + prerequisite unlock contract
+### Flow 5 UI E2E
 
-AI1 đã có prerequisite graph và hard guard. AI2 đã commit `a5119d4` loader authored bank 201 câu theo lesson, nhưng coordinator vẫn chưa publish API/state first-class để:
+PASS:
 
-- bắt đầu session đúng lesson/skill đã chọn;
-- quyết định lesson `locked/unlocked`;
-- mark lesson completion theo product contract.
+1. DB schema V4 healthy.
+2. Mở prerequisite lesson targeted.
+3. 3 authored questions có lesson/content traceability đúng.
+4. Submit qua actual typed/choice UI controls.
+5. Result `Hoàn thành bài học`, score **100%**.
+6. `MathLessonProgressStore`: completed=1, last=100, best=100.
+7. Reload Hub.
+8. Prerequisite lesson hiện completed/best score.
+9. Dependent lesson chuyển từ locked sang enabled `Luyện 3 câu bài này`.
 
-AI3 không tự suy đoán ngưỡng mastery/unlock.
+## 8. Verification gates
 
-### P1-02 — production clean build Data/SQLite
+Current HEAD (`ee7079b` sau content waves):
 
-Old-style `src/Data/WAHU.Data.csproj` với `PackageReference` vẫn không resolve `System.Data.SQLite` khi build bằng `dotnet msbuild` trong workstation hiện tại.
+- App Release x86 targeted build: **PASS**.
+- ChildUiRuntimeSmoke: **PASS — 1133 assertions**.
+- MathContentDataSmoke: **PASS — 22/22**.
 
-AI3 đã xác minh SDK-style x86/net48 harness compile cùng production Data source + SQLite thật PASS, nhưng đây không thay thế Definition of Done `clean build pass` của production solution.
+Isolated clean worktree tại exact upstream targeted commit `656a94b`, chỉ áp 3 file AI3:
 
-### P1-03 — result contract nâng cao
+- changed files: chỉ `MathHubForm.cs`, `MathLessonForm.cs`, `ChildUiRuntimeSmoke/Program.cs`;
+- Data SDK net48/x86 artifact: **0 warning / 0 error**;
+- Session SDK net48/x86 artifact: **0 warning / 0 error**;
+- App Release x86: **PASS**;
+- MathSessionPersistenceRuntimeSmoke: **PASS — 92 assertions**;
+- ChildUiRuntimeSmoke: **PASS — 1133 assertions**;
+- `git diff --check`: **PASS**.
 
-Baseline result đã dùng counters/reward durable. Engine vẫn chưa có lesson-level score / numeric XP / mastery delta summary / next-lesson contract first-class; AI3 không tự tính các giá trị này ở frontend.
+## 9. Remaining blockers
 
-## 8. Tests hiện tại
+### P1-01 — production Data/SQLite clean build
 
-- `WAHU.Learning.csproj` Release x86: PASS.
-- `WAHUKidsLearn.csproj` targeted Release x86: PASS.
-- `WAHU.ChildUiRuntimeSmoke.csproj` targeted Release x86: PASS.
-- ChildUiRuntimeSmoke: **PASS — 674 assertions**.
-- MathSessionPersistenceRuntimeSmoke: **PASS — 64 assertions** (exact resume + authored-bank loader/traceability).
-- MathEngineRuntimeSmoke baseline: **PASS — 47 assertions** ở gate gần nhất.
-- MathContentDataSmoke: **PASS — 16/16 tests**.
-- Full old-style solution Release x86: **FAIL — Data/SQLite compile-reference blocker**.
+Old-style `WAHU.Data.csproj` / SQLite reference vẫn chặn full clean production solution gate trên toolchain hiện tại. SDK source-equivalent harness pass nhưng không được coi là release-clean replacement.
 
-Assertions AI3 khóa hiện tại bao gồm:
+### P1-02 — advanced result stable contract
 
-- catalog 7 / 17 / 67;
-- objectives/concepts/worked examples/practice;
-- missing catalog safe state;
-- chapter/lesson accessibility;
-- responsive 1180×760 + 900×640;
-- continue lesson disabled/enabled đúng evidence;
-- chapter studied count từ real skill state;
-- continue opens exact lesson;
-- resume child-safe messaging cho restored/corrupt/progress cases;
-- stop CTA có semantics học tiếp;
-- generated interaction question → no choices → segment UI → correct serialized answer;
-- result counters: independent/hinted/needs-practice + bounded inconsistent input;
-- result support: distinct skills + garden/unlock message;
-- completion/fatal CTA route label đúng `Về thư viện Toán` + accessibility.
+Upstream `8b32944` đã publish `MasteryChanges`, target mastery before/after/delta và `NextLessonId/Title`. AI3-005 chưa consume để giữ wave nhỏ; AI3-006 sẽ dùng trực tiếp các field này. Numeric XP chưa có product rule first-class.
 
-## 9. Việc AI3 tiếp theo
+### P1-03 — adaptive interaction generator ownership
 
-1. Chốt commit/push wave AI3-004.
-2. Theo dõi contract targeted lesson/prerequisite unlock; khi publish, thêm “Luyện bài này”, lock state và Flow 5.
-3. Khi result contract nâng cao publish, bổ sung score/mastery-delta/XP/next lesson vào result baseline hiện có.
-4. Khi SQLite production build blocker đóng, chạy full clean solution + toàn bộ smoke/E2E làm release gate.
+Authored `interaction_integer` + UI control pass. Child UI không test `MathQuestionGenerator` để tránh ownership coupling; generator case `draw_segment_given_length` phải được engine smoke AI2 khóa khi commit.
+
+## 10. Next AI3 actions
+
+1. Commit/push AI3-005.
+2. Consume advanced result contract ngay khi AI2 commit stable fields.
+3. Sau khi production SQLite build blocker đóng: full clean solution + complete Math smoke/E2E release gate.
+4. Kiểm packaging/installer có mang schema V4 + 3 Math content files và launch/update không mất targeted lesson progress.

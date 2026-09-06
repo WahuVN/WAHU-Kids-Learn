@@ -8,6 +8,7 @@ using WAHU.Content;
 using WAHU.Data;
 using WAHU.Learning;
 using WAHU.Performance;
+using WAHU.Session;
 
 namespace WAHUKidsLearn
 {
@@ -21,6 +22,7 @@ namespace WAHUKidsLearn
 
         private MathLessonCatalogSnapshot _catalog;
         private IDictionary<string, SkillSnapshot> _skills = new Dictionary<string, SkillSnapshot>(StringComparer.Ordinal);
+        private IDictionary<string, MathLessonAccessSnapshot> _lessonAccess = new Dictionary<string, MathLessonAccessSnapshot>(StringComparer.Ordinal);
         private MathChapterDescriptor _selectedChapter;
         private MathLessonDescriptor _selectedLesson;
         private FlowLayoutPanel _chapterFlow;
@@ -70,6 +72,7 @@ namespace WAHUKidsLearn
             {
                 _catalog = new MathLessonCatalogSource().Load(_catalogPath);
                 RefreshSkillProgress();
+                RefreshLessonAccess();
                 _summary.Text = _catalog.Chapters.Count + " chương  •  " + _catalog.Topics.Count + " chủ đề  •  " +
                     _catalog.Lessons.Count + " bài học";
                 PopulateChapters();
@@ -458,8 +461,8 @@ namespace WAHUKidsLearn
 
                 var snapshot = Skill(lesson.SkillId);
                 var state = LessonStateText(lesson);
-                var stateLabel = AddDetailLabel(state, 9.3f, FontStyle.Bold, StateColor(snapshot), 32, ContentAlignment.MiddleCenter);
-                stateLabel.BackColor = StateBackground(snapshot);
+                var stateLabel = AddDetailLabel(state, 9.3f, FontStyle.Bold, LessonStateColor(lesson), 32, ContentAlignment.MiddleCenter);
+                stateLabel.BackColor = LessonStateBackground(lesson);
                 stateLabel.Padding = new Padding(10, 4, 10, 4);
                 stateLabel.AccessibleName = "Tiến độ bài học: " + state;
 
@@ -491,6 +494,15 @@ namespace WAHUKidsLearn
                 AddSection("Luyện tập");
                 var practiceCount = lesson.PracticeSets == null ? 0 : lesson.PracticeSets.TotalCount;
                 AddBody(practiceCount + " câu trong ngân hàng bài học: cơ bản, vừa sức và vận dụng.");
+                var access = LessonAccess(lesson.Id);
+                _detailFlow.Controls.Add(CreateLessonPracticeButton(lesson, access, practiceCount));
+                if (access != null && access.IsCompleted && access.LastScorePercent.HasValue)
+                {
+                    var scoreText = "Lần gần nhất: " + Math.Round(access.LastScorePercent.Value) + "%";
+                    if (access.BestScorePercent.HasValue)
+                        scoreText += "  •  Tốt nhất: " + Math.Round(access.BestScorePercent.Value) + "%";
+                    AddBody(scoreText, true);
+                }
 
                 var prerequisites = lesson.PrerequisiteSkills ?? new List<string>();
                 if (prerequisites.Count > 0)
@@ -519,6 +531,60 @@ namespace WAHUKidsLearn
             }
         }
 
+        private ChildActionButton CreateLessonPracticeButton(MathLessonDescriptor lesson, MathLessonAccessSnapshot access, int practiceCount)
+        {
+            var button = new ChildActionButton
+            {
+                AutoSize = false,
+                Height = 54,
+                Margin = new Padding(8, 8, 8, 8),
+                FillColor = ChildVisualTheme.MintStrong,
+                HoverColor = Color.FromArgb(90, 156, 103),
+                PressedColor = Color.FromArgb(75, 139, 88),
+                Font = ChildVisualTheme.Font(10.5f, FontStyle.Bold),
+                Radius = 16,
+                AccessibleName = "Luyện tập bài " + lesson.TitleVi
+            };
+
+            if (access == null)
+            {
+                button.Text = "Chưa thể mở luyện tập bài này";
+                button.Enabled = false;
+                button.AccessibleDescription = "Tiến độ bài học chưa sẵn sàng. Nội dung lý thuyết vẫn có thể xem.";
+                return button;
+            }
+
+            if (!access.IsUnlocked)
+            {
+                var missing = (access.UnsatisfiedPrerequisiteLessonIds ?? new List<string>())
+                    .Select(LessonTitle)
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .ToList();
+                button.Text = "Học bài trước để mở luyện tập";
+                button.Enabled = false;
+                button.FillColor = Color.FromArgb(226, 224, 216);
+                button.TextColor = ChildVisualTheme.MutedInk;
+                button.AccessibleDescription = missing.Count == 0
+                    ? "Bài luyện tập đang khóa vì còn bài học cần hoàn thành trước."
+                    : "Cần hoàn thành trước: " + string.Join(", ", missing) + ".";
+                return button;
+            }
+
+            button.Text = (access.IsCompleted ? "Luyện lại " : "Luyện ") + Math.Max(1, practiceCount) + " câu bài này";
+            button.BadgeText = Math.Max(1, practiceCount).ToString();
+            button.AccessibleDescription = access.IsCompleted
+                ? "Mở lại bài luyện tập " + lesson.TitleVi + "."
+                : "Bắt đầu bài luyện tập " + lesson.TitleVi + ".";
+            button.Click += delegate { OpenLessonPractice(lesson); };
+            return button;
+        }
+
+        private string LessonTitle(string lessonId)
+        {
+            var lesson = _catalog == null ? null : _catalog.FindLesson(lessonId);
+            return lesson == null ? lessonId : lesson.TitleVi;
+        }
+
         private Button CreateCatalogButton(string text, int height)
         {
             var button = new Button
@@ -545,9 +611,24 @@ namespace WAHUKidsLearn
 
         private void ApplyLessonStateStyle(Button button, MathLessonDescriptor lesson)
         {
-            var snapshot = Skill(lesson.SkillId);
-            button.BackColor = StateBackground(snapshot);
-            button.ForeColor = StateColor(snapshot);
+            button.BackColor = LessonStateBackground(lesson);
+            button.ForeColor = LessonStateColor(lesson);
+        }
+
+        private Color LessonStateBackground(MathLessonDescriptor lesson)
+        {
+            var access = lesson == null ? null : LessonAccess(lesson.Id);
+            if (access != null && !access.IsUnlocked) return Color.FromArgb(235, 234, 229);
+            if (access != null && access.IsCompleted) return Color.FromArgb(225, 243, 224);
+            return StateBackground(lesson == null ? null : Skill(lesson.SkillId));
+        }
+
+        private Color LessonStateColor(MathLessonDescriptor lesson)
+        {
+            var access = lesson == null ? null : LessonAccess(lesson.Id);
+            if (access != null && !access.IsUnlocked) return Color.FromArgb(132, 130, 124);
+            if (access != null && access.IsCompleted) return ChildVisualTheme.MintStrong;
+            return StateColor(lesson == null ? null : Skill(lesson.SkillId));
         }
 
         private string ChapterProgressText(MathChapterDescriptor chapter, int lessonCount)
@@ -623,6 +704,17 @@ namespace WAHUKidsLearn
 
         private string LessonStateText(MathLessonDescriptor lesson)
         {
+            var access = lesson == null ? null : LessonAccess(lesson.Id);
+            if (access != null && !access.IsUnlocked) return "Đang khóa  •  học bài trước";
+            if (access != null && access.IsCompleted)
+            {
+                var best = access.BestScorePercent.HasValue
+                    ? "  •  tốt nhất " + Math.Round(access.BestScorePercent.Value) + "%"
+                    : string.Empty;
+                return "Đã hoàn thành" + best;
+            }
+            if (access != null && access.StartedCount > 0) return "Đang học  •  chưa hoàn thành";
+
             var snapshot = Skill(lesson.SkillId);
             if (snapshot == null || snapshot.AttemptsCount <= 0) return "Chưa học";
             var percent = (int)Math.Round(Math.Max(0, Math.Min(1, snapshot.MasteryScore)) * 100.0);
@@ -640,6 +732,13 @@ namespace WAHUKidsLearn
             if (string.IsNullOrWhiteSpace(skillId) || _skills == null) return null;
             SkillSnapshot snapshot;
             return _skills.TryGetValue(skillId, out snapshot) ? snapshot : null;
+        }
+
+        private MathLessonAccessSnapshot LessonAccess(string lessonId)
+        {
+            if (string.IsNullOrWhiteSpace(lessonId) || _lessonAccess == null) return null;
+            MathLessonAccessSnapshot access;
+            return _lessonAccess.TryGetValue(lessonId, out access) ? access : null;
         }
 
         private static Color StateBackground(SkillSnapshot snapshot)
@@ -740,6 +839,45 @@ namespace WAHUKidsLearn
             }
         }
 
+        private void RefreshLessonAccess()
+        {
+            try
+            {
+                _lessonAccess = new MathLessonProgressService(_database, _catalogPath)
+                    .GetAllAccess(LearnerSessionService.PrimaryChildId)
+                    .ToDictionary(x => x.LessonId, x => x, StringComparer.Ordinal);
+            }
+            catch
+            {
+                _lessonAccess = new Dictionary<string, MathLessonAccessSnapshot>(StringComparer.Ordinal);
+            }
+        }
+
+        private void OpenLessonPractice(MathLessonDescriptor lessonDescriptor)
+        {
+            if (lessonDescriptor == null) return;
+            var access = LessonAccess(lessonDescriptor.Id);
+            if (access == null || !access.IsUnlocked) return;
+
+            try
+            {
+                using (var lesson = new MathLessonForm(_database, _performance, lessonDescriptor.Id))
+                    lesson.ShowDialog(this);
+                RefreshSkillProgress();
+                RefreshLessonAccess();
+                PopulateChapters();
+                RefreshContinueLessonState();
+                var refreshed = _catalog == null ? null : _catalog.FindLesson(lessonDescriptor.Id);
+                if (refreshed != null) SelectLessonInCatalog(refreshed);
+            }
+            catch
+            {
+                MessageBox.Show(this,
+                    "Chưa thể mở phần luyện tập của bài này lúc này. Con vẫn có thể xem lại kiến thức và ví dụ.",
+                    "WAHU Kids Learn", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
         private void OpenAdaptiveMission()
         {
             try
@@ -749,6 +887,7 @@ namespace WAHUKidsLearn
                 var selectedLessonId = _selectedLesson == null ? null : _selectedLesson.Id;
                 using (var lesson = new MathLessonForm(_database, _performance)) lesson.ShowDialog(this);
                 RefreshSkillProgress();
+                RefreshLessonAccess();
                 PopulateChapters();
                 RefreshContinueLessonState();
                 if (_catalog != null && !string.IsNullOrWhiteSpace(selectedChapterId))

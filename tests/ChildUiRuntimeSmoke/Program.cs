@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
 using WAHU.Content;
@@ -32,6 +33,9 @@ namespace WAHU.ChildUiRuntimeSmoke
             TestResumePresentation(appAssembly);
             TestCompletionPresentation(appAssembly);
             TestAnswerGridLayout(appAssembly);
+            TestTypedAnswerInput(appAssembly);
+            TestAllAuthoredAnswerSurfaces(appAssembly);
+            TestTargetedLessonUiFlow(appAssembly);
             TestInteractiveSegmentAnswer(appAssembly);
             TestBasicControls(appAssembly);
 
@@ -244,6 +248,24 @@ namespace WAHU.ChildUiRuntimeSmoke
                     A(ContainsControlText(detailFlow, "Ví dụ có lời giải"), "math_hub_detail_shows_example_section");
                     A(ContainsControlText(detailFlow, "Luyện tập"), "math_hub_detail_shows_practice_section");
                     A(ContainsControlText(detailFlow, "3 câu trong ngân hàng bài học"), "math_hub_detail_shows_practice_count");
+                    var firstPractice = FindButtonContaining(detailFlow, "Luyện 3 câu bài này");
+                    A(firstPractice != null && firstPractice.Enabled,
+                        "math_hub_first_lesson_targeted_practice_unlocked");
+                    A(firstPractice.AccessibleDescription.IndexOf(firstLesson.TitleVi, StringComparison.OrdinalIgnoreCase) >= 0,
+                        "math_hub_targeted_practice_names_lesson");
+
+                    var lockedLesson = catalog.Lessons.FirstOrDefault(x => x.PrerequisiteSkills != null && x.PrerequisiteSkills.Count > 0);
+                    A(lockedLesson != null, "math_hub_catalog_has_prerequisite_lesson_for_lock_test");
+                    Invoke(form, "SelectLessonInCatalog", lockedLesson);
+                    var lockedPractice = FindButtonContaining(detailFlow, "Học bài trước để mở luyện tập");
+                    A(lockedPractice != null && !lockedPractice.Enabled,
+                        "math_hub_prerequisite_lesson_practice_locked");
+                    A(ContainsControlText(detailFlow, "Mục tiêu") && ContainsControlText(detailFlow, "Kiến thức cần nhớ"),
+                        "math_hub_locked_lesson_theory_remains_readable");
+                    var prerequisiteLesson = catalog.FindLessonBySkill(lockedLesson.PrerequisiteSkills[0]);
+                    A(prerequisiteLesson != null && lockedPractice.AccessibleDescription.IndexOf(prerequisiteLesson.TitleVi, StringComparison.OrdinalIgnoreCase) >= 0,
+                        "math_hub_locked_practice_names_missing_prerequisite");
+                    Invoke(form, "SelectLessonInCatalog", firstLesson);
 
                     var firstChapterButton = chapterFlow.Controls[0] as Button;
                     A(firstChapterButton != null && !string.IsNullOrWhiteSpace(firstChapterButton.AccessibleName),
@@ -346,6 +368,21 @@ namespace WAHU.ChildUiRuntimeSmoke
             A(resumedText.IndexOf("tiếp tục", StringComparison.OrdinalIgnoreCase) >= 0,
                 "math_resume_notice_completed_progress");
 
+            var targetedCtor = typeof(WAHUKidsLearn.MathLessonForm).GetConstructor(
+                BindingFlags.Instance | BindingFlags.NonPublic,
+                null,
+                new[] { typeof(LearningDatabase), typeof(RuntimePerformanceSettings), typeof(string) },
+                null);
+            A(targetedCtor != null, "math_targeted_lesson_constructor_available");
+
+            var targeted = Activator.CreateInstance(startType);
+            Set(targeted, "SessionMode", "lesson");
+            Set(targeted, "TargetQuestionCount", 3);
+            Set(targeted, "TargetLessonTitleVi", "Đọc, viết số đến 1000");
+            var targetedText = (string)method.Invoke(null, new[] { targeted });
+            A(targetedText.IndexOf("3 câu", StringComparison.OrdinalIgnoreCase) >= 0,
+                "math_targeted_session_notice_uses_engine_question_count");
+
             var fresh = Activator.CreateInstance(startType);
             var freshText = (string)method.Invoke(null, new[] { fresh });
             A(freshText == null, "math_fresh_session_has_no_resume_notice");
@@ -386,6 +423,24 @@ namespace WAHU.ChildUiRuntimeSmoke
             A(support.IndexOf("Mở khóa: Bồn hoa", StringComparison.OrdinalIgnoreCase) >= 0,
                 "math_completion_support_shows_unlock_message");
 
+            var targetedSummary = Activator.CreateInstance(summaryType);
+            Set(targetedSummary, "Attempts", 3);
+            Set(targetedSummary, "Correct", 2);
+            Set(targetedSummary, "HintedCorrect", 1);
+            Set(targetedSummary, "Wrong", 1);
+            Set(targetedSummary, "DistinctSkills", 1);
+            Set(targetedSummary, "SessionMode", "lesson");
+            Set(targetedSummary, "LessonCompleted", true);
+            Set(targetedSummary, "LessonScorePercent", 66.6666667d);
+            Set(targetedSummary, "LessonBestScorePercent", 100d);
+            var targetedPerformance = (string)performanceMethod.Invoke(null, new[] { targetedSummary });
+            var targetedSupport = (string)supportMethod.Invoke(null, new[] { targetedSummary });
+            A(targetedPerformance.IndexOf("Điểm bài 67%", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                targetedPerformance.IndexOf("Tốt nhất 100%", StringComparison.OrdinalIgnoreCase) >= 0,
+                "math_completion_targeted_score_uses_engine_contract");
+            A(targetedSupport.IndexOf("trong bài này", StringComparison.OrdinalIgnoreCase) >= 0,
+                "math_completion_targeted_support_names_lesson_context");
+
             var inconsistent = Activator.CreateInstance(summaryType);
             Set(inconsistent, "Attempts", 3);
             Set(inconsistent, "Correct", 8);
@@ -416,6 +471,10 @@ namespace WAHU.ChildUiRuntimeSmoke
                         "math_completion_support_accessible_summary");
                     A(next.Text == "Về thư viện Toán" && next.AccessibleDescription.IndexOf("danh sách bài Toán", StringComparison.OrdinalIgnoreCase) >= 0,
                         "math_completion_return_route_matches_math_hub");
+                    Invoke(form, "ShowCompletion", targetedSummary);
+                    A(GetField<Label>(form, "_prompt").Text == "Hoàn thành bài học" &&
+                        GetField<Label>(form, "_feedback").Text == targetedPerformance,
+                        "math_completion_targeted_form_shows_lesson_result");
                     SetField(form, "_finished", true);
                     Invoke(form, "HandleNextButton");
                     A(form.DialogResult == DialogResult.OK,
@@ -472,24 +531,301 @@ namespace WAHU.ChildUiRuntimeSmoke
             }
         }
 
+        private static void TestTypedAnswerInput(Assembly appAssembly)
+        {
+            var tempRoot = Path.Combine(Path.GetTempPath(), "wahu-child-ui-typed-answer-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempRoot);
+            try
+            {
+                var schema = Path.Combine(Directory.GetCurrentDirectory(), "data", "schema", "001_initial.sql");
+                var database = new LearningDatabase(Path.Combine(tempRoot, "learning.db"), schema);
+                using (var form = new WAHUKidsLearn.MathLessonForm(database, new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW }))
+                {
+                    var numeric = new MathQuestion
+                    {
+                        QuestionId = "typed_numeric",
+                        QuestionType = "numeric_input",
+                        AnswerKind = "integer",
+                        CorrectAnswerText = "507",
+                        PromptVi = "Viết số năm trăm linh bảy.",
+                        Choices = new List<int>(),
+                        ChoiceTexts = new List<string>()
+                    };
+                    Invoke(form, "ConfigureAnswerInput", numeric);
+                    var typedLayout = GetField<Control>(form, "_typedAnswerLayout");
+                    var typedBox = GetField<TextBox>(form, "_typedAnswerBox");
+                    var typedSubmit = GetField<Button>(form, "_typedSubmitButton");
+                    A(typedLayout.Controls.Contains(typedBox) && !GetField<Control>(form, "_answerGrid").Visible && !GetField<Control>(form, "_interactiveAnswerLayout").Visible,
+                        "typed_numeric_switches_to_input_surface");
+                    A(typedBox.Enabled && string.IsNullOrEmpty(typedBox.Text) && !typedSubmit.Enabled,
+                        "typed_numeric_starts_empty_and_submit_disabled");
+                    typedBox.Text = "507";
+                    A(typedSubmit.Enabled, "typed_numeric_submit_enabled_after_input");
+                    A(GetField<Label>(form, "_support").Text.IndexOf("Nhập đáp án", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "typed_numeric_has_child_safe_guidance");
+
+                    var expression = new MathQuestion
+                    {
+                        QuestionId = "typed_expression",
+                        QuestionType = "expression_input",
+                        AnswerKind = "expression",
+                        CorrectAnswerText = "100 - 30 + 5",
+                        AcceptedAnswers = new List<string> { "75" },
+                        Choices = new List<int>(),
+                        ChoiceTexts = new List<string>()
+                    };
+                    Invoke(form, "ConfigureAnswerInput", expression);
+                    A(typedBox.Enabled && GetField<Label>(form, "_support").Text.IndexOf("biểu thức", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "typed_expression_uses_expression_guidance");
+
+                    var unit = new MathQuestion
+                    {
+                        QuestionId = "typed_unit",
+                        QuestionType = "unit_input",
+                        AnswerKind = "unit",
+                        CorrectAnswerText = "5 kg",
+                        ExpectedUnit = "kg",
+                        AcceptedUnits = new List<string> { "kg", "kilôgam" },
+                        Choices = new List<int>(),
+                        ChoiceTexts = new List<string>()
+                    };
+                    Invoke(form, "ConfigureAnswerInput", unit);
+                    A(typedBox.Enabled && GetField<Label>(form, "_support").Text.IndexOf("đơn vị", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "typed_unit_requests_number_and_unit");
+                    A(typedBox.AccessibleDescription.IndexOf("Enter", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "typed_answer_keyboard_submit_is_announced");
+
+                    var wordProblem = new MathQuestion
+                    {
+                        QuestionId = "typed_word_problem",
+                        QuestionType = "word_problem",
+                        AnswerKind = "integer",
+                        CorrectAnswerText = "25",
+                        Choices = new List<int>(),
+                        ChoiceTexts = new List<string>()
+                    };
+                    Invoke(form, "ConfigureAnswerInput", wordProblem);
+                    A(typedBox.Enabled && !GetField<Control>(form, "_answerGrid").Visible, "typed_word_problem_uses_input_surface");
+                    RenderFormAndAssert(form, 1080, 720, "typed_answer_default_window");
+                    RenderFormAndAssert(form, 900, 640, "typed_answer_min_window");
+                }
+            }
+            finally
+            {
+                try { Directory.Delete(tempRoot, true); } catch { }
+            }
+        }
+        private static void TestAllAuthoredAnswerSurfaces(Assembly appAssembly)
+        {
+            var sessionPath = Path.Combine(Path.GetDirectoryName(appAssembly.Location), "WAHU.Session.dll");
+            var sessionAssembly = Assembly.LoadFrom(sessionPath);
+            var sourceType = sessionAssembly.GetType("WAHU.Session.MathAuthoredQuestionSource", true);
+            var source = Activator.CreateInstance(sourceType);
+            var load = sourceType.GetMethod("Load", BindingFlags.Instance | BindingFlags.Public);
+            A(load != null, "authored_ui_source_loader_available");
+            var bankPath = Path.Combine(Directory.GetCurrentDirectory(), "content_packs", "math_grade2_v1", "question_bank_v1.json");
+            var bank = load.Invoke(source, new object[] { bankPath });
+            var questionsProperty = bank.GetType().GetProperty("Questions", BindingFlags.Instance | BindingFlags.Public);
+            A(questionsProperty != null, "authored_ui_bank_questions_available");
+            var questions = questionsProperty.GetValue(bank, null) as System.Collections.IEnumerable;
+            A(questions != null, "authored_ui_bank_questions_enumerable");
+
+            var tempRoot = Path.Combine(Path.GetTempPath(), "wahu-child-ui-all-authored-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempRoot);
+            try
+            {
+                var schema = Path.Combine(Directory.GetCurrentDirectory(), "data", "schema", "001_initial.sql");
+                var database = new LearningDatabase(Path.Combine(tempRoot, "learning.db"), schema);
+                using (var form = new WAHUKidsLearn.MathLessonForm(database, new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW }))
+                {
+                    var count = 0;
+                    var typedCount = 0;
+                    var choiceCount = 0;
+                    var interactionCount = 0;
+                    foreach (var raw in questions)
+                    {
+                        var question = raw as MathQuestion;
+                        A(question != null && !string.IsNullOrWhiteSpace(question.ContentQuestionId), "authored_ui_question_maps_" + count);
+                        try
+                        {
+                            Invoke(form, "ConfigureAnswerInput", question);
+                        }
+                        catch (TargetInvocationException ex)
+                        {
+                            throw new Exception("Authored UI cannot render " + question.ContentQuestionId + " (" + question.QuestionType + "/" + question.AnswerKind + ")", ex.InnerException ?? ex);
+                        }
+
+                        if (string.Equals(question.AnswerKind, "interaction_integer", StringComparison.Ordinal))
+                        {
+                            interactionCount++;
+                            A(GetField<Control>(form, "_interactiveAnswer").Enabled, "authored_ui_interaction_ready_" + question.ContentQuestionId);
+                        }
+                        else if (question.DisplayChoices == null || question.DisplayChoices.Count == 0)
+                        {
+                            typedCount++;
+                            A(GetField<TextBox>(form, "_typedAnswerBox").Enabled && !GetField<Button>(form, "_typedSubmitButton").Enabled,
+                                "authored_ui_typed_ready_" + question.ContentQuestionId);
+                        }
+                        else
+                        {
+                            choiceCount++;
+                            A(question.DisplayChoices.Count >= 2 && question.DisplayChoices.Count <= 4,
+                                "authored_ui_choice_count_supported_" + question.ContentQuestionId);
+                        }
+                        count++;
+                    }
+                    A(count == 201, "authored_ui_sweep_all_201_questions");
+                    A(typedCount == 109, "authored_ui_sweep_109_typed_questions");
+                    A(choiceCount == 91, "authored_ui_sweep_91_choice_questions");
+                    A(interactionCount == 1, "authored_ui_sweep_one_interaction_question");
+                }
+            }
+            finally
+            {
+                try { Directory.Delete(tempRoot, true); } catch { }
+            }
+        }
+        private static void TestTargetedLessonUiFlow(Assembly appAssembly)
+        {
+            var repo = Directory.GetCurrentDirectory();
+            var sourceContent = Path.Combine(repo, "content_packs", "math_grade2_v1");
+            var runtimeContent = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "content_packs", "math_grade2_v1");
+            Directory.CreateDirectory(runtimeContent);
+            foreach (var name in new[] { "verified_templates_v1.json", "lesson_catalog_v1.json", "question_bank_v1.json" })
+                File.Copy(Path.Combine(sourceContent, name), Path.Combine(runtimeContent, name), true);
+
+            var catalogPath = Path.Combine(sourceContent, "lesson_catalog_v1.json");
+            var catalog = new MathLessonCatalogSource().Load(catalogPath);
+            var prerequisite = catalog.FindLesson("m2_ls_num_count_read_write_0_1000");
+            var dependent = catalog.FindLesson("m2_ls_num_full_hundreds_recognize");
+            A(prerequisite != null && dependent != null && dependent.PrerequisiteSkills.Contains(prerequisite.SkillId),
+                "targeted_ui_flow_fixture_prerequisite_edge");
+
+            var tempRoot = Path.Combine(Path.GetTempPath(), "wahu-child-ui-targeted-flow-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempRoot);
+            try
+            {
+                var schemaSource = Path.Combine(repo, "data", "schema");
+                var schemaDir = Path.Combine(tempRoot, "schema");
+                Directory.CreateDirectory(schemaDir);
+                foreach (var source in Directory.GetFiles(schemaSource, "*.sql"))
+                    File.Copy(source, Path.Combine(schemaDir, Path.GetFileName(source)), true);
+                var database = new LearningDatabase(Path.Combine(tempRoot, "learning.db"), Path.Combine(schemaDir, "001_initial.sql"));
+                var init = database.Initialize("DELETE");
+                A(init.SchemaVersion == 4 && init.Health.IsHealthy, "targeted_ui_flow_database_v4_ready");
+                new LearnerSessionService(database).EnsurePrimaryChild("Bé UI targeted");
+
+                var lessonCtor = typeof(WAHUKidsLearn.MathLessonForm).GetConstructor(
+                    BindingFlags.Instance | BindingFlags.NonPublic,
+                    null,
+                    new[] { typeof(LearningDatabase), typeof(RuntimePerformanceSettings), typeof(string) },
+                    null);
+                A(lessonCtor != null, "targeted_ui_flow_lesson_constructor_available");
+                using (var form = (WAHUKidsLearn.MathLessonForm)lessonCtor.Invoke(new object[]
+                {
+                    database,
+                    new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW },
+                    prerequisite.Id
+                }))
+                {
+                    Invoke(form, "StartSession");
+                    for (var ordinal = 0; ordinal < 3; ordinal++)
+                    {
+                        var question = GetField<MathQuestion>(form, "_question");
+                        A(question != null && question.LessonId == prerequisite.Id && !string.IsNullOrWhiteSpace(question.ContentQuestionId),
+                            "targeted_ui_flow_question_traceability_" + ordinal);
+                        if (question.DisplayChoices == null || question.DisplayChoices.Count == 0)
+                        {
+                            var input = GetField<TextBox>(form, "_typedAnswerBox");
+                            input.Text = question.CorrectAnswerDisplay;
+                            A(GetField<Button>(form, "_typedSubmitButton").Enabled,
+                                "targeted_ui_flow_typed_submit_ready_" + ordinal);
+                            Invoke(form, "SubmitTypedAnswer", "ui_e2e");
+                        }
+                        else
+                        {
+                            var correctIndex = -1;
+                            for (var i = 0; i < question.DisplayChoices.Count; i++)
+                                if (string.Equals(question.DisplayChoices[i], question.CorrectAnswerDisplay, StringComparison.Ordinal)) correctIndex = i;
+                            A(correctIndex >= 0, "targeted_ui_flow_choice_correct_index_" + ordinal);
+                            Invoke(form, "SubmitChoice", correctIndex, "ui_e2e");
+                        }
+
+                        if (ordinal < 2)
+                            Invoke(form, "HandleNextButton");
+                        else
+                        {
+                            A(GetField<bool>(form, "_completeOnNext"), "targeted_ui_flow_last_answer_routes_to_result");
+                            Invoke(form, "HandleNextButton");
+                        }
+                    }
+
+                    A(GetField<bool>(form, "_finished"), "targeted_ui_flow_form_completed");
+                    A(GetField<Label>(form, "_prompt").Text == "Hoàn thành bài học",
+                        "targeted_ui_flow_result_title_is_lesson");
+                    A(GetField<Label>(form, "_feedback").Text.IndexOf("Điểm bài 100%", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "targeted_ui_flow_result_uses_engine_score");
+                }
+
+                var storedProgress = new MathLessonProgressStore(database)
+                    .LoadOne(LearnerSessionService.PrimaryChildId, prerequisite.Id);
+                A(storedProgress != null && storedProgress.CompletedCount == 1,
+                    "targeted_ui_flow_progress_row_persisted");
+                A(storedProgress.LastScorePercent.HasValue && storedProgress.BestScorePercent.HasValue &&
+                    Math.Abs(storedProgress.LastScorePercent.Value - 100.0) < 0.001 &&
+                    Math.Abs(storedProgress.BestScorePercent.Value - 100.0) < 0.001,
+                    "targeted_ui_flow_progress_score_persisted");
+
+                var hubCtor = typeof(WAHUKidsLearn.MathHubForm).GetConstructor(
+                    BindingFlags.Instance | BindingFlags.NonPublic,
+                    null,
+                    new[] { typeof(LearningDatabase), typeof(RuntimePerformanceSettings), typeof(string) },
+                    null);
+                A(hubCtor != null, "targeted_ui_flow_hub_constructor_available");
+                using (var hub = (WAHUKidsLearn.MathHubForm)hubCtor.Invoke(new object[]
+                {
+                    database,
+                    new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW },
+                    catalogPath
+                }))
+                {
+                    Invoke(hub, "LoadCatalogAndProgress");
+                    Invoke(hub, "SelectLessonInCatalog", prerequisite);
+                    var detail = GetField<FlowLayoutPanel>(hub, "_detailFlow");
+                    A(ContainsControlText(detail, "Đã hoàn thành") && ContainsControlText(detail, "Tốt nhất: 100%"),
+                        "targeted_ui_flow_hub_shows_completed_score");
+                    Invoke(hub, "SelectLessonInCatalog", dependent);
+                    var unlockedPractice = FindButtonContaining(detail, "Luyện 3 câu bài này");
+                    A(unlockedPractice != null && unlockedPractice.Enabled,
+                        "targeted_ui_flow_completing_prerequisite_unlocks_next_lesson");
+                }
+            }
+            finally
+            {
+                try { Directory.Delete(tempRoot, true); } catch { }
+            }
+        }
         private static void TestInteractiveSegmentAnswer(Assembly appAssembly)
         {
-            var generator = new MathQuestionGenerator(314159);
-            var question = generator.Generate(new MathSelectionDecision
+            var question = new MathQuestion
             {
-                Template = new MathTemplateRef
-                {
-                    TemplateId = "draw_segment_given_length",
-                    SkillId = "DRAW_SEGMENT_GIVEN_LENGTH"
-                },
-                DifficultyFit = 0.5
-            });
+                QuestionId = "segment_ui_smoke",
+                TemplateId = "draw_segment_given_length",
+                SkillId = "DRAW_SEGMENT_GIVEN_LENGTH",
+                PromptVi = "Vẽ đoạn thẳng AB dài 7 cm bằng cách chọn hai đầu mút trên thước.",
+                CorrectAnswer = 7,
+                AnswerKind = "interaction_integer",
+                CorrectAnswerText = "7",
+                Choices = new List<int>(),
+                ChoiceTexts = new List<string>(),
+                IllustrationData = "segmentdraw|7|15"
+            };
             A(string.Equals(question.AnswerKind, "interaction_integer", StringComparison.Ordinal),
-                "segment_generated_question_preserves_interaction_kind");
-            A(question.DisplayChoices.Count == 0, "segment_generated_question_has_no_fake_choices");
+                "segment_ui_question_preserves_interaction_kind");
+            A(question.DisplayChoices.Count == 0, "segment_ui_question_has_no_fake_choices");
             A(!string.IsNullOrWhiteSpace(question.IllustrationData) &&
                 question.IllustrationData.StartsWith("segmentdraw|", StringComparison.Ordinal),
-                "segment_generated_question_has_interaction_geometry");
+                "segment_ui_question_has_interaction_geometry");
 
             using (var control = CreateInternalControl(appAssembly, "WAHUKidsLearn.SegmentDrawingAnswerControl"))
             {
@@ -625,6 +961,20 @@ namespace WAHU.ChildUiRuntimeSmoke
             foreach (Control child in root.Controls)
             {
                 var found = FindFirstButton(child);
+                if (found != null) return found;
+            }
+            return null;
+        }
+
+        private static Button FindButtonContaining(Control root, string text)
+        {
+            if (root == null || string.IsNullOrWhiteSpace(text)) return null;
+            var button = root as Button;
+            if (button != null && !string.IsNullOrWhiteSpace(button.Text) &&
+                button.Text.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0) return button;
+            foreach (Control child in root.Controls)
+            {
+                var found = FindButtonContaining(child, text);
                 if (found != null) return found;
             }
             return null;
