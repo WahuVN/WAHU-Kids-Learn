@@ -572,13 +572,13 @@
       "skill_id": "NUM_EXPANDED_FORM_HTO",
       "difficulty": "application",
       "question_type": "multiple_choice",
-      "prompt_vi": "Dạng khai triển đúng của 908 là gì?",
+      "prompt_vi": "Bạn An viết 908 = 900 + 80. Cách sửa nào đúng?",
       "answer_kind": "text",
-      "correct_answer": "900 + 0 + 8",
+      "correct_answer": "908 = 900 + 8",
       "accepted_answers": [
-        "900 + 0 + 8"
+        "908 = 900 + 8"
       ],
-      "explanation_vi": "908 có 9 trăm, 0 chục và 8 đơn vị.",
+      "explanation_vi": "908 có 9 trăm, 0 chục và 8 đơn vị; hàng chục bằng 0 nên dạng đúng là 900 + 8.",
       "hints_vi": [
         "Nhớ kiến thức: Dạng khai triển biểu diễn một số bằng tổng giá trị hàng trăm, hàng chục và hàng đơn vị.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Dạng khai triển” trước rồi mới chọn phương án khớp kết quả."
@@ -598,23 +598,23 @@
       "choices": [
         {
           "id": "a",
-          "text": "900 + 0 + 8",
-          "rationale_vi": "908 có 9 trăm, 0 chục và 8 đơn vị."
+          "text": "908 = 900 + 8",
+          "rationale_vi": "908 có 9 trăm, 0 chục và 8 đơn vị; hàng chục bằng 0 nên dạng đúng là 900 + 8."
         },
         {
           "id": "b",
-          "text": "90 + 8",
-          "rationale_vi": "“90 + 8” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Dạng khai triển” rồi thử lại."
+          "text": "908 = 90 + 8",
+          "rationale_vi": "“908 = 90 + 8” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Dạng khai triển” rồi thử lại."
         },
         {
           "id": "c",
-          "text": "900 + 80",
-          "rationale_vi": "Nếu chọn “900 + 80”, có ít nhất một bước của “Dạng khai triển” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "text": "908 = 900 + 80 + 8",
+          "rationale_vi": "Nếu chọn “908 = 900 + 80 + 8”, có ít nhất một bước của “Dạng khai triển” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
-          "text": "900 + 8 + 80",
-          "rationale_vi": "“900 + 8 + 80” là phương án nhiễu gần đúng. Tự làm theo “Dạng khai triển” rồi so kết quả với lựa chọn này."
+          "text": "908 = 900 + 0 + 80",
+          "rationale_vi": "“908 = 900 + 0 + 80” là phương án nhiễu gần đúng. Tự làm theo “Dạng khai triển” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "a"
@@ -687,13 +687,13 @@
       "skill_id": "NUMBER_RAY_FILL",
       "difficulty": "application",
       "question_type": "numeric_input",
-      "prompt_vi": "Tia số bắt đầu 0, 100, 200, 300, 400, 500, __. Điền số tiếp theo.",
+      "prompt_vi": "Trên tia số, mỗi bước tăng 100. Từ số 300 đi 3 bước sang phải thì đến số nào?",
       "answer_kind": "integer",
       "correct_answer": 600,
       "accepted_answers": [
         "600"
       ],
-      "explanation_vi": "Mỗi bước tăng 100; sau 500 là 600.",
+      "explanation_vi": "Từ 300 đi lần lượt đến 400, 500 rồi 600; ba bước sang phải đưa ta đến 600.",
       "hints_vi": [
         "Nhớ kiến thức: Khoảng cách số giữa hai vạch liên tiếp là không đổi trong cùng một bài tia số.",
         "Viết một phép tính hoặc quan hệ ngắn cho “Bước trên tia số”, tính xong đối chiếu lại điều đề đang hỏi."
@@ -2399,13 +2399,13 @@
       "skill_id": "DIVISION_MEANING",
       "difficulty": "application",
       "question_type": "numeric_input",
-      "prompt_vi": "20 thẻ chia đều vào 5 hộp. Mỗi hộp có bao nhiêu thẻ?",
+      "prompt_vi": "20 thẻ chia đều vào 5 hộp. Lan định lấy 20 - 5 và nói mỗi hộp có 15 thẻ. Mỗi hộp thực sự có bao nhiêu thẻ?",
       "answer_kind": "integer",
       "correct_answer": 4,
       "accepted_answers": [
         "4"
       ],
-      "explanation_vi": "20 : 5 = 4 nên mỗi hộp có 4 thẻ.",
+      "explanation_vi": "Chia đều 20 thẻ vào 5 hộp phải dùng 20 : 5 = 4; phép trừ 20 - 5 không mô tả chia đều.",
       "hints_vi": [
         "Nhớ kiến thức: Chia đều nghĩa là mỗi nhóm nhận cùng số lượng và không bỏ sót đối tượng trong bài chia hết.",
         "Viết một phép tính hoặc quan hệ ngắn cho “Chia đều”, tính xong đối chiếu lại điều đề đang hỏi."
@@ -3341,13 +3341,13 @@
       "skill_id": "WP_ONE_STEP_ADD_MORE",
       "difficulty": "application",
       "question_type": "word_problem",
-      "prompt_vi": "Buổi sáng thư viện nhận 310 sách, buổi chiều nhận thêm 260 sách. Tổng số sách nhận là bao nhiêu?",
+      "prompt_vi": "Buổi sáng thư viện nhận 310 sách, buổi chiều nhận thêm 260 sách. An định lấy 310 - 260 để tìm tổng. Tổng số sách đúng là bao nhiêu?",
       "answer_kind": "integer",
       "correct_answer": 570,
       "accepted_answers": [
         "570"
       ],
-      "explanation_vi": "310 + 260 = 570. Đây là cách dùng thêm vào để trả lời đúng đại lượng mà đề đang hỏi.",
+      "explanation_vi": "Từ “nhận thêm” cho biết phải cộng: 310 + 260 = 570; phép trừ của An không đúng với tình huống.",
       "hints_vi": [
         "Nhớ kiến thức: Tổng mới = số ban đầu + số được thêm.",
         "Có thể vẽ sơ đồ hoặc chia tình huống thành nhóm; dùng “Thêm vào” để kiểm tra phép tính trước khi tính."
@@ -3434,13 +3434,13 @@
       "skill_id": "WP_ONE_STEP_SUB_LESS",
       "difficulty": "application",
       "question_type": "word_problem",
-      "prompt_vi": "Một lớp có 40 tờ giấy màu, dùng 18 tờ. Còn bao nhiêu tờ?",
+      "prompt_vi": "Một lớp có 40 tờ giấy màu, đã dùng 18 tờ. Mai định cộng 40 + 18 để tìm số còn lại. Số tờ còn lại đúng là bao nhiêu?",
       "answer_kind": "integer",
       "correct_answer": 22,
       "accepted_answers": [
         "22"
       ],
-      "explanation_vi": "40 - 18 = 22. Đây là cách dùng bớt đi để trả lời đúng đại lượng mà đề đang hỏi.",
+      "explanation_vi": "Đã dùng bớt 18 tờ nên phải trừ: 40 - 18 = 22; cộng 40 + 18 không trả lời số còn lại.",
       "hints_vi": [
         "Nhớ kiến thức: Số còn lại = số ban đầu - số bị lấy bớt.",
         "Có thể vẽ sơ đồ hoặc chia tình huống thành nhóm; dùng “Bớt đi” để kiểm tra phép tính trước khi tính."
@@ -3528,13 +3528,13 @@
       "skill_id": "WP_ONE_STEP_MORE_THAN",
       "difficulty": "application",
       "question_type": "word_problem",
-      "prompt_vi": "Giỏ đỏ có 240 quả. Giỏ xanh có nhiều hơn 120 quả. Giỏ xanh có bao nhiêu quả?",
+      "prompt_vi": "Giỏ đỏ có 240 quả. Giỏ xanh nhiều hơn giỏ đỏ 120 quả. Nam định tính 240 - 120. Giỏ xanh thực sự có bao nhiêu quả?",
       "answer_kind": "integer",
       "correct_answer": 360,
       "accepted_answers": [
         "360"
       ],
-      "explanation_vi": "240 + 120 = 360. Đây là cách dùng nhiều hơn để trả lời đúng đại lượng mà đề đang hỏi.",
+      "explanation_vi": "Giỏ xanh nhiều hơn nên phải cộng lượng mốc với phần hơn: 240 + 120 = 360; phép trừ sẽ đi sai chiều so sánh.",
       "hints_vi": [
         "Nhớ kiến thức: Một lượng nhiều hơn lượng mốc k đơn vị bằng lượng mốc cộng k.",
         "Có thể vẽ sơ đồ hoặc chia tình huống thành nhóm; dùng “Nhiều hơn” để kiểm tra phép tính trước khi tính."
@@ -3622,13 +3622,13 @@
       "skill_id": "WP_ONE_STEP_LESS_THAN",
       "difficulty": "application",
       "question_type": "word_problem",
-      "prompt_vi": "Kho lớn có 650 hộp. Kho nhỏ ít hơn 230 hộp. Kho nhỏ có bao nhiêu hộp?",
+      "prompt_vi": "Kho lớn có 650 hộp. Kho nhỏ ít hơn kho lớn 230 hộp. Lan định tính 650 + 230. Kho nhỏ thực sự có bao nhiêu hộp?",
       "answer_kind": "integer",
       "correct_answer": 420,
       "accepted_answers": [
         "420"
       ],
-      "explanation_vi": "650 - 230 = 420. Đây là cách dùng ít hơn để trả lời đúng đại lượng mà đề đang hỏi.",
+      "explanation_vi": "Kho nhỏ ít hơn nên phải lấy lượng mốc trừ phần chênh lệch: 650 - 230 = 420; phép cộng sẽ làm số lượng lớn hơn.",
       "hints_vi": [
         "Nhớ kiến thức: Một lượng ít hơn lượng mốc k đơn vị bằng lượng mốc trừ k.",
         "Có thể vẽ sơ đồ hoặc chia tình huống thành nhóm; dùng “Ít hơn” để kiểm tra phép tính trước khi tính."
@@ -3808,13 +3808,13 @@
       "skill_id": "WP_ONE_STEP_DIVISION_CONTEXT",
       "difficulty": "application",
       "question_type": "word_problem",
-      "prompt_vi": "20 học sinh chia đều thành 5 nhóm. Mỗi nhóm có bao nhiêu học sinh?",
+      "prompt_vi": "20 học sinh chia đều thành 5 nhóm. An định tính 20 - 5. Muốn tìm số học sinh mỗi nhóm, kết quả đúng là bao nhiêu?",
       "answer_kind": "integer",
       "correct_answer": 4,
       "accepted_answers": [
         "4"
       ],
-      "explanation_vi": "20 : 5 = 4. Đây là cách dùng chia trong tình huống để trả lời đúng đại lượng mà đề đang hỏi.",
+      "explanation_vi": "Chia đều thành 5 nhóm phải dùng 20 : 5 = 4, không dùng phép trừ 20 - 5.",
       "hints_vi": [
         "Nhớ kiến thức: Thương trả lời kích thước mỗi nhóm hoặc số nhóm khi chia đều.",
         "Có thể vẽ sơ đồ hoặc chia tình huống thành nhóm; dùng “Chia trong tình huống” để kiểm tra phép tính trước khi tính."
@@ -6769,13 +6769,13 @@
       "skill_id": "MEASURE_WITH_RULER_CM",
       "difficulty": "application",
       "question_type": "numeric_input",
-      "prompt_vi": "Bút chì đặt từ vạch 2 cm đến vạch 11 cm. Bút dài bao nhiêu cm?",
+      "prompt_vi": "Bạn Minh đo bút chì từ vạch 2 cm đến vạch 11 cm nhưng đọc là 11 cm vì chỉ nhìn vạch cuối. Độ dài đúng là bao nhiêu cm?",
       "answer_kind": "integer",
       "correct_answer": 9,
       "accepted_answers": [
         "9"
       ],
-      "explanation_vi": "11 - 2 = 9 cm. Kết quả này theo đúng quy tắc đo bằng thước cm; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "Vật không bắt đầu ở vạch 0 nên phải lấy 11 - 2 = 9 cm; không thể chỉ đọc số ở vạch cuối.",
       "hints_vi": [
         "Nhớ kiến thức: Độ dài bằng hiệu số giữa hai vị trí đầu mút trên thước chia cm.",
         "Viết một phép tính hoặc quan hệ ngắn cho “Đo bằng thước cm”, tính xong đối chiếu lại điều đề đang hỏi."
@@ -7117,13 +7117,13 @@
       "skill_id": "MEASUREMENT_CONVERT_CALCULATE_LEARNED_UNITS",
       "difficulty": "application",
       "question_type": "numeric_input",
-      "prompt_vi": "5 l - 2 l bằng bao nhiêu lít?",
+      "prompt_vi": "Một đoạn dây dài 2 m, nối thêm đoạn 3 dm. Tổng độ dài là bao nhiêu dm?",
       "answer_kind": "integer",
-      "correct_answer": 3,
+      "correct_answer": 23,
       "accepted_answers": [
-        "3"
+        "23"
       ],
-      "explanation_vi": "Hai số đo cùng đơn vị l nên 5 - 2 = 3 l.",
+      "explanation_vi": "Đổi 2 m = 20 dm, rồi cộng 20 + 3 = 23 dm.",
       "hints_vi": [
         "Nhớ kiến thức: Đưa các số đo về cùng đơn vị trước khi cộng, trừ hoặc so sánh.",
         "Viết một phép tính hoặc quan hệ ngắn cho “Tính với số đo”, tính xong đối chiếu lại điều đề đang hỏi."
@@ -7141,7 +7141,7 @@
         "numeric_max": 1000
       },
       "status": "CHILD_READY",
-      "answer_unit": "l"
+      "answer_unit": "dm"
     },
     {
       "id": "m2_q_measurement_estimate_basic_01",
@@ -7372,13 +7372,13 @@
       "skill_id": "POLYLINE_LENGTH_SUM_SEGMENTS",
       "difficulty": "application",
       "question_type": "numeric_input",
-      "prompt_vi": "Một đường gấp khúc gồm các đoạn 7 cm, 4 cm, 6 cm. Tổng độ dài là bao nhiêu?",
+      "prompt_vi": "Đường gấp khúc ABCD có AB = 7 cm, BC = 4 cm, CD = 6 cm. Bạn chỉ cộng AB và CD được 13 cm. Tổng độ dài đúng là bao nhiêu cm?",
       "answer_kind": "integer",
       "correct_answer": 17,
       "accepted_answers": [
         "17"
       ],
-      "explanation_vi": "7 + 4 + 6 = 17 cm. Kết quả này theo đúng quy tắc độ dài đường gấp khúc; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "Phải cộng đủ ba đoạn AB, BC và CD: 7 + 4 + 6 = 17 cm; phép tính 13 cm đã bỏ sót đoạn BC.",
       "hints_vi": [
         "Nhớ kiến thức: Cộng độ dài từng đoạn thành phần để có tổng độ dài đường gấp khúc.",
         "Viết một phép tính hoặc quan hệ ngắn cho “Độ dài đường gấp khúc”, tính xong đối chiếu lại điều đề đang hỏi."
@@ -7468,13 +7468,13 @@
       "skill_id": "MEASUREMENT_REAL_WORLD_ONE_STEP",
       "difficulty": "application",
       "question_type": "numeric_input",
-      "prompt_vi": "Bao A nặng 6 kg, bao B nặng 4 kg. Cả hai nặng bao nhiêu kg?",
+      "prompt_vi": "Bao A nặng 6 kg, bao B nặng 4 kg. Bạn Bình cộng được 10 nhưng ghi đơn vị m. Cả hai bao nặng đúng bao nhiêu kg?",
       "answer_kind": "integer",
       "correct_answer": 10,
       "accepted_answers": [
         "10"
       ],
-      "explanation_vi": "6 kg + 4 kg = 10 kg. Kết quả này theo đúng quy tắc giải toán đo lường; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "Hai đại lượng đều là khối lượng nên cộng 6 + 4 = 10 và giữ đơn vị kg; đơn vị m của Bình là sai.",
       "hints_vi": [
         "Nhớ kiến thức: Một bài đo lường một bước kết hợp số đo cùng đơn vị với cộng hoặc trừ phù hợp tình huống.",
         "Viết một phép tính hoặc quan hệ ngắn cho “Giải toán đo lường”, tính xong đối chiếu lại điều đề đang hỏi."
@@ -7655,13 +7655,13 @@
       "skill_id": "PICTOGRAPH_READ_DESCRIBE",
       "difficulty": "application",
       "question_type": "numeric_input",
-      "prompt_vi": "Một hàng có 5 biểu tượng, chú giải 1 biểu tượng = 2 quyển sách. Hàng đó biểu diễn bao nhiêu quyển?",
+      "prompt_vi": "Một hàng có 5 biểu tượng, chú giải 1 biểu tượng = 2 quyển sách. Minh nói hàng đó có 5 quyển vì chỉ đếm số hình. Hàng thực sự biểu diễn bao nhiêu quyển?",
       "answer_kind": "integer",
       "correct_answer": 10,
       "accepted_answers": [
         "10"
       ],
-      "explanation_vi": "5 × 2 = 10 quyển. Kết quả này theo đúng quy tắc biểu đồ tranh; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "Mỗi hình đại diện 2 quyển nên phải dùng chú giải: 5 × 2 = 10 quyển; chỉ đếm 5 hình là chưa đủ.",
       "hints_vi": [
         "Nhớ kiến thức: Số lượng = số biểu tượng × giá trị mỗi biểu tượng theo chú giải.",
         "Viết một phép tính hoặc quan hệ ngắn cho “Biểu đồ tranh”, tính xong đối chiếu lại điều đề đang hỏi."

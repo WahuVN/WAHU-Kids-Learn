@@ -318,6 +318,51 @@ class MathContentDataSmoke(unittest.TestCase):
         self.assertIn("số 6", clock["prompt_vi"].lower())
         self.assertEqual("5 giờ 30 phút", clock["correct_answer"])
 
+    def test_application_progression_transfer_regressions(self):
+        expanded = self.question_by_id["m2_q_num_expanded_form_hto_03"]
+        division_meaning = self.question_by_id["m2_q_division_meaning_03"]
+        number_ray = self.question_by_id["m2_q_number_ray_fill_03"]
+        ruler = self.question_by_id["m2_q_measure_with_ruler_cm_03"]
+        convert_measure = self.question_by_id["m2_q_measurement_convert_calculate_learned_units_03"]
+        polyline = self.question_by_id["m2_q_polyline_length_sum_segments_03"]
+        pictograph = self.question_by_id["m2_q_pictograph_read_describe_03"]
+        division_context = self.question_by_id["m2_q_wp_one_step_division_context_03"]
+        add_more = self.question_by_id["m2_q_wp_one_step_add_more_03"]
+        sub_less = self.question_by_id["m2_q_wp_one_step_sub_less_03"]
+        more_than = self.question_by_id["m2_q_wp_one_step_more_than_03"]
+        less_than = self.question_by_id["m2_q_wp_one_step_less_than_03"]
+        measurement_story = self.question_by_id["m2_q_measurement_real_world_one_step_03"]
+
+        self.assertEqual("multiple_choice", expanded["question_type"])
+        self.assertIn("bạn an viết", expanded["prompt_vi"].lower())
+        self.assertEqual("908 = 900 + 8", expanded["correct_answer"])
+        self.assertEqual("numeric_input", division_meaning["question_type"])
+        self.assertIn("lan định lấy 20 - 5", division_meaning["prompt_vi"].lower())
+        self.assertEqual(4, division_meaning["correct_answer"])
+        self.assertIn("3 bước sang phải", number_ray["prompt_vi"].lower())
+        self.assertIn("nhưng đọc là 11 cm", ruler["prompt_vi"].lower())
+        self.assertEqual(23, convert_measure["correct_answer"])
+        self.assertEqual("dm", convert_measure["answer_unit"])
+        self.assertIn("2 m", convert_measure["prompt_vi"].lower())
+        self.assertIn("3 dm", convert_measure["prompt_vi"].lower())
+        self.assertIn("chỉ cộng", polyline["prompt_vi"].lower())
+        self.assertEqual(17, polyline["correct_answer"])
+        self.assertIn("minh nói", pictograph["prompt_vi"].lower())
+        self.assertEqual(10, pictograph["correct_answer"])
+        self.assertIn("an định tính 20 - 5", division_context["prompt_vi"].lower())
+        self.assertEqual(4, division_context["correct_answer"])
+        self.assertIn("an định lấy 310 - 260", add_more["prompt_vi"].lower())
+        self.assertEqual(570, add_more["correct_answer"])
+        self.assertIn("mai định cộng 40 + 18", sub_less["prompt_vi"].lower())
+        self.assertEqual(22, sub_less["correct_answer"])
+        self.assertIn("nam định tính 240 - 120", more_than["prompt_vi"].lower())
+        self.assertEqual(360, more_than["correct_answer"])
+        self.assertIn("lan định tính 650 + 230", less_than["prompt_vi"].lower())
+        self.assertEqual(420, less_than["correct_answer"])
+        self.assertIn("ghi đơn vị m", measurement_story["prompt_vi"].lower())
+        self.assertEqual(10, measurement_story["correct_answer"])
+        self.assertEqual("kg", measurement_story["answer_unit"])
+
     def test_distractor_rationales_are_specific_not_placeholders(self):
         rationales = []
         for item in self.questions:

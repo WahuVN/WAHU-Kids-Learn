@@ -549,12 +549,12 @@ Q = {
     "NUM_EXPANDED_FORM_HTO": [
         mc("Dạng khai triển đúng của 352 là gì?", "300 + 50 + 2", ["300 + 5 + 2", "30 + 50 + 2", "300 + 50 + 20"], "352 có 3 trăm, 5 chục và 2 đơn vị nên bằng 300 + 50 + 2."),
         nq("Số nào bằng 600 + 20 + 7?", 627, "Cộng giá trị các hàng: 600 + 20 + 7 = 627."),
-        mc("Dạng khai triển đúng của 908 là gì?", "900 + 0 + 8", ["90 + 8", "900 + 80", "900 + 8 + 80"], "908 có 9 trăm, 0 chục và 8 đơn vị."),
+        mc("Bạn An viết 908 = 900 + 80. Cách sửa nào đúng?", "908 = 900 + 8", ["908 = 90 + 8", "908 = 900 + 80 + 8", "908 = 900 + 0 + 80"], "908 có 9 trăm, 0 chục và 8 đơn vị; hàng chục bằng 0 nên dạng đúng là 900 + 8."),
     ],
     "NUMBER_RAY_FILL": [
         nq("Trên tia số có các vạch 200, 300, __, 500. Số còn thiếu là gì?", 400, "Mỗi vạch tăng 100 nên sau 300 là 400."),
         nq("Trên tia số: 650, 700, __, 800. Mỗi bước bằng nhau. Số còn thiếu là gì?", 750, "Từ 650 đến 700 tăng 50, nên vạch tiếp theo là 750."),
-        nq("Tia số bắt đầu 0, 100, 200, 300, 400, 500, __. Điền số tiếp theo.", 600, "Mỗi bước tăng 100; sau 500 là 600."),
+        nq("Trên tia số, mỗi bước tăng 100. Từ số 300 đi 3 bước sang phải thì đến số nào?", 600, "Từ 300 đi lần lượt đến 400, 500 rồi 600; ba bước sang phải đưa ta đến 600."),
     ],
     "NUM_COMPARE_0_1000": [
         mc("Điền dấu đúng: 608 __ 680", "<", [">", "=", "+"], "Cùng 6 trăm nhưng 0 chục nhỏ hơn 8 chục nên 608 < 680."),
@@ -631,7 +631,7 @@ Q = {
     "DIVISION_MEANING": [
         nq("Có 10 chiếc bánh chia đều cho 2 bạn. Mỗi bạn được bao nhiêu chiếc?", 5, "10 chia đều thành 2 phần bằng nhau thì mỗi phần có 5."),
         nq("15 bông hoa xếp thành các nhóm 5 bông. Có bao nhiêu nhóm?", 3, "15 : 5 = 3 nhóm."),
-        nq("20 thẻ chia đều vào 5 hộp. Mỗi hộp có bao nhiêu thẻ?", 4, "20 : 5 = 4 nên mỗi hộp có 4 thẻ."),
+        nq("20 thẻ chia đều vào 5 hộp. Lan định lấy 20 - 5 và nói mỗi hộp có 15 thẻ. Mỗi hộp thực sự có bao nhiêu thẻ?", 4, "Chia đều 20 thẻ vào 5 hộp phải dùng 20 : 5 = 4; phép trừ 20 - 5 không mô tả chia đều."),
     ],
     "MULTIPLICATION_COMPONENTS": [
         mc("Trong 2 × 5 = 10, số 2 được gọi là gì?", "thừa số", ["tích", "thương", "số bị chia"], "2 là một số được nhân nên là thừa số."),
@@ -672,22 +672,22 @@ Q = {
     "WP_ONE_STEP_ADD_MORE": [
         nq("Lan có 24 bút chì, được cho thêm 13 bút. Lan có tất cả bao nhiêu bút?", 37, "24 + 13 = 37 vì số bút được thêm vào lượng ban đầu."),
         nq("Một giỏ có 125 quả, đặt thêm 243 quả. Giỏ có bao nhiêu quả?", 368, "125 + 243 = 368."),
-        nq("Buổi sáng thư viện nhận 310 sách, buổi chiều nhận thêm 260 sách. Tổng số sách nhận là bao nhiêu?", 570, "310 + 260 = 570."),
+        nq("Buổi sáng thư viện nhận 310 sách, buổi chiều nhận thêm 260 sách. An định lấy 310 - 260 để tìm tổng. Tổng số sách đúng là bao nhiêu?", 570, "Từ “nhận thêm” cho biết phải cộng: 310 + 260 = 570; phép trừ của An không đúng với tình huống."),
     ],
     "WP_ONE_STEP_SUB_LESS": [
         nq("Có 45 quả bóng, cho đi 12 quả. Còn lại bao nhiêu quả?", 33, "45 - 12 = 33 vì 12 quả bị bớt khỏi số ban đầu."),
         nq("Kho có 786 hộp, chuyển đi 234 hộp. Còn bao nhiêu hộp?", 552, "786 - 234 = 552."),
-        nq("Một lớp có 40 tờ giấy màu, dùng 18 tờ. Còn bao nhiêu tờ?", 22, "40 - 18 = 22."),
+        nq("Một lớp có 40 tờ giấy màu, đã dùng 18 tờ. Mai định cộng 40 + 18 để tìm số còn lại. Số tờ còn lại đúng là bao nhiêu?", 22, "Đã dùng bớt 18 tờ nên phải trừ: 40 - 18 = 22; cộng 40 + 18 không trả lời số còn lại."),
     ],
     "WP_ONE_STEP_MORE_THAN": [
         nq("An có 25 viên bi. Bình có nhiều hơn An 7 viên. Bình có bao nhiêu viên?", 32, "Bình nhiều hơn An 7 viên nên 25 + 7 = 32."),
         nq("Cây A cao 120 cm. Cây B cao hơn cây A 30 cm. Cây B cao bao nhiêu cm?", 150, "120 + 30 = 150 cm.", unit="cm"),
-        nq("Giỏ đỏ có 240 quả. Giỏ xanh có nhiều hơn 120 quả. Giỏ xanh có bao nhiêu quả?", 360, "240 + 120 = 360."),
+        nq("Giỏ đỏ có 240 quả. Giỏ xanh nhiều hơn giỏ đỏ 120 quả. Nam định tính 240 - 120. Giỏ xanh thực sự có bao nhiêu quả?", 360, "Giỏ xanh nhiều hơn nên phải cộng lượng mốc với phần hơn: 240 + 120 = 360; phép trừ sẽ đi sai chiều so sánh."),
     ],
     "WP_ONE_STEP_LESS_THAN": [
         nq("Mai có 30 nhãn dán. Linh có ít hơn Mai 8 nhãn. Linh có bao nhiêu nhãn?", 22, "Linh ít hơn Mai 8 nên 30 - 8 = 22."),
         nq("Dây A dài 90 cm. Dây B ngắn hơn dây A 20 cm. Dây B dài bao nhiêu cm?", 70, "90 - 20 = 70 cm.", unit="cm"),
-        nq("Kho lớn có 650 hộp. Kho nhỏ ít hơn 230 hộp. Kho nhỏ có bao nhiêu hộp?", 420, "650 - 230 = 420."),
+        nq("Kho lớn có 650 hộp. Kho nhỏ ít hơn kho lớn 230 hộp. Lan định tính 650 + 230. Kho nhỏ thực sự có bao nhiêu hộp?", 420, "Kho nhỏ ít hơn nên phải lấy lượng mốc trừ phần chênh lệch: 650 - 230 = 420; phép cộng sẽ làm số lượng lớn hơn."),
     ],
     "WP_ONE_STEP_MULTIPLICATION_CONTEXT": [
         nq("Có 6 bàn, mỗi bàn 2 bạn. Có tất cả bao nhiêu bạn?", 12, "6 nhóm 2 bạn nên 6 × 2 = 12."),
@@ -697,7 +697,7 @@ Q = {
     "WP_ONE_STEP_DIVISION_CONTEXT": [
         nq("Có 14 chiếc bánh chia đều cho 2 đĩa. Mỗi đĩa có bao nhiêu chiếc?", 7, "14 : 2 = 7."),
         nq("Có 35 bút xếp vào các hộp, mỗi hộp 5 bút. Cần bao nhiêu hộp?", 7, "35 : 5 = 7."),
-        nq("20 học sinh chia đều thành 5 nhóm. Mỗi nhóm có bao nhiêu học sinh?", 4, "20 : 5 = 4."),
+        nq("20 học sinh chia đều thành 5 nhóm. An định tính 20 - 5. Muốn tìm số học sinh mỗi nhóm, kết quả đúng là bao nhiêu?", 4, "Chia đều thành 5 nhóm phải dùng 20 : 5 = 4, không dùng phép trừ 20 - 5."),
     ],
     "WP_SELECT_OPERATION_ONE_STEP": [
         mc("Có 10 quả, ăn 2 quả, hỏi còn lại. Chọn phép tính đúng.", "10 - 2", ["10 + 2", "10 × 2", "10 : 2"], "Tình huống lấy bớt và hỏi còn lại nên dùng phép trừ."),
@@ -804,7 +804,7 @@ Q = {
     "MEASURE_WITH_RULER_CM": [
         nq("Một đoạn thẳng bắt đầu ở vạch 0 cm và kết thúc ở vạch 8 cm. Dài bao nhiêu cm?", 8, "8 - 0 = 8 cm.", unit="cm"),
         nq("Một đoạn bắt đầu ở vạch 3 cm và kết thúc ở vạch 10 cm. Dài bao nhiêu cm?", 7, "10 - 3 = 7 cm.", unit="cm"),
-        nq("Bút chì đặt từ vạch 2 cm đến vạch 11 cm. Bút dài bao nhiêu cm?", 9, "11 - 2 = 9 cm.", unit="cm"),
+        nq("Bạn Minh đo bút chì từ vạch 2 cm đến vạch 11 cm nhưng đọc là 11 cm vì chỉ nhìn vạch cuối. Độ dài đúng là bao nhiêu cm?", 9, "Vật không bắt đầu ở vạch 0 nên phải lấy 11 - 2 = 9 cm; không thể chỉ đọc số ở vạch cuối.", unit="cm"),
     ],
     "MEASURE_WITH_COMMON_SCALE": [
         nq("Một thang đo có các vạch 0, 2, 4, 6, 8. Mỗi vạch tăng bao nhiêu đơn vị?", 2, "Hiệu giữa hai vạch liên tiếp là 2."),
@@ -819,7 +819,7 @@ Q = {
     "MEASUREMENT_CONVERT_CALCULATE_LEARNED_UNITS": [
         nq("Một sợi dây dài 3 m. Nếu ghi độ dài bằng đề-xi-mét, số đo là bao nhiêu dm?", 30, "1 m = 10 dm nên 3 m = 30 dm.", unit="dm"),
         nq("2 kg + 3 kg bằng bao nhiêu kg?", 5, "Hai số đo cùng đơn vị kg nên cộng 2 + 3 = 5 kg.", unit="kg"),
-        nq("5 l - 2 l bằng bao nhiêu lít?", 3, "Hai số đo cùng đơn vị l nên 5 - 2 = 3 l.", unit="l"),
+        nq("Một đoạn dây dài 2 m, nối thêm đoạn 3 dm. Tổng độ dài là bao nhiêu dm?", 23, "Đổi 2 m = 20 dm, rồi cộng 20 + 3 = 23 dm.", unit="dm", numeric_max=1000),
     ],
     "MEASUREMENT_ESTIMATE_BASIC": [
         mc("Chiều dài một chiếc bút chì hợp lý nhất khoảng bao nhiêu?", "15 cm", ["15 km", "15 m", "150 m"], "Bút chì là vật nhỏ, đơn vị cm và độ dài khoảng vài chục cm là hợp lý."),
@@ -829,12 +829,12 @@ Q = {
     "POLYLINE_LENGTH_SUM_SEGMENTS": [
         nq("Đường gấp khúc có hai đoạn dài 4 cm và 6 cm. Tổng độ dài là bao nhiêu?", 10, "4 + 6 = 10 cm.", unit="cm"),
         nq("Ba đoạn của đường gấp khúc dài 3 cm, 5 cm và 2 cm. Độ dài cả đường là bao nhiêu?", 10, "3 + 5 + 2 = 10 cm.", unit="cm"),
-        nq("Một đường gấp khúc gồm các đoạn 7 cm, 4 cm, 6 cm. Tổng độ dài là bao nhiêu?", 17, "7 + 4 + 6 = 17 cm.", unit="cm"),
+        nq("Đường gấp khúc ABCD có AB = 7 cm, BC = 4 cm, CD = 6 cm. Bạn chỉ cộng AB và CD được 13 cm. Tổng độ dài đúng là bao nhiêu cm?", 17, "Phải cộng đủ ba đoạn AB, BC và CD: 7 + 4 + 6 = 17 cm; phép tính 13 cm đã bỏ sót đoạn BC.", unit="cm"),
     ],
     "MEASUREMENT_REAL_WORLD_ONE_STEP": [
         nq("Một sợi dây dài 2 m, nối thêm đoạn 3 m. Dây dài tất cả bao nhiêu mét?", 5, "2 m + 3 m = 5 m.", unit="m"),
         nq("Bình có 8 l nước, rót ra 3 l. Còn bao nhiêu lít?", 5, "8 l - 3 l = 5 l.", unit="l"),
-        nq("Bao A nặng 6 kg, bao B nặng 4 kg. Cả hai nặng bao nhiêu kg?", 10, "6 kg + 4 kg = 10 kg.", unit="kg"),
+        nq("Bao A nặng 6 kg, bao B nặng 4 kg. Bạn Bình cộng được 10 nhưng ghi đơn vị m. Cả hai bao nặng đúng bao nhiêu kg?", 10, "Hai đại lượng đều là khối lượng nên cộng 6 + 4 = 10 và giữ đơn vị kg; đơn vị m của Bình là sai.", unit="kg"),
     ],
 
     "DATA_COLLECT_CLASSIFY_COUNT": [
@@ -845,7 +845,7 @@ Q = {
     "PICTOGRAPH_READ_DESCRIBE": [
         nq("Biểu đồ tranh có 4 hình ngôi sao cho nhóm A; chú giải 1 hình = 1 bạn. Nhóm A có bao nhiêu bạn?", 4, "4 biểu tượng × 1 bạn mỗi biểu tượng = 4 bạn."),
         nq("Biểu đồ có 3 hình quả táo; chú giải 1 hình = 2 quả. Có bao nhiêu quả táo?", 6, "3 biểu tượng × 2 quả = 6 quả."),
-        nq("Một hàng có 5 biểu tượng, chú giải 1 biểu tượng = 2 quyển sách. Hàng đó biểu diễn bao nhiêu quyển?", 10, "5 × 2 = 10 quyển."),
+        nq("Một hàng có 5 biểu tượng, chú giải 1 biểu tượng = 2 quyển sách. Minh nói hàng đó có 5 quyển vì chỉ đếm số hình. Hàng thực sự biểu diễn bao nhiêu quyển?", 10, "Mỗi hình đại diện 2 quyển nên phải dùng chú giải: 5 × 2 = 10 quyển; chỉ đếm 5 hình là chưa đủ."),
     ],
     "PICTOGRAPH_SIMPLE_INFERENCE": [
         nq("Biểu đồ: nhóm A có 6 biểu tượng, nhóm B có 4 biểu tượng; 1 biểu tượng = 1 bạn. A nhiều hơn B bao nhiêu bạn?", 2, "6 - 4 = 2 bạn."),

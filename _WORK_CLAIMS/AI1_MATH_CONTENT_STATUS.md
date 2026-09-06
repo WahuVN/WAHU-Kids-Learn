@@ -28,7 +28,7 @@ Owner: AI1 — Math Content & Data
   - interactive measurement
   - word problem
 - Semantic validator errors: **0**
-- Math content unittest: **26 / 26 PASS**
+- Math content unittest: **27 / 27 PASS**
 - Pack manifest/hash/listing check on current working tree: **PASS** (`version=1.9.0`, 3 listed files)
 
 ## Curriculum/content completeness
@@ -120,7 +120,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - 267 distractor có **256 rationale khác nhau**, max lặp 3 và placeholder chung = 0;
 - vị trí đáp án đúng được cân bằng deterministic: 88 câu 4-choice = 22/22/22/22 cho A/B/C/D; 3 true/false = 2/1;
 - 23 câu integer có `answer_unit` giữ đúng contract display-only, không đổi sang unit-input;
-- 4 application regression quan trọng đã được nâng từ single-fact recall sang kết hợp dữ kiện/khái niệm: thành phần phép trừ, thành phần phép chia, ghép hình, đọc đồng hồ;
+- **17 application regression quan trọng** được khóa riêng: 4 câu kết hợp dữ kiện/khái niệm trước đó + 13 câu transfer/error-analysis mới (dạng khai triển, ý nghĩa chia, tia số, đo thước, đổi+tính số đo, đường gấp khúc, biểu đồ tranh và các bài toán một bước);
 - child-facing lesson/question text có **0 internal-engine vocabulary**; metadata kỹ thuật như `application`, `numeric_input`, `deterministic` vẫn được phép;
 - **67/67 worked example unique**, mỗi ví dụ có ít nhất 2 bước giải, **0 exact/near overlap** với 201 câu practice và 67/67 solution chốt đáp án tường minh;
 - mục tiêu học thứ hai đạt **67/67 unique**, gắn concept + dạng vận dụng của từng lesson, placeholder chung = 0;
@@ -128,7 +128,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - toàn ngân hàng đạt **0 exact duplicate + 0 cross-lesson near-duplicate ≥ 0.95**; 2 cặp near-duplicate đã được viết lại theo ngữ cảnh khác;
 - 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract.
 
-Latest result: **26 tests PASS**.
+Latest result: **27 tests PASS**.
 
 ## Commits / waves
 
@@ -152,6 +152,7 @@ Latest result: **26 tests PASS**.
 - `19538b5` — `Toán: chốt đáp án rõ trong ví dụ mẫu`
 - `45aa6e8` — `Toán: đặc thù hóa mục tiêu cho 67 bài học`
 - `5e05fcc` — `Toán: nâng chiều sâu lời giải cho ngân hàng câu hỏi`
+- `d7aea5d` — `Toán: loại câu gần trùng giữa các bài học`
 
 ## Current blockers outside AI1 content ownership
 
