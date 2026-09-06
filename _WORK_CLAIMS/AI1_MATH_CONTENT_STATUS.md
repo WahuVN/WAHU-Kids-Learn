@@ -28,7 +28,7 @@ Owner: AI1 — Math Content & Data
   - interactive measurement
   - word problem
 - Semantic validator errors: **0**
-- Math content unittest: **15 / 15 PASS**
+- Math content unittest: **16 / 16 PASS**
 - Pack manifest/hash/listing check on current working tree: **PASS** (`version=1.9.0`, 3 listed files)
 
 ## Curriculum/content completeness
@@ -77,6 +77,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - malformed expression / divide by zero / unsupported expression nodes;
 - invalid unit metadata;
 - invalid MC correct choice / duplicate choices / rationale missing;
+- MCQ trùng nghĩa sau normalize Unicode/case/whitespace hoặc hai biểu thức choice cho cùng giá trị số;
 - invalid true/false shape;
 - mệnh giá tiền Việt Nam bị hard-code khi chưa có source/book mapping;
 - phép nhân/chia mở rộng không thuộc skill quan hệ thời gian `1 ngày = 24 giờ`, `1 giờ = 60 phút`;
@@ -104,9 +105,10 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - nội dung tiền Việt Nam không hard-code mệnh giá khi chưa có source/book mapping;
 - skill quan hệ thời gian không mở rộng thành phép nhân/chia ngoài yêu cầu cần đạt;
 - mọi phép nhân/chia literal child-facing nằm trong bảng 2 hoặc 5, kể cả distractor;
+- mọi MCQ có choice khác nhau sau normalize text và không có hai biểu thức choice cùng giá trị số;
 - 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract.
 
-Latest result: **15 tests PASS**.
+Latest result: **16 tests PASS**.
 
 ## Commits / waves
 
@@ -118,6 +120,7 @@ Latest result: **15 tests PASS**.
 - `ad5db15` — `Toán: chốt status content và test biểu thức fail-closed`
 - `c7e0b0e` — `Toán: bỏ mệnh giá tiền chưa map nguồn khỏi nội dung`
 - `2ac3027` — `Toán: siết hard guard thời gian và thứ tự prerequisite`
+- `234eafc` — `Toán: khóa phép nhân chia và nhớ mượn theo baseline`
 
 ## Current blockers outside AI1 content ownership
 

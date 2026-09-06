@@ -530,7 +530,7 @@
         },
         {
           "id": "d",
-          "text": "300 + 52",
+          "text": "300 + 50 + 20",
           "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
         }
       ]
@@ -2254,7 +2254,7 @@
         },
         {
           "id": "b",
-          "text": "3 + 3",
+          "text": "2 + 2 + 2 + 2",
           "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
         },
         {
@@ -3162,7 +3162,7 @@
         },
         {
           "id": "d",
-          "text": "4 - 2",
+          "text": "4 + 2",
           "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
         }
       ]

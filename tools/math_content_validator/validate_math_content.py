@@ -9,6 +9,7 @@ import difflib
 import json
 import re
 import sys
+import unicodedata
 from collections import Counter, defaultdict
 from fractions import Fraction
 from pathlib import Path
@@ -30,6 +31,7 @@ TIME_RELATION_SKILLS = {"TIME_DAY_24_HOURS", "TIME_HOUR_60_MINUTES"}
 TIME_OUT_OF_SCOPE_ARITH_RE = re.compile(r"\b\d+\s*(?:×|\*|÷|/|:)\s*\d+\b")
 GRADE2_MUL_LITERAL_RE = re.compile(r"(?<!\d)(\d+)\s*(?:×|\*)\s*(\d+)(?!\d)")
 GRADE2_DIV_LITERAL_RE = re.compile(r"(?<!\d)(\d+)(?:\s*÷\s*|\s+:\s+)(\d+)(?!\d)")
+NUMERIC_CHOICE_EXPR_RE = re.compile(r"^[\d\s+\-−–*/×÷:().,]+$")
 
 
 def load_json(path: Path, errors: list[str]) -> dict:
@@ -159,6 +161,22 @@ def eval_restricted_expression(text: str) -> Fraction:
         raise ValueError(f"unsupported_expression_node:{type(node).__name__}")
 
     return walk(tree)
+
+
+def normalize_choice_text(text: str) -> str:
+    if not isinstance(text, str):
+        return ""
+    return " ".join(unicodedata.normalize("NFC", text).casefold().split())
+
+
+def try_eval_numeric_choice(text: str) -> Fraction | None:
+    if not isinstance(text, str) or not NUMERIC_CHOICE_EXPR_RE.fullmatch(text.strip()):
+        return None
+    normalized = re.sub(r"\s+:\s+", " / ", text.strip())
+    try:
+        return eval_restricted_expression(normalized)
+    except (ArithmeticError, SyntaxError, ValueError, TypeError):
+        return None
 
 
 def parse_unit_answer(text: str) -> tuple[Fraction, str]:
@@ -614,6 +632,17 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
                 errors.append(f"duplicate_choice_id:{where}")
             if len(choice_texts) != len(set(choice_texts)):
                 errors.append(f"duplicate_choice_text:{where}")
+            normalized_choice_texts = [normalize_choice_text(x) for x in choice_texts]
+            if len(normalized_choice_texts) != len(set(normalized_choice_texts)):
+                errors.append(f"duplicate_choice_text_normalized:{where}")
+            numeric_choice_values: dict[Fraction, list[str]] = defaultdict(list)
+            for cid, text in zip(choice_ids, choice_texts):
+                value = try_eval_numeric_choice(text)
+                if value is not None:
+                    numeric_choice_values[value].append(cid)
+            for value, ids in numeric_choice_values.items():
+                if len(ids) > 1:
+                    errors.append(f"duplicate_choice_numeric_value:{where}:{value}:{','.join(ids)}")
             correct_id = q.get("correct_choice_id")
             correct_text = q.get("correct_answer")
             if correct_id not in choice_ids:

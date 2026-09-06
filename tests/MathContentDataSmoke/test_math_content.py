@@ -225,6 +225,21 @@ class MathContentDataSmoke(unittest.TestCase):
                 serialized = json.dumps(item, ensure_ascii=False)
                 self.assertEqual([], validator.grade2_operation_scope_violations(serialized))
 
+    def test_multiple_choice_options_are_semantically_distinct(self):
+        self.assertEqual("có thể", validator.normalize_choice_text("  CÓ   THỂ "))
+        self.assertEqual(validator.Fraction(352, 1), validator.try_eval_numeric_choice("300 + 52"))
+        self.assertEqual(validator.Fraction(352, 1), validator.try_eval_numeric_choice("300 + 50 + 2"))
+        for item in self.questions:
+            choices = item.get("choices", [])
+            if not choices:
+                continue
+            with self.subTest(item=item["id"]):
+                normalized = [validator.normalize_choice_text(c["text"]) for c in choices]
+                self.assertEqual(len(normalized), len(set(normalized)))
+                numeric_values = [validator.try_eval_numeric_choice(c["text"]) for c in choices]
+                numeric_values = [x for x in numeric_values if x is not None]
+                self.assertEqual(len(numeric_values), len(set(numeric_values)))
+
     def test_written_add_sub_transfer_counts_match_skill_contract(self):
         constrained = [
             x for x in self.questions

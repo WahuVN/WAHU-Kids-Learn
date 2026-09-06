@@ -256,7 +256,7 @@ Q = {
         nq("Số có 4 trăm, 0 chục và 9 đơn vị là số nào?", 409, "Giữ đúng vị trí hàng chục bằng 0: 400 + 0 + 9 = 409."),
     ],
     "NUM_EXPANDED_FORM_HTO": [
-        mc("Dạng khai triển đúng của 352 là gì?", "300 + 50 + 2", ["300 + 5 + 2", "30 + 50 + 2", "300 + 52"], "352 có 3 trăm, 5 chục và 2 đơn vị nên bằng 300 + 50 + 2."),
+        mc("Dạng khai triển đúng của 352 là gì?", "300 + 50 + 2", ["300 + 5 + 2", "30 + 50 + 2", "300 + 50 + 20"], "352 có 3 trăm, 5 chục và 2 đơn vị nên bằng 300 + 50 + 2."),
         nq("Số nào bằng 600 + 20 + 7?", 627, "Cộng giá trị các hàng: 600 + 20 + 7 = 627."),
         mc("Dạng khai triển đúng của 908 là gì?", "900 + 0 + 8", ["90 + 8", "900 + 80", "900 + 8 + 80"], "908 có 9 trăm, 0 chục và 8 đơn vị."),
     ],
@@ -333,7 +333,7 @@ Q = {
     ],
 
     "MULTIPLICATION_MEANING": [
-        mc("Có 3 nhóm, mỗi nhóm 2 chấm. Phép cộng lặp lại nào đúng?", "2 + 2 + 2", ["3 + 3", "2 + 3", "3 + 2 + 2"], "Ba nhóm, mỗi nhóm 2 tương ứng cộng số 2 ba lần."),
+        mc("Có 3 nhóm, mỗi nhóm 2 chấm. Phép cộng lặp lại nào đúng?", "2 + 2 + 2", ["2 + 2 + 2 + 2", "2 + 3", "3 + 2 + 2"], "Ba nhóm, mỗi nhóm 2 tương ứng cộng số 2 ba lần."),
         nq("5 nhóm, mỗi nhóm 2 vật có tất cả bao nhiêu vật?", 10, "2 + 2 + 2 + 2 + 2 = 10, cũng là 5 × 2."),
         nq("Có 4 túi, mỗi túi 5 viên bi. Có tất cả bao nhiêu viên?", 20, "Bốn nhóm bằng nhau, mỗi nhóm 5: 4 × 5 = 20."),
     ],
@@ -374,7 +374,7 @@ Q = {
     ],
 
     "OPERATION_MEANING_FROM_VISUAL": [
-        mc("Hai nhóm 4 chấm được gộp lại. Phép tính nào mô tả việc gộp?", "4 + 4", ["4 - 4", "4 : 2", "4 - 2"], "Gộp hai lượng lại là quan hệ cộng; hai nhóm 4 là 4 + 4."),
+        mc("Hai nhóm 4 chấm được gộp lại. Phép tính nào mô tả việc gộp?", "4 + 4", ["4 - 4", "4 : 2", "4 + 2"], "Gộp hai lượng lại là quan hệ cộng; hai nhóm 4 là 4 + 4."),
         mc("Có 10 chấm, gạch bỏ 3 chấm. Phép tính nào mô tả tình huống?", "10 - 3", ["10 + 3", "10 : 2", "3 - 10"], "Bỏ bớt một phần khỏi lượng ban đầu là phép trừ."),
         mc("Có 5 nhóm bằng nhau, mỗi nhóm 2 chấm. Phép tính nào phù hợp nhất?", "5 × 2", ["5 + 2", "5 - 2", "10 : 5"], "Nhiều nhóm bằng nhau được mô tả bằng phép nhân."),
     ],
