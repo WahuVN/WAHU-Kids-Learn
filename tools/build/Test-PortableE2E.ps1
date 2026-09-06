@@ -47,6 +47,7 @@ try {
         'WAHU.Motion.dll',
         'WAHU.Content.dll',
         'WAHU.Audio.dll',
+        'WAHU.Performance.dll',
         'WAHU.Data.dll',
         'System.Data.SQLite.dll',
         'e_sqlite3.dll',
@@ -83,7 +84,7 @@ try {
         'migration_version=2',
         'pre_migration_backup=none',
         'integrity=ok',
-        'foreign_key_issues=0','verified_content_packs=2'
+        'foreign_key_issues=0','verified_content_packs=2','performance_profile=','performance_motion_fps_cap=','performance_max_animated_regions=','performance_image_cache_mb=','performance_audio_cache_mb=','performance_evidence='
     )) {
         Assert ($text.Contains($needle)) "portable report missing: $needle"
     }

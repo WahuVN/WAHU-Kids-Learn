@@ -4,6 +4,7 @@ using System.Windows.Forms;
 using WAHU.Content;
 using WAHU.Data;
 using WAHU.Platform;
+using WAHU.Performance;
 
 namespace WAHUKidsLearn
 {
@@ -60,18 +61,19 @@ namespace WAHUKidsLearn
 
                     PreflightReport preflight = null;
                     DatabaseBootstrapResult database = null;
+                    RuntimePerformanceSettings performance = null;
                     string databaseError = null;
                     try
                     {
                         int verifiedContentPackCount;
-                        BootstrapRuntime(config, out preflight, out database, out verifiedContentPackCount);
+                        BootstrapRuntime(config, out preflight, out database, out verifiedContentPackCount, out performance);
                     }
                     catch (Exception ex)
                     {
                         databaseError = ex.GetType().Name + ": " + ex.Message;
                     }
 
-                    Application.Run(new MainForm(preflight, database, databaseError, runtimeMarker.PreviousRunUnclean));
+                    Application.Run(new MainForm(preflight, database, databaseError, runtimeMarker.PreviousRunUnclean, performance));
                     return 0;
                 }
             }
@@ -88,7 +90,8 @@ namespace WAHUKidsLearn
                 PreflightReport preflight;
                 DatabaseBootstrapResult database;
                 int verifiedContentPackCount;
-                BootstrapRuntime(config, out preflight, out database, out verifiedContentPackCount);
+                RuntimePerformanceSettings performance;
+                BootstrapRuntime(config, out preflight, out database, out verifiedContentPackCount, out performance);
                 var parent = Path.GetDirectoryName(outPath);
                 if (!string.IsNullOrWhiteSpace(parent)) Directory.CreateDirectory(parent);
                 File.WriteAllLines(outPath, new[]
@@ -118,7 +121,14 @@ namespace WAHUKidsLearn
                     "pre_migration_backup=" + (database.PreMigrationBackup == null ? "none" : database.PreMigrationBackup.MetadataPath),
                     "integrity=" + database.Health.Integrity,
                     "foreign_key_issues=" + database.Health.ForeignKeyIssues,
-                    "verified_content_packs=" + verifiedContentPackCount
+                    "verified_content_packs=" + verifiedContentPackCount,
+                    "performance_profile=" + performance.Profile,
+                    "performance_motion_fps_cap=" + performance.MotionFpsCap,
+                    "performance_max_animated_regions=" + performance.MaxAnimatedRegions,
+                    "performance_image_cache_mb=" + (performance.ImageCacheBytes / (1024L * 1024L)),
+                    "performance_audio_cache_mb=" + (performance.AudioCacheBytes / (1024L * 1024L)),
+                    "performance_decorative_outside_focus=" + performance.DecorativeMotionAllowedOutsideLearningFocus,
+                    "performance_evidence=" + string.Join(",", performance.Evidence ?? new string[0])
                 });
                 return database.Health != null && database.Health.IsHealthy ? 0 : 31;
             }
@@ -129,11 +139,15 @@ namespace WAHUKidsLearn
             }
         }
 
-        private static void BootstrapRuntime(RuntimeConfigBundle config, out PreflightReport preflight, out DatabaseBootstrapResult database, out int verifiedContentPackCount)
+        private static void BootstrapRuntime(RuntimeConfigBundle config, out PreflightReport preflight, out DatabaseBootstrapResult database, out int verifiedContentPackCount, out RuntimePerformanceSettings performance)
         {
             if (config == null) throw new ArgumentNullException("config");
             preflight = PreflightProbe.Collect(Application.ExecutablePath);
             JsonReportWriter.Write(preflight, Path.Combine(config.UserRoot, "diagnostics", "preflight.json"));
+
+            var autotuner = new PerformanceAutotuner();
+            var performanceDecision = autotuner.Select(preflight);
+            performance = autotuner.BuildRuntimeSettings(config, performanceDecision);
 
             verifiedContentPackCount = ValidateBundledContent();
 

@@ -36,6 +36,12 @@ namespace WAHU.Platform
         public int PrimaryChildTargetPx { get; private set; }
         public int LowMotionFpsCap { get; private set; }
         public int NormalMotionFpsCap { get; private set; }
+        public int LowMaxAnimatedRegions { get; private set; }
+        public int NormalMaxAnimatedRegions { get; private set; }
+        public int LowImageCacheMb { get; private set; }
+        public int NormalImageCacheMb { get; private set; }
+        public int LowAudioCacheMb { get; private set; }
+        public int NormalAudioCacheMb { get; private set; }
         public IReadOnlyDictionary<string, string> FileSha256 { get { return _hashes; } }
 
         public static RuntimeConfigBundle Load(string configDirectory)
@@ -184,8 +190,20 @@ namespace WAHU.Platform
             RequireString(timing, "elapsed_time_source", "System.Diagnostics.Stopwatch"); RequireBool(timing, "coalesce_ui_updates", true);
             if (Int(timing, "max_pending_ui_updates") != 1) throw new RuntimeConfigException("max_pending_ui_updates phải là 1.");
             var profiles = Obj(root, "profiles");
-            bundle.LowMotionFpsCap = Int(Obj(profiles, "LOW"), "motion_fps_cap"); bundle.NormalMotionFpsCap = Int(Obj(profiles, "NORMAL"), "motion_fps_cap");
+            var low = Obj(profiles, "LOW");
+            var normal = Obj(profiles, "NORMAL");
+            bundle.LowMotionFpsCap = Int(low, "motion_fps_cap");
+            bundle.NormalMotionFpsCap = Int(normal, "motion_fps_cap");
+            bundle.LowMaxAnimatedRegions = Int(low, "max_animated_regions");
+            bundle.NormalMaxAnimatedRegions = Int(normal, "max_animated_regions");
+            bundle.LowImageCacheMb = Int(low, "image_cache_mb");
+            bundle.NormalImageCacheMb = Int(normal, "image_cache_mb");
+            bundle.LowAudioCacheMb = Int(low, "audio_cache_mb");
+            bundle.NormalAudioCacheMb = Int(normal, "audio_cache_mb");
             if (bundle.LowMotionFpsCap != 18 || bundle.NormalMotionFpsCap != 30) throw new RuntimeConfigException("V1 motion caps phải là LOW=18, NORMAL=30 cho tới khi target benchmark version hóa thay đổi.");
+            if (bundle.LowMaxAnimatedRegions != 1 || bundle.NormalMaxAnimatedRegions != 2) throw new RuntimeConfigException("V1 animated-region budget phải LOW=1, NORMAL=2.");
+            if (bundle.LowImageCacheMb <= 0 || bundle.NormalImageCacheMb < bundle.LowImageCacheMb) throw new RuntimeConfigException("Image cache profile không hợp lệ.");
+            if (bundle.LowAudioCacheMb <= 0 || bundle.NormalAudioCacheMb < bundle.LowAudioCacheMb) throw new RuntimeConfigException("Audio cache profile không hợp lệ.");
         }
 
         private static void ValidateLogging(Dictionary<string, object> root)

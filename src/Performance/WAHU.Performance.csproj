@@ -1,0 +1,9 @@
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup><Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration><Platform Condition=" '$(Platform)' == '' ">x86</Platform><ProjectGuid>{FDD3D980-4DEE-4700-A6C1-527725D4E444}</ProjectGuid><OutputType>Library</OutputType><RootNamespace>WAHU.Performance</RootNamespace><AssemblyName>WAHU.Performance</AssemblyName><TargetFrameworkVersion>v4.8</TargetFrameworkVersion><FileAlignment>512</FileAlignment><Deterministic>true</Deterministic></PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' "><DebugSymbols>true</DebugSymbols><DebugType>full</DebugType><Optimize>false</Optimize><OutputPath>bin\Debug\</OutputPath><DefineConstants>DEBUG;TRACE</DefineConstants><PlatformTarget>x86</PlatformTarget></PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' "><DebugType>pdbonly</DebugType><Optimize>true</Optimize><OutputPath>bin\Release\</OutputPath><DefineConstants>TRACE</DefineConstants><PlatformTarget>x86</PlatformTarget></PropertyGroup>
+  <ItemGroup><Reference Include="System" /><Reference Include="System.Core" /></ItemGroup>
+  <ItemGroup><Compile Include="PerformanceModels.cs" /><Compile Include="PerformanceAutotuner.cs" /><Compile Include="RuntimeDegradationController.cs" /></ItemGroup>
+  <ItemGroup><ProjectReference Include="..\Platform\WAHU.Platform.csproj"><Project>{2759F943-D509-4130-9E79-B3E28C1CDC88}</Project><Name>WAHU.Platform</Name></ProjectReference></ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

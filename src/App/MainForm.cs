@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 using WAHU.Data;
 using WAHU.Platform;
+using WAHU.Performance;
 
 namespace WAHUKidsLearn
 {
@@ -12,13 +13,15 @@ namespace WAHUKidsLearn
         private readonly DatabaseBootstrapResult _database;
         private readonly string _databaseError;
         private readonly bool _previousRunUnclean;
+        private readonly RuntimePerformanceSettings _performance;
 
-        public MainForm(PreflightReport report, DatabaseBootstrapResult database, string databaseError, bool previousRunUnclean)
+        public MainForm(PreflightReport report, DatabaseBootstrapResult database, string databaseError, bool previousRunUnclean, RuntimePerformanceSettings performance)
         {
             _report = report;
             _database = database;
             _databaseError = databaseError;
             _previousRunUnclean = previousRunUnclean;
+            _performance = performance;
             Text = "WAHU Kids Learn — Bootstrap V1";
             StartPosition = FormStartPosition.CenterScreen;
             MinimumSize = new Size(800, 600);
@@ -56,7 +59,8 @@ namespace WAHUKidsLearn
             var machine = _report == null ? "Máy: chưa có preflight" : string.Format("Máy: {0} · .NET {1} · {2}", _report.CompatibilityLevel, _report.NetFrameworkRelease, _report.ProcessArch);
             var db = _database != null ? string.Format("DB: OK · SQLite {0} · journal {1}", _database.SQLiteVersion, _database.JournalMode) : "DB: cần phục hồi/kiểm tra";
             var recovery = _previousRunUnclean ? "Phiên trước đóng bất thường · đã kiểm tra DB" : "Phiên trước đóng sạch";
-            return machine + Environment.NewLine + db + Environment.NewLine + recovery;
+            var perf = _performance == null ? "Hiệu năng: chưa chọn profile" : string.Format("Hiệu năng: {0} · {1} FPS · {2} vùng động", _performance.Profile, _performance.MotionFpsCap, _performance.MaxAnimatedRegions);
+            return machine + Environment.NewLine + db + Environment.NewLine + perf + Environment.NewLine + recovery;
         }
 
         private void ShowDiagnostics()
@@ -64,7 +68,8 @@ namespace WAHUKidsLearn
             var machine = _report == null ? "Không có báo cáo preflight." : string.Format("Compatibility: {0}\r\nOS: {1} {2}\r\n.NET: {3}\r\nSHA-2: {4}\r\nDPI: {5}\r\nAudio: {6}\r\nMic: {7}", _report.CompatibilityLevel, _report.OsVersion, _report.ServicePack, _report.NetFrameworkRelease, _report.LegacySha2Readiness, _report.SystemDpi.HasValue ? _report.SystemDpi.Value.ToString("0") : "?", _report.AudioOutputAvailable ? "Có" : "Không", _report.MicrophoneAvailable ? "Có" : "Không");
             var db = _database == null ? "DB ERROR: " + (_databaseError ?? "không rõ") : string.Format("DB: {0}\r\nProvider: {1}\r\nSQLite: {2}\r\nJournal: {3}\r\nMigration: v{4}\r\nMigration SHA-256: {5}\r\nIntegrity: {6}\r\nFK issues: {7}", _database.DatabasePath, _database.ProviderVersion, _database.SQLiteVersion, _database.JournalMode, _database.Migration == null ? 0 : _database.Migration.Version, _database.Migration == null ? "?" : _database.Migration.ChecksumSha256, _database.Health.Integrity, _database.Health.ForeignKeyIssues);
             var recovery = _previousRunUnclean ? "Phiên trước: đóng bất thường" : "Phiên trước: đóng sạch";
-            MessageBox.Show(this, machine + "\r\n\r\n" + db + "\r\n\r\n" + recovery, "Chẩn đoán nền tảng", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            var perf = _performance == null ? "Performance: chưa có" : string.Format("Performance: {0}\r\nMotion cap: {1} FPS\r\nAnimated regions: {2}\r\nImage cache: {3} MB\r\nAudio cache: {4} MB", _performance.Profile, _performance.MotionFpsCap, _performance.MaxAnimatedRegions, _performance.ImageCacheBytes / (1024L * 1024L), _performance.AudioCacheBytes / (1024L * 1024L));
+            MessageBox.Show(this, machine + "\r\n\r\n" + db + "\r\n\r\n" + perf + "\r\n\r\n" + recovery, "Chẩn đoán nền tảng", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }
