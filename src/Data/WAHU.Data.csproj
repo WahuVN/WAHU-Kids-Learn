@@ -26,6 +26,7 @@
     <Compile Include="AdaptiveDecisionAuditService.cs" />
     <Compile Include="LearnerSessionService.cs" />
     <Compile Include="BehaviorDecisionAuditService.cs" />
+    <Compile Include="GameWorldRewardService.cs" />
     <Compile Include="BackupRecoveryService.cs" />
     <Compile Include="ParentSummaryService.cs" />
     <Compile Include="DatabaseHealth.cs" />

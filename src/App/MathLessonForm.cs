@@ -15,14 +15,16 @@ namespace WAHUKidsLearn
         private readonly RuntimePerformanceSettings _performance;
         private MathSessionCoordinator _coordinator;
         private MathQuestion _question;
-        private readonly Button[] _answerButtons = new Button[4];
-        private Label _progress;
+        private readonly AnswerChoiceButton[] _answerButtons = new AnswerChoiceButton[4];
+        private Label _progressText;
+        private ProgressStrip _progressBar;
         private Label _prompt;
         private Label _support;
         private Label _feedback;
-        private Button _hintButton;
-        private Button _nextButton;
-        private Button _stopButton;
+        private ChildCard _feedbackCard;
+        private ChildActionButton _hintButton;
+        private ChildActionButton _nextButton;
+        private ChildActionButton _stopButton;
         private int _hintLevel;
         private bool _finished;
         private bool _submitting;
@@ -34,11 +36,13 @@ namespace WAHUKidsLearn
             _performance = performance;
             Text = "WAHU Kids Learn — Toán lớp 2";
             StartPosition = FormStartPosition.CenterParent;
-            MinimumSize = new Size(800, 600);
-            ClientSize = new Size(1024, 720);
+            MinimumSize = new Size(900, 640);
+            ClientSize = new Size(1080, 720);
             AutoScaleMode = AutoScaleMode.Dpi;
-            Font = new Font("Segoe UI", 11f, FontStyle.Regular, GraphicsUnit.Point);
+            Font = ChildVisualTheme.Font(11f);
+            BackColor = ChildVisualTheme.Cream;
             KeyPreview = true;
+            DoubleBuffered = true;
             BuildUi();
             Shown += delegate { StartSession(); };
             FormClosing += OnFormClosing;
@@ -49,60 +53,114 @@ namespace WAHUKidsLearn
             var root = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
-                Padding = new Padding(34, 26, 34, 26),
+                BackColor = ChildVisualTheme.Cream,
+                Padding = new Padding(30, 22, 30, 22),
                 ColumnCount = 1,
-                RowCount = 7
+                RowCount = 6
             };
-            root.RowStyles.Add(new RowStyle(SizeType.Absolute, 56));
-            root.RowStyles.Add(new RowStyle(SizeType.Percent, 24));
-            root.RowStyles.Add(new RowStyle(SizeType.Absolute, 72));
-            root.RowStyles.Add(new RowStyle(SizeType.Percent, 42));
-            root.RowStyles.Add(new RowStyle(SizeType.Absolute, 72));
-            root.RowStyles.Add(new RowStyle(SizeType.Absolute, 64));
-            root.RowStyles.Add(new RowStyle(SizeType.Absolute, 50));
+            root.RowStyles.Add(new RowStyle(SizeType.Absolute, 58));
+            root.RowStyles.Add(new RowStyle(SizeType.Absolute, 26));
+            root.RowStyles.Add(new RowStyle(SizeType.Percent, 37));
+            root.RowStyles.Add(new RowStyle(SizeType.Percent, 40));
+            root.RowStyles.Add(new RowStyle(SizeType.Absolute, 88));
+            root.RowStyles.Add(new RowStyle(SizeType.Absolute, 58));
 
-            var header = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1 };
-            header.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 70));
-            header.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30));
-            var title = new Label
+            var header = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, RowCount = 1 };
+            header.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 156));
+            header.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            header.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 170));
+            _stopButton = new ChildActionButton
             {
                 Dock = DockStyle.Fill,
-                Text = "Toán lớp 2",
-                TextAlign = ContentAlignment.MiddleLeft,
-                Font = new Font(Font.FontFamily, 18f, FontStyle.Bold),
-                AccessibleName = "Môn Toán lớp 2"
+                Margin = new Padding(0, 4, 18, 4),
+                Text = "Dừng ở đây",
+                FillColor = Color.FromArgb(232, 230, 220),
+                HoverColor = Color.FromArgb(220, 217, 207),
+                PressedColor = Color.FromArgb(207, 204, 193),
+                TextColor = ChildVisualTheme.Ink,
+                Font = ChildVisualTheme.Font(10f, FontStyle.Bold),
+                Radius = 15,
+                AccessibleName = "Dừng buổi học"
             };
-            _progress = new Label
+            _stopButton.Click += delegate { RequestStop(); };
+            header.Controls.Add(_stopButton, 0, 0);
+            header.Controls.Add(new Label
+            {
+                Dock = DockStyle.Fill,
+                Text = "Nhiệm vụ Toán",
+                TextAlign = ContentAlignment.MiddleCenter,
+                ForeColor = ChildVisualTheme.Ink,
+                Font = ChildVisualTheme.Font(17f, FontStyle.Bold),
+                AccessibleName = "Nhiệm vụ Toán"
+            }, 1, 0);
+            _progressText = new Label
             {
                 Dock = DockStyle.Fill,
                 TextAlign = ContentAlignment.MiddleRight,
-                Font = new Font(Font.FontFamily, 12f, FontStyle.Bold),
+                ForeColor = ChildVisualTheme.MutedInk,
+                Font = ChildVisualTheme.Font(10.5f, FontStyle.Bold),
                 AccessibleName = "Tiến độ buổi học"
             };
-            header.Controls.Add(title, 0, 0);
-            header.Controls.Add(_progress, 1, 0);
+            header.Controls.Add(_progressText, 2, 0);
             root.Controls.Add(header, 0, 0);
 
+            _progressBar = new ProgressStrip
+            {
+                Dock = DockStyle.Fill,
+                Margin = new Padding(158, 2, 170, 7),
+                Maximum = MathSessionCoordinator.DefaultTargetQuestionCount
+            };
+            root.Controls.Add(_progressBar, 0, 1);
+
+            var questionCard = new ChildCard
+            {
+                Dock = DockStyle.Fill,
+                Margin = new Padding(50, 10, 50, 12),
+                Padding = new Padding(28, 20, 28, 18),
+                CardColor = Color.FromArgb(255, 253, 246),
+                Radius = 26
+            };
+            var questionLayout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 3 };
+            questionLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
+            questionLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+            questionLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 54));
+            questionLayout.Controls.Add(new Label
+            {
+                Dock = DockStyle.Fill,
+                Text = "CHỌN ĐÁP ÁN ĐÚNG",
+                TextAlign = ContentAlignment.MiddleCenter,
+                ForeColor = ChildVisualTheme.MintStrong,
+                Font = ChildVisualTheme.Font(9.5f, FontStyle.Bold)
+            }, 0, 0);
             _prompt = new Label
             {
                 Dock = DockStyle.Fill,
                 TextAlign = ContentAlignment.MiddleCenter,
-                Font = new Font(Font.FontFamily, 28f, FontStyle.Bold),
+                ForeColor = ChildVisualTheme.Ink,
+                Font = ChildVisualTheme.Font(30f, FontStyle.Bold),
                 AutoEllipsis = true,
                 AccessibleName = "Câu hỏi Toán"
             };
-            root.Controls.Add(_prompt, 0, 1);
-
+            questionLayout.Controls.Add(_prompt, 0, 1);
             _support = new Label
             {
                 Dock = DockStyle.Fill,
                 TextAlign = ContentAlignment.MiddleCenter,
-                Font = new Font(Font.FontFamily, 13f),
+                ForeColor = ChildVisualTheme.MutedInk,
+                Font = ChildVisualTheme.Font(11f),
                 AccessibleName = "Gợi ý học tập"
             };
-            root.Controls.Add(_support, 0, 2);
+            questionLayout.Controls.Add(_support, 0, 2);
+            questionCard.Controls.Add(questionLayout);
+            root.Controls.Add(questionCard, 0, 2);
 
-            var answerGrid = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 2, Padding = new Padding(80, 4, 80, 4) };
+            var answerGrid = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                ColumnCount = 2,
+                RowCount = 2,
+                Padding = new Padding(72, 4, 72, 8)
+            };
             answerGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
             answerGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
             answerGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
@@ -110,53 +168,78 @@ namespace WAHUKidsLearn
             for (var i = 0; i < _answerButtons.Length; i++)
             {
                 var index = i;
-                var button = new Button
+                var button = new AnswerChoiceButton
                 {
                     Dock = DockStyle.Fill,
-                    Margin = new Padding(10),
-                    Font = new Font(Font.FontFamily, 21f, FontStyle.Bold),
+                    Margin = new Padding(9),
+                    Font = ChildVisualTheme.Font(21f, FontStyle.Bold),
+                    BadgeText = (i + 1).ToString(),
                     AccessibleName = "Đáp án " + (i + 1),
                     TabIndex = i
                 };
-                button.Click += delegate { SubmitChoice(index); };
+                button.Click += delegate { SubmitChoice(index, "mouse"); };
                 _answerButtons[i] = button;
                 answerGrid.Controls.Add(button, i % 2, i / 2);
             }
             root.Controls.Add(answerGrid, 0, 3);
 
+            _feedbackCard = new ChildCard
+            {
+                Dock = DockStyle.Fill,
+                Margin = new Padding(120, 7, 120, 8),
+                Padding = new Padding(18, 10, 18, 10),
+                CardColor = Color.FromArgb(245, 244, 236),
+                BorderColor = Color.FromArgb(229, 227, 217),
+                Radius = 18,
+                Visible = false
+            };
             _feedback = new Label
             {
                 Dock = DockStyle.Fill,
                 TextAlign = ContentAlignment.MiddleCenter,
-                Font = new Font(Font.FontFamily, 14f, FontStyle.Bold),
+                ForeColor = ChildVisualTheme.Ink,
+                Font = ChildVisualTheme.Font(12.5f, FontStyle.Bold),
                 AccessibleName = "Phản hồi câu trả lời"
             };
-            root.Controls.Add(_feedback, 0, 4);
+            _feedbackCard.Controls.Add(_feedback);
+            root.Controls.Add(_feedbackCard, 0, 4);
 
-            var actions = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, RowCount = 1, Padding = new Padding(90, 4, 90, 4) };
-            actions.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
-            actions.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 34));
-            actions.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
-            _stopButton = new Button { Dock = DockStyle.Fill, Margin = new Padding(8), Text = "Dừng buổi học", AccessibleName = "Dừng buổi học" };
-            _hintButton = new Button { Dock = DockStyle.Fill, Margin = new Padding(8), Text = "Gợi ý", AccessibleName = "Xem gợi ý" };
-            _nextButton = new Button { Dock = DockStyle.Fill, Margin = new Padding(8), Text = "Câu tiếp theo", AccessibleName = "Chuyển sang câu tiếp theo", Visible = false };
-            _stopButton.Click += delegate { RequestStop(); };
+            var actions = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, RowCount = 1, Padding = new Padding(100, 4, 100, 0) };
+            actions.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30));
+            actions.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40));
+            actions.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30));
+            _hintButton = new ChildActionButton
+            {
+                Dock = DockStyle.Fill,
+                Margin = new Padding(8),
+                Text = "Gợi ý",
+                FillColor = ChildVisualTheme.Peach,
+                HoverColor = Color.FromArgb(245, 214, 178),
+                PressedColor = Color.FromArgb(236, 200, 159),
+                TextColor = Color.FromArgb(120, 79, 44),
+                Font = ChildVisualTheme.Font(10.5f, FontStyle.Bold),
+                Radius = 16,
+                AccessibleName = "Xem gợi ý"
+            };
             _hintButton.Click += delegate { ShowHint(); };
+            _nextButton = new ChildActionButton
+            {
+                Dock = DockStyle.Fill,
+                Margin = new Padding(8),
+                Text = "Câu tiếp theo",
+                FillColor = ChildVisualTheme.MintStrong,
+                HoverColor = Color.FromArgb(90, 156, 103),
+                PressedColor = Color.FromArgb(75, 139, 88),
+                Font = ChildVisualTheme.Font(11f, FontStyle.Bold),
+                Radius = 16,
+                AccessibleName = "Chuyển sang câu tiếp theo",
+                Visible = false
+            };
             _nextButton.Click += delegate { HandleNextButton(); };
-            actions.Controls.Add(_stopButton, 0, 0);
+            actions.Controls.Add(new Panel(), 0, 0);
             actions.Controls.Add(_hintButton, 1, 0);
             actions.Controls.Add(_nextButton, 2, 0);
             root.Controls.Add(actions, 0, 5);
-
-            var footer = new Label
-            {
-                Dock = DockStyle.Fill,
-                Text = "Phím 1–4: chọn đáp án · Enter: câu tiếp theo · Esc: dừng",
-                TextAlign = ContentAlignment.MiddleCenter,
-                Font = new Font(Font.FontFamily, 9.5f),
-                AccessibleName = "Hướng dẫn phím tắt"
-            };
-            root.Controls.Add(footer, 0, 6);
             Controls.Add(root);
         }
 
@@ -171,7 +254,7 @@ namespace WAHUKidsLearn
                 _coordinator = new MathSessionCoordinator(_database, templatePath, profile, seed);
                 var started = _coordinator.Start("Bé học");
                 if (started.RecoveredDanglingSessions > 0)
-                    _support.Text = "Buổi trước bị đóng dở đã được lưu an toàn. Mình bắt đầu buổi mới nhé.";
+                    _support.Text = "Buổi trước đã được lưu an toàn. Mình bắt đầu nhiệm vụ mới nhé.";
                 ShowNextQuestion();
             }
             catch
@@ -186,26 +269,27 @@ namespace WAHUKidsLearn
             try
             {
                 _question = _coordinator.NextQuestion();
-                if (_question == null)
-                {
-                    CompleteSession();
-                    return;
-                }
+                if (_question == null) { CompleteSession(); return; }
                 _hintLevel = 0;
                 _submitting = false;
                 _prompt.Text = _question.PromptVi;
                 _support.Text = "Chọn đáp án con thấy đúng nhất.";
                 _feedback.Text = string.Empty;
+                _feedbackCard.Visible = false;
                 _hintButton.Text = "Gợi ý";
                 _hintButton.Enabled = true;
                 _hintButton.Visible = true;
                 _nextButton.Visible = false;
                 _completeOnNext = false;
                 var summary = _coordinator.Summary;
-                _progress.Text = "Câu " + (summary.Attempts + 1) + " / " + MathSessionCoordinator.DefaultTargetQuestionCount;
+                var questionNumber = summary.Attempts + 1;
+                _progressText.Text = "Câu " + questionNumber + " / " + MathSessionCoordinator.DefaultTargetQuestionCount;
+                _progressBar.Value = summary.Attempts;
                 for (var i = 0; i < _answerButtons.Length; i++)
                 {
                     _answerButtons[i].Text = _question.Choices[i].ToString();
+                    _answerButtons[i].BadgeText = (i + 1).ToString();
+                    _answerButtons[i].VisualState = AnswerChoiceButton.ChoiceVisualState.Idle;
                     _answerButtons[i].Enabled = true;
                     _answerButtons[i].Visible = true;
                 }
@@ -233,7 +317,7 @@ namespace WAHUKidsLearn
             _hintButton.Text = "Đã xem đủ gợi ý";
         }
 
-        private void SubmitChoice(int index)
+        private void SubmitChoice(int index, string inputMode)
         {
             if (_question == null || _submitting || index < 0 || index >= _answerButtons.Length) return;
             _submitting = true;
@@ -242,12 +326,35 @@ namespace WAHUKidsLearn
             try
             {
                 var selected = _question.Choices[index];
-                var outcome = _coordinator.SubmitAnswer(selected, _hintLevel, "mouse");
+                var outcome = _coordinator.SubmitAnswer(selected, _hintLevel, inputMode);
+                var correctIndex = FindCorrectChoiceIndex();
+                for (var i = 0; i < _answerButtons.Length; i++)
+                {
+                    if (i == correctIndex)
+                    {
+                        _answerButtons[i].VisualState = AnswerChoiceButton.ChoiceVisualState.Correct;
+                        _answerButtons[i].BadgeText = "✓";
+                    }
+                    else if (i == index && !outcome.IsCorrect)
+                    {
+                        _answerButtons[i].VisualState = AnswerChoiceButton.ChoiceVisualState.Incorrect;
+                        _answerButtons[i].BadgeText = "×";
+                    }
+                    else
+                    {
+                        _answerButtons[i].VisualState = AnswerChoiceButton.ChoiceVisualState.Muted;
+                        _answerButtons[i].BadgeText = string.Empty;
+                    }
+                }
                 _feedback.Text = outcome.FeedbackVi;
+                _feedbackCard.CardColor = outcome.IsCorrect ? Color.FromArgb(226, 242, 224) : Color.FromArgb(251, 232, 222);
+                _feedbackCard.BorderColor = outcome.IsCorrect ? Color.FromArgb(190, 221, 188) : Color.FromArgb(236, 202, 187);
+                _feedbackCard.Visible = true;
                 _support.Text = outcome.IsCorrect
-                    ? "Mỗi câu con làm giúp ứng dụng chọn lần ôn phù hợp hơn."
-                    : "Không sao, câu tiếp theo sẽ được chọn để con luyện đúng phần đang cần.";
-                _progress.Text = "Đã làm " + outcome.CompletedQuestionCount + " / " + outcome.TargetQuestionCount;
+                    ? "Tốt rồi. Câu này đã được lưu để lần sau ôn đúng lúc."
+                    : "Mình đã chỉ ra đáp án đúng. Câu sau sẽ giúp con luyện tiếp phần này.";
+                _progressText.Text = "Đã làm " + outcome.CompletedQuestionCount + " / " + outcome.TargetQuestionCount;
+                _progressBar.Value = outcome.CompletedQuestionCount;
                 _hintButton.Visible = false;
                 _nextButton.Visible = true;
                 _completeOnNext = outcome.SuggestPositiveEnd || outcome.CompletedQuestionCount >= outcome.TargetQuestionCount;
@@ -263,14 +370,17 @@ namespace WAHUKidsLearn
             }
         }
 
+        private int FindCorrectChoiceIndex()
+        {
+            if (_question == null || _question.Choices == null) return -1;
+            for (var i = 0; i < _question.Choices.Count; i++)
+                if (_question.Choices[i] == _question.CorrectAnswer) return i;
+            return -1;
+        }
+
         private void HandleNextButton()
         {
-            if (_finished)
-            {
-                DialogResult = DialogResult.OK;
-                Close();
-                return;
-            }
+            if (_finished) { DialogResult = DialogResult.OK; Close(); return; }
             if (_completeOnNext) CompleteSession();
             else ShowNextQuestion();
         }
@@ -298,19 +408,24 @@ namespace WAHUKidsLearn
         private void ShowCompletion(MathSessionSummary summary)
         {
             _question = null;
-            _prompt.Text = "Hoàn thành buổi Toán";
+            _prompt.Text = "Hoàn thành nhiệm vụ";
             _support.Text = summary == null
                 ? "Các câu đã làm được lưu để lần sau tiếp tục đúng chỗ."
-                : "Con đã luyện " + summary.DistinctSkills + " kỹ năng. Các câu đã được lưu để lần sau ôn đúng lúc.";
-            _feedback.Text = summary == null ? string.Empty :
-                "Hoàn thành " + summary.Attempts + " câu · Tự làm đúng " + Math.Max(0, summary.Correct - summary.HintedCorrect) + " câu";
+                : "Khu vườn vừa lớn thêm một chút. Con đã luyện " + summary.DistinctSkills + " kỹ năng."
+                    + (string.IsNullOrWhiteSpace(summary.GardenUnlockMessage) ? string.Empty : " " + summary.GardenUnlockMessage);
+            _feedback.Text = summary == null ? "Mình về màn hình chính nhé." :
+                "Đã làm " + summary.Attempts + " câu · Tự làm đúng " + Math.Max(0, summary.Correct - summary.HintedCorrect) + " câu";
+            _feedbackCard.CardColor = Color.FromArgb(226, 242, 224);
+            _feedbackCard.BorderColor = Color.FromArgb(190, 221, 188);
+            _feedbackCard.Visible = true;
             foreach (var button in _answerButtons) button.Visible = false;
             _hintButton.Visible = false;
             _stopButton.Visible = false;
             _nextButton.Visible = true;
-            _nextButton.Text = "Về màn hình chính";
+            _nextButton.Text = "Về khu vườn";
             _completeOnNext = false;
-            _progress.Text = "Đã hoàn thành";
+            _progressText.Text = "Hoàn thành";
+            _progressBar.Value = _progressBar.Maximum;
             _nextButton.Focus();
         }
 
@@ -341,12 +456,14 @@ namespace WAHUKidsLearn
             _question = null;
             _prompt.Text = "Mình dừng ở đây nhé";
             _support.Text = message;
-            _feedback.Text = "Những dữ liệu đã lưu trước đó không bị xóa.";
+            _feedback.Text = "Những dữ liệu đã lưu trước đó vẫn an toàn.";
+            _feedbackCard.CardColor = Color.FromArgb(245, 239, 224);
+            _feedbackCard.Visible = true;
             foreach (var button in _answerButtons) button.Visible = false;
             _hintButton.Visible = false;
             _stopButton.Visible = false;
             _nextButton.Visible = true;
-            _nextButton.Text = "Về màn hình chính";
+            _nextButton.Text = "Về khu vườn";
             _completeOnNext = false;
             _nextButton.Focus();
         }
@@ -356,13 +473,13 @@ namespace WAHUKidsLearn
             if (keyData >= Keys.D1 && keyData <= Keys.D4)
             {
                 var index = (int)keyData - (int)Keys.D1;
-                if (_answerButtons[index].Enabled && _answerButtons[index].Visible) SubmitChoice(index);
+                if (_answerButtons[index].Visible) SubmitChoice(index, "keyboard");
                 return true;
             }
             if (keyData >= Keys.NumPad1 && keyData <= Keys.NumPad4)
             {
                 var index = (int)keyData - (int)Keys.NumPad1;
-                if (_answerButtons[index].Enabled && _answerButtons[index].Visible) SubmitChoice(index);
+                if (_answerButtons[index].Visible) SubmitChoice(index, "keyboard");
                 return true;
             }
             if (keyData == Keys.Enter && _nextButton.Visible && _nextButton.Enabled)

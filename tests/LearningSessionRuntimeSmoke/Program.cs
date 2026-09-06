@@ -264,7 +264,14 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 var summary = coordinator.Complete();
                 A(summary.Attempts == 4, "coordinator_summary_attempts");
                 A(summary.Correct == 3 && summary.Wrong == 1, "coordinator_summary_correct_wrong");
+                A(summary.GardenGrowthSteps == 1, "completed_session_grants_one_garden_growth_step");
+                A(!string.IsNullOrWhiteSpace(summary.GardenUnlockMessage), "first_completed_session_unlocks_seedling_message");
                 A(!coordinator.IsActive, "coordinator_inactive_after_complete");
+                var world = new GameWorldRewardService(database);
+                var progress = world.ReadProgress(started.ChildId);
+                A(progress.GrowthSteps == 1 && progress.UnlockedItems.Contains("garden_seedling"), "garden_progress_persisted_after_complete");
+                var replay = world.GrantCompletedMathSession(started.ChildId, started.SessionId, 4);
+                A(!replay.RewardCreated && replay.GrowthSteps == 1, "garden_reward_idempotent_per_completed_session");
             }
             var parent = ParentSummaryService.Read(database);
             A(parent.SessionCount == 1 && parent.AttemptCount == 4, "coordinator_persists_parent_summary");

@@ -38,5 +38,7 @@ namespace WAHU.Session
         public BehaviorState FinalBehaviorState { get; set; }
         public DateTime StartedAtUtc { get; set; }
         public DateTime? EndedAtUtc { get; set; }
+        public int GardenGrowthSteps { get; set; }
+        public string GardenUnlockMessage { get; set; }
     }
 }

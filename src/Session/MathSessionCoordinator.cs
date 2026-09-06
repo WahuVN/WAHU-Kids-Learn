@@ -22,6 +22,7 @@ namespace WAHU.Session
         private readonly AnswerCommitService _answerCommit;
         private readonly BehaviorDecisionAuditService _behaviorAudit;
         private readonly AdaptiveDecisionAuditService _adaptiveAudit;
+        private readonly GameWorldRewardService _gameWorld;
         private readonly BehaviorController _behavior = new BehaviorController();
         private readonly AdaptiveMathSelector _selector = new AdaptiveMathSelector();
         private readonly MathQuestionGenerator _generator;
@@ -64,6 +65,7 @@ namespace WAHU.Session
             _answerCommit = new AnswerCommitService(database);
             _behaviorAudit = new BehaviorDecisionAuditService(database);
             _adaptiveAudit = new AdaptiveDecisionAuditService(database);
+            _gameWorld = new GameWorldRewardService(database);
         }
 
         public bool IsActive { get { return _active; } }
@@ -316,6 +318,17 @@ namespace WAHU.Session
                     { "wrong", summary.Wrong }, { "distinct_skills", summary.DistinctSkills }, { "subject", "math" }
                 }),
                 _json.Serialize(new Dictionary<string, object> { { "final_state", summary.FinalBehaviorState.ToString() } }));
+            try
+            {
+                var reward = _gameWorld.GrantCompletedMathSession(_profile.ChildId, _session.SessionId, summary.Attempts);
+                summary.GardenGrowthSteps = reward.GrowthSteps;
+                if (reward.NewlyUnlockedItems != null && reward.NewlyUnlockedItems.Count > 0)
+                    summary.GardenUnlockMessage = "Khu vườn mở thêm " + reward.NewlyUnlockedItems.Count + " món mới.";
+            }
+            catch
+            {
+                // Game-world reward is downstream of durable learning. Reward failure must never roll back learning.
+            }
             _active = false;
             return summary;
         }
