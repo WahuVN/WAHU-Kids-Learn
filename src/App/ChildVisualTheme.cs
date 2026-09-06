@@ -248,7 +248,17 @@ namespace WAHUKidsLearn
             if (_question == null || Width < 80 || Height < 40) return;
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             var values = ExtractNumbers(_question.PromptVi);
-            if (_question.Representation == "hundreds_blocks")
+            if (_question.Representation == "balance_scale")
+                DrawBalanceScale(e.Graphics);
+            else if (_question.Representation == "mass_kg_scale")
+                DrawMassKgScale(e.Graphics);
+            else if (_question.Representation == "liter_measure")
+                DrawLiterMeasure(e.Graphics);
+            else if (_question.Representation == "unit_relation" || _question.Representation == "time_relation")
+                DrawUnitRelation(e.Graphics);
+            else if (_question.Representation == "calendar")
+                DrawCalendar(e.Graphics);
+            else if (_question.Representation == "hundreds_blocks")
                 DrawHundredsBlocks(e.Graphics);
             else if (_question.Representation == "number_line_fill")
                 DrawNumberLineFill(e.Graphics);
@@ -287,6 +297,139 @@ namespace WAHUKidsLearn
                 DrawPlaceValue(e.Graphics, values);
             else if (_question.TemplateId == "polyline_length")
                 DrawPolyline(e.Graphics, values);
+        }
+
+        private void DrawBalanceScale(Graphics g)
+        {
+            var parts = (_question.IllustrationData ?? string.Empty).Split('|');
+            int leftWeight, rightWeight;
+            if (parts.Length != 4 || parts[0] != "balance" || !int.TryParse(parts[1], out leftWeight) || !int.TryParse(parts[2], out rightWeight) || leftWeight == rightWeight) return;
+            var centerX = Width / 2;
+            var pivotY = Height / 2 - 4;
+            var delta = leftWeight > rightWeight ? 12 : -12;
+            var leftY = pivotY + delta;
+            var rightY = pivotY - delta;
+            using (var stand = new Pen(Color.FromArgb(105, 122, 117), 4f))
+            {
+                g.DrawLine(stand, centerX, pivotY - 8, centerX, Height - 18);
+                g.DrawLine(stand, centerX - 42, Height - 18, centerX + 42, Height - 18);
+                g.DrawLine(stand, centerX - 170, leftY, centerX + 170, rightY);
+            }
+            using (var rope = new Pen(Color.FromArgb(128, 139, 132), 1.5f))
+            using (var pan = new SolidBrush(Color.FromArgb(239, 229, 198)))
+            using (var border = new Pen(Color.FromArgb(164, 148, 112), 1.2f))
+            {
+                var leftX = centerX - 145; var rightX = centerX + 145;
+                g.DrawLine(rope, leftX, leftY, leftX, leftY + 26);
+                g.DrawLine(rope, rightX, rightY, rightX, rightY + 26);
+                var lp = new Rectangle(leftX - 42, leftY + 25, 84, 22);
+                var rp = new Rectangle(rightX - 42, rightY + 25, 84, 22);
+                g.FillEllipse(pan, lp); g.DrawEllipse(border, lp);
+                g.FillEllipse(pan, rp); g.DrawEllipse(border, rp);
+                using (var obj = new SolidBrush(Color.FromArgb(218, 233, 213)))
+                {
+                    g.FillEllipse(obj, leftX - 17, leftY + 8, 34, 27);
+                    g.FillEllipse(obj, rightX - 17, rightY + 8, 34, 27);
+                }
+            }
+            DrawCentered(g, "trái", new Rectangle(centerX - 215, Height - 24, 140, 18), ChildVisualTheme.MutedInk, 8f);
+            DrawCentered(g, "phải", new Rectangle(centerX + 75, Height - 24, 140, 18), ChildVisualTheme.MutedInk, 8f);
+        }
+
+        private void DrawMassKgScale(Graphics g)
+        {
+            var parts = (_question.IllustrationData ?? string.Empty).Split('|');
+            int kg;
+            if (parts.Length != 2 || parts[0] != "masskg" || !int.TryParse(parts[1], out kg)) return;
+            var body = new Rectangle(Width / 2 - 115, 12, 230, Math.Max(72, Height - 24));
+            using (var path = ChildVisualTheme.RoundedRect(body, 22))
+            using (var fill = new SolidBrush(Color.FromArgb(239, 246, 235)))
+            using (var border = new Pen(Color.FromArgb(177, 199, 169), 1.4f))
+            { g.FillPath(fill, path); g.DrawPath(border, path); }
+            var dial = new Rectangle(body.Left + 52, body.Top + 14, body.Width - 104, 50);
+            using (var path = ChildVisualTheme.RoundedRect(dial, 12))
+            using (var fill = new SolidBrush(Color.White))
+            using (var border = new Pen(Color.FromArgb(165, 179, 159), 1.2f))
+            { g.FillPath(fill, path); g.DrawPath(border, path); }
+            DrawCentered(g, kg + " kg", dial, ChildVisualTheme.Ink, 13f);
+            using (var tray = new SolidBrush(Color.FromArgb(235, 220, 189)))
+                g.FillEllipse(tray, body.Left + 34, body.Bottom - 27, body.Width - 68, 16);
+        }
+
+        private void DrawLiterMeasure(Graphics g)
+        {
+            var parts = (_question.IllustrationData ?? string.Empty).Split('|');
+            int liters;
+            if (parts.Length != 2 || parts[0] != "liter" || !int.TryParse(parts[1], out liters) || liters < 1 || liters > 10) return;
+            var vessel = new Rectangle(Width / 2 - 82, 9, 164, Math.Max(78, Height - 18));
+            using (var fill = new SolidBrush(Color.FromArgb(249, 252, 249)))
+            using (var border = new Pen(Color.FromArgb(128, 151, 146), 2f))
+            { g.FillRectangle(fill, vessel); g.DrawRectangle(border, vessel); }
+            var inner = Rectangle.Inflate(vessel, -12, -10);
+            var levelY = inner.Bottom - (int)Math.Round(inner.Height * (liters / 10.0));
+            using (var water = new SolidBrush(Color.FromArgb(207, 232, 239)))
+                g.FillRectangle(water, inner.Left, levelY, inner.Width, Math.Max(2, inner.Bottom - levelY));
+            for (var i = 1; i <= 10; i++)
+            {
+                var y = inner.Bottom - inner.Height * i / 10;
+                using (var pen = new Pen(Color.FromArgb(122, 145, 140), i == liters ? 2f : 1f))
+                    g.DrawLine(pen, vessel.Right - 32, y, vessel.Right - 10, y);
+                if (i == liters) DrawCentered(g, i + " L", new Rectangle(vessel.Right + 8, y - 10, 58, 20), ChildVisualTheme.PeachStrong, 8.5f);
+            }
+        }
+
+        private void DrawUnitRelation(Graphics g)
+        {
+            var parts = (_question.IllustrationData ?? string.Empty).Split('|');
+            if (parts.Length != 5 || (parts[0] != "unitrelation" && parts[0] != "timerelation")) return;
+            var left = new Rectangle(Width / 2 - 220, Height / 2 - 28, 160, 54);
+            var right = new Rectangle(Width / 2 + 60, Height / 2 - 28, 160, 54);
+            foreach (var rect in new[] { left, right })
+            {
+                using (var path = ChildVisualTheme.RoundedRect(rect, 14))
+                using (var fill = new SolidBrush(Color.FromArgb(243, 248, 238)))
+                using (var border = new Pen(Color.FromArgb(185, 202, 177), 1.2f))
+                { g.FillPath(fill, path); g.DrawPath(border, path); }
+            }
+            DrawCentered(g, parts[1] + " " + parts[2], left, ChildVisualTheme.Ink, 11f);
+            DrawCentered(g, _hintLevel >= 2 ? parts[3] + " " + parts[4] : "? " + parts[4], right, _hintLevel >= 2 ? ChildVisualTheme.PeachStrong : ChildVisualTheme.Ink, 11f);
+            using (var pen = new Pen(ChildVisualTheme.PeachStrong, 2f))
+            {
+                g.DrawLine(pen, left.Right + 16, Height / 2, right.Left - 16, Height / 2);
+                g.DrawLine(pen, right.Left - 25, Height / 2 - 7, right.Left - 16, Height / 2);
+                g.DrawLine(pen, right.Left - 25, Height / 2 + 7, right.Left - 16, Height / 2);
+            }
+            if (_hintLevel >= 1)
+                DrawCentered(g, parts[0] == "timerelation" ? "Quan hệ thời gian" : "Quan hệ độ dài", new Rectangle(0, Height - 22, Width, 18), ChildVisualTheme.MutedInk, 8.2f);
+        }
+
+        private void DrawCalendar(Graphics g)
+        {
+            var parts = (_question.IllustrationData ?? string.Empty).Split('|');
+            int month, days, highlight;
+            if (parts.Length != 5 || parts[0] != "calendar" || !int.TryParse(parts[1], out month) || !int.TryParse(parts[2], out days) || !int.TryParse(parts[3], out highlight)) return;
+            var stage = new Rectangle(Width / 2 - 205, 5, 410, Math.Max(88, Height - 10));
+            using (var path = ChildVisualTheme.RoundedRect(stage, 14))
+            using (var fill = new SolidBrush(Color.FromArgb(250, 249, 242)))
+            using (var border = new Pen(Color.FromArgb(214, 217, 202), 1.2f))
+            { g.FillPath(fill, path); g.DrawPath(border, path); }
+            DrawCentered(g, "THÁNG " + month, new Rectangle(stage.Left, stage.Top + 3, stage.Width, 18), ChildVisualTheme.Ink, 9f);
+            var gridTop = stage.Top + 24;
+            var cellW = stage.Width / 7;
+            var rows = 5;
+            var cellH = Math.Max(12, (stage.Height - 28) / rows);
+            for (var day = 1; day <= days; day++)
+            {
+                var index = day - 1;
+                var col = index % 7; var row = index / 7;
+                var rect = new Rectangle(stage.Left + col * cellW + 2, gridTop + row * cellH, cellW - 4, cellH - 2);
+                if (day == highlight)
+                {
+                    using (var path = ChildVisualTheme.RoundedRect(rect, 7))
+                    using (var fill = new SolidBrush(Color.FromArgb(244, 226, 193))) g.FillPath(fill, path);
+                }
+                DrawCentered(g, day.ToString(), rect, day == highlight ? ChildVisualTheme.PeachStrong : ChildVisualTheme.Ink, 7.6f);
+            }
         }
 
         private void DrawHundredsBlocks(Graphics g)

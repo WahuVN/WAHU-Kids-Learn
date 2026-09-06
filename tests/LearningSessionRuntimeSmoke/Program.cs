@@ -40,7 +40,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
         private static IList<MathTemplateRef> TestVerifiedContentAndCore(string templatePath)
         {
             var descriptors = new MathVerifiedTemplateSource().Load(templatePath);
-            A(descriptors.Count == 53, "verified_template_source_flattens_all_verified_variants");
+            A(descriptors.Count == 60, "verified_template_source_flattens_all_verified_variants");
             A(descriptors.All(x => x.Status == "VERIFIED_A_TEMPLATE"), "template_source_filters_verified_a_only");
             var refs = descriptors.Select(x => new MathTemplateRef
             {
@@ -51,7 +51,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 StatementVi = x.StatementVi,
                 AnswerText = x.AnswerText
             }).Where(AdaptiveMathSelector.IsSupported).ToList();
-            A(refs.Count == 53, "generator_supports_all_fifty_three_verified_runtime_candidates");
+            A(refs.Count == 60, "generator_supports_all_sixty_verified_runtime_candidates");
             var chanceRefs = refs.Where(x => x.TemplateId.StartsWith("possible_certain_impossible_die__", StringComparison.Ordinal)).ToList();
             A(chanceRefs.Count == 3, "compound_probability_template_flattens_three_variants");
             A(chanceRefs.All(x => x.SourceTemplateId == "possible_certain_impossible_die" &&
@@ -95,7 +95,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
             var first = selector.Select(refs, empty, new DateTime(2026, 9, 6, 10, 0, 0, DateTimeKind.Utc), new string[0], new string[0]);
             A(first != null && first.Template != null, "selector_returns_candidate");
             A(first.DifficultyFit >= 0 && first.DifficultyFit <= 1, "selector_difficulty_fit_bounded");
-            A(first.CandidateSummary.Count == 53, "selector_audits_all_candidates");
+            A(first.CandidateSummary.Count == 60, "selector_audits_all_candidates");
 
             var dueSkills = new Dictionary<string, SkillSnapshot>(StringComparer.Ordinal);
             foreach (var r in refs) dueSkills[r.SkillId] = new SkillSnapshot { SkillId = r.SkillId, MasteryScore = 0.20, Confidence = 0.20, AttemptsCount = 1, LearningState = "LEARNING" };
@@ -143,6 +143,8 @@ namespace WAHU.LearningSessionRuntimeSmoke
                     A(ValidateOperationConceptContract(q), "operation_concept_contract_" + r.TemplateId);
                 if (IsNumberExtensionTemplate(r.TemplateId))
                     A(ValidateNumberExtensionContract(q), "number_extension_contract_" + r.TemplateId);
+                if (IsMeasurementFoundationTemplate(r.TemplateId))
+                    A(ValidateMeasurementFoundationContract(q), "measurement_foundation_contract_" + r.TemplateId);
                 if (r.TemplateId.StartsWith("word_problem_", StringComparison.Ordinal) && r.TemplateId != "word_problem_select_operation_one_step")
                     A(ValidateWordProblemContract(q), "word_problem_relation_contract_" + r.TemplateId);
             }
@@ -248,6 +250,23 @@ namespace WAHU.LearningSessionRuntimeSmoke
             A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "sort_up_to_4" }) == "compare_two_numbers_1000", "sort_repairs_to_compare");
             A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "add_sub_two_operators_left_to_right" }) == "mental_add_within_20", "two_step_repairs_to_mental_add");
             A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "mental_round_tens_hundreds_1000" }) == "mental_add_within_20", "round_number_repairs_to_mental_add");
+            var heavierQuestion = TextQuestion("heavier_lighter_balance", "bên trái", new[] { "bên trái", "bên phải" });
+            A(classifier.Classify(heavierQuestion, "bên phải").ErrorType == "MEASUREMENT_COMPARE_ERROR", "heavier_lighter_error_classified");
+            var massQuestion = TextQuestion("mass_kg_read_write", "7 kg", new[] { "7 kg", "8 kg" });
+            A(classifier.Classify(massQuestion, "8 kg").ErrorType == "MEASUREMENT_UNIT_ERROR", "mass_unit_error_classified");
+            var literQuestion = TextQuestion("capacity_liter_read_write", "6 lít", new[] { "6 lít", "5 lít" });
+            A(classifier.Classify(literQuestion, "5 lít").ErrorType == "MEASUREMENT_UNIT_ERROR", "liter_unit_error_classified");
+            var lengthRelationQuestion = TextQuestion("length_dm_m_km_relation", "10 dm", new[] { "10 dm", "100 dm" });
+            A(classifier.Classify(lengthRelationQuestion, "100 dm").ErrorType == "MEASUREMENT_UNIT_ERROR", "length_relation_error_classified");
+            var dayQuestion = TextQuestion("time_day_24_hours", "24 giờ", new[] { "24 giờ", "12 giờ" });
+            A(classifier.Classify(dayQuestion, "12 giờ").ErrorType == "TIME_RELATION_ERROR", "day_24_hours_error_classified");
+            var hourQuestion = TextQuestion("time_hour_60_minutes", "60 phút", new[] { "60 phút", "30 phút" });
+            A(classifier.Classify(hourQuestion, "30 phút").ErrorType == "TIME_RELATION_ERROR", "hour_60_minutes_error_classified");
+            var calendarQuestion = TextQuestion("calendar_days_in_month_date", "30 ngày", new[] { "30 ngày", "31 ngày" });
+            A(classifier.Classify(calendarQuestion, "31 ngày").ErrorType == "CALENDAR_READ_ERROR", "calendar_read_error_classified");
+            A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "time_hour_60_minutes" }) == "clock_read_minute_hand_3_or_6", "hour_relation_repairs_to_clock");
+            A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "time_day_24_hours" }) == "time_hour_60_minutes", "day_relation_repairs_to_hour_relation");
+            A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "calendar_days_in_month_date" }) == "time_day_24_hours", "calendar_repairs_to_day_relation");
 
             TestGeneratorFuzz(refs);
             return refs;
@@ -296,7 +315,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 adaptiveAudit.Record(new AdaptiveDecisionAuditRequest
                 {
                     Id = "adaptive-" + Guid.NewGuid().ToString("N"), SessionId = session.SessionId, ChildId = profile.ChildId,
-                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.4.0", Question = question, Selection = selection,
+                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.5.0", Question = question, Selection = selection,
                     Behavior = lastBehavior, CreatedAtUtc = DateTime.UtcNow
                 });
 
@@ -323,7 +342,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 answerCommit.Commit(new AnswerCommitRequest
                 {
                     AttemptId = attemptId, SessionId = session.SessionId, ChildId = profile.ChildId,
-                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.4.0", QuestionId = question.QuestionId,
+                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.5.0", QuestionId = question.QuestionId,
                     SkillId = question.SkillId, Subject = "math", StartedAtUtc = answered.AddMilliseconds(-responseMs), AnsweredAtUtc = answered,
                     AnswerJson = Json.Serialize(new Dictionary<string, object> { { "answer", answer } }), IsCorrect = isCorrect,
                     ResponseMs = responseMs, HintLevel = hintLevel, Representation = question.Representation, InputMethod = "mouse",
@@ -449,6 +468,30 @@ VALUES(@child,'MENTAL_ADD_SUB_ROUND_TENS_HUNDREDS_1000','math',0.59,0.52,@roundA
                 "math_roadmap_groups_round_mental_into_operations");
             A(roadmapWithExtension.TotalTrackedAttempts == roadmapWithConcepts.TotalTrackedAttempts + 6,
                 "math_roadmap_total_includes_number_extension_attempts");
+            var measurementBeforeFoundation = roadmapWithExtension.Measurement.Attempts;
+            var dayAttemptsBefore = ReadSkillAttempts(database, profile.ChildId, "TIME_DAY_24_HOURS");
+            var massAttemptsBefore = ReadSkillAttempts(database, profile.ChildId, "MASS_KG_READ_WRITE");
+            using (var connection = database.OpenConnection())
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = @"INSERT OR REPLACE INTO child_skill
+(child_id,skill_id,subject,mastery_score,confidence,attempts_count,independent_success_count,hinted_success_count,transfer_success_count,learning_state,mastery_engine_version,updated_at_utc)
+VALUES(@child,'TIME_DAY_24_HOURS','math',0.63,0.57,@dayAttempts,2,1,0,'LEARNING',@engine,@updated);
+INSERT OR REPLACE INTO child_skill
+(child_id,skill_id,subject,mastery_score,confidence,attempts_count,independent_success_count,hinted_success_count,transfer_success_count,learning_state,mastery_engine_version,updated_at_utc)
+VALUES(@child,'MASS_KG_READ_WRITE','math',0.60,0.54,@massAttempts,1,1,0,'LEARNING',@engine,@updated);";
+                command.Parameters.AddWithValue("@child", profile.ChildId);
+                command.Parameters.AddWithValue("@dayAttempts", dayAttemptsBefore + 3);
+                command.Parameters.AddWithValue("@massAttempts", massAttemptsBefore + 2);
+                command.Parameters.AddWithValue("@engine", MasteryEngineV1.Version);
+                command.Parameters.AddWithValue("@updated", DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture));
+                command.ExecuteNonQuery();
+            }
+            var roadmapWithMeasurement = new MathRoadmapService(database).Read(profile.ChildId);
+            A(roadmapWithMeasurement.Measurement.Attempts == measurementBeforeFoundation + 5,
+                "math_roadmap_groups_measurement_foundation_attempts");
+            A(roadmapWithMeasurement.TotalTrackedAttempts == roadmapWithExtension.TotalTrackedAttempts + 5,
+                "math_roadmap_total_includes_measurement_foundation_attempts");
             A(correctCount == 5, "vertical_slice_fixture_correctness_expected");
         }
 
@@ -603,6 +646,8 @@ VALUES(@child,'MENTAL_ADD_SUB_ROUND_TENS_HUNDREDS_1000','math',0.59,0.52,@roundA
                 throw new Exception("FUZZ_FAIL operation concept contract: " + q.TemplateId);
             if (IsNumberExtensionTemplate(q.TemplateId) && !ValidateNumberExtensionContract(q))
                 throw new Exception("FUZZ_FAIL number extension contract: " + q.TemplateId);
+            if (IsMeasurementFoundationTemplate(q.TemplateId) && !ValidateMeasurementFoundationContract(q))
+                throw new Exception("FUZZ_FAIL measurement foundation contract: " + q.TemplateId);
             if (q.TemplateId.StartsWith("word_problem_", StringComparison.Ordinal) && q.TemplateId != "word_problem_select_operation_one_step" && !ValidateWordProblemContract(q))
                 throw new Exception("FUZZ_FAIL word problem relation contract: " + q.TemplateId);
         }
@@ -737,6 +782,70 @@ VALUES(@child,'MENTAL_ADD_SUB_ROUND_TENS_HUNDREDS_1000','math',0.59,0.52,@roundA
             return false;
         }
 
+        private static bool IsMeasurementFoundationTemplate(string templateId)
+        {
+            return templateId == "heavier_lighter_balance" || templateId == "mass_kg_read_write" ||
+                   templateId == "capacity_liter_read_write" || templateId == "length_dm_m_km_relation" ||
+                   templateId == "time_day_24_hours" || templateId == "time_hour_60_minutes" ||
+                   templateId == "calendar_days_in_month_date";
+        }
+
+        private static bool ValidateMeasurementFoundationContract(MathQuestion q)
+        {
+            if (q == null || !q.UsesTextChoices || q.DisplayChoices == null || q.DisplayChoices.Count < 2 || q.DisplayChoices.Count > 4) return false;
+            var parts = (q.IllustrationData ?? string.Empty).Split('|');
+            if (q.TemplateId == "heavier_lighter_balance")
+            {
+                int left, right;
+                if (q.Representation != "balance_scale" || parts.Length != 4 || parts[0] != "balance" ||
+                    !int.TryParse(parts[1], out left) || !int.TryParse(parts[2], out right) || left == right ||
+                    (parts[3] != "heavier" && parts[3] != "lighter") || q.DisplayChoices.Count != 2) return false;
+                var answerLeft = parts[3] == "heavier" ? left > right : left < right;
+                return q.CorrectAnswerDisplay == (answerLeft ? "bên trái" : "bên phải") &&
+                       new HashSet<string>(q.DisplayChoices, StringComparer.Ordinal).SetEquals(new[] { "bên trái", "bên phải" });
+            }
+            if (q.TemplateId == "mass_kg_read_write")
+            {
+                int kg;
+                return q.Representation == "mass_kg_scale" && parts.Length == 2 && parts[0] == "masskg" && int.TryParse(parts[1], out kg) &&
+                       kg >= 1 && kg <= 20 && q.CorrectAnswerDisplay == kg + " kg" && q.DisplayChoices.Count == 4 &&
+                       q.DisplayChoices.All(x => x.EndsWith(" kg", StringComparison.Ordinal));
+            }
+            if (q.TemplateId == "capacity_liter_read_write")
+            {
+                int liters;
+                return q.Representation == "liter_measure" && parts.Length == 2 && parts[0] == "liter" && int.TryParse(parts[1], out liters) &&
+                       liters >= 1 && liters <= 10 && q.CorrectAnswerDisplay == liters + " lít" && q.DisplayChoices.Count == 4 &&
+                       q.DisplayChoices.All(x => x.EndsWith(" lít", StringComparison.Ordinal));
+            }
+            if (q.TemplateId == "length_dm_m_km_relation")
+            {
+                if (q.Representation != "unit_relation" || parts.Length != 5 || parts[0] != "unitrelation" || q.DisplayChoices.Count != 4) return false;
+                var pair = parts[1] + "|" + parts[2] + "|" + parts[3] + "|" + parts[4];
+                var valid = pair == "1|m|10|dm" || pair == "10|dm|1|m" || pair == "1|km|1000|m" || pair == "1000|m|1|km";
+                return valid && q.CorrectAnswerDisplay == parts[3] + " " + parts[4];
+            }
+            if (q.TemplateId == "time_day_24_hours")
+                return q.Representation == "time_relation" && q.IllustrationData == "timerelation|1|ngày|24|giờ" &&
+                       q.CorrectAnswerDisplay == "24 giờ" && q.DisplayChoices.Count == 4;
+            if (q.TemplateId == "time_hour_60_minutes")
+                return q.Representation == "time_relation" && q.IllustrationData == "timerelation|1|giờ|60|phút" &&
+                       q.CorrectAnswerDisplay == "60 phút" && q.DisplayChoices.Count == 4;
+            if (q.TemplateId == "calendar_days_in_month_date")
+            {
+                int month, days, highlight;
+                if (q.Representation != "calendar" || parts.Length != 5 || parts[0] != "calendar" ||
+                    !int.TryParse(parts[1], out month) || !int.TryParse(parts[2], out days) || !int.TryParse(parts[3], out highlight) ||
+                    (parts[4] != "date" && parts[4] != "days") || q.DisplayChoices.Count != 4) return false;
+                var expectedDays = new[] { 4, 6, 9, 11 }.Contains(month) ? 30 : new[] { 1, 3, 5, 7, 8, 10, 12 }.Contains(month) ? 31 : 0;
+                if (expectedDays == 0 || days != expectedDays || highlight < 1 || highlight > days || month == 2) return false;
+                return parts[4] == "date"
+                    ? q.CorrectAnswerDisplay == "ngày " + highlight + " tháng " + month
+                    : q.CorrectAnswerDisplay == days + " ngày";
+            }
+            return false;
+        }
+
         private static bool ValidateWordProblemContract(MathQuestion q)
         {
             if (q == null || q.UsesTextChoices || q.Representation != "word_problem_model") return false;
@@ -832,6 +941,12 @@ VALUES(@child,'MENTAL_ADD_SUB_ROUND_TENS_HUNDREDS_1000','math',0.59,0.52,@roundA
             if (templateId == "min_max_up_to_4" || templateId == "sort_up_to_4") return "number_cards";
             if (templateId == "add_sub_two_operators_left_to_right") return "two_step_strip";
             if (templateId == "mental_round_tens_hundreds_1000") return "round_number_chunks";
+            if (templateId == "heavier_lighter_balance") return "balance_scale";
+            if (templateId == "mass_kg_read_write") return "mass_kg_scale";
+            if (templateId == "capacity_liter_read_write") return "liter_measure";
+            if (templateId == "length_dm_m_km_relation") return "unit_relation";
+            if (templateId == "time_day_24_hours" || templateId == "time_hour_60_minutes") return "time_relation";
+            if (templateId == "calendar_days_in_month_date") return "calendar";
             if (templateId == "place_value_decompose_3digit" || templateId == "expanded_form_3digit") return "place_value_blocks";
             if (templateId == "predecessor_successor" || templateId == "compare_two_numbers_1000") return "number_line_1000";
             if (templateId == "mental_add_within_20" || templateId == "mental_sub_within_20") return "number_ray";

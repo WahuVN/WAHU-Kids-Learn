@@ -11,7 +11,7 @@ namespace WAHU.Session
     public sealed class MathSessionCoordinator : IDisposable
     {
         public const string PackId = "math_grade2_verified_templates_v1";
-        public const string PackVersion = "1.4.0";
+        public const string PackVersion = "1.5.0";
         public const int DefaultTargetQuestionCount = 8;
 
         private readonly LearningDatabase _database;
@@ -480,6 +480,9 @@ namespace WAHU.Session
                 case "sort_up_to_4": return "compare_two_numbers_1000";
                 case "add_sub_two_operators_left_to_right":
                 case "mental_round_tens_hundreds_1000": return "mental_add_within_20";
+                case "time_day_24_hours": return "time_hour_60_minutes";
+                case "time_hour_60_minutes": return "clock_read_minute_hand_3_or_6";
+                case "calendar_days_in_month_date": return "time_day_24_hours";
                 default: return templateId;
             }
         }
@@ -562,6 +565,10 @@ namespace WAHU.Session
             if (error != null && error.ErrorType == "NUMBER_ORDER_ERROR") return "Chưa đúng. Con so sánh từ hàng trăm rồi đến hàng chục và đơn vị nhé.";
             if (error != null && error.ErrorType == "TWO_STEP_CALCULATION_ERROR") return "Chưa đúng. Con làm phép tính thứ nhất trước rồi dùng kết quả cho bước thứ hai nhé.";
             if (error != null && error.ErrorType == "ROUND_NUMBER_FACT_ERROR") return "Chưa đúng. Con xem các số tròn chục hoặc tròn trăm thành những nhóm bằng nhau nhé.";
+            if (error != null && error.ErrorType == "MEASUREMENT_COMPARE_ERROR") return "Chưa đúng. Con nhìn độ cao hai đĩa cân: bên nặng hơn sẽ thấp hơn nhé.";
+            if (error != null && error.ErrorType == "MEASUREMENT_UNIT_ERROR") return "Chưa đúng. Con đọc lại số đo và đơn vị kg, lít, dm, m hoặc km nhé.";
+            if (error != null && error.ErrorType == "TIME_RELATION_ERROR") return "Chưa đúng. Con nhớ 1 ngày = 24 giờ và 1 giờ = 60 phút nhé.";
+            if (error != null && error.ErrorType == "CALENDAR_READ_ERROR") return "Chưa đúng. Con đọc lại tháng, ô ngày được đánh dấu và ngày cuối cùng của tháng nhé.";
             if (error != null && error.ErrorType == "EVENT_CLASSIFICATION_ERROR") return "Chưa đúng. Con đối chiếu câu này với tất cả kết quả có thể của xúc xắc nhé.";
             return "Chưa đúng. Mình xem gợi ý rồi thử câu tiếp theo nhé.";
         }

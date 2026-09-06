@@ -70,6 +70,13 @@ namespace WAHU.Learning
                     case "sort_up_to_4": question = SortUpToFour(decision.Template); break;
                     case "add_sub_two_operators_left_to_right": question = TwoOperatorsLeftToRight(decision.Template); break;
                     case "mental_round_tens_hundreds_1000": question = MentalRoundTensHundreds(decision.Template); break;
+                    case "heavier_lighter_balance": question = HeavierLighterBalance(decision.Template); break;
+                    case "mass_kg_read_write": question = MassKgReadWrite(decision.Template); break;
+                    case "capacity_liter_read_write": question = CapacityLiterReadWrite(decision.Template); break;
+                    case "length_dm_m_km_relation": question = LengthUnitRelation(decision.Template); break;
+                    case "time_day_24_hours": question = TimeDay24Hours(decision.Template); break;
+                    case "time_hour_60_minutes": question = TimeHour60Minutes(decision.Template); break;
+                    case "calendar_days_in_month_date": question = CalendarDaysInMonthDate(decision.Template); break;
                     default: throw new InvalidOperationException("Unsupported VERIFIED math template: " + decision.Template.TemplateId);
                 }
             }
@@ -553,6 +560,159 @@ namespace WAHU.Learning
             return question;
         }
 
+        private MathQuestion HeavierLighterBalance(MathTemplateRef template)
+        {
+            var left = _random.Next(1, 10);
+            var right = _random.Next(1, 10);
+            while (right == left) right = _random.Next(1, 10);
+            var askHeavier = _random.Next(0, 2) == 0;
+            var leftIsAnswer = askHeavier ? left > right : left < right;
+            var answer = leftIsAnswer ? "bên trái" : "bên phải";
+            var question = NewTextQuestion(template,
+                "Quan sát cân. " + (askHeavier ? "Bên nào có vật nặng hơn?" : "Bên nào có vật nhẹ hơn?"),
+                answer, new[] { "bên trái", "bên phải" },
+                "Bên nặng hơn làm đĩa cân hạ thấp hơn.",
+                askHeavier ? "Chọn phía có đĩa cân thấp hơn." : "Chọn phía có đĩa cân cao hơn.");
+            question.IllustrationData = "balance|" + left + "|" + right + "|" + (askHeavier ? "heavier" : "lighter");
+            return question;
+        }
+
+        private MathQuestion MassKgReadWrite(MathTemplateRef template)
+        {
+            var kg = _random.Next(1, 21);
+            var options = UnitChoices(kg, 1, 20, " kg");
+            var question = NewTextQuestion(template,
+                "Quan sát cân và chọn số đo khối lượng đúng.", kg + " kg", options,
+                "Đọc số trên mặt cân rồi nhớ đơn vị ki-lô-gam.",
+                "Kí hiệu của ki-lô-gam là kg.");
+            question.IllustrationData = "masskg|" + kg;
+            return question;
+        }
+
+        private MathQuestion CapacityLiterReadWrite(MathTemplateRef template)
+        {
+            var liters = _random.Next(1, 11);
+            var options = UnitChoices(liters, 1, 10, " lít");
+            var question = NewTextQuestion(template,
+                "Quan sát bình đo và chọn dung tích đúng.", liters + " lít", options,
+                "Đọc vạch mà mực nước đang chạm tới.",
+                "Đơn vị đang dùng là lít.");
+            question.IllustrationData = "liter|" + liters;
+            return question;
+        }
+
+        private MathQuestion LengthUnitRelation(MathTemplateRef template)
+        {
+            var mode = _random.Next(0, 4);
+            string prompt, answer, data;
+            IList<string> choices;
+            if (mode == 0)
+            {
+                prompt = "1 m bằng bao nhiêu dm?"; answer = "10 dm";
+                choices = new[] { "10 dm", "100 dm", "1 dm", "1000 dm" };
+                data = "unitrelation|1|m|10|dm";
+            }
+            else if (mode == 1)
+            {
+                prompt = "10 dm bằng bao nhiêu m?"; answer = "1 m";
+                choices = new[] { "1 m", "10 m", "100 m", "1000 m" };
+                data = "unitrelation|10|dm|1|m";
+            }
+            else if (mode == 2)
+            {
+                prompt = "1 km bằng bao nhiêu m?"; answer = "1000 m";
+                choices = new[] { "1000 m", "100 m", "10 m", "1 m" };
+                data = "unitrelation|1|km|1000|m";
+            }
+            else
+            {
+                prompt = "1000 m bằng bao nhiêu km?"; answer = "1 km";
+                choices = new[] { "1 km", "10 km", "100 km", "1000 km" };
+                data = "unitrelation|1000|m|1|km";
+            }
+            var question = NewTextQuestion(template, prompt, answer, Shuffle(choices.ToList()),
+                "Nhìn hai đơn vị và nhớ quan hệ đã học.",
+                mode < 2 ? "1 m = 10 dm." : "1 km = 1000 m.");
+            question.IllustrationData = data;
+            return question;
+        }
+
+        private MathQuestion TimeDay24Hours(MathTemplateRef template)
+        {
+            var question = NewTextQuestion(template,
+                "1 ngày có bao nhiêu giờ?", "24 giờ",
+                Shuffle(new List<string> { "24 giờ", "12 giờ", "60 giờ", "30 giờ" }),
+                "Một ngày gồm cả ban ngày và ban đêm.",
+                "1 ngày = 24 giờ.");
+            question.IllustrationData = "timerelation|1|ngày|24|giờ";
+            return question;
+        }
+
+        private MathQuestion TimeHour60Minutes(MathTemplateRef template)
+        {
+            var question = NewTextQuestion(template,
+                "1 giờ có bao nhiêu phút?", "60 phút",
+                Shuffle(new List<string> { "60 phút", "30 phút", "24 phút", "100 phút" }),
+                "Hãy nghĩ đến một vòng đầy đủ của kim phút.",
+                "1 giờ = 60 phút.");
+            question.IllustrationData = "timerelation|1|giờ|60|phút";
+            return question;
+        }
+
+        private MathQuestion CalendarDaysInMonthDate(MathTemplateRef template)
+        {
+            var months30 = new[] { 4, 6, 9, 11 };
+            var months31 = new[] { 1, 3, 5, 7, 8, 10, 12 };
+            var allMonths = months30.Concat(months31).ToArray();
+            var month = allMonths[_random.Next(0, allMonths.Length)];
+            var days = months30.Contains(month) ? 30 : 31;
+            var highlighted = _random.Next(1, days + 1);
+            var askDate = _random.Next(0, 2) == 0;
+            MathQuestion question;
+            if (askDate)
+            {
+                var answer = "ngày " + highlighted + " tháng " + month;
+                var d2 = highlighted == days ? highlighted - 1 : highlighted + 1;
+                var d3 = highlighted <= 2 ? highlighted + 2 : highlighted - 2;
+                var otherMonth = month == 12 ? 11 : month + 1;
+                question = NewTextQuestion(template,
+                    "Quan sát lịch. Ngày được đánh dấu là ngày nào?", answer,
+                    Shuffle(new List<string>
+                    {
+                        answer,
+                        "ngày " + d2 + " tháng " + month,
+                        "ngày " + d3 + " tháng " + month,
+                        "ngày " + highlighted + " tháng " + otherMonth
+                    }),
+                    "Đọc số trong ô được đánh dấu rồi đọc tên tháng.",
+                    "Ô được đánh dấu nằm trong lịch tháng " + month + ".");
+            }
+            else
+            {
+                var answer = days + " ngày";
+                question = NewTextQuestion(template,
+                    "Quan sát lịch tháng " + month + ". Tháng này có bao nhiêu ngày?", answer,
+                    Shuffle(new List<string> { "30 ngày", "31 ngày", "28 ngày", "29 ngày" }),
+                    "Nhìn số ngày cuối cùng xuất hiện trong tờ lịch.",
+                    "Tháng " + month + " kết thúc ở ngày " + days + ".");
+            }
+            question.IllustrationData = "calendar|" + month + "|" + days + "|" + highlighted + "|" + (askDate ? "date" : "days");
+            return question;
+        }
+
+        private IList<string> UnitChoices(int correct, int min, int max, string suffix)
+        {
+            var values = new HashSet<int> { correct };
+            foreach (var delta in new[] { -1, 1, -2, 2, -5, 5 })
+            {
+                var value = correct + delta;
+                if (value >= min && value <= max) values.Add(value);
+                if (values.Count >= 4) break;
+            }
+            for (var value = min; values.Count < 4 && value <= max; value++) values.Add(value);
+            return Shuffle(values.Take(4).Select(x => x + suffix).ToList());
+        }
+
         private MathQuestion FullHundredsRecognize(MathTemplateRef template)
         {
             var hundreds = _random.Next(1, 10);
@@ -854,6 +1014,19 @@ namespace WAHU.Learning
                     return "two_step_strip";
                 case "mental_round_tens_hundreds_1000":
                     return "round_number_chunks";
+                case "heavier_lighter_balance":
+                    return "balance_scale";
+                case "mass_kg_read_write":
+                    return "mass_kg_scale";
+                case "capacity_liter_read_write":
+                    return "liter_measure";
+                case "length_dm_m_km_relation":
+                    return "unit_relation";
+                case "time_day_24_hours":
+                case "time_hour_60_minutes":
+                    return "time_relation";
+                case "calendar_days_in_month_date":
+                    return "calendar";
                 default:
                     return "symbolic";
             }

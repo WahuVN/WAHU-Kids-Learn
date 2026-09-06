@@ -144,6 +144,13 @@ namespace WAHU.Learning
                 case "sort_up_to_4":
                 case "add_sub_two_operators_left_to_right":
                 case "mental_round_tens_hundreds_1000":
+                case "heavier_lighter_balance":
+                case "mass_kg_read_write":
+                case "capacity_liter_read_write":
+                case "length_dm_m_km_relation":
+                case "time_day_24_hours":
+                case "time_hour_60_minutes":
+                case "calendar_days_in_month_date":
                     return true;
                 default:
                     return false;

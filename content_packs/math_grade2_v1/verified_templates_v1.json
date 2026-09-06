@@ -635,6 +635,48 @@
                           "skill":  "MENTAL_ADD_SUB_ROUND_TENS_HUNDREDS_1000",
                           "status":  "VERIFIED_A_TEMPLATE",
                           "prompt_vi":  "Tính nhẩm cộng hoặc trừ các số tròn chục, tròn trăm trong phạm vi 1000."
+                      },
+                      {
+                          "id":  "heavier_lighter_balance",
+                          "skill":  "HEAVIER_LIGHTER",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Quan sát cân và chọn phía có vật nặng hơn hoặc nhẹ hơn."
+                      },
+                      {
+                          "id":  "mass_kg_read_write",
+                          "skill":  "MASS_KG_READ_WRITE",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Đọc số đo khối lượng theo ki-lô-gam (kg)."
+                      },
+                      {
+                          "id":  "capacity_liter_read_write",
+                          "skill":  "CAPACITY_LITER_READ_WRITE",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Đọc số đo dung tích theo lít."
+                      },
+                      {
+                          "id":  "length_dm_m_km_relation",
+                          "skill":  "LENGTH_DM_M_KM_RECOGNIZE_RELATION",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Nhận biết quan hệ giữa dm, m và km."
+                      },
+                      {
+                          "id":  "time_day_24_hours",
+                          "skill":  "TIME_DAY_24_HOURS",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Nhận biết một ngày có 24 giờ."
+                      },
+                      {
+                          "id":  "time_hour_60_minutes",
+                          "skill":  "TIME_HOUR_60_MINUTES",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Nhận biết một giờ có 60 phút."
+                      },
+                      {
+                          "id":  "calendar_days_in_month_date",
+                          "skill":  "CALENDAR_DAYS_IN_MONTH_DATE",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Đọc số ngày trong tháng và ngày tháng trên lịch; không dùng tháng 2 trong template cơ sở."
                       }
                   ]
 }

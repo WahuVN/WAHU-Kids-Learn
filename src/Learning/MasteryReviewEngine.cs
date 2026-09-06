@@ -159,6 +159,14 @@ namespace WAHU.Learning
                     return New("COMPARISON_ERROR", 0.68, "wrong_comparison_symbol");
                 if (question.TemplateId == "predecessor_successor")
                     return New("SEQUENCE_NEIGHBOR_ERROR", 0.62, "wrong_predecessor_successor_pair");
+                if (question.TemplateId == "heavier_lighter_balance")
+                    return New("MEASUREMENT_COMPARE_ERROR", 0.66, "wrong_heavier_lighter_visual_choice");
+                if (question.TemplateId == "mass_kg_read_write" || question.TemplateId == "capacity_liter_read_write" || question.TemplateId == "length_dm_m_km_relation")
+                    return New("MEASUREMENT_UNIT_ERROR", 0.66, "wrong_measurement_unit_read_or_relation_choice");
+                if (question.TemplateId == "time_day_24_hours" || question.TemplateId == "time_hour_60_minutes")
+                    return New("TIME_RELATION_ERROR", 0.68, "wrong_day_hour_or_hour_minute_relation");
+                if (question.TemplateId == "calendar_days_in_month_date")
+                    return New("CALENDAR_READ_ERROR", 0.64, "wrong_calendar_month_or_date_choice");
                 if (question.TemplateId == "sort_up_to_4")
                     return New("NUMBER_ORDER_ERROR", 0.66, "wrong_four_number_sort_order");
                 if (question.TemplateId == "add_components_recognize" || question.TemplateId == "sub_components_recognize" ||

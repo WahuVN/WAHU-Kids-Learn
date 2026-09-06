@@ -81,7 +81,10 @@ FROM child_skill WHERE child_id=@child AND subject='math';";
                                  skill == "MULTIPLICATION_MEANING" || skill == "DIVISION_MEANING" ||
                                  skill == "MULTIPLICATION_COMPONENTS" || skill == "DIVISION_COMPONENTS")
                             Add(tables, ref tableScore, mastery, attempts);
-                        else if (skill == "POLYLINE_LENGTH_SUM_SEGMENTS" || skill == "CLOCK_MINUTE_HAND_AT_3_OR_6" || IsGeometrySkill(skill))
+                        else if (skill == "POLYLINE_LENGTH_SUM_SEGMENTS" || skill == "CLOCK_MINUTE_HAND_AT_3_OR_6" ||
+                                 skill == "HEAVIER_LIGHTER" || skill == "MASS_KG_READ_WRITE" || skill == "CAPACITY_LITER_READ_WRITE" ||
+                                 skill == "LENGTH_DM_M_KM_RECOGNIZE_RELATION" || skill == "TIME_DAY_24_HOURS" ||
+                                 skill == "TIME_HOUR_60_MINUTES" || skill == "CALENDAR_DAYS_IN_MONTH_DATE" || IsGeometrySkill(skill))
                             Add(measurement, ref measurementScore, mastery, attempts);
                         else if (skill == "EVENT_POSSIBLE" || skill == "EVENT_CERTAIN" || skill == "EVENT_IMPOSSIBLE" ||
                                  skill == "PICTOGRAPH_READ_DESCRIBE" || skill == "PICTOGRAPH_SIMPLE_INFERENCE")

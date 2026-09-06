@@ -37,6 +37,13 @@ namespace WAHU.ChildUiRuntimeSmoke
         {
             var cases = new[]
             {
+                QV("heavier_lighter_balance", "HEAVIER_LIGHTER", "Quan sát cân. Bên nào có vật nặng hơn?", "bên trái", "balance|8|3|heavier", "balance_scale"),
+                QV("mass_kg_read_write", "MASS_KG_READ_WRITE", "Quan sát cân và chọn số đo khối lượng đúng.", "7 kg", "masskg|7", "mass_kg_scale"),
+                QV("capacity_liter_read_write", "CAPACITY_LITER_READ_WRITE", "Quan sát bình đo và chọn dung tích đúng.", "6 lít", "liter|6", "liter_measure"),
+                QV("length_dm_m_km_relation", "LENGTH_DM_M_KM_RECOGNIZE_RELATION", "1 m bằng bao nhiêu dm?", "10 dm", "unitrelation|1|m|10|dm", "unit_relation"),
+                QV("time_day_24_hours", "TIME_DAY_24_HOURS", "1 ngày có bao nhiêu giờ?", "24 giờ", "timerelation|1|ngày|24|giờ", "time_relation"),
+                QV("time_hour_60_minutes", "TIME_HOUR_60_MINUTES", "1 giờ có bao nhiêu phút?", "60 phút", "timerelation|1|giờ|60|phút", "time_relation"),
+                QV("calendar_days_in_month_date", "CALENDAR_DAYS_IN_MONTH_DATE", "Quan sát lịch. Ngày được đánh dấu là ngày nào?", "ngày 15 tháng 4", "calendar|4|30|15|date", "calendar"),
                 QV("full_hundreds_recognize", "NUM_FULL_HUNDREDS_RECOGNIZE", "Quan sát mô hình trăm.", "500", "hundreds|5", "hundreds_blocks"),
                 QV("number_ray_fill_1000", "NUMBER_RAY_FILL", "Điền số còn thiếu trên trục số.", "340", "numberlinefill|300|10|4|5", "number_line_fill"),
                 QV("min_max_up_to_4", "NUM_MIN_MAX_UP_TO_4", "Trong các số 472, 810, 305, 699, số lớn nhất là số nào?", "810", "numbercards|472|810|305|699|max", "number_cards"),
