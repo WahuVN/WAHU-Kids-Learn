@@ -416,6 +416,10 @@ namespace WAHU.ChildUiRuntimeSmoke
                         "math_completion_support_accessible_summary");
                     A(next.Text == "Về thư viện Toán" && next.AccessibleDescription.IndexOf("danh sách bài Toán", StringComparison.OrdinalIgnoreCase) >= 0,
                         "math_completion_return_route_matches_math_hub");
+                    SetField(form, "_finished", true);
+                    Invoke(form, "HandleNextButton");
+                    A(form.DialogResult == DialogResult.OK,
+                        "math_completion_returns_ok_to_math_hub_modal_flow");
                 }
             }
             finally
