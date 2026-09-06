@@ -28,7 +28,7 @@ Owner: AI1 — Math Content & Data
   - interactive measurement
   - word problem
 - Semantic validator errors: **0**
-- Math content unittest: **28 / 28 PASS**
+- Math content unittest: **29 / 29 PASS**
 - Pack manifest/hash/listing check on current working tree: **PASS** (`version=1.9.0`, 3 listed files)
 
 ## Curriculum/content completeness
@@ -81,6 +81,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - invalid MC correct choice / duplicate choices / rationale missing;
 - distractor rationale placeholder/generic hoặc bị tái dùng quá mức;
 - hint cấp 2 placeholder/generic hoặc bị tái dùng quá mức;
+- hint cấp 1/2 tiết lộ canonical answer chưa xuất hiện trong đề; true/false được loại khỏi detector để “Đúng/Sai” vẫn dùng được như ngôn ngữ hướng dẫn;
 - vocabulary kỹ thuật nội bộ lọt vào field child-facing (`baseline`, `runtime`, `template`, `validator`, ...);
 - mục tiêu học thứ hai generic/placeholder hoặc bị tái dùng quá mức;
 - explanation câu hỏi quá ngắn, không đủ bước giải thích/kiểm tra cho feedback học tập;
@@ -118,7 +119,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - skill quan hệ thời gian không mở rộng thành phép nhân/chia ngoài yêu cầu cần đạt;
 - mọi phép nhân/chia literal child-facing nằm trong bảng 2 hoặc 5, kể cả distractor;
 - mọi MCQ có choice khác nhau sau normalize text và không có hai biểu thức choice cùng giá trị số;
-- 201/201 hint cấp 2 hiện actionable theo dạng câu + độ khó + concept, không còn placeholder chung;
+- 201/201 hint cấp 2 hiện actionable, **201 unique / max repeat 1**; 45 hint slots trên 34 câu đã được thay bằng prompt-focused guidance và toàn bộ 402 hint slots đạt **0 unseen-answer leak**;
 - 267 distractor có **256 rationale khác nhau**, max lặp 3 và placeholder chung = 0;
 - vị trí đáp án đúng được cân bằng deterministic: 88 câu 4-choice = 22/22/22/22 cho A/B/C/D; 3 true/false = 2/1;
 - 23 câu integer có `answer_unit` giữ đúng contract display-only, không đổi sang unit-input;
@@ -130,7 +131,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - toàn ngân hàng đạt **0 exact duplicate + 0 cross-lesson near-duplicate ≥ 0.95**; 2 cặp near-duplicate đã được viết lại theo ngữ cảnh khác;
 - 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract.
 
-Latest result: **28 tests PASS**.
+Latest result: **29 tests PASS**.
 
 ## Commits / waves
 
@@ -157,14 +158,16 @@ Latest result: **28 tests PASS**.
 - `d7aea5d` — `Toán: loại câu gần trùng giữa các bài học`
 - `896f2f0` — `Toán: nâng độ khó vận dụng theo hướng chuyển giao`
 - `7d56516` — `Toán: chốt đáp án tường minh trong mọi lời giải`
+- `a77bfdf` — `Toán: khóa accepted answer fail-closed`
 
 ## Current blockers outside AI1 content ownership
 
 1. Request 005 functional path đã được commit end-to-end: engine `656a94b` + UI `1436705`. Targeted lesson dùng authored bank đúng 3 câu, all-201 answer-surface sweep PASS, Child UI **1475 assertions PASS**, Flow 5 prerequisite unlock PASS và persistence **99 assertions PASS**. Release-clean full solution vẫn bị SQLite/toolchain chặn; Request 007 vẫn là recovery edge riêng cần khóa regression.
 2. Request 007 **CLOSED** tại `7f79367`: targeted corrupt regression xác nhận cursor rollback 2→1, phát lại đúng medium, sau đó application, đủ 3 attempts mới complete; persistence smoke hiện **99 assertions PASS**.
 3. Request 006 vẫn mở: 23 câu integer có `answer_unit` được content giữ display-only, nhưng `MathAuthoredQuestionSource`/`MathQuestion` chưa preserve field để feedback hiện `8 cm`, `5 kg`, `60 phút` mà vẫn chấm raw integer.
-4. UI smoke build hiện gặp lỗi reference `System.Data.SQLite` khi build `WAHU.Data.csproj`; targeted persistence smoke không bị lỗi. Đây là build/dependency WIP ngoài AI1, không phải lỗi content.
-5. Legacy generator vẫn chỉ phủ 65/67 skill, nhưng lesson-authored path WIP đã cho phép hai skill `FOLD_CUT_COMPOSE_SHAPES` và `MONEY_VND_NOTE_RECOGNITION` có bài luyện thật mà không cần template giả.
+4. UI smoke full project-reference build vẫn gặp lỗi reference `System.Data.SQLite` khi build `WAHU.Data.csproj`; App + Child UI targeted build với `BuildProjectReferences=false` PASS. Đây là build/dependency WIP ngoài AI1.
+5. Concurrent retry UI WIP hiện fail `choice_retry_marks_selected_wrong_choice`: engine đã vào retry (`AnswerAttempts=1`) nhưng choice button vẫn `Idle/disabled`. AI1 hint diff chỉ đổi `hints_vi`, không đổi choices/correct IDs; content validator, 29 tests, persistence 99 và pack hash đều PASS. Owner sửa: AI3 UI/retry presentation.
+6. Legacy generator vẫn chỉ phủ 65/67 skill, nhưng lesson-authored path đã cho phép hai skill `FOLD_CUT_COMPOSE_SHAPES` và `MONEY_VND_NOTE_RECOGNITION` có bài luyện thật mà không cần template giả.
 
 ## Lane verdict
 

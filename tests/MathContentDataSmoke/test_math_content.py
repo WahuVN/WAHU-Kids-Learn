@@ -236,6 +236,12 @@ class MathContentDataSmoke(unittest.TestCase):
                 serialized = json.dumps(item, ensure_ascii=False)
                 self.assertEqual([], validator.grade2_operation_scope_violations(serialized))
 
+    def test_hints_do_not_reveal_unseen_answers(self):
+        for item in self.questions:
+            for index, hint in enumerate(item["hints_vi"], 1):
+                with self.subTest(item=item["id"], hint=index):
+                    self.assertFalse(validator.hint_reveals_unseen_answer(item, hint))
+
     def test_second_hints_are_actionable_not_placeholders(self):
         second_hints = [x["hints_vi"][1] for x in self.questions]
         self.assertNotIn(validator.GENERIC_SECOND_HINT, second_hints)

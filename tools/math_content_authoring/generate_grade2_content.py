@@ -74,6 +74,54 @@ def explanation_with_answer(explanation: str, answer_display: object) -> str:
     return text + f" Vậy đáp án là {answer}."
 
 
+def hint_reveals_unseen_answer(prompt: str, hint: str, answer: object, answer_kind: str, question_type: str) -> bool:
+    if question_type == "true_false":
+        return False
+    answer_text = str(answer).strip()
+    if not answer_text:
+        return False
+    if answer_kind in {"integer", "interaction_integer"}:
+        answer_token = str(answer)
+        prompt_numbers = re.findall(r"(?<!\d)[+-]?\d+(?!\d)", prompt)
+        hint_numbers = re.findall(r"(?<!\d)[+-]?\d+(?!\d)", hint)
+        return answer_token not in prompt_numbers and answer_token in hint_numbers
+    answer_evidence = normalize_answer_evidence(answer_text)
+    prompt_evidence = normalize_answer_evidence(prompt)
+    hint_evidence = normalize_answer_evidence(hint)
+    if answer_evidence:
+        answer_phrase = f" {answer_evidence} "
+        prompt_phrase = f" {prompt_evidence} "
+        hint_phrase = f" {hint_evidence} "
+        return answer_phrase not in prompt_phrase and answer_phrase in hint_phrase
+    return answer_text not in prompt and answer_text in hint
+
+
+def answer_safe_hint(candidate: str, prompt: str, answer: object, answer_kind: str, question_type: str, level: int) -> str:
+    if not hint_reveals_unseen_answer(prompt, candidate, answer, answer_kind, question_type):
+        return candidate
+    focus = " ".join(prompt.split())
+    if len(focus) > 110:
+        focus = focus[:107].rstrip() + "…"
+    first = {
+        "multiple_choice": f"Đọc lại dữ kiện “{focus}”. Xác định vai trò hoặc đặc điểm đang được hỏi trước khi nhìn các lựa chọn.",
+        "numeric_input": f"Đọc lại dữ kiện “{focus}”. Xác định các số đã biết và điều cần tìm trước khi chọn phép tính.",
+        "word_problem": f"Đọc lại tình huống “{focus}”. Nói rõ đã biết gì và cần tìm gì trước khi chọn phép tính.",
+        "expression_input": f"Đọc lại yêu cầu “{focus}”. Xác định đúng thứ tự các phép tính trước khi viết biểu thức.",
+        "unit_input": f"Đọc lại yêu cầu “{focus}”. Xác định đại lượng cần tìm và đơn vị phải ghi ở kết quả.",
+        "interactive_measurement": f"Đọc lại yêu cầu “{focus}”. Xác định hai đầu mút và độ dài cần tạo trước khi thao tác.",
+    }
+    second = {
+        "multiple_choice": f"Với “{focus}”, loại từng lựa chọn không khớp dữ kiện; chỉ giữ phương án thỏa tất cả chi tiết.",
+        "numeric_input": f"Với “{focus}”, viết một phép tính ngắn từ dữ kiện rồi kiểm tra kết quả theo điều đề đang hỏi.",
+        "word_problem": f"Với “{focus}”, chọn phép tính theo sự thay đổi hoặc quan hệ trong tình huống rồi kiểm tra ngược kết quả.",
+        "expression_input": f"Với “{focus}”, viết biểu thức theo đúng thứ tự rồi tính từng bước để tự kiểm tra.",
+        "unit_input": f"Với “{focus}”, tính phần số trước rồi kiểm tra lại đơn vị ở cuối đáp án.",
+        "interactive_measurement": f"Với “{focus}”, đặt hai đầu mút rồi đo lại khoảng cách trước khi xác nhận.",
+    }
+    table = first if level == 1 else second
+    return table.get(question_type, table["numeric_input"])
+
+
 def second_hint(question_type: str, difficulty: str, concept_name: str) -> str:
     """Give a child a concrete next move without revealing the authored answer."""
     concept = concept_name.strip()
@@ -934,6 +982,12 @@ def build() -> tuple[dict, dict]:
                     answer_display += " " + str(spec["answer_unit"])
                 question_explanation = explanation_with_answer(
                     deepen_explanation(spec["explanation_vi"], question_type, concept_name), answer_display)
+                first_hint_text = answer_safe_hint(
+                    "Nhớ kiến thức: " + concept_def, spec["prompt_vi"], spec["correct_answer"],
+                    spec["answer_kind"], question_type, 1)
+                second_hint_text = answer_safe_hint(
+                    second_hint(question_type, difficulty, concept_name), spec["prompt_vi"], spec["correct_answer"],
+                    spec["answer_kind"], question_type, 2)
                 q = {
                     "id": qid,
                     "lesson_id": lesson_id,
@@ -945,10 +999,7 @@ def build() -> tuple[dict, dict]:
                     "correct_answer": spec["correct_answer"],
                     "accepted_answers": spec["accepted_answers"],
                     "explanation_vi": question_explanation,
-                    "hints_vi": [
-                        "Nhớ kiến thức: " + concept_def,
-                        second_hint(question_type, difficulty, concept_name),
-                    ],
+                    "hints_vi": [first_hint_text, second_hint_text],
                     "tags": [skill.lower(), domain_key, difficulty, question_type, spec["answer_kind"]],
                     "validation": spec["validation"],
                     "status": "CHILD_READY",

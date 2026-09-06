@@ -161,6 +161,31 @@ def explanation_states_answer(question: dict, explanation: str) -> bool:
     return bool(answer_display and answer_display in explanation)
 
 
+def hint_reveals_unseen_answer(question: dict, hint: str) -> bool:
+    if question.get("question_type") == "true_false":
+        return False
+    answer = question.get("correct_answer")
+    if answer is None:
+        return False
+    answer_kind = question.get("answer_kind")
+    prompt = str(question.get("prompt_vi") or "")
+    if answer_kind in {"integer", "interaction_integer"}:
+        answer_token = str(answer)
+        prompt_numbers = re.findall(r"(?<!\d)[+-]?\d+(?!\d)", prompt)
+        hint_numbers = re.findall(r"(?<!\d)[+-]?\d+(?!\d)", hint)
+        return answer_token not in prompt_numbers and answer_token in hint_numbers
+    answer_text = str(answer).strip()
+    answer_evidence = normalize_prompt_identity(answer_text)
+    prompt_evidence = normalize_prompt_identity(prompt)
+    hint_evidence = normalize_prompt_identity(hint)
+    if answer_evidence:
+        answer_phrase = f" {answer_evidence} "
+        prompt_phrase = f" {prompt_evidence} "
+        hint_phrase = f" {hint_evidence} "
+        return answer_phrase not in prompt_phrase and answer_phrase in hint_phrase
+    return bool(answer_text and answer_text not in prompt and answer_text in hint)
+
+
 def grade2_operation_scope_violations(text: str) -> list[str]:
     violations: list[str] = []
     if not isinstance(text, str):
@@ -617,6 +642,9 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
         if len(hints) < 2 or any(not isinstance(x, str) or not x.strip() for x in hints):
             errors.append(f"invalid_hints:{where}")
         else:
+            for hint_index, hint_text in enumerate(hints):
+                if hint_reveals_unseen_answer(q, hint_text):
+                    errors.append(f"hint_reveals_unseen_answer:{where}:{hint_index + 1}")
             second_hint = " ".join(hints[1].split())
             second_hint_counts[second_hint] += 1
             if second_hint == GENERIC_SECOND_HINT:

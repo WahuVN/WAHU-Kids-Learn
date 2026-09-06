@@ -726,7 +726,7 @@
       ],
       "explanation_vi": "Cùng 6 trăm nhưng 0 chục nhỏ hơn 8 chục nên 608 < 680. Vậy đáp án là <.",
       "hints_vi": [
-        "Nhớ kiến thức: Dùng các dấu >, <, = sau khi so sánh lần lượt từ hàng cao nhất xuống.",
+        "Đọc lại dữ kiện “Điền dấu đúng: 608 __ 680”. Xác định vai trò hoặc đặc điểm đang được hỏi trước khi nhìn các lựa chọn.",
         "Đối chiếu từng lựa chọn với kiến thức “So sánh số”; loại ngay lựa chọn trái với dữ kiện của đề."
       ],
       "tags": [
@@ -779,7 +779,7 @@
       ],
       "explanation_vi": "Cùng 9 trăm; 4 chục lớn hơn 2 chục nên 945 > 925. Vậy đáp án là >.",
       "hints_vi": [
-        "Nhớ kiến thức: Dùng các dấu >, <, = sau khi so sánh lần lượt từ hàng cao nhất xuống.",
+        "Đọc lại dữ kiện “Điền dấu đúng: 945 __ 925”. Xác định vai trò hoặc đặc điểm đang được hỏi trước khi nhìn các lựa chọn.",
         "Tự xác định đặc điểm đúng của “So sánh số” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
@@ -1252,8 +1252,8 @@
       ],
       "explanation_vi": "23 là một trong hai số được cộng nên là số hạng.",
       "hints_vi": [
-        "Nhớ kiến thức: Hai số được cộng là số hạng; kết quả của phép cộng là tổng.",
-        "Đối chiếu từng lựa chọn với kiến thức “Số hạng và tổng”; loại ngay lựa chọn trái với dữ kiện của đề."
+        "Đọc lại dữ kiện “Trong 23 + 15 = 38, số 23 được gọi là gì?”. Xác định vai trò hoặc đặc điểm đang được hỏi trước khi nhìn các lựa chọn.",
+        "Với “Trong 23 + 15 = 38, số 23 được gọi là gì?”, loại từng lựa chọn không khớp dữ kiện; chỉ giữ phương án thỏa tất cả chi tiết."
       ],
       "tags": [
         "add_components_recognize",
@@ -1305,8 +1305,8 @@
       ],
       "explanation_vi": "Kết quả của phép cộng gọi là tổng.",
       "hints_vi": [
-        "Nhớ kiến thức: Hai số được cộng là số hạng; kết quả của phép cộng là tổng.",
-        "Tự xác định đặc điểm đúng của “Số hạng và tổng” trước, rồi so với từng lựa chọn để loại dần."
+        "Đọc lại dữ kiện “Trong 41 + 8 = 49, số 49 được gọi là gì?”. Xác định vai trò hoặc đặc điểm đang được hỏi trước khi nhìn các lựa chọn.",
+        "Với “Trong 41 + 8 = 49, số 49 được gọi là gì?”, loại từng lựa chọn không khớp dữ kiện; chỉ giữ phương án thỏa tất cả chi tiết."
       ],
       "tags": [
         "add_components_recognize",
@@ -1411,8 +1411,8 @@
       ],
       "explanation_vi": "50 là số đứng trước dấu trừ nên là số bị trừ.",
       "hints_vi": [
-        "Nhớ kiến thức: Phép trừ gồm số bị trừ, số trừ và kết quả gọi là hiệu.",
-        "Đối chiếu từng lựa chọn với kiến thức “Số bị trừ, số trừ, hiệu”; loại ngay lựa chọn trái với dữ kiện của đề."
+        "Đọc lại dữ kiện “Trong 50 - 12 = 38, số 50 được gọi là gì?”. Xác định vai trò hoặc đặc điểm đang được hỏi trước khi nhìn các lựa chọn.",
+        "Với “Trong 50 - 12 = 38, số 50 được gọi là gì?”, loại từng lựa chọn không khớp dữ kiện; chỉ giữ phương án thỏa tất cả chi tiết."
       ],
       "tags": [
         "sub_components_recognize",
@@ -1464,8 +1464,8 @@
       ],
       "explanation_vi": "20 là lượng được bớt khỏi số bị trừ nên là số trừ.",
       "hints_vi": [
-        "Nhớ kiến thức: Phép trừ gồm số bị trừ, số trừ và kết quả gọi là hiệu.",
-        "Tự xác định đặc điểm đúng của “Số bị trừ, số trừ, hiệu” trước, rồi so với từng lựa chọn để loại dần."
+        "Đọc lại dữ kiện “Trong 72 - 20 = 52, số 20 được gọi là gì?”. Xác định vai trò hoặc đặc điểm đang được hỏi trước khi nhìn các lựa chọn.",
+        "Với “Trong 72 - 20 = 52, số 20 được gọi là gì?”, loại từng lựa chọn không khớp dữ kiện; chỉ giữ phương án thỏa tất cả chi tiết."
       ],
       "tags": [
         "sub_components_recognize",
@@ -2438,8 +2438,8 @@
       ],
       "explanation_vi": "2 là một số được nhân nên là thừa số.",
       "hints_vi": [
-        "Nhớ kiến thức: Các số được nhân là thừa số; kết quả là tích.",
-        "Đối chiếu từng lựa chọn với kiến thức “Thừa số và tích”; loại ngay lựa chọn trái với dữ kiện của đề."
+        "Đọc lại dữ kiện “Trong 2 × 5 = 10, số 2 được gọi là gì?”. Xác định vai trò hoặc đặc điểm đang được hỏi trước khi nhìn các lựa chọn.",
+        "Với “Trong 2 × 5 = 10, số 2 được gọi là gì?”, loại từng lựa chọn không khớp dữ kiện; chỉ giữ phương án thỏa tất cả chi tiết."
       ],
       "tags": [
         "multiplication_components",
@@ -2491,8 +2491,8 @@
       ],
       "explanation_vi": "Kết quả của phép nhân gọi là tích.",
       "hints_vi": [
-        "Nhớ kiến thức: Các số được nhân là thừa số; kết quả là tích.",
-        "Tự xác định đặc điểm đúng của “Thừa số và tích” trước, rồi so với từng lựa chọn để loại dần."
+        "Đọc lại dữ kiện “Trong 5 × 6 = 30, số 30 là gì?”. Xác định vai trò hoặc đặc điểm đang được hỏi trước khi nhìn các lựa chọn.",
+        "Với “Trong 5 × 6 = 30, số 30 là gì?”, loại từng lựa chọn không khớp dữ kiện; chỉ giữ phương án thỏa tất cả chi tiết."
       ],
       "tags": [
         "multiplication_components",
@@ -2597,8 +2597,8 @@
       ],
       "explanation_vi": "10 là lượng được đem chia nên là số bị chia.",
       "hints_vi": [
-        "Nhớ kiến thức: Phép chia gồm số bị chia, số chia và kết quả gọi là thương.",
-        "Đối chiếu từng lựa chọn với kiến thức “Số bị chia, số chia, thương”; loại ngay lựa chọn trái với dữ kiện của đề."
+        "Đọc lại dữ kiện “Trong 10 : 2 = 5, số 10 là gì?”. Xác định vai trò hoặc đặc điểm đang được hỏi trước khi nhìn các lựa chọn.",
+        "Với “Trong 10 : 2 = 5, số 10 là gì?”, loại từng lựa chọn không khớp dữ kiện; chỉ giữ phương án thỏa tất cả chi tiết."
       ],
       "tags": [
         "division_components",
@@ -2650,8 +2650,8 @@
       ],
       "explanation_vi": "5 là số dùng để chia nên là số chia.",
       "hints_vi": [
-        "Nhớ kiến thức: Phép chia gồm số bị chia, số chia và kết quả gọi là thương.",
-        "Tự xác định đặc điểm đúng của “Số bị chia, số chia, thương” trước, rồi so với từng lựa chọn để loại dần."
+        "Đọc lại dữ kiện “Trong 20 : 5 = 4, số 5 là gì?”. Xác định vai trò hoặc đặc điểm đang được hỏi trước khi nhìn các lựa chọn.",
+        "Với “Trong 20 : 5 = 4, số 5 là gì?”, loại từng lựa chọn không khớp dữ kiện; chỉ giữ phương án thỏa tất cả chi tiết."
       ],
       "tags": [
         "division_components",
@@ -4377,8 +4377,8 @@
       ],
       "explanation_vi": "Vòng cung là một đường cong. Lựa chọn này khớp với đường cong; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng.",
       "hints_vi": [
-        "Nhớ kiến thức: Đường cong không giữ một hướng thẳng cố định trên toàn bộ đường.",
-        "Tự xác định đặc điểm đúng của “Đường cong” trước, rồi so với từng lựa chọn để loại dần."
+        "Đọc lại dữ kiện “Một nét vẽ hình vòng cung là ví dụ gần nhất của loại đường nào?”. Xác định vai trò hoặc đặc điểm đang được hỏi trước khi nhìn các lựa chọn.",
+        "Với “Một nét vẽ hình vòng cung là ví dụ gần nhất của loại đường nào?”, loại từng lựa chọn không khớp dữ kiện; chỉ giữ phương án thỏa tất cả chi tiết."
       ],
       "tags": [
         "curve_recognize",
@@ -4536,8 +4536,8 @@
       ],
       "explanation_vi": "Đó là mô tả của đường thẳng. Lựa chọn này khớp với đường thẳng; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng.",
       "hints_vi": [
-        "Nhớ kiến thức: Đường thẳng có thể kéo dài mãi theo hai hướng và không cong.",
-        "Tự xác định đặc điểm đúng của “Đường thẳng” trước, rồi so với từng lựa chọn để loại dần."
+        "Đọc lại dữ kiện “Một nét không uốn cong và có thể kéo dài mãi theo hai hướng là gì?”. Xác định vai trò hoặc đặc điểm đang được hỏi trước khi nhìn các lựa chọn.",
+        "Với “Một nét không uốn cong và có thể kéo dài mãi theo hai hướng là gì?”, loại từng lựa chọn không khớp dữ kiện; chỉ giữ phương án thỏa tất cả chi tiết."
       ],
       "tags": [
         "straight_line_recognize",
@@ -4801,8 +4801,8 @@
       ],
       "explanation_vi": "Ba điểm cùng nằm trên một đường thẳng là ba điểm thẳng hàng.",
       "hints_vi": [
-        "Nhớ kiến thức: Các điểm thẳng hàng cùng nằm trên một đường thẳng duy nhất.",
-        "Đối chiếu từng lựa chọn với kiến thức “Thẳng hàng”; loại ngay lựa chọn trái với dữ kiện của đề."
+        "Đọc lại dữ kiện “Ba điểm A, B, C cùng nằm trên một đường thẳng. Ta nói ba điểm thế nào?”. Xác định vai trò hoặc đặc điểm đang được hỏi trước khi nhìn các lựa chọn.",
+        "Với “Ba điểm A, B, C cùng nằm trên một đường thẳng. Ta nói ba điểm thế nào?”, loại từng lựa chọn không khớp dữ kiện; chỉ giữ phương án thỏa tất cả chi tiết."
       ],
       "tags": [
         "three_collinear_points",
@@ -5044,7 +5044,7 @@
       ],
       "explanation_vi": "Hình kín có bốn cạnh là tứ giác. Vậy đáp án là hình tứ giác.",
       "hints_vi": [
-        "Nhớ kiến thức: Một hình kín có đúng bốn cạnh là hình tứ giác.",
+        "Đọc lại dữ kiện “Một hình kín có đúng 4 cạnh được gọi chung là gì?”. Xác định vai trò hoặc đặc điểm đang được hỏi trước khi nhìn các lựa chọn.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Tứ giác” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
@@ -5667,7 +5667,7 @@
       ],
       "explanation_vi": "Với cân hoạt động đúng, phía hạ thấp hơn là phía nặng hơn.",
       "hints_vi": [
-        "Nhớ kiến thức: Nặng hơn nghĩa là có khối lượng lớn hơn; nhẹ hơn nghĩa là có khối lượng nhỏ hơn.",
+        "Đọc lại dữ kiện “Trên cân thăng bằng, đĩa bên trái hạ thấp hơn. Vật bên trái thường thế nào?”. Xác định vai trò hoặc đặc điểm đang được hỏi trước khi nhìn các lựa chọn.",
         "Đối chiếu từng lựa chọn với kiến thức “So sánh khối lượng”; loại ngay lựa chọn trái với dữ kiện của đề."
       ],
       "tags": [
@@ -5720,7 +5720,7 @@
       ],
       "explanation_vi": "Quan hệ nặng hơn - nhẹ hơn là hai chiều đối lập.",
       "hints_vi": [
-        "Nhớ kiến thức: Nặng hơn nghĩa là có khối lượng lớn hơn; nhẹ hơn nghĩa là có khối lượng nhỏ hơn.",
+        "Đọc lại dữ kiện “Nếu vật A nặng hơn vật B thì vật B thế nào so với A?”. Xác định vai trò hoặc đặc điểm đang được hỏi trước khi nhìn các lựa chọn.",
         "Tự xác định đặc điểm đúng của “So sánh khối lượng” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
@@ -5858,7 +5858,7 @@
       ],
       "explanation_vi": "Kilôgam được kí hiệu là kg. Lựa chọn này khớp với kilôgam; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng.",
       "hints_vi": [
-        "Nhớ kiến thức: kg là kí hiệu của kilôgam, một đơn vị đo khối lượng thông dụng.",
+        "Đọc lại dữ kiện “Kí hiệu đúng của kilôgam là gì?”. Xác định vai trò hoặc đặc điểm đang được hỏi trước khi nhìn các lựa chọn.",
         "Tự xác định đặc điểm đúng của “Kilôgam” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
@@ -5979,7 +5979,7 @@
       ],
       "explanation_vi": "Lít được kí hiệu là l. Lựa chọn này khớp với lít; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng.",
       "hints_vi": [
-        "Nhớ kiến thức: l là kí hiệu của lít, đơn vị đo dung tích.",
+        "Đọc lại dữ kiện “Kí hiệu nào là đơn vị lít?”. Xác định vai trò hoặc đặc điểm đang được hỏi trước khi nhìn các lựa chọn.",
         "Tự xác định đặc điểm đúng của “Lít” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
@@ -6064,7 +6064,7 @@
       ],
       "explanation_vi": "Theo quan hệ đơn vị, 1 m = 10 dm.",
       "hints_vi": [
-        "Nhớ kiến thức: dm, m và km là các đơn vị độ dài với 1 m = 10 dm, 1 km = 1000 m.",
+        "Đọc lại dữ kiện “1 m bằng bao nhiêu dm?”. Xác định các số đã biết và điều cần tìm trước khi chọn phép tính.",
         "Khoanh các số cần dùng, áp dụng “Quan hệ đơn vị độ dài”, rồi viết phần số của kết quả."
       ],
       "tags": [
@@ -6096,7 +6096,7 @@
       ],
       "explanation_vi": "Theo quan hệ đơn vị, 1 km = 1000 m.",
       "hints_vi": [
-        "Nhớ kiến thức: dm, m và km là các đơn vị độ dài với 1 m = 10 dm, 1 km = 1000 m.",
+        "Đọc lại dữ kiện “1 km bằng bao nhiêu m?”. Xác định các số đã biết và điều cần tìm trước khi chọn phép tính.",
         "Tách dữ kiện theo “Quan hệ đơn vị độ dài”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
       ],
       "tags": [
@@ -6128,7 +6128,7 @@
       ],
       "explanation_vi": "Quãng đường dài thường được đo bằng ki-lô-mét. Vậy đáp án là km.",
       "hints_vi": [
-        "Nhớ kiến thức: dm, m và km là các đơn vị độ dài với 1 m = 10 dm, 1 km = 1000 m.",
+        "Đọc lại dữ kiện “Đơn vị nào hợp lý hơn để nói quãng đường giữa hai làng?”. Xác định vai trò hoặc đặc điểm đang được hỏi trước khi nhìn các lựa chọn.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Quan hệ đơn vị độ dài” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
@@ -6181,7 +6181,7 @@
       ],
       "explanation_vi": "Theo quan hệ thời gian, 1 ngày = 24 giờ.",
       "hints_vi": [
-        "Nhớ kiến thức: 1 ngày = 24 giờ.",
+        "Đọc lại dữ kiện “Một ngày đầy đủ có bao nhiêu giờ?”. Xác định các số đã biết và điều cần tìm trước khi chọn phép tính.",
         "Khoanh các số cần dùng, áp dụng “Ngày và giờ”, rồi viết phần số của kết quả."
       ],
       "tags": [
@@ -6213,7 +6213,7 @@
       ],
       "explanation_vi": "Theo quan hệ đã học, 24 giờ liên tiếp bằng 1 ngày đầy đủ.",
       "hints_vi": [
-        "Nhớ kiến thức: 1 ngày = 24 giờ.",
+        "Đọc lại dữ kiện “Khi đã đủ 24 giờ liên tiếp, khoảng thời gian đó bằng bao nhiêu ngày đầy đủ?”. Xác định vai trò hoặc đặc điểm đang được hỏi trước khi nhìn các lựa chọn.",
         "Tự xác định đặc điểm đúng của “Ngày và giờ” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
@@ -6309,7 +6309,7 @@
       ],
       "explanation_vi": "Theo quan hệ thời gian, 1 giờ = 60 phút.",
       "hints_vi": [
-        "Nhớ kiến thức: 1 giờ = 60 phút.",
+        "Đọc lại dữ kiện “1 giờ bằng bao nhiêu phút?”. Xác định các số đã biết và điều cần tìm trước khi chọn phép tính.",
         "Khoanh các số cần dùng, áp dụng “Giờ và phút”, rồi viết phần số của kết quả."
       ],
       "tags": [
@@ -6394,7 +6394,7 @@
       ],
       "explanation_vi": "Theo quan hệ đã học, 60 phút bằng 1 giờ.",
       "hints_vi": [
-        "Nhớ kiến thức: 1 giờ = 60 phút.",
+        "Đọc lại dữ kiện “Một hoạt động kéo dài đúng 60 phút. Khoảng thời gian đó bằng gì?”. Xác định vai trò hoặc đặc điểm đang được hỏi trước khi nhìn các lựa chọn.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Giờ và phút” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
@@ -7810,7 +7810,7 @@
       "explanation_vi": "Số 4 là một mặt có thể xuất hiện nhưng không phải lần nào cũng ra 4.",
       "hints_vi": [
         "Nhớ kiến thức: Có ít nhất một kết quả làm sự kiện xảy ra và cũng có kết quả làm nó không xảy ra.",
-        "Đối chiếu từng lựa chọn với kiến thức “Có thể”; loại ngay lựa chọn trái với dữ kiện của đề."
+        "Với “Gieo xúc xắc có các mặt 1 đến 6. Xuất hiện số 4 là sự kiện gì?”, loại từng lựa chọn không khớp dữ kiện; chỉ giữ phương án thỏa tất cả chi tiết."
       ],
       "tags": [
         "event_possible",
@@ -7863,7 +7863,7 @@
       "explanation_vi": "Có bóng đỏ trong túi nên có thể lấy được, nhưng còn bóng xanh nên không chắc chắn.",
       "hints_vi": [
         "Nhớ kiến thức: Có ít nhất một kết quả làm sự kiện xảy ra và cũng có kết quả làm nó không xảy ra.",
-        "Tự xác định đặc điểm đúng của “Có thể” trước, rồi so với từng lựa chọn để loại dần."
+        "Với “Trong túi có bóng đỏ và xanh. Lấy ngẫu nhiên một bóng, lấy được bóng đỏ là gì?”, loại từng lựa chọn không khớp dữ kiện; chỉ giữ phương án thỏa tất cả chi tiết."
       ],
       "tags": [
         "event_possible",
@@ -7916,7 +7916,7 @@
       "explanation_vi": "Số 2 có trên vòng quay nên có thể xảy ra, nhưng không phải kết quả duy nhất.",
       "hints_vi": [
         "Nhớ kiến thức: Có ít nhất một kết quả làm sự kiện xảy ra và cũng có kết quả làm nó không xảy ra.",
-        "Đừng đoán theo vị trí đáp án. Tự giải theo “Có thể” trước rồi mới chọn phương án khớp kết quả."
+        "Với “Quay vòng có các số 1, 2, 3. Kim dừng ở số 2 là sự kiện gì?”, loại từng lựa chọn không khớp dữ kiện; chỉ giữ phương án thỏa tất cả chi tiết."
       ],
       "tags": [
         "event_possible",
@@ -7969,7 +7969,7 @@
       "explanation_vi": "Mọi mặt của xúc xắc đều là một số từ 1 đến 6. Vậy đáp án là chắc chắn.",
       "hints_vi": [
         "Nhớ kiến thức: Sự kiện xảy ra trong tất cả các kết quả có thể của tình huống.",
-        "Đối chiếu từng lựa chọn với kiến thức “Chắc chắn”; loại ngay lựa chọn trái với dữ kiện của đề."
+        "Với “Gieo xúc xắc chuẩn 1 đến 6. Kết quả là một số từ 1 đến 6. Sự kiện này là gì?”, loại từng lựa chọn không khớp dữ kiện; chỉ giữ phương án thỏa tất cả chi tiết."
       ],
       "tags": [
         "event_certain",
@@ -8022,7 +8022,7 @@
       "explanation_vi": "Mọi bóng trong túi đều xanh nên lấy bóng nào cũng xanh. Vậy đáp án là chắc chắn.",
       "hints_vi": [
         "Nhớ kiến thức: Sự kiện xảy ra trong tất cả các kết quả có thể của tình huống.",
-        "Tự xác định đặc điểm đúng của “Chắc chắn” trước, rồi so với từng lựa chọn để loại dần."
+        "Với “Trong túi chỉ có bóng xanh. Lấy một bóng, bóng lấy ra màu xanh là gì?”, loại từng lựa chọn không khớp dữ kiện; chỉ giữ phương án thỏa tất cả chi tiết."
       ],
       "tags": [
         "event_certain",
@@ -8075,7 +8075,7 @@
       "explanation_vi": "Tất cả thẻ đều là 2 hoặc 5 nên sự kiện luôn xảy ra. Vậy đáp án là chắc chắn.",
       "hints_vi": [
         "Nhớ kiến thức: Sự kiện xảy ra trong tất cả các kết quả có thể của tình huống.",
-        "Đừng đoán theo vị trí đáp án. Tự giải theo “Chắc chắn” trước rồi mới chọn phương án khớp kết quả."
+        "Với “Một hộp chỉ chứa thẻ số 2 và 5. Rút một thẻ, số rút được là 2 hoặc 5. Sự kiện gì?”, loại từng lựa chọn không khớp dữ kiện; chỉ giữ phương án thỏa tất cả chi tiết."
       ],
       "tags": [
         "event_certain",
@@ -8128,7 +8128,7 @@
       "explanation_vi": "Không có mặt số 8 nên sự kiện không thể xảy ra.",
       "hints_vi": [
         "Nhớ kiến thức: Không có kết quả hợp lệ nào làm sự kiện xảy ra.",
-        "Đối chiếu từng lựa chọn với kiến thức “Không thể”; loại ngay lựa chọn trái với dữ kiện của đề."
+        "Với “Gieo xúc xắc chuẩn 1 đến 6. Xuất hiện số 8 là sự kiện gì?”, loại từng lựa chọn không khớp dữ kiện; chỉ giữ phương án thỏa tất cả chi tiết."
       ],
       "tags": [
         "event_impossible",
@@ -8181,7 +8181,7 @@
       "explanation_vi": "Không có bóng xanh trong túi nên không thể lấy bóng xanh.",
       "hints_vi": [
         "Nhớ kiến thức: Không có kết quả hợp lệ nào làm sự kiện xảy ra.",
-        "Tự xác định đặc điểm đúng của “Không thể” trước, rồi so với từng lựa chọn để loại dần."
+        "Với “Trong túi chỉ có bóng đỏ. Lấy một bóng màu xanh là gì?”, loại từng lựa chọn không khớp dữ kiện; chỉ giữ phương án thỏa tất cả chi tiết."
       ],
       "tags": [
         "event_impossible",
@@ -8234,7 +8234,7 @@
       "explanation_vi": "Số 5 không có trên vòng quay nên sự kiện không thể xảy ra.",
       "hints_vi": [
         "Nhớ kiến thức: Không có kết quả hợp lệ nào làm sự kiện xảy ra.",
-        "Đừng đoán theo vị trí đáp án. Tự giải theo “Không thể” trước rồi mới chọn phương án khớp kết quả."
+        "Với “Vòng quay chỉ có các số 1, 2, 3. Kim dừng ở số 5 là sự kiện gì?”, loại từng lựa chọn không khớp dữ kiện; chỉ giữ phương án thỏa tất cả chi tiết."
       ],
       "tags": [
         "event_impossible",
