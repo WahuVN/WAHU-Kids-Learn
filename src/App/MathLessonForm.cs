@@ -618,6 +618,30 @@ namespace WAHUKidsLearn
             }
         }
 
+        private static string BuildCompletionPerformanceText(MathSessionSummary summary)
+        {
+            if (summary == null) return "Kết quả chưa sẵn sàng. Mình về thư viện Toán nhé.";
+            var attempts = Math.Max(0, summary.Attempts);
+            var correct = Math.Max(0, Math.Min(attempts, summary.Correct));
+            var hinted = Math.Max(0, Math.Min(correct, summary.HintedCorrect));
+            var independent = Math.Max(0, correct - hinted);
+            var needsPractice = Math.Max(0, Math.Min(Math.Max(0, attempts - correct), summary.Wrong));
+            return "Đã làm " + attempts + " câu · Tự làm đúng " + independent +
+                " · Đúng nhờ gợi ý " + hinted + " · Cần luyện lại " + needsPractice;
+        }
+
+        private static string BuildCompletionSupportText(MathSessionSummary summary)
+        {
+            if (summary == null) return "Các câu đã làm được lưu an toàn. Mình về thư viện Toán nhé.";
+            var skills = Math.Max(0, summary.DistinctSkills);
+            var text = "Con đã luyện " + skills + " kỹ năng trong nhiệm vụ này.";
+            if (summary.GardenGrowthSteps > 0)
+                text += " Khu vườn đã ghi nhận tiến bộ của con.";
+            if (!string.IsNullOrWhiteSpace(summary.GardenUnlockMessage))
+                text += " " + summary.GardenUnlockMessage.Trim();
+            return text;
+        }
+
         private void ShowCompletion(MathSessionSummary summary)
         {
             _question = null;
@@ -631,12 +655,10 @@ namespace WAHUKidsLearn
             _completionVisual.Visible = true;
             _companion.State = CompanionReactionState.Celebrate;
             _prompt.Text = "Hoàn thành nhiệm vụ";
-            _support.Text = summary == null
-                ? "Các câu đã làm được lưu để lần sau tiếp tục đúng chỗ."
-                : "Khu vườn vừa lớn thêm một chút. Con đã luyện " + summary.DistinctSkills + " kỹ năng."
-                    + (string.IsNullOrWhiteSpace(summary.GardenUnlockMessage) ? string.Empty : " " + summary.GardenUnlockMessage);
-            _feedback.Text = summary == null ? "Mình về màn hình chính nhé." :
-                "Đã làm " + summary.Attempts + " câu · Tự làm đúng " + Math.Max(0, summary.Correct - summary.HintedCorrect) + " câu";
+            _support.Text = BuildCompletionSupportText(summary);
+            _support.AccessibleName = "Tóm tắt tiến bộ: " + _support.Text;
+            _feedback.Text = BuildCompletionPerformanceText(summary);
+            _feedback.AccessibleName = "Kết quả nhiệm vụ: " + _feedback.Text;
             _feedbackCard.CardColor = Color.FromArgb(226, 242, 224);
             _feedbackCard.BorderColor = Color.FromArgb(190, 221, 188);
             _feedbackCard.Visible = true;
@@ -646,7 +668,9 @@ namespace WAHUKidsLearn
             _hintButton.Visible = false;
             _stopButton.Visible = false;
             _nextButton.Visible = true;
-            _nextButton.Text = "Về khu vườn";
+            _nextButton.Text = "Về thư viện Toán";
+            _nextButton.AccessibleName = "Về thư viện Toán";
+            _nextButton.AccessibleDescription = "Đóng kết quả và quay lại danh sách bài Toán.";
             _completeOnNext = false;
             _progressText.Text = "Hoàn thành";
             _progressBar.Value = _progressBar.Maximum;
@@ -693,7 +717,9 @@ namespace WAHUKidsLearn
             _hintButton.Visible = false;
             _stopButton.Visible = false;
             _nextButton.Visible = true;
-            _nextButton.Text = "Về khu vườn";
+            _nextButton.Text = "Về thư viện Toán";
+            _nextButton.AccessibleName = "Về thư viện Toán";
+            _nextButton.AccessibleDescription = "Đóng thông báo và quay lại danh sách bài Toán.";
             _completeOnNext = false;
             _nextButton.Focus();
         }

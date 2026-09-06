@@ -30,6 +30,7 @@ namespace WAHU.ChildUiRuntimeSmoke
             TestRoadmap(appAssembly);
             TestMathCatalogAndHub(appAssembly);
             TestResumePresentation(appAssembly);
+            TestCompletionPresentation(appAssembly);
             TestAnswerGridLayout(appAssembly);
             TestInteractiveSegmentAnswer(appAssembly);
             TestBasicControls(appAssembly);
@@ -348,6 +349,79 @@ namespace WAHU.ChildUiRuntimeSmoke
             var fresh = Activator.CreateInstance(startType);
             var freshText = (string)method.Invoke(null, new[] { fresh });
             A(freshText == null, "math_fresh_session_has_no_resume_notice");
+        }
+
+        private static void TestCompletionPresentation(Assembly appAssembly)
+        {
+            var sessionPath = Path.Combine(Path.GetDirectoryName(appAssembly.Location), "WAHU.Session.dll");
+            var sessionAssembly = Assembly.LoadFrom(sessionPath);
+            var summaryType = sessionAssembly.GetType("WAHU.Session.MathSessionSummary", true);
+            var performanceMethod = typeof(WAHUKidsLearn.MathLessonForm).GetMethod(
+                "BuildCompletionPerformanceText", BindingFlags.Static | BindingFlags.NonPublic);
+            var supportMethod = typeof(WAHUKidsLearn.MathLessonForm).GetMethod(
+                "BuildCompletionSupportText", BindingFlags.Static | BindingFlags.NonPublic);
+            A(performanceMethod != null && supportMethod != null, "math_completion_helpers_available");
+
+            var summary = Activator.CreateInstance(summaryType);
+            Set(summary, "Attempts", 8);
+            Set(summary, "Correct", 6);
+            Set(summary, "HintedCorrect", 2);
+            Set(summary, "Wrong", 2);
+            Set(summary, "DistinctSkills", 4);
+            Set(summary, "GardenGrowthSteps", 3);
+            Set(summary, "GardenUnlockMessage", "Mở khóa: Bồn hoa.");
+
+            var performance = (string)performanceMethod.Invoke(null, new[] { summary });
+            A(performance.IndexOf("Đã làm 8", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                performance.IndexOf("Tự làm đúng 4", StringComparison.OrdinalIgnoreCase) >= 0,
+                "math_completion_shows_independent_correct_count");
+            A(performance.IndexOf("Đúng nhờ gợi ý 2", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                performance.IndexOf("Cần luyện lại 2", StringComparison.OrdinalIgnoreCase) >= 0,
+                "math_completion_shows_hinted_and_practice_counts");
+
+            var support = (string)supportMethod.Invoke(null, new[] { summary });
+            A(support.IndexOf("4 kỹ năng", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                support.IndexOf("Khu vườn", StringComparison.OrdinalIgnoreCase) >= 0,
+                "math_completion_support_shows_skills_and_garden_progress");
+            A(support.IndexOf("Mở khóa: Bồn hoa", StringComparison.OrdinalIgnoreCase) >= 0,
+                "math_completion_support_shows_unlock_message");
+
+            var inconsistent = Activator.CreateInstance(summaryType);
+            Set(inconsistent, "Attempts", 3);
+            Set(inconsistent, "Correct", 8);
+            Set(inconsistent, "HintedCorrect", 9);
+            Set(inconsistent, "Wrong", 9);
+            var bounded = (string)performanceMethod.Invoke(null, new[] { inconsistent });
+            A(bounded.IndexOf("Đã làm 3", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                bounded.IndexOf("Đúng nhờ gợi ý 3", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                bounded.IndexOf("Cần luyện lại 0", StringComparison.OrdinalIgnoreCase) >= 0,
+                "math_completion_bounds_inconsistent_counters");
+
+            var tempRoot = Path.Combine(Path.GetTempPath(), "wahu-child-ui-completion-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempRoot);
+            try
+            {
+                var schema = Path.Combine(Directory.GetCurrentDirectory(), "data", "schema", "001_initial.sql");
+                var database = new LearningDatabase(Path.Combine(tempRoot, "learning.db"), schema);
+                using (var form = new WAHUKidsLearn.MathLessonForm(database,
+                    new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW }))
+                {
+                    Invoke(form, "ShowCompletion", summary);
+                    var feedback = GetField<Label>(form, "_feedback");
+                    var supportLabel = GetField<Label>(form, "_support");
+                    var next = GetField<Button>(form, "_nextButton");
+                    A(feedback.Text == performance && feedback.AccessibleName.IndexOf("Kết quả nhiệm vụ", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "math_completion_feedback_accessible_summary");
+                    A(supportLabel.Text == support && supportLabel.AccessibleName.IndexOf("Tóm tắt tiến bộ", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "math_completion_support_accessible_summary");
+                    A(next.Text == "Về thư viện Toán" && next.AccessibleDescription.IndexOf("danh sách bài Toán", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "math_completion_return_route_matches_math_hub");
+                }
+            }
+            finally
+            {
+                try { Directory.Delete(tempRoot, true); } catch { }
+            }
         }
 
         private static void TestAnswerGridLayout(Assembly appAssembly)
