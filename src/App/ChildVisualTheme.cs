@@ -248,7 +248,17 @@ namespace WAHUKidsLearn
             if (_question == null || Width < 80 || Height < 40) return;
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             var values = ExtractNumbers(_question.PromptVi);
-            if (_question.Representation == "balance_scale")
+            if (_question.Representation == "ruler_cm")
+                DrawRulerCm(e.Graphics);
+            else if (_question.Representation == "common_scale")
+                DrawCommonScale(e.Graphics);
+            else if (_question.Representation == "measurement_calc")
+                DrawMeasurementCalc(e.Graphics);
+            else if (_question.Representation == "measurement_word_model")
+                DrawWordProblemModel(e.Graphics);
+            else if (_question.Representation == "classify_count")
+                DrawClassifyCount(e.Graphics);
+            else if (_question.Representation == "balance_scale")
                 DrawBalanceScale(e.Graphics);
             else if (_question.Representation == "mass_kg_scale")
                 DrawMassKgScale(e.Graphics);
@@ -297,6 +307,141 @@ namespace WAHUKidsLearn
                 DrawPlaceValue(e.Graphics, values);
             else if (_question.TemplateId == "polyline_length")
                 DrawPolyline(e.Graphics, values);
+        }
+
+        private void DrawRulerCm(Graphics g)
+        {
+            var parts = (_question.IllustrationData ?? string.Empty).Split('|');
+            int start, end;
+            if (parts.Length != 3 || parts[0] != "rulercm" || !int.TryParse(parts[1], out start) || !int.TryParse(parts[2], out end) || end <= start) return;
+            var max = Math.Max(15, end);
+            var left = Math.Max(34, Width / 12);
+            var right = Width - left;
+            var rulerY = Height / 2 + 14;
+            using (var body = new SolidBrush(Color.FromArgb(246, 235, 194)))
+                g.FillRectangle(body, left, rulerY, right - left, 30);
+            using (var basePen = new Pen(Color.FromArgb(151, 135, 92), 1.5f))
+                g.DrawRectangle(basePen, left, rulerY, right - left, 30);
+            for (var i = 0; i <= max; i++)
+            {
+                var x = left + (right - left) * i / max;
+                var tickH = i % 5 == 0 ? 17 : 11;
+                using (var pen = new Pen(Color.FromArgb(116, 108, 81), 1f)) g.DrawLine(pen, x, rulerY, x, rulerY + tickH);
+                if (i % 5 == 0 || i == start || i == end)
+                    DrawCentered(g, i.ToString(), new Rectangle(x - 18, rulerY + 13, 36, 16), ChildVisualTheme.Ink, 7f);
+            }
+            var xA = left + (right - left) * start / max;
+            var xB = left + (right - left) * end / max;
+            var segY = rulerY - 18;
+            using (var pen = new Pen(ChildVisualTheme.PeachStrong, 3f)) g.DrawLine(pen, xA, segY, xB, segY);
+            using (var dot = new SolidBrush(ChildVisualTheme.PeachStrong))
+            { g.FillEllipse(dot, xA - 4, segY - 4, 8, 8); g.FillEllipse(dot, xB - 4, segY - 4, 8, 8); }
+            DrawCentered(g, "A", new Rectangle(xA - 18, segY - 23, 36, 18), ChildVisualTheme.Ink, 8f);
+            DrawCentered(g, "B", new Rectangle(xB - 18, segY - 23, 36, 18), ChildVisualTheme.Ink, 8f);
+            if (_hintLevel >= 2)
+                DrawCentered(g, end + " − " + start + " = ? cm", new Rectangle(0, 3, Width, 18), ChildVisualTheme.PeachStrong, 8.5f);
+        }
+
+        private void DrawCommonScale(Graphics g)
+        {
+            var parts = (_question.IllustrationData ?? string.Empty).Split('|');
+            int min, max, step, value;
+            if (parts.Length != 5 || parts[0] != "commonscale" || !int.TryParse(parts[1], out min) || !int.TryParse(parts[2], out max) ||
+                !int.TryParse(parts[3], out step) || !int.TryParse(parts[4], out value) || step <= 0 || max <= min) return;
+            var stage = new Rectangle(Math.Max(18, Width / 9), 9, Math.Max(200, Width * 7 / 9), Math.Max(72, Height - 20));
+            using (var path = ChildVisualTheme.RoundedRect(stage, 16))
+            using (var fill = new SolidBrush(Color.FromArgb(246, 249, 242)))
+            using (var border = new Pen(Color.FromArgb(214, 224, 207), 1f))
+            { g.FillPath(fill, path); g.DrawPath(border, path); }
+            var left = stage.Left + 28; var right = stage.Right - 28; var y = stage.Top + stage.Height / 2;
+            using (var pen = new Pen(Color.FromArgb(107, 126, 121), 2f)) g.DrawLine(pen, left, y, right, y);
+            var tickCount = (max - min) / step;
+            for (var i = 0; i <= tickCount; i++)
+            {
+                var tickValue = min + i * step;
+                var x = left + (right - left) * i / tickCount;
+                using (var pen = new Pen(Color.FromArgb(107, 126, 121), 1.5f)) g.DrawLine(pen, x, y - 9, x, y + 9);
+                if (i == 0 || i == tickCount || i % 2 == 0)
+                    DrawCentered(g, tickValue.ToString(), new Rectangle(x - 28, y + 10, 56, 18), ChildVisualTheme.MutedInk, 7.5f);
+            }
+            var valueIndex = (value - min) / step;
+            var valueX = left + (right - left) * valueIndex / tickCount;
+            using (var pointer = new SolidBrush(ChildVisualTheme.PeachStrong))
+            {
+                var pts = new[] { new Point(valueX, y - 12), new Point(valueX - 9, y - 30), new Point(valueX + 9, y - 30) };
+                g.FillPolygon(pointer, pts);
+            }
+            if (_hintLevel >= 2)
+                DrawCentered(g, "+ " + step + " mỗi vạch", new Rectangle(0, 4, Width, 18), ChildVisualTheme.PeachStrong, 8.3f);
+        }
+
+        private void DrawMeasurementCalc(Graphics g)
+        {
+            var parts = (_question.IllustrationData ?? string.Empty).Split('|');
+            if (parts.Length < 4 || parts[0] != "unitcalc") return;
+            string leftText, rightUnit, answerText;
+            if (parts[1] == "convert_m_dm") { leftText = parts[2] + " m"; rightUnit = "dm"; answerText = parts[3] + " dm"; }
+            else if (parts[1] == "convert_km_m") { leftText = parts[2] + " km"; rightUnit = "m"; answerText = parts[3] + " m"; }
+            else if ((parts[1] == "add" || parts[1] == "sub") && parts.Length == 5)
+            {
+                var op = parts[1] == "add" ? "+" : "−";
+                leftText = parts[2] + " " + parts[4] + " " + op + " " + parts[3] + " " + parts[4];
+                rightUnit = parts[4];
+                int a, b;
+                if (!int.TryParse(parts[2], out a) || !int.TryParse(parts[3], out b)) return;
+                answerText = (parts[1] == "add" ? a + b : a - b) + " " + parts[4];
+            }
+            else return;
+            var left = new Rectangle(Width / 2 - 235, Height / 2 - 28, 200, 54);
+            var right = new Rectangle(Width / 2 + 35, Height / 2 - 28, 200, 54);
+            foreach (var rect in new[] { left, right })
+            {
+                using (var path = ChildVisualTheme.RoundedRect(rect, 14))
+                using (var fill = new SolidBrush(Color.FromArgb(243, 248, 238)))
+                using (var border = new Pen(Color.FromArgb(185, 202, 177), 1.2f))
+                { g.FillPath(fill, path); g.DrawPath(border, path); }
+            }
+            DrawCentered(g, leftText, left, ChildVisualTheme.Ink, 9.5f);
+            DrawCentered(g, _hintLevel >= 2 ? answerText : "? " + rightUnit, right, _hintLevel >= 2 ? ChildVisualTheme.PeachStrong : ChildVisualTheme.Ink, 10f);
+            DrawCentered(g, "=", new Rectangle(Width / 2 - 30, Height / 2 - 18, 60, 36), ChildVisualTheme.PeachStrong, 13f);
+        }
+
+        private void DrawClassifyCount(Graphics g)
+        {
+            var parts = (_question.IllustrationData ?? string.Empty).Split('|');
+            if (parts.Length != 5 || parts[0] != "classify") return;
+            int circle, square, triangle;
+            if (!TryReadNamedInt(parts[1], "circle", out circle) || !TryReadNamedInt(parts[2], "square", out square) || !TryReadNamedInt(parts[3], "triangle", out triangle)) return;
+            var counts = new[] { circle, square, triangle };
+            var startX = Width / 2 - 210;
+            var groupW = 140;
+            for (var group = 0; group < 3; group++)
+            {
+                var rect = new Rectangle(startX + group * groupW, 10, groupW - 12, Math.Max(75, Height - 20));
+                using (var path = ChildVisualTheme.RoundedRect(rect, 12))
+                using (var fill = new SolidBrush(Color.FromArgb(247, 249, 242)))
+                using (var border = new Pen(Color.FromArgb(214, 222, 207), 1f))
+                { g.FillPath(fill, path); g.DrawPath(border, path); }
+                for (var i = 0; i < counts[group]; i++)
+                {
+                    var col = i % 3; var row = i / 3;
+                    var x = rect.Left + 18 + col * 31; var y = rect.Top + 18 + row * 30;
+                    using (var pen = new Pen(Color.FromArgb(111, 135, 128), 2f))
+                    {
+                        if (group == 0) g.DrawEllipse(pen, x, y, 18, 18);
+                        else if (group == 1) g.DrawRectangle(pen, x, y, 18, 18);
+                        else g.DrawPolygon(pen, new[] { new Point(x + 9, y), new Point(x, y + 18), new Point(x + 18, y + 18) });
+                    }
+                }
+            }
+            if (_hintLevel >= 1) DrawCentered(g, "Phân loại trước · đếm sau", new Rectangle(0, Height - 20, Width, 17), ChildVisualTheme.MutedInk, 8f);
+        }
+
+        private static bool TryReadNamedInt(string part, string name, out int value)
+        {
+            value = 0;
+            var prefix = name + "=";
+            return part != null && part.StartsWith(prefix, StringComparison.Ordinal) && int.TryParse(part.Substring(prefix.Length), out value);
         }
 
         private void DrawBalanceScale(Graphics g)

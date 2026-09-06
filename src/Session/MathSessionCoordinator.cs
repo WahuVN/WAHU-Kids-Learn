@@ -11,7 +11,7 @@ namespace WAHU.Session
     public sealed class MathSessionCoordinator : IDisposable
     {
         public const string PackId = "math_grade2_verified_templates_v1";
-        public const string PackVersion = "1.5.0";
+        public const string PackVersion = "1.6.0";
         public const int DefaultTargetQuestionCount = 8;
 
         private readonly LearningDatabase _database;
@@ -483,6 +483,10 @@ namespace WAHU.Session
                 case "time_day_24_hours": return "time_hour_60_minutes";
                 case "time_hour_60_minutes": return "clock_read_minute_hand_3_or_6";
                 case "calendar_days_in_month_date": return "time_day_24_hours";
+                case "measure_with_ruler_cm": return "measure_with_common_scale";
+                case "measure_with_common_scale": return "number_ray_fill_1000";
+                case "measurement_convert_calculate_learned_units": return "length_dm_m_km_relation";
+                case "measurement_real_world_one_step": return "measurement_convert_calculate_learned_units";
                 default: return templateId;
             }
         }
@@ -569,6 +573,11 @@ namespace WAHU.Session
             if (error != null && error.ErrorType == "MEASUREMENT_UNIT_ERROR") return "Chưa đúng. Con đọc lại số đo và đơn vị kg, lít, dm, m hoặc km nhé.";
             if (error != null && error.ErrorType == "TIME_RELATION_ERROR") return "Chưa đúng. Con nhớ 1 ngày = 24 giờ và 1 giờ = 60 phút nhé.";
             if (error != null && error.ErrorType == "CALENDAR_READ_ERROR") return "Chưa đúng. Con đọc lại tháng, ô ngày được đánh dấu và ngày cuối cùng của tháng nhé.";
+            if (error != null && error.ErrorType == "MEASURE_READ_ERROR") return "Chưa đúng. Con đọc vị trí hai đầu A, B trên thước rồi lấy số cuối trừ số đầu nhé.";
+            if (error != null && error.ErrorType == "SCALE_READ_ERROR") return "Chưa đúng. Con tìm bước tăng giữa hai vạch liền nhau rồi đọc lại mũi tên nhé.";
+            if (error != null && error.ErrorType == "MEASUREMENT_CALC_ERROR") return "Chưa đúng. Con kiểm tra đơn vị trước, rồi mới đổi hoặc cộng trừ các số đo nhé.";
+            if (error != null && error.ErrorType == "MEASUREMENT_WORD_ERROR") return "Chưa đúng. Con xác định số đo ban đầu và phần thêm hoặc bớt trước nhé.";
+            if (error != null && error.ErrorType == "DATA_CLASSIFY_COUNT_ERROR") return "Chưa đúng. Con phân loại các hình cùng loại rồi chỉ đếm nhóm được hỏi nhé.";
             if (error != null && error.ErrorType == "EVENT_CLASSIFICATION_ERROR") return "Chưa đúng. Con đối chiếu câu này với tất cả kết quả có thể của xúc xắc nhé.";
             return "Chưa đúng. Mình xem gợi ý rồi thử câu tiếp theo nhé.";
         }

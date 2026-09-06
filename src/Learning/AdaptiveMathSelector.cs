@@ -151,6 +151,11 @@ namespace WAHU.Learning
                 case "time_day_24_hours":
                 case "time_hour_60_minutes":
                 case "calendar_days_in_month_date":
+                case "measure_with_ruler_cm":
+                case "measure_with_common_scale":
+                case "measurement_convert_calculate_learned_units":
+                case "measurement_real_world_one_step":
+                case "data_collect_classify_count":
                     return true;
                 default:
                     return false;

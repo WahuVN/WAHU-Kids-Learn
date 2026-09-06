@@ -167,6 +167,12 @@ namespace WAHU.Learning
                     return New("TIME_RELATION_ERROR", 0.68, "wrong_day_hour_or_hour_minute_relation");
                 if (question.TemplateId == "calendar_days_in_month_date")
                     return New("CALENDAR_READ_ERROR", 0.64, "wrong_calendar_month_or_date_choice");
+                if (question.TemplateId == "measure_with_ruler_cm")
+                    return New("MEASURE_READ_ERROR", 0.68, "wrong_ruler_segment_length_choice");
+                if (question.TemplateId == "measurement_convert_calculate_learned_units")
+                    return New("MEASUREMENT_CALC_ERROR", 0.64, "wrong_unit_conversion_or_same_unit_calculation");
+                if (question.TemplateId == "measurement_real_world_one_step")
+                    return New("MEASUREMENT_WORD_ERROR", 0.58, "wrong_one_step_measurement_context_answer");
                 if (question.TemplateId == "sort_up_to_4")
                     return New("NUMBER_ORDER_ERROR", 0.66, "wrong_four_number_sort_order");
                 if (question.TemplateId == "add_components_recognize" || question.TemplateId == "sub_components_recognize" ||
@@ -203,6 +209,10 @@ namespace WAHU.Learning
                 return New("NUMBER_ORDER_ERROR", 0.66, "wrong_min_or_max_choice");
             if (question.TemplateId == "add_sub_two_operators_left_to_right")
                 return New("TWO_STEP_CALCULATION_ERROR", 0.60, "wrong_left_to_right_two_operator_result");
+            if (question.TemplateId == "measure_with_common_scale")
+                return New("SCALE_READ_ERROR", 0.66, "wrong_common_scale_tick_value");
+            if (question.TemplateId == "data_collect_classify_count")
+                return New("DATA_CLASSIFY_COUNT_ERROR", 0.64, "wrong_classified_group_count");
             if (question.TemplateId != null && question.TemplateId.StartsWith("word_problem_", StringComparison.Ordinal))
                 return New("WORD_PROBLEM_RELATION_ERROR", 0.56, "wrong_one_step_relation_answer");
             return New("UNKNOWN", 0.40, "single_attempt_insufficient_for_specific_diagnosis");

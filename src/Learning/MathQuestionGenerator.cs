@@ -77,6 +77,11 @@ namespace WAHU.Learning
                     case "time_day_24_hours": question = TimeDay24Hours(decision.Template); break;
                     case "time_hour_60_minutes": question = TimeHour60Minutes(decision.Template); break;
                     case "calendar_days_in_month_date": question = CalendarDaysInMonthDate(decision.Template); break;
+                    case "measure_with_ruler_cm": question = MeasureWithRulerCm(decision.Template); break;
+                    case "measure_with_common_scale": question = MeasureWithCommonScale(decision.Template); break;
+                    case "measurement_convert_calculate_learned_units": question = MeasurementConvertCalculate(decision.Template); break;
+                    case "measurement_real_world_one_step": question = MeasurementRealWorldOneStep(decision.Template); break;
+                    case "data_collect_classify_count": question = DataCollectClassifyCount(decision.Template); break;
                     default: throw new InvalidOperationException("Unsupported VERIFIED math template: " + decision.Template.TemplateId);
                 }
             }
@@ -560,6 +565,131 @@ namespace WAHU.Learning
             return question;
         }
 
+        private MathQuestion MeasureWithRulerCm(MathTemplateRef template)
+        {
+            var start = _random.Next(0, 6);
+            var length = _random.Next(1, 11);
+            var end = start + length;
+            var question = NewTextQuestion(template,
+                "Quan sát thước. Đoạn AB dài bao nhiêu xăng-ti-mét?", length + " cm",
+                UnitChoices(length, 1, 15, " cm"),
+                "Đọc vị trí hai đầu A và B trên thước.",
+                "Độ dài bằng số ở đầu B trừ số ở đầu A.");
+            question.IllustrationData = "rulercm|" + start + "|" + end;
+            return question;
+        }
+
+        private MathQuestion MeasureWithCommonScale(MathTemplateRef template)
+        {
+            var stepOptions = new[] { 1, 2, 5 };
+            var step = stepOptions[_random.Next(0, stepOptions.Length)];
+            var tickCount = _random.Next(5, 11);
+            var max = step * tickCount;
+            var tick = _random.Next(1, tickCount);
+            var value = tick * step;
+            var values = new HashSet<int> { value };
+            foreach (var delta in new[] { -step, step, -2 * step, 2 * step })
+            {
+                var candidate = value + delta;
+                if (candidate >= 0 && candidate <= max) values.Add(candidate);
+                if (values.Count >= 4) break;
+            }
+            for (var candidate = 0; values.Count < 4 && candidate <= max; candidate += step) values.Add(candidate);
+            var question = NewNumericQuestion(template,
+                "Quan sát thang đo. Mũi tên đang chỉ giá trị nào?", value,
+                "Tìm giá trị tăng thêm giữa hai vạch liền nhau.",
+                "Mỗi vạch tăng " + step + " đơn vị.");
+            question.Choices = Shuffle(values.Take(4).ToList());
+            question.IllustrationData = "commonscale|0|" + max + "|" + step + "|" + value;
+            return question;
+        }
+
+        private MathQuestion MeasurementConvertCalculate(MathTemplateRef template)
+        {
+            var mode = _random.Next(0, 5);
+            MathQuestion question;
+            if (mode == 0)
+            {
+                var meters = _random.Next(1, 10);
+                var dm = meters * 10;
+                question = NewTextQuestion(template, meters + " m bằng bao nhiêu dm?", dm + " dm",
+                    UnitChoices(dm, 10, 100, " dm"), "Mỗi mét có 10 đề-xi-mét.", meters + " × 10 = " + dm + ".");
+                question.IllustrationData = "unitcalc|convert_m_dm|" + meters + "|" + dm;
+            }
+            else if (mode == 1)
+            {
+                question = NewTextQuestion(template, "1 km bằng bao nhiêu m?", "1000 m",
+                    new[] { "1000 m", "100 m", "10 m", "1 m" }, "Nhớ quan hệ giữa ki-lô-mét và mét.", "1 km = 1000 m.");
+                question.IllustrationData = "unitcalc|convert_km_m|1|1000";
+            }
+            else if (mode == 2)
+            {
+                var a = _random.Next(1, 11); var b = _random.Next(1, 11); var result = a + b;
+                question = NewTextQuestion(template, a + " kg + " + b + " kg = ?", result + " kg",
+                    UnitChoices(result, 2, 20, " kg"), "Hai số đo cùng đơn vị nên cộng các số.", a + " + " + b + " = " + result + ".");
+                question.IllustrationData = "unitcalc|add|" + a + "|" + b + "|kg";
+            }
+            else if (mode == 3)
+            {
+                var a = _random.Next(5, 21); var b = _random.Next(1, a); var result = a - b;
+                question = NewTextQuestion(template, a + " lít - " + b + " lít = ?", result + " lít",
+                    UnitChoices(result, 1, 20, " lít"), "Hai số đo cùng đơn vị nên trừ các số.", a + " - " + b + " = " + result + ".");
+                question.IllustrationData = "unitcalc|sub|" + a + "|" + b + "|lít";
+            }
+            else
+            {
+                var a = _random.Next(1, 51); var b = _random.Next(1, 51); var result = a + b;
+                question = NewTextQuestion(template, a + " m + " + b + " m = ?", result + " m",
+                    UnitChoices(result, 2, 100, " m"), "Hai số đo cùng đơn vị nên cộng các số.", a + " + " + b + " = " + result + ".");
+                question.IllustrationData = "unitcalc|add|" + a + "|" + b + "|m";
+            }
+            return question;
+        }
+
+        private MathQuestion MeasurementRealWorldOneStep(MathTemplateRef template)
+        {
+            var unitOptions = new[] { "kg", "lít", "m" };
+            var unit = unitOptions[_random.Next(0, unitOptions.Length)];
+            var add = _random.Next(0, 2) == 0;
+            var a = add ? _random.Next(2, 41) : _random.Next(10, 61);
+            var b = add ? _random.Next(1, 21) : _random.Next(1, a);
+            var result = add ? a + b : a - b;
+            string prompt;
+            if (unit == "kg")
+                prompt = add ? "Một bao có " + a + " kg gạo, thêm " + b + " kg. Có tất cả bao nhiêu ki-lô-gam gạo?"
+                             : "Một bao có " + a + " kg gạo, lấy ra " + b + " kg. Còn lại bao nhiêu ki-lô-gam gạo?";
+            else if (unit == "lít")
+                prompt = add ? "Bình có " + a + " lít nước, thêm " + b + " lít. Có tất cả bao nhiêu lít nước?"
+                             : "Bình có " + a + " lít nước, dùng " + b + " lít. Còn lại bao nhiêu lít nước?";
+            else
+                prompt = add ? "Đoạn dây dài " + a + " m, nối thêm " + b + " m. Đoạn dây mới dài bao nhiêu mét?"
+                             : "Đoạn dây dài " + a + " m, cắt đi " + b + " m. Còn lại bao nhiêu mét?";
+            var suffix = " " + unit;
+            var question = NewTextQuestion(template, prompt, result + suffix,
+                UnitChoices(result, 1, 100, suffix),
+                "Xác định số đo ban đầu, phần thêm vào hoặc bớt đi.",
+                "Phép tính phù hợp là " + a + (add ? " + " : " - ") + b + ".");
+            question.IllustrationData = "wordbar|" + (add ? "add" : "sub") + "|" + a + "|" + b;
+            return question;
+        }
+
+        private MathQuestion DataCollectClassifyCount(MathTemplateRef template)
+        {
+            var circle = _random.Next(1, 6);
+            var square = _random.Next(1, 6);
+            var triangle = _random.Next(1, 6);
+            var targets = new[] { "circle", "square", "triangle" };
+            var target = targets[_random.Next(0, targets.Length)];
+            var answer = target == "circle" ? circle : target == "square" ? square : triangle;
+            var label = target == "circle" ? "hình tròn" : target == "square" ? "hình vuông" : "hình tam giác";
+            var question = NewNumericQuestion(template,
+                "Quan sát dữ liệu. Có bao nhiêu " + label + "?", answer,
+                "Phân loại các hình cùng loại rồi đếm riêng nhóm cần tìm.",
+                "Chỉ đếm " + label + ", không cộng các nhóm khác.");
+            question.IllustrationData = "classify|circle=" + circle + "|square=" + square + "|triangle=" + triangle + "|target=" + target;
+            return question;
+        }
+
         private MathQuestion HeavierLighterBalance(MathTemplateRef template)
         {
             var left = _random.Next(1, 10);
@@ -1027,6 +1157,16 @@ namespace WAHU.Learning
                     return "time_relation";
                 case "calendar_days_in_month_date":
                     return "calendar";
+                case "measure_with_ruler_cm":
+                    return "ruler_cm";
+                case "measure_with_common_scale":
+                    return "common_scale";
+                case "measurement_convert_calculate_learned_units":
+                    return "measurement_calc";
+                case "measurement_real_world_one_step":
+                    return "measurement_word_model";
+                case "data_collect_classify_count":
+                    return "classify_count";
                 default:
                     return "symbolic";
             }

@@ -677,6 +677,36 @@
                           "skill":  "CALENDAR_DAYS_IN_MONTH_DATE",
                           "status":  "VERIFIED_A_TEMPLATE",
                           "prompt_vi":  "Đọc số ngày trong tháng và ngày tháng trên lịch; không dùng tháng 2 trong template cơ sở."
+                      },
+                      {
+                          "id":  "measure_with_ruler_cm",
+                          "skill":  "MEASURE_WITH_RULER_CM",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Đo độ dài đoạn thẳng bằng thước chia xăng-ti-mét."
+                      },
+                      {
+                          "id":  "measure_with_common_scale",
+                          "skill":  "MEASURE_WITH_COMMON_SCALE",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Đọc giá trị trên một thang đo đều."
+                      },
+                      {
+                          "id":  "measurement_convert_calculate_learned_units",
+                          "skill":  "MEASUREMENT_CONVERT_CALCULATE_LEARNED_UNITS",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Đổi hoặc tính với các đơn vị đo đã học trong tình huống trực tiếp."
+                      },
+                      {
+                          "id":  "measurement_real_world_one_step",
+                          "skill":  "MEASUREMENT_REAL_WORLD_ONE_STEP",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Giải bài toán thực tế một bước với cùng một đơn vị đo đã học."
+                      },
+                      {
+                          "id":  "data_collect_classify_count",
+                          "skill":  "DATA_COLLECT_CLASSIFY_COUNT",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Quan sát tập dữ liệu, phân loại theo hình dạng và đếm số phần tử của một nhóm."
                       }
                   ]
 }

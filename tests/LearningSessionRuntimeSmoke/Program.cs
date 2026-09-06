@@ -40,7 +40,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
         private static IList<MathTemplateRef> TestVerifiedContentAndCore(string templatePath)
         {
             var descriptors = new MathVerifiedTemplateSource().Load(templatePath);
-            A(descriptors.Count == 60, "verified_template_source_flattens_all_verified_variants");
+            A(descriptors.Count == 65, "verified_template_source_flattens_all_verified_variants");
             A(descriptors.All(x => x.Status == "VERIFIED_A_TEMPLATE"), "template_source_filters_verified_a_only");
             var refs = descriptors.Select(x => new MathTemplateRef
             {
@@ -51,7 +51,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 StatementVi = x.StatementVi,
                 AnswerText = x.AnswerText
             }).Where(AdaptiveMathSelector.IsSupported).ToList();
-            A(refs.Count == 60, "generator_supports_all_sixty_verified_runtime_candidates");
+            A(refs.Count == 65, "generator_supports_all_sixty_five_verified_runtime_candidates");
             var chanceRefs = refs.Where(x => x.TemplateId.StartsWith("possible_certain_impossible_die__", StringComparison.Ordinal)).ToList();
             A(chanceRefs.Count == 3, "compound_probability_template_flattens_three_variants");
             A(chanceRefs.All(x => x.SourceTemplateId == "possible_certain_impossible_die" &&
@@ -95,7 +95,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
             var first = selector.Select(refs, empty, new DateTime(2026, 9, 6, 10, 0, 0, DateTimeKind.Utc), new string[0], new string[0]);
             A(first != null && first.Template != null, "selector_returns_candidate");
             A(first.DifficultyFit >= 0 && first.DifficultyFit <= 1, "selector_difficulty_fit_bounded");
-            A(first.CandidateSummary.Count == 60, "selector_audits_all_candidates");
+            A(first.CandidateSummary.Count == 65, "selector_audits_all_candidates");
 
             var dueSkills = new Dictionary<string, SkillSnapshot>(StringComparer.Ordinal);
             foreach (var r in refs) dueSkills[r.SkillId] = new SkillSnapshot { SkillId = r.SkillId, MasteryScore = 0.20, Confidence = 0.20, AttemptsCount = 1, LearningState = "LEARNING" };
@@ -145,6 +145,8 @@ namespace WAHU.LearningSessionRuntimeSmoke
                     A(ValidateNumberExtensionContract(q), "number_extension_contract_" + r.TemplateId);
                 if (IsMeasurementFoundationTemplate(r.TemplateId))
                     A(ValidateMeasurementFoundationContract(q), "measurement_foundation_contract_" + r.TemplateId);
+                if (IsMeasurementPracticeTemplate(r.TemplateId))
+                    A(ValidateMeasurementPracticeContract(q), "measurement_practice_contract_" + r.TemplateId);
                 if (r.TemplateId.StartsWith("word_problem_", StringComparison.Ordinal) && r.TemplateId != "word_problem_select_operation_one_step")
                     A(ValidateWordProblemContract(q), "word_problem_relation_contract_" + r.TemplateId);
             }
@@ -267,6 +269,20 @@ namespace WAHU.LearningSessionRuntimeSmoke
             A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "time_hour_60_minutes" }) == "clock_read_minute_hand_3_or_6", "hour_relation_repairs_to_clock");
             A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "time_day_24_hours" }) == "time_hour_60_minutes", "day_relation_repairs_to_hour_relation");
             A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "calendar_days_in_month_date" }) == "time_day_24_hours", "calendar_repairs_to_day_relation");
+            var rulerQuestion = TextQuestion("measure_with_ruler_cm", "7 cm", new[] { "7 cm", "8 cm" });
+            A(classifier.Classify(rulerQuestion, "8 cm").ErrorType == "MEASURE_READ_ERROR", "ruler_measure_error_classified");
+            var commonScaleQuestion = new MathQuestion { TemplateId = "measure_with_common_scale", CorrectAnswer = 12, AnswerKind = "integer", CorrectAnswerText = "12" };
+            A(classifier.Classify(commonScaleQuestion, "10").ErrorType == "SCALE_READ_ERROR", "common_scale_error_classified");
+            var measurementCalcQuestion = TextQuestion("measurement_convert_calculate_learned_units", "30 dm", new[] { "30 dm", "3 dm" });
+            A(classifier.Classify(measurementCalcQuestion, "3 dm").ErrorType == "MEASUREMENT_CALC_ERROR", "measurement_calculation_error_classified");
+            var measurementWordQuestion = TextQuestion("measurement_real_world_one_step", "17 m", new[] { "17 m", "7 m" });
+            A(classifier.Classify(measurementWordQuestion, "7 m").ErrorType == "MEASUREMENT_WORD_ERROR", "measurement_word_error_classified");
+            var classifyQuestion = new MathQuestion { TemplateId = "data_collect_classify_count", CorrectAnswer = 4, AnswerKind = "integer", CorrectAnswerText = "4" };
+            A(classifier.Classify(classifyQuestion, "3").ErrorType == "DATA_CLASSIFY_COUNT_ERROR", "data_classify_count_error_classified");
+            A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "measure_with_ruler_cm" }) == "measure_with_common_scale", "ruler_repairs_to_common_scale");
+            A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "measure_with_common_scale" }) == "number_ray_fill_1000", "common_scale_repairs_to_number_line");
+            A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "measurement_convert_calculate_learned_units" }) == "length_dm_m_km_relation", "measurement_calc_repairs_to_unit_relation");
+            A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "measurement_real_world_one_step" }) == "measurement_convert_calculate_learned_units", "measurement_word_repairs_to_measurement_calc");
 
             TestGeneratorFuzz(refs);
             return refs;
@@ -315,7 +331,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 adaptiveAudit.Record(new AdaptiveDecisionAuditRequest
                 {
                     Id = "adaptive-" + Guid.NewGuid().ToString("N"), SessionId = session.SessionId, ChildId = profile.ChildId,
-                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.5.0", Question = question, Selection = selection,
+                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.6.0", Question = question, Selection = selection,
                     Behavior = lastBehavior, CreatedAtUtc = DateTime.UtcNow
                 });
 
@@ -342,7 +358,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 answerCommit.Commit(new AnswerCommitRequest
                 {
                     AttemptId = attemptId, SessionId = session.SessionId, ChildId = profile.ChildId,
-                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.5.0", QuestionId = question.QuestionId,
+                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.6.0", QuestionId = question.QuestionId,
                     SkillId = question.SkillId, Subject = "math", StartedAtUtc = answered.AddMilliseconds(-responseMs), AnsweredAtUtc = answered,
                     AnswerJson = Json.Serialize(new Dictionary<string, object> { { "answer", answer } }), IsCorrect = isCorrect,
                     ResponseMs = responseMs, HintLevel = hintLevel, Representation = question.Representation, InputMethod = "mouse",
@@ -492,6 +508,33 @@ VALUES(@child,'MASS_KG_READ_WRITE','math',0.60,0.54,@massAttempts,1,1,0,'LEARNIN
                 "math_roadmap_groups_measurement_foundation_attempts");
             A(roadmapWithMeasurement.TotalTrackedAttempts == roadmapWithExtension.TotalTrackedAttempts + 5,
                 "math_roadmap_total_includes_measurement_foundation_attempts");
+            var measurementBeforePractice = roadmapWithMeasurement.Measurement.Attempts;
+            var chanceBeforePractice = roadmapWithMeasurement.Chance.Attempts;
+            var rulerAttemptsBefore = ReadSkillAttempts(database, profile.ChildId, "MEASURE_WITH_RULER_CM");
+            var classifyAttemptsBefore = ReadSkillAttempts(database, profile.ChildId, "DATA_COLLECT_CLASSIFY_COUNT");
+            using (var connection = database.OpenConnection())
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = @"INSERT OR REPLACE INTO child_skill
+(child_id,skill_id,subject,mastery_score,confidence,attempts_count,independent_success_count,hinted_success_count,transfer_success_count,learning_state,mastery_engine_version,updated_at_utc)
+VALUES(@child,'MEASURE_WITH_RULER_CM','math',0.62,0.55,@rulerAttempts,2,1,0,'LEARNING',@engine,@updated);
+INSERT OR REPLACE INTO child_skill
+(child_id,skill_id,subject,mastery_score,confidence,attempts_count,independent_success_count,hinted_success_count,transfer_success_count,learning_state,mastery_engine_version,updated_at_utc)
+VALUES(@child,'DATA_COLLECT_CLASSIFY_COUNT','math',0.57,0.51,@classifyAttempts,2,2,0,'LEARNING',@engine,@updated);";
+                command.Parameters.AddWithValue("@child", profile.ChildId);
+                command.Parameters.AddWithValue("@rulerAttempts", rulerAttemptsBefore + 3);
+                command.Parameters.AddWithValue("@classifyAttempts", classifyAttemptsBefore + 4);
+                command.Parameters.AddWithValue("@engine", MasteryEngineV1.Version);
+                command.Parameters.AddWithValue("@updated", DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture));
+                command.ExecuteNonQuery();
+            }
+            var roadmapWithPractice = new MathRoadmapService(database).Read(profile.ChildId);
+            A(roadmapWithPractice.Measurement.Attempts == measurementBeforePractice + 3,
+                "math_roadmap_groups_ruler_practice_into_measurement");
+            A(roadmapWithPractice.Chance.Attempts == chanceBeforePractice + 4,
+                "math_roadmap_groups_data_classify_into_data_and_chance");
+            A(roadmapWithPractice.TotalTrackedAttempts == roadmapWithMeasurement.TotalTrackedAttempts + 7,
+                "math_roadmap_total_includes_measurement_practice_and_data_attempts");
             A(correctCount == 5, "vertical_slice_fixture_correctness_expected");
         }
 
@@ -648,6 +691,8 @@ VALUES(@child,'MASS_KG_READ_WRITE','math',0.60,0.54,@massAttempts,1,1,0,'LEARNIN
                 throw new Exception("FUZZ_FAIL number extension contract: " + q.TemplateId);
             if (IsMeasurementFoundationTemplate(q.TemplateId) && !ValidateMeasurementFoundationContract(q))
                 throw new Exception("FUZZ_FAIL measurement foundation contract: " + q.TemplateId);
+            if (IsMeasurementPracticeTemplate(q.TemplateId) && !ValidateMeasurementPracticeContract(q))
+                throw new Exception("FUZZ_FAIL measurement practice contract: " + q.TemplateId);
             if (q.TemplateId.StartsWith("word_problem_", StringComparison.Ordinal) && q.TemplateId != "word_problem_select_operation_one_step" && !ValidateWordProblemContract(q))
                 throw new Exception("FUZZ_FAIL word problem relation contract: " + q.TemplateId);
         }
@@ -846,6 +891,89 @@ VALUES(@child,'MASS_KG_READ_WRITE','math',0.60,0.54,@massAttempts,1,1,0,'LEARNIN
             return false;
         }
 
+        private static bool IsMeasurementPracticeTemplate(string templateId)
+        {
+            return templateId == "measure_with_ruler_cm" || templateId == "measure_with_common_scale" ||
+                   templateId == "measurement_convert_calculate_learned_units" || templateId == "measurement_real_world_one_step" ||
+                   templateId == "data_collect_classify_count";
+        }
+
+        private static bool ValidateMeasurementPracticeContract(MathQuestion q)
+        {
+            if (q == null || q.DisplayChoices == null || q.DisplayChoices.Count < 2 || q.DisplayChoices.Count > 4) return false;
+            var parts = (q.IllustrationData ?? string.Empty).Split('|');
+            if (q.TemplateId == "measure_with_ruler_cm")
+            {
+                int start, end;
+                return q.UsesTextChoices && q.Representation == "ruler_cm" && parts.Length == 3 && parts[0] == "rulercm" &&
+                       int.TryParse(parts[1], out start) && int.TryParse(parts[2], out end) && start >= 0 && start <= 5 &&
+                       end > start && end - start >= 1 && end - start <= 10 && q.CorrectAnswerDisplay == (end - start) + " cm" &&
+                       q.DisplayChoices.Count == 4 && q.DisplayChoices.All(x => x.EndsWith(" cm", StringComparison.Ordinal));
+            }
+            if (q.TemplateId == "measure_with_common_scale")
+            {
+                int min, max, step, value;
+                return !q.UsesTextChoices && q.Representation == "common_scale" && parts.Length == 5 && parts[0] == "commonscale" &&
+                       int.TryParse(parts[1], out min) && int.TryParse(parts[2], out max) && int.TryParse(parts[3], out step) && int.TryParse(parts[4], out value) &&
+                       min == 0 && max > min && (step == 1 || step == 2 || step == 5) && max % step == 0 && value > min && value < max && value % step == 0 &&
+                       q.CorrectAnswer == value && q.Choices.Count == 4 && q.Choices.All(x => x >= min && x <= max && x % step == 0);
+            }
+            if (q.TemplateId == "measurement_convert_calculate_learned_units")
+            {
+                if (!q.UsesTextChoices || q.Representation != "measurement_calc" || parts.Length < 4 || parts[0] != "unitcalc" || q.DisplayChoices.Count != 4) return false;
+                int a, b;
+                if (parts[1] == "convert_m_dm")
+                    return parts.Length == 4 && int.TryParse(parts[2], out a) && int.TryParse(parts[3], out b) && a >= 1 && a <= 9 && b == a * 10 && q.CorrectAnswerDisplay == b + " dm";
+                if (parts[1] == "convert_km_m")
+                    return parts.Length == 4 && parts[2] == "1" && parts[3] == "1000" && q.CorrectAnswerDisplay == "1000 m";
+                if ((parts[1] == "add" || parts[1] == "sub") && parts.Length == 5 && int.TryParse(parts[2], out a) && int.TryParse(parts[3], out b))
+                {
+                    var result = parts[1] == "add" ? a + b : a - b;
+                    return result >= 0 && (parts[4] == "kg" || parts[4] == "lít" || parts[4] == "m") &&
+                           q.CorrectAnswerDisplay == result + " " + parts[4];
+                }
+                return false;
+            }
+            if (q.TemplateId == "measurement_real_world_one_step")
+            {
+                if (!q.UsesTextChoices || q.Representation != "measurement_word_model" || parts.Length != 4 || parts[0] != "wordbar" ||
+                    (parts[1] != "add" && parts[1] != "sub") || q.DisplayChoices.Count != 4) return false;
+                int a, b;
+                if (!int.TryParse(parts[2], out a) || !int.TryParse(parts[3], out b)) return false;
+                var result = parts[1] == "add" ? a + b : a - b;
+                if (result < 1 || result > 100) return false;
+                var suffix = q.PromptVi.Contains("ki-lô-gam") ? " kg" : q.PromptVi.Contains("lít") ? " lít" : q.PromptVi.Contains("mét") ? " m" : string.Empty;
+                return suffix.Length > 0 && q.CorrectAnswerDisplay == result + suffix && q.DisplayChoices.All(x => x.EndsWith(suffix, StringComparison.Ordinal));
+            }
+            if (q.TemplateId == "data_collect_classify_count")
+            {
+                if (q.UsesTextChoices || q.Representation != "classify_count" || parts.Length != 5 || parts[0] != "classify") return false;
+                int circle, square, triangle;
+                string target;
+                if (!TryNamed(parts[1], "circle", out circle) || !TryNamed(parts[2], "square", out square) || !TryNamed(parts[3], "triangle", out triangle) ||
+                    !TryNamedText(parts[4], "target", out target) || circle < 1 || circle > 5 || square < 1 || square > 5 || triangle < 1 || triangle > 5) return false;
+                var expected = target == "circle" ? circle : target == "square" ? square : target == "triangle" ? triangle : -1;
+                return expected >= 1 && q.CorrectAnswer == expected && q.DisplayChoices.Contains(expected.ToString(CultureInfo.InvariantCulture));
+            }
+            return false;
+        }
+
+        private static bool TryNamed(string part, string name, out int value)
+        {
+            value = 0;
+            var prefix = name + "=";
+            return part != null && part.StartsWith(prefix, StringComparison.Ordinal) && int.TryParse(part.Substring(prefix.Length), out value);
+        }
+
+        private static bool TryNamedText(string part, string name, out string value)
+        {
+            value = null;
+            var prefix = name + "=";
+            if (part == null || !part.StartsWith(prefix, StringComparison.Ordinal)) return false;
+            value = part.Substring(prefix.Length);
+            return value.Length > 0;
+        }
+
         private static bool ValidateWordProblemContract(MathQuestion q)
         {
             if (q == null || q.UsesTextChoices || q.Representation != "word_problem_model") return false;
@@ -947,6 +1075,11 @@ VALUES(@child,'MASS_KG_READ_WRITE','math',0.60,0.54,@massAttempts,1,1,0,'LEARNIN
             if (templateId == "length_dm_m_km_relation") return "unit_relation";
             if (templateId == "time_day_24_hours" || templateId == "time_hour_60_minutes") return "time_relation";
             if (templateId == "calendar_days_in_month_date") return "calendar";
+            if (templateId == "measure_with_ruler_cm") return "ruler_cm";
+            if (templateId == "measure_with_common_scale") return "common_scale";
+            if (templateId == "measurement_convert_calculate_learned_units") return "measurement_calc";
+            if (templateId == "measurement_real_world_one_step") return "measurement_word_model";
+            if (templateId == "data_collect_classify_count") return "classify_count";
             if (templateId == "place_value_decompose_3digit" || templateId == "expanded_form_3digit") return "place_value_blocks";
             if (templateId == "predecessor_successor" || templateId == "compare_two_numbers_1000") return "number_line_1000";
             if (templateId == "mental_add_within_20" || templateId == "mental_sub_within_20") return "number_ray";

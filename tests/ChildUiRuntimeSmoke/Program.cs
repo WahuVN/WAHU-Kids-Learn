@@ -37,6 +37,11 @@ namespace WAHU.ChildUiRuntimeSmoke
         {
             var cases = new[]
             {
+                QV("measure_with_ruler_cm", "MEASURE_WITH_RULER_CM", "Quan sát thước. Đoạn AB dài bao nhiêu xăng-ti-mét?", "7 cm", "rulercm|2|9", "ruler_cm"),
+                QV("measure_with_common_scale", "MEASURE_WITH_COMMON_SCALE", "Quan sát thang đo. Mũi tên đang chỉ giá trị nào?", "12", "commonscale|0|20|2|12", "common_scale"),
+                QV("measurement_convert_calculate_learned_units", "MEASUREMENT_CONVERT_CALCULATE_LEARNED_UNITS", "3 m bằng bao nhiêu dm?", "30 dm", "unitcalc|convert_m_dm|3|30", "measurement_calc"),
+                QV("measurement_real_world_one_step", "MEASUREMENT_REAL_WORLD_ONE_STEP", "Đoạn dây dài 12 m, nối thêm 5 m. Đoạn dây mới dài bao nhiêu mét?", "17 m", "wordbar|add|12|5", "measurement_word_model"),
+                QV("data_collect_classify_count", "DATA_COLLECT_CLASSIFY_COUNT", "Quan sát dữ liệu. Có bao nhiêu hình tam giác?", "4", "classify|circle=3|square=2|triangle=4|target=triangle", "classify_count"),
                 QV("heavier_lighter_balance", "HEAVIER_LIGHTER", "Quan sát cân. Bên nào có vật nặng hơn?", "bên trái", "balance|8|3|heavier", "balance_scale"),
                 QV("mass_kg_read_write", "MASS_KG_READ_WRITE", "Quan sát cân và chọn số đo khối lượng đúng.", "7 kg", "masskg|7", "mass_kg_scale"),
                 QV("capacity_liter_read_write", "CAPACITY_LITER_READ_WRITE", "Quan sát bình đo và chọn dung tích đúng.", "6 lít", "liter|6", "liter_measure"),

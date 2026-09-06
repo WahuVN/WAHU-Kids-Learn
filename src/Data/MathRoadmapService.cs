@@ -84,10 +84,12 @@ FROM child_skill WHERE child_id=@child AND subject='math';";
                         else if (skill == "POLYLINE_LENGTH_SUM_SEGMENTS" || skill == "CLOCK_MINUTE_HAND_AT_3_OR_6" ||
                                  skill == "HEAVIER_LIGHTER" || skill == "MASS_KG_READ_WRITE" || skill == "CAPACITY_LITER_READ_WRITE" ||
                                  skill == "LENGTH_DM_M_KM_RECOGNIZE_RELATION" || skill == "TIME_DAY_24_HOURS" ||
-                                 skill == "TIME_HOUR_60_MINUTES" || skill == "CALENDAR_DAYS_IN_MONTH_DATE" || IsGeometrySkill(skill))
+                                 skill == "TIME_HOUR_60_MINUTES" || skill == "CALENDAR_DAYS_IN_MONTH_DATE" ||
+                                 skill == "MEASURE_WITH_RULER_CM" || skill == "MEASURE_WITH_COMMON_SCALE" ||
+                                 skill == "MEASUREMENT_CONVERT_CALCULATE_LEARNED_UNITS" || skill == "MEASUREMENT_REAL_WORLD_ONE_STEP" || IsGeometrySkill(skill))
                             Add(measurement, ref measurementScore, mastery, attempts);
                         else if (skill == "EVENT_POSSIBLE" || skill == "EVENT_CERTAIN" || skill == "EVENT_IMPOSSIBLE" ||
-                                 skill == "PICTOGRAPH_READ_DESCRIBE" || skill == "PICTOGRAPH_SIMPLE_INFERENCE")
+                                 skill == "PICTOGRAPH_READ_DESCRIBE" || skill == "PICTOGRAPH_SIMPLE_INFERENCE" || skill == "DATA_COLLECT_CLASSIFY_COUNT")
                             Add(chance, ref chanceScore, mastery, attempts);
                         else if (!string.IsNullOrWhiteSpace(skill) &&
                                  (skill.StartsWith("ADD_WITHIN_1000", StringComparison.Ordinal) ||
