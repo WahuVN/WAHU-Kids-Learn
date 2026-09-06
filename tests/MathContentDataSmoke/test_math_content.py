@@ -235,6 +235,16 @@ class MathContentDataSmoke(unittest.TestCase):
             with self.subTest(item=item["id"]):
                 self.assertGreaterEqual(len(item["hints_vi"][1].strip()), 40)
 
+    def test_child_facing_text_avoids_internal_engine_vocabulary(self):
+        self.assertEqual([], validator.child_facing_internal_vocabulary(self.catalog))
+        self.assertEqual([], validator.child_facing_internal_vocabulary(self.bank))
+        metadata_only = {
+            "difficulty_span": ["application"],
+            "id_policy": "deterministic_ascii_lower_snake",
+            "question_type": "numeric_input",
+        }
+        self.assertEqual([], validator.child_facing_internal_vocabulary(metadata_only))
+
     def test_application_questions_do_not_regress_to_single_fact_recall(self):
         subtraction = self.question_by_id["m2_q_sub_components_recognize_03"]
         division = self.question_by_id["m2_q_division_components_03"]

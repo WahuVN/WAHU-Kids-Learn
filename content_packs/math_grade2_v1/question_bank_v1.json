@@ -6564,7 +6564,7 @@
       ],
       "explanation_vi": "Để nhận biết giá trị, cần đọc con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền.",
       "hints_vi": [
-        "Nhớ kiến thức: Giá trị tiền được đọc theo con số in trên tờ và đơn vị đồng; bài học này chỉ rèn nhận biết, không mở rộng chuẩn số học ngoài baseline.",
+        "Nhớ kiến thức: Giá trị tiền được đọc theo con số in trên tờ và đơn vị đồng; bài học này tập trung vào cách nhận biết giá trị được ghi.",
         "Đối chiếu từng lựa chọn với kiến thức “Giá trị tờ tiền”; loại ngay lựa chọn trái với dữ kiện của đề."
       ],
       "tags": [
@@ -6617,7 +6617,7 @@
       ],
       "explanation_vi": "Màu sắc có thể hỗ trợ quan sát nhưng cần đọc con số mệnh giá và đơn vị đồng để nhận biết giá trị.",
       "hints_vi": [
-        "Nhớ kiến thức: Giá trị tiền được đọc theo con số in trên tờ và đơn vị đồng; bài học này chỉ rèn nhận biết, không mở rộng chuẩn số học ngoài baseline.",
+        "Nhớ kiến thức: Giá trị tiền được đọc theo con số in trên tờ và đơn vị đồng; bài học này tập trung vào cách nhận biết giá trị được ghi.",
         "Tìm một dữ kiện xác nhận hoặc bác bỏ mệnh đề theo “Giá trị tờ tiền”; chỉ một điểm sai cũng đủ chọn Sai."
       ],
       "tags": [
@@ -6660,7 +6660,7 @@
       ],
       "explanation_vi": "Đọc đúng con số mệnh giá trên từng tờ rồi so sánh hai giá trị; không đoán chỉ từ màu sắc hoặc vị trí.",
       "hints_vi": [
-        "Nhớ kiến thức: Giá trị tiền được đọc theo con số in trên tờ và đơn vị đồng; bài học này chỉ rèn nhận biết, không mở rộng chuẩn số học ngoài baseline.",
+        "Nhớ kiến thức: Giá trị tiền được đọc theo con số in trên tờ và đơn vị đồng; bài học này tập trung vào cách nhận biết giá trị được ghi.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Giá trị tờ tiền” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [

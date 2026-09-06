@@ -804,7 +804,7 @@
         "Nhận biết và thực hiện đúng nội dung: cộng đến 1000 có nhớ một lượt.",
         "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
       ],
-      "explanation_vi": "Nếu tổng ở một cột từ 10 trở lên, viết phần đơn vị ở cột đó và nhớ 1 sang cột bên trái. Bài lớp 2 baseline giới hạn không quá một lượt nhớ.",
+      "explanation_vi": "Nếu tổng ở một cột từ 10 trở lên, viết phần đơn vị ở cột đó và nhớ 1 sang cột bên trái. Trong các bài này, chỉ có nhiều nhất một cột cần nhớ.",
       "concepts": [
         {
           "id": "m2_cp_add_within_1000_one_carry_max_01",
@@ -907,7 +907,7 @@
         "Nhận biết và thực hiện đúng nội dung: trừ đến 1000 có mượn một lượt.",
         "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
       ],
-      "explanation_vi": "Khi chữ số trên nhỏ hơn chữ số dưới ở một cột, mượn 1 từ hàng bên trái, tương đương thêm 10 vào hàng đang trừ. Baseline giới hạn không quá một lượt mượn.",
+      "explanation_vi": "Khi chữ số trên nhỏ hơn chữ số dưới ở một cột, mượn 1 từ hàng bên trái, tương đương thêm 10 vào hàng đang trừ. Trong các bài này, chỉ có nhiều nhất một cột cần mượn.",
       "concepts": [
         {
           "id": "m2_cp_sub_within_1000_one_borrow_max_01",
@@ -2851,7 +2851,7 @@
         {
           "id": "m2_cp_money_vnd_note_recognition_01",
           "name_vi": "Giá trị tờ tiền",
-          "definition_vi": "Giá trị tiền được đọc theo con số in trên tờ và đơn vị đồng; bài học này chỉ rèn nhận biết, không mở rộng chuẩn số học ngoài baseline."
+          "definition_vi": "Giá trị tiền được đọc theo con số in trên tờ và đơn vị đồng; bài học này tập trung vào cách nhận biết giá trị được ghi."
         }
       ],
       "worked_examples": [

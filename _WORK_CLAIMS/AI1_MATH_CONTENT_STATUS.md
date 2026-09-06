@@ -28,7 +28,7 @@ Owner: AI1 — Math Content & Data
   - interactive measurement
   - word problem
 - Semantic validator errors: **0**
-- Math content unittest: **21 / 21 PASS**
+- Math content unittest: **22 / 22 PASS**
 - Pack manifest/hash/listing check on current working tree: **PASS** (`version=1.9.0`, 3 listed files)
 
 ## Curriculum/content completeness
@@ -80,6 +80,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - invalid MC correct choice / duplicate choices / rationale missing;
 - distractor rationale placeholder/generic hoặc bị tái dùng quá mức;
 - hint cấp 2 placeholder/generic hoặc bị tái dùng quá mức;
+- vocabulary kỹ thuật nội bộ lọt vào field child-facing (`baseline`, `runtime`, `template`, `validator`, ...);
 - MCQ trùng nghĩa sau normalize Unicode/case/whitespace hoặc hai biểu thức choice cho cùng giá trị số;
 - vị trí đáp án đúng bị lệch pattern; bank phải phân bố cân bằng theo số lượng choices;
 - invalid true/false shape;
@@ -115,9 +116,10 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - vị trí đáp án đúng được cân bằng deterministic: 88 câu 4-choice = 22/22/22/22 cho A/B/C/D; 3 true/false = 2/1;
 - 23 câu integer có `answer_unit` giữ đúng contract display-only, không đổi sang unit-input;
 - 4 application regression quan trọng đã được nâng từ single-fact recall sang kết hợp dữ kiện/khái niệm: thành phần phép trừ, thành phần phép chia, ghép hình, đọc đồng hồ;
+- child-facing lesson/question text có **0 internal-engine vocabulary**; metadata kỹ thuật như `application`, `numeric_input`, `deterministic` vẫn được phép;
 - 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract.
 
-Latest result: **21 tests PASS**.
+Latest result: **22 tests PASS**.
 
 ## Commits / waves
 
@@ -135,6 +137,7 @@ Latest result: **21 tests PASS**.
 - `9472d63` — `Toán: cân bằng vị trí đáp án trắc nghiệm`
 - `0bfabc5` — `Toán: nâng chất lượng gợi ý cho 201 câu`
 - `719c80b` — `Toán: nâng rationale cho 267 đáp án nhiễu`
+- `ee7079b` — `Toán: nâng progression cho câu vận dụng`
 
 ## Current blockers outside AI1 content ownership
 

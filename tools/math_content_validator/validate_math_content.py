@@ -34,6 +34,14 @@ GRADE2_DIV_LITERAL_RE = re.compile(r"(?<!\d)(\d+)(?:\s*÷\s*|\s+:\s+)(\d+)(?!\d)
 NUMERIC_CHOICE_EXPR_RE = re.compile(r"^[\d\s+\-−–*/×÷:().,]+$")
 GENERIC_SECOND_HINT = "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
 GENERIC_DISTRACTOR_RATIONALE = "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+CHILD_FACING_KEYS = {
+    "title_vi", "objectives_vi", "explanation_vi", "name_vi", "definition_vi",
+    "prompt_vi", "solution_steps_vi", "hints_vi", "rationale_vi", "text",
+    "answer", "correct_answer",
+}
+INTERNAL_CHILD_VOCAB_RE = re.compile(
+    r"(?i)(?<![A-Za-z])(?:baseline|runtime|mapping|template|deterministic|numeric|metadata|validator|contract|engine|json|source|prompt)(?![A-Za-z])"
+)
 
 
 def load_json(path: Path, errors: list[str]) -> dict:
@@ -65,6 +73,26 @@ def required_list(obj: dict, key: str, where: str, errors: list[str], min_len: i
         errors.append(f"missing_list:{where}:{key}")
         return []
     return value
+
+
+def child_facing_internal_vocabulary(value: object) -> list[tuple[str, str, str]]:
+    violations: list[tuple[str, str, str]] = []
+
+    def scan(node: object, path: str, child_facing: bool = False) -> None:
+        if isinstance(node, dict):
+            for key, item in node.items():
+                scan(item, f"{path}.{key}" if path else key, key in CHILD_FACING_KEYS)
+            return
+        if isinstance(node, list):
+            for index, item in enumerate(node):
+                scan(item, f"{path}[{index}]", child_facing)
+            return
+        if child_facing and isinstance(node, str):
+            for match in INTERNAL_CHILD_VOCAB_RE.finditer(node):
+                violations.append((path, match.group(0).lower(), node))
+
+    scan(value, "")
+    return violations
 
 
 def check_id(value: object, where: str, errors: list[str]) -> str:
@@ -253,6 +281,8 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             errors.append(f"bad_grade:{name}")
         if root.get("curriculum_id") != baseline.get("curriculum_id"):
             errors.append(f"curriculum_mismatch:{name}")
+        for path, term, _text in child_facing_internal_vocabulary(root):
+            errors.append(f"internal_vocabulary_child_facing:{name}:{path}:{term}")
 
     baseline_skills = []
     domains = baseline.get("domains")
