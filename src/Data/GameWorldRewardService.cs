@@ -9,6 +9,9 @@ namespace WAHU.Data
         public int GrowthSteps { get; set; }
         public int CompletedMathSessions { get; set; }
         public IList<string> UnlockedItems { get; set; }
+        public int SessionsUntilNextMilestone { get; set; }
+        public int NextMilestoneSessionCount { get; set; }
+        public string NextMilestoneItemId { get; set; }
     }
 
     public sealed class GameWorldRewardResult
@@ -17,6 +20,9 @@ namespace WAHU.Data
         public int GrowthSteps { get; set; }
         public int CompletedMathSessions { get; set; }
         public IList<string> NewlyUnlockedItems { get; set; }
+        public int SessionsUntilNextMilestone { get; set; }
+        public int NextMilestoneSessionCount { get; set; }
+        public string NextMilestoneItemId { get; set; }
     }
 
     public sealed class GameWorldRewardService
@@ -113,6 +119,7 @@ VALUES(@child,@item,@utc,0);";
                     using (var reader = command.ExecuteReader())
                         while (reader.Read()) progress.UnlockedItems.Add(Convert.ToString(reader[0], CultureInfo.InvariantCulture));
                 }
+                PopulateNextMilestone(progress);
                 return progress;
             }
         }
@@ -125,8 +132,27 @@ VALUES(@child,@item,@utc,0);";
                 RewardCreated = created,
                 GrowthSteps = progress.GrowthSteps,
                 CompletedMathSessions = progress.CompletedMathSessions,
-                NewlyUnlockedItems = unlocked
+                NewlyUnlockedItems = unlocked,
+                SessionsUntilNextMilestone = progress.SessionsUntilNextMilestone,
+                NextMilestoneSessionCount = progress.NextMilestoneSessionCount,
+                NextMilestoneItemId = progress.NextMilestoneItemId
             };
+        }
+
+        private static void PopulateNextMilestone(GameWorldProgress progress)
+        {
+            if (progress == null) return;
+            foreach (var milestone in Milestones)
+            {
+                if (milestone.Key <= progress.CompletedMathSessions) continue;
+                progress.NextMilestoneSessionCount = milestone.Key;
+                progress.NextMilestoneItemId = milestone.Value;
+                progress.SessionsUntilNextMilestone = milestone.Key - progress.CompletedMathSessions;
+                return;
+            }
+            progress.NextMilestoneSessionCount = 0;
+            progress.NextMilestoneItemId = null;
+            progress.SessionsUntilNextMilestone = 0;
         }
 
         private static int CountCompletedMathSessions(System.Data.SQLite.SQLiteConnection connection,

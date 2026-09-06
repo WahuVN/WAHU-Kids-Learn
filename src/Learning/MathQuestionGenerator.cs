@@ -32,7 +32,7 @@ namespace WAHU.Learning
             question.QuestionId = decision.Template.TemplateId + "-" + Guid.NewGuid().ToString("N");
             question.TemplateId = decision.Template.TemplateId;
             question.SkillId = decision.Template.SkillId;
-            question.Representation = "symbolic";
+            question.Representation = RepresentationFor(decision.Template.TemplateId);
             question.DifficultyFit = decision.DifficultyFit;
             question.Choices = BuildChoices(question.CorrectAnswer);
             return question;
@@ -131,6 +131,26 @@ namespace WAHU.Learning
                 b = bh * 100 + bt * 10 + bo;
             }
             if (a + b > 1000) GenerateExactlyOneCarryPair(out a, out b);
+        }
+
+        private static string RepresentationFor(string templateId)
+        {
+            switch (templateId)
+            {
+                case "mental_add_within_20":
+                case "mental_sub_within_20":
+                    return "number_ray";
+                case "times_table_2":
+                case "times_table_5":
+                    return "equal_groups";
+                case "add_within_1000_no_carry":
+                case "add_within_1000_one_carry":
+                case "subtract_within_1000_no_borrow":
+                case "subtract_within_1000_one_borrow":
+                    return "place_value";
+                default:
+                    return "symbolic";
+            }
         }
 
         private static MathQuestion NewQuestion(MathTemplateRef template, string prompt, int answer, string hint1, string hint2)

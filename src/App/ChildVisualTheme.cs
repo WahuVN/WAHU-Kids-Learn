@@ -438,6 +438,237 @@ namespace WAHUKidsLearn
         }
     }
 
+    internal enum CompanionReactionState
+    {
+        Calm,
+        Correct,
+        TryAgain,
+        Tired,
+        Celebrate
+    }
+
+    internal sealed class CompanionReactionControl : Control
+    {
+        private CompanionReactionState _state;
+
+        public CompanionReactionState State
+        {
+            get { return _state; }
+            set { _state = value; AccessibleDescription = Describe(value); Invalidate(); }
+        }
+
+        public CompanionReactionControl()
+        {
+            SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint |
+                     ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw |
+                     ControlStyles.SupportsTransparentBackColor, true);
+            BackColor = Color.Transparent;
+            AccessibleName = "Bạn đồng hành";
+            State = CompanionReactionState.Calm;
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
+            var g = e.Graphics;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            var cx = Width / 2;
+            var cy = Height / 2 + 2;
+            var size = Math.Max(34, Math.Min(58, Math.Min(Width - 6, Height - 6)));
+            var face = new Rectangle(cx - size / 2, cy - size / 2, size, size - 4);
+            var fill = State == CompanionReactionState.Tired
+                ? Color.FromArgb(238, 235, 221) : Color.FromArgb(248, 240, 220);
+            using (var body = new SolidBrush(fill))
+            using (var outline = new Pen(Color.FromArgb(105, 116, 111), 2f))
+            {
+                var earL = new Point[]
+                {
+                    new Point(face.Left + 8, face.Top + 10), new Point(face.Left + 3, face.Top - 8), new Point(face.Left + 20, face.Top + 2)
+                };
+                var earR = new Point[]
+                {
+                    new Point(face.Right - 8, face.Top + 10), new Point(face.Right - 3, face.Top - 8), new Point(face.Right - 20, face.Top + 2)
+                };
+                g.FillPolygon(body, earL); g.DrawPolygon(outline, earL);
+                g.FillPolygon(body, earR); g.DrawPolygon(outline, earR);
+                g.FillEllipse(body, face); g.DrawEllipse(outline, face);
+            }
+
+            DrawEyes(g, cx, cy, size);
+            DrawMouth(g, cx, cy, size);
+            if (State == CompanionReactionState.Celebrate)
+            {
+                using (var star = new SolidBrush(ChildVisualTheme.Sun))
+                {
+                    g.FillEllipse(star, face.Right - 3, face.Top - 9, 8, 8);
+                    g.FillEllipse(star, face.Left - 5, face.Top + 4, 6, 6);
+                }
+            }
+        }
+
+        private void DrawEyes(Graphics g, int cx, int cy, int size)
+        {
+            var eyeY = cy - size / 10;
+            var dx = size / 6;
+            using (var pen = new Pen(ChildVisualTheme.Ink, 2f))
+            using (var brush = new SolidBrush(ChildVisualTheme.Ink))
+            {
+                if (State == CompanionReactionState.Correct || State == CompanionReactionState.Celebrate)
+                {
+                    g.DrawArc(pen, cx - dx - 5, eyeY - 2, 10, 8, 5, 170);
+                    g.DrawArc(pen, cx + dx - 5, eyeY - 2, 10, 8, 5, 170);
+                }
+                else if (State == CompanionReactionState.Tired)
+                {
+                    g.DrawLine(pen, cx - dx - 5, eyeY, cx - dx + 5, eyeY);
+                    g.DrawLine(pen, cx + dx - 5, eyeY, cx + dx + 5, eyeY);
+                }
+                else
+                {
+                    g.FillEllipse(brush, cx - dx - 3, eyeY - 2, 6, 7);
+                    g.FillEllipse(brush, cx + dx - 3, eyeY - 2, 6, 7);
+                }
+            }
+        }
+
+        private void DrawMouth(Graphics g, int cx, int cy, int size)
+        {
+            using (var pen = new Pen(Color.FromArgb(173, 105, 91), 2f))
+            {
+                if (State == CompanionReactionState.Correct || State == CompanionReactionState.Celebrate)
+                    g.DrawArc(pen, cx - 9, cy + size / 10, 18, 10, 10, 160);
+                else if (State == CompanionReactionState.TryAgain)
+                    g.DrawArc(pen, cx - 7, cy + size / 8, 14, 7, 190, 160);
+                else
+                    g.DrawLine(pen, cx - 6, cy + size / 7, cx + 6, cy + size / 7);
+            }
+        }
+
+        private static string Describe(CompanionReactionState state)
+        {
+            switch (state)
+            {
+                case CompanionReactionState.Correct: return "Bạn đồng hành vui nhẹ vì câu trả lời đúng.";
+                case CompanionReactionState.TryAgain: return "Bạn đồng hành bình tĩnh động viên thử tiếp.";
+                case CompanionReactionState.Tired: return "Bạn đồng hành gợi ý nghỉ ngơi.";
+                case CompanionReactionState.Celebrate: return "Bạn đồng hành chúc mừng hoàn thành nhiệm vụ.";
+                default: return "Bạn đồng hành đang bình tĩnh chờ bé suy nghĩ.";
+            }
+        }
+    }
+
+    internal sealed class LessonCompletionVisual : Control
+    {
+        private int _growthSteps;
+        private string _unlockedItemId;
+        private int _sessionsUntilNext;
+        private string _nextItemId;
+
+        public LessonCompletionVisual()
+        {
+            SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint |
+                     ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw |
+                     ControlStyles.SupportsTransparentBackColor, true);
+            BackColor = Color.Transparent;
+            AccessibleName = "Tiến bộ khu vườn sau nhiệm vụ";
+        }
+
+        public void SetProgress(int growthSteps, string unlockedItemId, int sessionsUntilNext, string nextItemId)
+        {
+            _growthSteps = Math.Max(0, growthSteps);
+            _unlockedItemId = unlockedItemId;
+            _sessionsUntilNext = Math.Max(0, sessionsUntilNext);
+            _nextItemId = nextItemId;
+            AccessibleDescription = BuildDescription();
+            Invalidate();
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
+            var g = e.Graphics;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            var iconSize = Math.Min(58, Math.Max(38, Height - 16));
+            var icon = new Rectangle(16, (Height - iconSize) / 2, iconSize, iconSize);
+            using (var circle = new SolidBrush(Color.FromArgb(224, 242, 220))) g.FillEllipse(circle, icon);
+            DrawRewardIcon(g, icon, _unlockedItemId);
+
+            var textLeft = icon.Right + 16;
+            var titleRect = new Rectangle(textLeft, 6, Math.Max(20, Width - textLeft - 10), 25);
+            var detailRect = new Rectangle(textLeft, 31, Math.Max(20, Width - textLeft - 10), Math.Max(22, Height - 34));
+            var title = string.IsNullOrWhiteSpace(_unlockedItemId)
+                ? "Khu vườn lớn thêm 1 bước"
+                : "Mở khóa: " + ItemName(_unlockedItemId);
+            TextRenderer.DrawText(g, title, ChildVisualTheme.Font(11f, FontStyle.Bold), titleRect,
+                ChildVisualTheme.Ink, TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+
+            var next = _sessionsUntilNext > 0 && !string.IsNullOrWhiteSpace(_nextItemId)
+                ? "Còn " + _sessionsUntilNext + " nhiệm vụ hoàn thành để tới " + ItemName(_nextItemId) + "."
+                : "Các mốc khu vườn hiện tại đã được mở đủ.";
+            TextRenderer.DrawText(g, "Vườn: " + _growthSteps + " bước · " + next,
+                ChildVisualTheme.Font(9.5f), detailRect, ChildVisualTheme.MutedInk,
+                TextFormatFlags.Left | TextFormatFlags.Top | TextFormatFlags.WordBreak | TextFormatFlags.EndEllipsis);
+        }
+
+        private static void DrawRewardIcon(Graphics g, Rectangle r, string itemId)
+        {
+            var cx = r.Left + r.Width / 2;
+            var bottom = r.Bottom - 10;
+            if (itemId == "garden_lantern")
+            {
+                using (var pole = new Pen(Color.FromArgb(107, 91, 72), 3f)) g.DrawLine(pole, cx, bottom, cx, r.Top + 10);
+                using (var lamp = new SolidBrush(ChildVisualTheme.Sun)) g.FillRectangle(lamp, cx + 1, r.Top + 10, 13, 15);
+                return;
+            }
+            if (itemId == "garden_bench")
+            {
+                using (var wood = new SolidBrush(Color.FromArgb(176, 126, 82)))
+                {
+                    g.FillRectangle(wood, r.Left + 9, r.Top + 17, r.Width - 18, 7);
+                    g.FillRectangle(wood, r.Left + 12, r.Top + 30, r.Width - 24, 7);
+                }
+                return;
+            }
+            if (itemId == "garden_flower_patch")
+            {
+                for (var i = 0; i < 3; i++)
+                {
+                    var x = r.Left + 15 + i * 13;
+                    using (var stem = new Pen(Color.FromArgb(88, 145, 88), 2f)) g.DrawLine(stem, x, bottom, x, r.Top + 19);
+                    using (var bloom = new SolidBrush(i == 1 ? ChildVisualTheme.PeachStrong : ChildVisualTheme.Sun))
+                        g.FillEllipse(bloom, x - 5, r.Top + 13, 10, 10);
+                }
+                return;
+            }
+            using (var stem = new Pen(Color.FromArgb(88, 145, 88), 3f)) g.DrawLine(stem, cx, bottom, cx, r.Top + 14);
+            using (var leaf = new SolidBrush(ChildVisualTheme.MintStrong))
+            {
+                g.FillEllipse(leaf, cx - 16, r.Top + 19, 16, 9);
+                g.FillEllipse(leaf, cx, r.Top + 27, 16, 9);
+            }
+        }
+
+        private string BuildDescription()
+        {
+            var unlocked = string.IsNullOrWhiteSpace(_unlockedItemId) ? "khu vườn lớn thêm một bước" : "mở khóa " + ItemName(_unlockedItemId);
+            var next = _sessionsUntilNext > 0 && !string.IsNullOrWhiteSpace(_nextItemId)
+                ? ", còn " + _sessionsUntilNext + " nhiệm vụ tới " + ItemName(_nextItemId) : string.Empty;
+            return unlocked + next + ".";
+        }
+
+        private static string ItemName(string itemId)
+        {
+            switch (itemId)
+            {
+                case "garden_seedling": return "Mầm cây mới";
+                case "garden_flower_patch": return "Bồn hoa";
+                case "garden_lantern": return "Đèn vườn";
+                case "garden_bench": return "Ghế nhỏ";
+                default: return "mốc khu vườn";
+            }
+        }
+    }
+
     internal sealed class GardenWorldControl : Control
     {
         public int GrowthLevel { get; set; }

@@ -22,6 +22,7 @@ namespace WAHU.ChildUiRuntimeSmoke
             TestInstructionVisuals(appAssembly, 1.25f);
             TestGarden(appAssembly, 1.00f);
             TestGarden(appAssembly, 1.25f);
+            TestCompanionAndCompletion(appAssembly);
             TestBasicControls(appAssembly);
 
             Console.WriteLine("CHILD_UI_RUNTIME_SMOKE_PASS assertions=" + _assertions);
@@ -63,6 +64,28 @@ namespace WAHU.ChildUiRuntimeSmoke
                 Set(control, "HasLantern", true);
                 Set(control, "HasBench", true);
                 RenderAndAssert(control, (int)(640 * scale), (int)(360 * scale), "garden_full_scale_" + scale);
+            }
+        }
+
+        private static void TestCompanionAndCompletion(Assembly appAssembly)
+        {
+            var stateType = appAssembly.GetType("WAHUKidsLearn.CompanionReactionState", true);
+            foreach (var name in new[] { "Calm", "Correct", "TryAgain", "Tired", "Celebrate" })
+            {
+                using (var companion = CreateInternalControl(appAssembly, "WAHUKidsLearn.CompanionReactionControl"))
+                {
+                    Set(companion, "State", Enum.Parse(stateType, name));
+                    RenderAndAssert(companion, 74, 72, "companion_" + name);
+                }
+            }
+
+            foreach (var scale in new[] { 1.00f, 1.25f })
+            {
+                using (var completion = CreateInternalControl(appAssembly, "WAHUKidsLearn.LessonCompletionVisual"))
+                {
+                    Invoke(completion, "SetProgress", 3, "garden_flower_patch", 3, "garden_lantern");
+                    RenderAndAssert(completion, (int)(620 * scale), (int)(100 * scale), "completion_reward_scale_" + scale);
+                }
             }
         }
 

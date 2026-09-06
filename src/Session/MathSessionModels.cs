@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using WAHU.Learning;
 
 namespace WAHU.Session
@@ -40,5 +41,8 @@ namespace WAHU.Session
         public DateTime? EndedAtUtc { get; set; }
         public int GardenGrowthSteps { get; set; }
         public string GardenUnlockMessage { get; set; }
+        public IList<string> GardenUnlockedItemIds { get; set; }
+        public int SessionsUntilNextGardenMilestone { get; set; }
+        public string NextGardenMilestoneItemId { get; set; }
     }
 }

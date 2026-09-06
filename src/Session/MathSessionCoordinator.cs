@@ -322,8 +322,12 @@ namespace WAHU.Session
             {
                 var reward = _gameWorld.GrantCompletedMathSession(_profile.ChildId, _session.SessionId, summary.Attempts);
                 summary.GardenGrowthSteps = reward.GrowthSteps;
-                if (reward.NewlyUnlockedItems != null && reward.NewlyUnlockedItems.Count > 0)
-                    summary.GardenUnlockMessage = "Khu vườn mở thêm " + reward.NewlyUnlockedItems.Count + " món mới.";
+                summary.GardenUnlockedItemIds = reward.NewlyUnlockedItems == null
+                    ? new List<string>() : reward.NewlyUnlockedItems.ToList();
+                summary.SessionsUntilNextGardenMilestone = reward.SessionsUntilNextMilestone;
+                summary.NextGardenMilestoneItemId = reward.NextMilestoneItemId;
+                if (summary.GardenUnlockedItemIds.Count > 0)
+                    summary.GardenUnlockMessage = BuildGardenUnlockMessage(summary.GardenUnlockedItemIds);
             }
             catch
             {
@@ -406,6 +410,23 @@ namespace WAHU.Session
                 case "subtract_within_1000_no_borrow": return "mental_sub_within_20";
                 default: return templateId;
             }
+        }
+
+        private static string BuildGardenUnlockMessage(IList<string> itemIds)
+        {
+            if (itemIds == null || itemIds.Count == 0) return null;
+            var names = new List<string>();
+            foreach (var id in itemIds)
+            {
+                switch (id)
+                {
+                    case "garden_seedling": names.Add("Mầm cây mới"); break;
+                    case "garden_flower_patch": names.Add("Bồn hoa"); break;
+                    case "garden_lantern": names.Add("Đèn vườn"); break;
+                    case "garden_bench": names.Add("Ghế nhỏ"); break;
+                }
+            }
+            return names.Count == 0 ? "Khu vườn vừa có thêm một món mới." : "Mở khóa: " + string.Join(", ", names) + ".";
         }
 
         private static string BuildFeedback(bool correct, int hintLevel, MathErrorClassification error)

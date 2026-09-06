@@ -340,7 +340,7 @@ namespace WAHUKidsLearn
                 else
                 {
                     _gardenProgress.Text = world.GrowthSteps > 0
-                        ? "Khu vườn đã lớn " + world.GrowthSteps + " bước từ những buổi học hoàn thành."
+                        ? "Khu vườn đã lớn " + world.GrowthSteps + " bước." + BuildNextGardenMilestoneText(world)
                         : "Bé đã làm " + summary.AttemptCount + " câu. Hoàn thành một nhiệm vụ để khu vườn lớn thêm nhé.";
                     if (summary.ReviewSkillCount > 0)
                         _missionSummary.Text = "Có " + summary.ReviewSkillCount + " phần đã tới lúc ôn. Buổi Toán sẽ ưu tiên chúng trước.";
@@ -370,6 +370,25 @@ namespace WAHUKidsLearn
         {
             return (_issue == null || _issue.Kind == RuntimeIssueKind.None) &&
                 _database != null && _database.Health != null && _database.Health.IsHealthy;
+        }
+
+        private static string BuildNextGardenMilestoneText(GameWorldProgress world)
+        {
+            if (world == null || world.SessionsUntilNextMilestone <= 0 || string.IsNullOrWhiteSpace(world.NextMilestoneItemId))
+                return " Các mốc hiện tại đã mở đủ.";
+            return " Còn " + world.SessionsUntilNextMilestone + " nhiệm vụ tới " + GardenItemName(world.NextMilestoneItemId) + ".";
+        }
+
+        private static string GardenItemName(string itemId)
+        {
+            switch (itemId)
+            {
+                case "garden_seedling": return "Mầm cây mới";
+                case "garden_flower_patch": return "Bồn hoa";
+                case "garden_lantern": return "Đèn vườn";
+                case "garden_bench": return "Ghế nhỏ";
+                default: return "mốc khu vườn";
+            }
         }
 
         private string BuildChildSafeFooter()

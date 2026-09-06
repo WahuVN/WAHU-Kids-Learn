@@ -20,9 +20,11 @@ namespace WAHUKidsLearn
         private ProgressStrip _progressBar;
         private Label _prompt;
         private MathInstructionVisual _instructionVisual;
+        private LessonCompletionVisual _completionVisual;
         private Label _support;
         private Label _feedback;
         private ChildCard _feedbackCard;
+        private CompanionReactionControl _companion;
         private ChildActionButton _hintButton;
         private ChildActionButton _nextButton;
         private ChildActionButton _stopButton;
@@ -144,12 +146,12 @@ namespace WAHUKidsLearn
                 AccessibleName = "Câu hỏi Toán"
             };
             questionLayout.Controls.Add(_prompt, 0, 1);
-            _instructionVisual = new MathInstructionVisual
-            {
-                Dock = DockStyle.Fill,
-                Margin = new Padding(12, 0, 12, 0)
-            };
-            questionLayout.Controls.Add(_instructionVisual, 0, 2);
+            var visualHost = new Panel { Dock = DockStyle.Fill, Margin = new Padding(12, 0, 12, 0), BackColor = Color.Transparent };
+            _instructionVisual = new MathInstructionVisual { Dock = DockStyle.Fill };
+            _completionVisual = new LessonCompletionVisual { Dock = DockStyle.Fill, Visible = false };
+            visualHost.Controls.Add(_completionVisual);
+            visualHost.Controls.Add(_instructionVisual);
+            questionLayout.Controls.Add(visualHost, 0, 2);
             _support = new Label
             {
                 Dock = DockStyle.Fill,
@@ -201,15 +203,22 @@ namespace WAHUKidsLearn
                 Radius = 18,
                 Visible = false
             };
+            var feedbackLayout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1 };
+            feedbackLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 72));
+            feedbackLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            _companion = new CompanionReactionControl { Dock = DockStyle.Fill, Margin = new Padding(0) };
             _feedback = new Label
             {
                 Dock = DockStyle.Fill,
-                TextAlign = ContentAlignment.MiddleCenter,
+                TextAlign = ContentAlignment.MiddleLeft,
                 ForeColor = ChildVisualTheme.Ink,
                 Font = ChildVisualTheme.Font(12.5f, FontStyle.Bold),
+                Padding = new Padding(4, 0, 0, 0),
                 AccessibleName = "Phản hồi câu trả lời"
             };
-            _feedbackCard.Controls.Add(_feedback);
+            feedbackLayout.Controls.Add(_companion, 0, 0);
+            feedbackLayout.Controls.Add(_feedback, 1, 0);
+            _feedbackCard.Controls.Add(feedbackLayout);
             root.Controls.Add(_feedbackCard, 0, 4);
 
             var actions = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, RowCount = 1, Padding = new Padding(100, 4, 100, 0) };
@@ -281,7 +290,10 @@ namespace WAHUKidsLearn
                 _hintLevel = 0;
                 _submitting = false;
                 _prompt.Text = _question.PromptVi;
+                _completionVisual.Visible = false;
+                _instructionVisual.Visible = true;
                 _instructionVisual.SetQuestion(_question, 0);
+                _companion.State = CompanionReactionState.Calm;
                 _support.Text = "Chọn đáp án con thấy đúng nhất.";
                 _feedback.Text = string.Empty;
                 _feedbackCard.Visible = false;
@@ -358,6 +370,8 @@ namespace WAHUKidsLearn
                     }
                 }
                 _feedback.Text = outcome.FeedbackVi;
+                _companion.State = outcome.SuggestPositiveEnd ? CompanionReactionState.Tired :
+                    (outcome.IsCorrect ? CompanionReactionState.Correct : CompanionReactionState.TryAgain);
                 _feedbackCard.CardColor = outcome.IsCorrect ? Color.FromArgb(226, 242, 224) : Color.FromArgb(251, 232, 222);
                 _feedbackCard.BorderColor = outcome.IsCorrect ? Color.FromArgb(190, 221, 188) : Color.FromArgb(236, 202, 187);
                 _feedbackCard.Visible = true;
@@ -420,6 +434,14 @@ namespace WAHUKidsLearn
         {
             _question = null;
             _instructionVisual.SetQuestion(null, 0);
+            _instructionVisual.Visible = false;
+            var unlockedItem = summary != null && summary.GardenUnlockedItemIds != null && summary.GardenUnlockedItemIds.Count > 0
+                ? summary.GardenUnlockedItemIds[0] : null;
+            _completionVisual.SetProgress(summary == null ? 0 : summary.GardenGrowthSteps, unlockedItem,
+                summary == null ? 0 : summary.SessionsUntilNextGardenMilestone,
+                summary == null ? null : summary.NextGardenMilestoneItemId);
+            _completionVisual.Visible = true;
+            _companion.State = CompanionReactionState.Celebrate;
             _prompt.Text = "Hoàn thành nhiệm vụ";
             _support.Text = summary == null
                 ? "Các câu đã làm được lưu để lần sau tiếp tục đúng chỗ."
@@ -467,6 +489,9 @@ namespace WAHUKidsLearn
             _finished = true;
             _question = null;
             _instructionVisual.SetQuestion(null, 0);
+            _instructionVisual.Visible = false;
+            _completionVisual.Visible = false;
+            _companion.State = CompanionReactionState.Tired;
             _prompt.Text = "Mình dừng ở đây nhé";
             _support.Text = message;
             _feedback.Text = "Những dữ liệu đã lưu trước đó vẫn an toàn.";

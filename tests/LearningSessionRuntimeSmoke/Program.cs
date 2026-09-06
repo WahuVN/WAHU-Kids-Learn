@@ -65,6 +65,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 var q = generator.Generate(new MathSelectionDecision { Template = r, DifficultyFit = 0.8, Reasons = new[] { "smoke" }, CandidateSummary = new[] { r.TemplateId } });
                 A(!string.IsNullOrWhiteSpace(q.QuestionId), "question_id_" + r.TemplateId);
                 A(!string.IsNullOrWhiteSpace(q.PromptVi), "prompt_" + r.TemplateId);
+                A(q.Representation == ExpectedRepresentation(r.TemplateId), "representation_matches_instruction_visual_" + r.TemplateId);
                 A(q.Choices.Count == 4 && q.Choices.Distinct().Count() == 4, "four_unique_choices_" + r.TemplateId);
                 A(q.Choices.Contains(q.CorrectAnswer), "correct_choice_present_" + r.TemplateId);
                 if (r.TemplateId == "add_within_1000_no_carry") A(CarryCount(ParseA(q), ParseB(q)) == 0, "add_no_carry_constraint");
@@ -266,6 +267,8 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 A(summary.Correct == 3 && summary.Wrong == 1, "coordinator_summary_correct_wrong");
                 A(summary.GardenGrowthSteps == 1, "completed_session_grants_one_garden_growth_step");
                 A(!string.IsNullOrWhiteSpace(summary.GardenUnlockMessage), "first_completed_session_unlocks_seedling_message");
+                A(summary.GardenUnlockedItemIds != null && summary.GardenUnlockedItemIds.Contains("garden_seedling"), "completion_exposes_exact_unlocked_garden_item");
+                A(summary.SessionsUntilNextGardenMilestone == 2 && summary.NextGardenMilestoneItemId == "garden_flower_patch", "completion_exposes_predictable_next_garden_milestone");
                 A(!coordinator.IsActive, "coordinator_inactive_after_complete");
                 var world = new GameWorldRewardService(database);
                 var progress = world.ReadProgress(started.ChildId);
@@ -292,6 +295,14 @@ namespace WAHU.LearningSessionRuntimeSmoke
 
         private static int FirstWrongChoice(MathQuestion q) { return q.Choices.First(x => x != q.CorrectAnswer); }
         private static void AddRecent(IList<string> list, string value) { list.Add(value); while (list.Count > 4) list.RemoveAt(0); }
+
+        private static string ExpectedRepresentation(string templateId)
+        {
+            if (templateId == "mental_add_within_20" || templateId == "mental_sub_within_20") return "number_ray";
+            if (templateId == "times_table_2" || templateId == "times_table_5") return "equal_groups";
+            if (templateId.StartsWith("add_within_1000", StringComparison.Ordinal) || templateId.StartsWith("subtract_within_1000", StringComparison.Ordinal)) return "place_value";
+            return "symbolic";
+        }
 
         private static int ParseA(MathQuestion q) { return ParseBinary(q)[0]; }
         private static int ParseB(MathQuestion q) { return ParseBinary(q)[1]; }
