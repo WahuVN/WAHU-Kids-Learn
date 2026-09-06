@@ -33,6 +33,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestTargetedCorruptOpenQuestionReplaysAuthoredOrdinal(root, schemaPath, templatePath, lessonCatalogPath);
                 TestRetryAwareAnswerFlow(root, schemaPath, templatePath);
                 TestRetryWrongFinalizesOnce(root, schemaPath, templatePath);
+                TestStaleCoordinatorCannotAppendAfterTerminalSession(root, schemaPath, templatePath);
                 TestResumeOpenQuestionAndComplete(root, schemaPath, templatePath);
                 TestCommittedStaleQuestionIsNotReplayed(root, schemaPath, templatePath);
                 TestCorruptOpenQuestionRecoversWithoutProgressReset(root, schemaPath, templatePath);
@@ -429,6 +430,60 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
             foreach (var candidate in new[] { "__wahu_wrong_answer__", "-999999999", "999999999" })
                 if (!question.IsCorrectAnswer(candidate)) return candidate;
             throw new InvalidOperationException("Could not construct a guaranteed wrong Math answer for smoke test.");
+        }
+
+        private static void TestStaleCoordinatorCannotAppendAfterTerminalSession(string root, string schemaPath, string templatePath)
+        {
+            var database = NewDatabase(Path.Combine(root, "stale-terminal-coordinator.db"), schemaPath);
+            string sessionId;
+            MathQuestion staleSecondQuestion;
+
+            using (var first = new MathSessionCoordinator(database, templatePath, "LOW", 8301, 2))
+            {
+                var started = first.Start("Bé stale terminal");
+                sessionId = started.SessionId;
+                var q1 = first.NextQuestion();
+
+                using (var second = new MathSessionCoordinator(database, templatePath, "LOW", 9999, 9))
+                {
+                    var resumed = second.Start("Bé stale terminal");
+                    A(resumed.ResumedExistingSession && resumed.RestoredOpenQuestion && resumed.SessionId == sessionId,
+                        "stale_terminal_second_coordinator_resumes_same_open_question");
+                    var q1b = second.NextQuestion();
+                    A(q1b.QuestionId == q1.QuestionId,
+                        "stale_terminal_both_coordinators_hold_same_first_question");
+
+                    first.SubmitAnswerAt(q1.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 800);
+                    staleSecondQuestion = first.NextQuestion();
+                    A(staleSecondQuestion != null && staleSecondQuestion.QuestionId != q1.QuestionId,
+                        "stale_terminal_first_coordinator_advances_to_second_question");
+
+                    second.SubmitAnswerAt(q1b.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 850);
+                    A(second.Summary.Attempts == 1,
+                        "stale_terminal_second_coordinator_replays_committed_first_question");
+                    second.Complete();
+                }
+
+                A(Count(database, "SELECT count(*) FROM session WHERE id='" + sessionId + "' AND state='completed' AND ended_at_utc IS NOT NULL;") == 1,
+                    "stale_terminal_session_is_durably_completed_by_second_coordinator");
+                var rejected = false;
+                try
+                {
+                    first.SubmitAnswerAt(staleSecondQuestion.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 900);
+                }
+                catch (InvalidOperationException)
+                {
+                    rejected = true;
+                }
+                A(rejected,
+                    "stale_terminal_first_coordinator_cannot_append_new_attempt_after_completion");
+                A(Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + sessionId + "';") == 1,
+                    "stale_terminal_rejected_submit_keeps_attempt_count_one");
+                A(Count(database, "SELECT count(*) FROM attempt_commit_key WHERE session_id='" + sessionId + "' AND question_id='" + staleSecondQuestion.QuestionId + "';") == 0,
+                    "stale_terminal_rejected_submit_writes_no_semantic_key");
+                A(Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + sessionId + "';") == 1,
+                    "stale_terminal_rejected_submit_writes_no_extra_mastery");
+            }
         }
 
         private static void TestResumeOpenQuestionAndComplete(string root, string schemaPath, string templatePath)

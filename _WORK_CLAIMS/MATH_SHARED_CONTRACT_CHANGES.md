@@ -156,6 +156,16 @@ Retry là opt-in engine contract; API one-shot hiện tại vẫn giữ nguyên 
 - `HintedCorrect` chỉ đếm success có **gợi ý thật sự được mở**; retry-correct không hint nằm ở `RetriedCorrect`, không được UI suy `independent = correct - hinted` nữa. UI phải dùng `IndependentCorrect`/`RetriedCorrect` khi hiển thị result retry-aware.
 - Resume/rebuild lấy final question state từ mastery-bearing attempt; pending first-wrong không làm tăng completed-question count và không double mastery.
 
+## 2026-09-07 — Terminal-session write guard (AI2)
+
+Persistence boundary phải từ chối learning write mới từ coordinator/process stale sau khi session đã kết thúc:
+
+- `AnswerCommitService` chỉ insert attempt mới khi session cùng `child_id` còn `started/active`, `ended_at_utc IS NULL`, và subject phù hợp session.
+- Check active-session và `INSERT attempt` nằm trong cùng một SQLite statement/transaction; không dùng check-then-insert tách rời dễ race giữa process.
+- Nếu session đã `completed`/`aborted`, attempt mới bị reject trước `attempt_commit_key`, `error_event`, `mastery_event`, `child_skill` và `review_schedule`.
+- **Exact semantic replay đã commit trước đó vẫn hợp lệ sau terminal state**: service kiểm semantic key trước active-session guard và trả durable attempt cũ, để mất response/retry network không biến thành lỗi giả.
+- Khi hai coordinator cùng giữ một session, coordinator stale không được append câu mới sau khi coordinator còn lại đã complete/abort session.
+
 ## Contract còn chưa chốt
 
 Các mục sau chưa được UI/content tự invent cho tới khi AI2 publish contract:

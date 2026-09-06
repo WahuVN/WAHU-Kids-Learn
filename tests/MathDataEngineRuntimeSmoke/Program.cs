@@ -19,6 +19,7 @@ namespace WAHU.MathDataEngineRuntimeSmoke
                 var repo = FindRepoRoot();
                 var sourceSchema = Path.Combine(repo, "data", "schema");
                 TestFreshV3AndIdempotentCommit(root, sourceSchema);
+                TestTerminalSessionRejectsNewAttemptsButAllowsExactReplay(root, sourceSchema);
                 TestExistingV1UpgradesToV3WithBackup(root, sourceSchema);
                 TestV3BackfillPreservesLegacyDuplicates(root, sourceSchema);
                 Console.WriteLine("MATH_DATA_ENGINE_RUNTIME_SMOKE_PASS assertions=" + _assertions);
@@ -90,6 +91,61 @@ namespace WAHU.MathDataEngineRuntimeSmoke
                     "@started", now.ToString("o", CultureInfo.InvariantCulture),
                     "@updated", now.ToString("o", CultureInfo.InvariantCulture));
                 A(Count(c, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + session.SessionId + "' AND generated_question_count=2;") == 1, "runtime_state_insertable");
+            }
+        }
+
+        private static void TestTerminalSessionRejectsNewAttemptsButAllowsExactReplay(string root, string sourceSchema)
+        {
+            var schemaDir = Path.Combine(root, "schema-terminal-session");
+            CopySchemas(sourceSchema, schemaDir);
+            var database = new LearningDatabase(Path.Combine(root, "terminal-session.db"), Path.Combine(schemaDir, "001_initial.sql"));
+            database.Initialize("DELETE");
+            var sessions = new LearnerSessionService(database);
+            var profile = sessions.EnsurePrimaryChild("Bé stale guard");
+            var service = new AnswerCommitService(database);
+            var now = DateTime.UtcNow;
+
+            var completedSession = sessions.BeginSession(profile.ChildId, "math", "LOW");
+            var durable = BuildRequest(profile.ChildId, completedSession.SessionId, "attempt-before-complete", "q-before-complete", "12", true, now);
+            var first = service.Commit(durable);
+            A(!first.AlreadyCommitted, "terminal_guard_fixture_commits_before_complete");
+            sessions.CompleteSession(completedSession.SessionId, false, "{}", "{}");
+
+            var replay = BuildRequest(profile.ChildId, completedSession.SessionId, "attempt-replay-after-complete", "q-before-complete", "12", true, now.AddSeconds(2));
+            var replayResult = service.Commit(replay);
+            A(replayResult.AlreadyCommitted && replayResult.AttemptId == "attempt-before-complete",
+                "terminal_guard_exact_replay_after_complete_still_idempotent");
+
+            var newAfterComplete = BuildRequest(profile.ChildId, completedSession.SessionId, "attempt-after-complete", "q-after-complete", "13", false, now.AddSeconds(4));
+            var completedRejected = false;
+            try { service.Commit(newAfterComplete); }
+            catch (InvalidOperationException) { completedRejected = true; }
+            A(completedRejected, "terminal_guard_rejects_new_attempt_after_complete");
+            using (var c = database.OpenConnection())
+            {
+                A(Count(c, "SELECT count(*) FROM attempt WHERE session_id='" + completedSession.SessionId + "';") == 1,
+                    "terminal_guard_complete_keeps_attempt_count_unchanged");
+                A(Count(c, "SELECT count(*) FROM attempt_commit_key WHERE session_id='" + completedSession.SessionId + "' AND question_id='q-after-complete';") == 0,
+                    "terminal_guard_complete_writes_no_semantic_key_for_rejected_attempt");
+                A(Count(c, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + completedSession.SessionId + "';") == 1,
+                    "terminal_guard_complete_writes_no_extra_mastery");
+            }
+
+            var abortedSession = sessions.BeginSession(profile.ChildId, "math", "LOW");
+            sessions.CompleteSession(abortedSession.SessionId, true, "{}", "{}");
+            var newAfterAbort = BuildRequest(profile.ChildId, abortedSession.SessionId, "attempt-after-abort", "q-after-abort", "12", true, now.AddSeconds(6));
+            var abortedRejected = false;
+            try { service.Commit(newAfterAbort); }
+            catch (InvalidOperationException) { abortedRejected = true; }
+            A(abortedRejected, "terminal_guard_rejects_new_attempt_after_abort");
+            using (var c = database.OpenConnection())
+            {
+                A(Count(c, "SELECT count(*) FROM attempt WHERE session_id='" + abortedSession.SessionId + "';") == 0,
+                    "terminal_guard_abort_writes_no_attempt");
+                A(Count(c, "SELECT count(*) FROM attempt_commit_key WHERE session_id='" + abortedSession.SessionId + "';") == 0,
+                    "terminal_guard_abort_writes_no_semantic_key");
+                A(Count(c, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + abortedSession.SessionId + "';") == 0,
+                    "terminal_guard_abort_writes_no_mastery");
             }
         }
 

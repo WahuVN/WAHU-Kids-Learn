@@ -278,8 +278,12 @@ VALUES(@session,@question,@attemptIndex,@attempt,@utc);";
 id,session_id,child_id,pack_id,pack_version,question_id,skill_id,subject,
 started_at_utc,answered_at_utc,answer_json,is_correct,response_ms,hint_level,
 representation,input_method,attempt_index,listen_count)
-VALUES(@id,@session,@child,@pack,@packVersion,@question,@skill,@subject,
-@started,@answered,@answer,@correct,@responseMs,@hint,@representation,@input,@attemptIndex,@listenCount);";
+SELECT @id,@session,@child,@pack,@packVersion,@question,@skill,@subject,
+@started,@answered,@answer,@correct,@responseMs,@hint,@representation,@input,@attemptIndex,@listenCount
+FROM session s
+WHERE s.id=@session AND s.child_id=@child
+  AND s.state IN ('started','active') AND s.ended_at_utc IS NULL
+  AND (s.planned_subject IS NULL OR s.planned_subject='mixed' OR s.planned_subject=@subject);";
                 command.Parameters.AddWithValue("@id", request.AttemptId);
                 command.Parameters.AddWithValue("@session", request.SessionId);
                 command.Parameters.AddWithValue("@child", request.ChildId);
@@ -298,7 +302,8 @@ VALUES(@id,@session,@child,@pack,@packVersion,@question,@skill,@subject,
                 command.Parameters.AddWithValue("@input", DbValue(request.InputMethod));
                 command.Parameters.AddWithValue("@attemptIndex", request.AttemptIndex);
                 command.Parameters.AddWithValue("@listenCount", request.ListenCount);
-                command.ExecuteNonQuery();
+                if (command.ExecuteNonQuery() != 1)
+                    throw new InvalidOperationException("Cannot commit a new attempt because the learner session is not active, does not belong to the child, or does not accept this subject.");
             }
         }
 

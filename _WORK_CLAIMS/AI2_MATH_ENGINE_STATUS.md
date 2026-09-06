@@ -19,8 +19,8 @@ Branch: `main`
 ## Tests
 
 - `tests/MathEngineRuntimeSmoke`: PASS — **47 assertions**.
-- `tests/MathDataEngineRuntimeSmoke`: PASS — **35 assertions**.
-- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **140 assertions** (authored bank + targeted lesson + prerequisite unlock + exact resume + mastery delta + next lesson + corrupt authored cursor recovery + retry/resume/anti-double-submit).
+- `tests/MathDataEngineRuntimeSmoke`: PASS — **45 assertions** (idempotency + terminal-session guard + exact replay after terminal state).
+- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **150 assertions** (authored bank + targeted lesson + prerequisite unlock + exact resume + mastery delta + next lesson + corrupt authored cursor recovery + retry/resume/anti-double-submit + stale coordinator terminal guard).
 - `tests/SQLiteRuntimeSmoke`: PASS — **166 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
 - `tests/LearningSessionRuntimeSmoke`: PASS — **794 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
 - PowerShell release/build scripts: schema V4 payload/bootstrap expectations đã cập nhật; parse/build gate PASS.
@@ -48,6 +48,7 @@ Branch: `main`
 - committed attempt transaction: PASS.
 - immutable attempt history: PASS (migration V2 trigger).
 - semantic attempt idempotency: PASS (schema V3 `attempt_commit_key`).
+- terminal-session write guard: PASS — attempt mới chỉ insert khi session còn active; exact replay đã commit vẫn hợp lệ sau complete/abort.
 - schema V4: PASS — thêm `session_mode`, `target_lesson_id`, `math_lesson_progress`; checksum/tamper guard và deployment payload gate đã có.
 - V1 → V4: PASS với pre-migration verified backup; migration history giữ đủ V1/V2/V3/V4.
 - V2 → V3 historical duplicate semantic attempt: PASS, không xóa lịch sử; key pin vào earliest committed attempt; sau đó V4 apply bình thường.
@@ -67,6 +68,7 @@ Branch: `main`
 - attempt replay không nhân mastery/child_skill/review: PASS.
 - resume counters được reconstruct từ committed DB attempts, không từ in-memory cache: PASS.
 - stale mastery risk do concurrent submit cùng coordinator: mitigated bằng submit gate + semantic key; regression replay PASS.
+- stale coordinator/process sau terminal session: PASS — persistence atomic guard chặn attempt mới sau complete/abort, không ghi semantic key/mastery phụ.
 - lesson completion/progress: PASS first-class persistence — `started_count`, `completed_count`, last/best score.
 - lesson score: PASS first-class cho targeted session; score = correct / authored target count × 100, persisted cùng transaction session completion.
 - lesson prerequisite unlock: PASS first-class — prerequisite được thỏa bởi completed targeted lesson; legacy `STABLE` skill được công nhận để không khóa ngược dữ liệu cũ.
@@ -76,9 +78,9 @@ Branch: `main`
 
 ## Known edge cases
 
-PASS: `0`, số âm, số rất lớn, decimal, fraction, malformed, empty, divide-by-zero, unit, expression safety, duplicate event, same-payload replay, conflict payload, app close giữa lesson, exact resume, stale cached open question, corrupted cached question, V1/V2/V3/V4 migration, locked lesson direct-start, targeted suspend/resume, prerequisite completion → unlock, retry suspend/resume, retry-correct/retry-wrong, duplicate initial retry intent.
+PASS: `0`, số âm, số rất lớn, decimal, fraction, malformed, empty, divide-by-zero, unit, expression safety, duplicate event, same-payload replay, conflict payload, app close giữa lesson, exact resume, stale cached open question, corrupted cached question, V1/V2/V3/V4 migration, locked lesson direct-start, targeted suspend/resume, prerequisite completion → unlock, retry suspend/resume, retry-correct/retry-wrong, duplicate initial retry intent, exact replay sau terminal state, stale coordinator submit sau complete/abort.
 
-Còn phải làm: skip policy nếu product cho phép, numeric XP/daily streak nếu product cần, stale-state/concurrency regression mở rộng và network/write-failure behavior ở integration boundary. Lesson-target/completion/score/prerequisite unlock + mastery-delta/next-lesson + retry/first-try/hint scoring contract đã đóng.
+Còn phải làm: skip policy nếu product cho phép, numeric XP/daily streak nếu product cần, multi-process race/failure regression sâu hơn và network/write-failure behavior ở integration boundary. Lesson-target/completion/score/prerequisite unlock + mastery-delta/next-lesson + retry/first-try/hint scoring + terminal-session write guard đã đóng.
 
 ## Commits
 
@@ -90,7 +92,8 @@ Còn phải làm: skip policy nếu product cho phép, numeric XP/daily streak n
 - `656a94b` — `feat(toán): thêm phiên học theo bài và mở khóa prerequisite` — pushed.
 - `8b32944` — `feat(toán): publish mastery delta và bài tiếp theo` — pushed.
 - `7f79367` — `fix(toán): khôi phục đúng câu authored khi cache hỏng` — pushed.
-- retry / first-try / hint scoring contract — đang chốt selective commit hiện tại.
+- `7c9a9ea` — `feat(toán): thêm retry an toàn và chấm first-try` — pushed.
+- terminal-session write guard — đang chốt selective commit hiện tại.
 
 ## Blocker / coordination
 
