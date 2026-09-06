@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="620" viewBox="0 0 900 620" role="img" aria-labelledby="title desc">
+  <title id="title">English numbers one to twenty</title>
+  <desc id="desc">The numerals 1 through 20 paired with their standard English spellings.</desc>
+  <g font-family="Arial, sans-serif" fill="currentColor">
+    <text x="30" y="42" font-size="30">Numbers 1–20</text>
+    <g font-size="24">
+      <text x="60" y="100">1 — one</text><text x="330" y="100">11 — eleven</text>
+      <text x="60" y="145">2 — two</text><text x="330" y="145">12 — twelve</text>
+      <text x="60" y="190">3 — three</text><text x="330" y="190">13 — thirteen</text>
+      <text x="60" y="235">4 — four</text><text x="330" y="235">14 — fourteen</text>
+      <text x="60" y="280">5 — five</text><text x="330" y="280">15 — fifteen</text>
+      <text x="60" y="325">6 — six</text><text x="330" y="325">16 — sixteen</text>
+      <text x="60" y="370">7 — seven</text><text x="330" y="370">17 — seventeen</text>
+      <text x="60" y="415">8 — eight</text><text x="330" y="415">18 — eighteen</text>
+      <text x="60" y="460">9 — nine</text><text x="330" y="460">19 — nineteen</text>
+      <text x="60" y="505">10 — ten</text><text x="330" y="505">20 — twenty</text>
+    </g>
+  </g>
+</svg>

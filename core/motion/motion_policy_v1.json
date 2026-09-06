@@ -1,0 +1,106 @@
+{
+  "schema_version": 2,
+  "policy_id": "wahu_kids_motion_v1",
+  "goal": "use_motion_to_explain_signal_feedback_or_orient_without_competing_with_learning",
+  "timing": {
+    "elapsed_time_source": "System.Diagnostics.Stopwatch",
+    "fps_values_are_render_caps_not_timer_accuracy_promises": true,
+    "system_windows_forms_timer_as_33ms_clock_for_30fps_forbidden": true,
+    "single_logical_scheduler": true,
+    "coalesce_wakeups": true,
+    "max_pending_ui_update_requests": 1,
+    "skip_intermediate_frames_when_ui_busy": true,
+    "final_state_deterministic": true,
+    "background_callback_must_marshal_to_ui_thread": true
+  },
+  "rendering": {
+    "double_buffer_custom_animated_controls": true,
+    "prefer_dirty_region_invalidation": true,
+    "dispose_gdi_resources_deterministically": true,
+    "monitor_gdi_object_growth_in_soak_tests": true
+  },
+  "classes": {
+    "INSTRUCTIONAL": {
+      "priority": 100,
+      "allowed_during_question": true,
+      "must_be_relevant": true,
+      "user_replay": true,
+      "reduce_behavior": "preserve_information"
+    },
+    "SIGNAL": {
+      "priority": 90,
+      "allowed_during_question": true,
+      "max_concurrent": 1,
+      "loop": false,
+      "reduce_behavior": "shorten_or_static_highlight"
+    },
+    "FEEDBACK": {
+      "priority": 60,
+      "allowed_during_question": false,
+      "loop": false,
+      "reduce_behavior": "fade_or_instant"
+    },
+    "NAVIGATION": {
+      "priority": 50,
+      "allowed_during_question": false,
+      "loop": false,
+      "reduce_behavior": "shorten"
+    },
+    "DECORATIVE": {
+      "priority": 10,
+      "allowed_during_question": false,
+      "loop": "idle_only",
+      "reduce_behavior": "disable"
+    }
+  },
+  "behavior_state_rules": {
+    "READY": {"decorative": "restrained", "signal": "normal"},
+    "FLOW_LIKELY": {"decorative": "off", "feedback": "minimal", "navigation": "normal", "instructional": "only_if_needed"},
+    "BORED_OR_UNDERCHALLENGED": {"decorative": "off", "strategy": "change_representation_not_more_effects"},
+    "STRAINED": {"decorative": "off", "signal": "single_clear_cue", "instructional": "stepwise"},
+    "FRUSTRATED_LIKELY": {"decorative": "off", "feedback": "calm_no_shake_no_buzzer", "instructional": "slow_stepwise_replayable"},
+    "FATIGUED_LIKELY": {"decorative": "off", "feedback": "minimal", "navigation": "minimal", "instructional": "only_if_session_continues_by_choice"}
+  },
+  "motion_modes": {
+    "normal": {"decorative_idle": "restrained", "travel_motion": true, "essential_motion": true},
+    "reduced": {"decorative_idle": false, "travel_motion": "short", "essential_motion": true},
+    "minimal": {"decorative_idle": false, "travel_motion": false, "essential_motion": true, "prefer_static_signal": true}
+  },
+  "accessibility": {
+    "nonessential_interaction_animation_disableable": true,
+    "long_auto_moving_content_requires_pause_stop_hide_or_policy_block": true,
+    "reduced_modes_must_preserve_instructional_information": true
+  },
+  "engineering_targets_not_scientific_constants": {
+    "press_feedback_ms": [80, 140],
+    "simple_transition_ms": [120, 220],
+    "page_transition_ms": [180, 300],
+    "success_microcelebration_ms": [250, 450],
+    "instructional_motion_ms": "content_dependent_and_replayable"
+  },
+  "performance": {
+    "normal_fps_cap": 30,
+    "low_fps_cap": 18,
+    "fps_semantics": "presentation_cap",
+    "max_animated_regions_normal": 2,
+    "max_animated_regions_low": 1,
+    "stop_when_invisible": true,
+    "animation_must_be_cancellable": true,
+    "drop_decorative_before_input_latency": true,
+    "priority_order": ["INPUT", "QUESTION_STATE", "AUDIO", "INSTRUCTIONAL", "SIGNAL", "NAVIGATION", "FEEDBACK", "DECORATIVE"]
+  },
+  "forbidden": [
+    "variable_ratio_reward_animation",
+    "streak_loss_animation",
+    "fake_countdown",
+    "infinite_one_more_task_loop",
+    "companion_guilt_animation",
+    "continuous_particles_during_learning",
+    "decorative_animation_while_child_reads_or_listens",
+    "red_failure_shake",
+    "long_unskippable_celebration",
+    "timer_per_control",
+    "queued_animation_backlog",
+    "precision_timing_assumption_from_windows_forms_timer"
+  ]
+}

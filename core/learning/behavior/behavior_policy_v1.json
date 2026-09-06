@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "policy_id": "comfort_first_behavior_controller_v1",
+  "goal": "maximize_verified_learning_under_calm_sustainable_engagement",
+  "never_optimize_for": [
+    "raw_time_in_app",
+    "daily_login_rate",
+    "reward_click_rate",
+    "streak_preservation",
+    "session_extension"
+  ],
+  "states": {
+    "READY": {
+      "actions": ["normal_instruction"]
+    },
+    "FLOW_LIKELY": {
+      "actions": ["keep_challenge", "minimize_interruptions", "minimal_feedback"]
+    },
+    "BORED_OR_UNDERCHALLENGED": {
+      "signals": ["very_high_recent_accuracy", "very_fast_response_vs_personal_baseline", "stable_mastery", "representation_repetition"],
+      "actions_ordered": ["representation_transfer", "context_transfer", "fade_scaffold", "small_difficulty_increase", "advance_skill_if_stable"]
+    },
+    "STRAINED": {
+      "signals": ["response_time_rising", "recent_errors", "hint_use_rising"],
+      "actions_ordered": ["reduce_extraneous_load", "small_cue", "visual_representation", "segment_task"]
+    },
+    "FRUSTRATED_LIKELY": {
+      "signals": ["repeated_error_pattern", "max_hint_use", "rapid_wrong_inputs", "skip_or_exit_rising", "high_response_variance"],
+      "actions_ordered": ["neutralize_failure_feedback", "worked_example", "prerequisite_repair", "meaningful_success_recovery", "target_revisit_or_break"]
+    },
+    "FATIGUED_LIKELY": {
+      "signals": ["global_slowdown", "cross_skill_accuracy_drop", "input_miss_rate_rising", "elapsed_budget_high"],
+      "actions_ordered": ["do_not_penalize_mastery_without_knowledge_evidence", "offer_break", "positive_session_close", "defer_due_review"]
+    }
+  },
+  "inference": {
+    "single_event_can_define_state": false,
+    "use_rolling_window": true,
+    "require_confidence": true,
+    "personal_baseline_over_population_baseline": true,
+    "outputs": ["state_label", "confidence", "evidence_features", "action_taken"]
+  },
+  "choice": {
+    "max_child_choices_per_decision": 2,
+    "choices_must_be_meaningful": true,
+    "all_choices_must_preserve_learning_goal": true
+  },
+  "feedback": {
+    "prefer": ["specific", "actionable", "process_or_strategy_focused", "informational"],
+    "avoid": ["trait_praise", "shame", "comparison", "generic_overpraise", "difficulty_minimization"]
+  },
+  "reward": {
+    "stakes": "low",
+    "allow_choice": true,
+    "reward_progress_not_presence": true,
+    "variable_ratio": false,
+    "loss_based_streak": false,
+    "leaderboard": false,
+    "fake_scarcity": false
+  },
+  "priority_order": [
+    "safety_and_fatigue",
+    "prevent_frustration_spiral",
+    "repair_knowledge_gap",
+    "preserve_real_competence",
+    "maintain_suitable_challenge",
+    "support_autonomy",
+    "game_reward_polish"
+  ]
+}

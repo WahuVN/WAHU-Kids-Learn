@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "curriculum_id": "vn_moet_familiarization_english_grade2_tt32_2018",
+  "grade": 2,
+  "subject": "english",
+  "status": "VERIFIED_A_BASELINE",
+  "program_nature": "optional_familiarization",
+  "source_ids": ["MOET_TT32_2018", "TT32_FULL_ANNEX_MIRROR"],
+  "program_total_periods_grades_1_2": 140,
+  "periods_per_week": 2,
+  "grade2_new_vocabulary_range": [35, 70],
+  "number_range": [1, 20],
+  "grade2_letters_approx": 13,
+  "priority": ["listening", "communication", "context", "age_appropriate_experience"],
+  "skills": {
+    "listening": ["LISTEN_LETTER_NAME_RECOGNIZE", "LISTEN_BASIC_SOUND_INITIAL_FINAL", "LISTEN_NUMBERS_1_20", "LISTEN_FAMILIAR_WORD_PHRASE", "LISTEN_NONVERBAL_RESPONSE", "LISTEN_CLASSROOM_INSTRUCTION", "LISTEN_ACTIVITY_INSTRUCTION", "LISTEN_FAMILIAR_QA_RESPONSE"],
+    "speaking": ["REPEAT_SIMPLE_PHRASE_SENTENCE", "REPEAT_RHYME_SONG", "SAY_FAMILIAR_WORD_IN_CONTEXT", "REPEAT_BASIC_SOUND", "ANSWER_FAMILIAR_QUESTION_SHORT", "GIVE_FAMILIAR_CLASSROOM_INSTRUCTION"],
+    "reading": ["READ_FAMILIAR_WORD_ALOUD", "READ_FAMILIAR_SIMPLE_PHRASE", "READ_SHORT_PHRASE_SENTENCE_MAIN_MEANING"],
+    "writing": ["TRACE_COPY_LETTER_IN_WORD", "WRITE_LETTER_IN_WORD", "WRITE_VERY_SIMPLE_WORD"]
+  },
+  "official_topic_suggestions": ["days_of_week", "classroom_activities", "feelings", "playground_activities", "basic_shapes", "numbers", "clothes", "transport", "animals", "classroom_games", "friends", "school", "family", "world_around_child"],
+  "not_official_baseline_without_extra_source": ["CVC_BLEND", "CVC_SEGMENT", "COMMON_DIGRAPH_LIST", "GRAMMAR_TENSE_SYLLABUS", "PARAGRAPH_WRITING", "AI_PRONUNCIATION_SCORE"]
+}

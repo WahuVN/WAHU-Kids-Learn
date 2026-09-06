@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "threshold_set_id": "behavior_thresholds_v1_engineering_baseline",
+  "status": "CALIBRATION_REQUIRED_ON_TARGET_CHILD_DATA",
+  "warning": "These are reversible engineering heuristics, not psychological diagnoses or medical thresholds.",
+  "windowing": {
+    "recent_attempt_window": 8,
+    "minimum_evidence_attempts": 4,
+    "minimum_distinct_skills_for_fatigue": 2,
+    "state_enter_consecutive_evaluations": 2,
+    "state_exit_consecutive_evaluations": 1,
+    "state_change_cooldown_questions": 1
+  },
+  "flow": {
+    "learning_success_probability_target_min": 0.75,
+    "learning_success_probability_target_max": 0.85,
+    "recent_accuracy_min": 0.70,
+    "recent_accuracy_max": 0.90,
+    "max_hint_rate": 0.25,
+    "max_rapid_wrong_rate": 0.10,
+    "response_time_personal_median_ratio_min": 0.70,
+    "response_time_personal_median_ratio_max": 1.35
+  },
+  "bored_or_underchallenged": {
+    "recent_accuracy_min": 0.92,
+    "mastery_score_min": 0.80,
+    "fast_response_personal_median_ratio_max": 0.75,
+    "same_representation_recent_count_min": 4,
+    "rule": "Require high accuracy plus stable mastery, then at least one underchallenge signal. Never infer boredom from speed alone."
+  },
+  "strained": {
+    "recent_error_count_min": 2,
+    "response_time_personal_median_ratio_min": 1.35,
+    "hint_rate_min": 0.35,
+    "rule": "Two weak signals may enter STRAINED; prefer reducing extraneous load before lowering the learning target."
+  },
+  "frustrated_likely": {
+    "same_error_pattern_count_min": 2,
+    "max_hint_events_recent_min": 1,
+    "rapid_wrong_rate_min": 0.25,
+    "skip_or_exit_signal_min": 1,
+    "response_time_variability_ratio_min": 1.60,
+    "rule": "Repeated same-error evidence plus at least one additional frustration signal is preferred. One wrong answer cannot define this state."
+  },
+  "fatigued_likely": {
+    "cross_skill_accuracy_drop_from_personal_baseline_min": 0.18,
+    "cross_skill_response_time_ratio_min": 1.45,
+    "input_miss_rate_min": 0.12,
+    "focus_minutes_soft_signal": 18,
+    "rule": "Require cross-skill/global deterioration. A single difficult skill must not be treated as fatigue. Session time is only a supporting signal."
+  },
+  "rapid_guess": {
+    "wrong_response_time_personal_median_ratio_max": 0.55,
+    "minimum_prior_baseline_samples": 8,
+    "rule": "Speed alone is never guessing; combine unusually fast response with wrong/low-information interaction."
+  },
+  "mastery_protection": {
+    "fatigue_suspected_blocks_negative_mastery_update_without_skill_error_evidence": true,
+    "hinted_success_weight_less_than_independent": true,
+    "single_session_high_accuracy_cannot_mark_stable_without_delayed_recall": true
+  },
+  "actions": {
+    "max_consecutive_target_failures_before_repair": 2,
+    "max_repair_items_before_target_revisit": 3,
+    "success_recovery_must_be_meaningful": true,
+    "break_offer_is_never_punitive": true
+  }
+}

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="420" viewBox="0 0 900 420" role="img" aria-labelledby="title desc">
+  <title id="title">Biểu diễn số 234 bằng khối cơ số mười</title>
+  <desc id="desc">Hai khối trăm, ba thanh chục và bốn ô đơn vị. Tổng bằng 234.</desc>
+  <defs>
+    <pattern id="grid10" width="12" height="12" patternUnits="userSpaceOnUse">
+      <rect width="12" height="12" fill="none" stroke="currentColor" stroke-width="0.7"/>
+    </pattern>
+    <pattern id="rod10" width="12" height="12" patternUnits="userSpaceOnUse">
+      <rect width="12" height="12" fill="none" stroke="currentColor" stroke-width="0.7"/>
+    </pattern>
+  </defs>
+  <g font-family="Arial, sans-serif" fill="currentColor" stroke="currentColor">
+    <text x="30" y="38" font-size="28" stroke="none">234 = 2 trăm + 3 chục + 4 đơn vị</text>
+    <text x="30" y="82" font-size="22" stroke="none">Trăm</text>
+    <rect x="30" y="100" width="120" height="120" fill="url(#grid10)" stroke-width="2"/>
+    <rect x="175" y="100" width="120" height="120" fill="url(#grid10)" stroke-width="2"/>
+    <text x="30" y="260" font-size="22" stroke="none">Chục</text>
+    <rect x="30" y="280" width="120" height="12" fill="url(#rod10)" stroke-width="2"/>
+    <rect x="30" y="308" width="120" height="12" fill="url(#rod10)" stroke-width="2"/>
+    <rect x="30" y="336" width="120" height="12" fill="url(#rod10)" stroke-width="2"/>
+    <text x="360" y="82" font-size="22" stroke="none">Đơn vị</text>
+    <rect x="360" y="100" width="12" height="12" fill="none" stroke-width="2"/>
+    <rect x="400" y="100" width="12" height="12" fill="none" stroke-width="2"/>
+    <rect x="440" y="100" width="12" height="12" fill="none" stroke-width="2"/>
+    <rect x="480" y="100" width="12" height="12" fill="none" stroke-width="2"/>
+    <text x="360" y="165" font-size="24" stroke="none">200 + 30 + 4 = 234</text>
+  </g>
+</svg>

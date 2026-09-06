@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500" viewBox="0 0 500 500" role="img" aria-labelledby="title desc">
+  <title id="title">Đồng hồ chỉ 3 giờ 30 phút</title>
+  <desc id="desc">Kim phút chỉ số 6. Kim giờ nằm giữa số 3 và số 4, tương ứng 3 giờ 30 phút.</desc>
+  <g font-family="Arial, sans-serif" fill="currentColor" stroke="currentColor">
+    <text x="250" y="34" font-size="26" text-anchor="middle" stroke="none">3 giờ 30 phút</text>
+    <circle cx="250" cy="260" r="180" fill="none" stroke-width="4"/>
+    <g font-size="24" text-anchor="middle" dominant-baseline="middle" stroke="none">
+      <text x="250" y="105">12</text><text x="328" y="126">1</text><text x="384" y="182">2</text><text x="405" y="260">3</text><text x="384" y="338">4</text><text x="328" y="394">5</text><text x="250" y="415">6</text><text x="172" y="394">7</text><text x="116" y="338">8</text><text x="95" y="260">9</text><text x="116" y="182">10</text><text x="172" y="126">11</text>
+    </g>
+    <g stroke-linecap="round">
+      <line x1="250" y1="260" x2="250" y2="395" stroke-width="6"/>
+      <line x1="250" y1="260" x2="356.25" y2="288.47" stroke-width="10"/>
+    </g>
+    <circle cx="250" cy="260" r="8"/>
+    <text x="250" y="475" font-size="20" text-anchor="middle" stroke="none">Kim phút → 6 · Kim giờ → giữa 3 và 4</text>
+  </g>
+</svg>

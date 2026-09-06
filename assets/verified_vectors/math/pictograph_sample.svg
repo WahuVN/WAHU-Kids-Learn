@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="850" height="430" viewBox="0 0 850 430" role="img" aria-labelledby="title desc">
+  <title id="title">Biểu đồ tranh mẫu</title>
+  <desc id="desc">Mèo có 3 biểu tượng, chó có 2 biểu tượng, thỏ có 4 biểu tượng. Mỗi biểu tượng đại diện cho một con.</desc>
+  <defs><g id="icon"><circle cx="0" cy="0" r="15" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="-5" cy="-3" r="2"/><circle cx="5" cy="-3" r="2"/><path d="M-5 6 Q0 10 5 6" fill="none" stroke="currentColor" stroke-width="2"/></g></defs>
+  <g font-family="Arial, sans-serif" fill="currentColor" stroke="currentColor">
+    <text x="30" y="42" font-size="30" stroke="none">Biểu đồ tranh — Số con vật</text>
+    <text x="30" y="78" font-size="20" stroke="none">Chú giải: mỗi ○ = 1 con</text>
+    <g font-size="24" stroke="none"><text x="50" y="150">Mèo</text><text x="50" y="235">Chó</text><text x="50" y="320">Thỏ</text></g>
+    <g transform="translate(190 142)"><use href="#icon" x="0"/><use href="#icon" x="55"/><use href="#icon" x="110"/></g>
+    <g transform="translate(190 227)"><use href="#icon" x="0"/><use href="#icon" x="55"/></g>
+    <g transform="translate(190 312)"><use href="#icon" x="0"/><use href="#icon" x="55"/><use href="#icon" x="110"/><use href="#icon" x="165"/></g>
+    <g font-size="20" stroke="none"><text x="460" y="150">3</text><text x="460" y="235">2</text><text x="460" y="320">4</text></g>
+  </g>
+</svg>

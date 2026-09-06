@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "pack_id": "english_grade2_verified_core_v1",
+  "grade": 2,
+  "subject": "english",
+  "curriculum_source": "vn_moet_familiarization_english_grade2_tt32_2018",
+  "note": "Only exact lexical items explicitly fixed by the baseline are marked VERIFIED_A_CORE. Other vocabulary must be book-mapped or supplementary-reviewed.",
+  "verified_core": {
+    "numbers": [
+      {"n":1,"word":"one"},{"n":2,"word":"two"},{"n":3,"word":"three"},{"n":4,"word":"four"},{"n":5,"word":"five"},
+      {"n":6,"word":"six"},{"n":7,"word":"seven"},{"n":8,"word":"eight"},{"n":9,"word":"nine"},{"n":10,"word":"ten"},
+      {"n":11,"word":"eleven"},{"n":12,"word":"twelve"},{"n":13,"word":"thirteen"},{"n":14,"word":"fourteen"},{"n":15,"word":"fifteen"},
+      {"n":16,"word":"sixteen"},{"n":17,"word":"seventeen"},{"n":18,"word":"eighteen"},{"n":19,"word":"nineteen"},{"n":20,"word":"twenty"}
+    ],
+    "topic_days_of_week": {
+      "status": "VERIFIED_A_TOPIC",
+      "ordered_words": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+      "note": "Days of the week is an official suggested Grade-2 topic; exact lesson sequencing remains content-author choice."
+    }
+  },
+  "generation_templates": [
+    {
+      "id":"listen_number_select_numeral",
+      "skill":"LISTEN_NUMBERS_1_20",
+      "status":"VERIFIED_A_TEMPLATE",
+      "input":"audio_word_for_n",
+      "choices":"four_unique_numerals_1_20_including_n",
+      "answer":"n"
+    },
+    {
+      "id":"number_word_match",
+      "skill":"NUMBERS_1_20",
+      "status":"VERIFIED_A_TEMPLATE",
+      "prompt":"Match numeral n to its English word.",
+      "answer":"canonical_word[n]"
+    },
+    {
+      "id":"day_sequence_next",
+      "skill":"TOPIC_DAYS_OF_WEEK",
+      "status":"VERIFIED_A_TOPIC_TEMPLATE",
+      "constraint":"day is Monday through Saturday",
+      "prompt":"What day comes after {day}?",
+      "answer":"next_day(day)"
+    }
+  ],
+  "hold_until_book_mapping": [
+    "specific_grade2_letter_order",
+    "specific_35_to_70_vocabulary_list",
+    "specific_sentence_pattern_sequence",
+    "CVC_blending_sequence",
+    "digraph_sequence"
+  ]
+}

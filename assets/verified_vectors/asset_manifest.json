@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-09-06",
+  "assets": [
+    {"asset_id":"math_base10_234_v1","path":"math/base10_234.svg","concept_id":"PLACE_VALUE_HUNDREDS_TENS_ONES","source_type":"self_vector","expected":{"hundreds":2,"tens":3,"ones":4,"value":234},"semantic_review":"PASS","geometry_review":"PASS","status":"VERIFIED","license":"project_original"},
+    {"asset_id":"math_number_ray_0_20_v1","path":"math/number_ray_0_20.svg","concept_id":"NUMBER_RAY_FILL","source_type":"self_vector","expected":{"start":0,"end":20,"step":1,"tick_count":21},"semantic_review":"PASS","geometry_review":"PASS","status":"VERIFIED","license":"project_original"},
+    {"asset_id":"math_clock_03_30_v1","path":"math/clock_03_30.svg","concept_id":"CLOCK_MINUTE_HAND_AT_3_OR_6","source_type":"self_vector","expected":{"hour":3,"minute":30,"minute_hand_number":6,"hour_hand_angle_degrees_from_12":105},"semantic_review":"PASS","geometry_review":"PASS","status":"VERIFIED","license":"project_original"},
+    {"asset_id":"math_geometry_grade2_v1","path":"math/geometry_grade2.svg","concept_id":"GEOMETRY_VISUAL_LIBRARY_G2","source_type":"self_vector","expected":{"objects":["point","line_segment","curve","straight_line","polyline","three_collinear_points","quadrilateral","cylinder","sphere"]},"semantic_review":"PASS","geometry_review":"PASS","status":"VERIFIED","license":"project_original"},
+    {"asset_id":"math_pictograph_sample_v1","path":"math/pictograph_sample.svg","concept_id":"PICTOGRAPH_READ_DESCRIBE","source_type":"self_vector","expected":{"cat":3,"dog":2,"rabbit":4,"legend_value":1},"semantic_review":"PASS","geometry_review":"PASS","status":"VERIFIED","license":"project_original"},
+    {"asset_id":"english_numbers_1_20_v1","path":"english/numbers_1_20.svg","concept_id":"NUMBERS_1_20","source_type":"self_vector","expected":{"range":[1,20]},"semantic_review":"PASS","geometry_review":"N/A","status":"VERIFIED","license":"project_original"},
+    {"asset_id":"english_days_of_week_v1","path":"english/days_of_week.svg","concept_id":"TOPIC_DAYS_OF_WEEK","source_type":"self_vector","expected":{"order":["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]},"semantic_review":"PASS","geometry_review":"N/A","status":"VERIFIED","license":"project_original"}
+  ]
+}

@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "pack_id": "math_grade2_verified_templates_v1",
+  "grade": 2,
+  "subject": "math",
+  "curriculum_source": "vn_moet_math_grade2_tt32_2018",
+  "release_policy": "generator_output_must_pass_validator_before_child_runtime",
+  "templates": [
+    {
+      "id": "place_value_decompose_3digit",
+      "skill": "PLACE_VALUE_HUNDREDS_TENS_ONES",
+      "status": "VERIFIED_A_TEMPLATE",
+      "variables": {"h":{"min":1,"max":9},"t":{"min":0,"max":9},"o":{"min":0,"max":9}},
+      "derive": {"n":"100*h + 10*t + o"},
+      "prompt_vi": "Số {n} gồm bao nhiêu trăm, chục và đơn vị?",
+      "answer": {"hundreds":"h","tens":"t","ones":"o"},
+      "validator": ["1 <= h <= 9","0 <= t <= 9","0 <= o <= 9","100 <= n <= 999"]
+    },
+    {
+      "id": "expanded_form_3digit",
+      "skill": "NUM_EXPANDED_FORM_HTO",
+      "status": "VERIFIED_A_TEMPLATE",
+      "variables": {"h":{"min":1,"max":9},"t":{"min":0,"max":9},"o":{"min":0,"max":9}},
+      "derive": {"n":"100*h + 10*t + o","expanded":"100*h + 10*t + o"},
+      "prompt_vi": "Viết {n} thành tổng của trăm, chục và đơn vị.",
+      "answer_expression": "100*h + 10*t + o"
+    },
+    {
+      "id": "predecessor_successor",
+      "skill": "NUM_PREDECESSOR_SUCCESSOR",
+      "status": "VERIFIED_A_TEMPLATE",
+      "variables": {"n":{"min":1,"max":999}},
+      "prompt_vi": "Số liền trước và số liền sau của {n} là gì?",
+      "answer": {"previous":"n-1","next":"n+1"},
+      "validator": ["1 <= n <= 999","0 <= n-1","n+1 <= 1000"]
+    },
+    {
+      "id": "compare_two_numbers_1000",
+      "skill": "NUM_COMPARE_0_1000",
+      "status": "VERIFIED_A_TEMPLATE",
+      "variables": {"a":{"min":0,"max":1000},"b":{"min":0,"max":1000}},
+      "constraint": "a != b",
+      "prompt_vi": "Điền dấu > hoặc < : {a} __ {b}",
+      "answer_expression": "'>' if a>b else '<'"
+    },
+    {
+      "id": "add_within_1000_no_carry",
+      "skill": "ADD_WITHIN_1000_NO_CARRY",
+      "status": "VERIFIED_A_TEMPLATE",
+      "variables": {"a":{"min":0,"max":999},"b":{"min":0,"max":999}},
+      "constraint": "a+b <= 1000 AND ones(a)+ones(b)<10 AND tens(a)+tens(b)<10 AND hundreds(a)+hundreds(b)<10",
+      "prompt_vi": "Tính: {a} + {b} = ?",
+      "answer_expression": "a+b",
+      "validator": ["answer == a+b","answer <= 1000","carry_count(a,b) == 0"]
+    },
+    {
+      "id": "add_within_1000_one_carry",
+      "skill": "ADD_WITHIN_1000_ONE_CARRY_MAX",
+      "status": "VERIFIED_A_TEMPLATE",
+      "variables": {"a":{"min":0,"max":999},"b":{"min":0,"max":999}},
+      "constraint": "a+b <= 1000 AND carry_count(a,b) == 1",
+      "prompt_vi": "Tính: {a} + {b} = ?",
+      "answer_expression": "a+b",
+      "validator": ["answer == a+b","answer <= 1000","carry_count(a,b) == 1"]
+    },
+    {
+      "id": "subtract_within_1000_no_borrow",
+      "skill": "SUB_WITHIN_1000_NO_BORROW",
+      "status": "VERIFIED_A_TEMPLATE",
+      "variables": {"a":{"min":0,"max":1000},"b":{"min":0,"max":1000}},
+      "constraint": "a >= b AND borrow_count(a,b) == 0",
+      "prompt_vi": "Tính: {a} - {b} = ?",
+      "answer_expression": "a-b",
+      "validator": ["answer == a-b","answer >= 0","borrow_count(a,b) == 0"]
+    },
+    {
+      "id": "subtract_within_1000_one_borrow",
+      "skill": "SUB_WITHIN_1000_ONE_BORROW_MAX",
+      "status": "VERIFIED_A_TEMPLATE",
+      "variables": {"a":{"min":0,"max":1000},"b":{"min":0,"max":1000}},
+      "constraint": "a >= b AND borrow_count(a,b) == 1",
+      "prompt_vi": "Tính: {a} - {b} = ?",
+      "answer_expression": "a-b",
+      "validator": ["answer == a-b","answer >= 0","borrow_count(a,b) == 1"]
+    },
+    {
+      "id": "mental_add_within_20",
+      "skill": "MENTAL_ADD_SUB_WITHIN_20",
+      "status": "VERIFIED_A_TEMPLATE",
+      "variables": {"a":{"min":0,"max":20},"b":{"min":0,"max":20}},
+      "constraint": "a+b <= 20",
+      "prompt_vi": "Tính nhẩm: {a} + {b} = ?",
+      "answer_expression": "a+b"
+    },
+    {
+      "id": "mental_sub_within_20",
+      "skill": "MENTAL_ADD_SUB_WITHIN_20",
+      "status": "VERIFIED_A_TEMPLATE",
+      "variables": {"a":{"min":0,"max":20},"b":{"min":0,"max":20}},
+      "constraint": "a >= b",
+      "prompt_vi": "Tính nhẩm: {a} - {b} = ?",
+      "answer_expression": "a-b"
+    },
+    {
+      "id": "times_table_2",
+      "skill": "TIMES_TABLE_2",
+      "status": "VERIFIED_A_TEMPLATE",
+      "variables": {"n":{"min":1,"max":10}},
+      "prompt_vi": "Tính: 2 × {n} = ?",
+      "answer_expression": "2*n"
+    },
+    {
+      "id": "times_table_5",
+      "skill": "TIMES_TABLE_5",
+      "status": "VERIFIED_A_TEMPLATE",
+      "variables": {"n":{"min":1,"max":10}},
+      "prompt_vi": "Tính: 5 × {n} = ?",
+      "answer_expression": "5*n"
+    },
+    {
+      "id": "divide_table_2_exact",
+      "skill": "DIVIDE_TABLE_2",
+      "status": "VERIFIED_A_TEMPLATE",
+      "variables": {"n":{"min":1,"max":10}},
+      "derive": {"dividend":"2*n"},
+      "prompt_vi": "Tính: {dividend} : 2 = ?",
+      "answer_expression": "n"
+    },
+    {
+      "id": "divide_table_5_exact",
+      "skill": "DIVIDE_TABLE_5",
+      "status": "VERIFIED_A_TEMPLATE",
+      "variables": {"n":{"min":1,"max":10}},
+      "derive": {"dividend":"5*n"},
+      "prompt_vi": "Tính: {dividend} : 5 = ?",
+      "answer_expression": "n"
+    },
+    {
+      "id": "polyline_length",
+      "skill": "POLYLINE_LENGTH_SUM_SEGMENTS",
+      "status": "VERIFIED_A_TEMPLATE",
+      "variables": {"a":{"min":1,"max":20},"b":{"min":1,"max":20},"c":{"min":1,"max":20}},
+      "prompt_vi": "Đường gấp khúc có ba đoạn dài {a} cm, {b} cm và {c} cm. Độ dài đường gấp khúc là bao nhiêu?",
+      "answer_expression": "a+b+c",
+      "answer_unit": "cm"
+    },
+    {
+      "id": "possible_certain_impossible_die",
+      "status": "VERIFIED_A_TEMPLATE",
+      "fixed_context": "Gieo một con xúc xắc chuẩn có các mặt 1,2,3,4,5,6.",
+      "variants": [
+        {"skill":"EVENT_POSSIBLE","statement":"Xuất hiện số 3.","answer":"có thể"},
+        {"skill":"EVENT_CERTAIN","statement":"Xuất hiện một số từ 1 đến 6.","answer":"chắc chắn"},
+        {"skill":"EVENT_IMPOSSIBLE","statement":"Xuất hiện số 8.","answer":"không thể"}
+      ]
+    }
+  ]
+}
