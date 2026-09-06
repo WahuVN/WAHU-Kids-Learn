@@ -775,6 +775,25 @@ namespace WAHUKidsLearn
             var skills = Math.Max(0, summary.DistinctSkills);
             var context = string.Equals(summary.SessionMode, "lesson", StringComparison.Ordinal) ? "bài này" : "nhiệm vụ này";
             var text = "Con đã luyện " + skills + " kỹ năng trong " + context + ".";
+
+            if (summary.TargetSkillMasteryAfter.HasValue)
+            {
+                var after = (int)Math.Round(Math.Max(0, Math.Min(1, summary.TargetSkillMasteryAfter.Value)) * 100.0);
+                text += " Mức thành thạo hiện tại: " + after + "%";
+                if (summary.TargetSkillMasteryDelta.HasValue && summary.TargetSkillMasteryDelta.Value > 0.000000001)
+                {
+                    var delta = (int)Math.Round(Math.Max(0, Math.Min(1, summary.TargetSkillMasteryDelta.Value)) * 100.0);
+                    if (delta > 0) text += " · tăng thêm " + delta + " điểm phần trăm";
+                }
+                text += ".";
+            }
+            else if (summary.ImprovedSkillCount > 0)
+            {
+                text += " Có " + summary.ImprovedSkillCount + " kỹ năng tiến bộ trong nhiệm vụ này.";
+            }
+
+            if (!string.IsNullOrWhiteSpace(summary.NextLessonId) && !string.IsNullOrWhiteSpace(summary.NextLessonTitleVi))
+                text += " Bài tiếp theo đã sẵn sàng: " + summary.NextLessonTitleVi.Trim() + ".";
             if (summary.GardenGrowthSteps > 0)
                 text += " Khu vườn đã ghi nhận tiến bộ của con.";
             if (!string.IsNullOrWhiteSpace(summary.GardenUnlockMessage))

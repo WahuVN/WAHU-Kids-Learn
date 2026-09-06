@@ -40,7 +40,7 @@ Resume flow:
 | Accessibility | PASS baseline | names/descriptions cho hub, lock, typed/interaction, result |
 | Result counters | DONE | attempts, independent/hinted/wrong, distinct skills |
 | Lesson score/best score | DONE | dùng `LessonScorePercent` / `LessonBestScorePercent` |
-| Mastery delta / next lesson | UPSTREAM READY | `8b32944` đã publish; AI3-005 chưa consume, dành cho wave kế tiếp |
+| Mastery delta / next lesson | DONE | AI3-006 consume trực tiếp `TargetSkillMasteryAfter/Delta`, `ImprovedSkillCount`, `NextLessonId/Title` từ `8b32944` |
 | Numeric XP | NO PRODUCT CONTRACT | UI không tự invent XP |
 | Progress/mastery presentation | DONE baseline | durable engine state |
 | Exact resume | DONE | targeted + adaptive persistence regression |
@@ -84,6 +84,8 @@ Commit `37f0b97`; route regression `b6a1ce4`.
 - `Về thư viện Toán` đúng modal route.
 
 ## 7. AI3-005 — targeted lesson / prerequisite / typed authored input
+
+Commit `1436705` — `Toán UI: hoàn thiện luyện theo bài và toàn bộ dạng nhập đáp án`.
 
 ### Hub/access
 
@@ -151,41 +153,46 @@ PASS:
 8. Prerequisite lesson hiện completed/best score.
 9. Dependent lesson chuyển từ locked sang enabled `Luyện 3 câu bài này`.
 
-## 8. Verification gates
+## 8. AI3-006 — advanced result presentation
 
-Current HEAD (`ee7079b` sau content waves):
+Upstream contract: `8b32944`.
+
+- Targeted result hiển thị `TargetSkillMasteryAfter` theo phần trăm.
+- Khi `TargetSkillMasteryDelta > 0`, UI hiển thị mức tăng theo điểm phần trăm; không tự tính từ attempts.
+- Adaptive result dùng `ImprovedSkillCount` trực tiếp từ summary.
+- `NextLessonId` + `NextLessonTitleVi` chỉ được hiển thị khi engine publish đủ cặp; UI không tự dò một lesson khác và không tự điều hướng.
+- Numeric XP không hiển thị vì product chưa có first-class XP contract.
+- Synthetic result regression khóa 25% → 55% / +30 điểm phần trăm và next-lesson title.
+- Flow 5 E2E khóa result support nhận mastery + immediate next lesson thật sau 3 authored questions.
+
+## 9. Verification gates
+
+Current clean HEAD `9682572` + đúng 2 file AI3-006:
 
 - App Release x86 targeted build: **PASS**.
-- ChildUiRuntimeSmoke: **PASS — 1133 assertions**.
-- MathContentDataSmoke: **PASS — 22/22**.
-
-Isolated clean worktree tại exact upstream targeted commit `656a94b`, chỉ áp 3 file AI3:
-
-- changed files: chỉ `MathHubForm.cs`, `MathLessonForm.cs`, `ChildUiRuntimeSmoke/Program.cs`;
-- Data SDK net48/x86 artifact: **0 warning / 0 error**;
-- Session SDK net48/x86 artifact: **0 warning / 0 error**;
-- App Release x86: **PASS**;
-- MathSessionPersistenceRuntimeSmoke: **PASS — 92 assertions**;
-- ChildUiRuntimeSmoke: **PASS — 1133 assertions**;
+- ChildUiRuntimeSmoke: **PASS — 1138 assertions**.
+- MathSessionPersistenceRuntimeSmoke: **PASS — 99 assertions**.
+- MathContentDataSmoke: **PASS — 23/23**.
 - `git diff --check`: **PASS**.
+- Data/Session/Learning/Content source không đổi giữa upstream advanced-result `8b32944` và `9682572`; clean dependency artifacts tái dùng có kiểm chứng.
 
-## 9. Remaining blockers
+## 10. Remaining blockers
 
 ### P1-01 — production Data/SQLite clean build
 
 Old-style `WAHU.Data.csproj` / SQLite reference vẫn chặn full clean production solution gate trên toolchain hiện tại. SDK source-equivalent harness pass nhưng không được coi là release-clean replacement.
 
-### P1-02 — advanced result stable contract
+### P1-02 — adaptive interaction generator ownership
 
-Upstream `8b32944` đã publish `MasteryChanges`, target mastery before/after/delta và `NextLessonId/Title`. AI3-005 chưa consume để giữ wave nhỏ; AI3-006 sẽ dùng trực tiếp các field này. Numeric XP chưa có product rule first-class.
+Authored `interaction_integer` + UI control pass. Child UI không test `MathQuestionGenerator` để tránh ownership coupling; generator case `draw_segment_given_length` phải được engine smoke AI2 khóa khi commit ổn định.
 
-### P1-03 — adaptive interaction generator ownership
+### P1-03 — release packaging/E2E
 
-Authored `interaction_integer` + UI control pass. Child UI không test `MathQuestionGenerator` để tránh ownership coupling; generator case `draw_segment_given_length` phải được engine smoke AI2 khóa khi commit.
+Cần xác nhận installer/portable đóng gói schema V4 + `lesson_catalog_v1.json` + `question_bank_v1.json` + `verified_templates_v1.json`, và upgrade/relaunch không làm mất lesson progress.
 
-## 10. Next AI3 actions
+## 11. Next AI3 actions
 
-1. Commit/push AI3-005.
-2. Consume advanced result contract ngay khi AI2 commit stable fields.
-3. Sau khi production SQLite build blocker đóng: full clean solution + complete Math smoke/E2E release gate.
-4. Kiểm packaging/installer có mang schema V4 + 3 Math content files và launch/update không mất targeted lesson progress.
+1. Commit/push AI3-006.
+2. Audit packaging/installer/portable Math runtime files + schema V4.
+3. Khi production SQLite build blocker đóng: full clean solution + complete Math smoke/E2E release gate.
+4. Khi AI2 commit generator `draw_segment_given_length`, chạy engine-owned adaptive interaction regression rồi cập nhật status.

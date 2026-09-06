@@ -405,6 +405,7 @@ namespace WAHU.ChildUiRuntimeSmoke
             Set(summary, "HintedCorrect", 2);
             Set(summary, "Wrong", 2);
             Set(summary, "DistinctSkills", 4);
+            Set(summary, "ImprovedSkillCount", 2);
             Set(summary, "GardenGrowthSteps", 3);
             Set(summary, "GardenUnlockMessage", "Mở khóa: Bồn hoa.");
 
@@ -423,6 +424,9 @@ namespace WAHU.ChildUiRuntimeSmoke
             A(support.IndexOf("Mở khóa: Bồn hoa", StringComparison.OrdinalIgnoreCase) >= 0,
                 "math_completion_support_shows_unlock_message");
 
+            A(support.IndexOf("2 kỹ năng tiến bộ", StringComparison.OrdinalIgnoreCase) >= 0,
+                "math_completion_adaptive_uses_improved_skill_count");
+
             var targetedSummary = Activator.CreateInstance(summaryType);
             Set(targetedSummary, "Attempts", 3);
             Set(targetedSummary, "Correct", 2);
@@ -433,6 +437,11 @@ namespace WAHU.ChildUiRuntimeSmoke
             Set(targetedSummary, "LessonCompleted", true);
             Set(targetedSummary, "LessonScorePercent", 66.6666667d);
             Set(targetedSummary, "LessonBestScorePercent", 100d);
+            Set(targetedSummary, "TargetSkillMasteryBefore", 0.25d);
+            Set(targetedSummary, "TargetSkillMasteryAfter", 0.55d);
+            Set(targetedSummary, "TargetSkillMasteryDelta", 0.30d);
+            Set(targetedSummary, "NextLessonId", "m2_ls_num_full_hundreds_recognize");
+            Set(targetedSummary, "NextLessonTitleVi", "Nhận biết các số tròn trăm");
             var targetedPerformance = (string)performanceMethod.Invoke(null, new[] { targetedSummary });
             var targetedSupport = (string)supportMethod.Invoke(null, new[] { targetedSummary });
             A(targetedPerformance.IndexOf("Điểm bài 67%", StringComparison.OrdinalIgnoreCase) >= 0 &&
@@ -440,6 +449,13 @@ namespace WAHU.ChildUiRuntimeSmoke
                 "math_completion_targeted_score_uses_engine_contract");
             A(targetedSupport.IndexOf("trong bài này", StringComparison.OrdinalIgnoreCase) >= 0,
                 "math_completion_targeted_support_names_lesson_context");
+
+            A(targetedSupport.IndexOf("Mức thành thạo hiện tại: 55%", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                targetedSupport.IndexOf("tăng thêm 30 điểm phần trăm", StringComparison.OrdinalIgnoreCase) >= 0,
+                "math_completion_targeted_shows_engine_mastery_delta");
+            A(targetedSupport.IndexOf("Bài tiếp theo đã sẵn sàng", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                targetedSupport.IndexOf("Nhận biết các số tròn trăm", StringComparison.OrdinalIgnoreCase) >= 0,
+                "math_completion_targeted_shows_engine_next_lesson");
 
             var inconsistent = Activator.CreateInstance(summaryType);
             Set(inconsistent, "Attempts", 3);
@@ -765,6 +781,13 @@ namespace WAHU.ChildUiRuntimeSmoke
                         "targeted_ui_flow_result_title_is_lesson");
                     A(GetField<Label>(form, "_feedback").Text.IndexOf("Điểm bài 100%", StringComparison.OrdinalIgnoreCase) >= 0,
                         "targeted_ui_flow_result_uses_engine_score");
+                    var resultSupport = GetField<Label>(form, "_support").Text;
+                    A(resultSupport.IndexOf("Mức thành thạo hiện tại", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                        resultSupport.IndexOf("tăng thêm", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "targeted_ui_flow_result_uses_engine_mastery_delta");
+                    A(resultSupport.IndexOf("Bài tiếp theo đã sẵn sàng", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                        resultSupport.IndexOf(dependent.TitleVi, StringComparison.OrdinalIgnoreCase) >= 0,
+                        "targeted_ui_flow_result_uses_engine_next_lesson");
                 }
 
                 var storedProgress = new MathLessonProgressStore(database)
