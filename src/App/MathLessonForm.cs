@@ -19,6 +19,7 @@ namespace WAHUKidsLearn
         private Label _progressText;
         private ProgressStrip _progressBar;
         private Label _prompt;
+        private MathInstructionVisual _instructionVisual;
         private Label _support;
         private Label _feedback;
         private ChildCard _feedbackCard;
@@ -60,8 +61,8 @@ namespace WAHUKidsLearn
             };
             root.RowStyles.Add(new RowStyle(SizeType.Absolute, 58));
             root.RowStyles.Add(new RowStyle(SizeType.Absolute, 26));
-            root.RowStyles.Add(new RowStyle(SizeType.Percent, 37));
-            root.RowStyles.Add(new RowStyle(SizeType.Percent, 40));
+            root.RowStyles.Add(new RowStyle(SizeType.Percent, 52));
+            root.RowStyles.Add(new RowStyle(SizeType.Percent, 48));
             root.RowStyles.Add(new RowStyle(SizeType.Absolute, 88));
             root.RowStyles.Add(new RowStyle(SizeType.Absolute, 58));
 
@@ -120,10 +121,11 @@ namespace WAHUKidsLearn
                 CardColor = Color.FromArgb(255, 253, 246),
                 Radius = 26
             };
-            var questionLayout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 3 };
-            questionLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
+            var questionLayout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 4 };
+            questionLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
+            questionLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 68));
             questionLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            questionLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 54));
+            questionLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 46));
             questionLayout.Controls.Add(new Label
             {
                 Dock = DockStyle.Fill,
@@ -142,6 +144,12 @@ namespace WAHUKidsLearn
                 AccessibleName = "Câu hỏi Toán"
             };
             questionLayout.Controls.Add(_prompt, 0, 1);
+            _instructionVisual = new MathInstructionVisual
+            {
+                Dock = DockStyle.Fill,
+                Margin = new Padding(12, 0, 12, 0)
+            };
+            questionLayout.Controls.Add(_instructionVisual, 0, 2);
             _support = new Label
             {
                 Dock = DockStyle.Fill,
@@ -150,7 +158,7 @@ namespace WAHUKidsLearn
                 Font = ChildVisualTheme.Font(11f),
                 AccessibleName = "Gợi ý học tập"
             };
-            questionLayout.Controls.Add(_support, 0, 2);
+            questionLayout.Controls.Add(_support, 0, 3);
             questionCard.Controls.Add(questionLayout);
             root.Controls.Add(questionCard, 0, 2);
 
@@ -273,6 +281,7 @@ namespace WAHUKidsLearn
                 _hintLevel = 0;
                 _submitting = false;
                 _prompt.Text = _question.PromptVi;
+                _instructionVisual.SetQuestion(_question, 0);
                 _support.Text = "Chọn đáp án con thấy đúng nhất.";
                 _feedback.Text = string.Empty;
                 _feedbackCard.Visible = false;
@@ -307,11 +316,13 @@ namespace WAHUKidsLearn
             if (_hintLevel == 0)
             {
                 _hintLevel = 1;
+                _instructionVisual.SetQuestion(_question, _hintLevel);
                 _support.Text = _question.HintLevel1;
                 _hintButton.Text = "Gợi ý thêm";
                 return;
             }
             _hintLevel = 2;
+            _instructionVisual.SetQuestion(_question, _hintLevel);
             _support.Text = _question.HintLevel2;
             _hintButton.Enabled = false;
             _hintButton.Text = "Đã xem đủ gợi ý";
@@ -408,6 +419,7 @@ namespace WAHUKidsLearn
         private void ShowCompletion(MathSessionSummary summary)
         {
             _question = null;
+            _instructionVisual.SetQuestion(null, 0);
             _prompt.Text = "Hoàn thành nhiệm vụ";
             _support.Text = summary == null
                 ? "Các câu đã làm được lưu để lần sau tiếp tục đúng chỗ."
@@ -454,6 +466,7 @@ namespace WAHUKidsLearn
         {
             _finished = true;
             _question = null;
+            _instructionVisual.SetQuestion(null, 0);
             _prompt.Text = "Mình dừng ở đây nhé";
             _support.Text = message;
             _feedback.Text = "Những dữ liệu đã lưu trước đó vẫn an toàn.";

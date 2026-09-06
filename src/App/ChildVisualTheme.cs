@@ -2,6 +2,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
+using WAHU.Learning;
 
 namespace WAHUKidsLearn
 {
@@ -215,6 +216,225 @@ namespace WAHUKidsLearn
             var fill = new Rectangle(track.X, track.Y, Math.Min(track.Width, filledWidth), track.Height);
             using (var path = ChildVisualTheme.RoundedRect(fill, fill.Height / 2))
             using (var b = new SolidBrush(ChildVisualTheme.MintStrong)) e.Graphics.FillPath(b, path);
+        }
+    }
+
+    internal sealed class MathInstructionVisual : Control
+    {
+        private MathQuestion _question;
+        private int _hintLevel;
+
+        public MathInstructionVisual()
+        {
+            SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint |
+                     ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw |
+                     ControlStyles.SupportsTransparentBackColor, true);
+            BackColor = Color.Transparent;
+            AccessibleName = "Minh họa câu Toán";
+        }
+
+        public void SetQuestion(MathQuestion question, int hintLevel)
+        {
+            _question = question;
+            _hintLevel = Math.Max(0, Math.Min(2, hintLevel));
+            AccessibleDescription = question == null ? string.Empty : "Minh họa trực quan cho " + question.PromptVi;
+            Invalidate();
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
+            if (_question == null || Width < 80 || Height < 40) return;
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            var values = ExtractNumbers(_question.PromptVi);
+            if (_question.TemplateId == "mental_add_within_20" || _question.TemplateId == "mental_sub_within_20")
+                DrawNumberRay(e.Graphics, values);
+            else if (_question.TemplateId == "times_table_2" || _question.TemplateId == "times_table_5")
+                DrawGroups(e.Graphics, values);
+            else if (_question.TemplateId != null && (_question.TemplateId.StartsWith("add_within_1000", StringComparison.Ordinal) ||
+                     _question.TemplateId.StartsWith("subtract_within_1000", StringComparison.Ordinal)))
+                DrawPlaceValue(e.Graphics, values);
+        }
+
+        private void DrawNumberRay(Graphics g, int[] values)
+        {
+            if (values.Length < 2) return;
+            var start = values[0];
+            var amount = values[1];
+            var subtract = _question.TemplateId == "mental_sub_within_20";
+            var end = subtract ? start - amount : start + amount;
+            const int min = 0, max = 20;
+            var left = 38;
+            var right = Math.Max(left + 40, Width - 38);
+            var y = Height / 2 + 8;
+            using (var line = new Pen(Color.FromArgb(128, 139, 137), 2f))
+            {
+                g.DrawLine(line, left, y, right, y);
+                for (var n = min; n <= max; n++)
+                {
+                    var x = left + (int)Math.Round((right - left) * (n / 20.0));
+                    var tick = n % 5 == 0 ? 9 : 5;
+                    g.DrawLine(line, x, y - tick, x, y + tick);
+                    if (n % 5 == 0)
+                    {
+                        var r = new Rectangle(x - 18, y + 10, 36, 19);
+                        TextRenderer.DrawText(g, n.ToString(), ChildVisualTheme.Font(8.5f), r,
+                            ChildVisualTheme.MutedInk, TextFormatFlags.HorizontalCenter | TextFormatFlags.Top);
+                    }
+                }
+            }
+
+            var sx = left + (int)Math.Round((right - left) * (start / 20.0));
+            var ex = left + (int)Math.Round((right - left) * (Math.Max(min, Math.Min(max, end)) / 20.0));
+            using (var startBrush = new SolidBrush(ChildVisualTheme.PeachStrong))
+                g.FillEllipse(startBrush, sx - 6, y - 6, 12, 12);
+            var startLabel = new Rectangle(sx - 32, 2, 64, 22);
+            TextRenderer.DrawText(g, "bắt đầu " + start, ChildVisualTheme.Font(8.5f, FontStyle.Bold), startLabel,
+                ChildVisualTheme.PeachStrong, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+
+            var arrowY = y - 25;
+            using (var arrow = new Pen(ChildVisualTheme.MintStrong, 4f))
+            {
+                arrow.StartCap = LineCap.Round;
+                arrow.EndCap = LineCap.ArrowAnchor;
+                g.DrawLine(arrow, sx, arrowY, ex, arrowY);
+            }
+            var label = (subtract ? "lùi " : "tiến ") + amount + " bước";
+            var mid = (sx + ex) / 2;
+            var labelRect = new Rectangle(mid - 55, arrowY - 25, 110, 20);
+            TextRenderer.DrawText(g, label, ChildVisualTheme.Font(9f, FontStyle.Bold), labelRect,
+                ChildVisualTheme.MintStrong, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+
+            if (_hintLevel >= 2)
+            {
+                using (var endBrush = new SolidBrush(Color.FromArgb(118, 172, 116)))
+                    g.FillEllipse(endBrush, ex - 5, y - 5, 10, 10);
+            }
+        }
+
+        private void DrawGroups(Graphics g, int[] values)
+        {
+            if (values.Length < 2) return;
+            var perGroup = values[0];
+            var groups = Math.Max(1, Math.Min(10, values[1]));
+            var cols = Math.Min(5, groups);
+            var rows = (int)Math.Ceiling(groups / (double)cols);
+            var cellW = Math.Max(44, Width / Math.Max(1, cols));
+            var cellH = Math.Max(42, Height / Math.Max(1, rows));
+            for (var i = 0; i < groups; i++)
+            {
+                var col = i % cols;
+                var row = i / cols;
+                var cx = col * cellW + cellW / 2;
+                var cy = row * cellH + cellH / 2;
+                using (var ring = new Pen(Color.FromArgb(179, 201, 176), 2f))
+                    g.DrawEllipse(ring, cx - 20, cy - 16, 40, 32);
+                using (var dot = new SolidBrush(ChildVisualTheme.MintStrong))
+                {
+                    if (perGroup <= 5)
+                    {
+                        var span = 9;
+                        var startX = cx - ((perGroup - 1) * span) / 2;
+                        for (var d = 0; d < perGroup; d++) g.FillEllipse(dot, startX + d * span - 3, cy - 3, 7, 7);
+                    }
+                }
+            }
+            var labelRect = new Rectangle(0, Math.Max(0, Height - 22), Width, 20);
+            TextRenderer.DrawText(g, groups + " nhóm · mỗi nhóm " + perGroup, ChildVisualTheme.Font(8.5f), labelRect,
+                ChildVisualTheme.MutedInk, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+        }
+
+        private void DrawPlaceValue(Graphics g, int[] values)
+        {
+            if (values.Length < 2) return;
+            var a = values[0];
+            var b = values[1];
+            var add = _question.TemplateId.StartsWith("add_", StringComparison.Ordinal);
+            var headers = new[] { "Trăm", "Chục", "Đơn vị" };
+            var digitsA = new[] { (a / 100) % 10, (a / 10) % 10, a % 10 };
+            var digitsB = new[] { (b / 100) % 10, (b / 10) % 10, b % 10 };
+            var cellW = Math.Min(105, Math.Max(74, Width / 4));
+            var totalW = cellW * 3;
+            var left = (Width - totalW) / 2;
+            var headerY = 1;
+            var rowA = 27;
+            var rowB = 58;
+            var cueColumn = FindCarryBorrowColumn(digitsA, digitsB, add);
+
+            for (var c = 0; c < 3; c++)
+            {
+                var x = left + c * cellW;
+                if (_hintLevel >= 1 && c == cueColumn)
+                {
+                    using (var hi = new SolidBrush(Color.FromArgb(65, ChildVisualTheme.Sun)))
+                        g.FillRectangle(hi, x + 3, 0, cellW - 6, Math.Min(Height - 2, 88));
+                }
+                TextRenderer.DrawText(g, headers[c], ChildVisualTheme.Font(8.5f, FontStyle.Bold),
+                    new Rectangle(x, headerY, cellW, 20), ChildVisualTheme.MutedInk,
+                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+                TextRenderer.DrawText(g, digitsA[c].ToString(), ChildVisualTheme.Font(15f, FontStyle.Bold),
+                    new Rectangle(x, rowA, cellW, 27), ChildVisualTheme.Ink,
+                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+                TextRenderer.DrawText(g, digitsB[c].ToString(), ChildVisualTheme.Font(15f, FontStyle.Bold),
+                    new Rectangle(x, rowB, cellW, 27), ChildVisualTheme.Ink,
+                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+                using (var divider = new Pen(Color.FromArgb(224, 222, 210), 1f))
+                    if (c > 0) g.DrawLine(divider, x, 3, x, Math.Min(Height - 3, 88));
+            }
+            var signRect = new Rectangle(Math.Max(0, left - 37), rowB, 34, 27);
+            TextRenderer.DrawText(g, add ? "+" : "−", ChildVisualTheme.Font(15f, FontStyle.Bold), signRect,
+                ChildVisualTheme.PeachStrong, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+            using (var pen = new Pen(ChildVisualTheme.Ink, 2f))
+                g.DrawLine(pen, left + 5, Math.Min(Height - 8, 88), left + totalW - 5, Math.Min(Height - 8, 88));
+
+            if (_hintLevel >= 2 && cueColumn >= 0)
+            {
+                var cue = add ? "nhớ 1 sang trái" : "mượn 1 từ trái";
+                var cueX = left + cueColumn * cellW;
+                TextRenderer.DrawText(g, cue, ChildVisualTheme.Font(8.5f, FontStyle.Bold),
+                    new Rectangle(cueX - 25, Math.Min(Height - 25, 92), cellW + 50, 22),
+                    ChildVisualTheme.PeachStrong, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+            }
+        }
+
+        private int FindCarryBorrowColumn(int[] a, int[] b, bool add)
+        {
+            if (_question == null || (!_question.TemplateId.EndsWith("one_carry", StringComparison.Ordinal) &&
+                !_question.TemplateId.EndsWith("one_borrow", StringComparison.Ordinal))) return -1;
+            if (add)
+            {
+                if (a[2] + b[2] >= 10) return 2;
+                if (a[1] + b[1] >= 10) return 1;
+            }
+            else
+            {
+                if (a[2] < b[2]) return 2;
+                var borrowed = a[2] < b[2] ? 1 : 0;
+                if (a[1] - borrowed < b[1]) return 1;
+            }
+            return -1;
+        }
+
+        private static int[] ExtractNumbers(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return new int[0];
+            var list = new System.Collections.Generic.List<int>();
+            var current = -1;
+            foreach (var ch in text)
+            {
+                if (ch >= '0' && ch <= '9')
+                {
+                    if (current < 0) current = 0;
+                    current = current * 10 + (ch - '0');
+                }
+                else if (current >= 0)
+                {
+                    list.Add(current);
+                    current = -1;
+                }
+            }
+            if (current >= 0) list.Add(current);
+            return list.ToArray();
         }
     }
 

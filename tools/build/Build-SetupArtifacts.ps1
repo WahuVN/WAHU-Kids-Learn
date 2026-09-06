@@ -33,10 +33,15 @@ Write-Host "[1/15] Restore + rebuild solution net48/x86 bằng $msbuild"
 & $msbuild 'WAHUKidsLearn.sln' /restore /m /t:Rebuild "/p:Configuration=$Configuration" /p:Platform=x86 /v:minimal /nologo
 if ($LASTEXITCODE -ne 0) { throw "MSBuild fail: $LASTEXITCODE" }
 
+Write-Host '[1b/15] Build Child UI render smoke x86'
+& $msbuild 'tests\ChildUiRuntimeSmoke\WAHU.ChildUiRuntimeSmoke.csproj' /restore /t:Rebuild "/p:Configuration=$Configuration" /p:Platform=x86 /v:minimal /nologo
+if ($LASTEXITCODE -ne 0) { throw "Child UI smoke build fail: $LASTEXITCODE" }
+
 $preflightSmoke = Join-Path $root "tests\SetupPreflightSmoke\bin\$Configuration\WAHU.SetupPreflight.Smoke.exe"
 $behaviorSmoke = Join-Path $root "tests\BehaviorRuntimeSmoke\bin\$Configuration\WAHU.BehaviorRuntimeSmoke.exe"
 $learningSessionSmoke = Join-Path $root "tests\LearningSessionRuntimeSmoke\bin\$Configuration\WAHU.LearningSessionRuntimeSmoke.exe"
 $motionSmoke = Join-Path $root "tests\MotionRuntimeSmoke\bin\$Configuration\WAHU.MotionRuntimeSmoke.exe"
+$childUiSmoke = Join-Path $root "tests\ChildUiRuntimeSmoke\bin\$Configuration\WAHU.ChildUiRuntimeSmoke.exe"
 $contentSmoke = Join-Path $root "tests\ContentRuntimeSmoke\bin\$Configuration\WAHU.ContentRuntimeSmoke.exe"
 $securitySmoke = Join-Path $root "tests\SecurityRuntimeSmoke\bin\$Configuration\WAHU.SecurityRuntimeSmoke.exe"
 $audioSmoke = Join-Path $root "tests\AudioRuntimeSmoke\bin\$Configuration\WAHU.AudioRuntimeSmoke.exe"
@@ -49,6 +54,7 @@ Require-File $preflightSmoke
 Require-File $behaviorSmoke
 Require-File $learningSessionSmoke
 Require-File $motionSmoke
+Require-File $childUiSmoke
 Require-File $contentSmoke
 Require-File $securitySmoke
 Require-File $audioSmoke
@@ -73,6 +79,10 @@ if ($LASTEXITCODE -ne 0) { throw "Learning session runtime smoke fail: $LASTEXIT
 Write-Host '[5/15] Motion runtime smoke'
 & $motionSmoke
 if ($LASTEXITCODE -ne 0) { throw "Motion runtime smoke fail: $LASTEXITCODE" }
+
+Write-Host '[5b/15] Child UI GDI+ render smoke (100% + 125%)'
+& $childUiSmoke
+if ($LASTEXITCODE -ne 0) { throw "Child UI runtime smoke fail: $LASTEXITCODE" }
 
 Write-Host '[6/15] Content runtime + secure import smoke'
 & $contentSmoke
@@ -229,9 +239,11 @@ $manifest = [ordered]@{
         behavior_runtime_smoke = 'PASS'
         behavior_runtime_smoke_assertions = 15
         learning_session_runtime_smoke = 'PASS'
-        learning_session_runtime_smoke_assertions = 92
+        learning_session_runtime_smoke_assertions = 96
         motion_runtime_smoke = 'PASS'
         motion_runtime_smoke_assertions = 25
+        child_ui_render_smoke = 'PASS'
+        child_ui_render_smoke_assertions = 72
         content_runtime_smoke = 'PASS'
         content_runtime_smoke_assertions = 20
         security_runtime_smoke = 'PASS'
