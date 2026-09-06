@@ -43,10 +43,17 @@ try {
         'WAHUKidsLearn.exe',
         'WAHUKidsLearn.exe.config',
         'WAHU.Platform.dll',
+        'WAHU.Learning.dll',
+        'WAHU.Motion.dll',
+        'WAHU.Content.dll',
+        'WAHU.Audio.dll',
         'WAHU.Data.dll',
         'System.Data.SQLite.dll',
         'e_sqlite3.dll',
         'data\schema\001_initial.sql',
+        'data\schema\002_attempt_immutability.sql',
+        'content_packs\math_grade2_v1\manifest.json',
+        'content_packs\english_grade2_v1\manifest.json',
         'config\runtime_defaults_v1.json',
         'config\database_runtime_v1.json',
         'config\paths_v1.json'
@@ -76,7 +83,7 @@ try {
         'migration_version=2',
         'pre_migration_backup=none',
         'integrity=ok',
-        'foreign_key_issues=0'
+        'foreign_key_issues=0','verified_content_packs=2'
     )) {
         Assert ($text.Contains($needle)) "portable report missing: $needle"
     }

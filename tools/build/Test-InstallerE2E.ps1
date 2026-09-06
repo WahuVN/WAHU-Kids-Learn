@@ -56,10 +56,17 @@ try {
     $required = @(
         'WAHUKidsLearn.exe',
         'WAHU.Platform.dll',
+        'WAHU.Learning.dll',
+        'WAHU.Motion.dll',
+        'WAHU.Content.dll',
+        'WAHU.Audio.dll',
         'WAHU.Data.dll',
         'System.Data.SQLite.dll',
         'e_sqlite3.dll',
         'data\schema\001_initial.sql',
+        'data\schema\002_attempt_immutability.sql',
+        'content_packs\math_grade2_v1\manifest.json',
+        'content_packs\english_grade2_v1\manifest.json',
         'WAHU.SetupPreflight.exe'
     )
     foreach ($rel in $required) { Assert (Test-Path -LiteralPath (Join-Path $appDir $rel)) "installed payload missing: $rel" }
@@ -74,7 +81,7 @@ try {
     Assert ($app.ExitCode -eq 0) "app bootstrap smoke exit $($app.ExitCode)"
     Assert (Test-Path -LiteralPath $bootstrapReport) 'bootstrap report missing'
     $bootstrapText = Get-Content -Raw -LiteralPath $bootstrapReport
-    foreach ($needle in @('result=PASS','previous_run_unclean=False','storage_mode=INSTALLED','config_files=9','config_journal=DELETE','config_low_fps_cap=18','config_normal_fps_cap=30','provider_version=2.0.4.0','sqlite_version=3.53.4','journal=DELETE','schema_version=2','migration_version=2','pre_migration_backup=none','integrity=ok','foreign_key_issues=0')) {
+    foreach ($needle in @('result=PASS','previous_run_unclean=False','storage_mode=INSTALLED','config_files=9','config_journal=DELETE','config_low_fps_cap=18','config_normal_fps_cap=30','provider_version=2.0.4.0','sqlite_version=3.53.4','journal=DELETE','schema_version=2','migration_version=2','pre_migration_backup=none','integrity=ok','foreign_key_issues=0','verified_content_packs=2')) {
         Assert ($bootstrapText.Contains($needle)) "bootstrap report missing: $needle"
     }
     Assert ($bootstrapText.Contains('app_version=' + $AppVersion)) 'installed runtime app_version mismatch'
