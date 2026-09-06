@@ -20,6 +20,8 @@ namespace WAHU.Data
         public const string InitialName = "001_initial";
         public const int AttemptImmutabilityVersion = 2;
         public const string AttemptImmutabilityName = "002_attempt_immutability";
+        public const int MathAttemptRuntimeVersion = 3;
+        public const string MathAttemptRuntimeName = "003_math_attempt_idempotency_runtime";
 
         public static int GetSchemaVersion(SQLiteConnection connection)
         {

@@ -108,8 +108,8 @@ namespace WAHU.SQLiteRuntimeSmoke
             Assert(init.ProviderVersion == "2.0.4.0", "service_provider_version");
             Assert(init.SQLiteVersion.StartsWith("3.53.4", StringComparison.Ordinal), "service_sqlite_version");
             Assert(init.JournalMode == "DELETE", "service_safe_default_delete");
-            Assert(init.SchemaVersion == 2, "service_schema_version_2");
-            Assert(init.Migration != null && init.Migration.Version == 2, "service_latest_migration_v2");
+            Assert(init.SchemaVersion == 3, "service_schema_version_3");
+            Assert(init.Migration != null && init.Migration.Version == 3, "service_latest_migration_v3");
 
             using (var c = database.OpenConnection()) InsertLearningFixture(c);
             var backup = SQLiteBackupService.CreateVerifiedBackup(database, backupPath);
@@ -140,25 +140,29 @@ namespace WAHU.SQLiteRuntimeSmoke
             var schemaCopy = Path.Combine(migrationDir, "001_initial.sql");
             var sourceV2 = Path.Combine(Path.GetDirectoryName(schemaPath), "002_attempt_immutability.sql");
             var migrationV2Copy = Path.Combine(migrationDir, "002_attempt_immutability.sql");
+            var sourceV3 = Path.Combine(Path.GetDirectoryName(schemaPath), "003_math_attempt_idempotency_runtime.sql");
+            var migrationV3Copy = Path.Combine(migrationDir, "003_math_attempt_idempotency_runtime.sql");
             File.Copy(schemaPath, schemaCopy, true);
             File.Copy(sourceV2, migrationV2Copy, true);
+            File.Copy(sourceV3, migrationV3Copy, true);
             var dbPath = Path.Combine(root, "migration-coordinator.db");
             var database = new LearningDatabase(dbPath, schemaCopy);
 
             var first = database.Initialize("DELETE");
-            Assert(first.SchemaVersion == 2, "migration_fresh_boot_schema_v2");
-            Assert(first.Migration != null && first.Migration.Version == 2 && first.Migration.RecordedNow, "migration_v2_recorded_first_boot");
-            Assert(first.Migration.ChecksumSha256.Length == 64, "migration_v2_checksum_sha256");
+            Assert(first.SchemaVersion == 3, "migration_fresh_boot_schema_v3");
+            Assert(first.Migration != null && first.Migration.Version == 3 && first.Migration.RecordedNow, "migration_v3_recorded_first_boot");
+            Assert(first.Migration.ChecksumSha256.Length == 64, "migration_v3_checksum_sha256");
             using (var c = database.OpenConnection())
             {
-                Assert(Convert.ToInt32(Scalar(c, "SELECT count(*) FROM migration_history;"), CultureInfo.InvariantCulture) == 2, "migration_history_two_rows");
+                Assert(Convert.ToInt32(Scalar(c, "SELECT count(*) FROM migration_history;"), CultureInfo.InvariantCulture) == 3, "migration_history_three_rows");
                 Assert(Convert.ToInt32(Scalar(c, "SELECT count(*) FROM migration_history WHERE version=1;"), CultureInfo.InvariantCulture) == 1, "migration_history_v1_one_row");
                 Assert(Convert.ToInt32(Scalar(c, "SELECT count(*) FROM migration_history WHERE version=2;"), CultureInfo.InvariantCulture) == 1, "migration_history_v2_one_row");
-                Assert(Convert.ToString(Scalar(c, "SELECT checksum_sha256 FROM migration_history WHERE version=2;"), CultureInfo.InvariantCulture) == first.Migration.ChecksumSha256, "migration_history_v2_checksum_matches");
+                Assert(Convert.ToInt32(Scalar(c, "SELECT count(*) FROM migration_history WHERE version=3;"), CultureInfo.InvariantCulture) == 1, "migration_history_v3_one_row");
+                Assert(Convert.ToString(Scalar(c, "SELECT checksum_sha256 FROM migration_history WHERE version=3;"), CultureInfo.InvariantCulture) == first.Migration.ChecksumSha256, "migration_history_v3_checksum_matches");
             }
 
             var second = database.Initialize("DELETE");
-            Assert(second.SchemaVersion == 2 && second.Migration != null && second.Migration.Version == 2 && !second.Migration.RecordedNow, "migration_v2_not_duplicated_second_boot");
+            Assert(second.SchemaVersion == 3 && second.Migration != null && second.Migration.Version == 3 && !second.Migration.RecordedNow, "migration_v3_not_duplicated_second_boot");
 
             database.Writes.Execute((c, tx) =>
             {
@@ -214,6 +218,13 @@ namespace WAHU.SQLiteRuntimeSmoke
             Assert(rollbackObserved, "write_coordinator_exception_propagated");
             using (var c = database.OpenConnection())
                 Assert(Convert.ToInt32(Scalar(c, "SELECT count(*) FROM parent_note WHERE id='rollback-note';"), CultureInfo.InvariantCulture) == 0, "write_coordinator_transaction_rolled_back");
+
+            File.AppendAllText(migrationV3Copy, Environment.NewLine + "-- intentional v3 checksum tamper" + Environment.NewLine);
+            bool v3TamperRejected = false;
+            try { database.Initialize("DELETE"); }
+            catch (InvalidDataException) { v3TamperRejected = true; }
+            Assert(v3TamperRejected, "migration_v3_checksum_tamper_rejected");
+            File.Copy(sourceV3, migrationV3Copy, true);
 
             File.AppendAllText(migrationV2Copy, Environment.NewLine + "-- intentional v2 checksum tamper" + Environment.NewLine);
             bool v2TamperRejected = false;
@@ -301,7 +312,7 @@ VALUES('math_grade2_v1','1','math',2,'builtin','VERIFIED',1,'ABCDEF','content_pa
 
             var verified = ManagedBackupService.VerifyManagedBackup(latestRecent.MetadataPath);
             Assert(verified.IsValid, "managed_latest_metadata_valid");
-            Assert(verified.SchemaVersion == 2, "managed_latest_schema_v2");
+            Assert(verified.SchemaVersion == 3, "managed_latest_schema_v3");
             Assert(string.Equals(verified.ActualSha256, latestRecent.Sha256, StringComparison.OrdinalIgnoreCase), "managed_latest_sha_matches");
             var metadataText = File.ReadAllText(latestRecent.MetadataPath);
             Assert(metadataText.Contains("math_grade2_v1@1"), "managed_metadata_active_pack_recorded");
@@ -374,8 +385,10 @@ VALUES('math_grade2_v1','1','math',2,'builtin','VERIFIED',1,'ABCDEF','content_pa
             Directory.CreateDirectory(migrationDir);
             var schemaV1 = Path.Combine(migrationDir, "001_initial.sql");
             var schemaV2 = Path.Combine(migrationDir, "002_attempt_immutability.sql");
+            var schemaV3 = Path.Combine(migrationDir, "003_math_attempt_idempotency_runtime.sql");
             File.Copy(schemaPath, schemaV1, true);
             File.Copy(Path.Combine(Path.GetDirectoryName(schemaPath), "002_attempt_immutability.sql"), schemaV2, true);
+            File.Copy(Path.Combine(Path.GetDirectoryName(schemaPath), "003_math_attempt_idempotency_runtime.sql"), schemaV3, true);
 
             var dbPath = Path.Combine(root, "existing-v1-learning.db");
             using (var c = new SQLiteConnection("Data Source=" + dbPath + ";Version=3;Foreign Keys=True;Pooling=False;"))
@@ -405,8 +418,8 @@ VALUES('math_grade2_v1','1','math',2,'builtin','VERIFIED',1,'ABCDEF','content_pa
 
             var backupRoot = Path.Combine(root, "existing-v1-pre-migration-backups");
             var migrated = database.Initialize("DELETE", backupRoot, "0.1-test");
-            Assert(migrated.SchemaVersion == 2, "existing_v1_migrated_to_v2");
-            Assert(migrated.Migration != null && migrated.Migration.Version == 2, "existing_v1_latest_migration_v2");
+            Assert(migrated.SchemaVersion == 3, "existing_v1_migrated_to_v3");
+            Assert(migrated.Migration != null && migrated.Migration.Version == 3, "existing_v1_latest_migration_v3");
             Assert(migrated.PreMigrationBackup != null, "existing_v1_pre_migration_backup_returned");
             Assert(File.Exists(migrated.PreMigrationBackup.DatabasePath), "existing_v1_pre_migration_db_exists");
             Assert(File.Exists(migrated.PreMigrationBackup.MetadataPath), "existing_v1_pre_migration_metadata_exists");
@@ -415,8 +428,9 @@ VALUES('math_grade2_v1','1','math',2,'builtin','VERIFIED',1,'ABCDEF','content_pa
 
             using (var c = database.OpenConnection())
             {
-                Assert(MigrationManager.GetSchemaVersion(c) == 2, "existing_v1_db_now_schema2");
+                Assert(MigrationManager.GetSchemaVersion(c) == 3, "existing_v1_db_now_schema3");
                 Assert(Convert.ToInt32(Scalar(c, "SELECT count(*) FROM migration_history WHERE version=2;"), CultureInfo.InvariantCulture) == 1, "existing_v1_migration_history_v2");
+                Assert(Convert.ToInt32(Scalar(c, "SELECT count(*) FROM migration_history WHERE version=3;"), CultureInfo.InvariantCulture) == 1, "existing_v1_migration_history_v3");
 
                 bool updateRejected = false;
                 try { Exec(c, null, "UPDATE attempt SET response_ms=999 WHERE id='attempt-1';"); }
@@ -436,7 +450,7 @@ VALUES('corr-1','attempt-1','metadata_fix','{""response_ms"":1200}','{""response
             var dbPath = Path.Combine(root, "answer-commit-learning.db");
             var database = new LearningDatabase(dbPath, schemaPath);
             var init = database.Initialize("DELETE");
-            Assert(init.SchemaVersion == 2, "answer_commit_schema_v2_ready");
+            Assert(init.SchemaVersion == 3, "answer_commit_schema_v3_ready");
 
             var now = DateTime.UtcNow;
             using (var c = database.OpenConnection())
@@ -615,7 +629,7 @@ VALUES('corr-1','attempt-1','metadata_fix','{""response_ms"":1200}','{""response
             var dbPath = Path.Combine(root, "behavior-audit.db");
             var database = new LearningDatabase(dbPath, schemaPath);
             var init = database.Initialize("DELETE");
-            Assert(init.SchemaVersion == 2, "behavior_audit_schema_v2");
+            Assert(init.SchemaVersion == 3, "behavior_audit_schema_v3");
             var now = DateTime.UtcNow;
             using (var c = database.OpenConnection())
             {

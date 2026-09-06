@@ -76,6 +76,7 @@ namespace WAHU.Data
     public sealed class AnswerCommitResult
     {
         public string AttemptId { get; set; }
+        public bool AlreadyCommitted { get; set; }
         public bool ErrorWritten { get; set; }
         public bool MasteryWritten { get; set; }
         public bool ChildSkillWritten { get; set; }
@@ -105,23 +106,47 @@ namespace WAHU.Data
         public AnswerCommitResult Commit(AnswerCommitRequest request)
         {
             Validate(request);
-            return _database.Writes.Execute((connection, transaction) =>
+            try
             {
-                InsertAttempt(connection, transaction, request);
-                var errorWritten = InsertError(connection, transaction, request);
-                var masteryWritten = InsertMastery(connection, transaction, request);
-                var skillWritten = UpsertChildSkill(connection, transaction, request);
-                var reviewWritten = UpsertReview(connection, transaction, request);
-
-                return new AnswerCommitResult
+                return _database.Writes.Execute((connection, transaction) =>
                 {
-                    AttemptId = request.AttemptId,
-                    ErrorWritten = errorWritten,
-                    MasteryWritten = masteryWritten,
-                    ChildSkillWritten = skillWritten,
-                    ReviewWritten = reviewWritten
-                };
-            });
+                    var existing = FindExistingCommit(connection, transaction, request);
+                    if (existing != null)
+                    {
+                        VerifyReplay(existing, request);
+                        return ReplayResult(existing.AttemptId);
+                    }
+
+                    InsertAttempt(connection, transaction, request);
+                    InsertAttemptCommitKey(connection, transaction, request);
+                    var errorWritten = InsertError(connection, transaction, request);
+                    var masteryWritten = InsertMastery(connection, transaction, request);
+                    var skillWritten = UpsertChildSkill(connection, transaction, request);
+                    var reviewWritten = UpsertReview(connection, transaction, request);
+
+                    return new AnswerCommitResult
+                    {
+                        AttemptId = request.AttemptId,
+                        AlreadyCommitted = false,
+                        ErrorWritten = errorWritten,
+                        MasteryWritten = masteryWritten,
+                        ChildSkillWritten = skillWritten,
+                        ReviewWritten = reviewWritten
+                    };
+                });
+            }
+            catch (SQLiteException)
+            {
+                // A second process can race the semantic-key insert. The losing transaction
+                // rolls back completely; re-read the durable key and accept only an exact replay.
+                using (var connection = _database.OpenConnection())
+                {
+                    var existing = FindExistingCommit(connection, null, request);
+                    if (existing == null) throw;
+                    VerifyReplay(existing, request);
+                    return ReplayResult(existing.AttemptId);
+                }
+            }
         }
 
         public void RecordCorrection(AttemptCorrectionWrite correction)
@@ -151,6 +176,97 @@ VALUES(@id,@attempt,@type,@before,@after,@reason,@utc);";
                     command.ExecuteNonQuery();
                 }
             });
+        }
+
+        private sealed class ExistingAttemptCommit
+        {
+            public string AttemptId { get; set; }
+            public string ChildId { get; set; }
+            public string PackId { get; set; }
+            public string PackVersion { get; set; }
+            public string SkillId { get; set; }
+            public string Subject { get; set; }
+            public string AnswerJson { get; set; }
+            public bool IsCorrect { get; set; }
+            public int HintLevel { get; set; }
+        }
+
+        private static ExistingAttemptCommit FindExistingCommit(
+            SQLiteConnection connection,
+            SQLiteTransaction transaction,
+            AnswerCommitRequest request)
+        {
+            using (var command = connection.CreateCommand())
+            {
+                command.Transaction = transaction;
+                command.CommandText = @"SELECT a.id,a.child_id,a.pack_id,a.pack_version,a.skill_id,a.subject,
+a.answer_json,a.is_correct,a.hint_level
+FROM attempt_commit_key k
+JOIN attempt a ON a.id=k.attempt_id
+WHERE k.session_id=@session AND k.question_id=@question AND k.attempt_index=@attemptIndex;";
+                command.Parameters.AddWithValue("@session", request.SessionId);
+                command.Parameters.AddWithValue("@question", request.QuestionId);
+                command.Parameters.AddWithValue("@attemptIndex", request.AttemptIndex);
+                using (var reader = command.ExecuteReader())
+                {
+                    if (!reader.Read()) return null;
+                    return new ExistingAttemptCommit
+                    {
+                        AttemptId = Convert.ToString(reader[0], System.Globalization.CultureInfo.InvariantCulture),
+                        ChildId = Convert.ToString(reader[1], System.Globalization.CultureInfo.InvariantCulture),
+                        PackId = Convert.ToString(reader[2], System.Globalization.CultureInfo.InvariantCulture),
+                        PackVersion = Convert.ToString(reader[3], System.Globalization.CultureInfo.InvariantCulture),
+                        SkillId = Convert.ToString(reader[4], System.Globalization.CultureInfo.InvariantCulture),
+                        Subject = Convert.ToString(reader[5], System.Globalization.CultureInfo.InvariantCulture),
+                        AnswerJson = reader[6] == DBNull.Value ? null : Convert.ToString(reader[6], System.Globalization.CultureInfo.InvariantCulture),
+                        IsCorrect = Convert.ToInt32(reader[7], System.Globalization.CultureInfo.InvariantCulture) != 0,
+                        HintLevel = Convert.ToInt32(reader[8], System.Globalization.CultureInfo.InvariantCulture)
+                    };
+                }
+            }
+        }
+
+        private static void VerifyReplay(ExistingAttemptCommit existing, AnswerCommitRequest request)
+        {
+            if (!string.Equals(existing.ChildId, request.ChildId, StringComparison.Ordinal) ||
+                !string.Equals(existing.PackId, request.PackId, StringComparison.Ordinal) ||
+                !string.Equals(existing.PackVersion, request.PackVersion, StringComparison.Ordinal) ||
+                !string.Equals(existing.SkillId, request.SkillId, StringComparison.Ordinal) ||
+                !string.Equals(existing.Subject, request.Subject, StringComparison.Ordinal) ||
+                !string.Equals(existing.AnswerJson ?? string.Empty, request.AnswerJson ?? string.Empty, StringComparison.Ordinal) ||
+                existing.IsCorrect != request.IsCorrect || existing.HintLevel != request.HintLevel)
+                throw new InvalidOperationException(
+                    "Attempt idempotency key conflict for session/question/attempt_index. Retry must reuse the same payload or increment attempt_index.");
+        }
+
+        private static AnswerCommitResult ReplayResult(string attemptId)
+        {
+            return new AnswerCommitResult
+            {
+                AttemptId = attemptId,
+                AlreadyCommitted = true,
+                ErrorWritten = false,
+                MasteryWritten = false,
+                ChildSkillWritten = false,
+                ReviewWritten = false
+            };
+        }
+
+        private static void InsertAttemptCommitKey(SQLiteConnection connection, SQLiteTransaction transaction, AnswerCommitRequest request)
+        {
+            using (var command = connection.CreateCommand())
+            {
+                command.Transaction = transaction;
+                command.CommandText = @"INSERT INTO attempt_commit_key(
+session_id,question_id,attempt_index,attempt_id,created_at_utc)
+VALUES(@session,@question,@attemptIndex,@attempt,@utc);";
+                command.Parameters.AddWithValue("@session", request.SessionId);
+                command.Parameters.AddWithValue("@question", request.QuestionId);
+                command.Parameters.AddWithValue("@attemptIndex", request.AttemptIndex);
+                command.Parameters.AddWithValue("@attempt", request.AttemptId);
+                command.Parameters.AddWithValue("@utc", Utc(request.AnsweredAtUtc));
+                command.ExecuteNonQuery();
+            }
         }
 
         private static void InsertAttempt(SQLiteConnection connection, SQLiteTransaction transaction, AnswerCommitRequest request)

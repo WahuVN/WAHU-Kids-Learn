@@ -25,7 +25,7 @@ namespace WAHU.Data
             result.JournalMode = Convert.ToString(Scalar(connection, "PRAGMA journal_mode;"), CultureInfo.InvariantCulture).ToUpperInvariant();
             result.IsHealthy = string.Equals(result.Integrity, "ok", StringComparison.OrdinalIgnoreCase) &&
                                result.ForeignKeyIssues == 0 &&
-                               (result.SchemaVersion == "1" || result.SchemaVersion == "2");
+                               (result.SchemaVersion == "1" || result.SchemaVersion == "2" || result.SchemaVersion == "3");
             return result;
         }
 

@@ -56,6 +56,7 @@ try {
         'e_sqlite3.dll',
         'data\schema\001_initial.sql',
         'data\schema\002_attempt_immutability.sql',
+        'data\schema\003_math_attempt_idempotency_runtime.sql',
         'content_packs\math_grade2_v1\manifest.json',
         'content_packs\english_grade2_v1\manifest.json',
         'config\runtime_defaults_v1.json',
@@ -87,8 +88,8 @@ try {
         'config_normal_fps_cap=30',
         'provider_version=2.0.4.0',
         'sqlite_version=3.53.4',
-        'schema_version=2',
-        'migration_version=2',
+        'schema_version=3',
+        'migration_version=3',
         'pre_migration_backup=none',
         'integrity=ok',
         'foreign_key_issues=0','verified_content_packs=2','performance_profile=','performance_motion_fps_cap=','performance_max_animated_regions=','performance_image_cache_mb=','performance_audio_cache_mb=','performance_evidence=','parent_pin_configured=False'

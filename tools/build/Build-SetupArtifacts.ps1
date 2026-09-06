@@ -160,7 +160,7 @@ Copy-Item 'assets\verified_vectors' (Join-Path $publish 'assets') -Recurse -Forc
 Copy-Item 'data\schema\*.sql' (Join-Path $publish 'data\schema') -Force
 
 # Hard deployment guards: these must be in the actual staged installer payload.
-foreach ($name in @('WAHU.Learning.dll','WAHU.Motion.dll','WAHU.Content.dll','WAHU.Audio.dll','WAHU.Security.dll','WAHU.Performance.dll','WAHU.Session.dll','WAHU.Data.dll','WAHU.Updater.exe','System.Data.SQLite.dll','e_sqlite3.dll','data\schema\001_initial.sql','data\schema\002_attempt_immutability.sql')) {
+foreach ($name in @('WAHU.Learning.dll','WAHU.Motion.dll','WAHU.Content.dll','WAHU.Audio.dll','WAHU.Security.dll','WAHU.Performance.dll','WAHU.Session.dll','WAHU.Data.dll','WAHU.Updater.exe','System.Data.SQLite.dll','e_sqlite3.dll','data\schema\001_initial.sql','data\schema\002_attempt_immutability.sql','data\schema\003_math_attempt_idempotency_runtime.sql')) {
     Require-File (Join-Path $publish $name)
 }
 
@@ -211,7 +211,7 @@ try { $gitCommit = (& git rev-parse HEAD 2>$null).Trim() } catch { }
 $providerPath = Join-Path $publish 'System.Data.SQLite.dll'
 $nativePath = Join-Path $publish 'e_sqlite3.dll'
 $manifest = [ordered]@{
-    schema_version = 2
+    schema_version = 3
     app_version = $AppVersion
     build_channel = 'dev'
     target_framework = 'net48'
@@ -221,7 +221,7 @@ $manifest = [ordered]@{
     msbuild = $msbuild
     signed = $false
     database = [ordered]@{
-        schema_version = 2
+        schema_version = 3
         provider = 'System.Data.SQLite'
         provider_version = '2.0.4'
         provider_sha256 = Sha256 $providerPath

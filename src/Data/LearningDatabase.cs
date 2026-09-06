@@ -22,7 +22,7 @@ namespace WAHU.Data
     {
         public const string SafeDefaultJournalMode = "DELETE";
         public const int DefaultBusyTimeoutMs = 2500;
-        public const int CurrentSchemaVersion = 2;
+        public const int CurrentSchemaVersion = 3;
 
         private readonly string _databasePath;
         private readonly string _schemaPath;
@@ -61,6 +61,8 @@ namespace WAHU.Data
             if (!File.Exists(_schemaPath)) throw new FileNotFoundException("Không tìm thấy SQLite schema V1.", _schemaPath);
             var migrationV2Path = Path.Combine(_schemaDirectory, "002_attempt_immutability.sql");
             if (!File.Exists(migrationV2Path)) throw new FileNotFoundException("Không tìm thấy SQLite migration V2.", migrationV2Path);
+            var migrationV3Path = Path.Combine(_schemaDirectory, "003_math_attempt_idempotency_runtime.sql");
+            if (!File.Exists(migrationV3Path)) throw new FileNotFoundException("Không tìm thấy SQLite migration V3.", migrationV3Path);
 
             var parent = Path.GetDirectoryName(_databasePath);
             if (!string.IsNullOrWhiteSpace(parent)) Directory.CreateDirectory(parent);
@@ -87,13 +89,21 @@ namespace WAHU.Data
                     throw new InvalidOperationException("Unsupported learner DB schema_version=" + schemaVersion);
 
                 latestMigration = MigrationManager.VerifyOrRecordInitial(connection, _schemaPath);
-                if (schemaVersion == CurrentSchemaVersion)
+                if (schemaVersion >= MigrationManager.AttemptImmutabilityVersion)
                 {
                     latestMigration = MigrationManager.VerifyRecordedMigration(
                         connection,
                         MigrationManager.AttemptImmutabilityVersion,
                         MigrationManager.AttemptImmutabilityName,
                         migrationV2Path);
+                }
+                if (schemaVersion >= MigrationManager.MathAttemptRuntimeVersion)
+                {
+                    latestMigration = MigrationManager.VerifyRecordedMigration(
+                        connection,
+                        MigrationManager.MathAttemptRuntimeVersion,
+                        MigrationManager.MathAttemptRuntimeName,
+                        migrationV3Path);
                 }
             }
 
@@ -118,12 +128,24 @@ namespace WAHU.Data
                 using (var connection = _factory.Open())
                 {
                     SetJournalMode(connection, journal);
-                    latestMigration = MigrationManager.ApplyMigration(
-                        connection,
-                        MigrationManager.AttemptImmutabilityVersion,
-                        MigrationManager.AttemptImmutabilityName,
-                        migrationV2Path);
-                    schemaVersion = MigrationManager.GetSchemaVersion(connection);
+                    if (schemaVersion < MigrationManager.AttemptImmutabilityVersion)
+                    {
+                        latestMigration = MigrationManager.ApplyMigration(
+                            connection,
+                            MigrationManager.AttemptImmutabilityVersion,
+                            MigrationManager.AttemptImmutabilityName,
+                            migrationV2Path);
+                        schemaVersion = MigrationManager.GetSchemaVersion(connection);
+                    }
+                    if (schemaVersion < MigrationManager.MathAttemptRuntimeVersion)
+                    {
+                        latestMigration = MigrationManager.ApplyMigration(
+                            connection,
+                            MigrationManager.MathAttemptRuntimeVersion,
+                            MigrationManager.MathAttemptRuntimeName,
+                            migrationV3Path);
+                        schemaVersion = MigrationManager.GetSchemaVersion(connection);
+                    }
                     if (schemaVersion != CurrentSchemaVersion)
                         throw new InvalidDataException("Migration completed without expected schema_version=" + CurrentSchemaVersion);
                 }
@@ -138,8 +160,13 @@ namespace WAHU.Data
                     MigrationManager.AttemptImmutabilityVersion,
                     MigrationManager.AttemptImmutabilityName,
                     migrationV2Path);
-                if (latestMigration == null)
-                    latestMigration = verifiedV2;
+                var verifiedV3 = MigrationManager.VerifyRecordedMigration(
+                    connection,
+                    MigrationManager.MathAttemptRuntimeVersion,
+                    MigrationManager.MathAttemptRuntimeName,
+                    migrationV3Path);
+                if (latestMigration == null || latestMigration.Version < verifiedV3.Version)
+                    latestMigration = verifiedV3;
                 schemaVersion = MigrationManager.GetSchemaVersion(connection);
                 if (schemaVersion != CurrentSchemaVersion)
                     throw new InvalidDataException("Final learner DB schema_version mismatch=" + schemaVersion);
