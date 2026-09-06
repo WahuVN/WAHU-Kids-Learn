@@ -17,15 +17,16 @@ namespace WAHU.Session
         private readonly LearningDatabase _database;
         private readonly string _templatePath;
         private readonly string _performanceProfile;
-        private readonly int _targetQuestionCount;
+        private readonly int _requestedSeed;
+        private readonly int _requestedTargetQuestionCount;
         private readonly LearnerSessionService _sessionService;
+        private readonly MathSessionRuntimeService _runtime;
         private readonly AnswerCommitService _answerCommit;
         private readonly BehaviorDecisionAuditService _behaviorAudit;
         private readonly AdaptiveDecisionAuditService _adaptiveAudit;
         private readonly GameWorldRewardService _gameWorld;
-        private readonly BehaviorController _behavior = new BehaviorController();
+        private BehaviorController _behavior = new BehaviorController();
         private readonly AdaptiveMathSelector _selector = new AdaptiveMathSelector();
-        private readonly MathQuestionGenerator _generator;
         private readonly MasteryEngineV1 _mastery = new MasteryEngineV1();
         private readonly ReviewSchedulerV1 _scheduler = new ReviewSchedulerV1();
         private readonly MathErrorClassifierV1 _errorClassifier = new MathErrorClassifierV1();
@@ -33,6 +34,7 @@ namespace WAHU.Session
         private readonly List<string> _recentTemplates = new List<string>();
         private readonly List<string> _recentSkills = new List<string>();
         private readonly HashSet<string> _distinctSkills = new HashSet<string>(StringComparer.Ordinal);
+        private readonly object _submitGate = new object();
 
         private IList<MathTemplateRef> _templates;
         private IDictionary<string, SkillSnapshot> _skills;
@@ -44,6 +46,9 @@ namespace WAHU.Session
         private BehaviorDecision _lastBehavior;
         private string _forcedRepairTemplateId;
         private bool _active;
+        private int _seed;
+        private int _targetQuestionCount;
+        private int _generatedQuestionCount;
         private int _attempts;
         private int _correct;
         private int _hintedCorrect;
@@ -59,9 +64,12 @@ namespace WAHU.Session
             _templatePath = templatePath;
             _performanceProfile = performanceProfile == "NORMAL" ? "NORMAL" : "LOW";
             if (targetQuestionCount < 1 || targetQuestionCount > 40) throw new ArgumentOutOfRangeException("targetQuestionCount");
+            _requestedSeed = seed;
+            _requestedTargetQuestionCount = targetQuestionCount;
+            _seed = seed;
             _targetQuestionCount = targetQuestionCount;
-            _generator = new MathQuestionGenerator(seed);
             _sessionService = new LearnerSessionService(database);
+            _runtime = new MathSessionRuntimeService(database);
             _answerCommit = new AnswerCommitService(database);
             _behaviorAudit = new BehaviorDecisionAuditService(database);
             _adaptiveAudit = new AdaptiveDecisionAuditService(database);
@@ -75,88 +83,133 @@ namespace WAHU.Session
         public MathSessionStartResult Start(string displayName)
         {
             if (_active || _session != null) throw new InvalidOperationException("Math session already started.");
-            var descriptors = new MathVerifiedTemplateSource().Load(_templatePath);
-            _templates = descriptors.Select(x => new MathTemplateRef
-            {
-                TemplateId = x.Id,
-                SkillId = x.SkillId,
-                SourceTemplateId = x.SourceTemplateId,
-                FixedContextVi = x.FixedContextVi,
-                StatementVi = x.StatementVi,
-                AnswerText = x.AnswerText
-            }).Where(AdaptiveMathSelector.IsSupported).ToList();
-            if (_templates.Count == 0) throw new InvalidOperationException("Không có template Toán VERIFIED được runtime hỗ trợ.");
-
+            LoadTemplates();
             _profile = _sessionService.EnsurePrimaryChild(displayName);
-            var recovered = _sessionService.RecoverDanglingSessions();
-            try
+
+            var resumed = false;
+            var restoredOpenQuestion = false;
+            var discardedCorruptOpenQuestion = false;
+            var recovered = 0;
+            var resumable = _runtime.LoadLatestResumable(_profile.ChildId);
+            if (resumable != null)
             {
-                _session = _sessionService.BeginSession(_profile.ChildId, "math", _performanceProfile);
-                _skills = _sessionService.LoadSkillSnapshots(_profile.ChildId, "math");
-                _active = true;
+                RestoreSession(resumable, out restoredOpenQuestion, out discardedCorruptOpenQuestion);
+                resumed = true;
             }
-            catch
+            else
             {
-                if (_session != null)
+                recovered = _sessionService.RecoverDanglingSessions();
+                try
                 {
-                    try
-                    {
-                        _sessionService.CompleteSession(_session.SessionId, true,
-                            _json.Serialize(new Dictionary<string, object> { { "reason", "session_start_failed" }, { "attempts", 0 } }),
-                            _json.Serialize(new Dictionary<string, object> { { "final_state", BehaviorState.READY.ToString() } }));
-                    }
-                    catch { }
+                    _seed = _requestedSeed;
+                    _targetQuestionCount = _requestedTargetQuestionCount;
+                    _generatedQuestionCount = 0;
+                    _session = _sessionService.BeginSession(_profile.ChildId, "math", _performanceProfile);
+                    _runtime.Create(_session.SessionId, _seed, _targetQuestionCount);
+                    _skills = _sessionService.LoadSkillSnapshots(_profile.ChildId, "math");
+                    _active = true;
                 }
-                _session = null;
-                _skills = null;
-                _active = false;
-                throw;
+                catch
+                {
+                    if (_session != null)
+                    {
+                        try { _runtime.Delete(_session.SessionId); } catch { }
+                        try
+                        {
+                            _sessionService.CompleteSession(_session.SessionId, true,
+                                _json.Serialize(new Dictionary<string, object> { { "reason", "session_start_failed" }, { "attempts", 0 } }),
+                                _json.Serialize(new Dictionary<string, object> { { "final_state", BehaviorState.READY.ToString() } }));
+                        }
+                        catch { }
+                    }
+                    _session = null;
+                    _skills = null;
+                    _active = false;
+                    throw;
+                }
             }
+
             return new MathSessionStartResult
             {
                 SessionId = _session.SessionId,
                 ChildId = _profile.ChildId,
                 DisplayName = _profile.DisplayName,
                 RecoveredDanglingSessions = recovered,
-                TargetQuestionCount = _targetQuestionCount
+                TargetQuestionCount = _targetQuestionCount,
+                CompletedQuestionCount = _attempts,
+                ResumedExistingSession = resumed,
+                RestoredOpenQuestion = restoredOpenQuestion,
+                DiscardedCorruptOpenQuestion = discardedCorruptOpenQuestion
             };
         }
 
         public MathQuestion NextQuestion()
         {
             EnsureActive();
-            if (_currentQuestion != null) throw new InvalidOperationException("Current question has not been answered.");
+            if (_currentQuestion != null) return _currentQuestion;
             if (_attempts >= _targetQuestionCount) return null;
 
             IEnumerable<MathTemplateRef> candidates = _templates;
-            if (!string.IsNullOrWhiteSpace(_forcedRepairTemplateId))
+            var requestedRepair = _forcedRepairTemplateId;
+            if (!string.IsNullOrWhiteSpace(requestedRepair))
             {
-                var repair = _templates.Where(x => string.Equals(x.TemplateId, _forcedRepairTemplateId, StringComparison.Ordinal)).ToList();
+                var repair = _templates.Where(x => string.Equals(x.TemplateId, requestedRepair, StringComparison.Ordinal)).ToList();
                 if (repair.Count > 0) candidates = repair;
             }
 
             _currentSelection = _selector.Select(candidates, _skills, DateTime.UtcNow, _recentTemplates, _recentSkills);
-            if (!string.IsNullOrWhiteSpace(_forcedRepairTemplateId))
+            var consumedRepair = !string.IsNullOrWhiteSpace(requestedRepair);
+            if (consumedRepair)
             {
                 if (_currentSelection.Reasons == null) _currentSelection.Reasons = new List<string>();
                 _currentSelection.Reasons.Add("prerequisite_repair");
                 _forcedRepairTemplateId = null;
             }
-            _currentQuestion = _generator.Generate(_currentSelection);
-            _questionStartedAtUtc = DateTime.UtcNow;
 
-            _adaptiveAudit.Record(new AdaptiveDecisionAuditRequest
+            var nextOrdinal = checked(_generatedQuestionCount + 1);
+            var generator = new MathQuestionGenerator(QuestionSeed(_seed, nextOrdinal, _currentSelection.Template.TemplateId));
+            _currentQuestion = generator.Generate(_currentSelection);
+            _questionStartedAtUtc = DateTime.UtcNow;
+            _generatedQuestionCount = nextOrdinal;
+
+            try
             {
-                Id = "adaptive-" + Guid.NewGuid().ToString("N"),
-                SessionId = _session.SessionId,
-                ChildId = _profile.ChildId,
-                PackId = PackId,
-                PackVersion = PackVersion,
-                Question = _currentQuestion,
-                Selection = _currentSelection,
-                Behavior = _lastBehavior,
-                CreatedAtUtc = _questionStartedAtUtc
-            });
+                _runtime.SaveOpenQuestion(
+                    _session.SessionId,
+                    _generatedQuestionCount,
+                    _json.Serialize(_currentQuestion),
+                    SerializeSelection(_currentSelection),
+                    _questionStartedAtUtc,
+                    _forcedRepairTemplateId);
+            }
+            catch
+            {
+                _generatedQuestionCount--;
+                _currentQuestion = null;
+                _currentSelection = null;
+                if (consumedRepair) _forcedRepairTemplateId = requestedRepair;
+                throw;
+            }
+
+            try
+            {
+                _adaptiveAudit.Record(new AdaptiveDecisionAuditRequest
+                {
+                    Id = "adaptive-" + Guid.NewGuid().ToString("N"),
+                    SessionId = _session.SessionId,
+                    ChildId = _profile.ChildId,
+                    PackId = PackId,
+                    PackVersion = PackVersion,
+                    Question = _currentQuestion,
+                    Selection = _currentSelection,
+                    Behavior = _lastBehavior,
+                    CreatedAtUtc = _questionStartedAtUtc
+                });
+            }
+            catch
+            {
+                // Diagnostic only. The exact open question is already durable and must not be regenerated.
+            }
             return _currentQuestion;
         }
 
@@ -178,6 +231,14 @@ namespace WAHU.Session
         }
 
         public MathAnswerOutcome SubmitAnswerAt(string answer, int hintLevel, string inputMethod, DateTime answeredAtUtc, int responseMs)
+        {
+            lock (_submitGate)
+            {
+                return SubmitAnswerAtCore(answer, hintLevel, inputMethod, answeredAtUtc, responseMs);
+            }
+        }
+
+        private MathAnswerOutcome SubmitAnswerAtCore(string answer, int hintLevel, string inputMethod, DateTime answeredAtUtc, int responseMs)
         {
             EnsureActive();
             if (_currentQuestion == null || _currentSelection == null) throw new InvalidOperationException("No active question.");
@@ -213,7 +274,7 @@ namespace WAHU.Session
             var review = _scheduler.Schedule(answeredUtc, mastery, isCorrect, hintLevel);
             var attemptId = "attempt-" + Guid.NewGuid().ToString("N");
 
-            _answerCommit.Commit(new AnswerCommitRequest
+            var commit = _answerCommit.Commit(new AnswerCommitRequest
             {
                 AttemptId = attemptId,
                 SessionId = _session.SessionId,
@@ -284,7 +345,7 @@ namespace WAHU.Session
                     Id = "behavior-" + Guid.NewGuid().ToString("N"),
                     SessionId = _session.SessionId,
                     ChildId = _profile.ChildId,
-                    AttemptId = attemptId,
+                    AttemptId = commit.AttemptId,
                     Decision = behaviorDecision,
                     ControllerVersion = "behavior-v1",
                     CreatedAtUtc = answeredUtc
@@ -295,14 +356,30 @@ namespace WAHU.Session
                 // Best-effort diagnostic only. Learning state is already committed atomically.
             }
 
-            _skills[question.SkillId] = Apply(current, mastery, answeredUtc, review.DueAtUtc, isCorrect);
-            AddRecent(_recentTemplates, question.TemplateId);
-            AddRecent(_recentSkills, question.SkillId);
-            _distinctSkills.Add(question.SkillId);
-            _attempts++;
-            if (isCorrect) { _correct++; if (hintLevel > 0) _hintedCorrect++; } else _wrong++;
-            _lastBehavior = behaviorDecision;
-            if (behaviorDecision.TriggerPrerequisiteRepair) _forcedRepairTemplateId = RepairTemplateFor(question);
+            if (commit.AlreadyCommitted)
+            {
+                _skills = _sessionService.LoadSkillSnapshots(_profile.ChildId, "math");
+                RebuildFromCommittedAttempts(_runtime.LoadCommittedAttempts(_session.SessionId));
+                _forcedRepairTemplateId = behaviorDecision.TriggerPrerequisiteRepair ? RepairTemplateFor(question) : _forcedRepairTemplateId;
+            }
+            else
+            {
+                _skills[question.SkillId] = Apply(current, mastery, answeredUtc, review.DueAtUtc, isCorrect);
+                AddRecent(_recentTemplates, question.TemplateId);
+                AddRecent(_recentSkills, question.SkillId);
+                _distinctSkills.Add(question.SkillId);
+                _attempts++;
+                if (isCorrect) { _correct++; if (hintLevel > 0) _hintedCorrect++; } else _wrong++;
+                _lastBehavior = behaviorDecision;
+                if (behaviorDecision.TriggerPrerequisiteRepair) _forcedRepairTemplateId = RepairTemplateFor(question);
+            }
+
+            try { _runtime.SaveCheckpoint(_session.SessionId, _generatedQuestionCount, _forcedRepairTemplateId); }
+            catch
+            {
+                // Attempt is already durable. A stale open-question checkpoint is safe because resume
+                // checks attempt_commit_key before showing it again.
+            }
 
             var outcome = new MathAnswerOutcome
             {
@@ -337,6 +414,7 @@ namespace WAHU.Session
                     { "wrong", summary.Wrong }, { "distinct_skills", summary.DistinctSkills }, { "subject", "math" }
                 }),
                 _json.Serialize(new Dictionary<string, object> { { "final_state", summary.FinalBehaviorState.ToString() } }));
+            try { _runtime.Delete(_session.SessionId); } catch { }
             try
             {
                 var reward = _gameWorld.GrantCompletedMathSession(_profile.ChildId, _session.SessionId, summary.Attempts);
@@ -368,16 +446,255 @@ namespace WAHU.Session
                     { "reason", string.IsNullOrWhiteSpace(reason) ? "user_exit" : reason }
                 }),
                 _json.Serialize(new Dictionary<string, object> { { "final_state", summary.FinalBehaviorState.ToString() } }));
+            try { _runtime.Delete(_session.SessionId); } catch { }
             _active = false;
             return summary;
+        }
+
+        public MathSessionSummary Suspend(string reason)
+        {
+            if (!_active) return BuildSummary(null);
+            try { _runtime.Touch(_session.SessionId); }
+            catch
+            {
+                // Existing runtime checkpoint remains valid even if touching updated_at fails.
+            }
+            _active = false;
+            return BuildSummary(null);
         }
 
         public void Dispose()
         {
             if (_active)
             {
-                try { Abort("coordinator_disposed"); }
+                try { Suspend("coordinator_disposed"); }
                 catch { }
+            }
+        }
+
+        private void LoadTemplates()
+        {
+            var descriptors = new MathVerifiedTemplateSource().Load(_templatePath);
+            _templates = descriptors.Select(x => new MathTemplateRef
+            {
+                TemplateId = x.Id,
+                SkillId = x.SkillId,
+                SourceTemplateId = x.SourceTemplateId,
+                FixedContextVi = x.FixedContextVi,
+                StatementVi = x.StatementVi,
+                AnswerText = x.AnswerText
+            }).Where(AdaptiveMathSelector.IsSupported).ToList();
+            if (_templates.Count == 0) throw new InvalidOperationException("Không có template Toán VERIFIED được runtime hỗ trợ.");
+        }
+
+        private void RestoreSession(
+            MathSessionRuntimeSnapshot runtime,
+            out bool restoredOpenQuestion,
+            out bool discardedCorruptOpenQuestion)
+        {
+            if (runtime == null) throw new ArgumentNullException("runtime");
+            restoredOpenQuestion = false;
+            discardedCorruptOpenQuestion = false;
+            _session = new LearnerSessionHandle
+            {
+                SessionId = runtime.SessionId,
+                ChildId = runtime.ChildId,
+                StartedAtUtc = runtime.StartedAtUtc,
+                Subject = "math",
+                PerformanceProfile = runtime.PerformanceProfile
+            };
+            _seed = runtime.Seed;
+            _targetQuestionCount = runtime.TargetQuestionCount;
+            _generatedQuestionCount = runtime.GeneratedQuestionCount;
+            _forcedRepairTemplateId = runtime.ForcedRepairTemplateId;
+            _skills = _sessionService.LoadSkillSnapshots(_profile.ChildId, "math");
+            _active = true;
+
+            RebuildFromCommittedAttempts(_runtime.LoadCommittedAttempts(_session.SessionId));
+            if (_generatedQuestionCount < _attempts) _generatedQuestionCount = _attempts;
+
+            if (string.IsNullOrWhiteSpace(runtime.CurrentQuestionJson))
+            {
+                if (!string.IsNullOrWhiteSpace(runtime.CurrentSelectionJson) || runtime.QuestionStartedAtUtc.HasValue)
+                {
+                    discardedCorruptOpenQuestion = true;
+                    try { _runtime.SaveCheckpoint(_session.SessionId, _generatedQuestionCount, _forcedRepairTemplateId); } catch { }
+                }
+                return;
+            }
+
+            try
+            {
+                var question = _json.Deserialize<MathQuestion>(runtime.CurrentQuestionJson);
+                if (!IsUsableRestoredQuestion(question)) throw new InvalidOperationException("Invalid cached Math question.");
+
+                if (_runtime.HasCommittedAttempt(_session.SessionId, question.QuestionId, 1))
+                {
+                    if (_lastBehavior != null && _lastBehavior.TriggerPrerequisiteRepair)
+                        _forcedRepairTemplateId = RepairTemplateFor(question);
+                    try { _runtime.SaveCheckpoint(_session.SessionId, _generatedQuestionCount, _forcedRepairTemplateId); } catch { }
+                    return;
+                }
+
+                _currentQuestion = question;
+                _currentSelection = DeserializeSelection(runtime.CurrentSelectionJson, question);
+                _questionStartedAtUtc = runtime.QuestionStartedAtUtc ?? DateTime.UtcNow;
+                restoredOpenQuestion = true;
+            }
+            catch
+            {
+                _currentQuestion = null;
+                _currentSelection = null;
+                discardedCorruptOpenQuestion = true;
+                try { _runtime.SaveCheckpoint(_session.SessionId, _generatedQuestionCount, _forcedRepairTemplateId); } catch { }
+            }
+        }
+
+        private void RebuildFromCommittedAttempts(IList<MathCommittedAttemptSnapshot> attempts)
+        {
+            _recentTemplates.Clear();
+            _recentSkills.Clear();
+            _distinctSkills.Clear();
+            _attempts = 0;
+            _correct = 0;
+            _hintedCorrect = 0;
+            _wrong = 0;
+            _behavior = new BehaviorController();
+            _lastBehavior = null;
+
+            if (attempts == null) return;
+            foreach (var attempt in attempts)
+            {
+                _attempts++;
+                if (attempt.IsCorrect)
+                {
+                    _correct++;
+                    if (attempt.HintLevel > 0) _hintedCorrect++;
+                }
+                else _wrong++;
+
+                _distinctSkills.Add(attempt.SkillId);
+                AddRecent(_recentSkills, attempt.SkillId);
+                var templateId = TemplateIdFromQuestionId(attempt.QuestionId);
+                if (!string.IsNullOrWhiteSpace(templateId)) AddRecent(_recentTemplates, templateId);
+
+                _lastBehavior = _behavior.Observe(new BehaviorObservation
+                {
+                    SkillId = attempt.SkillId,
+                    IsCorrect = attempt.IsCorrect,
+                    ResponseMs = Math.Max(0, attempt.ResponseMs),
+                    HintLevel = Math.Max(0, attempt.HintLevel),
+                    UsedMaxHint = attempt.HintLevel >= 2,
+                    RapidWrong = !attempt.IsCorrect && attempt.ResponseMs <= 550,
+                    SkippedOrExited = false,
+                    InputMiss = false,
+                    ErrorType = attempt.ErrorType,
+                    Representation = attempt.Representation,
+                    MasteryScore = Math.Max(0.0, Math.Min(1.0, attempt.MasteryScoreBefore)),
+                    SessionElapsedMinutes = Math.Max(0, (attempt.AnsweredAtUtc - _session.StartedAtUtc).TotalMinutes)
+                });
+            }
+        }
+
+        private string SerializeSelection(MathSelectionDecision selection)
+        {
+            if (selection == null || selection.Template == null) throw new ArgumentNullException("selection");
+            return _json.Serialize(new Dictionary<string, object>
+            {
+                { "template_id", selection.Template.TemplateId },
+                { "skill_id", selection.Template.SkillId },
+                { "score", selection.Score },
+                { "difficulty_fit", selection.DifficultyFit },
+                { "reasons", selection.Reasons ?? new string[0] },
+                { "candidate_summary", selection.CandidateSummary ?? new string[0] }
+            });
+        }
+
+        private MathSelectionDecision DeserializeSelection(string json, MathQuestion question)
+        {
+            var template = _templates.FirstOrDefault(x => string.Equals(x.TemplateId, question.TemplateId, StringComparison.Ordinal));
+            if (template == null)
+                template = new MathTemplateRef { TemplateId = question.TemplateId, SkillId = question.SkillId };
+
+            if (string.IsNullOrWhiteSpace(json))
+                return new MathSelectionDecision { Template = template, DifficultyFit = question.DifficultyFit, Reasons = new List<string>(), CandidateSummary = new List<string>() };
+
+            var data = _json.Deserialize<Dictionary<string, object>>(json);
+            object value;
+            var decision = new MathSelectionDecision { Template = template };
+            if (data != null && data.TryGetValue("score", out value)) decision.Score = DoubleValue(value, 0);
+            if (data != null && data.TryGetValue("difficulty_fit", out value)) decision.DifficultyFit = DoubleValue(value, question.DifficultyFit);
+            else decision.DifficultyFit = question.DifficultyFit;
+            decision.Reasons = data != null && data.TryGetValue("reasons", out value) ? StringList(value) : new List<string>();
+            decision.CandidateSummary = data != null && data.TryGetValue("candidate_summary", out value) ? StringList(value) : new List<string>();
+            return decision;
+        }
+
+        private static IList<string> StringList(object value)
+        {
+            var result = new List<string>();
+            if (value == null) return result;
+            var single = value as string;
+            if (single != null) { result.Add(single); return result; }
+            var enumerable = value as System.Collections.IEnumerable;
+            if (enumerable == null) return result;
+            foreach (var item in enumerable)
+            {
+                var text = Convert.ToString(item, System.Globalization.CultureInfo.InvariantCulture);
+                if (!string.IsNullOrWhiteSpace(text)) result.Add(text);
+            }
+            return result;
+        }
+
+        private static double DoubleValue(object value, double fallback)
+        {
+            if (value == null) return fallback;
+            try { return Convert.ToDouble(value, System.Globalization.CultureInfo.InvariantCulture); }
+            catch { return fallback; }
+        }
+
+        private static bool IsUsableRestoredQuestion(MathQuestion question)
+        {
+            return question != null &&
+                   !string.IsNullOrWhiteSpace(question.QuestionId) &&
+                   !string.IsNullOrWhiteSpace(question.TemplateId) &&
+                   !string.IsNullOrWhiteSpace(question.SkillId) &&
+                   !string.IsNullOrWhiteSpace(question.PromptVi);
+        }
+
+        private static string TemplateIdFromQuestionId(string questionId)
+        {
+            if (string.IsNullOrWhiteSpace(questionId)) return null;
+            var split = questionId.LastIndexOf('-');
+            if (split <= 0 || questionId.Length - split - 1 != 32) return null;
+            for (var i = split + 1; i < questionId.Length; i++)
+            {
+                var c = questionId[i];
+                if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'))) return null;
+            }
+            return questionId.Substring(0, split);
+        }
+
+        private static int QuestionSeed(int baseSeed, int ordinal, string templateId)
+        {
+            unchecked
+            {
+                uint hash = 2166136261;
+                Action<int> mix = value =>
+                {
+                    hash ^= (byte)value; hash *= 16777619;
+                    hash ^= (byte)(value >> 8); hash *= 16777619;
+                    hash ^= (byte)(value >> 16); hash *= 16777619;
+                    hash ^= (byte)(value >> 24); hash *= 16777619;
+                };
+                mix(baseSeed);
+                mix(ordinal);
+                foreach (var c in templateId ?? string.Empty)
+                {
+                    hash ^= (byte)c; hash *= 16777619;
+                    hash ^= (byte)(c >> 8); hash *= 16777619;
+                }
+                return (int)(hash & 0x7fffffff);
             }
         }
 

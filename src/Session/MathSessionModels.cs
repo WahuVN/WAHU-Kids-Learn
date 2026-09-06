@@ -11,6 +11,10 @@ namespace WAHU.Session
         public string DisplayName { get; set; }
         public int RecoveredDanglingSessions { get; set; }
         public int TargetQuestionCount { get; set; }
+        public int CompletedQuestionCount { get; set; }
+        public bool ResumedExistingSession { get; set; }
+        public bool RestoredOpenQuestion { get; set; }
+        public bool DiscardedCorruptOpenQuestion { get; set; }
     }
 
     public sealed class MathAnswerOutcome
