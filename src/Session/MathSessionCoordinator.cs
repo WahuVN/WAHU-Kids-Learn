@@ -11,7 +11,7 @@ namespace WAHU.Session
     public sealed class MathSessionCoordinator : IDisposable
     {
         public const string PackId = "math_grade2_verified_templates_v1";
-        public const string PackVersion = "1.1.0";
+        public const string PackVersion = "1.2.0";
         public const int DefaultTargetQuestionCount = 8;
 
         private readonly LearningDatabase _database;
@@ -302,7 +302,7 @@ namespace WAHU.Session
             _attempts++;
             if (isCorrect) { _correct++; if (hintLevel > 0) _hintedCorrect++; } else _wrong++;
             _lastBehavior = behaviorDecision;
-            if (behaviorDecision.TriggerPrerequisiteRepair) _forcedRepairTemplateId = RepairTemplateFor(question.TemplateId);
+            if (behaviorDecision.TriggerPrerequisiteRepair) _forcedRepairTemplateId = RepairTemplateFor(question);
 
             var outcome = new MathAnswerOutcome
             {
@@ -419,8 +419,10 @@ namespace WAHU.Session
             return new SkillSnapshot { SkillId = id, MasteryScore = 0.25, Confidence = 0.20, LearningState = "NEW" };
         }
 
-        private static string RepairTemplateFor(string templateId)
+        private static string RepairTemplateFor(MathQuestion question)
         {
+            if (question == null || string.IsNullOrWhiteSpace(question.TemplateId)) return null;
+            var templateId = question.TemplateId;
             switch (templateId)
             {
                 case "expanded_form_3digit": return "place_value_decompose_3digit";
@@ -433,8 +435,32 @@ namespace WAHU.Session
                 case "subtract_within_1000_one_borrow": return "subtract_within_1000_no_borrow";
                 case "add_within_1000_no_carry": return "mental_add_within_20";
                 case "subtract_within_1000_no_borrow": return "mental_sub_within_20";
+                case "word_problem_add_more":
+                case "word_problem_more_than": return "mental_add_within_20";
+                case "word_problem_sub_less":
+                case "word_problem_less_than": return "mental_sub_within_20";
+                case "word_problem_multiply_groups_2_5":
+                {
+                    var factor = ReadIllustrationInt(question.IllustrationData, "wordgroups", 1);
+                    return factor == 5 ? "times_table_5" : "times_table_2";
+                }
+                case "word_problem_divide_groups_2_5":
+                {
+                    var divisor = ReadIllustrationInt(question.IllustrationData, "wordshare", 2);
+                    return divisor == 5 ? "times_table_5" : "times_table_2";
+                }
                 default: return templateId;
             }
+        }
+
+        private static int ReadIllustrationInt(string data, string prefix, int index)
+        {
+            var parts = (data ?? string.Empty).Split('|');
+            int value;
+            if (parts.Length <= index || !string.Equals(parts[0], prefix, StringComparison.Ordinal) ||
+                !int.TryParse(parts[index], System.Globalization.NumberStyles.Integer,
+                    System.Globalization.CultureInfo.InvariantCulture, out value)) return 0;
+            return value;
         }
 
         private static object AnswerValueForJson(MathQuestion question, string answer)
@@ -478,6 +504,7 @@ namespace WAHU.Session
             if (error != null && error.ErrorType == "TIME_READ_ERROR") return "Chưa đúng. Con đọc kim phút trước: số 3 là 15 phút, số 6 là 30 phút nhé.";
             if (error != null && error.ErrorType == "GEOMETRY_RECOGNITION_ERROR") return "Chưa đúng. Con nhìn lại đặc điểm của hình: nét, đầu mút, số cạnh hoặc dạng khối nhé.";
             if (error != null && error.ErrorType == "PICTOGRAPH_READ_ERROR") return "Chưa đúng. Con đếm lại từng hình trong biểu đồ rồi so sánh nhé.";
+            if (error != null && error.ErrorType == "WORD_PROBLEM_RELATION_ERROR") return "Chưa đúng. Con xác định điều đã biết, điều cần tìm rồi nhìn lại sơ đồ quan hệ nhé.";
             if (error != null && error.ErrorType == "EVENT_CLASSIFICATION_ERROR") return "Chưa đúng. Con đối chiếu câu này với tất cả kết quả có thể của xúc xắc nhé.";
             return "Chưa đúng. Mình xem gợi ý rồi thử câu tiếp theo nhé.";
         }

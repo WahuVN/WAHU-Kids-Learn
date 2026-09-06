@@ -442,6 +442,115 @@
                                                "answer":  "1"
                                            }
                                        ]
+                      },
+                      {
+                          "id":  "word_problem_add_more",
+                          "skill":  "WP_ONE_STEP_ADD_MORE",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "variables":  {
+                                            "a":  {
+                                                      "min":  1,
+                                                      "max":  50
+                                                  },
+                                            "b":  {
+                                                      "min":  1,
+                                                      "max":  40
+                                                  }
+                                        },
+                          "constraint":  "a+b \u003c= 100",
+                          "prompt_vi":  "Lan có {a} nhãn vở. Mẹ cho thêm {b} nhãn vở. Lan có tất cả bao nhiêu nhãn vở?",
+                          "answer_expression":  "a+b"
+                      },
+                      {
+                          "id":  "word_problem_sub_less",
+                          "skill":  "WP_ONE_STEP_SUB_LESS",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "variables":  {
+                                            "a":  {
+                                                      "min":  10,
+                                                      "max":  100
+                                                  },
+                                            "b":  {
+                                                      "min":  1,
+                                                      "max":  40
+                                                  }
+                                        },
+                          "constraint":  "a \u003e= b",
+                          "prompt_vi":  "Lan có {a} nhãn vở. Lan cho bạn {b} nhãn vở. Lan còn lại bao nhiêu nhãn vở?",
+                          "answer_expression":  "a-b"
+                      },
+                      {
+                          "id":  "word_problem_more_than",
+                          "skill":  "WP_ONE_STEP_MORE_THAN",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "variables":  {
+                                            "a":  {
+                                                      "min":  1,
+                                                      "max":  50
+                                                  },
+                                            "b":  {
+                                                      "min":  1,
+                                                      "max":  30
+                                                  }
+                                        },
+                          "constraint":  "a+b \u003c= 100",
+                          "prompt_vi":  "Mai có {a} bông hoa. Lan có nhiều hơn Mai {b} bông hoa. Lan có bao nhiêu bông hoa?",
+                          "answer_expression":  "a+b"
+                      },
+                      {
+                          "id":  "word_problem_less_than",
+                          "skill":  "WP_ONE_STEP_LESS_THAN",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "variables":  {
+                                            "a":  {
+                                                      "min":  10,
+                                                      "max":  100
+                                                  },
+                                            "b":  {
+                                                      "min":  1,
+                                                      "max":  30
+                                                  }
+                                        },
+                          "constraint":  "a \u003e= b",
+                          "prompt_vi":  "Lan có {a} bông hoa. Mai có ít hơn Lan {b} bông hoa. Mai có bao nhiêu bông hoa?",
+                          "answer_expression":  "a-b"
+                      },
+                      {
+                          "id":  "word_problem_multiply_groups_2_5",
+                          "skill":  "WP_ONE_STEP_MULTIPLICATION_CONTEXT",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "variables":  {
+                                            "factor":  [
+                                                           2,
+                                                           5
+                                                       ],
+                                            "groups":  {
+                                                           "min":  1,
+                                                           "max":  10
+                                                       }
+                                        },
+                          "prompt_vi":  "Có {groups} giỏ, mỗi giỏ có {factor} quả. Có tất cả bao nhiêu quả?",
+                          "answer_expression":  "groups*factor"
+                      },
+                      {
+                          "id":  "word_problem_divide_groups_2_5",
+                          "skill":  "WP_ONE_STEP_DIVISION_CONTEXT",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "variables":  {
+                                            "divisor":  [
+                                                            2,
+                                                            5
+                                                        ],
+                                            "quotient":  {
+                                                             "min":  1,
+                                                             "max":  10
+                                                         }
+                                        },
+                          "derive":  {
+                                         "total":  "divisor*quotient"
+                                     },
+                          "prompt_vi":  "Có {total} chiếc bánh chia đều cho {divisor} bạn. Mỗi bạn được bao nhiêu chiếc bánh?",
+                          "answer_expression":  "quotient"
                       }
                   ]
 }

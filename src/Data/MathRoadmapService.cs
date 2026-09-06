@@ -84,7 +84,8 @@ FROM child_skill WHERE child_id=@child AND subject='math';";
                             Add(chance, ref chanceScore, mastery, attempts);
                         else if (!string.IsNullOrWhiteSpace(skill) &&
                                  (skill.StartsWith("ADD_WITHIN_1000", StringComparison.Ordinal) ||
-                                  skill.StartsWith("SUB_WITHIN_1000", StringComparison.Ordinal)))
+                                  skill.StartsWith("SUB_WITHIN_1000", StringComparison.Ordinal) ||
+                                  skill.StartsWith("WP_ONE_STEP_", StringComparison.Ordinal)))
                             Add(written, ref writtenScore, mastery, attempts);
                     }
                 }

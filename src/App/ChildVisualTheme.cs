@@ -248,7 +248,9 @@ namespace WAHUKidsLearn
             if (_question == null || Width < 80 || Height < 40) return;
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             var values = ExtractNumbers(_question.PromptVi);
-            if (_question.TemplateId == "clock_read_minute_hand_3_or_6")
+            if (_question.TemplateId != null && _question.TemplateId.StartsWith("word_problem_", StringComparison.Ordinal))
+                DrawWordProblemModel(e.Graphics);
+            else if (_question.TemplateId == "clock_read_minute_hand_3_or_6")
                 DrawClock(e.Graphics);
             else if (_question.TemplateId != null && _question.TemplateId.StartsWith("geometry_identify_basic__", StringComparison.Ordinal))
                 DrawGeometry(e.Graphics);
@@ -271,6 +273,147 @@ namespace WAHUKidsLearn
                 DrawPlaceValue(e.Graphics, values);
             else if (_question.TemplateId == "polyline_length")
                 DrawPolyline(e.Graphics, values);
+        }
+
+        private void DrawWordProblemModel(Graphics g)
+        {
+            var parts = (_question.IllustrationData ?? string.Empty).Split('|');
+            if (parts.Length < 3) return;
+
+            var stage = new Rectangle(Math.Max(12, Width / 7), 7, Math.Max(160, Width * 5 / 7), Math.Max(62, Height - 20));
+            using (var path = ChildVisualTheme.RoundedRect(stage, 18))
+            using (var fill = new SolidBrush(Color.FromArgb(249, 248, 240)))
+            using (var border = new Pen(Color.FromArgb(222, 226, 215), 1f))
+            { g.FillPath(fill, path); g.DrawPath(border, path); }
+            using (var band = new SolidBrush(Color.FromArgb(239, 245, 237)))
+                g.FillRectangle(band, stage.Left + 2, stage.Top + 2, Math.Max(8, stage.Width - 4), Math.Min(16, stage.Height - 4));
+
+            int first, second;
+            if (parts[0] == "wordbar")
+            {
+                if (parts.Length < 4 || !int.TryParse(parts[2], out first) || !int.TryParse(parts[3], out second)) return;
+                DrawWordBar(g, stage, parts[1], first, second);
+            }
+            else if (parts[0] == "wordgroups")
+            {
+                if (!int.TryParse(parts[1], out first) || !int.TryParse(parts[2], out second)) return;
+                DrawWordGroups(g, stage, first, second);
+            }
+            else if (parts[0] == "wordshare")
+            {
+                if (!int.TryParse(parts[1], out first) || !int.TryParse(parts[2], out second)) return;
+                DrawWordShare(g, stage, first, second);
+            }
+        }
+
+        private void DrawWordBar(Graphics g, Rectangle stage, string relation, int a, int b)
+        {
+            var left = stage.Left + 38;
+            var right = stage.Right - 38;
+            var width = Math.Max(120, right - left);
+            var y = stage.Top + 23;
+            var h = 28;
+            using (var knownA = new SolidBrush(Color.FromArgb(220, 239, 224)))
+            using (var knownB = new SolidBrush(Color.FromArgb(240, 226, 196)))
+            using (var unknown = new SolidBrush(Color.FromArgb(229, 239, 247)))
+            using (var outline = new Pen(Color.FromArgb(128, 142, 136), 1.5f))
+            {
+                if (relation == "add" || relation == "more")
+                {
+                    var w1 = Math.Max(70, width * 3 / 5);
+                    var w2 = width - w1;
+                    g.FillRectangle(knownA, left, y, w1, h); g.DrawRectangle(outline, left, y, w1, h);
+                    g.FillRectangle(knownB, left + w1, y, w2, h); g.DrawRectangle(outline, left + w1, y, w2, h);
+                    DrawCentered(g, a.ToString(), new Rectangle(left, y, w1, h), ChildVisualTheme.Ink, 10f);
+                    DrawCentered(g, b.ToString(), new Rectangle(left + w1, y, w2, h), ChildVisualTheme.Ink, 10f);
+                    DrawBracket(g, left, left + width, y + h + 8, "?");
+                    if (relation == "more")
+                        DrawCentered(g, "phần bằng nhau     phần nhiều hơn", new Rectangle(left, stage.Bottom - 24, width, 20), ChildVisualTheme.MutedInk, 7.8f);
+                }
+                else
+                {
+                    g.FillRectangle(unknown, left, y, width, h); g.DrawRectangle(outline, left, y, width, h);
+                    var removedW = Math.Max(55, width / 3);
+                    g.FillRectangle(knownB, left + width - removedW, y, removedW, h);
+                    g.DrawRectangle(outline, left + width - removedW, y, removedW, h);
+                    DrawCentered(g, "?", new Rectangle(left, y, width - removedW, h), ChildVisualTheme.PeachStrong, 13f);
+                    DrawCentered(g, b.ToString(), new Rectangle(left + width - removedW, y, removedW, h), ChildVisualTheme.Ink, 10f);
+                    DrawBracket(g, left, left + width, y - 8, a.ToString());
+                    var label = relation == "less" ? "ít hơn " + b : "đã bớt " + b;
+                    DrawCentered(g, label, new Rectangle(left, stage.Bottom - 24, width, 20), ChildVisualTheme.MutedInk, 8f);
+                }
+            }
+            if (_hintLevel >= 2)
+            {
+                var op = (relation == "add" || relation == "more") ? "+" : "−";
+                DrawCentered(g, a + " " + op + " " + b + " = ?", new Rectangle(stage.Left, stage.Bottom - 22, stage.Width, 20), ChildVisualTheme.PeachStrong, 9f);
+            }
+        }
+
+        private void DrawWordGroups(Graphics g, Rectangle stage, int factor, int groups)
+        {
+            var cols = Math.Min(5, groups);
+            var rows = (groups + cols - 1) / cols;
+            var cellW = Math.Max(48, Math.Min(72, (stage.Width - 24) / cols));
+            var cellH = Math.Max(34, Math.Min(43, (stage.Height - 26) / Math.Max(1, rows)));
+            var totalW = cols * cellW;
+            var startX = stage.Left + (stage.Width - totalW) / 2;
+            var startY = stage.Top + 7;
+            for (var group = 0; group < groups; group++)
+            {
+                var col = group % cols; var row = group / cols;
+                var rect = new Rectangle(startX + col * cellW + 4, startY + row * cellH, cellW - 8, cellH - 5);
+                using (var path = ChildVisualTheme.RoundedRect(rect, 10))
+                using (var fill = new SolidBrush(Color.FromArgb(236, 244, 228)))
+                using (var border = new Pen(Color.FromArgb(185, 202, 177), 1f))
+                { g.FillPath(fill, path); g.DrawPath(border, path); }
+                for (var i = 0; i < factor; i++)
+                {
+                    var px = rect.Left + 10 + (i % 3) * 12;
+                    var py = rect.Top + rect.Height / 2 - 4 + (i / 3) * 10;
+                    using (var dot = new SolidBrush(ChildVisualTheme.PeachStrong)) g.FillEllipse(dot, px, py, 7, 7);
+                }
+            }
+            DrawCentered(g, groups + " nhóm · mỗi nhóm " + factor, new Rectangle(stage.Left, stage.Bottom - 22, stage.Width, 19), ChildVisualTheme.MutedInk, 8.2f);
+            if (_hintLevel >= 2)
+                DrawCentered(g, groups + " × " + factor + " = ?", new Rectangle(stage.Left, stage.Bottom - 22, stage.Width, 19), ChildVisualTheme.PeachStrong, 9f);
+        }
+
+        private void DrawWordShare(Graphics g, Rectangle stage, int total, int divisor)
+        {
+            var boxW = Math.Max(62, Math.Min(92, (stage.Width - 30) / divisor));
+            var totalW = boxW * divisor;
+            var left = stage.Left + (stage.Width - totalW) / 2;
+            var y = stage.Top + 20;
+            for (var i = 0; i < divisor; i++)
+            {
+                var rect = new Rectangle(left + i * boxW + 4, y, boxW - 8, 43);
+                using (var path = ChildVisualTheme.RoundedRect(rect, 12))
+                using (var fill = new SolidBrush(Color.FromArgb(229, 240, 247)))
+                using (var border = new Pen(Color.FromArgb(172, 196, 211), 1f))
+                { g.FillPath(fill, path); g.DrawPath(border, path); }
+                DrawCentered(g, "?", rect, ChildVisualTheme.SkyStrong, 13f);
+            }
+            DrawCentered(g, total + " chiếc bánh → " + divisor + " phần bằng nhau", new Rectangle(stage.Left, stage.Top + 1, stage.Width, 18), ChildVisualTheme.Ink, 8.2f);
+            if (_hintLevel >= 2)
+                DrawCentered(g, total + " : " + divisor + " = ?", new Rectangle(stage.Left, stage.Bottom - 22, stage.Width, 19), ChildVisualTheme.PeachStrong, 9f);
+        }
+
+        private static void DrawBracket(Graphics g, int left, int right, int y, string label)
+        {
+            using (var pen = new Pen(Color.FromArgb(126, 139, 135), 1.5f))
+            {
+                g.DrawLine(pen, left, y, right, y);
+                g.DrawLine(pen, left, y - 4, left, y + 4);
+                g.DrawLine(pen, right, y - 4, right, y + 4);
+            }
+            DrawCentered(g, label, new Rectangle(left, y - 19, Math.Max(1, right - left), 18), ChildVisualTheme.PeachStrong, 9f);
+        }
+
+        private static void DrawCentered(Graphics g, string text, Rectangle rect, Color color, float size)
+        {
+            TextRenderer.DrawText(g, text ?? string.Empty, ChildVisualTheme.Font(size, FontStyle.Bold), rect, color,
+                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
         }
 
         private void DrawClock(Graphics g)
@@ -1121,7 +1264,7 @@ namespace WAHUKidsLearn
             {
                 new RoadmapRow("Số đến 1000", _snapshot == null ? null : _snapshot.NumberSense, ChildVisualTheme.Sun),
                 new RoadmapRow("Nhẩm 0–20", _snapshot == null ? null : _snapshot.Mental20, ChildVisualTheme.PeachStrong),
-                new RoadmapRow("Cộng / Trừ đến 1000", _snapshot == null ? null : _snapshot.Written1000, ChildVisualTheme.MintStrong),
+                new RoadmapRow("Phép tính & bài toán", _snapshot == null ? null : _snapshot.Written1000, ChildVisualTheme.MintStrong),
                 new RoadmapRow("Nhân / Chia 2 · 5", _snapshot == null ? null : _snapshot.Tables25, ChildVisualTheme.SkyStrong),
                 new RoadmapRow("Hình & đo lường", _snapshot == null ? null : _snapshot.Measurement, Color.FromArgb(147, 126, 181)),
                 new RoadmapRow("Dữ liệu & khả năng", _snapshot == null ? null : _snapshot.Chance, Color.FromArgb(185, 126, 157))
@@ -1167,7 +1310,7 @@ namespace WAHUKidsLearn
             if (snapshot == null) return "Chưa có dữ liệu lộ trình Toán.";
             return DescribeGroup("Số đến 1000", snapshot.NumberSense) + "; " +
                    DescribeGroup("Nhẩm 0 đến 20", snapshot.Mental20) + "; " +
-                   DescribeGroup("Cộng trừ đến 1000", snapshot.Written1000) + "; " +
+                   DescribeGroup("Phép tính và bài toán", snapshot.Written1000) + "; " +
                    DescribeGroup("Nhân chia bảng 2 và 5", snapshot.Tables25) + "; " +
                    DescribeGroup("Hình và đo lường", snapshot.Measurement) + "; " +
                    DescribeGroup("Dữ liệu và khả năng", snapshot.Chance) + ".";

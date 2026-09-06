@@ -177,6 +177,8 @@ namespace WAHU.Learning
                 return New("FACT_ERROR", 0.62, "wrong_numeric_fact_answer");
             if (question.TemplateId == "polyline_length")
                 return New("MEASUREMENT_SUM_ERROR", 0.58, "wrong_polyline_length_sum");
+            if (question.TemplateId != null && question.TemplateId.StartsWith("word_problem_", StringComparison.Ordinal))
+                return New("WORD_PROBLEM_RELATION_ERROR", 0.56, "wrong_one_step_relation_answer");
             return New("UNKNOWN", 0.40, "single_attempt_insufficient_for_specific_diagnosis");
         }
 

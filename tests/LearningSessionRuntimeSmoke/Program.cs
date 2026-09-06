@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Web.Script.Serialization;
 using WAHU.Content;
 using WAHU.Data;
@@ -39,7 +40,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
         private static IList<MathTemplateRef> TestVerifiedContentAndCore(string templatePath)
         {
             var descriptors = new MathVerifiedTemplateSource().Load(templatePath);
-            A(descriptors.Count == 33, "verified_template_source_flattens_all_verified_variants");
+            A(descriptors.Count == 39, "verified_template_source_flattens_all_verified_variants");
             A(descriptors.All(x => x.Status == "VERIFIED_A_TEMPLATE"), "template_source_filters_verified_a_only");
             var refs = descriptors.Select(x => new MathTemplateRef
             {
@@ -50,7 +51,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 StatementVi = x.StatementVi,
                 AnswerText = x.AnswerText
             }).Where(AdaptiveMathSelector.IsSupported).ToList();
-            A(refs.Count == 33, "generator_supports_all_thirty_three_verified_runtime_candidates");
+            A(refs.Count == 39, "generator_supports_all_thirty_nine_verified_runtime_candidates");
             var chanceRefs = refs.Where(x => x.TemplateId.StartsWith("possible_certain_impossible_die__", StringComparison.Ordinal)).ToList();
             A(chanceRefs.Count == 3, "compound_probability_template_flattens_three_variants");
             A(chanceRefs.All(x => x.SourceTemplateId == "possible_certain_impossible_die" &&
@@ -70,13 +71,22 @@ namespace WAHU.LearningSessionRuntimeSmoke
             A(pictographRefs.All(x => x.SourceTemplateId == "pictograph_animals_legend1" &&
                                      !string.IsNullOrWhiteSpace(x.StatementVi) && !string.IsNullOrWhiteSpace(x.AnswerText)),
                 "pictograph_variant_provenance_preserved");
+            var wordRefs = refs.Where(x => x.TemplateId.StartsWith("word_problem_", StringComparison.Ordinal)).ToList();
+            A(wordRefs.Count == 6, "word_problem_pack_has_six_one_step_relations");
+            A(wordRefs.Select(x => x.SkillId).Distinct(StringComparer.Ordinal).Count() == 6,
+                "word_problem_relations_map_to_six_distinct_skills");
+            A(new HashSet<string>(wordRefs.Select(x => x.TemplateId), StringComparer.Ordinal).SetEquals(new[]
+            {
+                "word_problem_add_more", "word_problem_sub_less", "word_problem_more_than", "word_problem_less_than",
+                "word_problem_multiply_groups_2_5", "word_problem_divide_groups_2_5"
+            }), "word_problem_expected_template_ids_present");
 
             var selector = new AdaptiveMathSelector();
             var empty = new Dictionary<string, SkillSnapshot>(StringComparer.Ordinal);
             var first = selector.Select(refs, empty, new DateTime(2026, 9, 6, 10, 0, 0, DateTimeKind.Utc), new string[0], new string[0]);
             A(first != null && first.Template != null, "selector_returns_candidate");
             A(first.DifficultyFit >= 0 && first.DifficultyFit <= 1, "selector_difficulty_fit_bounded");
-            A(first.CandidateSummary.Count == 33, "selector_audits_all_candidates");
+            A(first.CandidateSummary.Count == 39, "selector_audits_all_candidates");
 
             var dueSkills = new Dictionary<string, SkillSnapshot>(StringComparer.Ordinal);
             foreach (var r in refs) dueSkills[r.SkillId] = new SkillSnapshot { SkillId = r.SkillId, MasteryScore = 0.20, Confidence = 0.20, AttemptsCount = 1, LearningState = "LEARNING" };
@@ -120,6 +130,8 @@ namespace WAHU.LearningSessionRuntimeSmoke
                     A(q.UsesTextChoices && q.DisplayChoices.Count >= 3 && (q.IllustrationData ?? string.Empty).StartsWith("pictograph|", StringComparison.Ordinal) &&
                       !q.PromptVi.Contains("3 mèo") && !q.PromptVi.Contains("2 chó") && !q.PromptVi.Contains("4 thỏ"),
                       "pictograph_visual_data_not_leaked_into_prompt_" + r.TemplateId);
+                if (r.TemplateId.StartsWith("word_problem_", StringComparison.Ordinal))
+                    A(ValidateWordProblemContract(q), "word_problem_relation_contract_" + r.TemplateId);
             }
 
             var mastery = new MasteryEngineV1();
@@ -175,6 +187,20 @@ namespace WAHU.LearningSessionRuntimeSmoke
             A(classifier.Classify(geometryQuestion, "đường gấp khúc").ErrorType == "GEOMETRY_RECOGNITION_ERROR", "geometry_error_classified");
             var pictographQuestion = TextQuestion("pictograph_animals_legend1__pictograph_read_describe", "3", new[] { "2", "3", "4" });
             A(classifier.Classify(pictographQuestion, "2").ErrorType == "PICTOGRAPH_READ_ERROR", "pictograph_error_classified");
+            var wordQuestion = new MathQuestion { TemplateId = "word_problem_add_more", CorrectAnswer = 17, AnswerKind = "integer", CorrectAnswerText = "17" };
+            A(classifier.Classify(wordQuestion, "16").ErrorType == "WORD_PROBLEM_RELATION_ERROR", "word_problem_relation_error_classified");
+            A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "word_problem_add_more" }) == "mental_add_within_20",
+                "word_problem_add_repairs_to_mental_add");
+            A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "word_problem_less_than" }) == "mental_sub_within_20",
+                "word_problem_less_repairs_to_mental_sub");
+            A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "word_problem_multiply_groups_2_5", IllustrationData = "wordgroups|5|4" }) == "times_table_5",
+                "word_problem_multiply_5_repairs_to_table_5");
+            A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "word_problem_multiply_groups_2_5", IllustrationData = "wordgroups|2|4" }) == "times_table_2",
+                "word_problem_multiply_2_repairs_to_table_2");
+            A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "word_problem_divide_groups_2_5", IllustrationData = "wordshare|20|5" }) == "times_table_5",
+                "word_problem_divide_5_repairs_to_table_5");
+            A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "word_problem_divide_groups_2_5", IllustrationData = "wordshare|12|2" }) == "times_table_2",
+                "word_problem_divide_2_repairs_to_table_2");
 
             TestGeneratorFuzz(refs);
             return refs;
@@ -223,7 +249,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 adaptiveAudit.Record(new AdaptiveDecisionAuditRequest
                 {
                     Id = "adaptive-" + Guid.NewGuid().ToString("N"), SessionId = session.SessionId, ChildId = profile.ChildId,
-                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.1.0", Question = question, Selection = selection,
+                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.2.0", Question = question, Selection = selection,
                     Behavior = lastBehavior, CreatedAtUtc = DateTime.UtcNow
                 });
 
@@ -250,7 +276,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 answerCommit.Commit(new AnswerCommitRequest
                 {
                     AttemptId = attemptId, SessionId = session.SessionId, ChildId = profile.ChildId,
-                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.1.0", QuestionId = question.QuestionId,
+                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.2.0", QuestionId = question.QuestionId,
                     SkillId = question.SkillId, Subject = "math", StartedAtUtc = answered.AddMilliseconds(-responseMs), AnsweredAtUtc = answered,
                     AnswerJson = Json.Serialize(new Dictionary<string, object> { { "answer", answer } }), IsCorrect = isCorrect,
                     ResponseMs = responseMs, HintLevel = hintLevel, Representation = question.Representation, InputMethod = "mouse",
@@ -305,6 +331,23 @@ namespace WAHU.LearningSessionRuntimeSmoke
             var roadmap = new MathRoadmapService(database).Read(profile.ChildId);
             A(roadmap.TotalTrackedAttempts == 6, "math_roadmap_tracks_all_supported_vertical_slice_attempts");
             A(RoadmapScoresBounded(roadmap), "math_roadmap_mastery_scores_bounded");
+            var writtenAttemptsBeforeWordProblem = roadmap.Written1000.Attempts;
+            using (var connection = database.OpenConnection())
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = @"INSERT OR REPLACE INTO child_skill
+(child_id,skill_id,subject,mastery_score,confidence,attempts_count,independent_success_count,hinted_success_count,transfer_success_count,learning_state,mastery_engine_version,updated_at_utc)
+VALUES(@child,'WP_ONE_STEP_MORE_THAN','math',0.62,0.55,3,2,1,0,'LEARNING',@engine,@updated);";
+                command.Parameters.AddWithValue("@child", profile.ChildId);
+                command.Parameters.AddWithValue("@engine", MasteryEngineV1.Version);
+                command.Parameters.AddWithValue("@updated", DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture));
+                command.ExecuteNonQuery();
+            }
+            var roadmapWithWordProblem = new MathRoadmapService(database).Read(profile.ChildId);
+            A(roadmapWithWordProblem.Written1000.Attempts == writtenAttemptsBeforeWordProblem + 3,
+                "math_roadmap_groups_word_problem_attempts_into_operations_and_problems");
+            A(roadmapWithWordProblem.TotalTrackedAttempts == roadmap.TotalTrackedAttempts + 3,
+                "math_roadmap_total_includes_word_problem_attempts");
             A(correctCount == 5, "vertical_slice_fixture_correctness_expected");
         }
 
@@ -455,8 +498,54 @@ namespace WAHU.LearningSessionRuntimeSmoke
                     q.PromptVi.Contains("3 mèo") || q.PromptVi.Contains("2 chó") || q.PromptVi.Contains("4 thỏ"))
                     throw new Exception("FUZZ_FAIL pictograph visual contract");
             }
+            if (q.TemplateId.StartsWith("word_problem_", StringComparison.Ordinal) && !ValidateWordProblemContract(q))
+                throw new Exception("FUZZ_FAIL word problem relation contract: " + q.TemplateId);
         }
 
+        private static bool ValidateWordProblemContract(MathQuestion q)
+        {
+            if (q == null || q.UsesTextChoices || q.Representation != "word_problem_model") return false;
+            var values = ExtractInts(q.PromptVi);
+            if (values.Length < 2) return false;
+            var parts = (q.IllustrationData ?? string.Empty).Split('|');
+            switch (q.TemplateId)
+            {
+                case "word_problem_add_more":
+                    return values[0] >= 5 && values[0] <= 50 && values[1] >= 1 && values[1] <= 40 &&
+                           values[0] + values[1] <= 100 && q.CorrectAnswer == values[0] + values[1] &&
+                           q.IllustrationData == "wordbar|add|" + values[0] + "|" + values[1];
+                case "word_problem_sub_less":
+                    return values[0] >= 10 && values[0] <= 100 && values[1] >= 1 && values[1] <= 40 &&
+                           values[1] <= values[0] && q.CorrectAnswer == values[0] - values[1] &&
+                           q.IllustrationData == "wordbar|sub|" + values[0] + "|" + values[1];
+                case "word_problem_more_than":
+                    return values[0] >= 5 && values[0] <= 50 && values[1] >= 1 && values[1] <= 30 &&
+                           values[0] + values[1] <= 100 && q.CorrectAnswer == values[0] + values[1] &&
+                           q.IllustrationData == "wordbar|more|" + values[0] + "|" + values[1];
+                case "word_problem_less_than":
+                    return values[0] >= 10 && values[0] <= 100 && values[1] >= 1 && values[1] <= 30 &&
+                           values[1] <= values[0] && q.CorrectAnswer == values[0] - values[1] &&
+                           q.IllustrationData == "wordbar|less|" + values[0] + "|" + values[1];
+                case "word_problem_multiply_groups_2_5":
+                    return values[0] >= 1 && values[0] <= 10 && (values[1] == 2 || values[1] == 5) &&
+                           q.CorrectAnswer == values[0] * values[1] && parts.Length == 3 && parts[0] == "wordgroups" &&
+                           parts[1] == values[1].ToString(CultureInfo.InvariantCulture) && parts[2] == values[0].ToString(CultureInfo.InvariantCulture);
+                case "word_problem_divide_groups_2_5":
+                    return values[0] >= 2 && values[0] <= 50 && (values[1] == 2 || values[1] == 5) && values[0] % values[1] == 0 &&
+                           q.CorrectAnswer == values[0] / values[1] && q.CorrectAnswer >= 1 && q.CorrectAnswer <= 10 &&
+                           parts.Length == 3 && parts[0] == "wordshare" && parts[1] == values[0].ToString(CultureInfo.InvariantCulture) &&
+                           parts[2] == values[1].ToString(CultureInfo.InvariantCulture);
+                default:
+                    return false;
+            }
+        }
+
+        private static string RepairTemplateForSmoke(MathQuestion question)
+        {
+            var method = typeof(MathSessionCoordinator).GetMethod("RepairTemplateFor", BindingFlags.NonPublic | BindingFlags.Static);
+            if (method == null) throw new Exception("RepairTemplateFor reflection target missing");
+            return method.Invoke(null, new object[] { question }) as string;
+        }
         private static MathQuestion TextQuestion(string templateId, string correct, IList<string> choices)
         {
             return new MathQuestion
@@ -494,6 +583,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
 
         private static string ExpectedRepresentation(string templateId)
         {
+            if (!string.IsNullOrWhiteSpace(templateId) && templateId.StartsWith("word_problem_", StringComparison.Ordinal)) return "word_problem_model";
             if (!string.IsNullOrWhiteSpace(templateId) && templateId.StartsWith("possible_certain_impossible_die__", StringComparison.Ordinal)) return "die_outcomes";
             if (!string.IsNullOrWhiteSpace(templateId) && templateId.StartsWith("geometry_identify_basic__", StringComparison.Ordinal)) return "geometry_basic";
             if (!string.IsNullOrWhiteSpace(templateId) && templateId.StartsWith("pictograph_animals_legend1__", StringComparison.Ordinal)) return "pictograph";

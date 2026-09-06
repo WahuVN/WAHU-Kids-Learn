@@ -50,6 +50,12 @@ namespace WAHU.Learning
                     case "subtract_within_1000_one_borrow": question = SubOneBorrow(decision.Template); break;
                     case "polyline_length": question = PolylineLength(decision.Template); break;
                     case "clock_read_minute_hand_3_or_6": question = ClockRead(decision.Template); break;
+                    case "word_problem_add_more": question = WordProblemAddMore(decision.Template); break;
+                    case "word_problem_sub_less": question = WordProblemSubLess(decision.Template); break;
+                    case "word_problem_more_than": question = WordProblemMoreThan(decision.Template); break;
+                    case "word_problem_less_than": question = WordProblemLessThan(decision.Template); break;
+                    case "word_problem_multiply_groups_2_5": question = WordProblemMultiply(decision.Template); break;
+                    case "word_problem_divide_groups_2_5": question = WordProblemDivide(decision.Template); break;
                     default: throw new InvalidOperationException("Unsupported VERIFIED math template: " + decision.Template.TemplateId);
                 }
             }
@@ -245,6 +251,89 @@ namespace WAHU.Learning
             return hour.ToString(CultureInfo.InvariantCulture) + " giờ " + minute.ToString("00", CultureInfo.InvariantCulture) + " phút";
         }
 
+        private MathQuestion WordProblemAddMore(MathTemplateRef template)
+        {
+            var a = _random.Next(5, 51);
+            var maxB = Math.Min(40, 100 - a);
+            var b = _random.Next(1, maxB + 1);
+            var question = NewNumericQuestion(template,
+                "Lan có " + a + " nhãn vở. Mẹ cho thêm " + b + " nhãn vở. Lan có tất cả bao nhiêu nhãn vở?",
+                a + b,
+                "Sơ đồ có hai phần: số nhãn Lan đã có và số nhãn được cho thêm. Cần tìm cả hai phần gộp lại.",
+                "Phép tính phù hợp là " + a + " + " + b + ".");
+            question.IllustrationData = "wordbar|add|" + a + "|" + b;
+            return question;
+        }
+
+        private MathQuestion WordProblemSubLess(MathTemplateRef template)
+        {
+            var a = _random.Next(10, 101);
+            var maxB = Math.Min(40, a);
+            var b = _random.Next(1, maxB + 1);
+            var question = NewNumericQuestion(template,
+                "Lan có " + a + " nhãn vở. Lan cho bạn " + b + " nhãn vở. Lan còn lại bao nhiêu nhãn vở?",
+                a - b,
+                "Sơ đồ bắt đầu bằng cả số nhãn Lan có, rồi tách ra phần đã cho bạn. Cần tìm phần còn lại.",
+                "Phép tính phù hợp là " + a + " - " + b + ".");
+            question.IllustrationData = "wordbar|sub|" + a + "|" + b;
+            return question;
+        }
+
+        private MathQuestion WordProblemMoreThan(MathTemplateRef template)
+        {
+            var a = _random.Next(5, 51);
+            var maxB = Math.Min(30, 100 - a);
+            var b = _random.Next(1, maxB + 1);
+            var question = NewNumericQuestion(template,
+                "Mai có " + a + " bông hoa. Lan có nhiều hơn Mai " + b + " bông hoa. Lan có bao nhiêu bông hoa?",
+                a + b,
+                "Lan có một phần bằng số hoa của Mai và thêm một phần nhiều hơn.",
+                "Phép tính phù hợp là " + a + " + " + b + ".");
+            question.IllustrationData = "wordbar|more|" + a + "|" + b;
+            return question;
+        }
+
+        private MathQuestion WordProblemLessThan(MathTemplateRef template)
+        {
+            var a = _random.Next(10, 101);
+            var maxB = Math.Min(30, a);
+            var b = _random.Next(1, maxB + 1);
+            var question = NewNumericQuestion(template,
+                "Lan có " + a + " bông hoa. Mai có ít hơn Lan " + b + " bông hoa. Mai có bao nhiêu bông hoa?",
+                a - b,
+                "Thanh của Mai ngắn hơn thanh của Lan đúng phần chênh lệch đã biết.",
+                "Phép tính phù hợp là " + a + " - " + b + ".");
+            question.IllustrationData = "wordbar|less|" + a + "|" + b;
+            return question;
+        }
+
+        private MathQuestion WordProblemMultiply(MathTemplateRef template)
+        {
+            var factor = _random.Next(0, 2) == 0 ? 2 : 5;
+            var groups = _random.Next(1, 11);
+            var question = NewNumericQuestion(template,
+                "Có " + groups + " giỏ, mỗi giỏ có " + factor + " quả. Có tất cả bao nhiêu quả?",
+                groups * factor,
+                "Mỗi giỏ có số quả bằng nhau. Hãy nghĩ thành " + groups + " nhóm, mỗi nhóm " + factor + ".",
+                "Phép tính phù hợp là " + groups + " × " + factor + ".");
+            question.IllustrationData = "wordgroups|" + factor + "|" + groups;
+            return question;
+        }
+
+        private MathQuestion WordProblemDivide(MathTemplateRef template)
+        {
+            var divisor = _random.Next(0, 2) == 0 ? 2 : 5;
+            var quotient = _random.Next(1, 11);
+            var total = divisor * quotient;
+            var question = NewNumericQuestion(template,
+                "Có " + total + " chiếc bánh chia đều cho " + divisor + " bạn. Mỗi bạn được bao nhiêu chiếc bánh?",
+                quotient,
+                "Chia đều nghĩa là mỗi bạn nhận số bánh bằng nhau. Hãy phân " + total + " chiếc bánh vào " + divisor + " phần bằng nhau.",
+                "Phép tính phù hợp là " + total + " : " + divisor + ".");
+            question.IllustrationData = "wordshare|" + total + "|" + divisor;
+            return question;
+        }
+
         private MathQuestion MentalAdd(MathTemplateRef template)
         {
             var a = _random.Next(2, 16);
@@ -363,6 +452,8 @@ namespace WAHU.Learning
 
         private static string RepresentationFor(string templateId)
         {
+            if (!string.IsNullOrWhiteSpace(templateId) && templateId.StartsWith("word_problem_", StringComparison.Ordinal))
+                return "word_problem_model";
             if (!string.IsNullOrWhiteSpace(templateId) && templateId.StartsWith("possible_certain_impossible_die__", StringComparison.Ordinal))
                 return "die_outcomes";
             if (!string.IsNullOrWhiteSpace(templateId) && templateId.StartsWith("geometry_identify_basic__", StringComparison.Ordinal))

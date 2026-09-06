@@ -124,6 +124,12 @@ namespace WAHU.Learning
                 case "subtract_within_1000_one_borrow":
                 case "polyline_length":
                 case "clock_read_minute_hand_3_or_6":
+                case "word_problem_add_more":
+                case "word_problem_sub_less":
+                case "word_problem_more_than":
+                case "word_problem_less_than":
+                case "word_problem_multiply_groups_2_5":
+                case "word_problem_divide_groups_2_5":
                     return true;
                 default:
                     return false;

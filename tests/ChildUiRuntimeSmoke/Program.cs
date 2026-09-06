@@ -37,7 +37,12 @@ namespace WAHU.ChildUiRuntimeSmoke
         {
             var cases = new[]
             {
-                QV("clock_read_minute_hand_3_or_6", "CLOCK_MINUTE_HAND_AT_3_OR_6", "Quan sát đồng hồ và chọn thời gian đúng.", "3 giờ 30 phút", "clock|3|30", "clock"),
+                QWP("word_problem_add_more", "WP_ONE_STEP_ADD_MORE", "Lan có 23 nhãn vở. Mẹ cho thêm 7 nhãn vở. Lan có tất cả bao nhiêu nhãn vở?", 30, "wordbar|add|23|7"),
+                QWP("word_problem_sub_less", "WP_ONE_STEP_SUB_LESS", "Lan có 41 nhãn vở. Lan cho bạn 12 nhãn vở. Lan còn lại bao nhiêu nhãn vở?", 29, "wordbar|sub|41|12"),
+                QWP("word_problem_more_than", "WP_ONE_STEP_MORE_THAN", "Mai có 18 bông hoa. Lan có nhiều hơn Mai 6 bông hoa. Lan có bao nhiêu bông hoa?", 24, "wordbar|more|18|6"),
+                QWP("word_problem_less_than", "WP_ONE_STEP_LESS_THAN", "Lan có 30 bông hoa. Mai có ít hơn Lan 8 bông hoa. Mai có bao nhiêu bông hoa?", 22, "wordbar|less|30|8"),
+                QWP("word_problem_multiply_groups_2_5", "WP_ONE_STEP_MULTIPLICATION_CONTEXT", "Có 4 giỏ, mỗi giỏ có 5 quả. Có tất cả bao nhiêu quả?", 20, "wordgroups|5|4"),
+                QWP("word_problem_divide_groups_2_5", "WP_ONE_STEP_DIVISION_CONTEXT", "Có 20 chiếc bánh chia đều cho 5 bạn. Mỗi bạn được bao nhiêu chiếc bánh?", 4, "wordshare|20|5"),                QV("clock_read_minute_hand_3_or_6", "CLOCK_MINUTE_HAND_AT_3_OR_6", "Quan sát đồng hồ và chọn thời gian đúng.", "3 giờ 30 phút", "clock|3|30", "clock"),
                 QV("geometry_identify_basic__point_recognize", "POINT_RECOGNIZE", "Quan sát hình minh họa.", "điểm", "geometry|POINT_RECOGNIZE", "geometry_basic"),
                 QV("geometry_identify_basic__line_segment_recognize", "LINE_SEGMENT_RECOGNIZE", "Quan sát hình minh họa.", "đoạn thẳng", "geometry|LINE_SEGMENT_RECOGNIZE", "geometry_basic"),
                 QV("geometry_identify_basic__curve_recognize", "CURVE_RECOGNIZE", "Quan sát hình minh họa.", "đường cong", "geometry|CURVE_RECOGNIZE", "geometry_basic"),
@@ -260,6 +265,24 @@ namespace WAHU.ChildUiRuntimeSmoke
             }
         }
 
+        private static MathQuestion QWP(string template, string skill, string prompt, int answer, string illustrationData)
+        {
+            return new MathQuestion
+            {
+                TemplateId = template,
+                SkillId = skill,
+                PromptVi = prompt,
+                CorrectAnswer = answer,
+                AnswerKind = "integer",
+                CorrectAnswerText = answer.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                Choices = new[] { answer, answer + 1, Math.Max(0, answer - 1), answer + 2 },
+                ChoiceTexts = new[] { answer.ToString(), (answer + 1).ToString(), Math.Max(0, answer - 1).ToString(), (answer + 2).ToString() },
+                IllustrationData = illustrationData,
+                Representation = "word_problem_model",
+                HintLevel1 = "hint 1",
+                HintLevel2 = "hint 2"
+            };
+        }
         private static MathQuestion QV(string template, string skill, string prompt, string answer, string illustrationData, string representation)
         {
             return new MathQuestion
