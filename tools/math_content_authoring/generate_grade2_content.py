@@ -656,7 +656,7 @@ Q = {
     "DIVIDE_TABLE_2": [
         nq("Tính 16 : 2.", 8, "Vì 2 × 8 = 16 nên 16 : 2 = 8."),
         nq("Tính 20 : 2.", 10, "Vì 2 × 10 = 20 nên 20 : 2 = 10."),
-        nq("18 chiếc bánh chia đều cho 2 bạn. Mỗi bạn được bao nhiêu chiếc?", 9, "18 : 2 = 9."),
+        nq("18 chiếc bánh được xếp vào các đĩa, mỗi đĩa 2 chiếc. Cần bao nhiêu đĩa?", 9, "18 : 2 = 9."),
     ],
     "DIVIDE_TABLE_5": [
         nq("Tính 25 : 5.", 5, "Vì 5 × 5 = 25 nên 25 : 5 = 5."),
@@ -817,7 +817,7 @@ Q = {
         mc("Đồng hồ đang chỉ 5 giờ 15 phút. Kim phút đi tiếp từ số 3 đến số 6, còn kim giờ vẫn nằm giữa 5 và 6. Khi đó đồng hồ chỉ thời gian nào?", "5 giờ 30 phút", ["5 giờ 15 phút", "6 giờ 30 phút", "5 giờ 45 phút"], "Kim phút từ số 3 đến số 6 chuyển từ 15 phút sang 30 phút; kim giờ vẫn trong khoảng sau 5 nên là 5 giờ 30 phút."),
     ],
     "MEASUREMENT_CONVERT_CALCULATE_LEARNED_UNITS": [
-        nq("3 m bằng bao nhiêu dm?", 30, "1 m = 10 dm nên 3 m = 30 dm.", unit="dm"),
+        nq("Một sợi dây dài 3 m. Nếu ghi độ dài bằng đề-xi-mét, số đo là bao nhiêu dm?", 30, "1 m = 10 dm nên 3 m = 30 dm.", unit="dm"),
         nq("2 kg + 3 kg bằng bao nhiêu kg?", 5, "Hai số đo cùng đơn vị kg nên cộng 2 + 3 = 5 kg.", unit="kg"),
         nq("5 l - 2 l bằng bao nhiêu lít?", 3, "Hai số đo cùng đơn vị l nên 5 - 2 = 3 l.", unit="l"),
     ],

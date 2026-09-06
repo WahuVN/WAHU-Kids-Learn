@@ -256,6 +256,20 @@ class MathContentDataSmoke(unittest.TestCase):
         }
         self.assertEqual([], validator.child_facing_internal_vocabulary(metadata_only))
 
+    def test_cross_lesson_prompts_are_not_near_duplicates(self):
+        normalized = [
+            (item["lesson_id"], item["id"], validator.normalize_prompt_identity(item["prompt_vi"]))
+            for item in self.questions
+        ]
+        overlaps = []
+        for index, (lesson_a, id_a, prompt_a) in enumerate(normalized):
+            for lesson_b, id_b, prompt_b in normalized[index + 1:]:
+                if lesson_a == lesson_b:
+                    continue
+                if validator.prompts_are_near_duplicate(prompt_a, prompt_b, 0.95):
+                    overlaps.append((id_a, id_b))
+        self.assertEqual([], overlaps)
+
     def test_question_explanations_are_instructional(self):
         for item in self.questions:
             with self.subTest(item=item["id"]):

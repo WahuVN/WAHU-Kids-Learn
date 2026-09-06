@@ -117,6 +117,19 @@ def normalize_prompt_identity(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
+def prompts_are_near_duplicate(prompt_a: str, prompt_b: str, threshold: float = 0.95) -> bool:
+    if not prompt_a or not prompt_b:
+        return False
+    shorter = min(len(prompt_a), len(prompt_b))
+    longer = max(len(prompt_a), len(prompt_b))
+    if longer == 0 or shorter / longer < threshold:
+        return False
+    matcher = difflib.SequenceMatcher(None, prompt_a, prompt_b)
+    if matcher.quick_ratio() < threshold:
+        return False
+    return matcher.ratio() >= threshold
+
+
 def worked_example_prompt_overlap(example_prompt: str, practice_prompt: str, threshold: float = 0.96) -> str | None:
     example = normalize_prompt_identity(example_prompt)
     practice = normalize_prompt_identity(practice_prompt)
@@ -519,6 +532,7 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
     question_counts_by_skill = Counter()
     question_counts_by_difficulty = Counter()
     prompts_by_lesson: dict[str, list[tuple[str, str]]] = defaultdict(list)
+    all_question_prompts: list[tuple[str, str, str]] = []
     second_hint_counts = Counter()
     distractor_rationale_counts = Counter()
     correct_choice_positions_by_count: dict[int, Counter] = defaultdict(Counter)
@@ -548,6 +562,7 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
         prompt = required_text(q, "prompt_vi", where, errors)
         if prompt:
             prompts_by_lesson[lid].append((qid, prompt))
+            all_question_prompts.append((lid, qid, prompt))
         explanation = required_text(q, "explanation_vi", where, errors)
         if explanation and len(explanation) < MIN_QUESTION_EXPLANATION_CHARS:
             errors.append(f"question_explanation_too_short:{where}:{len(explanation)}")
@@ -839,6 +854,17 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
                 qb, pb = normalized[b]
                 if pa and pb and pa != pb and difflib.SequenceMatcher(None, pa, pb).ratio() >= 0.985:
                     errors.append(f"near_duplicate_prompt:{lid}:{qa}:{qb}")
+
+    # Cross-lesson prompts should not be effectively the same question with only a tiny wording/value change.
+    normalized_global = [(lid, qid, normalize_prompt_identity(prompt)) for lid, qid, prompt in all_question_prompts]
+    for a in range(len(normalized_global)):
+        lid_a, qid_a, prompt_a = normalized_global[a]
+        for b in range(a + 1, len(normalized_global)):
+            lid_b, qid_b, prompt_b = normalized_global[b]
+            if lid_a == lid_b or not prompt_a or not prompt_b:
+                continue
+            if prompts_are_near_duplicate(prompt_a, prompt_b, 0.95):
+                errors.append(f"cross_lesson_near_duplicate_prompt:{qid_a}:{qid_b}")
 
     # Global ID uniqueness, including nested content entities.
     id_counts = Counter(x for x, _ in all_ids if x)

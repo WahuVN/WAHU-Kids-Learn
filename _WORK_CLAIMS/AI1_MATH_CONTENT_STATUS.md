@@ -28,7 +28,7 @@ Owner: AI1 — Math Content & Data
   - interactive measurement
   - word problem
 - Semantic validator errors: **0**
-- Math content unittest: **25 / 25 PASS**
+- Math content unittest: **26 / 26 PASS**
 - Pack manifest/hash/listing check on current working tree: **PASS** (`version=1.9.0`, 3 listed files)
 
 ## Curriculum/content completeness
@@ -83,6 +83,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - vocabulary kỹ thuật nội bộ lọt vào field child-facing (`baseline`, `runtime`, `template`, `validator`, ...);
 - mục tiêu học thứ hai generic/placeholder hoặc bị tái dùng quá mức;
 - explanation câu hỏi quá ngắn, không đủ bước giải thích/kiểm tra cho feedback học tập;
+- prompt trùng/gần trùng giữa hai lesson khác nhau, tránh lãng phí ngân hàng câu hỏi;
 - MCQ trùng nghĩa sau normalize Unicode/case/whitespace hoặc hai biểu thức choice cho cùng giá trị số;
 - vị trí đáp án đúng bị lệch pattern; bank phải phân bố cân bằng theo số lượng choices;
 - invalid true/false shape;
@@ -124,9 +125,10 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - **67/67 worked example unique**, mỗi ví dụ có ít nhất 2 bước giải, **0 exact/near overlap** với 201 câu practice và 67/67 solution chốt đáp án tường minh;
 - mục tiêu học thứ hai đạt **67/67 unique**, gắn concept + dạng vận dụng của từng lesson, placeholder chung = 0;
 - 201/201 `explanation_vi` unique và dài ít nhất 32 ký tự; **57 lời giải quá ngắn đã được nâng lên 0**, MCQ giữ correct-rationale đồng bộ với explanation;
+- toàn ngân hàng đạt **0 exact duplicate + 0 cross-lesson near-duplicate ≥ 0.95**; 2 cặp near-duplicate đã được viết lại theo ngữ cảnh khác;
 - 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract.
 
-Latest result: **25 tests PASS**.
+Latest result: **26 tests PASS**.
 
 ## Commits / waves
 
@@ -149,6 +151,7 @@ Latest result: **25 tests PASS**.
 - `9682572` — `Toán: tách ví dụ mẫu khỏi câu luyện`
 - `19538b5` — `Toán: chốt đáp án rõ trong ví dụ mẫu`
 - `45aa6e8` — `Toán: đặc thù hóa mục tiêu cho 67 bài học`
+- `5e05fcc` — `Toán: nâng chiều sâu lời giải cho ngân hàng câu hỏi`
 
 ## Current blockers outside AI1 content ownership
 

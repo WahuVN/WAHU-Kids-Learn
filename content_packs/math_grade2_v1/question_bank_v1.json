@@ -2996,7 +2996,7 @@
       "skill_id": "DIVIDE_TABLE_2",
       "difficulty": "application",
       "question_type": "numeric_input",
-      "prompt_vi": "18 chiếc bánh chia đều cho 2 bạn. Mỗi bạn được bao nhiêu chiếc?",
+      "prompt_vi": "18 chiếc bánh được xếp vào các đĩa, mỗi đĩa 2 chiếc. Cần bao nhiêu đĩa?",
       "answer_kind": "integer",
       "correct_answer": 9,
       "accepted_answers": [
@@ -7053,7 +7053,7 @@
       "skill_id": "MEASUREMENT_CONVERT_CALCULATE_LEARNED_UNITS",
       "difficulty": "basic",
       "question_type": "numeric_input",
-      "prompt_vi": "3 m bằng bao nhiêu dm?",
+      "prompt_vi": "Một sợi dây dài 3 m. Nếu ghi độ dài bằng đề-xi-mét, số đo là bao nhiêu dm?",
       "answer_kind": "integer",
       "correct_answer": 30,
       "accepted_answers": [
