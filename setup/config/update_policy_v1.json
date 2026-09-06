@@ -10,8 +10,9 @@
     "provider": "github_releases",
     "owner": "WahuVN",
     "repository": "WAHU-Kids-Learn",
-    "manifest_url": "https://github.com/WahuVN/WAHU-Kids-Learn/releases/latest/download/update-manifest.json",
-    "channel": "dev"
+    "manifest_url": "https://github.com/WahuVN/WAHU-Kids-Learn/releases/download/update-dev/update-manifest.json",
+    "channel": "dev",
+    "feed_tag": "update-dev"
   },
   "transport": {
     "https_only": true,
@@ -29,5 +30,8 @@
   "startup": {
     "launch_with_windows_default": true,
     "installer_task_name": "startup"
-  }
+  },
+  "failure_retry_hours": 1,
+  "staged_retention_days": 7,
+  "download_temp_retention_hours": 24
 }

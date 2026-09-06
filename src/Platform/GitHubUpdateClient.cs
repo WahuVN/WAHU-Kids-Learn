@@ -1,25 +1,51 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Net;
+using System.Diagnostics;
 
 namespace WAHU.Platform
 {
     public sealed class GitHubUpdateClient
     {
+        private static readonly object CheckGate = new object();
         public bool TryCheckAndStage(RuntimeConfigBundle config, string currentVersion, out string result)
         {
+            return TryCheckAndStage(config, currentVersion, false, out result);
+        }
+
+        public bool TryCheckAndStage(RuntimeConfigBundle config, string currentVersion, bool force, out string result)
+        {
+            lock (CheckGate)
+            {
             result = "skipped";
-            if (config == null || config.PortableMode || !config.UpdateEnabled || !config.UpdateCheckOnStartup || !config.UpdateAutoDownload) return false;
+            if (config == null) { result = "disabled:no_config"; return false; }
+            if (config.PortableMode) { result = "portable_manual_only"; return false; }
+            if (!config.UpdateEnabled || !config.UpdateCheckOnStartup || !config.UpdateAutoDownload) { result = "disabled"; return false; }
+
+            StagedUpdate existing;
+            if (UpdateStagingService.TryGetStagedUpdate(config, currentVersion, out existing))
+            {
+                result = "already_staged:" + existing.AppVersion;
+                UpdateStatusService.WriteResult(config, result, string.Empty);
+                return true;
+            }
+
             var now = DateTime.UtcNow;
-            if (!UpdateStagingService.IsCheckDue(config, now)) { result = "not_due"; return false; }
+            if (!force && !UpdateStagingService.IsCheckDue(config, now)) { result = "not_due"; return false; }
             UpdateStagingService.MarkCheckAttempt(config, now);
+            UpdateStagingService.Cleanup(config, currentVersion, now);
             Directory.CreateDirectory(config.UpdatesDirectory);
             try
             {
                 EnableTls12();
                 var manifestText = DownloadText(config.UpdateManifestUrl, config.UpdateConnectTimeoutMs, config.UpdateReadTimeoutMs, config.UpdateMaxManifestBytes);
                 var manifest = UpdateManifestParser.ParseAndValidate(manifestText, config);
-                if (!AppVersionComparer.IsNewer(manifest.AppVersion, currentVersion)) { result = "current"; return false; }
+                if (!AppVersionComparer.IsNewer(manifest.AppVersion, currentVersion))
+                {
+                    result = "current:" + manifest.AppVersion;
+                    UpdateStatusService.WriteResult(config, result, string.Empty);
+                    return false;
+                }
                 var tempDir = Path.Combine(config.UpdatesDirectory, "download");
                 Directory.CreateDirectory(tempDir);
                 var temp = Path.Combine(tempDir, "installer-" + Guid.NewGuid().ToString("N") + ".exe");
@@ -28,6 +54,7 @@ namespace WAHU.Platform
                     DownloadFile(manifest.InstallerUrl, temp, config.UpdateConnectTimeoutMs, config.UpdateDownloadTimeoutMs, config.UpdateMaxInstallerBytes);
                     UpdateStagingService.StageVerifiedInstaller(config, manifest, temp);
                     result = "staged:" + manifest.AppVersion;
+                    UpdateStatusService.WriteResult(config, result, string.Empty);
                     return true;
                 }
                 finally { try { if (File.Exists(temp)) File.Delete(temp); } catch { } }
@@ -35,8 +62,9 @@ namespace WAHU.Platform
             catch (Exception ex)
             {
                 result = "update_check_failed:" + ex.GetType().Name;
-                WriteResult(config, result, ex.Message);
+                UpdateStatusService.WriteResult(config, result, ex.Message);
                 return false;
+            }
             }
         }
 
@@ -47,9 +75,10 @@ namespace WAHU.Platform
             using (var stream = response.GetResponseStream())
             using (var ms = new MemoryStream())
             {
+                ValidateFinalResponse(response);
                 if (response.ContentLength > maxBytes) throw new InvalidDataException("Manifest Content-Length exceeds limit.");
-                CopyBounded(stream, ms, maxBytes);
-                return System.Text.Encoding.UTF8.GetString(ms.ToArray());
+                CopyBounded(stream, ms, maxBytes, readTimeoutMs);
+                return System.Text.Encoding.UTF8.GetString(ms.ToArray()).TrimStart('\uFEFF');
             }
         }
 
@@ -60,8 +89,9 @@ namespace WAHU.Platform
             using (var stream = response.GetResponseStream())
             using (var file = new FileStream(destination, FileMode.CreateNew, FileAccess.Write, FileShare.None))
             {
+                ValidateFinalResponse(response);
                 if (response.ContentLength > maxBytes) throw new InvalidDataException("Installer Content-Length exceeds limit.");
-                CopyBounded(stream, file, maxBytes);
+                CopyBounded(stream, file, maxBytes, readTimeoutMs);
                 file.Flush(true);
             }
         }
@@ -80,17 +110,31 @@ namespace WAHU.Platform
             return request;
         }
 
-        private static void CopyBounded(Stream source, Stream destination, long maxBytes)
+        private static void CopyBounded(Stream source, Stream destination, long maxBytes, int totalTimeoutMs)
         {
             var buffer = new byte[64 * 1024];
             long total = 0;
             int read;
+            var elapsed = Stopwatch.StartNew();
             while ((read = source.Read(buffer, 0, buffer.Length)) > 0)
             {
+                if (elapsed.ElapsedMilliseconds > totalTimeoutMs) throw new TimeoutException("Download exceeded configured total timeout.");
                 total += read;
                 if (total > maxBytes) throw new InvalidDataException("Download exceeded configured size limit.");
                 destination.Write(buffer, 0, read);
             }
+            if (elapsed.ElapsedMilliseconds > totalTimeoutMs) throw new TimeoutException("Download exceeded configured total timeout.");
+        }
+
+        private static void ValidateFinalResponse(HttpWebResponse response)
+        {
+            if (response == null || response.ResponseUri == null || response.ResponseUri.Scheme != Uri.UriSchemeHttps)
+                throw new InvalidDataException("Update response must remain HTTPS.");
+            var host = response.ResponseUri.Host;
+            if (!string.Equals(host, "github.com", StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(host, "release-assets.githubusercontent.com", StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(host, "objects.githubusercontent.com", StringComparison.OrdinalIgnoreCase))
+                throw new InvalidDataException("Unexpected final update host: " + host);
         }
 
         private static void EnableTls12()
@@ -98,17 +142,5 @@ namespace WAHU.Platform
             try { ServicePointManager.SecurityProtocol |= (SecurityProtocolType)3072; } catch { }
         }
 
-        private static void WriteResult(RuntimeConfigBundle config, string result, string detail)
-        {
-            try
-            {
-                Directory.CreateDirectory(config.UpdatesDirectory);
-                File.WriteAllLines(Path.Combine(config.UpdatesDirectory, "last-result.txt"), new[]
-                {
-                    "captured_at_utc=" + DateTime.UtcNow.ToString("o"), "result=" + result, "detail=" + (detail ?? string.Empty)
-                });
-            }
-            catch { }
-        }
     }
 }

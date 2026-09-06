@@ -92,6 +92,7 @@ namespace WAHU.Platform
         public static UpdateManifest ParseAndValidate(string json, RuntimeConfigBundle config)
         {
             if (config == null) throw new ArgumentNullException("config");
+            if (json != null) json = json.TrimStart('\uFEFF');
             if (string.IsNullOrWhiteSpace(json)) throw new InvalidDataException("Update manifest empty.");
             if (json.Length * 2L > config.UpdateMaxManifestBytes) throw new InvalidDataException("Update manifest exceeds size limit.");
             Dictionary<string, object> root;

@@ -1,7 +1,8 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
+using System.Threading;
 using System.Windows.Forms;
 using WAHU.Data;
 using WAHU.Performance;
@@ -20,6 +21,8 @@ namespace WAHUKidsLearn
         private readonly RuntimeBootstrapIssue _issue;
         private readonly ParentPinStore _pinStore;
         private readonly Label _summary;
+        private readonly Button _updateButton;
+        private readonly Button _startupButton;
 
         public ParentDashboardForm(RuntimeConfigBundle config, LearningDatabase learningDatabase,
             DatabaseBootstrapResult database, PreflightReport preflight, RuntimePerformanceSettings performance,
@@ -50,15 +53,17 @@ namespace WAHUKidsLearn
             _summary = new Label { Dock = DockStyle.Fill, TextAlign = ContentAlignment.TopLeft, Padding = new Padding(4), AutoEllipsis = true };
             root.Controls.Add(_summary, 0, 1);
 
-            var actions = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, RowCount = 2, Padding = new Padding(0, 8, 0, 8) };
-            for (var i = 0; i < 3; i++) actions.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33f));
+            var actions = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 4, RowCount = 2, Padding = new Padding(0, 8, 0, 8) };
+            for (var i = 0; i < 4; i++) actions.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25f));
             actions.RowStyles.Add(new RowStyle(SizeType.Percent, 50)); actions.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
             AddAction(actions, "Sao lưu thủ công", 0, 0, ManualBackup);
             AddAction(actions, "Phục hồi dữ liệu", 1, 0, OpenRecovery);
-            AddAction(actions, "Chẩn đoán nâng cao", 2, 0, ShowDiagnostics);
-            AddAction(actions, "Đổi PIN", 0, 1, ChangePin);
-            AddAction(actions, "Mở thư mục backup", 1, 1, OpenBackupFolder);
-            AddAction(actions, "Làm mới", 2, 1, RefreshSummary);
+            _updateButton = AddAction(actions, "Kiểm tra cập nhật", 2, 0, CheckForUpdates);
+            _startupButton = AddAction(actions, "Khởi động cùng Windows", 3, 0, ToggleStartup);
+            AddAction(actions, "Chẩn đoán nâng cao", 0, 1, ShowDiagnostics);
+            AddAction(actions, "Đổi PIN", 1, 1, ChangePin);
+            AddAction(actions, "Mở thư mục backup", 2, 1, OpenBackupFolder);
+            AddAction(actions, "Làm mới", 3, 1, RefreshSummary);
             root.Controls.Add(actions, 0, 2);
 
             var footer = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.RightToLeft };
@@ -68,11 +73,12 @@ namespace WAHUKidsLearn
             Shown += delegate { RefreshSummary(); };
         }
 
-        private void AddAction(TableLayoutPanel panel, string text, int col, int row, EventHandler action)
+        private Button AddAction(TableLayoutPanel panel, string text, int col, int row, EventHandler action)
         {
             var button = new Button { Dock = DockStyle.Fill, Margin = new Padding(6), Text = text, AccessibleName = text };
             button.Click += action;
             panel.Controls.Add(button, col, row);
+            return button;
         }
 
         private void RefreshSummary(object sender = null, EventArgs e = null)
@@ -107,10 +113,126 @@ namespace WAHUKidsLearn
             }
 
             var backups = BackupRecoveryService.FindVerifiedBackups(_config.BackupsDirectory).Count;
+            var update = UpdateStatusService.Read(_config, Application.ExecutablePath);
+            var updateText = DescribeUpdate(update);
+            var startupText = _config.PortableMode ? "Khởi động cùng Windows: không áp dụng ở Portable" :
+                "Khởi động cùng Windows: " + (update.StartupEnabled ? "BẬT" : "TẮT");
+            if (_startupButton != null)
+            {
+                _startupButton.Enabled = !_config.PortableMode;
+                _startupButton.Text = _config.PortableMode ? "Startup: Portable" : (update.StartupEnabled ? "Tắt khởi động cùng Windows" : "Bật khởi động cùng Windows");
+            }
+            if (_updateButton != null) _updateButton.Enabled = !_config.PortableMode;
+
             _summary.Text = issueText + Environment.NewLine + Environment.NewLine + learning + Environment.NewLine +
-                "Backup VERIFIED: " + backups + Environment.NewLine + Environment.NewLine + device + Environment.NewLine + perf +
-                Environment.NewLine + Environment.NewLine +
-                "Các báo cáo kỹ năng Vững / Đang học / Cần ôn sẽ xuất hiện khi Learning Session được nối vào giao diện học.";
+                "Backup VERIFIED: " + backups + Environment.NewLine + updateText + Environment.NewLine + startupText + Environment.NewLine + Environment.NewLine +
+                device + Environment.NewLine + perf;
+        }
+
+        private static string DescribeUpdate(UpdateRuntimeStatus status)
+        {
+            if (status == null) return "Cập nhật: chưa có trạng thái";
+            if (status.PortableMode) return "Cập nhật: Portable dùng ZIP thủ công, không tự thay binary";
+            if (!string.IsNullOrWhiteSpace(status.StagedVersion))
+                return "Cập nhật: đã tải " + status.StagedVersion + " · sẵn sàng cài";
+            if (!string.IsNullOrWhiteSpace(status.LastResult) && status.LastResult.StartsWith("update_check_failed:", StringComparison.Ordinal))
+                return "Cập nhật: lần kiểm gần nhất chưa kết nối được; app vẫn dùng offline bình thường";
+            if (!string.IsNullOrWhiteSpace(status.LastResult) && status.LastResult.StartsWith("updated_to:", StringComparison.Ordinal))
+                return "Cập nhật: đã cập nhật thành công lên " + status.CurrentVersion;
+            if (!string.IsNullOrWhiteSpace(status.LastResult) && status.LastResult.StartsWith("current:", StringComparison.Ordinal))
+                return "Cập nhật: đang ở bản mới nhất " + status.CurrentVersion;
+            var checkedAt = status.LastCheckUtc.HasValue ? status.LastCheckUtc.Value.ToLocalTime().ToString("g") : "chưa kiểm";
+            return "Cập nhật: " + status.CurrentVersion + " · lần kiểm " + checkedAt;
+        }
+
+        private void CheckForUpdates(object sender, EventArgs e)
+        {
+            if (_config.PortableMode)
+            {
+                MessageBox.Show(this, "Bản Portable không tự thay file ứng dụng. Hãy tải ZIP Portable mới khi cần cập nhật.", "Cập nhật", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            if (_updateButton != null)
+            {
+                _updateButton.Enabled = false;
+                _updateButton.Text = "Đang kiểm tra...";
+            }
+            ThreadPool.QueueUserWorkItem(delegate
+            {
+                string result;
+                try { new GitHubUpdateClient().TryCheckAndStage(_config, _config.AppVersion, true, out result); }
+                catch (Exception ex) { result = "update_check_failed:" + ex.GetType().Name; }
+                if (IsDisposed || Disposing) return;
+                try
+                {
+                    BeginInvoke((MethodInvoker)delegate
+                    {
+                        if (_updateButton != null) { _updateButton.Enabled = true; _updateButton.Text = "Kiểm tra cập nhật"; }
+                        RefreshSummary();
+                        HandleUpdateResult(result);
+                    });
+                }
+                catch { }
+            });
+        }
+
+        private void HandleUpdateResult(string result)
+        {
+            result = result ?? string.Empty;
+            if (result.StartsWith("staged:", StringComparison.Ordinal) || result.StartsWith("already_staged:", StringComparison.Ordinal))
+            {
+                var version = result.Substring(result.IndexOf(':') + 1);
+                var choice = MessageBox.Show(this,
+                    "Đã tải và xác minh bản " + version + ".\r\n\r\nCài ngay? Ứng dụng sẽ sao lưu dữ liệu, đóng lại, cập nhật rồi mở lại tự động.",
+                    "Cập nhật đã sẵn sàng", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+                if (choice == DialogResult.Yes) ApplyStagedUpdateNow();
+                return;
+            }
+            if (result.StartsWith("current:", StringComparison.Ordinal))
+            {
+                MessageBox.Show(this, "WAHU Kids Learn đang ở bản mới nhất.", "Cập nhật", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            if (result == "portable_manual_only") return;
+            if (result.StartsWith("update_check_failed:", StringComparison.Ordinal))
+            {
+                MessageBox.Show(this, "Chưa kiểm tra được bản mới lúc này. Có thể đang mất mạng hoặc GitHub chưa truy cập được. Việc học offline vẫn hoạt động bình thường.", "Cập nhật", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            MessageBox.Show(this, "Chưa có bản cập nhật mới cần cài.", "Cập nhật", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void ApplyStagedUpdateNow()
+        {
+            if (_database == null || _database.Health == null || !_database.Health.IsHealthy)
+            {
+                MessageBox.Show(this, "Dữ liệu học chưa ở trạng thái đủ an toàn để cập nhật. Hãy phục hồi dữ liệu trước.", "Cập nhật", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            StagedUpdate staged;
+            string error;
+            if (!UpdateApplyCoordinator.TryLaunch(_config, _learningDatabase, AppDomain.CurrentDomain.BaseDirectory, Application.ExecutablePath, out staged, out error))
+            {
+                MessageBox.Show(this, "Chưa thể bắt đầu cập nhật an toàn. Bản hiện tại vẫn được giữ nguyên.", "Cập nhật", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            Close();
+            Application.Exit();
+        }
+
+        private void ToggleStartup(object sender, EventArgs e)
+        {
+            if (_config.PortableMode) return;
+            try
+            {
+                var enabled = StartupRegistrationService.IsEnabled(Application.ExecutablePath);
+                StartupRegistrationService.SetEnabled(Application.ExecutablePath, !enabled);
+                RefreshSummary();
+            }
+            catch
+            {
+                MessageBox.Show(this, "Không thể thay đổi thiết lập khởi động cùng Windows trên tài khoản này.", "Khởi động cùng Windows", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         }
 
         private void ManualBackup(object sender, EventArgs e)

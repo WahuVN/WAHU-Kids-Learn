@@ -34,6 +34,10 @@
     <Compile Include="UpdateStagingService.cs" />
     <Compile Include="GitHubUpdateClient.cs" />
     <Compile Include="UpdateLaunchService.cs" />
+    <Compile Include="StartupRegistrationService.cs" />
+
+    <Compile Include="UpdateStatusService.cs" />
+
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

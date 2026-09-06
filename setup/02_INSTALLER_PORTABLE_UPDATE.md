@@ -1,4 +1,4 @@
-# 02 — INSTALLER, PORTABLE, UPDATE & ROLLBACK
+﻿# 02 — INSTALLER, PORTABLE, UPDATE & ROLLBACK
 
 Cập nhật: 2026-09-06
 
@@ -86,7 +86,7 @@ Portable mode:
 V1 cho phép **auto-update binary ở installed mode** qua đúng release feed công khai của dự án:
 
 ```text
-https://github.com/WahuVN/WAHU-Kids-Learn/releases/latest/download/update-manifest.json
+https://github.com/WahuVN/WAHU-Kids-Learn/releases/download/update-dev/update-manifest.json
 ```
 
 Đây là ngoại lệ network hẹp; Child Mode, analytics, ads, content runtime và learner data vẫn không có network chung.

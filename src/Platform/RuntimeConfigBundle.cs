@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -48,6 +48,9 @@ namespace WAHU.Platform
         public bool UpdateAutoDownload { get; private set; }
         public bool UpdateAutoInstallOnNextStart { get; private set; }
         public int UpdateCheckIntervalHours { get; private set; }
+        public int UpdateFailureRetryHours { get; private set; }
+        public int UpdateStagedRetentionDays { get; private set; }
+        public int UpdateDownloadTempRetentionHours { get; private set; }
         public int UpdateConnectTimeoutMs { get; private set; }
         public int UpdateReadTimeoutMs { get; private set; }
         public int UpdateDownloadTimeoutMs { get; private set; }
@@ -205,19 +208,29 @@ namespace WAHU.Platform
             RequireBool(root, "installed_mode_only", true);
             bundle.UpdateCheckOnStartup = Bool(root, "check_on_startup");
             bundle.UpdateCheckIntervalHours = Int(root, "check_interval_hours");
+            bundle.UpdateFailureRetryHours = Int(root, "failure_retry_hours");
+            bundle.UpdateStagedRetentionDays = Int(root, "staged_retention_days");
+            bundle.UpdateDownloadTempRetentionHours = Int(root, "download_temp_retention_hours");
             bundle.UpdateAutoDownload = Bool(root, "auto_download");
             bundle.UpdateAutoInstallOnNextStart = Bool(root, "auto_install_on_next_start");
             if (!bundle.UpdateEnabled || !bundle.UpdateCheckOnStartup || !bundle.UpdateAutoDownload || !bundle.UpdateAutoInstallOnNextStart)
                 throw new RuntimeConfigException("V1 updater phải bật check/download/install-next-start theo policy đã khóa.");
             if (bundle.UpdateCheckIntervalHours < 1 || bundle.UpdateCheckIntervalHours > 168)
                 throw new RuntimeConfigException("check_interval_hours ngoài khoảng 1..168.");
+            if (bundle.UpdateFailureRetryHours < 1 || bundle.UpdateFailureRetryHours > bundle.UpdateCheckIntervalHours)
+                throw new RuntimeConfigException("failure_retry_hours phải nằm trong 1..check_interval_hours.");
+            if (bundle.UpdateStagedRetentionDays < 1 || bundle.UpdateStagedRetentionDays > 60)
+                throw new RuntimeConfigException("staged_retention_days ngoài khoảng 1..60.");
+            if (bundle.UpdateDownloadTempRetentionHours < 1 || bundle.UpdateDownloadTempRetentionHours > 168)
+                throw new RuntimeConfigException("download_temp_retention_hours ngoài khoảng 1..168.");
 
             var source = Obj(root, "source");
             RequireString(source, "provider", "github_releases");
             RequireString(source, "owner", "WahuVN");
             RequireString(source, "repository", "WAHU-Kids-Learn");
+            RequireString(source, "feed_tag", "update-dev");
             bundle.UpdateManifestUrl = String(source, "manifest_url");
-            var expectedManifest = "https://github.com/WahuVN/WAHU-Kids-Learn/releases/latest/download/update-manifest.json";
+            var expectedManifest = "https://github.com/WahuVN/WAHU-Kids-Learn/releases/download/update-dev/update-manifest.json";
             if (!string.Equals(bundle.UpdateManifestUrl, expectedManifest, StringComparison.Ordinal))
                 throw new RuntimeConfigException("update manifest URL không đúng GitHub release feed đã khóa.");
             bundle.UpdateChannel = String(source, "channel");

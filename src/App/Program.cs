@@ -52,6 +52,13 @@ namespace WAHUKidsLearn
                     return 42;
                 }
 
+                if (!portableMode)
+                {
+                    try { UpdateStagingService.Cleanup(config, config.AppVersion, DateTime.UtcNow); } catch { }
+                    if (HasArg(args, "--post-update"))
+                        UpdateStatusService.WriteResult(config, "updated_to:" + config.AppVersion, string.Empty);
+                }
+
                 var markerPath = Path.Combine(config.RecoveryDirectory, "runtime.running");
                 using (var runtimeMarker = RuntimeSessionMarker.Begin(markerPath))
                 {
@@ -221,33 +228,22 @@ namespace WAHUKidsLearn
         private static bool TryLaunchStagedUpdate(RuntimeConfigBundle config, LearningDatabase learningDatabase, string applicationBase)
         {
             StagedUpdate staged;
-            if (!UpdateStagingService.TryGetStagedUpdate(config, config.AppVersion, out staged)) return false;
+            string error;
+            if (UpdateApplyCoordinator.TryLaunch(config, learningDatabase, applicationBase, Application.ExecutablePath, out staged, out error))
+                return true;
+            if (string.Equals(error, "no_verified_staged_update", StringComparison.Ordinal) || string.Equals(error, "portable_manual_only", StringComparison.Ordinal))
+                return false;
             try
             {
-                var backupDir = Path.Combine(config.BackupsDirectory, "pre_update");
-                var backup = learningDatabase.CreateManualBackup(backupDir, config.AppVersion);
-                if (backup == null || backup.Health == null || !backup.Health.IsHealthy)
-                    throw new InvalidDataException("Pre-update backup verification failed.");
-                string error;
-                if (!UpdateLaunchService.TryLaunch(config, staged, applicationBase, Application.ExecutablePath, out error))
-                    throw new InvalidOperationException("Updater helper launch failed: " + error);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                try
+                Directory.CreateDirectory(config.UpdatesDirectory);
+                File.WriteAllLines(Path.Combine(config.UpdatesDirectory, "update-launch-error.txt"), new[]
                 {
-                    Directory.CreateDirectory(config.UpdatesDirectory);
-                    File.WriteAllLines(Path.Combine(config.UpdatesDirectory, "update-launch-error.txt"), new[]
-                    {
-                        "captured_at_utc=" + DateTime.UtcNow.ToString("o"),
-                        "error_type=" + ex.GetType().Name,
-                        "error=" + ex.Message
-                    });
-                }
-                catch { }
-                return false;
+                    "captured_at_utc=" + DateTime.UtcNow.ToString("o"),
+                    "error=" + (error ?? "unknown")
+                });
             }
+            catch { }
+            return false;
         }
 
         private static void QueueBackgroundUpdateCheck(RuntimeConfigBundle config)

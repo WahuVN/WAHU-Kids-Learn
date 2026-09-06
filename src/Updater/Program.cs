@@ -13,16 +13,18 @@ namespace WAHU.Updater
         private static int Main(string[] args)
         {
             if (Has(args, "--self-test")) return Sha256Text("abc") == "BA7816BF8F01CFEA414140DE5DAE2223B00361A396177A9CB410FF61F20015AD" ? 0 : 9;
-            string log = Get(args, "--log");
+            string log = TryGet(args, "--log");
             try
             {
-                var waitPid = int.Parse(Get(args, "--wait-pid"));
+                var waitPid = ParseRequiredInt(args, "--wait-pid");
                 var installer = Path.GetFullPath(Get(args, "--installer"));
                 var expectedSha = Get(args, "--sha256").ToUpperInvariant();
+                if (expectedSha.Length != 64 || !IsHex(expectedSha)) throw new ArgumentException("Invalid --sha256.");
                 var app = Path.GetFullPath(Get(args, "--app"));
                 var state = Path.GetFullPath(Get(args, "--staged-state"));
-                var production = string.Equals(Get(args, "--production"), "true", StringComparison.OrdinalIgnoreCase);
-                Write(log, "start wait_pid=" + waitPid);
+                var production = ParseRequiredBool(args, "--production");
+                var startupEnabled = ParseRequiredBool(args, "--startup-enabled");
+                Write(log, "start wait_pid=" + waitPid + " startup_enabled=" + startupEnabled);
                 WaitForProcessExit(waitPid, TimeSpan.FromMinutes(2));
                 if (!File.Exists(installer)) throw new FileNotFoundException("Staged installer missing.", installer);
                 var actual = Sha256File(installer);
@@ -32,7 +34,7 @@ namespace WAHU.Updater
                 var setup = Process.Start(new ProcessStartInfo
                 {
                     FileName = installer,
-                    Arguments = "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-",
+                    Arguments = "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP- /TASKS=\"" + (startupEnabled ? "startup" : "!startup") + "\"",
                     UseShellExecute = false,
                     CreateNoWindow = true
                 });
@@ -40,9 +42,32 @@ namespace WAHU.Updater
                 setup.WaitForExit();
                 if (setup.ExitCode != 0) throw new InvalidOperationException("Installer exit=" + setup.ExitCode);
                 try { if (File.Exists(state)) File.Delete(state); } catch { }
+                try
+                {
+                    if (File.Exists(installer)) File.Delete(installer);
+                    var stagedVersionDir = Path.GetDirectoryName(installer);
+                    if (!string.IsNullOrWhiteSpace(stagedVersionDir) && Directory.Exists(stagedVersionDir) && Directory.GetFileSystemEntries(stagedVersionDir).Length == 0)
+                        Directory.Delete(stagedVersionDir, false);
+                }
+                catch { }
                 Write(log, "install_pass");
                 if (File.Exists(app)) Process.Start(new ProcessStartInfo { FileName = app, Arguments = "--post-update", UseShellExecute = true });
                 return 0;
+            }
+            catch (ArgumentException ex)
+            {
+                Write(log, "ARG_ERROR " + ex.Message);
+                return 2;
+            }
+            catch (FormatException ex)
+            {
+                Write(log, "ARG_ERROR " + ex.Message);
+                return 2;
+            }
+            catch (OverflowException ex)
+            {
+                Write(log, "ARG_ERROR " + ex.Message);
+                return 2;
             }
             catch (Exception ex)
             {
@@ -73,8 +98,32 @@ namespace WAHU.Updater
         private static bool Has(string[] args, string name) { foreach (var a in args ?? new string[0]) if (string.Equals(a, name, StringComparison.OrdinalIgnoreCase)) return true; return false; }
         private static string Get(string[] args, string name)
         {
+            var value = TryGet(args, name);
+            if (string.IsNullOrWhiteSpace(value)) throw new ArgumentException("Missing argument " + name);
+            return value;
+        }
+        private static string TryGet(string[] args, string name)
+        {
             for (var i = 0; args != null && i + 1 < args.Length; i++) if (string.Equals(args[i], name, StringComparison.OrdinalIgnoreCase)) return args[i + 1];
-            throw new ArgumentException("Missing argument " + name);
+            return null;
+        }
+        private static int ParseRequiredInt(string[] args, string name)
+        {
+            int value;
+            if (!int.TryParse(Get(args, name), out value) || value < 0) throw new ArgumentException("Invalid " + name + ".");
+            return value;
+        }
+        private static bool ParseRequiredBool(string[] args, string name)
+        {
+            bool value;
+            if (!bool.TryParse(Get(args, name), out value)) throw new ArgumentException("Invalid " + name + ".");
+            return value;
+        }
+        private static bool IsHex(string value)
+        {
+            foreach (var c in value)
+                if (!((c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f'))) return false;
+            return true;
         }
         private static void Write(string path, string text)
         {

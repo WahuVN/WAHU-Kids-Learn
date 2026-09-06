@@ -17,7 +17,8 @@ namespace WAHU.Platform
             if (!File.Exists(path)) return true;
             DateTime last;
             if (!DateTime.TryParse(File.ReadAllText(path).Trim(), CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal, out last)) return true;
-            return utcNow.ToUniversalTime() - last.ToUniversalTime() >= TimeSpan.FromHours(config.UpdateCheckIntervalHours);
+            var hours = LastResultWasFailure(config) ? config.UpdateFailureRetryHours : config.UpdateCheckIntervalHours;
+            return utcNow.ToUniversalTime() - last.ToUniversalTime() >= TimeSpan.FromHours(hours);
         }
 
         public static void MarkCheckAttempt(RuntimeConfigBundle config, DateTime utcNow)
@@ -72,6 +73,26 @@ namespace WAHU.Platform
             return staged;
         }
 
+        public static string PeekStagedVersion(RuntimeConfigBundle config, string currentVersion)
+        {
+            if (config == null || config.PortableMode || !config.UpdateEnabled) return null;
+            try
+            {
+                var statePath = Path.Combine(config.UpdatesDirectory, "staged-update.json");
+                if (!File.Exists(statePath)) return null;
+                var root = Json.DeserializeObject(File.ReadAllText(statePath)) as Dictionary<string, object>;
+                if (root == null || Convert.ToInt32(root["schema_version"], CultureInfo.InvariantCulture) != 1) return null;
+                var version = Convert.ToString(root["app_version"], CultureInfo.InvariantCulture);
+                if (!AppVersionComparer.IsNewer(version, currentVersion)) return null;
+                var relative = Convert.ToString(root["installer_relative_path"], CultureInfo.InvariantCulture);
+                var path = ResolveUnder(config.UpdatesDirectory, relative);
+                var bytes = Convert.ToInt64(root["installer_bytes"], CultureInfo.InvariantCulture);
+                if (!File.Exists(path) || bytes <= 0 || bytes > config.UpdateMaxInstallerBytes || new FileInfo(path).Length != bytes) return null;
+                return version;
+            }
+            catch { return null; }
+        }
+
         public static bool TryGetStagedUpdate(RuntimeConfigBundle config, string currentVersion, out StagedUpdate staged)
         {
             staged = null;
@@ -107,6 +128,98 @@ namespace WAHU.Platform
         public static void ClearStaged(RuntimeConfigBundle config)
         {
             try { var path = Path.Combine(config.UpdatesDirectory, "staged-update.json"); if (File.Exists(path)) File.Delete(path); } catch { }
+        }
+
+        public static void Cleanup(RuntimeConfigBundle config, string currentVersion, DateTime utcNow)
+        {
+            if (config == null || config.PortableMode || string.IsNullOrWhiteSpace(config.UpdatesDirectory)) return;
+            try
+            {
+                var root = Path.GetFullPath(config.UpdatesDirectory);
+                Directory.CreateDirectory(root);
+                DeleteOldFiles(Path.Combine(root, "download"), utcNow.ToUniversalTime().AddHours(-config.UpdateDownloadTempRetentionHours));
+                DeleteOldDirectories(Path.Combine(root, "helper-run"), utcNow.ToUniversalTime().AddHours(-config.UpdateDownloadTempRetentionHours), null);
+
+                var activeVersion = ReadStagedVersion(root);
+                var stagedRoot = Path.Combine(root, "staged");
+                if (Directory.Exists(stagedRoot))
+                {
+                    var cutoff = utcNow.ToUniversalTime().AddDays(-config.UpdateStagedRetentionDays);
+                    foreach (var directory in new DirectoryInfo(stagedRoot).GetDirectories())
+                    {
+                        if ((directory.Attributes & FileAttributes.ReparsePoint) != 0) continue;
+                        var keepActive = !string.IsNullOrWhiteSpace(activeVersion) && string.Equals(directory.Name, activeVersion, StringComparison.OrdinalIgnoreCase);
+                        var isCurrent = string.Equals(directory.Name, currentVersion, StringComparison.OrdinalIgnoreCase);
+                        if (!keepActive && (isCurrent || directory.LastWriteTimeUtc < cutoff)) SafeDeleteDirectory(stagedRoot, directory.FullName);
+                    }
+                }
+            }
+            catch { }
+        }
+
+        private static bool LastResultWasFailure(RuntimeConfigBundle config)
+        {
+            try
+            {
+                var path = Path.Combine(config.UpdatesDirectory, "last-result.txt");
+                if (!File.Exists(path)) return false;
+                foreach (var line in File.ReadAllLines(path))
+                    if (line.StartsWith("result=update_check_failed:", StringComparison.Ordinal)) return true;
+            }
+            catch { }
+            return false;
+        }
+
+        private static string ReadStagedVersion(string updatesRoot)
+        {
+            try
+            {
+                var path = Path.Combine(updatesRoot, "staged-update.json");
+                if (!File.Exists(path)) return null;
+                var root = Json.DeserializeObject(File.ReadAllText(path)) as Dictionary<string, object>;
+                object value;
+                if (root != null && root.TryGetValue("app_version", out value)) return Convert.ToString(value, CultureInfo.InvariantCulture);
+            }
+            catch { }
+            return null;
+        }
+
+        private static void DeleteOldFiles(string directory, DateTime cutoffUtc)
+        {
+            if (!Directory.Exists(directory)) return;
+            foreach (var file in new DirectoryInfo(directory).GetFiles())
+            {
+                try
+                {
+                    if ((file.Attributes & FileAttributes.ReparsePoint) == 0 && file.LastWriteTimeUtc < cutoffUtc) file.Delete();
+                }
+                catch { }
+            }
+        }
+
+        private static void DeleteOldDirectories(string root, DateTime cutoffUtc, string keepName)
+        {
+            if (!Directory.Exists(root)) return;
+            foreach (var directory in new DirectoryInfo(root).GetDirectories())
+            {
+                if ((directory.Attributes & FileAttributes.ReparsePoint) != 0) continue;
+                if (!string.IsNullOrWhiteSpace(keepName) && string.Equals(directory.Name, keepName, StringComparison.OrdinalIgnoreCase)) continue;
+                if (directory.LastWriteTimeUtc < cutoffUtc) SafeDeleteDirectory(root, directory.FullName);
+            }
+        }
+
+        private static void SafeDeleteDirectory(string root, string path)
+        {
+            try
+            {
+                var normalizedRoot = Path.GetFullPath(root).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+                var normalized = Path.GetFullPath(path).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+                if (!normalized.StartsWith(normalizedRoot, StringComparison.OrdinalIgnoreCase)) return;
+                var info = new DirectoryInfo(path);
+                if (!info.Exists || (info.Attributes & FileAttributes.ReparsePoint) != 0) return;
+                info.Delete(true);
+            }
+            catch { }
         }
 
         private static void VerifySignaturePolicy(RuntimeConfigBundle config, UpdateManifest manifest, string path)

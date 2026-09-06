@@ -27,7 +27,8 @@ namespace WAHU.Platform
                     "--app", Quote(appExePath),
                     "--staged-state", Quote(Path.Combine(config.UpdatesDirectory, "staged-update.json")),
                     "--log", Quote(Path.Combine(config.UpdatesDirectory, "update-install.log")),
-                    "--production", (config.UpdateChannel == "stable" ? "true" : "false")
+                    "--production", (config.UpdateChannel == "stable" ? "true" : "false"),
+                    "--startup-enabled", (StartupRegistrationService.IsEnabled(appExePath) ? "true" : "false")
                 });
                 Process.Start(new ProcessStartInfo { FileName = helper, Arguments = args, WorkingDirectory = helperDir, UseShellExecute = false, CreateNoWindow = true });
                 return true;
