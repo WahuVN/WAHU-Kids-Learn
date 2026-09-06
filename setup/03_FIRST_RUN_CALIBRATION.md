@@ -112,7 +112,7 @@ Baseline tự cập nhật chậm sau các attempt tin cậy.
 
 Lần đầu trẻ chỉ cần thấy:
 1. avatar/companion;
-2. nút “Bắt đầu”; 
+2. nút “Bắt đầu”;
 3. một nhiệm vụ thành công ngắn;
 4. hướng dẫn qua hành động, không tutorial dài.
 
