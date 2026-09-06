@@ -88,9 +88,13 @@ namespace WAHU.Content
                     if (string.IsNullOrWhiteSpace(variantSkill) || string.IsNullOrWhiteSpace(statement) || string.IsNullOrWhiteSpace(answer))
                         throw new InvalidDataException("VERIFIED math variant missing skill/statement/answer: " + id);
 
+                    var baseVariantId = id + "__" + variantSkill.ToLowerInvariant();
+                    var variantId = baseVariantId;
+                    var ordinal = 2;
+                    while (ids.Contains(variantId)) variantId = baseVariantId + "__" + ordinal++;
                     Add(result, ids, new MathVerifiedTemplateDescriptor
                     {
-                        Id = id + "__" + variantSkill.ToLowerInvariant(),
+                        Id = variantId,
                         SourceTemplateId = id,
                         SkillId = variantSkill,
                         Status = status,

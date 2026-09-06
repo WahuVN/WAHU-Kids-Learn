@@ -100,7 +100,9 @@ namespace WAHU.Learning
         public static bool IsSupported(MathTemplateRef template)
         {
             if (template == null || string.IsNullOrWhiteSpace(template.TemplateId) || string.IsNullOrWhiteSpace(template.SkillId)) return false;
-            if (template.TemplateId.StartsWith("possible_certain_impossible_die__", StringComparison.Ordinal))
+            if (template.TemplateId.StartsWith("possible_certain_impossible_die__", StringComparison.Ordinal) ||
+                template.TemplateId.StartsWith("geometry_identify_basic__", StringComparison.Ordinal) ||
+                template.TemplateId.StartsWith("pictograph_animals_legend1__", StringComparison.Ordinal))
                 return !string.IsNullOrWhiteSpace(template.FixedContextVi) &&
                        !string.IsNullOrWhiteSpace(template.StatementVi) &&
                        !string.IsNullOrWhiteSpace(template.AnswerText);
@@ -121,6 +123,7 @@ namespace WAHU.Learning
                 case "subtract_within_1000_no_borrow":
                 case "subtract_within_1000_one_borrow":
                 case "polyline_length":
+                case "clock_read_minute_hand_3_or_6":
                     return true;
                 default:
                     return false;

@@ -145,6 +145,12 @@ namespace WAHU.Learning
 
             if (question.UsesTextChoices)
             {
+                if (question.TemplateId == "clock_read_minute_hand_3_or_6")
+                    return New("TIME_READ_ERROR", 0.66, "wrong_clock_quarter_or_half_hour_choice");
+                if (question.TemplateId != null && question.TemplateId.StartsWith("geometry_identify_basic__", StringComparison.Ordinal))
+                    return New("GEOMETRY_RECOGNITION_ERROR", 0.64, "wrong_geometry_label_choice");
+                if (question.TemplateId != null && question.TemplateId.StartsWith("pictograph_animals_legend1__", StringComparison.Ordinal))
+                    return New("PICTOGRAPH_READ_ERROR", 0.62, "wrong_pictograph_read_or_inference_choice");
                 if (question.TemplateId != null && question.TemplateId.StartsWith("possible_certain_impossible_die__", StringComparison.Ordinal))
                     return New("EVENT_CLASSIFICATION_ERROR", 0.64, "wrong_possible_certain_impossible_choice");
                 if (question.TemplateId == "place_value_decompose_3digit" || question.TemplateId == "expanded_form_3digit")

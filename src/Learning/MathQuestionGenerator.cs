@@ -22,6 +22,14 @@ namespace WAHU.Learning
             {
                 question = ProbabilityEvent(decision.Template);
             }
+            else if (decision.Template.TemplateId.StartsWith("geometry_identify_basic__", StringComparison.Ordinal))
+            {
+                question = GeometryVariant(decision.Template);
+            }
+            else if (decision.Template.TemplateId.StartsWith("pictograph_animals_legend1__", StringComparison.Ordinal))
+            {
+                question = PictographVariant(decision.Template);
+            }
             else
             {
                 switch (decision.Template.TemplateId)
@@ -41,6 +49,7 @@ namespace WAHU.Learning
                     case "subtract_within_1000_no_borrow": question = SubNoBorrow(decision.Template); break;
                     case "subtract_within_1000_one_borrow": question = SubOneBorrow(decision.Template); break;
                     case "polyline_length": question = PolylineLength(decision.Template); break;
+                    case "clock_read_minute_hand_3_or_6": question = ClockRead(decision.Template); break;
                     default: throw new InvalidOperationException("Unsupported VERIFIED math template: " + decision.Template.TemplateId);
                 }
             }
@@ -134,6 +143,106 @@ namespace WAHU.Learning
                 template.AnswerText, choices,
                 "Hãy nhìn tất cả sáu kết quả có thể xuất hiện trên xúc xắc: 1, 2, 3, 4, 5, 6.",
                 "So sánh câu đã cho với toàn bộ sáu mặt của xúc xắc rồi chọn: có thể, chắc chắn hoặc không thể.");
+        }
+
+        private MathQuestion ClockRead(MathTemplateRef template)
+        {
+            var hour = _random.Next(1, 13);
+            var minute = _random.Next(0, 2) == 0 ? 15 : 30;
+            var correct = ClockText(hour, minute);
+            var options = new List<string> { correct };
+            AddUnique(options, ClockText(hour, minute == 15 ? 30 : 15));
+            AddUnique(options, ClockText(hour == 12 ? 1 : hour + 1, minute));
+            AddUnique(options, ClockText(hour == 1 ? 12 : hour - 1, minute));
+            var question = NewTextQuestion(template,
+                "Quan sát đồng hồ và chọn thời gian đúng.", correct, TakeAndShuffle(options, 4),
+                "Kim phút chỉ số 3 là 15 phút; kim phút chỉ số 6 là 30 phút.",
+                "Đọc kim phút trước, rồi nhìn vị trí kim giờ để chọn giờ đúng.");
+            question.IllustrationData = "clock|" + hour.ToString(CultureInfo.InvariantCulture) + "|" + minute.ToString(CultureInfo.InvariantCulture);
+            return question;
+        }
+
+        private MathQuestion GeometryVariant(MathTemplateRef template)
+        {
+            if (template == null || string.IsNullOrWhiteSpace(template.SkillId) || string.IsNullOrWhiteSpace(template.AnswerText))
+                throw new InvalidOperationException("VERIFIED geometry variant metadata is incomplete.");
+            var question = NewTextQuestion(template,
+                "Quan sát hình minh họa. " + (template.StatementVi ?? "Hình được vẽ là gì?"),
+                template.AnswerText, GeometryChoices(template.SkillId, template.AnswerText),
+                "Hãy nhìn đặc điểm của hình: điểm, nét, số cạnh hoặc dạng khối.",
+                GeometryHint(template.SkillId));
+            question.IllustrationData = "geometry|" + template.SkillId;
+            return question;
+        }
+
+        private MathQuestion PictographVariant(MathTemplateRef template)
+        {
+            if (template == null || string.IsNullOrWhiteSpace(template.SkillId) || string.IsNullOrWhiteSpace(template.AnswerText))
+                throw new InvalidOperationException("VERIFIED pictograph variant metadata is incomplete.");
+            int numeric;
+            IList<string> choices;
+            if (int.TryParse(template.AnswerText, NumberStyles.Integer, CultureInfo.InvariantCulture, out numeric))
+                choices = Shuffle(new List<string> { "1", "2", "3", "4" });
+            else
+                choices = Shuffle(new List<string> { "mèo", "chó", "thỏ" });
+            var question = NewTextQuestion(template,
+                "Quan sát biểu đồ tranh. " + (template.StatementVi ?? string.Empty),
+                template.AnswerText, choices,
+                "Mỗi hình đại diện 1 con. Hãy đếm hoặc so sánh số hình ở từng hàng.",
+                "Biểu đồ có 3 mèo, 2 chó và 4 thỏ. Dùng các số đó để trả lời câu hỏi.");
+            question.IllustrationData = "pictograph|cat=3|dog=2|rabbit=4|legend=1";
+            return question;
+        }
+
+        private IList<string> GeometryChoices(string skillId, string correct)
+        {
+            List<string> values;
+            switch (skillId)
+            {
+                case "POINT_RECOGNIZE":
+                    values = new List<string> { "điểm", "đoạn thẳng", "đường thẳng", "đường cong" }; break;
+                case "LINE_SEGMENT_RECOGNIZE":
+                    values = new List<string> { "đoạn thẳng", "đường thẳng", "đường cong", "đường gấp khúc" }; break;
+                case "CURVE_RECOGNIZE":
+                    values = new List<string> { "đường cong", "đường thẳng", "đoạn thẳng", "đường gấp khúc" }; break;
+                case "STRAIGHT_LINE_RECOGNIZE":
+                    values = new List<string> { "đường thẳng", "đoạn thẳng", "đường cong", "đường gấp khúc" }; break;
+                case "POLYLINE_RECOGNIZE":
+                    values = new List<string> { "đường gấp khúc", "đường thẳng", "đường cong", "đoạn thẳng" }; break;
+                case "THREE_COLLINEAR_POINTS":
+                    values = new List<string> { "ba điểm thẳng hàng", "điểm", "đoạn thẳng", "đường gấp khúc" }; break;
+                case "QUADRILATERAL_RECOGNIZE":
+                    values = new List<string> { "hình tứ giác", "đường gấp khúc", "khối trụ", "khối cầu" }; break;
+                case "CYLINDER_RECOGNIZE":
+                case "SPHERE_RECOGNIZE":
+                    values = new List<string> { "khối trụ", "khối cầu", "hình tứ giác", "đường cong" }; break;
+                default:
+                    throw new InvalidOperationException("Unsupported VERIFIED geometry skill: " + skillId);
+            }
+            if (!values.Contains(correct)) values[0] = correct;
+            return Shuffle(values.Distinct(StringComparer.Ordinal).Take(4).ToList());
+        }
+
+        private static string GeometryHint(string skillId)
+        {
+            switch (skillId)
+            {
+                case "POINT_RECOGNIZE": return "Điểm chỉ một vị trí; nó không có độ dài như đoạn thẳng.";
+                case "LINE_SEGMENT_RECOGNIZE": return "Đoạn thẳng có hai đầu mút rõ ràng.";
+                case "CURVE_RECOGNIZE": return "Đường cong đổi hướng liên tục, không tạo các đoạn thẳng gãy.";
+                case "STRAIGHT_LINE_RECOGNIZE": return "Đường thẳng đi thẳng theo một hướng và được hiểu là kéo dài về hai phía.";
+                case "POLYLINE_RECOGNIZE": return "Đường gấp khúc gồm nhiều đoạn thẳng nối tiếp nhau.";
+                case "THREE_COLLINEAR_POINTS": return "Ba điểm thẳng hàng khi cùng nằm trên một đường thẳng.";
+                case "QUADRILATERAL_RECOGNIZE": return "Hình tứ giác có bốn cạnh.";
+                case "CYLINDER_RECOGNIZE": return "Khối trụ có hai mặt đáy tròn và một mặt cong xung quanh.";
+                case "SPHERE_RECOGNIZE": return "Khối cầu tròn đều theo mọi hướng, giống một quả bóng.";
+                default: return "Quan sát đặc điểm của hình rồi chọn tên phù hợp.";
+            }
+        }
+
+        private static string ClockText(int hour, int minute)
+        {
+            return hour.ToString(CultureInfo.InvariantCulture) + " giờ " + minute.ToString("00", CultureInfo.InvariantCulture) + " phút";
         }
 
         private MathQuestion MentalAdd(MathTemplateRef template)
@@ -256,6 +365,10 @@ namespace WAHU.Learning
         {
             if (!string.IsNullOrWhiteSpace(templateId) && templateId.StartsWith("possible_certain_impossible_die__", StringComparison.Ordinal))
                 return "die_outcomes";
+            if (!string.IsNullOrWhiteSpace(templateId) && templateId.StartsWith("geometry_identify_basic__", StringComparison.Ordinal))
+                return "geometry_basic";
+            if (!string.IsNullOrWhiteSpace(templateId) && templateId.StartsWith("pictograph_animals_legend1__", StringComparison.Ordinal))
+                return "pictograph";
             switch (templateId)
             {
                 case "place_value_decompose_3digit":
@@ -280,6 +393,8 @@ namespace WAHU.Learning
                     return "place_value";
                 case "polyline_length":
                     return "polyline";
+                case "clock_read_minute_hand_3_or_6":
+                    return "clock";
                 default:
                     return "symbolic";
             }

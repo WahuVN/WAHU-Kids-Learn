@@ -77,9 +77,10 @@ FROM child_skill WHERE child_id=@child AND subject='math';";
                         else if (skill == "TIMES_TABLE_2" || skill == "TIMES_TABLE_5" ||
                                  skill == "DIVIDE_TABLE_2" || skill == "DIVIDE_TABLE_5")
                             Add(tables, ref tableScore, mastery, attempts);
-                        else if (skill == "POLYLINE_LENGTH_SUM_SEGMENTS")
+                        else if (skill == "POLYLINE_LENGTH_SUM_SEGMENTS" || skill == "CLOCK_MINUTE_HAND_AT_3_OR_6" || IsGeometrySkill(skill))
                             Add(measurement, ref measurementScore, mastery, attempts);
-                        else if (skill == "EVENT_POSSIBLE" || skill == "EVENT_CERTAIN" || skill == "EVENT_IMPOSSIBLE")
+                        else if (skill == "EVENT_POSSIBLE" || skill == "EVENT_CERTAIN" || skill == "EVENT_IMPOSSIBLE" ||
+                                 skill == "PICTOGRAPH_READ_DESCRIBE" || skill == "PICTOGRAPH_SIMPLE_INFERENCE")
                             Add(chance, ref chanceScore, mastery, attempts);
                         else if (!string.IsNullOrWhiteSpace(skill) &&
                                  (skill.StartsWith("ADD_WITHIN_1000", StringComparison.Ordinal) ||
@@ -121,6 +122,25 @@ FROM child_skill WHERE child_id=@child AND subject='math';";
         private static void FinalizeAverage(MathRoadmapGroupProgress group, double sum)
         {
             group.MasteryAverage = group.SkillRows <= 0 ? 0.0 : Clamp01(sum / group.SkillRows);
+        }
+
+        private static bool IsGeometrySkill(string skill)
+        {
+            switch (skill)
+            {
+                case "POINT_RECOGNIZE":
+                case "LINE_SEGMENT_RECOGNIZE":
+                case "CURVE_RECOGNIZE":
+                case "STRAIGHT_LINE_RECOGNIZE":
+                case "POLYLINE_RECOGNIZE":
+                case "THREE_COLLINEAR_POINTS":
+                case "QUADRILATERAL_RECOGNIZE":
+                case "CYLINDER_RECOGNIZE":
+                case "SPHERE_RECOGNIZE":
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         private static double Clamp01(double value)

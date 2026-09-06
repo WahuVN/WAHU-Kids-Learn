@@ -37,6 +37,21 @@ namespace WAHU.ChildUiRuntimeSmoke
         {
             var cases = new[]
             {
+                QV("clock_read_minute_hand_3_or_6", "CLOCK_MINUTE_HAND_AT_3_OR_6", "Quan sát đồng hồ và chọn thời gian đúng.", "3 giờ 30 phút", "clock|3|30", "clock"),
+                QV("geometry_identify_basic__point_recognize", "POINT_RECOGNIZE", "Quan sát hình minh họa.", "điểm", "geometry|POINT_RECOGNIZE", "geometry_basic"),
+                QV("geometry_identify_basic__line_segment_recognize", "LINE_SEGMENT_RECOGNIZE", "Quan sát hình minh họa.", "đoạn thẳng", "geometry|LINE_SEGMENT_RECOGNIZE", "geometry_basic"),
+                QV("geometry_identify_basic__curve_recognize", "CURVE_RECOGNIZE", "Quan sát hình minh họa.", "đường cong", "geometry|CURVE_RECOGNIZE", "geometry_basic"),
+                QV("geometry_identify_basic__straight_line_recognize", "STRAIGHT_LINE_RECOGNIZE", "Quan sát hình minh họa.", "đường thẳng", "geometry|STRAIGHT_LINE_RECOGNIZE", "geometry_basic"),
+                QV("geometry_identify_basic__polyline_recognize", "POLYLINE_RECOGNIZE", "Quan sát hình minh họa.", "đường gấp khúc", "geometry|POLYLINE_RECOGNIZE", "geometry_basic"),
+                QV("geometry_identify_basic__three_collinear_points", "THREE_COLLINEAR_POINTS", "Quan sát hình minh họa.", "ba điểm thẳng hàng", "geometry|THREE_COLLINEAR_POINTS", "geometry_basic"),
+                QV("geometry_identify_basic__quadrilateral_recognize", "QUADRILATERAL_RECOGNIZE", "Quan sát hình minh họa.", "hình tứ giác", "geometry|QUADRILATERAL_RECOGNIZE", "geometry_basic"),
+                QV("geometry_identify_basic__cylinder_recognize", "CYLINDER_RECOGNIZE", "Quan sát hình minh họa.", "khối trụ", "geometry|CYLINDER_RECOGNIZE", "geometry_basic"),
+                QV("geometry_identify_basic__sphere_recognize", "SPHERE_RECOGNIZE", "Quan sát hình minh họa.", "khối cầu", "geometry|SPHERE_RECOGNIZE", "geometry_basic"),
+                QV("pictograph_animals_legend1__pictograph_read_describe", "PICTOGRAPH_READ_DESCRIBE", "Quan sát biểu đồ tranh. Có bao nhiêu con mèo?", "3", "pictograph|cat=3|dog=2|rabbit=4|legend=1", "pictograph"),
+                QV("pictograph_animals_legend1__pictograph_read_describe__2", "PICTOGRAPH_READ_DESCRIBE", "Quan sát biểu đồ tranh. Có bao nhiêu con chó?", "2", "pictograph|cat=3|dog=2|rabbit=4|legend=1", "pictograph"),
+                QV("pictograph_animals_legend1__pictograph_read_describe__3", "PICTOGRAPH_READ_DESCRIBE", "Quan sát biểu đồ tranh. Có bao nhiêu con thỏ?", "4", "pictograph|cat=3|dog=2|rabbit=4|legend=1", "pictograph"),
+                QV("pictograph_animals_legend1__pictograph_simple_inference", "PICTOGRAPH_SIMPLE_INFERENCE", "Quan sát biểu đồ tranh. Loài nào có nhiều nhất?", "thỏ", "pictograph|cat=3|dog=2|rabbit=4|legend=1", "pictograph"),
+                QV("pictograph_animals_legend1__pictograph_simple_inference__2", "PICTOGRAPH_SIMPLE_INFERENCE", "Quan sát biểu đồ tranh. Mèo nhiều hơn chó bao nhiêu con?", "1", "pictograph|cat=3|dog=2|rabbit=4|legend=1", "pictograph"),
                 QT("possible_certain_impossible_die__event_possible", "Gieo một con xúc xắc chuẩn có các mặt 1,2,3,4,5,6. Xuất hiện số 3. Điều này là gì?", "có thể"),
                 QT("possible_certain_impossible_die__event_certain", "Gieo một con xúc xắc chuẩn có các mặt 1,2,3,4,5,6. Xuất hiện một số từ 1 đến 6. Điều này là gì?", "chắc chắn"),
                 QT("possible_certain_impossible_die__event_impossible", "Gieo một con xúc xắc chuẩn có các mặt 1,2,3,4,5,6. Xuất hiện số 8. Điều này là gì?", "không thể"),
@@ -243,6 +258,23 @@ namespace WAHU.ChildUiRuntimeSmoke
                 }
                 host.Controls.Remove(child);
             }
+        }
+
+        private static MathQuestion QV(string template, string skill, string prompt, string answer, string illustrationData, string representation)
+        {
+            return new MathQuestion
+            {
+                TemplateId = template,
+                SkillId = skill,
+                PromptVi = prompt,
+                AnswerKind = "text",
+                CorrectAnswerText = answer,
+                ChoiceTexts = new[] { answer, "lựa chọn B", "lựa chọn C" },
+                IllustrationData = illustrationData,
+                Representation = representation,
+                HintLevel1 = "hint 1",
+                HintLevel2 = "hint 2"
+            };
         }
 
         private static MathQuestion QT(string template, string prompt, string answer)

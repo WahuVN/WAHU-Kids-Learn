@@ -39,7 +39,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
         private static IList<MathTemplateRef> TestVerifiedContentAndCore(string templatePath)
         {
             var descriptors = new MathVerifiedTemplateSource().Load(templatePath);
-            A(descriptors.Count == 18, "verified_template_source_flattens_all_verified_variants");
+            A(descriptors.Count == 33, "verified_template_source_flattens_all_verified_variants");
             A(descriptors.All(x => x.Status == "VERIFIED_A_TEMPLATE"), "template_source_filters_verified_a_only");
             var refs = descriptors.Select(x => new MathTemplateRef
             {
@@ -50,7 +50,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 StatementVi = x.StatementVi,
                 AnswerText = x.AnswerText
             }).Where(AdaptiveMathSelector.IsSupported).ToList();
-            A(refs.Count == 18, "generator_supports_all_eighteen_verified_runtime_candidates");
+            A(refs.Count == 33, "generator_supports_all_thirty_three_verified_runtime_candidates");
             var chanceRefs = refs.Where(x => x.TemplateId.StartsWith("possible_certain_impossible_die__", StringComparison.Ordinal)).ToList();
             A(chanceRefs.Count == 3, "compound_probability_template_flattens_three_variants");
             A(chanceRefs.All(x => x.SourceTemplateId == "possible_certain_impossible_die" &&
@@ -58,13 +58,25 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 "compound_probability_variant_metadata_preserved");
             A(new HashSet<string>(chanceRefs.Select(x => x.AnswerText), StringComparer.Ordinal).SetEquals(new[] { "có thể", "chắc chắn", "không thể" }),
                 "compound_probability_verified_answers_preserved");
+            var clockRefs = refs.Where(x => x.TemplateId == "clock_read_minute_hand_3_or_6").ToList();
+            A(clockRefs.Count == 1 && clockRefs[0].SkillId == "CLOCK_MINUTE_HAND_AT_3_OR_6", "clock_verified_candidate_loaded_once");
+            var geometryRefs = refs.Where(x => x.TemplateId.StartsWith("geometry_identify_basic__", StringComparison.Ordinal)).ToList();
+            A(geometryRefs.Count == 9 && geometryRefs.Select(x => x.SkillId).Distinct(StringComparer.Ordinal).Count() == 9,
+                "geometry_compound_template_flattens_nine_unique_skills");
+            var pictographRefs = refs.Where(x => x.TemplateId.StartsWith("pictograph_animals_legend1__", StringComparison.Ordinal)).ToList();
+            A(pictographRefs.Count == 5, "pictograph_compound_template_flattens_five_questions");
+            A(pictographRefs.Select(x => x.TemplateId).Distinct(StringComparer.Ordinal).Count() == 5,
+                "pictograph_duplicate_skill_variants_receive_unique_ids");
+            A(pictographRefs.All(x => x.SourceTemplateId == "pictograph_animals_legend1" &&
+                                     !string.IsNullOrWhiteSpace(x.StatementVi) && !string.IsNullOrWhiteSpace(x.AnswerText)),
+                "pictograph_variant_provenance_preserved");
 
             var selector = new AdaptiveMathSelector();
             var empty = new Dictionary<string, SkillSnapshot>(StringComparer.Ordinal);
             var first = selector.Select(refs, empty, new DateTime(2026, 9, 6, 10, 0, 0, DateTimeKind.Utc), new string[0], new string[0]);
             A(first != null && first.Template != null, "selector_returns_candidate");
             A(first.DifficultyFit >= 0 && first.DifficultyFit <= 1, "selector_difficulty_fit_bounded");
-            A(first.CandidateSummary.Count == 18, "selector_audits_all_candidates");
+            A(first.CandidateSummary.Count == 33, "selector_audits_all_candidates");
 
             var dueSkills = new Dictionary<string, SkillSnapshot>(StringComparer.Ordinal);
             foreach (var r in refs) dueSkills[r.SkillId] = new SkillSnapshot { SkillId = r.SkillId, MasteryScore = 0.20, Confidence = 0.20, AttemptsCount = 1, LearningState = "LEARNING" };
@@ -98,6 +110,16 @@ namespace WAHU.LearningSessionRuntimeSmoke
                     A(q.UsesTextChoices && q.DisplayChoices.Count == 3 &&
                       new HashSet<string>(q.DisplayChoices, StringComparer.Ordinal).SetEquals(new[] { "có thể", "chắc chắn", "không thể" }),
                       "probability_variant_uses_three_verified_classification_choices_" + r.SkillId);
+                if (r.TemplateId == "clock_read_minute_hand_3_or_6")
+                    A(q.UsesTextChoices && q.DisplayChoices.Count == 4 && (q.IllustrationData ?? string.Empty).StartsWith("clock|", StringComparison.Ordinal) &&
+                      !q.PromptVi.Any(char.IsDigit), "clock_uses_hidden_visual_data_without_prompt_answer_leak");
+                if (r.TemplateId.StartsWith("geometry_identify_basic__", StringComparison.Ordinal))
+                    A(q.UsesTextChoices && q.DisplayChoices.Count >= 3 && q.IllustrationData == "geometry|" + r.SkillId,
+                      "geometry_variant_has_skill_bound_visual_data_" + r.SkillId);
+                if (r.TemplateId.StartsWith("pictograph_animals_legend1__", StringComparison.Ordinal))
+                    A(q.UsesTextChoices && q.DisplayChoices.Count >= 3 && (q.IllustrationData ?? string.Empty).StartsWith("pictograph|", StringComparison.Ordinal) &&
+                      !q.PromptVi.Contains("3 mèo") && !q.PromptVi.Contains("2 chó") && !q.PromptVi.Contains("4 thỏ"),
+                      "pictograph_visual_data_not_leaked_into_prompt_" + r.TemplateId);
             }
 
             var mastery = new MasteryEngineV1();
@@ -147,6 +169,12 @@ namespace WAHU.LearningSessionRuntimeSmoke
             var eventQuestion = TextQuestion("possible_certain_impossible_die__event_possible", "có thể", new[] { "có thể", "chắc chắn", "không thể" });
             A(classifier.Classify(eventQuestion, "không thể").ErrorType == "EVENT_CLASSIFICATION_ERROR", "event_classification_error_classified");
             A(classifier.Classify(eventQuestion, "có thể") == null, "correct_event_classification_has_no_error");
+            var clockQuestion = TextQuestion("clock_read_minute_hand_3_or_6", "3 giờ 30 phút", new[] { "3 giờ 30 phút", "3 giờ 15 phút" });
+            A(classifier.Classify(clockQuestion, "3 giờ 15 phút").ErrorType == "TIME_READ_ERROR", "clock_read_error_classified");
+            var geometryQuestion = TextQuestion("geometry_identify_basic__quadrilateral_recognize", "hình tứ giác", new[] { "hình tứ giác", "đường gấp khúc" });
+            A(classifier.Classify(geometryQuestion, "đường gấp khúc").ErrorType == "GEOMETRY_RECOGNITION_ERROR", "geometry_error_classified");
+            var pictographQuestion = TextQuestion("pictograph_animals_legend1__pictograph_read_describe", "3", new[] { "2", "3", "4" });
+            A(classifier.Classify(pictographQuestion, "2").ErrorType == "PICTOGRAPH_READ_ERROR", "pictograph_error_classified");
 
             TestGeneratorFuzz(refs);
             return refs;
@@ -195,7 +223,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 adaptiveAudit.Record(new AdaptiveDecisionAuditRequest
                 {
                     Id = "adaptive-" + Guid.NewGuid().ToString("N"), SessionId = session.SessionId, ChildId = profile.ChildId,
-                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.0.0", Question = question, Selection = selection,
+                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.1.0", Question = question, Selection = selection,
                     Behavior = lastBehavior, CreatedAtUtc = DateTime.UtcNow
                 });
 
@@ -222,7 +250,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 answerCommit.Commit(new AnswerCommitRequest
                 {
                     AttemptId = attemptId, SessionId = session.SessionId, ChildId = profile.ChildId,
-                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.0.0", QuestionId = question.QuestionId,
+                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.1.0", QuestionId = question.QuestionId,
                     SkillId = question.SkillId, Subject = "math", StartedAtUtc = answered.AddMilliseconds(-responseMs), AnsweredAtUtc = answered,
                     AnswerJson = Json.Serialize(new Dictionary<string, object> { { "answer", answer } }), IsCorrect = isCorrect,
                     ResponseMs = responseMs, HintLevel = hintLevel, Representation = question.Representation, InputMethod = "mouse",
@@ -407,6 +435,26 @@ namespace WAHU.LearningSessionRuntimeSmoke
                     !new HashSet<string>(q.DisplayChoices, StringComparer.Ordinal).SetEquals(new[] { "có thể", "chắc chắn", "không thể" }))
                     throw new Exception("FUZZ_FAIL probability choice contract");
             }
+            if (q.TemplateId == "clock_read_minute_hand_3_or_6")
+            {
+                var parts = (q.IllustrationData ?? string.Empty).Split('|');
+                int hour, minute;
+                if (parts.Length != 3 || parts[0] != "clock" || !int.TryParse(parts[1], out hour) || !int.TryParse(parts[2], out minute) ||
+                    hour < 1 || hour > 12 || (minute != 15 && minute != 30) ||
+                    q.CorrectAnswerDisplay != hour + " giờ " + minute.ToString("00", CultureInfo.InvariantCulture) + " phút" || q.PromptVi.Any(char.IsDigit))
+                    throw new Exception("FUZZ_FAIL clock hidden-data contract");
+            }
+            if (q.TemplateId.StartsWith("geometry_identify_basic__", StringComparison.Ordinal))
+            {
+                if (!q.UsesTextChoices || q.DisplayChoices.Count < 3 || q.IllustrationData != "geometry|" + q.SkillId)
+                    throw new Exception("FUZZ_FAIL geometry visual contract");
+            }
+            if (q.TemplateId.StartsWith("pictograph_animals_legend1__", StringComparison.Ordinal))
+            {
+                if (!q.UsesTextChoices || q.DisplayChoices.Count < 3 || q.IllustrationData != "pictograph|cat=3|dog=2|rabbit=4|legend=1" ||
+                    q.PromptVi.Contains("3 mèo") || q.PromptVi.Contains("2 chó") || q.PromptVi.Contains("4 thỏ"))
+                    throw new Exception("FUZZ_FAIL pictograph visual contract");
+            }
         }
 
         private static MathQuestion TextQuestion(string templateId, string correct, IList<string> choices)
@@ -447,6 +495,9 @@ namespace WAHU.LearningSessionRuntimeSmoke
         private static string ExpectedRepresentation(string templateId)
         {
             if (!string.IsNullOrWhiteSpace(templateId) && templateId.StartsWith("possible_certain_impossible_die__", StringComparison.Ordinal)) return "die_outcomes";
+            if (!string.IsNullOrWhiteSpace(templateId) && templateId.StartsWith("geometry_identify_basic__", StringComparison.Ordinal)) return "geometry_basic";
+            if (!string.IsNullOrWhiteSpace(templateId) && templateId.StartsWith("pictograph_animals_legend1__", StringComparison.Ordinal)) return "pictograph";
+            if (templateId == "clock_read_minute_hand_3_or_6") return "clock";
             if (templateId == "place_value_decompose_3digit" || templateId == "expanded_form_3digit") return "place_value_blocks";
             if (templateId == "predecessor_successor" || templateId == "compare_two_numbers_1000") return "number_line_1000";
             if (templateId == "mental_add_within_20" || templateId == "mental_sub_within_20") return "number_ray";

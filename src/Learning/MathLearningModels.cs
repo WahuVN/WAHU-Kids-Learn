@@ -39,6 +39,7 @@ namespace WAHU.Learning
         public string AnswerKind { get; set; }
         public string CorrectAnswerText { get; set; }
         public IList<string> ChoiceTexts { get; set; }
+        public string IllustrationData { get; set; }
         public string Representation { get; set; }
         public string HintLevel1 { get; set; }
         public string HintLevel2 { get; set; }

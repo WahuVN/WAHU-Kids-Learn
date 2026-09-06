@@ -248,7 +248,13 @@ namespace WAHUKidsLearn
             if (_question == null || Width < 80 || Height < 40) return;
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             var values = ExtractNumbers(_question.PromptVi);
-            if (_question.TemplateId != null && _question.TemplateId.StartsWith("possible_certain_impossible_die__", StringComparison.Ordinal))
+            if (_question.TemplateId == "clock_read_minute_hand_3_or_6")
+                DrawClock(e.Graphics);
+            else if (_question.TemplateId != null && _question.TemplateId.StartsWith("geometry_identify_basic__", StringComparison.Ordinal))
+                DrawGeometry(e.Graphics);
+            else if (_question.TemplateId != null && _question.TemplateId.StartsWith("pictograph_animals_legend1__", StringComparison.Ordinal))
+                DrawPictograph(e.Graphics);
+            else if (_question.TemplateId != null && _question.TemplateId.StartsWith("possible_certain_impossible_die__", StringComparison.Ordinal))
                 DrawDieOutcomes(e.Graphics);
             else if (_question.TemplateId == "place_value_decompose_3digit" || _question.TemplateId == "expanded_form_3digit")
                 DrawPlaceValueConcept(e.Graphics, values);
@@ -265,6 +271,175 @@ namespace WAHUKidsLearn
                 DrawPlaceValue(e.Graphics, values);
             else if (_question.TemplateId == "polyline_length")
                 DrawPolyline(e.Graphics, values);
+        }
+
+        private void DrawClock(Graphics g)
+        {
+            var parts = (_question.IllustrationData ?? string.Empty).Split('|');
+            int hour, minute;
+            if (parts.Length != 3 || parts[0] != "clock" || !int.TryParse(parts[1], out hour) || !int.TryParse(parts[2], out minute)) return;
+            if (hour < 1 || hour > 12 || (minute != 15 && minute != 30)) return;
+
+            var radius = Math.Max(34, Math.Min(53, Math.Min(Width / 4, (Height - 8) / 2)));
+            var cx = Width / 2;
+            var cy = Height / 2;
+            var face = new Rectangle(cx - radius, cy - radius, radius * 2, radius * 2);
+            using (var fill = new SolidBrush(Color.FromArgb(253, 251, 243)))
+            using (var outline = new Pen(Color.FromArgb(126, 139, 135), 2f))
+            { g.FillEllipse(fill, face); g.DrawEllipse(outline, face); }
+
+            for (var n = 1; n <= 12; n++)
+            {
+                var angle = (n * 30 - 90) * Math.PI / 180.0;
+                var tx = cx + (int)Math.Round(Math.Cos(angle) * (radius - 13));
+                var ty = cy + (int)Math.Round(Math.Sin(angle) * (radius - 13));
+                TextRenderer.DrawText(g, n.ToString(), ChildVisualTheme.Font(7.2f, FontStyle.Bold),
+                    new Rectangle(tx - 10, ty - 9, 20, 18), ChildVisualTheme.MutedInk,
+                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+            }
+
+            var minuteAngle = (minute * 6 - 90) * Math.PI / 180.0;
+            var hourAngle = (((hour % 12) * 30) + minute * 0.5 - 90) * Math.PI / 180.0;
+            var minuteEnd = new Point(cx + (int)Math.Round(Math.Cos(minuteAngle) * (radius - 14)),
+                cy + (int)Math.Round(Math.Sin(minuteAngle) * (radius - 14)));
+            var hourEnd = new Point(cx + (int)Math.Round(Math.Cos(hourAngle) * (radius - 25)),
+                cy + (int)Math.Round(Math.Sin(hourAngle) * (radius - 25)));
+            using (var minutePen = new Pen(ChildVisualTheme.SkyStrong, 2.5f))
+            using (var hourPen = new Pen(ChildVisualTheme.Ink, 4f))
+            {
+                minutePen.StartCap = LineCap.Round; minutePen.EndCap = LineCap.Round;
+                hourPen.StartCap = LineCap.Round; hourPen.EndCap = LineCap.Round;
+                g.DrawLine(hourPen, new Point(cx, cy), hourEnd);
+                g.DrawLine(minutePen, new Point(cx, cy), minuteEnd);
+            }
+            using (var hub = new SolidBrush(ChildVisualTheme.PeachStrong)) g.FillEllipse(hub, cx - 4, cy - 4, 8, 8);
+
+            if (_hintLevel >= 1)
+            {
+                TextRenderer.DrawText(g, "Kim phút: số 3 = 15 phút · số 6 = 30 phút", ChildVisualTheme.Font(8.2f, FontStyle.Bold),
+                    new Rectangle(0, Math.Max(0, Height - 21), Width, 19), ChildVisualTheme.MutedInk,
+                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+            }
+        }
+
+        private void DrawGeometry(Graphics g)
+        {
+            var skill = _question.SkillId ?? string.Empty;
+            var cx = Width / 2;
+            var cy = Height / 2;
+            var stage = new Rectangle(Math.Max(12, Width / 5), 6, Math.Max(120, Width * 3 / 5), Math.Max(58, Height - 18));
+            using (var stagePath = ChildVisualTheme.RoundedRect(stage, 18))
+            using (var stageFill = new SolidBrush(Color.FromArgb(248, 249, 242)))
+            using (var stageBorder = new Pen(Color.FromArgb(224, 229, 218), 1f))
+            { g.FillPath(stageFill, stagePath); g.DrawPath(stageBorder, stagePath); }
+            using (var band = new SolidBrush(Color.FromArgb(239, 246, 241)))
+                g.FillRectangle(band, stage.Left + 2, stage.Bottom - Math.Min(18, stage.Height / 4), stage.Width - 4, Math.Min(16, stage.Height / 4));
+            using (var pen = new Pen(ChildVisualTheme.SkyStrong, 4f))
+            using (var thin = new Pen(Color.FromArgb(112, 132, 128), 2f))
+            using (var dot = new SolidBrush(ChildVisualTheme.PeachStrong))
+            {
+                pen.StartCap = LineCap.Round; pen.EndCap = LineCap.Round;
+                switch (skill)
+                {
+                    case "POINT_RECOGNIZE":
+                        var focus = new Rectangle(cx - 55, cy - 35, 110, 70);
+                        using (var focusFill = new SolidBrush(Color.FromArgb(244, 247, 238)))
+                        using (var focusBorder = new Pen(Color.FromArgb(220, 226, 213), 1f))
+                        using (var focusPath = ChildVisualTheme.RoundedRect(focus, 18))
+                        { g.FillPath(focusFill, focusPath); g.DrawPath(focusBorder, focusPath); }
+                        g.FillEllipse(dot, cx - 8, cy - 8, 16, 16);
+                        TextRenderer.DrawText(g, "A", ChildVisualTheme.Font(10f, FontStyle.Bold), new Rectangle(cx + 12, cy - 14, 32, 26), ChildVisualTheme.Ink);
+                        break;
+                    case "LINE_SEGMENT_RECOGNIZE":
+                        g.DrawLine(pen, cx - 100, cy, cx + 100, cy);
+                        g.FillEllipse(dot, cx - 105, cy - 5, 10, 10); g.FillEllipse(dot, cx + 95, cy - 5, 10, 10);
+                        TextRenderer.DrawText(g, "A", ChildVisualTheme.Font(8f, FontStyle.Bold), new Rectangle(cx - 118, cy + 8, 24, 20), ChildVisualTheme.Ink);
+                        TextRenderer.DrawText(g, "B", ChildVisualTheme.Font(8f, FontStyle.Bold), new Rectangle(cx + 94, cy + 8, 24, 20), ChildVisualTheme.Ink);
+                        break;
+                    case "CURVE_RECOGNIZE":
+                        g.DrawBezier(pen, cx - 130, cy + 28, cx - 45, cy - 70, cx + 50, cy + 70, cx + 130, cy - 24);
+                        break;
+                    case "STRAIGHT_LINE_RECOGNIZE":
+                        g.DrawLine(pen, cx - 150, cy + 30, cx + 150, cy - 30);
+                        g.DrawLine(thin, cx - 150, cy + 30, cx - 137, cy + 18);
+                        g.DrawLine(thin, cx + 150, cy - 30, cx + 137, cy - 18);
+                        break;
+                    case "POLYLINE_RECOGNIZE":
+                        var poly = new[] { new Point(cx - 135, cy + 25), new Point(cx - 55, cy - 35), new Point(cx + 25, cy + 28), new Point(cx + 135, cy - 20) };
+                        g.DrawLines(pen, poly);
+                        break;
+                    case "THREE_COLLINEAR_POINTS":
+                        g.DrawLine(thin, cx - 145, cy, cx + 145, cy);
+                        foreach (var x in new[] { cx - 90, cx, cx + 90 }) g.FillEllipse(dot, x - 5, cy - 5, 10, 10);
+                        break;
+                    case "QUADRILATERAL_RECOGNIZE":
+                        var quad = new[] { new Point(cx - 100, cy + 40), new Point(cx - 65, cy - 45), new Point(cx + 85, cy - 30), new Point(cx + 115, cy + 42) };
+                        g.DrawPolygon(pen, quad);
+                        break;
+                    case "CYLINDER_RECOGNIZE":
+                        var body = new Rectangle(cx - 70, cy - 42, 140, 84);
+                        g.DrawEllipse(pen, body.Left, body.Top - 14, body.Width, 28);
+                        g.DrawLine(pen, body.Left, body.Top, body.Left, body.Bottom);
+                        g.DrawLine(pen, body.Right, body.Top, body.Right, body.Bottom);
+                        g.DrawArc(pen, body.Left, body.Bottom - 14, body.Width, 28, 0, 180);
+                        break;
+                    case "SPHERE_RECOGNIZE":
+                        var sphere = new Rectangle(cx - 58, cy - 58, 116, 116);
+                        g.DrawEllipse(pen, sphere);
+                        g.DrawEllipse(thin, cx - 24, cy - 58, 48, 116);
+                        g.DrawEllipse(thin, cx - 58, cy - 20, 116, 40);
+                        break;
+                }
+            }
+            if (_hintLevel >= 1)
+                TextRenderer.DrawText(g, "Quan sát đặc điểm của hình", ChildVisualTheme.Font(8.3f, FontStyle.Bold),
+                    new Rectangle(0, Math.Max(0, Height - 21), Width, 19), ChildVisualTheme.MutedInk,
+                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+        }
+
+        private void DrawPictograph(Graphics g)
+        {
+            var labels = new[] { "Mèo", "Chó", "Thỏ" };
+            var counts = new[] { 3, 2, 4 };
+            var rowH = Math.Max(24, Math.Min(31, (Height - 24) / 3));
+            var startY = Math.Max(1, (Height - (rowH * 3 + 20)) / 2);
+            var labelW = Math.Min(82, Math.Max(58, Width / 8));
+            var iconSize = Math.Max(13, Math.Min(20, rowH - 7));
+            var gap = iconSize + 11;
+            var iconsLeft = Math.Max(labelW + 18, Width / 2 - gap * 2);
+            for (var row = 0; row < 3; row++)
+            {
+                var y = startY + row * rowH;
+                TextRenderer.DrawText(g, labels[row], ChildVisualTheme.Font(8.7f, FontStyle.Bold),
+                    new Rectangle(8, y, labelW, rowH), ChildVisualTheme.Ink,
+                    TextFormatFlags.Right | TextFormatFlags.VerticalCenter);
+                for (var i = 0; i < counts[row]; i++)
+                    DrawAnimalMark(g, new Rectangle(iconsLeft + i * gap, y + (rowH - iconSize) / 2, iconSize, iconSize), row);
+            }
+            TextRenderer.DrawText(g, "1 hình = 1 con", ChildVisualTheme.Font(8f, FontStyle.Bold),
+                new Rectangle(0, Math.Max(0, Height - 20), Width, 18), ChildVisualTheme.MutedInk,
+                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+        }
+
+        private static void DrawAnimalMark(Graphics g, Rectangle rect, int row)
+        {
+            var fillColor = row == 0 ? Color.FromArgb(236, 185, 139) : row == 1 ? Color.FromArgb(151, 187, 213) : Color.FromArgb(177, 202, 151);
+            using (var fill = new SolidBrush(fillColor))
+            using (var outline = new Pen(Color.FromArgb(103, 120, 115), 1f))
+            {
+                g.FillEllipse(fill, rect); g.DrawEllipse(outline, rect);
+                if (row != 1)
+                {
+                    var ear = Math.Max(3, rect.Width / 4);
+                    g.FillEllipse(fill, rect.Left + 1, rect.Top - ear / 2, ear, ear);
+                    g.FillEllipse(fill, rect.Right - ear - 1, rect.Top - ear / 2, ear, ear);
+                }
+                else
+                {
+                    g.FillRectangle(fill, rect.Left + 2, rect.Top - 2, Math.Max(3, rect.Width / 5), 5);
+                    g.FillRectangle(fill, rect.Right - Math.Max(3, rect.Width / 5) - 2, rect.Top - 2, Math.Max(3, rect.Width / 5), 5);
+                }
+            }
         }
 
         private void DrawDieOutcomes(Graphics g)
@@ -948,8 +1123,8 @@ namespace WAHUKidsLearn
                 new RoadmapRow("Nhẩm 0–20", _snapshot == null ? null : _snapshot.Mental20, ChildVisualTheme.PeachStrong),
                 new RoadmapRow("Cộng / Trừ đến 1000", _snapshot == null ? null : _snapshot.Written1000, ChildVisualTheme.MintStrong),
                 new RoadmapRow("Nhân / Chia 2 · 5", _snapshot == null ? null : _snapshot.Tables25, ChildVisualTheme.SkyStrong),
-                new RoadmapRow("Đo lường", _snapshot == null ? null : _snapshot.Measurement, Color.FromArgb(147, 126, 181)),
-                new RoadmapRow("Khả năng xảy ra", _snapshot == null ? null : _snapshot.Chance, Color.FromArgb(185, 126, 157))
+                new RoadmapRow("Hình & đo lường", _snapshot == null ? null : _snapshot.Measurement, Color.FromArgb(147, 126, 181)),
+                new RoadmapRow("Dữ liệu & khả năng", _snapshot == null ? null : _snapshot.Chance, Color.FromArgb(185, 126, 157))
             };
             var rowH = Math.Max(20, Height / 6);
             for (var i = 0; i < rows.Length; i++) DrawRow(e.Graphics, rows[i], new Rectangle(0, i * rowH, Width, rowH));
@@ -994,8 +1169,8 @@ namespace WAHUKidsLearn
                    DescribeGroup("Nhẩm 0 đến 20", snapshot.Mental20) + "; " +
                    DescribeGroup("Cộng trừ đến 1000", snapshot.Written1000) + "; " +
                    DescribeGroup("Nhân chia bảng 2 và 5", snapshot.Tables25) + "; " +
-                   DescribeGroup("Đo lường", snapshot.Measurement) + "; " +
-                   DescribeGroup("Khả năng xảy ra", snapshot.Chance) + ".";
+                   DescribeGroup("Hình và đo lường", snapshot.Measurement) + "; " +
+                   DescribeGroup("Dữ liệu và khả năng", snapshot.Chance) + ".";
         }
 
         private static string DescribeGroup(string name, MathRoadmapGroupProgress progress)

@@ -11,7 +11,7 @@ namespace WAHU.Session
     public sealed class MathSessionCoordinator : IDisposable
     {
         public const string PackId = "math_grade2_verified_templates_v1";
-        public const string PackVersion = "1.0.0";
+        public const string PackVersion = "1.1.0";
         public const int DefaultTargetQuestionCount = 8;
 
         private readonly LearningDatabase _database;
@@ -475,6 +475,9 @@ namespace WAHU.Session
             if (error != null && error.ErrorType == "COMPARISON_ERROR") return "Chưa đúng. Mình so sánh từ hàng lớn nhất trước nhé.";
             if (error != null && error.ErrorType == "SEQUENCE_NEIGHBOR_ERROR") return "Chưa đúng. Số liền trước kém 1 và số liền sau hơn 1 nhé.";
             if (error != null && error.ErrorType == "MEASUREMENT_SUM_ERROR") return "Chưa đúng. Độ dài đường gấp khúc là tổng các đoạn của nó.";
+            if (error != null && error.ErrorType == "TIME_READ_ERROR") return "Chưa đúng. Con đọc kim phút trước: số 3 là 15 phút, số 6 là 30 phút nhé.";
+            if (error != null && error.ErrorType == "GEOMETRY_RECOGNITION_ERROR") return "Chưa đúng. Con nhìn lại đặc điểm của hình: nét, đầu mút, số cạnh hoặc dạng khối nhé.";
+            if (error != null && error.ErrorType == "PICTOGRAPH_READ_ERROR") return "Chưa đúng. Con đếm lại từng hình trong biểu đồ rồi so sánh nhé.";
             if (error != null && error.ErrorType == "EVENT_CLASSIFICATION_ERROR") return "Chưa đúng. Con đối chiếu câu này với tất cả kết quả có thể của xúc xắc nhé.";
             return "Chưa đúng. Mình xem gợi ý rồi thử câu tiếp theo nhé.";
         }
