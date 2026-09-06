@@ -1,0 +1,117 @@
+{
+  "retrieved_at": "2026-09-06",
+  "sources": [
+    {
+      "id": "MOET_TT32_2018",
+      "tier": "A",
+      "title": "Thông tư 32/2018/TT-BGDĐT ban hành Chương trình giáo dục phổ thông",
+      "issuer": "Bộ Giáo dục và Đào tạo",
+      "url": "https://moet.gov.vn/content/vanban/Lists/VBPQ/Attachments/1483/vbhn-ttu-322018-202021-132022-ttbgddt.pdf",
+      "use": "legal/program authority and consolidated status"
+    },
+    {
+      "id": "TT32_FULL_ANNEX_MIRROR",
+      "tier": "A_MIRROR",
+      "title": "Toàn văn phụ lục CTGDPT gồm môn Toán và Làm quen Tiếng Anh lớp 1-2",
+      "issuer": "Mirror of BGDĐT-promulgated curriculum",
+      "url": "https://static3.luatvietnam.vn/genfile/contentmix/2018/12/26/noi-dung-mix-thong-tu-so-32-2018-tt-bgddt-110829.pdf",
+      "use": "line/page-level extraction of Grade 2 outcomes; cross-check against TT32 identity"
+    },
+    {
+      "id": "MOET_TT13_2022_INFO",
+      "tier": "A",
+      "title": "Bộ GDĐT điều chỉnh một số nội dung Chương trình GDPT 2018",
+      "issuer": "Bộ Giáo dục và Đào tạo",
+      "url": "https://www.moet.gov.vn/tintuc/Pages/CT-GDPT-Tong-The.aspx?ItemID=8013",
+      "use": "amendment context"
+    },
+    {
+      "id": "MOET_ENGLISH_PROJECT_2025_SUMMARY",
+      "tier": "A",
+      "title": "Tổng kết đề án dạy và học ngoại ngữ giai đoạn 2017-2025",
+      "issuer": "Đề án Ngoại ngữ Quốc gia - BGDĐT",
+      "url": "https://ngoainguquocgia.moet.gov.vn/tong-ket-de-an-day-va-hoc-ngoai-ngu-trong-he-thong-giao-duc-quoc-dan-giai-doan-2017-2025-6064105.html",
+      "use": "current implementation context for English familiarization Grades 1-2"
+    },
+    {
+      "id": "IES_ORGANIZING_STUDY",
+      "tier": "B",
+      "title": "Organizing Instruction and Study to Improve Student Learning",
+      "issuer": "IES What Works Clearinghouse",
+      "url": "https://ies.ed.gov/ncee/wwc/practiceguide/1",
+      "use": "spacing, worked examples, graphics+verbal, concrete-abstract, retrieval, deep questions"
+    },
+    {
+      "id": "IES_MATH_ELEMENTARY",
+      "tier": "B",
+      "title": "Assisting Students Struggling with Mathematics: Intervention in the Elementary Grades",
+      "issuer": "IES What Works Clearinghouse",
+      "url": "https://ies.ed.gov/ncee/wwc/practiceguide/26",
+      "use": "number lines, visual representations, word problems"
+    },
+    {
+      "id": "IES_FOUNDATIONAL_READING_K3",
+      "tier": "B",
+      "title": "Foundational Skills to Support Reading for Understanding in Kindergarten Through 3rd Grade",
+      "issuer": "IES What Works Clearinghouse",
+      "url": "https://ies.ed.gov/ncee/wwc/PracticeGuide/21",
+      "use": "evidence for phonological awareness, letter-sound mapping and decoding as supplementary pedagogy"
+    },
+    {
+      "id": "EEF_METACOGNITION",
+      "tier": "B",
+      "title": "Metacognition and self-regulation",
+      "issuer": "Education Endowment Foundation",
+      "url": "https://educationendowmentfoundation.org.uk/education-evidence/teaching-learning-toolkit/metacognition-and-self-regulation",
+      "use": "self-regulation/metacognitive prompting"
+    },
+    {
+      "id": "CAST_UDL_3",
+      "tier": "B_PRIMARY_FRAMEWORK",
+      "title": "Universal Design for Learning Guidelines 3.0",
+      "issuer": "CAST",
+      "url": "https://udlguidelines.cast.org/",
+      "use": "learner variability, choice/autonomy, challenge/support, multiple representations/actions, transfer and progress reflection"
+    },
+    {
+      "id": "AAP_DIGITAL_ECOSYSTEMS_2026",
+      "tier": "B_MEDICAL_POLICY",
+      "title": "Digital Ecosystems, Children, and Adolescents: Policy Statement",
+      "issuer": "American Academy of Pediatrics",
+      "url": "https://publications.aap.org/pediatrics/article/157/2/e2025075320/206129/Digital-Ecosystems-Children-and-Adolescents-Policy",
+      "use": "child-centered digital design, privacy, safety, learning/well-being, avoid engagement optimization that prolongs use"
+    },
+    {
+      "id": "W3C_WCAG22",
+      "tier": "B_STANDARD",
+      "title": "Web Content Accessibility Guidelines (WCAG) 2.2",
+      "issuer": "W3C",
+      "url": "https://www.w3.org/TR/WCAG22/",
+      "use": "accessibility reference for target size, dragging alternatives, motion controls and predictable interaction"
+    },
+    {
+      "id": "GCOMPRIS_OFFICIAL",
+      "tier": "C_PATTERN_REFERENCE",
+      "title": "GCompris Educational Software",
+      "issuer": "KDE / GCompris",
+      "url": "https://gcompris.net/",
+      "use": "unified child activity catalog, pictographic/voiced child-facing patterns, educational game organization; runtime not copied"
+    },
+    {
+      "id": "SUGAR_HIG",
+      "tier": "C_PATTERN_REFERENCE",
+      "title": "Sugar Human Interface Guidelines",
+      "issuer": "Sugar Labs",
+      "url": "https://wiki.sugarlabs.org/go/Human_Interface_Guidelines",
+      "use": "activities-not-applications, discoverability for inexperienced children, low-floor/no-ceiling, performance on constrained child hardware"
+    },
+    {
+      "id": "KOLIBRI_OFFLINE_CONTENT",
+      "tier": "C_PATTERN_REFERENCE",
+      "title": "Kolibri Channels and Resources",
+      "issuer": "Learning Equality",
+      "url": "https://kolibri.readthedocs.io/en/latest/manage/resources.html",
+      "use": "curated/versioned learning content, offline external-drive import/export, separate content distribution from learner runtime"
+    }
+  ]
+}
