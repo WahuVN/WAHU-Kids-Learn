@@ -32,6 +32,7 @@ TIME_OUT_OF_SCOPE_ARITH_RE = re.compile(r"\b\d+\s*(?:×|\*|÷|/|:)\s*\d+\b")
 GRADE2_MUL_LITERAL_RE = re.compile(r"(?<!\d)(\d+)\s*(?:×|\*)\s*(\d+)(?!\d)")
 GRADE2_DIV_LITERAL_RE = re.compile(r"(?<!\d)(\d+)(?:\s*÷\s*|\s+:\s+)(\d+)(?!\d)")
 NUMERIC_CHOICE_EXPR_RE = re.compile(r"^[\d\s+\-−–*/×÷:().,]+$")
+MIN_QUESTION_EXPLANATION_CHARS = 32
 GENERIC_SECOND_HINT = "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
 GENERIC_SECOND_OBJECTIVE = "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
 GENERIC_DISTRACTOR_RATIONALE = "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
@@ -548,6 +549,8 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
         if prompt:
             prompts_by_lesson[lid].append((qid, prompt))
         explanation = required_text(q, "explanation_vi", where, errors)
+        if explanation and len(explanation) < MIN_QUESTION_EXPLANATION_CHARS:
+            errors.append(f"question_explanation_too_short:{where}:{len(explanation)}")
         serialized_question = json.dumps(q, ensure_ascii=False)
         for violation in grade2_operation_scope_violations(serialized_question):
             errors.append(f"out_of_scope_grade2_operation:{where}:{violation}")

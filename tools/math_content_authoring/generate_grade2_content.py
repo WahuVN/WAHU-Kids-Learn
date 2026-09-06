@@ -39,6 +39,24 @@ def second_objective(question_types: list[str], concept_name: str) -> str:
     return f"Vận dụng {concept} với dữ kiện mới, nêu cách tìm kết quả và tự kiểm tra bằng quy tắc đã học."
 
 
+def deepen_explanation(explanation: str, question_type: str, concept_name: str) -> str:
+    """Keep concise authored math, but add the missing why/check step when feedback is too terse."""
+    text = explanation.strip()
+    if len(text) >= 32:
+        return text
+    concept = concept_name.strip().lower()
+    suffixes = {
+        "word_problem": f" Đây là cách dùng {concept} để trả lời đúng đại lượng mà đề đang hỏi.",
+        "numeric_input": f" Kết quả này theo đúng quy tắc {concept}; hãy đối chiếu lại với các số đã cho.",
+        "expression_input": f" Thứ tự các bước phải đúng với {concept}; tính lại từng bước sẽ kiểm tra được kết quả.",
+        "multiple_choice": f" Lựa chọn này khớp với {concept}; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng.",
+        "true_false": f" Mệnh đề được kiểm tra trực tiếp bằng {concept}, không dựa vào phỏng đoán.",
+        "unit_input": f" Khi dùng {concept}, cần kiểm tra cả phần số và đơn vị của kết quả.",
+        "interactive_measurement": f" Có thể kiểm tra lại bằng {concept} trên cùng các vạch đo.",
+    }
+    return text + suffixes.get(question_type, suffixes["numeric_input"])
+
+
 def second_hint(question_type: str, difficulty: str, concept_name: str) -> str:
     """Give a child a concrete next move without revealing the authored answer."""
     concept = concept_name.strip()
@@ -904,7 +922,7 @@ def build() -> tuple[dict, dict]:
                     "answer_kind": spec["answer_kind"],
                     "correct_answer": spec["correct_answer"],
                     "accepted_answers": spec["accepted_answers"],
-                    "explanation_vi": spec["explanation_vi"],
+                    "explanation_vi": deepen_explanation(spec["explanation_vi"], question_type, concept_name),
                     "hints_vi": [
                         "Nhớ kiến thức: " + concept_def,
                         second_hint(question_type, difficulty, concept_name),
@@ -924,6 +942,7 @@ def build() -> tuple[dict, dict]:
                     correct = next((choice for choice in choices if choice.get("id") == original_correct_id), None)
                     if correct is None:
                         raise SystemExit(f"Choice question missing correct choice: {qid}")
+                    correct["rationale_vi"] = q["explanation_vi"]
                     distractors = [choice for choice in choices if choice is not correct]
                     count = len(choices)
                     target = choice_position_counts.get(count, 0) % count

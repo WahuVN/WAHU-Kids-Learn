@@ -256,6 +256,16 @@ class MathContentDataSmoke(unittest.TestCase):
         }
         self.assertEqual([], validator.child_facing_internal_vocabulary(metadata_only))
 
+    def test_question_explanations_are_instructional(self):
+        for item in self.questions:
+            with self.subTest(item=item["id"]):
+                explanation = item["explanation_vi"].strip()
+                self.assertGreaterEqual(len(explanation), validator.MIN_QUESTION_EXPLANATION_CHARS)
+                choices = item.get("choices", [])
+                if choices:
+                    correct = next(choice for choice in choices if choice["id"] == item["correct_choice_id"])
+                    self.assertEqual(explanation, correct["rationale_vi"])
+
     def test_worked_examples_are_distinct_from_lesson_practice(self):
         example_prompts = []
         for lesson in self.lessons:

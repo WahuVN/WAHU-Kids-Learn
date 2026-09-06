@@ -28,7 +28,7 @@ Owner: AI1 — Math Content & Data
   - interactive measurement
   - word problem
 - Semantic validator errors: **0**
-- Math content unittest: **24 / 24 PASS**
+- Math content unittest: **25 / 25 PASS**
 - Pack manifest/hash/listing check on current working tree: **PASS** (`version=1.9.0`, 3 listed files)
 
 ## Curriculum/content completeness
@@ -82,6 +82,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - hint cấp 2 placeholder/generic hoặc bị tái dùng quá mức;
 - vocabulary kỹ thuật nội bộ lọt vào field child-facing (`baseline`, `runtime`, `template`, `validator`, ...);
 - mục tiêu học thứ hai generic/placeholder hoặc bị tái dùng quá mức;
+- explanation câu hỏi quá ngắn, không đủ bước giải thích/kiểm tra cho feedback học tập;
 - MCQ trùng nghĩa sau normalize Unicode/case/whitespace hoặc hai biểu thức choice cho cùng giá trị số;
 - vị trí đáp án đúng bị lệch pattern; bank phải phân bố cân bằng theo số lượng choices;
 - invalid true/false shape;
@@ -122,9 +123,10 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - child-facing lesson/question text có **0 internal-engine vocabulary**; metadata kỹ thuật như `application`, `numeric_input`, `deterministic` vẫn được phép;
 - **67/67 worked example unique**, mỗi ví dụ có ít nhất 2 bước giải, **0 exact/near overlap** với 201 câu practice và 67/67 solution chốt đáp án tường minh;
 - mục tiêu học thứ hai đạt **67/67 unique**, gắn concept + dạng vận dụng của từng lesson, placeholder chung = 0;
+- 201/201 `explanation_vi` unique và dài ít nhất 32 ký tự; **57 lời giải quá ngắn đã được nâng lên 0**, MCQ giữ correct-rationale đồng bộ với explanation;
 - 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract.
 
-Latest result: **24 tests PASS**.
+Latest result: **25 tests PASS**.
 
 ## Commits / waves
 
@@ -146,11 +148,12 @@ Latest result: **24 tests PASS**.
 - `5a31c41` — `Toán: làm sạch ngôn ngữ kỹ thuật khỏi nội dung trẻ em`
 - `9682572` — `Toán: tách ví dụ mẫu khỏi câu luyện`
 - `19538b5` — `Toán: chốt đáp án rõ trong ví dụ mẫu`
+- `45aa6e8` — `Toán: đặc thù hóa mục tiêu cho 67 bài học`
 
 ## Current blockers outside AI1 content ownership
 
-1. Request 005 functional path đã được commit end-to-end: engine `656a94b` + UI `1436705`. Targeted lesson dùng authored bank đúng 3 câu, all-201 answer-surface sweep PASS, Child UI **1138 assertions PASS**, Flow 5 prerequisite unlock PASS và persistence **92 assertions PASS**. Release-clean full solution vẫn bị SQLite/toolchain chặn; Request 007 vẫn là recovery edge riêng cần khóa regression.
-2. Request 007 mới: corrupt open-question ở lesson mode có thể giữ `generated_question_count > attempts`, skip câu medium và hết authored pool khi mới đủ 2/3 attempts. Cần regression + cursor reconciliation ở AI2.
+1. Request 005 functional path đã được commit end-to-end: engine `656a94b` + UI `1436705`. Targeted lesson dùng authored bank đúng 3 câu, all-201 answer-surface sweep PASS, Child UI **1475 assertions PASS**, Flow 5 prerequisite unlock PASS và persistence **99 assertions PASS**. Release-clean full solution vẫn bị SQLite/toolchain chặn; Request 007 vẫn là recovery edge riêng cần khóa regression.
+2. Request 007 hiện **PASS trong staged AI2 WIP**: targeted corrupt regression xác nhận cursor rollback 2→1, phát lại đúng medium, sau đó application, đủ 3 attempts mới complete; persistence smoke hiện **99 assertions PASS**. Chưa coi CLOSED cho tới khi AI2 commit thay đổi này.
 3. Request 006 vẫn mở: 23 câu integer có `answer_unit` được content giữ display-only, nhưng `MathAuthoredQuestionSource`/`MathQuestion` chưa preserve field để feedback hiện `8 cm`, `5 kg`, `60 phút` mà vẫn chấm raw integer.
 4. UI smoke build hiện gặp lỗi reference `System.Data.SQLite` khi build `WAHU.Data.csproj`; targeted persistence smoke không bị lỗi. Đây là build/dependency WIP ngoài AI1, không phải lỗi content.
 5. Legacy generator vẫn chỉ phủ 65/67 skill, nhưng lesson-authored path WIP đã cho phép hai skill `FOLD_CUT_COMPOSE_SHAPES` và `MONEY_VND_NOTE_RECOGNITION` có bài luyện thật mà không cần template giả.
