@@ -159,19 +159,27 @@ class MathContentDataSmoke(unittest.TestCase):
 
     def test_required_answer_kinds_only(self):
         kinds = Counter(q["answer_kind"] for q in self.questions)
-        self.assertEqual({"integer", "interaction_integer", "text", "unit", "expression"}, set(kinds))
-        self.assertGreater(kinds["integer"], 0)
-        self.assertGreater(kinds["text"], 0)
-        self.assertGreater(kinds["interaction_integer"], 0)
-        self.assertGreater(kinds["unit"], 0)
-        self.assertGreater(kinds["expression"], 0)
-        self.assertTrue(set(kinds).issubset(set(self.bank["supported_answer_kinds"])))
+        grade2_kinds = {"integer", "interaction_integer", "text", "unit", "expression"}
+        self.assertEqual(grade2_kinds, set(kinds))
+        self.assertEqual(validator.ENGINE_ANSWER_KINDS, set(self.bank["supported_answer_kinds"]))
+        self.assertEqual(grade2_kinds, set(self.bank["grade2_used_answer_kinds"]))
+        self.assertTrue(grade2_kinds.isdisjoint({"number", "decimal", "fraction"}))
+        self.assertTrue(all(kinds[x] > 0 for x in grade2_kinds))
 
         question_types = Counter(q["question_type"] for q in self.questions)
         required_types = {"numeric_input", "multiple_choice", "true_false", "expression_input", "unit_input", "interactive_measurement", "word_problem"}
         self.assertEqual(required_types, set(question_types))
         self.assertEqual(required_types, set(self.bank["question_types"]))
         self.assertTrue(all(question_types[x] > 0 for x in required_types))
+
+    def test_expression_validator_fails_closed(self):
+        self.assertEqual(validator.Fraction(75, 1), validator.eval_restricted_expression("100 - 30 + 5"))
+        with self.assertRaises(ZeroDivisionError):
+            validator.eval_restricted_expression("8 / (3 - 3)")
+        with self.assertRaises((SyntaxError, ValueError)):
+            validator.eval_restricted_expression("2 + foo")
+        with self.assertRaises((SyntaxError, ValueError)):
+            validator.eval_restricted_expression("__import__('os').system('echo bad')")
 
 
 if __name__ == "__main__":
