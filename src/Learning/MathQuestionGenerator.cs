@@ -85,6 +85,8 @@ namespace WAHU.Learning
                     case "count_place_value_to_1000": question = CountPlaceValueTo1000(decision.Template); break;
                     case "read_number_to_1000": question = ReadNumberTo1000(decision.Template); break;
                     case "write_number_to_1000": question = WriteNumberTo1000(decision.Template); break;
+                    case "estimate_objects_by_tens": question = EstimateObjectsByTens(decision.Template); break;
+                    case "measurement_estimate_reference_10cm": question = MeasurementEstimateReference10Cm(decision.Template); break;
                     default: throw new InvalidOperationException("Unsupported VERIFIED math template: " + decision.Template.TemplateId);
                 }
             }
@@ -565,6 +567,49 @@ namespace WAHU.Learning
                 "Chia đều nghĩa là mỗi bạn nhận số bánh bằng nhau. Hãy phân " + total + " chiếc bánh vào " + divisor + " phần bằng nhau.",
                 "Phép tính phù hợp là " + total + " : " + divisor + ".");
             question.IllustrationData = "wordshare|" + total + "|" + divisor;
+            return question;
+        }
+
+        private MathQuestion EstimateObjectsByTens(MathTemplateRef template)
+        {
+            var targetTens = _random.Next(2, 10) * 10;
+            var offsetOptions = new[] { -4, -3, -2, -1, 0, 1, 2, 3, 4 };
+            var count = targetTens + offsetOptions[_random.Next(0, offsetOptions.Length)];
+            count = Math.Max(16, Math.Min(94, count));
+            var nearest = ((count + 5) / 10) * 10;
+            var values = new HashSet<int> { nearest };
+            foreach (var delta in new[] { -10, 10, -20, 20, -30, 30 })
+            {
+                var candidate = nearest + delta;
+                if (candidate >= 10 && candidate <= 100) values.Add(candidate);
+                if (values.Count >= 4) break;
+            }
+            var question = NewNumericQuestion(template,
+                "Không đếm từng chấm. Nhóm chấm này gần với bao nhiêu chục nhất?", nearest,
+                "Nhìn cả nhóm và tưởng tượng chia thành các nhóm khoảng 10.",
+                "So sánh xem nhóm chấm gần mốc chục nào nhất.");
+            question.Choices = Shuffle(values.Take(4).ToList());
+            question.IllustrationData = "estimatedots|" + count + "|" + nearest;
+            return question;
+        }
+
+        private MathQuestion MeasurementEstimateReference10Cm(MathTemplateRef template)
+        {
+            var target = _random.Next(1, 6) * 10;
+            var jitterPercent = _random.Next(-8, 9);
+            var choices = new HashSet<int> { target };
+            foreach (var delta in new[] { -10, 10, -20, 20, -30, 30 })
+            {
+                var candidate = target + delta;
+                if (candidate >= 10 && candidate <= 60) choices.Add(candidate);
+                if (choices.Count >= 4) break;
+            }
+            var question = NewTextQuestion(template,
+                "Thanh mẫu dài 10 cm. Đoạn màu cam dài gần bao nhiêu xăng-ti-mét?", target + " cm",
+                Shuffle(choices.Take(4).Select(x => x + " cm").ToList()),
+                "So sánh độ dài đoạn màu cam với thanh mẫu 10 cm.",
+                "Ước lượng xem có thể đặt khoảng bao nhiêu thanh 10 cm nối tiếp nhau.");
+            question.IllustrationData = "estimatelength|10|" + target + "|" + jitterPercent;
             return question;
         }
 
@@ -1296,6 +1341,10 @@ namespace WAHU.Learning
                 case "read_number_to_1000":
                 case "write_number_to_1000":
                     return "number_word_card";
+                case "estimate_objects_by_tens":
+                    return "estimate_dots";
+                case "measurement_estimate_reference_10cm":
+                    return "estimate_length";
                 default:
                     return "symbolic";
             }

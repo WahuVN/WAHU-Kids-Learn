@@ -175,6 +175,8 @@ namespace WAHU.Learning
                     return New("MEASUREMENT_WORD_ERROR", 0.58, "wrong_one_step_measurement_context_answer");
                 if (question.TemplateId == "read_number_to_1000")
                     return New("NUMBER_READ_WRITE_ERROR", 0.68, "wrong_number_word_reading_choice");
+                if (question.TemplateId == "measurement_estimate_reference_10cm")
+                    return New("ESTIMATION_ERROR", 0.58, "wrong_reference_based_length_estimate");
                 if (question.TemplateId == "sort_up_to_4")
                     return New("NUMBER_ORDER_ERROR", 0.66, "wrong_four_number_sort_order");
                 if (question.TemplateId == "add_components_recognize" || question.TemplateId == "sub_components_recognize" ||
@@ -217,6 +219,8 @@ namespace WAHU.Learning
                 return New("DATA_CLASSIFY_COUNT_ERROR", 0.64, "wrong_classified_group_count");
             if (question.TemplateId == "count_place_value_to_1000" || question.TemplateId == "write_number_to_1000")
                 return New("NUMBER_READ_WRITE_ERROR", 0.68, "wrong_count_or_written_number_to_1000");
+            if (question.TemplateId == "estimate_objects_by_tens")
+                return New("ESTIMATION_ERROR", 0.58, "wrong_nearest_ten_object_estimate");
             if (question.TemplateId != null && question.TemplateId.StartsWith("word_problem_", StringComparison.Ordinal))
                 return New("WORD_PROBLEM_RELATION_ERROR", 0.56, "wrong_one_step_relation_answer");
             return New("UNKNOWN", 0.40, "single_attempt_insufficient_for_specific_diagnosis");

@@ -725,6 +725,18 @@
                           "skill":  "NUM_COUNT_READ_WRITE_0_1000",
                           "status":  "VERIFIED_A_TEMPLATE",
                           "prompt_vi":  "Viết số trong phạm vi 1000 từ cách đọc bằng chữ."
+                      },
+                      {
+                          "id":  "estimate_objects_by_tens",
+                          "skill":  "ESTIMATE_OBJECTS_BY_TENS",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Ước lượng số lượng vật theo chục gần nhất từ một nhóm nhiều vật."
+                      },
+                      {
+                          "id":  "measurement_estimate_reference_10cm",
+                          "skill":  "MEASUREMENT_ESTIMATE_BASIC",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Ước lượng độ dài dựa trên một thanh tham chiếu 10 cm."
                       }
                   ]
 }

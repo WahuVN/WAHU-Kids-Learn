@@ -37,6 +37,8 @@ namespace WAHU.ChildUiRuntimeSmoke
         {
             var cases = new[]
             {
+                QV("estimate_objects_by_tens", "ESTIMATE_OBJECTS_BY_TENS", "Không đếm từng chấm. Nhóm chấm này gần với bao nhiêu chục nhất?", "40", "estimatedots|37|40", "estimate_dots"),
+                QV("measurement_estimate_reference_10cm", "MEASUREMENT_ESTIMATE_BASIC", "Thanh mẫu dài 10 cm. Đoạn màu cam dài gần bao nhiêu xăng-ti-mét?", "30 cm", "estimatelength|10|30|5", "estimate_length"),
                 QV("count_place_value_to_1000", "NUM_COUNT_READ_WRITE_0_1000", "Quan sát mô hình khối trăm, thanh chục và ô đơn vị.", "472", "base10count|4|7|2", "base10_count"),
                 QV("read_number_to_1000", "NUM_COUNT_READ_WRITE_0_1000", "Số 472 đọc là:", "bốn trăm bảy mươi hai", "numberword|read|472", "number_word_card"),
                 QV("write_number_to_1000", "NUM_COUNT_READ_WRITE_0_1000", "Viết số: bốn trăm bảy mươi hai.", "472", "numberword|write", "number_word_card"),

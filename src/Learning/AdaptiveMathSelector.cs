@@ -159,6 +159,8 @@ namespace WAHU.Learning
                 case "count_place_value_to_1000":
                 case "read_number_to_1000":
                 case "write_number_to_1000":
+                case "estimate_objects_by_tens":
+                case "measurement_estimate_reference_10cm":
                     return true;
                 default:
                     return false;

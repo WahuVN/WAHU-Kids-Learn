@@ -248,7 +248,11 @@ namespace WAHUKidsLearn
             if (_question == null || Width < 80 || Height < 40) return;
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             var values = ExtractNumbers(_question.PromptVi);
-            if (_question.Representation == "base10_count")
+            if (_question.Representation == "estimate_dots")
+                DrawEstimateDots(e.Graphics);
+            else if (_question.Representation == "estimate_length")
+                DrawEstimateLength(e.Graphics);
+            else if (_question.Representation == "base10_count")
                 DrawBase10Count(e.Graphics);
             else if (_question.Representation == "number_word_card")
                 DrawNumberWordCard(e.Graphics);
@@ -311,6 +315,72 @@ namespace WAHUKidsLearn
                 DrawPlaceValue(e.Graphics, values);
             else if (_question.TemplateId == "polyline_length")
                 DrawPolyline(e.Graphics, values);
+        }
+
+        private void DrawEstimateDots(Graphics g)
+        {
+            var parts = (_question.IllustrationData ?? string.Empty).Split('|');
+            int count, nearest;
+            if (parts.Length != 3 || parts[0] != "estimatedots" || !int.TryParse(parts[1], out count) || !int.TryParse(parts[2], out nearest) || count < 1) return;
+            var stage = new Rectangle(Width / 2 - 225, 8, 450, Math.Max(90, Height - 16));
+            using (var path = ChildVisualTheme.RoundedRect(stage, 14))
+            using (var fill = new SolidBrush(Color.FromArgb(248, 250, 244)))
+            using (var border = new Pen(Color.FromArgb(214, 222, 207), 1f)) { g.FillPath(fill, path); g.DrawPath(border, path); }
+            using (var dot = new SolidBrush(Color.FromArgb(122, 158, 145)))
+            {
+                if (_hintLevel <= 0)
+                {
+                    for (var i = 0; i < count; i++)
+                    {
+                        var x = stage.Left + 16 + ((i * 47 + i * i * 7) % Math.Max(40, stage.Width - 38));
+                        var y = stage.Top + 14 + ((i * 31 + i * i * 11) % Math.Max(30, stage.Height - 40));
+                        g.FillEllipse(dot, x, y, 6, 6);
+                    }
+                }
+                else
+                {
+                    var gapX = Math.Max(12, (stage.Width - 40) / 10);
+                    var gapY = 14;
+                    for (var i = 0; i < count; i++)
+                    {
+                        var col = i % 10; var row = i / 10;
+                        var x = stage.Left + 20 + col * gapX;
+                        var y = stage.Top + 18 + row * gapY;
+                        g.FillEllipse(dot, x, y, 6, 6);
+                    }
+                    DrawCentered(g, "Mỗi hàng khoảng 10", new Rectangle(stage.Left, stage.Bottom - 22, stage.Width, 17), ChildVisualTheme.MutedInk, 7.8f);
+                }
+            }
+        }
+
+        private void DrawEstimateLength(Graphics g)
+        {
+            var parts = (_question.IllustrationData ?? string.Empty).Split('|');
+            int reference, target, jitter;
+            if (parts.Length != 4 || parts[0] != "estimatelength" || !int.TryParse(parts[1], out reference) || !int.TryParse(parts[2], out target) ||
+                !int.TryParse(parts[3], out jitter) || reference <= 0 || target <= 0) return;
+            var refPx = 64;
+            var targetPx = (int)Math.Round(refPx * (target / (double)reference) * (100 + jitter) / 100.0);
+            targetPx = Math.Max(40, Math.Min(Width - 80, targetPx));
+            var left = 40;
+            var refY = 28;
+            using (var referenceBrush = new SolidBrush(Color.FromArgb(214, 232, 209)))
+            using (var targetBrush = new SolidBrush(Color.FromArgb(239, 184, 121)))
+            {
+                g.FillRectangle(referenceBrush, left, refY, refPx, 14);
+                g.FillRectangle(targetBrush, left, refY + 50, targetPx, 16);
+            }
+            DrawCentered(g, "thanh mẫu 10 cm", new Rectangle(left - 10, refY - 22, refPx + 80, 18), ChildVisualTheme.MutedInk, 7.8f);
+            DrawCentered(g, "đoạn cần ước lượng", new Rectangle(left - 10, refY + 66, Math.Min(220, targetPx + 50), 18), ChildVisualTheme.MutedInk, 7.8f);
+            if (_hintLevel >= 2)
+            {
+                using (var pen = new Pen(Color.FromArgb(172, 188, 166), 1f))
+                {
+                    pen.DashStyle = DashStyle.Dash;
+                    for (var x = left + refPx; x < left + targetPx; x += refPx)
+                        g.DrawLine(pen, x, refY + 44, x, refY + 72);
+                }
+            }
         }
 
         private void DrawBase10Count(Graphics g)

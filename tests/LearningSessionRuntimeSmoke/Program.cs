@@ -40,7 +40,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
         private static IList<MathTemplateRef> TestVerifiedContentAndCore(string templatePath)
         {
             var descriptors = new MathVerifiedTemplateSource().Load(templatePath);
-            A(descriptors.Count == 68, "verified_template_source_flattens_all_verified_variants");
+            A(descriptors.Count == 70, "verified_template_source_flattens_all_verified_variants");
             A(descriptors.All(x => x.Status == "VERIFIED_A_TEMPLATE"), "template_source_filters_verified_a_only");
             var refs = descriptors.Select(x => new MathTemplateRef
             {
@@ -51,7 +51,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 StatementVi = x.StatementVi,
                 AnswerText = x.AnswerText
             }).Where(AdaptiveMathSelector.IsSupported).ToList();
-            A(refs.Count == 68, "generator_supports_all_sixty_eight_verified_runtime_candidates");
+            A(refs.Count == 70, "generator_supports_all_seventy_verified_runtime_candidates");
             var chanceRefs = refs.Where(x => x.TemplateId.StartsWith("possible_certain_impossible_die__", StringComparison.Ordinal)).ToList();
             A(chanceRefs.Count == 3, "compound_probability_template_flattens_three_variants");
             A(chanceRefs.All(x => x.SourceTemplateId == "possible_certain_impossible_die" &&
@@ -95,7 +95,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
             var first = selector.Select(refs, empty, new DateTime(2026, 9, 6, 10, 0, 0, DateTimeKind.Utc), new string[0], new string[0]);
             A(first != null && first.Template != null, "selector_returns_candidate");
             A(first.DifficultyFit >= 0 && first.DifficultyFit <= 1, "selector_difficulty_fit_bounded");
-            A(first.CandidateSummary.Count == 68, "selector_audits_all_candidates");
+            A(first.CandidateSummary.Count == 70, "selector_audits_all_candidates");
 
             var dueSkills = new Dictionary<string, SkillSnapshot>(StringComparer.Ordinal);
             foreach (var r in refs) dueSkills[r.SkillId] = new SkillSnapshot { SkillId = r.SkillId, MasteryScore = 0.20, Confidence = 0.20, AttemptsCount = 1, LearningState = "LEARNING" };
@@ -149,6 +149,8 @@ namespace WAHU.LearningSessionRuntimeSmoke
                     A(ValidateMeasurementPracticeContract(q), "measurement_practice_contract_" + r.TemplateId);
                 if (IsNumberReadWriteTemplate(r.TemplateId))
                     A(ValidateNumberReadWriteContract(q), "number_read_write_contract_" + r.TemplateId);
+                if (IsEstimationTemplate(r.TemplateId))
+                    A(ValidateEstimationContract(q), "estimation_contract_" + r.TemplateId);
                 if (r.TemplateId.StartsWith("word_problem_", StringComparison.Ordinal) && r.TemplateId != "word_problem_select_operation_one_step")
                     A(ValidateWordProblemContract(q), "word_problem_relation_contract_" + r.TemplateId);
             }
@@ -296,6 +298,12 @@ namespace WAHU.LearningSessionRuntimeSmoke
             A(NumberWordsForSmoke(105) == "một trăm linh năm", "number_words_105_linh");
             A(NumberWordsForSmoke(124) == "một trăm hai mươi tư", "number_words_124_tu");
             A(NumberWordsForSmoke(1000) == "một nghìn", "number_words_1000");
+            var estimateDotsQuestion = new MathQuestion { TemplateId = "estimate_objects_by_tens", CorrectAnswer = 40, AnswerKind = "integer", CorrectAnswerText = "40" };
+            A(classifier.Classify(estimateDotsQuestion, "30").ErrorType == "ESTIMATION_ERROR", "estimate_objects_error_classified");
+            var estimateLengthQuestion = TextQuestion("measurement_estimate_reference_10cm", "30 cm", new[] { "20 cm", "30 cm", "40 cm", "50 cm" });
+            A(classifier.Classify(estimateLengthQuestion, "20 cm").ErrorType == "ESTIMATION_ERROR", "estimate_length_error_classified");
+            A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "estimate_objects_by_tens" }) == "mental_round_tens_hundreds_1000", "estimate_objects_repairs_to_round_tens");
+            A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "measurement_estimate_reference_10cm" }) == "measure_with_ruler_cm", "estimate_length_repairs_to_ruler");
             A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "measure_with_ruler_cm" }) == "measure_with_common_scale", "ruler_repairs_to_common_scale");
             A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "measure_with_common_scale" }) == "number_ray_fill_1000", "common_scale_repairs_to_number_line");
             A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "measurement_convert_calculate_learned_units" }) == "length_dm_m_km_relation", "measurement_calc_repairs_to_unit_relation");
@@ -348,7 +356,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 adaptiveAudit.Record(new AdaptiveDecisionAuditRequest
                 {
                     Id = "adaptive-" + Guid.NewGuid().ToString("N"), SessionId = session.SessionId, ChildId = profile.ChildId,
-                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.7.0", Question = question, Selection = selection,
+                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.8.0", Question = question, Selection = selection,
                     Behavior = lastBehavior, CreatedAtUtc = DateTime.UtcNow
                 });
 
@@ -375,7 +383,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 answerCommit.Commit(new AnswerCommitRequest
                 {
                     AttemptId = attemptId, SessionId = session.SessionId, ChildId = profile.ChildId,
-                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.7.0", QuestionId = question.QuestionId,
+                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.8.0", QuestionId = question.QuestionId,
                     SkillId = question.SkillId, Subject = "math", StartedAtUtc = answered.AddMilliseconds(-responseMs), AnsweredAtUtc = answered,
                     AnswerJson = Json.Serialize(new Dictionary<string, object> { { "answer", answer } }), IsCorrect = isCorrect,
                     ResponseMs = responseMs, HintLevel = hintLevel, Representation = question.Representation, InputMethod = "mouse",
@@ -571,6 +579,33 @@ VALUES(@child,'NUM_COUNT_READ_WRITE_0_1000','math',0.60,0.54,@attempts,2,1,0,'LE
                 "math_roadmap_groups_number_read_write_into_number_sense");
             A(roadmapWithReadWrite.TotalTrackedAttempts == roadmapWithPractice.TotalTrackedAttempts + 3,
                 "math_roadmap_total_includes_number_read_write_attempts");
+            var numberSenseBeforeEstimate = roadmapWithReadWrite.NumberSense.Attempts;
+            var measurementBeforeEstimate = roadmapWithReadWrite.Measurement.Attempts;
+            var estimateObjectsBefore = ReadSkillAttempts(database, profile.ChildId, "ESTIMATE_OBJECTS_BY_TENS");
+            var estimateMeasureBefore = ReadSkillAttempts(database, profile.ChildId, "MEASUREMENT_ESTIMATE_BASIC");
+            using (var connection = database.OpenConnection())
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = @"INSERT OR REPLACE INTO child_skill
+(child_id,skill_id,subject,mastery_score,confidence,attempts_count,independent_success_count,hinted_success_count,transfer_success_count,learning_state,mastery_engine_version,updated_at_utc)
+VALUES(@child,'ESTIMATE_OBJECTS_BY_TENS','math',0.56,0.49,@objectsAttempts,1,1,0,'LEARNING',@engine,@updated);
+INSERT OR REPLACE INTO child_skill
+(child_id,skill_id,subject,mastery_score,confidence,attempts_count,independent_success_count,hinted_success_count,transfer_success_count,learning_state,mastery_engine_version,updated_at_utc)
+VALUES(@child,'MEASUREMENT_ESTIMATE_BASIC','math',0.58,0.50,@measureAttempts,1,1,0,'LEARNING',@engine,@updated);";
+                command.Parameters.AddWithValue("@child", profile.ChildId);
+                command.Parameters.AddWithValue("@objectsAttempts", estimateObjectsBefore + 2);
+                command.Parameters.AddWithValue("@measureAttempts", estimateMeasureBefore + 2);
+                command.Parameters.AddWithValue("@engine", MasteryEngineV1.Version);
+                command.Parameters.AddWithValue("@updated", DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture));
+                command.ExecuteNonQuery();
+            }
+            var roadmapWithEstimate = new MathRoadmapService(database).Read(profile.ChildId);
+            A(roadmapWithEstimate.NumberSense.Attempts == numberSenseBeforeEstimate + 2,
+                "math_roadmap_groups_object_estimation_into_number_sense");
+            A(roadmapWithEstimate.Measurement.Attempts == measurementBeforeEstimate + 2,
+                "math_roadmap_groups_measurement_estimation_into_measurement");
+            A(roadmapWithEstimate.TotalTrackedAttempts == roadmapWithReadWrite.TotalTrackedAttempts + 4,
+                "math_roadmap_total_includes_estimation_attempts");
             A(correctCount == 5, "vertical_slice_fixture_correctness_expected");
         }
 
@@ -731,6 +766,8 @@ VALUES(@child,'NUM_COUNT_READ_WRITE_0_1000','math',0.60,0.54,@attempts,2,1,0,'LE
                 throw new Exception("FUZZ_FAIL measurement practice contract: " + q.TemplateId);
             if (IsNumberReadWriteTemplate(q.TemplateId) && !ValidateNumberReadWriteContract(q))
                 throw new Exception("FUZZ_FAIL number read/write contract: " + q.TemplateId);
+            if (IsEstimationTemplate(q.TemplateId) && !ValidateEstimationContract(q))
+                throw new Exception("FUZZ_FAIL estimation contract: " + q.TemplateId);
             if (q.TemplateId.StartsWith("word_problem_", StringComparison.Ordinal) && q.TemplateId != "word_problem_select_operation_one_step" && !ValidateWordProblemContract(q))
                 throw new Exception("FUZZ_FAIL word problem relation contract: " + q.TemplateId);
         }
@@ -1012,6 +1049,35 @@ VALUES(@child,'NUM_COUNT_READ_WRITE_0_1000','math',0.60,0.54,@attempts,2,1,0,'LE
             return value.Length > 0;
         }
 
+        private static bool IsEstimationTemplate(string templateId)
+        {
+            return templateId == "estimate_objects_by_tens" || templateId == "measurement_estimate_reference_10cm";
+        }
+
+        private static bool ValidateEstimationContract(MathQuestion q)
+        {
+            if (q == null || q.DisplayChoices == null || q.DisplayChoices.Count != 4) return false;
+            var parts = (q.IllustrationData ?? string.Empty).Split('|');
+            if (q.TemplateId == "estimate_objects_by_tens")
+            {
+                int count, nearest;
+                return !q.UsesTextChoices && q.Representation == "estimate_dots" && parts.Length == 3 && parts[0] == "estimatedots" &&
+                       int.TryParse(parts[1], out count) && int.TryParse(parts[2], out nearest) && count >= 16 && count <= 94 &&
+                       nearest == ((count + 5) / 10) * 10 && nearest >= 20 && nearest <= 90 && q.CorrectAnswer == nearest &&
+                       q.Choices.Count == 4 && q.Choices.Distinct().Count() == 4 && q.Choices.All(x => x >= 10 && x <= 100 && x % 10 == 0);
+            }
+            if (q.TemplateId == "measurement_estimate_reference_10cm")
+            {
+                int reference, target, jitter;
+                return q.UsesTextChoices && q.Representation == "estimate_length" && parts.Length == 4 && parts[0] == "estimatelength" &&
+                       int.TryParse(parts[1], out reference) && int.TryParse(parts[2], out target) && int.TryParse(parts[3], out jitter) &&
+                       reference == 10 && target >= 10 && target <= 50 && target % 10 == 0 && jitter >= -8 && jitter <= 8 &&
+                       q.CorrectAnswerDisplay == target + " cm" && q.DisplayChoices.Count == 4 && q.DisplayChoices.Distinct(StringComparer.Ordinal).Count() == 4 &&
+                       q.DisplayChoices.All(x => x.EndsWith(" cm", StringComparison.Ordinal));
+            }
+            return false;
+        }
+
         private static bool IsNumberReadWriteTemplate(string templateId)
         {
             return templateId == "count_place_value_to_1000" || templateId == "read_number_to_1000" || templateId == "write_number_to_1000";
@@ -1160,6 +1226,8 @@ VALUES(@child,'NUM_COUNT_READ_WRITE_0_1000','math',0.60,0.54,@attempts,2,1,0,'LE
             if (templateId == "data_collect_classify_count") return "classify_count";
             if (templateId == "count_place_value_to_1000") return "base10_count";
             if (templateId == "read_number_to_1000" || templateId == "write_number_to_1000") return "number_word_card";
+            if (templateId == "estimate_objects_by_tens") return "estimate_dots";
+            if (templateId == "measurement_estimate_reference_10cm") return "estimate_length";
             if (templateId == "place_value_decompose_3digit" || templateId == "expanded_form_3digit") return "place_value_blocks";
             if (templateId == "predecessor_successor" || templateId == "compare_two_numbers_1000") return "number_line_1000";
             if (templateId == "mental_add_within_20" || templateId == "mental_sub_within_20") return "number_ray";
