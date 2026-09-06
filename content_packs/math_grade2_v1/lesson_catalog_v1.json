@@ -2426,8 +2426,7 @@
         ]
       },
       "prerequisite_skills": [
-        "LINE_SEGMENT_RECOGNIZE",
-        "MEASURE_WITH_RULER_CM"
+        "LINE_SEGMENT_RECOGNIZE"
       ],
       "difficulty_span": [
         "basic",

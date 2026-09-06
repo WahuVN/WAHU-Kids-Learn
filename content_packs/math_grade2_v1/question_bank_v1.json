@@ -6204,14 +6204,14 @@
       "lesson_id": "m2_ls_time_day_24_hours",
       "skill_id": "TIME_DAY_24_HOURS",
       "difficulty": "medium",
-      "question_type": "numeric_input",
-      "prompt_vi": "Hai ngày đầy đủ có bao nhiêu giờ?",
-      "answer_kind": "integer",
-      "correct_answer": 48,
+      "question_type": "multiple_choice",
+      "prompt_vi": "Khi đã đủ 24 giờ liên tiếp, khoảng thời gian đó bằng bao nhiêu ngày đầy đủ?",
+      "answer_kind": "text",
+      "correct_answer": "1 ngày",
       "accepted_answers": [
-        "48"
+        "1 ngày"
       ],
-      "explanation_vi": "2 × 24 = 48 giờ.",
+      "explanation_vi": "Theo quan hệ đã học, 24 giờ liên tiếp bằng 1 ngày đầy đủ.",
       "hints_vi": [
         "Nhớ kiến thức: 1 ngày = 24 giờ.",
         "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
@@ -6220,38 +6220,6 @@
         "time_day_24_hours",
         "measurement",
         "medium",
-        "numeric_input",
-        "integer"
-      ],
-      "validation": {
-        "integer_required": true,
-        "numeric_min": 0,
-        "numeric_max": 1000
-      },
-      "status": "CHILD_READY",
-      "answer_unit": "giờ"
-    },
-    {
-      "id": "m2_q_time_day_24_hours_03",
-      "lesson_id": "m2_ls_time_day_24_hours",
-      "skill_id": "TIME_DAY_24_HOURS",
-      "difficulty": "application",
-      "question_type": "multiple_choice",
-      "prompt_vi": "Khoảng thời gian nào đúng bằng một ngày đầy đủ?",
-      "answer_kind": "text",
-      "correct_answer": "24 giờ",
-      "accepted_answers": [
-        "24 giờ"
-      ],
-      "explanation_vi": "Một ngày đầy đủ bằng 24 giờ.",
-      "hints_vi": [
-        "Nhớ kiến thức: 1 ngày = 24 giờ.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
-      ],
-      "tags": [
-        "time_day_24_hours",
-        "measurement",
-        "application",
         "multiple_choice",
         "text"
       ],
@@ -6264,22 +6232,65 @@
       "choices": [
         {
           "id": "a",
-          "text": "24 giờ",
-          "rationale_vi": "Một ngày đầy đủ bằng 24 giờ."
+          "text": "1 ngày",
+          "rationale_vi": "Theo quan hệ đã học, 24 giờ liên tiếp bằng 1 ngày đầy đủ."
         },
         {
           "id": "b",
-          "text": "12 giờ",
+          "text": "2 ngày",
           "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
         },
         {
           "id": "c",
-          "text": "60 giờ",
+          "text": "10 ngày",
           "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
         },
         {
           "id": "d",
-          "text": "100 giờ",
+          "text": "không thể biết",
+          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+        }
+      ]
+    },
+    {
+      "id": "m2_q_time_day_24_hours_03",
+      "lesson_id": "m2_ls_time_day_24_hours",
+      "skill_id": "TIME_DAY_24_HOURS",
+      "difficulty": "application",
+      "question_type": "true_false",
+      "prompt_vi": "Một ngày đầy đủ có ít hơn 24 giờ.",
+      "answer_kind": "text",
+      "correct_answer": "Sai",
+      "accepted_answers": [
+        "Sai"
+      ],
+      "explanation_vi": "Một ngày đầy đủ có đúng 24 giờ nên phát biểu 'ít hơn 24 giờ' là sai.",
+      "hints_vi": [
+        "Nhớ kiến thức: 1 ngày = 24 giờ.",
+        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+      ],
+      "tags": [
+        "time_day_24_hours",
+        "measurement",
+        "application",
+        "true_false",
+        "text"
+      ],
+      "validation": {
+        "choice_count": 2,
+        "single_correct": true
+      },
+      "status": "CHILD_READY",
+      "correct_choice_id": "a",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Sai",
+          "rationale_vi": "Một ngày đầy đủ có đúng 24 giờ nên phát biểu 'ít hơn 24 giờ' là sai."
+        },
+        {
+          "id": "b",
+          "text": "Đúng",
           "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
         }
       ]
@@ -6321,14 +6332,14 @@
       "lesson_id": "m2_ls_time_hour_60_minutes",
       "skill_id": "TIME_HOUR_60_MINUTES",
       "difficulty": "medium",
-      "question_type": "numeric_input",
-      "prompt_vi": "2 giờ bằng bao nhiêu phút?",
-      "answer_kind": "integer",
-      "correct_answer": 120,
+      "question_type": "multiple_choice",
+      "prompt_vi": "45 phút so với 1 giờ là khoảng thời gian thế nào?",
+      "answer_kind": "text",
+      "correct_answer": "ngắn hơn",
       "accepted_answers": [
-        "120"
+        "ngắn hơn"
       ],
-      "explanation_vi": "2 × 60 = 120 phút.",
+      "explanation_vi": "1 giờ = 60 phút; 45 phút ít hơn 60 phút nên ngắn hơn 1 giờ.",
       "hints_vi": [
         "Nhớ kiến thức: 1 giờ = 60 phút.",
         "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
@@ -6337,16 +6348,37 @@
         "time_hour_60_minutes",
         "measurement",
         "medium",
-        "numeric_input",
-        "integer"
+        "multiple_choice",
+        "text"
       ],
       "validation": {
-        "integer_required": true,
-        "numeric_min": 0,
-        "numeric_max": 1000
+        "choice_count": 4,
+        "single_correct": true
       },
       "status": "CHILD_READY",
-      "answer_unit": "phút"
+      "correct_choice_id": "a",
+      "choices": [
+        {
+          "id": "a",
+          "text": "ngắn hơn",
+          "rationale_vi": "1 giờ = 60 phút; 45 phút ít hơn 60 phút nên ngắn hơn 1 giờ."
+        },
+        {
+          "id": "b",
+          "text": "dài hơn",
+          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+        },
+        {
+          "id": "c",
+          "text": "bằng nhau",
+          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+        },
+        {
+          "id": "d",
+          "text": "không so sánh được",
+          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+        }
+      ]
     },
     {
       "id": "m2_q_time_hour_60_minutes_03",
@@ -6354,13 +6386,13 @@
       "skill_id": "TIME_HOUR_60_MINUTES",
       "difficulty": "application",
       "question_type": "multiple_choice",
-      "prompt_vi": "90 phút dài hơn hay ngắn hơn 1 giờ?",
+      "prompt_vi": "Một hoạt động kéo dài đúng 60 phút. Khoảng thời gian đó bằng gì?",
       "answer_kind": "text",
-      "correct_answer": "dài hơn",
+      "correct_answer": "1 giờ",
       "accepted_answers": [
-        "dài hơn"
+        "1 giờ"
       ],
-      "explanation_vi": "1 giờ = 60 phút, mà 90 > 60 nên 90 phút dài hơn 1 giờ.",
+      "explanation_vi": "Theo quan hệ đã học, 60 phút bằng 1 giờ.",
       "hints_vi": [
         "Nhớ kiến thức: 1 giờ = 60 phút.",
         "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
@@ -6381,22 +6413,22 @@
       "choices": [
         {
           "id": "a",
-          "text": "dài hơn",
-          "rationale_vi": "1 giờ = 60 phút, mà 90 > 60 nên 90 phút dài hơn 1 giờ."
+          "text": "1 giờ",
+          "rationale_vi": "Theo quan hệ đã học, 60 phút bằng 1 giờ."
         },
         {
           "id": "b",
-          "text": "ngắn hơn",
+          "text": "1 ngày",
           "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
         },
         {
           "id": "c",
-          "text": "bằng nhau",
+          "text": "30 phút",
           "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
         },
         {
           "id": "d",
-          "text": "không so sánh được",
+          "text": "không thể biết",
           "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
         }
       ]

@@ -140,10 +140,18 @@ class MathContentDataSmoke(unittest.TestCase):
 
     def test_prerequisites_resolve_and_are_acyclic(self):
         graph = {x["skill_id"]: x["prerequisite_skills"] for x in self.lessons}
+        chapter_position = {x["id"]: i for i, x in enumerate(self.catalog["chapters"])}
+        topic_position = {x["id"]: i for i, x in enumerate(self.catalog["topics"])}
+        lesson_by_skill = {x["skill_id"]: x for x in self.lessons}
+
+        def order_key(lesson):
+            return (chapter_position[lesson["chapter_id"]], topic_position[lesson["topic_id"]], lesson["order_in_domain"])
+
         for skill, prereqs in graph.items():
             self.assertNotIn(skill, prereqs)
             for prereq in prereqs:
                 self.assertIn(prereq, self.skills)
+                self.assertLess(order_key(lesson_by_skill[prereq]), order_key(lesson_by_skill[skill]))
         self.assertIsNone(validator.find_cycle(graph))
 
     def test_balanced_difficulty_coverage(self):
@@ -191,6 +199,14 @@ class MathContentDataSmoke(unittest.TestCase):
             with self.subTest(item=item["id"]):
                 serialized = json.dumps(item, ensure_ascii=False)
                 self.assertIsNone(validator.MONEY_DENOMINATION_RE.search(serialized))
+
+    def test_time_relation_skills_do_not_expand_into_extra_arithmetic(self):
+        time_questions = [x for x in self.questions if x["skill_id"] in validator.TIME_RELATION_SKILLS]
+        self.assertEqual(6, len(time_questions))
+        for item in time_questions:
+            with self.subTest(item=item["id"]):
+                serialized = json.dumps(item, ensure_ascii=False)
+                self.assertIsNone(validator.TIME_OUT_OF_SCOPE_ARITH_RE.search(serialized))
 
 
 if __name__ == "__main__":

@@ -14,8 +14,8 @@ Owner: AI1 — Math Content & Data
 - Valid static questions: **201 / 201**
 - Difficulty coverage: **67 basic + 67 medium + 67 application**
 - Answer kinds used, aligned with AI2 engine contract:
-  - `integer`: 109
-  - `text`: 89
+  - `integer`: 107
+  - `text`: 91
   - `expression`: 1
   - `unit`: 1
   - `interaction_integer`: 1
@@ -28,7 +28,7 @@ Owner: AI1 — Math Content & Data
   - interactive measurement
   - word problem
 - Semantic validator errors: **0**
-- Math content unittest: **12 / 12 PASS**
+- Math content unittest: **13 / 13 PASS**
 - Pack manifest/hash/listing check on current working tree: **PASS** (`version=1.9.0`, 3 listed files)
 
 ## Curriculum/content completeness
@@ -70,7 +70,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - duplicate ID toàn catalog/bank;
 - missing lesson/question/reference;
 - orphan question;
-- bad prerequisite + prerequisite cycle;
+- bad prerequisite + prerequisite cycle + prerequisite trỏ về bài ở phía sau lộ trình;
 - invalid difficulty / practice-set mismatch;
 - invalid numeric range;
 - missing answer / accepted answer;
@@ -79,6 +79,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - invalid MC correct choice / duplicate choices / rationale missing;
 - invalid true/false shape;
 - mệnh giá tiền Việt Nam bị hard-code khi chưa có source/book mapping;
+- phép nhân/chia mở rộng không thuộc skill quan hệ thời gian `1 ngày = 24 giờ`, `1 giờ = 60 phút`;
 - answer kind ngoài Grade-2 bank;
 - question type không hợp contract;
 - exact/near duplicate prompt trong cùng lesson;
@@ -93,14 +94,15 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - mọi lesson có basic/medium/application;
 - mọi question có stable source + valid answer;
 - mọi question được reference đúng một lần;
-- prerequisite resolve và acyclic;
+- prerequisite resolve, acyclic và luôn trỏ về bài đã xuất hiện trước;
 - difficulty cân bằng;
 - authoring deterministic;
 - answer kinds/question types đúng contract;
 - expression validator fail-closed, kể cả divide-by-zero và payload không phải arithmetic;
-- nội dung tiền Việt Nam không hard-code mệnh giá khi chưa có source/book mapping.
+- nội dung tiền Việt Nam không hard-code mệnh giá khi chưa có source/book mapping;
+- skill quan hệ thời gian không mở rộng thành phép nhân/chia ngoài yêu cầu cần đạt.
 
-Latest result: **12 tests PASS**.
+Latest result: **13 tests PASS**.
 
 ## Commits / waves
 
@@ -109,6 +111,8 @@ Latest result: **12 tests PASS**.
 - `20c2dd0` — `Toán: thêm validator và test toàn vẹn nội dung`
 - `3993e20` — `Toán: đăng ký catalog và question bank vào content pack`
 - `e4a6217` — `Toán: chuẩn hóa question bank theo contract engine`
+- `ad5db15` — `Toán: chốt status content và test biểu thức fail-closed`
+- `c7e0b0e` — `Toán: bỏ mệnh giá tiền chưa map nguồn khỏi nội dung`
 
 ## Current blockers outside AI1 content ownership
 

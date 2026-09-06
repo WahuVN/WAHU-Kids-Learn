@@ -13,11 +13,11 @@
                   },
                   {
                       "path":  "lesson_catalog_v1.json",
-                      "sha256":  "265FA11E09797F050BC0F321AD3032108798DFB77FCBBAC6F9C9DC63EDB67A8D"
+                      "sha256":  "6E54A392F36C2CBAE4EF10AE69CBEE880944085E0B621A37C3049BB1F7BD8CBB"
                   },
                   {
                       "path":  "question_bank_v1.json",
-                      "sha256":  "9001C2AF4F93F79D0545F9AFC723F71B67BE4634D5888D861DE9B80F17AE7889"
+                      "sha256":  "2AD9E8E40662E18BC8CCE70DE876B622EE50B561EE37C12A6287910EF39006D6"
                   }
               ]
 }

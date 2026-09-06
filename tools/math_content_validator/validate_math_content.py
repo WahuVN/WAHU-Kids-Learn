@@ -24,6 +24,8 @@ ENGINE_ANSWER_KINDS = {"integer", "interaction_integer", "number", "decimal", "f
 GRADE2_USED_ANSWER_KINDS = {"integer", "interaction_integer", "text", "unit", "expression"}
 QUESTION_TYPES = {"numeric_input", "multiple_choice", "true_false", "expression_input", "unit_input", "interactive_measurement", "word_problem"}
 MONEY_DENOMINATION_RE = re.compile(r"\b\d[\d\s.,]*\s*đồng\b", re.IGNORECASE)
+TIME_RELATION_SKILLS = {"TIME_DAY_24_HOURS", "TIME_HOUR_60_MINUTES"}
+TIME_OUT_OF_SCOPE_ARITH_RE = re.compile(r"\b\d+\s*(?:×|\*|÷|/|:)\s*\d+\b")
 
 
 def load_json(path: Path, errors: list[str]) -> dict:
@@ -262,6 +264,9 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
         if lid:
             lesson_ids.add(lid); all_ids.append((lid, where)); lesson_by_id[lid] = lesson
         skill = required_text(lesson, "skill_id", where, errors)
+        order_in_domain = lesson.get("order_in_domain")
+        if type(order_in_domain) is not int or order_in_domain < 1:
+            errors.append(f"invalid_lesson_order:{where}:{order_in_domain!r}")
         if skill not in baseline_skill_set:
             errors.append(f"unknown_lesson_skill:{where}:{skill}")
         lesson_skill_counts[skill] += 1
@@ -347,6 +352,26 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
     if cycle:
         errors.append("prerequisite_cycle:" + "->".join(cycle))
 
+    chapter_position = {x.get("id"): i for i, x in enumerate(chapters) if isinstance(x, dict)}
+    topic_position = {x.get("id"): i for i, x in enumerate(topics) if isinstance(x, dict)}
+    for skill, lesson in lesson_by_skill.items():
+        target_key = (
+            chapter_position.get(lesson.get("chapter_id"), 10**9),
+            topic_position.get(lesson.get("topic_id"), 10**9),
+            lesson.get("order_in_domain") if type(lesson.get("order_in_domain")) is int else 10**9,
+        )
+        for prereq in lesson.get("prerequisite_skills", []):
+            prereq_lesson = lesson_by_skill.get(prereq)
+            if not isinstance(prereq_lesson, dict):
+                continue
+            prereq_key = (
+                chapter_position.get(prereq_lesson.get("chapter_id"), 10**9),
+                topic_position.get(prereq_lesson.get("topic_id"), 10**9),
+                prereq_lesson.get("order_in_domain") if type(prereq_lesson.get("order_in_domain")) is int else 10**9,
+            )
+            if prereq_key >= target_key:
+                errors.append(f"forward_prerequisite:{skill}:{prereq}")
+
     question_by_id: dict[str, dict] = {}
     question_counts_by_skill = Counter()
     question_counts_by_difficulty = Counter()
@@ -382,6 +407,10 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             serialized_money_item = json.dumps(q, ensure_ascii=False)
             if MONEY_DENOMINATION_RE.search(serialized_money_item):
                 errors.append(f"unsourced_money_denomination:{where}")
+        if skill in TIME_RELATION_SKILLS:
+            serialized_time_item = json.dumps(q, ensure_ascii=False)
+            if TIME_OUT_OF_SCOPE_ARITH_RE.search(serialized_time_item):
+                errors.append(f"out_of_scope_time_arithmetic:{where}")
         hints = required_list(q, "hints_vi", where, errors, 2)
         if len(hints) < 2 or any(not isinstance(x, str) or not x.strip() for x in hints):
             errors.append(f"invalid_hints:{where}")

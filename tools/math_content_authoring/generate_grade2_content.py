@@ -206,7 +206,7 @@ LESSON_INFO = {
     "QUADRILATERAL_RECOGNIZE": ("m2_tp11_lines_shapes", "Nhận biết hình tứ giác", "Hình tứ giác là hình phẳng kín có bốn cạnh và bốn đỉnh. Hình vuông và hình chữ nhật đều là các ví dụ của tứ giác.", "Tứ giác", "Một hình kín có đúng bốn cạnh là hình tứ giác.", ["LINE_SEGMENT_RECOGNIZE"]),
     "CYLINDER_RECOGNIZE": ("m2_tp12_solids_construct", "Nhận biết khối trụ", "Khối trụ có hai mặt đáy tròn bằng nhau và một mặt cong bao quanh. Lon nước là một vật thể gần dạng khối trụ.", "Khối trụ", "Khối có hai đáy tròn song song và một mặt cong xung quanh.", []),
     "SPHERE_RECOGNIZE": ("m2_tp12_solids_construct", "Nhận biết khối cầu", "Khối cầu tròn đều theo mọi hướng và không có cạnh hay đỉnh. Quả bóng là vật thể gần dạng khối cầu.", "Khối cầu", "Khối tròn không có cạnh, đỉnh hay mặt phẳng đáy.", []),
-    "DRAW_SEGMENT_GIVEN_LENGTH": ("m2_tp12_solids_construct", "Tạo đoạn thẳng có độ dài cho trước", "Đặt một đầu đoạn thẳng tại vạch đầu, rồi chọn đầu còn lại sao cho khoảng cách trên thước đúng bằng độ dài yêu cầu.", "Vẽ đoạn thẳng theo độ dài", "Độ dài đoạn thẳng bằng hiệu vị trí hai đầu mút trên cùng một thước chia đều.", ["LINE_SEGMENT_RECOGNIZE", "MEASURE_WITH_RULER_CM"]),
+    "DRAW_SEGMENT_GIVEN_LENGTH": ("m2_tp12_solids_construct", "Tạo đoạn thẳng có độ dài cho trước", "Đặt một đầu đoạn thẳng tại vạch đầu, rồi chọn đầu còn lại sao cho khoảng cách trên thước đúng bằng độ dài yêu cầu.", "Vẽ đoạn thẳng theo độ dài", "Độ dài đoạn thẳng bằng hiệu vị trí hai đầu mút trên cùng một thước chia đều.", ["LINE_SEGMENT_RECOGNIZE"]),
     "FOLD_CUT_COMPOSE_SHAPES": ("m2_tp12_solids_construct", "Gấp, cắt và ghép hình", "Có thể tạo hình mới bằng cách gấp, cắt hoặc ghép các hình đơn giản. Khi ghép, các cạnh phù hợp được đặt sát nhau mà không làm thay đổi bản chất của từng mảnh.", "Ghép và tạo hình", "Tách một hình thành các phần hoặc ghép các phần để tạo hình mới giúp nhận ra quan hệ giữa các hình.", ["QUADRILATERAL_RECOGNIZE"]),
 
     "HEAVIER_LIGHTER": ("m2_tp13_mass_length_capacity", "Nặng hơn và nhẹ hơn", "Khi so sánh bằng cân, phía hạ thấp hơn thường chứa vật nặng hơn; phía nâng cao hơn chứa vật nhẹ hơn nếu cân hoạt động cân bằng đúng.", "So sánh khối lượng", "Nặng hơn nghĩa là có khối lượng lớn hơn; nhẹ hơn nghĩa là có khối lượng nhỏ hơn.", []),
@@ -492,13 +492,13 @@ Q = {
     ],
     "TIME_DAY_24_HOURS": [
         nq("Một ngày đầy đủ có bao nhiêu giờ?", 24, "Theo quan hệ thời gian, 1 ngày = 24 giờ.", unit="giờ"),
-        nq("Hai ngày đầy đủ có bao nhiêu giờ?", 48, "2 × 24 = 48 giờ.", unit="giờ"),
-        mc("Khoảng thời gian nào đúng bằng một ngày đầy đủ?", "24 giờ", ["12 giờ", "60 giờ", "100 giờ"], "Một ngày đầy đủ bằng 24 giờ."),
+        mc("Khi đã đủ 24 giờ liên tiếp, khoảng thời gian đó bằng bao nhiêu ngày đầy đủ?", "1 ngày", ["2 ngày", "10 ngày", "không thể biết"], "Theo quan hệ đã học, 24 giờ liên tiếp bằng 1 ngày đầy đủ."),
+        tf("Một ngày đầy đủ có ít hơn 24 giờ.", False, "Một ngày đầy đủ có đúng 24 giờ nên phát biểu 'ít hơn 24 giờ' là sai."),
     ],
     "TIME_HOUR_60_MINUTES": [
         nq("1 giờ bằng bao nhiêu phút?", 60, "Theo quan hệ thời gian, 1 giờ = 60 phút.", unit="phút"),
-        nq("2 giờ bằng bao nhiêu phút?", 120, "2 × 60 = 120 phút.", unit="phút"),
-        mc("90 phút dài hơn hay ngắn hơn 1 giờ?", "dài hơn", ["ngắn hơn", "bằng nhau", "không so sánh được"], "1 giờ = 60 phút, mà 90 > 60 nên 90 phút dài hơn 1 giờ."),
+        mc("45 phút so với 1 giờ là khoảng thời gian thế nào?", "ngắn hơn", ["dài hơn", "bằng nhau", "không so sánh được"], "1 giờ = 60 phút; 45 phút ít hơn 60 phút nên ngắn hơn 1 giờ."),
+        mc("Một hoạt động kéo dài đúng 60 phút. Khoảng thời gian đó bằng gì?", "1 giờ", ["1 ngày", "30 phút", "không thể biết"], "Theo quan hệ đã học, 60 phút bằng 1 giờ."),
     ],
     "CALENDAR_DAYS_IN_MONTH_DATE": [
         nq("Tháng 4 có bao nhiêu ngày?", 30, "Tháng 4 có 30 ngày.", unit="ngày"),
