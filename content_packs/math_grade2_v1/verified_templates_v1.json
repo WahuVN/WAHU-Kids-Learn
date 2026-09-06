@@ -599,6 +599,42 @@
                           "skill":  "WP_SELECT_OPERATION_ONE_STEP",
                           "status":  "VERIFIED_A_TEMPLATE",
                           "prompt_vi":  "Đọc bài toán một bước và chọn phép tính phù hợp."
+                      },
+                      {
+                          "id":  "full_hundreds_recognize",
+                          "skill":  "NUM_FULL_HUNDREDS_RECOGNIZE",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Quan sát mô hình trăm và chọn số trăm tròn đúng."
+                      },
+                      {
+                          "id":  "number_ray_fill_1000",
+                          "skill":  "NUMBER_RAY_FILL",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Điền số còn thiếu trên trục số trong phạm vi 1000."
+                      },
+                      {
+                          "id":  "min_max_up_to_4",
+                          "skill":  "NUM_MIN_MAX_UP_TO_4",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Chọn số lớn nhất hoặc bé nhất trong tối đa bốn số."
+                      },
+                      {
+                          "id":  "sort_up_to_4",
+                          "skill":  "NUM_SORT_UP_TO_4",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Sắp xếp tối đa bốn số theo thứ tự tăng hoặc giảm."
+                      },
+                      {
+                          "id":  "add_sub_two_operators_left_to_right",
+                          "skill":  "ADD_SUB_TWO_OPERATORS_LEFT_TO_RIGHT",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Tính biểu thức gồm hai phép cộng hoặc trừ từ trái sang phải."
+                      },
+                      {
+                          "id":  "mental_round_tens_hundreds_1000",
+                          "skill":  "MENTAL_ADD_SUB_ROUND_TENS_HUNDREDS_1000",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Tính nhẩm cộng hoặc trừ các số tròn chục, tròn trăm trong phạm vi 1000."
                       }
                   ]
 }

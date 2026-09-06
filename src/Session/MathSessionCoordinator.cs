@@ -11,7 +11,7 @@ namespace WAHU.Session
     public sealed class MathSessionCoordinator : IDisposable
     {
         public const string PackId = "math_grade2_verified_templates_v1";
-        public const string PackVersion = "1.3.0";
+        public const string PackVersion = "1.4.0";
         public const int DefaultTargetQuestionCount = 8;
 
         private readonly LearningDatabase _database;
@@ -474,6 +474,12 @@ namespace WAHU.Session
                 case "operation_meaning_from_visual":
                 case "word_problem_select_operation_one_step":
                     return RepairByOperationModel(question);
+                case "full_hundreds_recognize": return "place_value_decompose_3digit";
+                case "number_ray_fill_1000": return "predecessor_successor";
+                case "min_max_up_to_4":
+                case "sort_up_to_4": return "compare_two_numbers_1000";
+                case "add_sub_two_operators_left_to_right":
+                case "mental_round_tens_hundreds_1000": return "mental_add_within_20";
                 default: return templateId;
             }
         }
@@ -551,6 +557,11 @@ namespace WAHU.Session
             if (error != null && error.ErrorType == "WORD_PROBLEM_RELATION_ERROR") return "Chưa đúng. Con xác định điều đã biết, điều cần tìm rồi nhìn lại sơ đồ quan hệ nhé.";
             if (error != null && error.ErrorType == "OPERATION_COMPONENT_ERROR") return "Chưa đúng. Con nhìn vị trí của số trong phép tính rồi gọi tên theo vai trò nhé.";
             if (error != null && error.ErrorType == "OPERATION_MEANING_ERROR") return "Chưa đúng. Con nhìn lại mô hình: gộp, bớt, nhóm bằng nhau hay chia đều nhé.";
+            if (error != null && error.ErrorType == "HUNDREDS_RECOGNITION_ERROR") return "Chưa đúng. Mỗi ô lớn là một trăm; con đếm lại số ô trăm nhé.";
+            if (error != null && error.ErrorType == "NUMBER_SEQUENCE_ERROR") return "Chưa đúng. Con nhìn khoảng cách đều giữa các mốc trên trục số nhé.";
+            if (error != null && error.ErrorType == "NUMBER_ORDER_ERROR") return "Chưa đúng. Con so sánh từ hàng trăm rồi đến hàng chục và đơn vị nhé.";
+            if (error != null && error.ErrorType == "TWO_STEP_CALCULATION_ERROR") return "Chưa đúng. Con làm phép tính thứ nhất trước rồi dùng kết quả cho bước thứ hai nhé.";
+            if (error != null && error.ErrorType == "ROUND_NUMBER_FACT_ERROR") return "Chưa đúng. Con xem các số tròn chục hoặc tròn trăm thành những nhóm bằng nhau nhé.";
             if (error != null && error.ErrorType == "EVENT_CLASSIFICATION_ERROR") return "Chưa đúng. Con đối chiếu câu này với tất cả kết quả có thể của xúc xắc nhé.";
             return "Chưa đúng. Mình xem gợi ý rồi thử câu tiếp theo nhé.";
         }

@@ -37,6 +37,12 @@ namespace WAHU.ChildUiRuntimeSmoke
         {
             var cases = new[]
             {
+                QV("full_hundreds_recognize", "NUM_FULL_HUNDREDS_RECOGNIZE", "Quan sát mô hình trăm.", "500", "hundreds|5", "hundreds_blocks"),
+                QV("number_ray_fill_1000", "NUMBER_RAY_FILL", "Điền số còn thiếu trên trục số.", "340", "numberlinefill|300|10|4|5", "number_line_fill"),
+                QV("min_max_up_to_4", "NUM_MIN_MAX_UP_TO_4", "Trong các số 472, 810, 305, 699, số lớn nhất là số nào?", "810", "numbercards|472|810|305|699|max", "number_cards"),
+                QV("sort_up_to_4", "NUM_SORT_UP_TO_4", "Sắp xếp 472, 810, 305, 699 từ bé đến lớn.", "305 < 472 < 699 < 810", "numbercards|472|810|305|699|asc", "number_cards"),
+                QV("add_sub_two_operators_left_to_right", "ADD_SUB_TWO_OPERATORS_LEFT_TO_RIGHT", "Tính từ trái sang phải: 120 + 80 - 50 = ?", "150", "twostep|120|+|80|-|50|200", "two_step_strip"),
+                QV("mental_round_tens_hundreds_1000", "MENTAL_ADD_SUB_ROUND_TENS_HUNDREDS_1000", "Tính nhẩm: 340 + 50 = ?", "390", "roundchunks|340|+|50|10", "round_number_chunks"),
                 QV("add_components_recognize", "ADD_COMPONENTS_RECOGNIZE", "Trong phép tính 23 + 7 = 30, số 23 được gọi là gì?", "số hạng", "equationparts|add|23|7|30|0", "equation_components"),
                 QV("sub_components_recognize", "SUB_COMPONENTS_RECOGNIZE", "Trong phép tính 41 - 12 = 29, số 12 được gọi là gì?", "số trừ", "equationparts|sub|41|12|29|1", "equation_components"),
                 QV("multiplication_components_recognize", "MULTIPLICATION_COMPONENTS", "Trong phép tính 5 × 4 = 20, số 20 được gọi là gì?", "tích", "equationparts|mul|5|4|20|2", "equation_components"),

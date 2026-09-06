@@ -70,7 +70,9 @@ FROM child_skill WHERE child_id=@child AND subject='math';";
                         var mastery = Clamp01(Convert.ToDouble(reader[1], CultureInfo.InvariantCulture));
                         var attempts = Math.Max(0, Convert.ToInt32(reader[2], CultureInfo.InvariantCulture));
                         if (skill == "PLACE_VALUE_HUNDREDS_TENS_ONES" || skill == "NUM_EXPANDED_FORM_HTO" ||
-                            skill == "NUM_PREDECESSOR_SUCCESSOR" || skill == "NUM_COMPARE_0_1000")
+                            skill == "NUM_PREDECESSOR_SUCCESSOR" || skill == "NUM_COMPARE_0_1000" ||
+                            skill == "NUM_FULL_HUNDREDS_RECOGNIZE" || skill == "NUMBER_RAY_FILL" ||
+                            skill == "NUM_MIN_MAX_UP_TO_4" || skill == "NUM_SORT_UP_TO_4")
                             Add(numberSense, ref numberSenseScore, mastery, attempts);
                         else if (skill == "MENTAL_ADD_SUB_WITHIN_20")
                             Add(mental, ref mentalScore, mastery, attempts);
@@ -89,7 +91,8 @@ FROM child_skill WHERE child_id=@child AND subject='math';";
                                   skill.StartsWith("SUB_WITHIN_1000", StringComparison.Ordinal) ||
                                   skill.StartsWith("WP_ONE_STEP_", StringComparison.Ordinal) ||
                                   skill == "ADD_COMPONENTS_RECOGNIZE" || skill == "SUB_COMPONENTS_RECOGNIZE" ||
-                                  skill == "OPERATION_MEANING_FROM_VISUAL" || skill == "WP_SELECT_OPERATION_ONE_STEP"))
+                                  skill == "OPERATION_MEANING_FROM_VISUAL" || skill == "WP_SELECT_OPERATION_ONE_STEP" ||
+                                  skill == "ADD_SUB_TWO_OPERATORS_LEFT_TO_RIGHT" || skill == "MENTAL_ADD_SUB_ROUND_TENS_HUNDREDS_1000"))
                             Add(written, ref writtenScore, mastery, attempts);
                     }
                 }

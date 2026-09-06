@@ -64,6 +64,12 @@ namespace WAHU.Learning
                     case "division_components_recognize": question = DivisionComponents(decision.Template); break;
                     case "operation_meaning_from_visual": question = OperationMeaningFromVisual(decision.Template); break;
                     case "word_problem_select_operation_one_step": question = WordProblemSelectOperation(decision.Template); break;
+                    case "full_hundreds_recognize": question = FullHundredsRecognize(decision.Template); break;
+                    case "number_ray_fill_1000": question = NumberRayFill(decision.Template); break;
+                    case "min_max_up_to_4": question = MinMaxUpToFour(decision.Template); break;
+                    case "sort_up_to_4": question = SortUpToFour(decision.Template); break;
+                    case "add_sub_two_operators_left_to_right": question = TwoOperatorsLeftToRight(decision.Template); break;
+                    case "mental_round_tens_hundreds_1000": question = MentalRoundTensHundreds(decision.Template); break;
                     default: throw new InvalidOperationException("Unsupported VERIFIED math template: " + decision.Template.TemplateId);
                 }
             }
@@ -547,6 +553,138 @@ namespace WAHU.Learning
             return question;
         }
 
+        private MathQuestion FullHundredsRecognize(MathTemplateRef template)
+        {
+            var hundreds = _random.Next(1, 10);
+            var correct = hundreds * 100;
+            var choices = Enumerable.Range(1, 9).Where(x => x != hundreds).Select(x => x * 100).ToList();
+            choices = Shuffle(choices).Take(3).Concat(new[] { correct }).ToList();
+            var question = NewNumericQuestion(template,
+                "Quan sát mô hình trăm. Số nào được biểu diễn?", correct,
+                "Mỗi ô lớn biểu diễn một trăm.",
+                "Đếm số ô trăm rồi nhân với 100.");
+            question.Choices = Shuffle(choices);
+            question.IllustrationData = "hundreds|" + hundreds.ToString(CultureInfo.InvariantCulture);
+            return question;
+        }
+
+        private MathQuestion NumberRayFill(MathTemplateRef template)
+        {
+            var step = _random.Next(0, 2) == 0 ? 10 : 100;
+            var maxStartIndex = (1000 - 4 * step) / step;
+            var start = _random.Next(0, maxStartIndex + 1) * step;
+            var missingIndex = _random.Next(1, 4);
+            var correct = start + missingIndex * step;
+            var choices = new HashSet<int> { correct };
+            foreach (var delta in new[] { -step, step, -2 * step, 2 * step, -10, 10, -100, 100 })
+            {
+                var candidate = correct + delta;
+                if (candidate >= 0 && candidate <= 1000) choices.Add(candidate);
+                if (choices.Count >= 4) break;
+            }
+            var question = NewNumericQuestion(template,
+                "Điền số còn thiếu trên trục số.", correct,
+                "Nhìn khoảng cách đều giữa các mốc để tìm bước nhảy.",
+                "Các mốc tăng đều " + step + " đơn vị mỗi bước.");
+            question.Choices = Shuffle(choices.Take(4).ToList());
+            question.IllustrationData = "numberlinefill|" + start + "|" + step + "|" + missingIndex + "|5";
+            return question;
+        }
+
+        private MathQuestion MinMaxUpToFour(MathTemplateRef template)
+        {
+            var values = DistinctNumbers(4, 0, 1001);
+            var askMax = _random.Next(0, 2) == 0;
+            var correct = askMax ? values.Max() : values.Min();
+            var question = NewNumericQuestion(template,
+                "Trong các số " + string.Join(", ", values) + ", số " + (askMax ? "lớn nhất" : "bé nhất") + " là số nào?", correct,
+                "So sánh từ hàng trăm, rồi hàng chục, rồi hàng đơn vị.",
+                "Hãy tìm số đứng xa nhất về phía " + (askMax ? "lớn" : "bé") + " khi so sánh từng hàng.");
+            question.Choices = Shuffle(values.ToList());
+            question.IllustrationData = "numbercards|" + string.Join("|", values) + "|" + (askMax ? "max" : "min");
+            return question;
+        }
+
+        private MathQuestion SortUpToFour(MathTemplateRef template)
+        {
+            var values = DistinctNumbers(4, 0, 1001);
+            var ascending = _random.Next(0, 2) == 0;
+            var sorted = ascending ? values.OrderBy(x => x).ToArray() : values.OrderByDescending(x => x).ToArray();
+            var separator = ascending ? " < " : " > ";
+            var correct = string.Join(separator, sorted);
+            var options = new List<string> { correct };
+            AddUnique(options, string.Join(separator, sorted.Reverse()));
+            var swapMiddle = sorted.ToArray();
+            var temp = swapMiddle[1]; swapMiddle[1] = swapMiddle[2]; swapMiddle[2] = temp;
+            AddUnique(options, string.Join(separator, swapMiddle));
+            var rotate = new[] { sorted[1], sorted[2], sorted[3], sorted[0] };
+            AddUnique(options, string.Join(separator, rotate));
+            while (options.Count < 4)
+            {
+                var shuffled = Shuffle(values.ToList()).ToArray();
+                AddUnique(options, string.Join(separator, shuffled));
+            }
+            var question = NewTextQuestion(template,
+                "Sắp xếp các số " + string.Join(", ", values) + " theo thứ tự " + (ascending ? "từ bé đến lớn" : "từ lớn đến bé") + ".",
+                correct, Shuffle(options.Take(4).ToList()),
+                "So sánh từng số từ hàng lớn nhất.",
+                "Đặt số " + (ascending ? "bé nhất trước rồi tăng dần" : "lớn nhất trước rồi giảm dần") + ".");
+            question.IllustrationData = "numbercards|" + string.Join("|", values) + "|" + (ascending ? "asc" : "desc");
+            return question;
+        }
+
+        private MathQuestion TwoOperatorsLeftToRight(MathTemplateRef template)
+        {
+            for (var attempt = 0; attempt < 500; attempt++)
+            {
+                var a = _random.Next(0, 501);
+                var b = _random.Next(0, 301);
+                var c = _random.Next(0, 301);
+                var op1 = _random.Next(0, 2) == 0 ? "+" : "-";
+                var op2 = _random.Next(0, 2) == 0 ? "+" : "-";
+                var middle = op1 == "+" ? a + b : a - b;
+                if (middle < 0 || middle > 1000) continue;
+                var final = op2 == "+" ? middle + c : middle - c;
+                if (final < 0 || final > 1000) continue;
+                var question = NewNumericQuestion(template,
+                    "Tính từ trái sang phải: " + a + " " + op1 + " " + b + " " + op2 + " " + c + " = ?", final,
+                    "Làm phép tính thứ nhất trước, rồi dùng kết quả để làm phép tính thứ hai.",
+                    "Bước 1: " + a + " " + op1 + " " + b + " = " + middle + ". Sau đó tính " + middle + " " + op2 + " " + c + ".");
+                question.IllustrationData = "twostep|" + a + "|" + op1 + "|" + b + "|" + op2 + "|" + c + "|" + middle;
+                return question;
+            }
+            throw new InvalidOperationException("Could not generate grade-2 two-operator expression.");
+        }
+
+        private MathQuestion MentalRoundTensHundreds(MathTemplateRef template)
+        {
+            for (var attempt = 0; attempt < 500; attempt++)
+            {
+                var unit = _random.Next(0, 2) == 0 ? 10 : 100;
+                var maxIndex = 1000 / unit;
+                var a = _random.Next(0, maxIndex + 1) * unit;
+                var b = _random.Next(1, maxIndex + 1) * unit;
+                var add = _random.Next(0, 2) == 0;
+                var answer = add ? a + b : a - b;
+                if (answer < 0 || answer > 1000) continue;
+                var op = add ? "+" : "-";
+                var question = NewNumericQuestion(template,
+                    "Tính nhẩm: " + a + " " + op + " " + b + " = ?", answer,
+                    "Xem các số là những nhóm " + unit + " đơn vị.",
+                    "Bỏ cùng " + (unit == 10 ? "một chữ số 0" : "hai chữ số 0") + ", tính phần còn lại rồi ghép số 0 trở lại.");
+                question.IllustrationData = "roundchunks|" + a + "|" + op + "|" + b + "|" + unit;
+                return question;
+            }
+            throw new InvalidOperationException("Could not generate rounded mental arithmetic item.");
+        }
+
+        private int[] DistinctNumbers(int count, int minInclusive, int maxExclusive)
+        {
+            var values = new HashSet<int>();
+            while (values.Count < count) values.Add(_random.Next(minInclusive, maxExclusive));
+            return values.ToArray();
+        }
+
         private MathQuestion MentalAdd(MathTemplateRef template)
         {
             var a = _random.Next(2, 16);
@@ -705,6 +843,17 @@ namespace WAHU.Learning
                     return "polyline";
                 case "clock_read_minute_hand_3_or_6":
                     return "clock";
+                case "full_hundreds_recognize":
+                    return "hundreds_blocks";
+                case "number_ray_fill_1000":
+                    return "number_line_fill";
+                case "min_max_up_to_4":
+                case "sort_up_to_4":
+                    return "number_cards";
+                case "add_sub_two_operators_left_to_right":
+                    return "two_step_strip";
+                case "mental_round_tens_hundreds_1000":
+                    return "round_number_chunks";
                 default:
                     return "symbolic";
             }
@@ -755,7 +904,16 @@ namespace WAHU.Learning
 
             question.AnswerKind = "integer";
             question.CorrectAnswerText = question.CorrectAnswer.ToString(CultureInfo.InvariantCulture);
-            question.Choices = BuildChoices(question.CorrectAnswer);
+            if (question.Choices == null || question.Choices.Count < 2)
+                question.Choices = BuildChoices(question.CorrectAnswer);
+            else
+            {
+                var explicitChoices = question.Choices.Distinct().ToList();
+                if (!explicitChoices.Contains(question.CorrectAnswer)) explicitChoices.Add(question.CorrectAnswer);
+                if (explicitChoices.Count < 2 || explicitChoices.Count > 4)
+                    throw new InvalidOperationException("Explicit numeric choices must contain 2 to 4 unique values.");
+                question.Choices = explicitChoices;
+            }
             question.ChoiceTexts = question.Choices.Select(x => x.ToString(CultureInfo.InvariantCulture)).ToList();
         }
 

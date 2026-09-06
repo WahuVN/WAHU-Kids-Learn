@@ -248,7 +248,17 @@ namespace WAHUKidsLearn
             if (_question == null || Width < 80 || Height < 40) return;
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             var values = ExtractNumbers(_question.PromptVi);
-            if (_question.Representation == "equation_components")
+            if (_question.Representation == "hundreds_blocks")
+                DrawHundredsBlocks(e.Graphics);
+            else if (_question.Representation == "number_line_fill")
+                DrawNumberLineFill(e.Graphics);
+            else if (_question.Representation == "number_cards")
+                DrawNumberCards(e.Graphics);
+            else if (_question.Representation == "two_step_strip")
+                DrawTwoStepStrip(e.Graphics);
+            else if (_question.Representation == "round_number_chunks")
+                DrawRoundNumberChunks(e.Graphics);
+            else if (_question.Representation == "equation_components")
                 DrawEquationComponents(e.Graphics);
             else if (_question.Representation == "operation_model")
                 DrawWordProblemModel(e.Graphics);
@@ -277,6 +287,138 @@ namespace WAHUKidsLearn
                 DrawPlaceValue(e.Graphics, values);
             else if (_question.TemplateId == "polyline_length")
                 DrawPolyline(e.Graphics, values);
+        }
+
+        private void DrawHundredsBlocks(Graphics g)
+        {
+            var parts = (_question.IllustrationData ?? string.Empty).Split('|');
+            int count;
+            if (parts.Length != 2 || parts[0] != "hundreds" || !int.TryParse(parts[1], out count) || count < 1 || count > 9) return;
+            var stage = new Rectangle(Math.Max(16, Width / 7), 7, Math.Max(180, Width * 5 / 7), Math.Max(70, Height - 20));
+            using (var path = ChildVisualTheme.RoundedRect(stage, 18))
+            using (var fill = new SolidBrush(Color.FromArgb(245, 249, 239)))
+            using (var border = new Pen(Color.FromArgb(215, 226, 207), 1f))
+            { g.FillPath(fill, path); g.DrawPath(border, path); }
+            var cell = Math.Max(30, Math.Min(48, (stage.Width - 36) / Math.Max(3, Math.Min(5, count))));
+            var cols = Math.Min(5, count);
+            var rows = (count + cols - 1) / cols;
+            var totalW = cols * cell;
+            var startX = (Width - totalW) / 2;
+            var startY = Math.Max(6, (Height - rows * cell) / 2 - 2);
+            for (var i = 0; i < count; i++)
+            {
+                var x = startX + (i % cols) * cell + 3;
+                var y = startY + (i / cols) * cell + 3;
+                var rect = new Rectangle(x, y, cell - 7, cell - 7);
+                using (var fill = new SolidBrush(Color.FromArgb(226, 239, 218)))
+                using (var border = new Pen(Color.FromArgb(132, 161, 123), 1.4f))
+                { g.FillRectangle(fill, rect); g.DrawRectangle(border, rect); }
+                for (var k = 1; k < 5; k++)
+                {
+                    var gx = rect.Left + k * rect.Width / 5;
+                    var gy = rect.Top + k * rect.Height / 5;
+                    using (var grid = new Pen(Color.FromArgb(196, 214, 188), 0.7f))
+                    { g.DrawLine(grid, gx, rect.Top, gx, rect.Bottom); g.DrawLine(grid, rect.Left, gy, rect.Right, gy); }
+                }
+            }
+            if (_hintLevel >= 1)
+                DrawCentered(g, "Mỗi ô lớn = 100", new Rectangle(0, Height - 22, Width, 18), ChildVisualTheme.MutedInk, 8.3f);
+        }
+
+        private void DrawNumberLineFill(Graphics g)
+        {
+            var parts = (_question.IllustrationData ?? string.Empty).Split('|');
+            int start, step, missing, count;
+            if (parts.Length != 5 || parts[0] != "numberlinefill" || !int.TryParse(parts[1], out start) ||
+                !int.TryParse(parts[2], out step) || !int.TryParse(parts[3], out missing) || !int.TryParse(parts[4], out count) || count < 3) return;
+            var left = Math.Max(38, Width / 10);
+            var right = Width - left;
+            var y = Height / 2;
+            using (var pen = new Pen(Color.FromArgb(107, 126, 121), 2f)) g.DrawLine(pen, left, y, right, y);
+            for (var i = 0; i < count; i++)
+            {
+                var x = left + (right - left) * i / (count - 1);
+                using (var pen = new Pen(Color.FromArgb(107, 126, 121), 2f)) g.DrawLine(pen, x, y - 8, x, y + 8);
+                var label = i == missing ? "?" : (start + i * step).ToString();
+                DrawCentered(g, label, new Rectangle(x - 36, y + 10, 72, 22), i == missing ? ChildVisualTheme.PeachStrong : ChildVisualTheme.Ink, i == missing ? 11f : 9f);
+            }
+            if (_hintLevel >= 1)
+                DrawCentered(g, "Các mốc cách đều nhau", new Rectangle(0, 3, Width, 18), ChildVisualTheme.MutedInk, 8f);
+            if (_hintLevel >= 2)
+                DrawCentered(g, "+ " + step + " mỗi bước", new Rectangle(0, 3, Width, 18), ChildVisualTheme.PeachStrong, 8.5f);
+        }
+
+        private void DrawNumberCards(Graphics g)
+        {
+            var parts = (_question.IllustrationData ?? string.Empty).Split('|');
+            if (parts.Length != 6 || parts[0] != "numbercards") return;
+            var values = new int[4];
+            for (var i = 0; i < 4; i++) if (!int.TryParse(parts[i + 1], out values[i])) return;
+            var mode = parts[5];
+            var gap = 10;
+            var cardW = Math.Max(68, Math.Min(105, (Width - 70 - gap * 3) / 4));
+            var totalW = cardW * 4 + gap * 3;
+            var startX = (Width - totalW) / 2;
+            var y = Math.Max(12, Height / 2 - 24);
+            for (var i = 0; i < 4; i++)
+            {
+                var rect = new Rectangle(startX + i * (cardW + gap), y, cardW, 46);
+                using (var path = ChildVisualTheme.RoundedRect(rect, 12))
+                using (var fill = new SolidBrush(Color.FromArgb(241, 245, 235)))
+                using (var border = new Pen(Color.FromArgb(190, 202, 183), 1.2f))
+                { g.FillPath(fill, path); g.DrawPath(border, path); }
+                DrawCentered(g, values[i].ToString(), rect, ChildVisualTheme.Ink, 11f);
+            }
+            if (_hintLevel >= 1)
+            {
+                var cue = mode == "max" ? "Tìm số lớn nhất" : mode == "min" ? "Tìm số bé nhất" : mode == "asc" ? "Bé → lớn" : "Lớn → bé";
+                DrawCentered(g, cue, new Rectangle(0, Height - 22, Width, 18), ChildVisualTheme.MutedInk, 8.4f);
+            }
+        }
+
+        private void DrawTwoStepStrip(Graphics g)
+        {
+            var parts = (_question.IllustrationData ?? string.Empty).Split('|');
+            int a, b, c, middle;
+            if (parts.Length != 7 || parts[0] != "twostep" || !int.TryParse(parts[1], out a) || !int.TryParse(parts[3], out b) ||
+                !int.TryParse(parts[5], out c) || !int.TryParse(parts[6], out middle)) return;
+            var op1 = parts[2]; var op2 = parts[4];
+            var centerY = Height / 2 - 15;
+            var step1 = new Rectangle(Width / 2 - 220, centerY, 180, 36);
+            var step2 = new Rectangle(Width / 2 + 40, centerY, 180, 36);
+            foreach (var rect in new[] { step1, step2 })
+            {
+                using (var path = ChildVisualTheme.RoundedRect(rect, 12))
+                using (var fill = new SolidBrush(Color.FromArgb(242, 247, 239)))
+                using (var border = new Pen(Color.FromArgb(179, 197, 174), 1.2f))
+                { g.FillPath(fill, path); g.DrawPath(border, path); }
+            }
+            DrawCentered(g, a + " " + op1 + " " + b + " = " + (_hintLevel >= 2 ? middle.ToString() : "?"), step1, ChildVisualTheme.Ink, 9.5f);
+            DrawCentered(g, (_hintLevel >= 2 ? middle.ToString() : "kết quả bước 1") + " " + op2 + " " + c + " = ?", step2, ChildVisualTheme.Ink, 9f);
+            using (var arrow = new Pen(ChildVisualTheme.PeachStrong, 2f))
+            { g.DrawLine(arrow, step1.Right + 8, centerY + 18, step2.Left - 8, centerY + 18); }
+            if (_hintLevel >= 1)
+                DrawCentered(g, "Làm bước 1 trước", new Rectangle(0, Height - 22, Width, 18), ChildVisualTheme.MutedInk, 8.2f);
+        }
+
+        private void DrawRoundNumberChunks(Graphics g)
+        {
+            var parts = (_question.IllustrationData ?? string.Empty).Split('|');
+            int a, b, unit;
+            if (parts.Length != 5 || parts[0] != "roundchunks" || !int.TryParse(parts[1], out a) || !int.TryParse(parts[3], out b) || !int.TryParse(parts[4], out unit)) return;
+            var op = parts[2];
+            var left = new Rectangle(Width / 2 - 220, Height / 2 - 24, 150, 46);
+            var right = new Rectangle(Width / 2 + 70, Height / 2 - 24, 150, 46);
+            foreach (var rect in new[] { left, right })
+            {
+                using (var path = ChildVisualTheme.RoundedRect(rect, 13))
+                using (var fill = new SolidBrush(Color.FromArgb(235, 244, 229))) g.FillPath(fill, path);
+            }
+            DrawCentered(g, (a / unit) + " nhóm " + unit, left, ChildVisualTheme.Ink, 9.2f);
+            DrawCentered(g, (b / unit) + " nhóm " + unit, right, ChildVisualTheme.Ink, 9.2f);
+            DrawCentered(g, op, new Rectangle(Width / 2 - 28, Height / 2 - 22, 56, 42), ChildVisualTheme.PeachStrong, 14f);
+            if (_hintLevel >= 1)
+                DrawCentered(g, "Tính số nhóm trước", new Rectangle(0, Height - 22, Width, 18), ChildVisualTheme.MutedInk, 8.2f);
         }
 
         private void DrawEquationComponents(Graphics g)

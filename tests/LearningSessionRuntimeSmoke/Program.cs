@@ -40,7 +40,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
         private static IList<MathTemplateRef> TestVerifiedContentAndCore(string templatePath)
         {
             var descriptors = new MathVerifiedTemplateSource().Load(templatePath);
-            A(descriptors.Count == 47, "verified_template_source_flattens_all_verified_variants");
+            A(descriptors.Count == 53, "verified_template_source_flattens_all_verified_variants");
             A(descriptors.All(x => x.Status == "VERIFIED_A_TEMPLATE"), "template_source_filters_verified_a_only");
             var refs = descriptors.Select(x => new MathTemplateRef
             {
@@ -51,7 +51,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 StatementVi = x.StatementVi,
                 AnswerText = x.AnswerText
             }).Where(AdaptiveMathSelector.IsSupported).ToList();
-            A(refs.Count == 47, "generator_supports_all_forty_seven_verified_runtime_candidates");
+            A(refs.Count == 53, "generator_supports_all_fifty_three_verified_runtime_candidates");
             var chanceRefs = refs.Where(x => x.TemplateId.StartsWith("possible_certain_impossible_die__", StringComparison.Ordinal)).ToList();
             A(chanceRefs.Count == 3, "compound_probability_template_flattens_three_variants");
             A(chanceRefs.All(x => x.SourceTemplateId == "possible_certain_impossible_die" &&
@@ -95,7 +95,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
             var first = selector.Select(refs, empty, new DateTime(2026, 9, 6, 10, 0, 0, DateTimeKind.Utc), new string[0], new string[0]);
             A(first != null && first.Template != null, "selector_returns_candidate");
             A(first.DifficultyFit >= 0 && first.DifficultyFit <= 1, "selector_difficulty_fit_bounded");
-            A(first.CandidateSummary.Count == 47, "selector_audits_all_candidates");
+            A(first.CandidateSummary.Count == 53, "selector_audits_all_candidates");
 
             var dueSkills = new Dictionary<string, SkillSnapshot>(StringComparer.Ordinal);
             foreach (var r in refs) dueSkills[r.SkillId] = new SkillSnapshot { SkillId = r.SkillId, MasteryScore = 0.20, Confidence = 0.20, AttemptsCount = 1, LearningState = "LEARNING" };
@@ -141,6 +141,8 @@ namespace WAHU.LearningSessionRuntimeSmoke
                       "pictograph_visual_data_not_leaked_into_prompt_" + r.TemplateId);
                 if (IsOperationConceptTemplate(r.TemplateId))
                     A(ValidateOperationConceptContract(q), "operation_concept_contract_" + r.TemplateId);
+                if (IsNumberExtensionTemplate(r.TemplateId))
+                    A(ValidateNumberExtensionContract(q), "number_extension_contract_" + r.TemplateId);
                 if (r.TemplateId.StartsWith("word_problem_", StringComparison.Ordinal) && r.TemplateId != "word_problem_select_operation_one_step")
                     A(ValidateWordProblemContract(q), "word_problem_relation_contract_" + r.TemplateId);
             }
@@ -228,6 +230,24 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 "operation_visual_sub_repairs_to_mental_sub");
             A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "word_problem_select_operation_one_step", IllustrationData = "wordgroups|5|4" }) == "times_table_5",
                 "word_problem_operation_selection_repairs_from_visual_relation");
+            var hundredsQuestion = new MathQuestion { TemplateId = "full_hundreds_recognize", CorrectAnswer = 500, AnswerKind = "integer", CorrectAnswerText = "500" };
+            A(classifier.Classify(hundredsQuestion, "400").ErrorType == "HUNDREDS_RECOGNITION_ERROR", "hundreds_recognition_error_classified");
+            var lineQuestion = new MathQuestion { TemplateId = "number_ray_fill_1000", CorrectAnswer = 340, AnswerKind = "integer", CorrectAnswerText = "340" };
+            A(classifier.Classify(lineQuestion, "330").ErrorType == "NUMBER_SEQUENCE_ERROR", "number_line_sequence_error_classified");
+            var minMaxQuestion = new MathQuestion { TemplateId = "min_max_up_to_4", CorrectAnswer = 901, AnswerKind = "integer", CorrectAnswerText = "901" };
+            A(classifier.Classify(minMaxQuestion, "810").ErrorType == "NUMBER_ORDER_ERROR", "minmax_number_order_error_classified");
+            var sortQuestion = TextQuestion("sort_up_to_4", "12 < 54 < 210 < 700", new[] { "12 < 54 < 210 < 700", "54 < 12 < 210 < 700" });
+            A(classifier.Classify(sortQuestion, "54 < 12 < 210 < 700").ErrorType == "NUMBER_ORDER_ERROR", "sort_number_order_error_classified");
+            var twoStepQuestion = new MathQuestion { TemplateId = "add_sub_two_operators_left_to_right", CorrectAnswer = 45, AnswerKind = "integer", CorrectAnswerText = "45" };
+            A(classifier.Classify(twoStepQuestion, "40").ErrorType == "TWO_STEP_CALCULATION_ERROR", "two_step_error_classified");
+            var roundQuestion = new MathQuestion { TemplateId = "mental_round_tens_hundreds_1000", CorrectAnswer = 700, AnswerKind = "integer", CorrectAnswerText = "700" };
+            A(classifier.Classify(roundQuestion, "600").ErrorType == "ROUND_NUMBER_FACT_ERROR", "round_number_fact_error_classified");
+            A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "full_hundreds_recognize" }) == "place_value_decompose_3digit", "hundreds_repairs_to_place_value");
+            A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "number_ray_fill_1000" }) == "predecessor_successor", "number_line_repairs_to_neighbor_skill");
+            A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "min_max_up_to_4" }) == "compare_two_numbers_1000", "minmax_repairs_to_compare");
+            A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "sort_up_to_4" }) == "compare_two_numbers_1000", "sort_repairs_to_compare");
+            A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "add_sub_two_operators_left_to_right" }) == "mental_add_within_20", "two_step_repairs_to_mental_add");
+            A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "mental_round_tens_hundreds_1000" }) == "mental_add_within_20", "round_number_repairs_to_mental_add");
 
             TestGeneratorFuzz(refs);
             return refs;
@@ -276,7 +296,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 adaptiveAudit.Record(new AdaptiveDecisionAuditRequest
                 {
                     Id = "adaptive-" + Guid.NewGuid().ToString("N"), SessionId = session.SessionId, ChildId = profile.ChildId,
-                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.3.0", Question = question, Selection = selection,
+                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.4.0", Question = question, Selection = selection,
                     Behavior = lastBehavior, CreatedAtUtc = DateTime.UtcNow
                 });
 
@@ -303,7 +323,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 answerCommit.Commit(new AnswerCommitRequest
                 {
                     AttemptId = attemptId, SessionId = session.SessionId, ChildId = profile.ChildId,
-                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.3.0", QuestionId = question.QuestionId,
+                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.4.0", QuestionId = question.QuestionId,
                     SkillId = question.SkillId, Subject = "math", StartedAtUtc = answered.AddMilliseconds(-responseMs), AnsweredAtUtc = answered,
                     AnswerJson = Json.Serialize(new Dictionary<string, object> { { "answer", answer } }), IsCorrect = isCorrect,
                     ResponseMs = responseMs, HintLevel = hintLevel, Representation = question.Representation, InputMethod = "mouse",
@@ -402,6 +422,33 @@ VALUES(@child,'MULTIPLICATION_COMPONENTS','math',0.64,0.56,@mulAttempts,3,1,0,'L
                 "math_roadmap_groups_multiplication_components_into_tables");
             A(roadmapWithConcepts.TotalTrackedAttempts == roadmapWithWordProblem.TotalTrackedAttempts + 6,
                 "math_roadmap_total_includes_operation_concept_attempts");
+            var numberSenseBeforeExtension = roadmapWithConcepts.NumberSense.Attempts;
+            var writtenBeforeExtension = roadmapWithConcepts.Written1000.Attempts;
+            var hundredsAttemptsBefore = ReadSkillAttempts(database, profile.ChildId, "NUM_FULL_HUNDREDS_RECOGNIZE");
+            var roundedAttemptsBefore = ReadSkillAttempts(database, profile.ChildId, "MENTAL_ADD_SUB_ROUND_TENS_HUNDREDS_1000");
+            using (var connection = database.OpenConnection())
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = @"INSERT OR REPLACE INTO child_skill
+(child_id,skill_id,subject,mastery_score,confidence,attempts_count,independent_success_count,hinted_success_count,transfer_success_count,learning_state,mastery_engine_version,updated_at_utc)
+VALUES(@child,'NUM_FULL_HUNDREDS_RECOGNIZE','math',0.61,0.55,@hundredsAttempts,2,0,0,'LEARNING',@engine,@updated);
+INSERT OR REPLACE INTO child_skill
+(child_id,skill_id,subject,mastery_score,confidence,attempts_count,independent_success_count,hinted_success_count,transfer_success_count,learning_state,mastery_engine_version,updated_at_utc)
+VALUES(@child,'MENTAL_ADD_SUB_ROUND_TENS_HUNDREDS_1000','math',0.59,0.52,@roundAttempts,3,1,0,'LEARNING',@engine,@updated);";
+                command.Parameters.AddWithValue("@child", profile.ChildId);
+                command.Parameters.AddWithValue("@hundredsAttempts", hundredsAttemptsBefore + 2);
+                command.Parameters.AddWithValue("@roundAttempts", roundedAttemptsBefore + 4);
+                command.Parameters.AddWithValue("@engine", MasteryEngineV1.Version);
+                command.Parameters.AddWithValue("@updated", DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture));
+                command.ExecuteNonQuery();
+            }
+            var roadmapWithExtension = new MathRoadmapService(database).Read(profile.ChildId);
+            A(roadmapWithExtension.NumberSense.Attempts == numberSenseBeforeExtension + 2,
+                "math_roadmap_groups_full_hundreds_into_number_sense");
+            A(roadmapWithExtension.Written1000.Attempts == writtenBeforeExtension + 4,
+                "math_roadmap_groups_round_mental_into_operations");
+            A(roadmapWithExtension.TotalTrackedAttempts == roadmapWithConcepts.TotalTrackedAttempts + 6,
+                "math_roadmap_total_includes_number_extension_attempts");
             A(correctCount == 5, "vertical_slice_fixture_correctness_expected");
         }
 
@@ -554,6 +601,8 @@ VALUES(@child,'MULTIPLICATION_COMPONENTS','math',0.64,0.56,@mulAttempts,3,1,0,'L
             }
             if (IsOperationConceptTemplate(q.TemplateId) && !ValidateOperationConceptContract(q))
                 throw new Exception("FUZZ_FAIL operation concept contract: " + q.TemplateId);
+            if (IsNumberExtensionTemplate(q.TemplateId) && !ValidateNumberExtensionContract(q))
+                throw new Exception("FUZZ_FAIL number extension contract: " + q.TemplateId);
             if (q.TemplateId.StartsWith("word_problem_", StringComparison.Ordinal) && q.TemplateId != "word_problem_select_operation_one_step" && !ValidateWordProblemContract(q))
                 throw new Exception("FUZZ_FAIL word problem relation contract: " + q.TemplateId);
         }
@@ -622,6 +671,68 @@ VALUES(@child,'MULTIPLICATION_COMPONENTS','math',0.64,0.56,@mulAttempts,3,1,0,'L
                 if (q.Representation != expectedRepresentation || q.DisplayChoices.Count != 4 ||
                     !expectedOperations.SetEquals(q.DisplayChoices) || !expectedOperations.Contains(q.CorrectAnswerDisplay)) return false;
                 return parts.Length >= 3 && (parts[0] == "wordbar" || parts[0] == "wordgroups" || parts[0] == "wordshare");
+            }
+            return false;
+        }
+
+        private static bool IsNumberExtensionTemplate(string templateId)
+        {
+            return templateId == "full_hundreds_recognize" || templateId == "number_ray_fill_1000" ||
+                   templateId == "min_max_up_to_4" || templateId == "sort_up_to_4" ||
+                   templateId == "add_sub_two_operators_left_to_right" || templateId == "mental_round_tens_hundreds_1000";
+        }
+
+        private static bool ValidateNumberExtensionContract(MathQuestion q)
+        {
+            if (q == null) return false;
+            var parts = (q.IllustrationData ?? string.Empty).Split('|');
+            if (q.TemplateId == "full_hundreds_recognize")
+            {
+                int count;
+                return !q.UsesTextChoices && q.Representation == "hundreds_blocks" && parts.Length == 2 && parts[0] == "hundreds" &&
+                       int.TryParse(parts[1], out count) && count >= 1 && count <= 9 && q.CorrectAnswer == count * 100 &&
+                       q.DisplayChoices.Count == 4 && q.Choices.All(x => x >= 100 && x <= 900 && x % 100 == 0);
+            }
+            if (q.TemplateId == "number_ray_fill_1000")
+            {
+                int start, step, missing, count;
+                return !q.UsesTextChoices && q.Representation == "number_line_fill" && parts.Length == 5 && parts[0] == "numberlinefill" &&
+                       int.TryParse(parts[1], out start) && int.TryParse(parts[2], out step) && int.TryParse(parts[3], out missing) && int.TryParse(parts[4], out count) &&
+                       (step == 10 || step == 100) && count == 5 && missing >= 1 && missing <= 3 && start >= 0 && start + 4 * step <= 1000 &&
+                       q.CorrectAnswer == start + missing * step && q.Choices.All(x => x >= 0 && x <= 1000);
+            }
+            if (q.TemplateId == "min_max_up_to_4")
+            {
+                var values = ExtractInts(q.PromptVi).Take(4).ToArray();
+                if (values.Length != 4 || values.Distinct().Count() != 4 || q.Representation != "number_cards" || q.DisplayChoices.Count != 4) return false;
+                var askMax = q.PromptVi.Contains("lớn nhất");
+                return q.CorrectAnswer == (askMax ? values.Max() : values.Min()) && new HashSet<int>(values).SetEquals(q.Choices);
+            }
+            if (q.TemplateId == "sort_up_to_4")
+            {
+                var values = ExtractInts(q.PromptVi).Take(4).ToArray();
+                if (values.Length != 4 || values.Distinct().Count() != 4 || !q.UsesTextChoices || q.Representation != "number_cards" || q.DisplayChoices.Count != 4) return false;
+                var ascending = q.PromptVi.Contains("từ bé đến lớn");
+                var expected = string.Join(ascending ? " < " : " > ", ascending ? values.OrderBy(x => x) : values.OrderByDescending(x => x));
+                return q.CorrectAnswerDisplay == expected;
+            }
+            if (q.TemplateId == "add_sub_two_operators_left_to_right")
+            {
+                int a, b, c, middle;
+                if (parts.Length != 7 || parts[0] != "twostep" || !int.TryParse(parts[1], out a) || !int.TryParse(parts[3], out b) ||
+                    !int.TryParse(parts[5], out c) || !int.TryParse(parts[6], out middle)) return false;
+                var expectedMiddle = parts[2] == "+" ? a + b : a - b;
+                var final = parts[4] == "+" ? expectedMiddle + c : expectedMiddle - c;
+                return !q.UsesTextChoices && q.Representation == "two_step_strip" && middle == expectedMiddle && final == q.CorrectAnswer &&
+                       middle >= 0 && middle <= 1000 && final >= 0 && final <= 1000;
+            }
+            if (q.TemplateId == "mental_round_tens_hundreds_1000")
+            {
+                int a, b, unit;
+                if (parts.Length != 5 || parts[0] != "roundchunks" || !int.TryParse(parts[1], out a) || !int.TryParse(parts[3], out b) || !int.TryParse(parts[4], out unit)) return false;
+                var expected = parts[2] == "+" ? a + b : a - b;
+                return !q.UsesTextChoices && q.Representation == "round_number_chunks" && (unit == 10 || unit == 100) &&
+                       a % unit == 0 && b % unit == 0 && q.CorrectAnswer == expected && expected >= 0 && expected <= 1000;
             }
             return false;
         }
@@ -716,6 +827,11 @@ VALUES(@child,'MULTIPLICATION_COMPONENTS','math',0.64,0.56,@mulAttempts,3,1,0,'L
             if (!string.IsNullOrWhiteSpace(templateId) && templateId.StartsWith("geometry_identify_basic__", StringComparison.Ordinal)) return "geometry_basic";
             if (!string.IsNullOrWhiteSpace(templateId) && templateId.StartsWith("pictograph_animals_legend1__", StringComparison.Ordinal)) return "pictograph";
             if (templateId == "clock_read_minute_hand_3_or_6") return "clock";
+            if (templateId == "full_hundreds_recognize") return "hundreds_blocks";
+            if (templateId == "number_ray_fill_1000") return "number_line_fill";
+            if (templateId == "min_max_up_to_4" || templateId == "sort_up_to_4") return "number_cards";
+            if (templateId == "add_sub_two_operators_left_to_right") return "two_step_strip";
+            if (templateId == "mental_round_tens_hundreds_1000") return "round_number_chunks";
             if (templateId == "place_value_decompose_3digit" || templateId == "expanded_form_3digit") return "place_value_blocks";
             if (templateId == "predecessor_successor" || templateId == "compare_two_numbers_1000") return "number_line_1000";
             if (templateId == "mental_add_within_20" || templateId == "mental_sub_within_20") return "number_ray";

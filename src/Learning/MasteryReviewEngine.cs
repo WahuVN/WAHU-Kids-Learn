@@ -159,6 +159,8 @@ namespace WAHU.Learning
                     return New("COMPARISON_ERROR", 0.68, "wrong_comparison_symbol");
                 if (question.TemplateId == "predecessor_successor")
                     return New("SEQUENCE_NEIGHBOR_ERROR", 0.62, "wrong_predecessor_successor_pair");
+                if (question.TemplateId == "sort_up_to_4")
+                    return New("NUMBER_ORDER_ERROR", 0.66, "wrong_four_number_sort_order");
                 if (question.TemplateId == "add_components_recognize" || question.TemplateId == "sub_components_recognize" ||
                     question.TemplateId == "multiplication_components_recognize" || question.TemplateId == "division_components_recognize")
                     return New("OPERATION_COMPONENT_ERROR", 0.64, "wrong_operation_component_role_choice");
@@ -177,12 +179,22 @@ namespace WAHU.Learning
                 return New("CARRY_MISSING", 0.78, "answer_matches_common_missing_carry_offset");
             if (question.TemplateId == "subtract_within_1000_one_borrow" && (difference == 10 || difference == 100))
                 return New("BORROW_MISSING", 0.76, "answer_matches_common_missing_borrow_offset");
+            if (question.TemplateId == "mental_round_tens_hundreds_1000")
+                return New("ROUND_NUMBER_FACT_ERROR", 0.62, "wrong_round_tens_or_hundreds_mental_result");
             if (question.TemplateId.StartsWith("mental_", StringComparison.Ordinal) ||
                 question.TemplateId.StartsWith("times_table_", StringComparison.Ordinal) ||
                 question.TemplateId.StartsWith("divide_table_", StringComparison.Ordinal))
                 return New("FACT_ERROR", 0.62, "wrong_numeric_fact_answer");
             if (question.TemplateId == "polyline_length")
                 return New("MEASUREMENT_SUM_ERROR", 0.58, "wrong_polyline_length_sum");
+            if (question.TemplateId == "full_hundreds_recognize")
+                return New("HUNDREDS_RECOGNITION_ERROR", 0.66, "wrong_full_hundreds_value");
+            if (question.TemplateId == "number_ray_fill_1000")
+                return New("NUMBER_SEQUENCE_ERROR", 0.64, "wrong_number_line_missing_value");
+            if (question.TemplateId == "min_max_up_to_4")
+                return New("NUMBER_ORDER_ERROR", 0.66, "wrong_min_or_max_choice");
+            if (question.TemplateId == "add_sub_two_operators_left_to_right")
+                return New("TWO_STEP_CALCULATION_ERROR", 0.60, "wrong_left_to_right_two_operator_result");
             if (question.TemplateId != null && question.TemplateId.StartsWith("word_problem_", StringComparison.Ordinal))
                 return New("WORD_PROBLEM_RELATION_ERROR", 0.56, "wrong_one_step_relation_answer");
             return New("UNKNOWN", 0.40, "single_attempt_insufficient_for_specific_diagnosis");

@@ -138,6 +138,12 @@ namespace WAHU.Learning
                 case "division_components_recognize":
                 case "operation_meaning_from_visual":
                 case "word_problem_select_operation_one_step":
+                case "full_hundreds_recognize":
+                case "number_ray_fill_1000":
+                case "min_max_up_to_4":
+                case "sort_up_to_4":
+                case "add_sub_two_operators_left_to_right":
+                case "mental_round_tens_hundreds_1000":
                     return true;
                 default:
                     return false;
