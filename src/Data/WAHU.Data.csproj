@@ -28,6 +28,7 @@
     <Compile Include="BehaviorDecisionAuditService.cs" />
     <Compile Include="GameWorldRewardService.cs" />
     <Compile Include="MathRoadmapService.cs" />
+    <Compile Include="MathLessonProgressStore.cs" />
     <Compile Include="MathSessionRuntimeService.cs" />
     <Compile Include="BackupRecoveryService.cs" />
     <Compile Include="ParentSummaryService.cs" />

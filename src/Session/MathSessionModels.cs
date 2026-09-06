@@ -15,6 +15,10 @@ namespace WAHU.Session
         public bool ResumedExistingSession { get; set; }
         public bool RestoredOpenQuestion { get; set; }
         public bool DiscardedCorruptOpenQuestion { get; set; }
+        public string SessionMode { get; set; }
+        public string TargetLessonId { get; set; }
+        public string TargetLessonTitleVi { get; set; }
+        public MathLessonAccessSnapshot LessonAccess { get; set; }
     }
 
     public sealed class MathAnswerOutcome
@@ -49,5 +53,10 @@ namespace WAHU.Session
         public IList<string> GardenUnlockedItemIds { get; set; }
         public int SessionsUntilNextGardenMilestone { get; set; }
         public string NextGardenMilestoneItemId { get; set; }
+        public string SessionMode { get; set; }
+        public string TargetLessonId { get; set; }
+        public bool LessonCompleted { get; set; }
+        public double? LessonScorePercent { get; set; }
+        public double? LessonBestScorePercent { get; set; }
     }
 }

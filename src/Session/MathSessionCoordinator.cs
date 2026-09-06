@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Web.Script.Serialization;
 using WAHU.Content;
@@ -19,7 +20,9 @@ namespace WAHU.Session
         private readonly string _performanceProfile;
         private readonly int _requestedSeed;
         private readonly int _requestedTargetQuestionCount;
+        private readonly string _requestedLessonId;
         private readonly LearnerSessionService _sessionService;
+        private readonly MathLessonProgressStore _lessonProgressStore;
         private readonly MathSessionRuntimeService _runtime;
         private readonly AnswerCommitService _answerCommit;
         private readonly BehaviorDecisionAuditService _behaviorAudit;
@@ -37,6 +40,12 @@ namespace WAHU.Session
         private readonly object _submitGate = new object();
 
         private IList<MathTemplateRef> _templates;
+        private MathLessonCatalogSnapshot _lessonCatalog;
+        private MathAuthoredQuestionBank _authoredBank;
+        private MathLessonDescriptor _targetLesson;
+        private IList<MathQuestion> _targetQuestions;
+        private string _sessionMode = "adaptive";
+        private string _targetLessonId;
         private IDictionary<string, SkillSnapshot> _skills;
         private LearnerProfile _profile;
         private LearnerSessionHandle _session;
@@ -55,9 +64,15 @@ namespace WAHU.Session
         private int _wrong;
 
         public MathSessionCoordinator(LearningDatabase database, string templatePath, string performanceProfile, int seed)
-            : this(database, templatePath, performanceProfile, seed, DefaultTargetQuestionCount) { }
+            : this(database, templatePath, performanceProfile, seed, DefaultTargetQuestionCount, null) { }
 
         public MathSessionCoordinator(LearningDatabase database, string templatePath, string performanceProfile, int seed, int targetQuestionCount)
+            : this(database, templatePath, performanceProfile, seed, targetQuestionCount, null) { }
+
+        public MathSessionCoordinator(LearningDatabase database, string templatePath, string performanceProfile, int seed, string lessonId)
+            : this(database, templatePath, performanceProfile, seed, DefaultTargetQuestionCount, lessonId) { }
+
+        private MathSessionCoordinator(LearningDatabase database, string templatePath, string performanceProfile, int seed, int targetQuestionCount, string lessonId)
         {
             _database = database ?? throw new ArgumentNullException("database");
             if (string.IsNullOrWhiteSpace(templatePath)) throw new ArgumentException("templatePath");
@@ -66,9 +81,11 @@ namespace WAHU.Session
             if (targetQuestionCount < 1 || targetQuestionCount > 40) throw new ArgumentOutOfRangeException("targetQuestionCount");
             _requestedSeed = seed;
             _requestedTargetQuestionCount = targetQuestionCount;
+            _requestedLessonId = string.IsNullOrWhiteSpace(lessonId) ? null : lessonId.Trim();
             _seed = seed;
             _targetQuestionCount = targetQuestionCount;
             _sessionService = new LearnerSessionService(database);
+            _lessonProgressStore = new MathLessonProgressStore(database);
             _runtime = new MathSessionRuntimeService(database);
             _answerCommit = new AnswerCommitService(database);
             _behaviorAudit = new BehaviorDecisionAuditService(database);
@@ -84,6 +101,7 @@ namespace WAHU.Session
         {
             if (_active || _session != null) throw new InvalidOperationException("Math session already started.");
             LoadTemplates();
+            if (!string.IsNullOrWhiteSpace(_requestedLessonId)) LoadLessonContent();
             _profile = _sessionService.EnsurePrimaryChild(displayName);
 
             var resumed = false;
@@ -93,6 +111,10 @@ namespace WAHU.Session
             var resumable = _runtime.LoadLatestResumable(_profile.ChildId);
             if (resumable != null)
             {
+                if (!string.IsNullOrWhiteSpace(_requestedLessonId) &&
+                    (!string.Equals(resumable.SessionMode, "lesson", StringComparison.Ordinal) ||
+                     !string.Equals(resumable.TargetLessonId, _requestedLessonId, StringComparison.Ordinal)))
+                    throw new InvalidOperationException("Một phiên Toán khác đang học dở. Hãy tiếp tục hoặc kết thúc phiên đó trước khi mở bài này.");
                 RestoreSession(resumable, out restoredOpenQuestion, out discardedCorruptOpenQuestion);
                 resumed = true;
             }
@@ -102,11 +124,20 @@ namespace WAHU.Session
                 try
                 {
                     _seed = _requestedSeed;
+                    _sessionMode = string.IsNullOrWhiteSpace(_requestedLessonId) ? "adaptive" : "lesson";
+                    _targetLessonId = _requestedLessonId;
                     _targetQuestionCount = _requestedTargetQuestionCount;
                     _generatedQuestionCount = 0;
+                    if (string.Equals(_sessionMode, "lesson", StringComparison.Ordinal))
+                    {
+                        PrepareTargetLessonForStart();
+                        _targetQuestionCount = _targetQuestions.Count;
+                    }
                     _session = _sessionService.BeginSession(_profile.ChildId, "math", _performanceProfile);
-                    _runtime.Create(_session.SessionId, _seed, _targetQuestionCount);
+                    _runtime.Create(_session.SessionId, _seed, _targetQuestionCount, _sessionMode, _targetLessonId);
                     _skills = _sessionService.LoadSkillSnapshots(_profile.ChildId, "math");
+                    if (string.Equals(_sessionMode, "lesson", StringComparison.Ordinal))
+                        _lessonProgressStore.MarkStarted(_profile.ChildId, _targetLesson.Id, _targetLesson.SkillId, _session.StartedAtUtc);
                     _active = true;
                 }
                 catch
@@ -139,7 +170,11 @@ namespace WAHU.Session
                 CompletedQuestionCount = _attempts,
                 ResumedExistingSession = resumed,
                 RestoredOpenQuestion = restoredOpenQuestion,
-                DiscardedCorruptOpenQuestion = discardedCorruptOpenQuestion
+                DiscardedCorruptOpenQuestion = discardedCorruptOpenQuestion,
+                SessionMode = _sessionMode,
+                TargetLessonId = _targetLessonId,
+                TargetLessonTitleVi = _targetLesson == null ? null : _targetLesson.TitleVi,
+                LessonAccess = string.IsNullOrWhiteSpace(_targetLessonId) ? null : CurrentLessonAccess()
             };
         }
 
@@ -149,26 +184,45 @@ namespace WAHU.Session
             if (_currentQuestion != null) return _currentQuestion;
             if (_attempts >= _targetQuestionCount) return null;
 
-            IEnumerable<MathTemplateRef> candidates = _templates;
+            var consumedRepair = false;
             var requestedRepair = _forcedRepairTemplateId;
-            if (!string.IsNullOrWhiteSpace(requestedRepair))
+            var nextOrdinal = checked(_generatedQuestionCount + 1);
+            if (string.Equals(_sessionMode, "lesson", StringComparison.Ordinal))
             {
-                var repair = _templates.Where(x => string.Equals(x.TemplateId, requestedRepair, StringComparison.Ordinal)).ToList();
-                if (repair.Count > 0) candidates = repair;
-            }
-
-            _currentSelection = _selector.Select(candidates, _skills, DateTime.UtcNow, _recentTemplates, _recentSkills);
-            var consumedRepair = !string.IsNullOrWhiteSpace(requestedRepair);
-            if (consumedRepair)
-            {
-                if (_currentSelection.Reasons == null) _currentSelection.Reasons = new List<string>();
-                _currentSelection.Reasons.Add("prerequisite_repair");
+                EnsureTargetLessonLoaded();
+                if (_generatedQuestionCount >= _targetQuestions.Count) return null;
+                var authored = _targetQuestions[_generatedQuestionCount];
+                _currentQuestion = MathAuthoredQuestionSource.CreateRuntimeInstance(authored);
+                _currentSelection = new MathSelectionDecision
+                {
+                    Template = new MathTemplateRef { TemplateId = _currentQuestion.TemplateId, SkillId = _currentQuestion.SkillId },
+                    Score = 1.0,
+                    DifficultyFit = _currentQuestion.DifficultyFit,
+                    Reasons = new List<string> { "lesson_targeted", "authored_content", _currentQuestion.Difficulty ?? "unknown_difficulty" },
+                    CandidateSummary = _targetQuestions.Select(x => x.ContentQuestionId).ToList()
+                };
                 _forcedRepairTemplateId = null;
             }
+            else
+            {
+                IEnumerable<MathTemplateRef> candidates = _templates;
+                if (!string.IsNullOrWhiteSpace(requestedRepair))
+                {
+                    var repair = _templates.Where(x => string.Equals(x.TemplateId, requestedRepair, StringComparison.Ordinal)).ToList();
+                    if (repair.Count > 0) candidates = repair;
+                }
 
-            var nextOrdinal = checked(_generatedQuestionCount + 1);
-            var generator = new MathQuestionGenerator(QuestionSeed(_seed, nextOrdinal, _currentSelection.Template.TemplateId));
-            _currentQuestion = generator.Generate(_currentSelection);
+                _currentSelection = _selector.Select(candidates, _skills, DateTime.UtcNow, _recentTemplates, _recentSkills);
+                consumedRepair = !string.IsNullOrWhiteSpace(requestedRepair);
+                if (consumedRepair)
+                {
+                    if (_currentSelection.Reasons == null) _currentSelection.Reasons = new List<string>();
+                    _currentSelection.Reasons.Add("prerequisite_repair");
+                    _forcedRepairTemplateId = null;
+                }
+                var generator = new MathQuestionGenerator(QuestionSeed(_seed, nextOrdinal, _currentSelection.Template.TemplateId));
+                _currentQuestion = generator.Generate(_currentSelection);
+            }
             _questionStartedAtUtc = DateTime.UtcNow;
             _generatedQuestionCount = nextOrdinal;
 
@@ -360,7 +414,8 @@ namespace WAHU.Session
             {
                 _skills = _sessionService.LoadSkillSnapshots(_profile.ChildId, "math");
                 RebuildFromCommittedAttempts(_runtime.LoadCommittedAttempts(_session.SessionId));
-                _forcedRepairTemplateId = behaviorDecision.TriggerPrerequisiteRepair ? RepairTemplateFor(question) : _forcedRepairTemplateId;
+                if (string.Equals(_sessionMode, "adaptive", StringComparison.Ordinal) && behaviorDecision.TriggerPrerequisiteRepair)
+                    _forcedRepairTemplateId = RepairTemplateFor(question);
             }
             else
             {
@@ -371,7 +426,8 @@ namespace WAHU.Session
                 _attempts++;
                 if (isCorrect) { _correct++; if (hintLevel > 0) _hintedCorrect++; } else _wrong++;
                 _lastBehavior = behaviorDecision;
-                if (behaviorDecision.TriggerPrerequisiteRepair) _forcedRepairTemplateId = RepairTemplateFor(question);
+                if (string.Equals(_sessionMode, "adaptive", StringComparison.Ordinal) && behaviorDecision.TriggerPrerequisiteRepair)
+                    _forcedRepairTemplateId = RepairTemplateFor(question);
             }
 
             try { _runtime.SaveCheckpoint(_session.SessionId, _generatedQuestionCount, _forcedRepairTemplateId); }
@@ -407,13 +463,37 @@ namespace WAHU.Session
             EnsureActive();
             var ended = DateTime.UtcNow;
             var summary = BuildSummary(ended);
-            _sessionService.CompleteSession(_session.SessionId, false,
-                _json.Serialize(new Dictionary<string, object>
-                {
-                    { "attempts", summary.Attempts }, { "correct", summary.Correct }, { "hinted_correct", summary.HintedCorrect },
-                    { "wrong", summary.Wrong }, { "distinct_skills", summary.DistinctSkills }, { "subject", "math" }
-                }),
-                _json.Serialize(new Dictionary<string, object> { { "final_state", summary.FinalBehaviorState.ToString() } }));
+            var summaryData = new Dictionary<string, object>
+            {
+                { "attempts", summary.Attempts }, { "correct", summary.Correct }, { "hinted_correct", summary.HintedCorrect },
+                { "wrong", summary.Wrong }, { "distinct_skills", summary.DistinctSkills }, { "subject", "math" },
+                { "session_mode", _sessionMode }
+            };
+            if (!string.IsNullOrWhiteSpace(_targetLessonId)) summaryData["target_lesson_id"] = _targetLessonId;
+            var behaviorJson = _json.Serialize(new Dictionary<string, object> { { "final_state", summary.FinalBehaviorState.ToString() } });
+
+            if (string.Equals(_sessionMode, "lesson", StringComparison.Ordinal) && _targetLesson != null &&
+                _attempts >= _targetQuestionCount && _targetQuestionCount > 0)
+            {
+                var score = 100.0 * _correct / _targetQuestionCount;
+                var existing = _lessonProgressStore.LoadOne(_profile.ChildId, _targetLesson.Id);
+                var best = existing == null || !existing.BestScorePercent.HasValue
+                    ? score : Math.Max(existing.BestScorePercent.Value, score);
+                summary.LessonCompleted = true;
+                summary.LessonScorePercent = score;
+                summary.LessonBestScorePercent = best;
+                summaryData["lesson_completed"] = true;
+                summaryData["lesson_score_percent"] = score;
+                summaryData["lesson_best_score_percent"] = best;
+                _lessonProgressStore.CompleteActiveSession(
+                    _session.SessionId, _profile.ChildId, _targetLesson.Id, _targetLesson.SkillId,
+                    _correct, _targetQuestionCount, _json.Serialize(summaryData), behaviorJson, ended);
+            }
+            else
+            {
+                summaryData["lesson_completed"] = false;
+                _sessionService.CompleteSession(_session.SessionId, false, _json.Serialize(summaryData), behaviorJson);
+            }
             try { _runtime.Delete(_session.SessionId); } catch { }
             try
             {
@@ -487,6 +567,64 @@ namespace WAHU.Session
             if (_templates.Count == 0) throw new InvalidOperationException("Không có template Toán VERIFIED được runtime hỗ trợ.");
         }
 
+        private string ContentSiblingPath(string fileName)
+        {
+            var directory = Path.GetDirectoryName(Path.GetFullPath(_templatePath));
+            if (string.IsNullOrWhiteSpace(directory)) throw new InvalidOperationException("Math content pack directory is unavailable.");
+            return Path.Combine(directory, fileName);
+        }
+
+        private void LoadLessonContent()
+        {
+            if (_lessonCatalog == null)
+                _lessonCatalog = new MathLessonCatalogSource().Load(ContentSiblingPath("lesson_catalog_v1.json"));
+            if (_authoredBank == null)
+                _authoredBank = new MathAuthoredQuestionSource().Load(ContentSiblingPath("question_bank_v1.json"));
+        }
+
+        private void PrepareTargetLessonForStart()
+        {
+            EnsureTargetLessonLoaded();
+            var access = CurrentLessonAccess();
+            if (!access.IsUnlocked) throw new MathLessonLockedException(access);
+        }
+
+        private void EnsureTargetLessonLoaded()
+        {
+            if (!string.Equals(_sessionMode, "lesson", StringComparison.Ordinal)) return;
+            if (string.IsNullOrWhiteSpace(_targetLessonId)) throw new InvalidDataException("Targeted Math runtime is missing target_lesson_id.");
+            LoadLessonContent();
+            _targetLesson = _lessonCatalog.FindLesson(_targetLessonId);
+            if (_targetLesson == null) throw new InvalidDataException("Targeted Math lesson no longer exists: " + _targetLessonId);
+
+            var orderedIds = new List<string>();
+            if (_targetLesson.PracticeSets != null)
+            {
+                orderedIds.AddRange(_targetLesson.PracticeSets.Basic ?? new List<string>());
+                orderedIds.AddRange(_targetLesson.PracticeSets.Medium ?? new List<string>());
+                orderedIds.AddRange(_targetLesson.PracticeSets.Application ?? new List<string>());
+            }
+            _targetQuestions = new List<MathQuestion>();
+            foreach (var id in orderedIds)
+            {
+                var question = _authoredBank.FindContentQuestion(id);
+                if (question == null) throw new InvalidDataException("Lesson references missing authored question: " + id);
+                if (!string.Equals(question.LessonId, _targetLesson.Id, StringComparison.Ordinal) ||
+                    !string.Equals(question.SkillId, _targetLesson.SkillId, StringComparison.Ordinal))
+                    throw new InvalidDataException("Authored question lesson/skill mismatch: " + id);
+                _targetQuestions.Add(question);
+            }
+            if (_targetQuestions.Count == 0 || _targetQuestions.Count > 40)
+                throw new InvalidDataException("Targeted Math lesson has invalid practice question count: " + _targetLesson.Id);
+        }
+
+        private MathLessonAccessSnapshot CurrentLessonAccess()
+        {
+            if (_profile == null || string.IsNullOrWhiteSpace(_targetLessonId)) return null;
+            return new MathLessonProgressService(_database, ContentSiblingPath("lesson_catalog_v1.json"))
+                .GetAccess(_profile.ChildId, _targetLessonId);
+        }
+
         private void RestoreSession(
             MathSessionRuntimeSnapshot runtime,
             out bool restoredOpenQuestion,
@@ -506,7 +644,16 @@ namespace WAHU.Session
             _seed = runtime.Seed;
             _targetQuestionCount = runtime.TargetQuestionCount;
             _generatedQuestionCount = runtime.GeneratedQuestionCount;
-            _forcedRepairTemplateId = runtime.ForcedRepairTemplateId;
+            _sessionMode = string.IsNullOrWhiteSpace(runtime.SessionMode) ? "adaptive" : runtime.SessionMode;
+            _targetLessonId = runtime.TargetLessonId;
+            _forcedRepairTemplateId = string.Equals(_sessionMode, "adaptive", StringComparison.Ordinal)
+                ? runtime.ForcedRepairTemplateId : null;
+            if (string.Equals(_sessionMode, "lesson", StringComparison.Ordinal))
+            {
+                EnsureTargetLessonLoaded();
+                if (_targetQuestionCount != _targetQuestions.Count)
+                    throw new InvalidDataException("Targeted Math question count changed during an active session.");
+            }
             _skills = _sessionService.LoadSkillSnapshots(_profile.ChildId, "math");
             _active = true;
 
@@ -530,7 +677,8 @@ namespace WAHU.Session
 
                 if (_runtime.HasCommittedAttempt(_session.SessionId, question.QuestionId, 1))
                 {
-                    if (_lastBehavior != null && _lastBehavior.TriggerPrerequisiteRepair)
+                    if (string.Equals(_sessionMode, "adaptive", StringComparison.Ordinal) &&
+                        _lastBehavior != null && _lastBehavior.TriggerPrerequisiteRepair)
                         _forcedRepairTemplateId = RepairTemplateFor(question);
                     try { _runtime.SaveCheckpoint(_session.SessionId, _generatedQuestionCount, _forcedRepairTemplateId); } catch { }
                     return;
@@ -709,7 +857,13 @@ namespace WAHU.Session
                 DistinctSkills = _distinctSkills.Count,
                 FinalBehaviorState = _lastBehavior == null ? BehaviorState.READY : _lastBehavior.State,
                 StartedAtUtc = _session == null ? DateTime.MinValue : _session.StartedAtUtc,
-                EndedAtUtc = ended
+                EndedAtUtc = ended,
+                SessionMode = _sessionMode,
+                TargetLessonId = _targetLessonId,
+                LessonCompleted = false,
+                LessonScorePercent = string.Equals(_sessionMode, "lesson", StringComparison.Ordinal) && _attempts > 0
+                    ? (double?)(100.0 * _correct / _attempts) : null,
+                LessonBestScorePercent = null
             };
         }
 

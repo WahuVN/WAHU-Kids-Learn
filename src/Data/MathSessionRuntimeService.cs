@@ -13,6 +13,8 @@ namespace WAHU.Data
         public int Seed { get; set; }
         public int TargetQuestionCount { get; set; }
         public int GeneratedQuestionCount { get; set; }
+        public string SessionMode { get; set; }
+        public string TargetLessonId { get; set; }
         public string CurrentQuestionJson { get; set; }
         public string CurrentSelectionJson { get; set; }
         public DateTime? QuestionStartedAtUtc { get; set; }
@@ -45,19 +47,29 @@ namespace WAHU.Data
 
         public void Create(string sessionId, int seed, int targetQuestionCount)
         {
+            Create(sessionId, seed, targetQuestionCount, "adaptive", null);
+        }
+
+        public void Create(string sessionId, int seed, int targetQuestionCount, string sessionMode, string targetLessonId)
+        {
             Require(sessionId, "sessionId");
             if (targetQuestionCount < 1 || targetQuestionCount > 40) throw new ArgumentOutOfRangeException("targetQuestionCount");
+            if (sessionMode != "adaptive" && sessionMode != "lesson") throw new ArgumentException("Invalid Math session mode.");
+            if (sessionMode == "lesson") Require(targetLessonId, "targetLessonId");
+            else targetLessonId = null;
             _database.Writes.Execute((connection, transaction) =>
             {
                 using (var command = connection.CreateCommand())
                 {
                     command.Transaction = transaction;
                     command.CommandText = @"INSERT INTO math_session_runtime(
-session_id,seed,target_question_count,generated_question_count,updated_at_utc)
-VALUES(@session,@seed,@target,0,@utc);";
+session_id,seed,target_question_count,generated_question_count,session_mode,target_lesson_id,updated_at_utc)
+VALUES(@session,@seed,@target,0,@mode,@lesson,@utc);";
                     command.Parameters.AddWithValue("@session", sessionId);
                     command.Parameters.AddWithValue("@seed", seed);
                     command.Parameters.AddWithValue("@target", targetQuestionCount);
+                    command.Parameters.AddWithValue("@mode", sessionMode);
+                    command.Parameters.AddWithValue("@lesson", string.IsNullOrWhiteSpace(targetLessonId) ? (object)DBNull.Value : targetLessonId);
                     command.Parameters.AddWithValue("@utc", Utc(DateTime.UtcNow));
                     command.ExecuteNonQuery();
                 }
@@ -71,7 +83,7 @@ VALUES(@session,@seed,@target,0,@utc);";
             using (var command = connection.CreateCommand())
             {
                 command.CommandText = @"SELECT s.id,s.child_id,s.started_at_utc,s.performance_profile,
-r.seed,r.target_question_count,r.generated_question_count,r.current_question_json,
+r.seed,r.target_question_count,r.generated_question_count,r.session_mode,r.target_lesson_id,r.current_question_json,
 r.current_selection_json,r.question_started_at_utc,r.forced_repair_template_id,r.updated_at_utc
 FROM session s
 JOIN math_session_runtime r ON r.session_id=s.id
@@ -92,11 +104,13 @@ LIMIT 1;";
                         Seed = Convert.ToInt32(reader[4], CultureInfo.InvariantCulture),
                         TargetQuestionCount = Convert.ToInt32(reader[5], CultureInfo.InvariantCulture),
                         GeneratedQuestionCount = Convert.ToInt32(reader[6], CultureInfo.InvariantCulture),
-                        CurrentQuestionJson = NullableText(reader[7]),
-                        CurrentSelectionJson = NullableText(reader[8]),
-                        QuestionStartedAtUtc = ReadNullableUtc(reader[9]),
-                        ForcedRepairTemplateId = NullableText(reader[10]),
-                        UpdatedAtUtc = ReadUtc(reader[11])
+                        SessionMode = Text(reader[7]),
+                        TargetLessonId = NullableText(reader[8]),
+                        CurrentQuestionJson = NullableText(reader[9]),
+                        CurrentSelectionJson = NullableText(reader[10]),
+                        QuestionStartedAtUtc = ReadNullableUtc(reader[11]),
+                        ForcedRepairTemplateId = NullableText(reader[12]),
+                        UpdatedAtUtc = ReadUtc(reader[13])
                     };
                 }
             }

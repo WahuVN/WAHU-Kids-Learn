@@ -22,6 +22,8 @@ namespace WAHU.Data
         public const string AttemptImmutabilityName = "002_attempt_immutability";
         public const int MathAttemptRuntimeVersion = 3;
         public const string MathAttemptRuntimeName = "003_math_attempt_idempotency_runtime";
+        public const int MathLessonProgressVersion = 4;
+        public const string MathLessonProgressName = "004_math_lesson_progress";
 
         public static int GetSchemaVersion(SQLiteConnection connection)
         {

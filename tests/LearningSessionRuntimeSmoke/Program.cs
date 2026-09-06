@@ -320,9 +320,10 @@ namespace WAHU.LearningSessionRuntimeSmoke
             File.Copy(schemaPath, Path.Combine(schemaDir, "001_initial.sql"), true);
             File.Copy(Path.Combine(Path.GetDirectoryName(schemaPath), "002_attempt_immutability.sql"), Path.Combine(schemaDir, "002_attempt_immutability.sql"), true);
             File.Copy(Path.Combine(Path.GetDirectoryName(schemaPath), "003_math_attempt_idempotency_runtime.sql"), Path.Combine(schemaDir, "003_math_attempt_idempotency_runtime.sql"), true);
+            File.Copy(Path.Combine(Path.GetDirectoryName(schemaPath), "004_math_lesson_progress.sql"), Path.Combine(schemaDir, "004_math_lesson_progress.sql"), true);
             var database = new LearningDatabase(Path.Combine(temp, "learning.db"), Path.Combine(schemaDir, "001_initial.sql"));
             var init = database.Initialize("DELETE");
-            A(init.Health.IsHealthy && init.SchemaVersion == 3, "vertical_slice_db_ready_v3");
+            A(init.Health.IsHealthy && init.SchemaVersion == 4, "vertical_slice_db_ready_v4");
 
             var sessions = new LearnerSessionService(database);
             var profile = sessions.EnsurePrimaryChild("Bé thử");
@@ -618,6 +619,7 @@ VALUES(@child,'MEASUREMENT_ESTIMATE_BASIC','math',0.58,0.50,@measureAttempts,1,1
             File.Copy(schemaPath, Path.Combine(schemaDir, "001_initial.sql"), true);
             File.Copy(Path.Combine(Path.GetDirectoryName(schemaPath), "002_attempt_immutability.sql"), Path.Combine(schemaDir, "002_attempt_immutability.sql"), true);
             File.Copy(Path.Combine(Path.GetDirectoryName(schemaPath), "003_math_attempt_idempotency_runtime.sql"), Path.Combine(schemaDir, "003_math_attempt_idempotency_runtime.sql"), true);
+            File.Copy(Path.Combine(Path.GetDirectoryName(schemaPath), "004_math_lesson_progress.sql"), Path.Combine(schemaDir, "004_math_lesson_progress.sql"), true);
             var database = new LearningDatabase(Path.Combine(root, "learning.db"), Path.Combine(schemaDir, "001_initial.sql"));
             database.Initialize("DELETE");
 

@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Web.Script.Serialization;
+using WAHU.Content;
 using WAHU.Data;
 using WAHU.Learning;
 using WAHU.Session;
@@ -26,7 +27,9 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 var schemaPath = Path.Combine(repo, "data", "schema", "001_initial.sql");
                 var templatePath = Path.Combine(repo, "content_packs", "math_grade2_v1", "verified_templates_v1.json");
                 var questionBankPath = Path.Combine(repo, "content_packs", "math_grade2_v1", "question_bank_v1.json");
+                var lessonCatalogPath = Path.Combine(repo, "content_packs", "math_grade2_v1", "lesson_catalog_v1.json");
                 TestAuthoredQuestionBank(questionBankPath);
+                TestTargetedLessonUnlockAndResume(root, schemaPath, templatePath, lessonCatalogPath);
                 TestResumeOpenQuestionAndComplete(root, schemaPath, templatePath);
                 TestCommittedStaleQuestionIsNotReplayed(root, schemaPath, templatePath);
                 TestCorruptOpenQuestionRecoversWithoutProgressReset(root, schemaPath, templatePath);
@@ -89,6 +92,128 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 "authored_runtime_instances_keep_stable_content_id");
             A(runtimeA.QuestionId != runtimeB.QuestionId && runtimeA.QuestionId.StartsWith(authored.ContentQuestionId + "-", StringComparison.Ordinal),
                 "authored_runtime_question_id_remains_unique_instance_id");
+        }
+
+        private static void TestTargetedLessonUnlockAndResume(string root, string schemaPath, string templatePath, string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var dependent = catalog.Lessons.FirstOrDefault(lesson =>
+            {
+                var prerequisites = lesson.PrerequisiteSkills ?? new List<string>();
+                if (prerequisites.Count != 1) return false;
+                var prerequisiteLesson = catalog.FindLessonBySkill(prerequisites[0]);
+                return prerequisiteLesson != null &&
+                       (prerequisiteLesson.PrerequisiteSkills == null || prerequisiteLesson.PrerequisiteSkills.Count == 0);
+            });
+            A(dependent != null, "targeted_test_has_simple_prerequisite_edge");
+            var prerequisite = catalog.FindLessonBySkill(dependent.PrerequisiteSkills[0]);
+            A(prerequisite != null, "targeted_test_resolves_prerequisite_lesson");
+
+            var database = NewDatabase(Path.Combine(root, "targeted-lesson.db"), schemaPath);
+            var profile = new LearnerSessionService(database).EnsurePrimaryChild("Bé targeted");
+            var accessService = new MathLessonProgressService(database, lessonCatalogPath);
+            var prerequisiteAccess = accessService.GetAccess(profile.ChildId, prerequisite.Id);
+            var dependentAccess = accessService.GetAccess(profile.ChildId, dependent.Id);
+            A(prerequisiteAccess.IsUnlocked, "root_prerequisite_lesson_unlocked");
+            A(!dependentAccess.IsUnlocked && dependentAccess.UnsatisfiedPrerequisiteLessonIds.Contains(prerequisite.Id),
+                "dependent_lesson_locked_before_prerequisite_completion");
+
+            var directStartBlocked = false;
+            try
+            {
+                using (var blocked = new MathSessionCoordinator(database, templatePath, "LOW", 7001, dependent.Id))
+                    blocked.Start("Bé targeted");
+            }
+            catch (MathLessonLockedException ex)
+            {
+                directStartBlocked = string.Equals(ex.LessonId, dependent.Id, StringComparison.Ordinal) &&
+                                     ex.UnsatisfiedPrerequisiteLessonIds.Contains(prerequisite.Id);
+            }
+            A(directStartBlocked, "engine_blocks_direct_start_of_locked_lesson");
+            A(Count(database, "SELECT count(*) FROM session WHERE state='active';") == 0,
+                "blocked_lesson_start_creates_no_active_session");
+
+            string sessionId;
+            string openQuestionId;
+            using (var first = new MathSessionCoordinator(database, templatePath, "LOW", 7002, prerequisite.Id))
+            {
+                var started = first.Start("Bé targeted");
+                sessionId = started.SessionId;
+                A(started.SessionMode == "lesson" && started.TargetLessonId == prerequisite.Id,
+                    "targeted_start_publishes_lesson_identity");
+                A(started.TargetQuestionCount == prerequisite.PracticeSets.TotalCount,
+                    "targeted_start_uses_catalog_practice_count");
+                A(started.LessonAccess != null && started.LessonAccess.IsUnlocked,
+                    "targeted_start_publishes_access_snapshot");
+
+                var q1 = first.NextQuestion();
+                A(q1.LessonId == prerequisite.Id && q1.SkillId == prerequisite.SkillId,
+                    "targeted_question_matches_selected_lesson_skill");
+                A(q1.ContentQuestionId == prerequisite.PracticeSets.Basic[0],
+                    "targeted_first_question_uses_basic_practice_id");
+                first.SubmitAnswerAt(q1.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 900);
+
+                var q2 = first.NextQuestion();
+                openQuestionId = q2.QuestionId;
+                A(q2.ContentQuestionId == prerequisite.PracticeSets.Medium[0],
+                    "targeted_second_question_uses_medium_practice_id");
+                first.Suspend("targeted_resume_test");
+            }
+
+            A(Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + sessionId +
+                "' AND session_mode='lesson' AND target_lesson_id='" + prerequisite.Id + "';") == 1,
+                "targeted_runtime_persists_mode_and_lesson");
+
+            using (var resumed = new MathSessionCoordinator(database, templatePath, "NORMAL", 9999, 9))
+            {
+                var started = resumed.Start("Bé targeted");
+                A(started.ResumedExistingSession && started.SessionId == sessionId,
+                    "adaptive_entry_resumes_existing_targeted_session");
+                A(started.SessionMode == "lesson" && started.TargetLessonId == prerequisite.Id,
+                    "targeted_resume_restores_mode_and_lesson");
+                A(started.CompletedQuestionCount == 1 && started.RestoredOpenQuestion,
+                    "targeted_resume_rebuilds_progress_and_open_question");
+
+                var q2 = resumed.NextQuestion();
+                A(q2.QuestionId == openQuestionId && q2.ContentQuestionId == prerequisite.PracticeSets.Medium[0],
+                    "targeted_resume_returns_exact_open_authored_question");
+                resumed.SubmitAnswerAt(q2.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 950);
+
+                var q3 = resumed.NextQuestion();
+                A(q3.ContentQuestionId == prerequisite.PracticeSets.Application[0],
+                    "targeted_third_question_uses_application_practice_id");
+                resumed.SubmitAnswerAt(q3.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 1000);
+                A(resumed.NextQuestion() == null, "targeted_session_stops_after_catalog_practice_set");
+
+                var summary = resumed.Complete();
+                A(summary.LessonCompleted && summary.TargetLessonId == prerequisite.Id,
+                    "targeted_completion_marks_lesson_completed");
+                A(summary.LessonScorePercent.HasValue && Math.Abs(summary.LessonScorePercent.Value - 100.0) < 0.0001,
+                    "targeted_completion_reports_numeric_score");
+                A(summary.LessonBestScorePercent.HasValue && Math.Abs(summary.LessonBestScorePercent.Value - 100.0) < 0.0001,
+                    "targeted_completion_reports_best_score");
+            }
+
+            var stored = new MathLessonProgressStore(database).LoadOne(profile.ChildId, prerequisite.Id);
+            A(stored != null && stored.StartedCount == 1 && stored.CompletedCount == 1,
+                "lesson_progress_persists_started_and_completed_counts");
+            A(stored.LastScorePercent.HasValue && stored.BestScorePercent.HasValue &&
+              Math.Abs(stored.LastScorePercent.Value - 100.0) < 0.0001 && Math.Abs(stored.BestScorePercent.Value - 100.0) < 0.0001,
+                "lesson_progress_persists_last_and_best_score");
+
+            dependentAccess = accessService.GetAccess(profile.ChildId, dependent.Id);
+            A(dependentAccess.IsUnlocked && dependentAccess.UnsatisfiedPrerequisiteLessonIds.Count == 0,
+                "completing_prerequisite_unlocks_dependent_lesson");
+
+            using (var next = new MathSessionCoordinator(database, templatePath, "LOW", 7003, dependent.Id))
+            {
+                var started = next.Start("Bé targeted");
+                A(started.TargetLessonId == dependent.Id && started.LessonAccess.IsUnlocked,
+                    "newly_unlocked_lesson_can_start_through_engine_guard");
+                var question = next.NextQuestion();
+                A(question.LessonId == dependent.Id, "newly_unlocked_session_targets_exact_lesson");
+                next.Abort("targeted_cleanup");
+            }
         }
 
         private static void TestResumeOpenQuestionAndComplete(string root, string schemaPath, string templatePath)
@@ -296,7 +421,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
         {
             var database = new LearningDatabase(dbPath, schemaPath);
             var init = database.Initialize("DELETE");
-            A(init.SchemaVersion == 3 && init.Health.IsHealthy, "database_ready_v3_" + Path.GetFileNameWithoutExtension(dbPath));
+            A(init.SchemaVersion == 4 && init.Health.IsHealthy, "database_ready_v4_" + Path.GetFileNameWithoutExtension(dbPath));
             return database;
         }
 

@@ -96,6 +96,24 @@ Khi resume:
 - nếu cached question đã có committed semantic attempt (crash giữa answer commit và clear-cache): engine xóa stale open state và không hiển thị lại;
 - suspend/restart không tạo garden reward; completed reward vẫn idempotent theo session.
 
+## 2026-09-07 — Lesson-target / prerequisite / progress contract (AI2, schema V4)
+
+Engine publish first-class lesson contract, không để UI tự suy đoán:
+
+- `MathSessionCoordinator(..., lessonId)` mở targeted session cho đúng lesson đã chọn.
+- Targeted session dùng đúng authored question IDs từ `practice_sets` theo thứ tự `basic → medium → application`; không chen adaptive repair question ngoài lesson.
+- `MathSessionStartResult` publish `SessionMode`, `TargetLessonId`, `TargetLessonTitleVi`, `LessonAccess`.
+- `math_session_runtime` persist `session_mode` + `target_lesson_id`, nên suspend/resume quay lại đúng targeted lesson và exact open question.
+- `MathLessonProgressService.GetAccess/GetAllAccess` là source-of-truth cho locked/unlocked presentation.
+- Prerequisite thỏa khi prerequisite lesson đã có `completed_count > 0`; dữ liệu legacy được tương thích nếu prerequisite skill đã `STABLE`.
+- Coordinator kiểm lock trước khi tạo session; caller bypass UI vẫn không mở được lesson đang khóa.
+- `math_lesson_progress` persist `started_count`, `completed_count`, `last_score_percent`, `best_score_percent`.
+- Targeted lesson chỉ mark complete khi đã commit đủ authored target question count; score = `correct / target_count * 100`.
+- Session completion + lesson completion/score được ghi trong cùng SQLite transaction.
+- `MathSessionSummary` publish `SessionMode`, `TargetLessonId`, `LessonCompleted`, `LessonScorePercent`, `LessonBestScorePercent`.
+
+AI3 có thể dùng contract này để render “Luyện bài này”, lock state và result score; không tự tính unlock threshold hoặc lesson score.
+
 ## Contract còn chưa chốt
 
 Các mục sau chưa được UI/content tự invent cho tới khi AI2 publish contract:
@@ -103,8 +121,8 @@ Các mục sau chưa được UI/content tự invent cho tới khi AI2 publish c
 - retry cùng question và `attempt_index` semantics;
 - skip policy;
 - first-try / retry / hint scoring;
-- lesson score và numeric XP nếu product thật sự cần;
-- lesson completion/unlock/prerequisite/daily streak first-class persistence.
+- numeric XP nếu product thật sự cần;
+- mastery-delta summary / daily streak first-class contract.
 
 ## Coordination rules
 

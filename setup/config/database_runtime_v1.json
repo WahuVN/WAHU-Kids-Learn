@@ -1,5 +1,5 @@
 {
-  "schema_version": 3,
+  "schema_version": 4,
   "provider": {
     "name": "System.Data.SQLite",
     "version": "2.0.4",
@@ -58,7 +58,7 @@
   },
   "evidence": {
     "workstation_net48_x86_provider_load": "PASS",
-    "sqlite_runtime_smoke_assertions": 160,
+    "sqlite_runtime_smoke_assertions": 166,
     "online_backup_restore_smoke": "PASS",
     "win7_target_smoke": "PENDING"
   }
