@@ -257,6 +257,21 @@ pack_id,version,subject,grade,install_source,status,active,manifest_sha256,relat
 VALUES('math_grade2_v1','1','math',2,'builtin','VERIFIED',1,'ABCDEF','content_packs/math_grade2_v1',@t,@t);", "@t", now);
             }
 
+            using (var c = database.OpenConnection())
+            {
+                var t = DateTime.UtcNow.ToString("o");
+                Exec(c, null, "INSERT INTO child_skill(child_id,skill_id,subject,mastery_score,confidence,learning_state,mastery_engine_version,updated_at_utc) VALUES('child-1','skill-stable','math',0.90,0.90,'STABLE','test-v1',@t);", "@t", t);
+                Exec(c, null, "INSERT INTO child_skill(child_id,skill_id,subject,mastery_score,confidence,learning_state,mastery_engine_version,updated_at_utc) VALUES('child-1','skill-learning','math',0.50,0.60,'LEARNING','test-v1',@t);", "@t", t);
+                Exec(c, null, "INSERT INTO child_skill(child_id,skill_id,subject,mastery_score,confidence,learning_state,mastery_engine_version,updated_at_utc) VALUES('child-1','skill-review','math',0.40,0.50,'REVIEW','test-v1',@t);", "@t", t);
+            }
+            var parentSummary = ParentSummaryService.Read(database);
+            Assert(parentSummary.SessionCount == 1, "parent_summary_session_count");
+            Assert(parentSummary.AttemptCount == 1, "parent_summary_attempt_count");
+            Assert(parentSummary.SkillCount == 3, "parent_summary_skill_count");
+            Assert(parentSummary.StableSkillCount == 1, "parent_summary_stable_count");
+            Assert(parentSummary.LearningSkillCount == 1, "parent_summary_learning_count");
+            Assert(parentSummary.ReviewSkillCount == 1, "parent_summary_review_count");
+
             var start = new DateTime(2026, 1, 5, 12, 0, 0, DateTimeKind.Utc);
             ManagedBackupArtifact latestRecent = null;
             ManagedBackupArtifact preMigration = null;

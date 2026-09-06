@@ -58,7 +58,7 @@
   },
   "evidence": {
     "workstation_net48_x86_provider_load": "PASS",
-    "sqlite_runtime_smoke_assertions": 154,
+    "sqlite_runtime_smoke_assertions": 160,
     "online_backup_restore_smoke": "PASS",
     "win7_target_smoke": "PENDING"
   }

@@ -25,6 +25,7 @@
     <Compile Include="AnswerCommitService.cs" />
     <Compile Include="BehaviorDecisionAuditService.cs" />
     <Compile Include="BackupRecoveryService.cs" />
+    <Compile Include="ParentSummaryService.cs" />
     <Compile Include="DatabaseHealth.cs" />
     <Compile Include="LearningDatabase.cs" />
     <Compile Include="ManagedBackupService.cs" />

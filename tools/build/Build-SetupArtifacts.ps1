@@ -202,7 +202,7 @@ $manifest = [ordered]@{
         native_binary = 'e_sqlite3.dll'
         native_sha256 = Sha256 $nativePath
         default_journal = 'DELETE'
-        sqlite_runtime_smoke_assertions = 154
+        sqlite_runtime_smoke_assertions = 160
     }
     gates = [ordered]@{
         preflight_smoke = 'PASS'
