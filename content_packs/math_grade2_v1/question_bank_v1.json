@@ -47,7 +47,7 @@
       "explanation_vi": "5 trăm là 500, 0 chục là 0 và 7 đơn vị là 7; 500 + 0 + 7 = 507.",
       "hints_vi": [
         "Nhớ kiến thức: Ghép số trăm, số chục và số đơn vị theo đúng vị trí để tạo hoặc đọc một số.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Đọc và viết số”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "num_count_read_write_0_1000",
@@ -78,7 +78,7 @@
       "explanation_vi": "420 có 4 trăm, 2 chục và 0 đơn vị nên đọc là bốn trăm hai mươi.",
       "hints_vi": [
         "Nhớ kiến thức: Ghép số trăm, số chục và số đơn vị theo đúng vị trí để tạo hoặc đọc một số.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tự xác định đặc điểm đúng của “Đọc và viết số” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
         "num_count_read_write_0_1000",
@@ -131,7 +131,7 @@
       "explanation_vi": "7 trăm + 3 chục + 4 đơn vị = 700 + 30 + 4 = 734.",
       "hints_vi": [
         "Nhớ kiến thức: Ghép số trăm, số chục và số đơn vị theo đúng vị trí để tạo hoặc đọc một số.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Viết một phép tính hoặc quan hệ ngắn cho “Đọc và viết số”, tính xong đối chiếu lại điều đề đang hỏi."
       ],
       "tags": [
         "num_count_read_write_0_1000",
@@ -162,7 +162,7 @@
       "explanation_vi": "600 có hàng chục và hàng đơn vị đều bằng 0.",
       "hints_vi": [
         "Nhớ kiến thức: Số có dạng n00 trong phạm vi 1000, với hàng chục và đơn vị bằng 0.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đối chiếu từng lựa chọn với kiến thức “Số tròn trăm”; loại ngay lựa chọn trái với dữ kiện của đề."
       ],
       "tags": [
         "num_full_hundreds_recognize",
@@ -215,7 +215,7 @@
       "explanation_vi": "700 có hàng chục và hàng đơn vị đều bằng 0 nên đây là số tròn trăm.",
       "hints_vi": [
         "Nhớ kiến thức: Số có dạng n00 trong phạm vi 1000, với hàng chục và đơn vị bằng 0.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tìm một dữ kiện xác nhận hoặc bác bỏ mệnh đề theo “Số tròn trăm”; chỉ một điểm sai cũng đủ chọn Sai."
       ],
       "tags": [
         "num_full_hundreds_recognize",
@@ -258,7 +258,7 @@
       "explanation_vi": "700 có đúng 7 trăm và không có thêm chục hay đơn vị.",
       "hints_vi": [
         "Nhớ kiến thức: Số có dạng n00 trong phạm vi 1000, với hàng chục và đơn vị bằng 0.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đừng đoán theo vị trí đáp án. Tự giải theo “Số tròn trăm” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
         "num_full_hundreds_recognize",
@@ -311,7 +311,7 @@
       "explanation_vi": "Số liền trước nhỏ hơn 500 đúng 1 nên là 499.",
       "hints_vi": [
         "Nhớ kiến thức: Với số n, số liền trước là n - 1 và số liền sau là n + 1 khi còn trong phạm vi học.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Liền trước và liền sau”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "num_predecessor_successor",
@@ -342,7 +342,7 @@
       "explanation_vi": "Số liền sau lớn hơn 999 đúng 1 nên là 1000.",
       "hints_vi": [
         "Nhớ kiến thức: Với số n, số liền trước là n - 1 và số liền sau là n + 1 khi còn trong phạm vi học.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tách dữ kiện theo “Liền trước và liền sau”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
       ],
       "tags": [
         "num_predecessor_successor",
@@ -373,7 +373,7 @@
       "explanation_vi": "Dãy tăng mỗi lần 1 đơn vị: sau 399 là 400 rồi đến 401.",
       "hints_vi": [
         "Nhớ kiến thức: Với số n, số liền trước là n - 1 và số liền sau là n + 1 khi còn trong phạm vi học.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Viết một phép tính hoặc quan hệ ngắn cho “Liền trước và liền sau”, tính xong đối chiếu lại điều đề đang hỏi."
       ],
       "tags": [
         "num_predecessor_successor",
@@ -404,7 +404,7 @@
       "explanation_vi": "Chữ số 6 đứng ở hàng trăm nên có giá trị 600.",
       "hints_vi": [
         "Nhớ kiến thức: Trong số có ba chữ số, chữ số thứ nhất là hàng trăm, thứ hai là hàng chục, thứ ba là hàng đơn vị.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Giá trị theo hàng”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "place_value_hundreds_tens_ones",
@@ -435,7 +435,7 @@
       "explanation_vi": "Số 572 có 5 trăm, 7 chục và 2 đơn vị.",
       "hints_vi": [
         "Nhớ kiến thức: Trong số có ba chữ số, chữ số thứ nhất là hàng trăm, thứ hai là hàng chục, thứ ba là hàng đơn vị.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tách dữ kiện theo “Giá trị theo hàng”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
       ],
       "tags": [
         "place_value_hundreds_tens_ones",
@@ -466,7 +466,7 @@
       "explanation_vi": "Giữ đúng vị trí hàng chục bằng 0: 400 + 0 + 9 = 409.",
       "hints_vi": [
         "Nhớ kiến thức: Trong số có ba chữ số, chữ số thứ nhất là hàng trăm, thứ hai là hàng chục, thứ ba là hàng đơn vị.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Viết một phép tính hoặc quan hệ ngắn cho “Giá trị theo hàng”, tính xong đối chiếu lại điều đề đang hỏi."
       ],
       "tags": [
         "place_value_hundreds_tens_ones",
@@ -497,7 +497,7 @@
       "explanation_vi": "352 có 3 trăm, 5 chục và 2 đơn vị nên bằng 300 + 50 + 2.",
       "hints_vi": [
         "Nhớ kiến thức: Dạng khai triển biểu diễn một số bằng tổng giá trị hàng trăm, hàng chục và hàng đơn vị.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đối chiếu từng lựa chọn với kiến thức “Dạng khai triển”; loại ngay lựa chọn trái với dữ kiện của đề."
       ],
       "tags": [
         "num_expanded_form_hto",
@@ -550,7 +550,7 @@
       "explanation_vi": "Cộng giá trị các hàng: 600 + 20 + 7 = 627.",
       "hints_vi": [
         "Nhớ kiến thức: Dạng khai triển biểu diễn một số bằng tổng giá trị hàng trăm, hàng chục và hàng đơn vị.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tách dữ kiện theo “Dạng khai triển”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
       ],
       "tags": [
         "num_expanded_form_hto",
@@ -581,7 +581,7 @@
       "explanation_vi": "908 có 9 trăm, 0 chục và 8 đơn vị.",
       "hints_vi": [
         "Nhớ kiến thức: Dạng khai triển biểu diễn một số bằng tổng giá trị hàng trăm, hàng chục và hàng đơn vị.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đừng đoán theo vị trí đáp án. Tự giải theo “Dạng khai triển” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
         "num_expanded_form_hto",
@@ -634,7 +634,7 @@
       "explanation_vi": "Mỗi vạch tăng 100 nên sau 300 là 400.",
       "hints_vi": [
         "Nhớ kiến thức: Khoảng cách số giữa hai vạch liên tiếp là không đổi trong cùng một bài tia số.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Bước trên tia số”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "number_ray_fill",
@@ -665,7 +665,7 @@
       "explanation_vi": "Từ 650 đến 700 tăng 50, nên vạch tiếp theo là 750.",
       "hints_vi": [
         "Nhớ kiến thức: Khoảng cách số giữa hai vạch liên tiếp là không đổi trong cùng một bài tia số.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tách dữ kiện theo “Bước trên tia số”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
       ],
       "tags": [
         "number_ray_fill",
@@ -696,7 +696,7 @@
       "explanation_vi": "Mỗi bước tăng 100; sau 500 là 600.",
       "hints_vi": [
         "Nhớ kiến thức: Khoảng cách số giữa hai vạch liên tiếp là không đổi trong cùng một bài tia số.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Viết một phép tính hoặc quan hệ ngắn cho “Bước trên tia số”, tính xong đối chiếu lại điều đề đang hỏi."
       ],
       "tags": [
         "number_ray_fill",
@@ -727,7 +727,7 @@
       "explanation_vi": "Cùng 6 trăm nhưng 0 chục nhỏ hơn 8 chục nên 608 < 680.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng các dấu >, <, = sau khi so sánh lần lượt từ hàng cao nhất xuống.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đối chiếu từng lựa chọn với kiến thức “So sánh số”; loại ngay lựa chọn trái với dữ kiện của đề."
       ],
       "tags": [
         "num_compare_0_1000",
@@ -780,7 +780,7 @@
       "explanation_vi": "Cùng 9 trăm; 4 chục lớn hơn 2 chục nên 945 > 925.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng các dấu >, <, = sau khi so sánh lần lượt từ hàng cao nhất xuống.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tự xác định đặc điểm đúng của “So sánh số” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
         "num_compare_0_1000",
@@ -833,7 +833,7 @@
       "explanation_vi": "399 còn dưới 400, trong khi 403 lớn hơn 400 nên 399 < 403.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng các dấu >, <, = sau khi so sánh lần lượt từ hàng cao nhất xuống.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đừng đoán theo vị trí đáp án. Tự giải theo “So sánh số” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
         "num_compare_0_1000",
@@ -886,7 +886,7 @@
       "explanation_vi": "Cả bốn số đều khác nhau; so sánh hàng trăm cho thấy 407 và 470 nhỏ hơn các số 7 trăm, rồi 407 < 470.",
       "hints_vi": [
         "Nhớ kiến thức: Số lớn nhất không nhỏ hơn số nào trong nhóm; số bé nhất không lớn hơn số nào trong nhóm.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Lớn nhất và bé nhất”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "num_min_max_up_to_4",
@@ -917,7 +917,7 @@
       "explanation_vi": "512 có 5 trăm, lớn hơn các số chỉ có 1 hoặc 2 trăm.",
       "hints_vi": [
         "Nhớ kiến thức: Số lớn nhất không nhỏ hơn số nào trong nhóm; số bé nhất không lớn hơn số nào trong nhóm.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tách dữ kiện theo “Lớn nhất và bé nhất”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
       ],
       "tags": [
         "num_min_max_up_to_4",
@@ -948,7 +948,7 @@
       "explanation_vi": "Cùng 9 trăm; 999 có 9 chục và 9 đơn vị nên lớn nhất.",
       "hints_vi": [
         "Nhớ kiến thức: Số lớn nhất không nhỏ hơn số nào trong nhóm; số bé nhất không lớn hơn số nào trong nhóm.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Viết một phép tính hoặc quan hệ ngắn cho “Lớn nhất và bé nhất”, tính xong đối chiếu lại điều đề đang hỏi."
       ],
       "tags": [
         "num_min_max_up_to_4",
@@ -979,7 +979,7 @@
       "explanation_vi": "Tăng dần là từ bé đến lớn: 203 < 230 < 302 < 320.",
       "hints_vi": [
         "Nhớ kiến thức: Tăng dần: mỗi số sau không nhỏ hơn số trước; giảm dần: mỗi số sau không lớn hơn số trước.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đối chiếu từng lựa chọn với kiến thức “Thứ tự tăng giảm”; loại ngay lựa chọn trái với dữ kiện của đề."
       ],
       "tags": [
         "num_sort_up_to_4",
@@ -1032,7 +1032,7 @@
       "explanation_vi": "Giảm dần là từ lớn đến bé: 540 > 504 > 450 > 405.",
       "hints_vi": [
         "Nhớ kiến thức: Tăng dần: mỗi số sau không nhỏ hơn số trước; giảm dần: mỗi số sau không lớn hơn số trước.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tự xác định đặc điểm đúng của “Thứ tự tăng giảm” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
         "num_sort_up_to_4",
@@ -1085,7 +1085,7 @@
       "explanation_vi": "So sánh hàng chục rồi hàng đơn vị để có 100 < 101 < 110 < 111.",
       "hints_vi": [
         "Nhớ kiến thức: Tăng dần: mỗi số sau không nhỏ hơn số trước; giảm dần: mỗi số sau không lớn hơn số trước.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đừng đoán theo vị trí đáp án. Tự giải theo “Thứ tự tăng giảm” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
         "num_sort_up_to_4",
@@ -1138,7 +1138,7 @@
       "explanation_vi": "6 nhóm chục tương ứng khoảng 60 que.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng các nhóm 10 làm mốc để chọn số chục gần và hợp lý với số lượng quan sát.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Ước lượng theo chục”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "estimate_objects_by_tens",
@@ -1169,7 +1169,7 @@
       "explanation_vi": "8 chục nghĩa là khoảng 80.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng các nhóm 10 làm mốc để chọn số chục gần và hợp lý với số lượng quan sát.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tách dữ kiện theo “Ước lượng theo chục”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
       ],
       "tags": [
         "estimate_objects_by_tens",
@@ -1200,7 +1200,7 @@
       "explanation_vi": "73 gần 70 hơn 80 khi ước lượng theo chục gần nhất.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng các nhóm 10 làm mốc để chọn số chục gần và hợp lý với số lượng quan sát.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đừng đoán theo vị trí đáp án. Tự giải theo “Ước lượng theo chục” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
         "estimate_objects_by_tens",
@@ -1253,7 +1253,7 @@
       "explanation_vi": "23 là một trong hai số được cộng nên là số hạng.",
       "hints_vi": [
         "Nhớ kiến thức: Hai số được cộng là số hạng; kết quả của phép cộng là tổng.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đối chiếu từng lựa chọn với kiến thức “Số hạng và tổng”; loại ngay lựa chọn trái với dữ kiện của đề."
       ],
       "tags": [
         "add_components_recognize",
@@ -1306,7 +1306,7 @@
       "explanation_vi": "Kết quả của phép cộng gọi là tổng.",
       "hints_vi": [
         "Nhớ kiến thức: Hai số được cộng là số hạng; kết quả của phép cộng là tổng.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tự xác định đặc điểm đúng của “Số hạng và tổng” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
         "add_components_recognize",
@@ -1359,7 +1359,7 @@
       "explanation_vi": "Hai số đứng trước dấu bằng và được nối bằng dấu + là hai số hạng.",
       "hints_vi": [
         "Nhớ kiến thức: Hai số được cộng là số hạng; kết quả của phép cộng là tổng.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đừng đoán theo vị trí đáp án. Tự giải theo “Số hạng và tổng” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
         "add_components_recognize",
@@ -1412,7 +1412,7 @@
       "explanation_vi": "50 là số đứng trước dấu trừ nên là số bị trừ.",
       "hints_vi": [
         "Nhớ kiến thức: Phép trừ gồm số bị trừ, số trừ và kết quả gọi là hiệu.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đối chiếu từng lựa chọn với kiến thức “Số bị trừ, số trừ, hiệu”; loại ngay lựa chọn trái với dữ kiện của đề."
       ],
       "tags": [
         "sub_components_recognize",
@@ -1465,7 +1465,7 @@
       "explanation_vi": "20 là lượng được bớt khỏi số bị trừ nên là số trừ.",
       "hints_vi": [
         "Nhớ kiến thức: Phép trừ gồm số bị trừ, số trừ và kết quả gọi là hiệu.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tự xác định đặc điểm đúng của “Số bị trừ, số trừ, hiệu” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
         "sub_components_recognize",
@@ -1518,7 +1518,7 @@
       "explanation_vi": "Kết quả của phép trừ gọi là hiệu.",
       "hints_vi": [
         "Nhớ kiến thức: Phép trừ gồm số bị trừ, số trừ và kết quả gọi là hiệu.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đừng đoán theo vị trí đáp án. Tự giải theo “Số bị trừ, số trừ, hiệu” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
         "sub_components_recognize",
@@ -1571,7 +1571,7 @@
       "explanation_vi": "Cộng từng hàng: 3+5=8, 4+2=6, 2+1=3; được 368.",
       "hints_vi": [
         "Nhớ kiến thức: Cộng từng hàng mà không tạo thêm một chục hoặc một trăm để chuyển sang cột kế tiếp.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Cộng không nhớ”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "add_within_1000_no_carry",
@@ -1602,7 +1602,7 @@
       "explanation_vi": "0+0=0, 1 chục + 3 chục = 4 chục, 4 trăm + 2 trăm = 6 trăm; được 640.",
       "hints_vi": [
         "Nhớ kiến thức: Cộng từng hàng mà không tạo thêm một chục hoặc một trăm để chuyển sang cột kế tiếp.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tách dữ kiện theo “Cộng không nhớ”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
       ],
       "tags": [
         "add_within_1000_no_carry",
@@ -1633,7 +1633,7 @@
       "explanation_vi": "324 + 253 = 577; từng cột đều không cần nhớ.",
       "hints_vi": [
         "Nhớ kiến thức: Cộng từng hàng mà không tạo thêm một chục hoặc một trăm để chuyển sang cột kế tiếp.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Viết một phép tính hoặc quan hệ ngắn cho “Cộng không nhớ”, tính xong đối chiếu lại điều đề đang hỏi."
       ],
       "tags": [
         "add_within_1000_no_carry",
@@ -1664,7 +1664,7 @@
       "explanation_vi": "6+7=13, viết 3 nhớ 1; 4+3+1=8; 2+1=3, nên kết quả 383.",
       "hints_vi": [
         "Nhớ kiến thức: Một lượt nhớ xảy ra khi tổng của một hàng tạo thêm 1 đơn vị ở hàng kế tiếp.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Cộng có nhớ”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "add_within_1000_one_carry_max",
@@ -1695,7 +1695,7 @@
       "explanation_vi": "8+4=12, viết 2 nhớ 1; 5+2+1=8; 3+1=4, nên 482.",
       "hints_vi": [
         "Nhớ kiến thức: Một lượt nhớ xảy ra khi tổng của một hàng tạo thêm 1 đơn vị ở hàng kế tiếp.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tách dữ kiện theo “Cộng có nhớ”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
       ],
       "tags": [
         "add_within_1000_one_carry_max",
@@ -1726,7 +1726,7 @@
       "explanation_vi": "465 + 217 = 682; chỉ hàng đơn vị tạo một lượt nhớ.",
       "hints_vi": [
         "Nhớ kiến thức: Một lượt nhớ xảy ra khi tổng của một hàng tạo thêm 1 đơn vị ở hàng kế tiếp.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Viết một phép tính hoặc quan hệ ngắn cho “Cộng có nhớ”, tính xong đối chiếu lại điều đề đang hỏi."
       ],
       "tags": [
         "add_within_1000_one_carry_max",
@@ -1757,7 +1757,7 @@
       "explanation_vi": "6-4=2, 8-3=5, 7-2=5; được 552.",
       "hints_vi": [
         "Nhớ kiến thức: Trừ từng hàng trực tiếp khi mỗi chữ số của số bị trừ đủ lớn ở cột tương ứng.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Trừ không mượn”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "sub_within_1000_no_borrow",
@@ -1788,7 +1788,7 @@
       "explanation_vi": "9 trăm trừ 4 trăm còn 5 trăm, tức 500.",
       "hints_vi": [
         "Nhớ kiến thức: Trừ từng hàng trực tiếp khi mỗi chữ số của số bị trừ đủ lớn ở cột tương ứng.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tách dữ kiện theo “Trừ không mượn”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
       ],
       "tags": [
         "sub_within_1000_no_borrow",
@@ -1819,7 +1819,7 @@
       "explanation_vi": "654 - 321 = 333 và không cột nào cần mượn.",
       "hints_vi": [
         "Nhớ kiến thức: Trừ từng hàng trực tiếp khi mỗi chữ số của số bị trừ đủ lớn ở cột tương ứng.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Viết một phép tính hoặc quan hệ ngắn cho “Trừ không mượn”, tính xong đối chiếu lại điều đề đang hỏi."
       ],
       "tags": [
         "sub_within_1000_no_borrow",
@@ -1850,7 +1850,7 @@
       "explanation_vi": "Mượn 1 chục: 12-8=4; còn 4 chục, 4-3=1; 3-1=2, được 214.",
       "hints_vi": [
         "Nhớ kiến thức: Một lượt mượn đổi 1 đơn vị của hàng lớn hơn thành 10 đơn vị ở hàng nhỏ hơn.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Trừ có mượn”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "sub_within_1000_one_borrow_max",
@@ -1881,7 +1881,7 @@
       "explanation_vi": "Mượn 1 chục: 11-3=8; còn 3 chục, 3-2=1; 6-2=4, được 418.",
       "hints_vi": [
         "Nhớ kiến thức: Một lượt mượn đổi 1 đơn vị của hàng lớn hơn thành 10 đơn vị ở hàng nhỏ hơn.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tách dữ kiện theo “Trừ có mượn”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
       ],
       "tags": [
         "sub_within_1000_one_borrow_max",
@@ -1912,7 +1912,7 @@
       "explanation_vi": "730 - 412 = 318; mượn 1 chục ở hàng đơn vị rồi các hàng còn lại trừ trực tiếp.",
       "hints_vi": [
         "Nhớ kiến thức: Một lượt mượn đổi 1 đơn vị của hàng lớn hơn thành 10 đơn vị ở hàng nhỏ hơn.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Viết một phép tính hoặc quan hệ ngắn cho “Trừ có mượn”, tính xong đối chiếu lại điều đề đang hỏi."
       ],
       "tags": [
         "sub_within_1000_one_borrow_max",
@@ -1943,7 +1943,7 @@
       "explanation_vi": "50 + 20 = 70, rồi 70 - 10 = 60.",
       "hints_vi": [
         "Nhớ kiến thức: Biểu thức chỉ gồm + và - được tính lần lượt từ trái qua phải.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Tính từ trái sang phải”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "add_sub_two_operators_left_to_right",
@@ -1974,7 +1974,7 @@
       "explanation_vi": "100 - 30 = 70, rồi 70 + 5 = 75.",
       "hints_vi": [
         "Nhớ kiến thức: Biểu thức chỉ gồm + và - được tính lần lượt từ trái qua phải.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Viết biểu thức trước khi tính; kiểm tra từng dấu phép tính có đúng với “Tính từ trái sang phải” hay chưa."
       ],
       "tags": [
         "add_sub_two_operators_left_to_right",
@@ -2014,7 +2014,7 @@
       "explanation_vi": "Từ trái sang phải theo tình huống: 200 + 150 = 350, 350 - 100 = 250.",
       "hints_vi": [
         "Nhớ kiến thức: Biểu thức chỉ gồm + và - được tính lần lượt từ trái qua phải.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Viết một phép tính hoặc quan hệ ngắn cho “Tính từ trái sang phải”, tính xong đối chiếu lại điều đề đang hỏi."
       ],
       "tags": [
         "add_sub_two_operators_left_to_right",
@@ -2045,7 +2045,7 @@
       "explanation_vi": "Tách 7 thành 2 và 5: 8+2=10, rồi 10+5=15.",
       "hints_vi": [
         "Nhớ kiến thức: Biến đổi số thành các phần dễ cộng hoặc trừ, đặc biệt dựa vào mốc 10.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Tính nhẩm đến 20”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "mental_add_sub_within_20",
@@ -2076,7 +2076,7 @@
       "explanation_vi": "Có thể trừ 10 rồi thêm lại 1: 17-10=7, 7+1=8.",
       "hints_vi": [
         "Nhớ kiến thức: Biến đổi số thành các phần dễ cộng hoặc trừ, đặc biệt dựa vào mốc 10.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tách dữ kiện theo “Tính nhẩm đến 20”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
       ],
       "tags": [
         "mental_add_sub_within_20",
@@ -2107,7 +2107,7 @@
       "explanation_vi": "12 + 5 = 17, vẫn trong phạm vi 20.",
       "hints_vi": [
         "Nhớ kiến thức: Biến đổi số thành các phần dễ cộng hoặc trừ, đặc biệt dựa vào mốc 10.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Viết một phép tính hoặc quan hệ ngắn cho “Tính nhẩm đến 20”, tính xong đối chiếu lại điều đề đang hỏi."
       ],
       "tags": [
         "mental_add_sub_within_20",
@@ -2138,7 +2138,7 @@
       "explanation_vi": "3 chục + 4 chục = 7 chục, tức 70.",
       "hints_vi": [
         "Nhớ kiến thức: Xem 30 là 3 chục và 400 là 4 trăm để cộng trừ theo đơn vị chục hoặc trăm.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Nhẩm số tròn”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "mental_add_sub_round_tens_hundreds_1000",
@@ -2169,7 +2169,7 @@
       "explanation_vi": "5 trăm - 2 trăm = 3 trăm, tức 300.",
       "hints_vi": [
         "Nhớ kiến thức: Xem 30 là 3 chục và 400 là 4 trăm để cộng trừ theo đơn vị chục hoặc trăm.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tách dữ kiện theo “Nhẩm số tròn”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
       ],
       "tags": [
         "mental_add_sub_round_tens_hundreds_1000",
@@ -2200,7 +2200,7 @@
       "explanation_vi": "3 trăm + 4 trăm = 7 trăm = 700.",
       "hints_vi": [
         "Nhớ kiến thức: Xem 30 là 3 chục và 400 là 4 trăm để cộng trừ theo đơn vị chục hoặc trăm.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Viết một phép tính hoặc quan hệ ngắn cho “Nhẩm số tròn”, tính xong đối chiếu lại điều đề đang hỏi."
       ],
       "tags": [
         "mental_add_sub_round_tens_hundreds_1000",
@@ -2231,7 +2231,7 @@
       "explanation_vi": "Ba nhóm, mỗi nhóm 2 tương ứng cộng số 2 ba lần.",
       "hints_vi": [
         "Nhớ kiến thức: Phép nhân là cách viết gọn của phép cộng lặp lại các nhóm có cùng số lượng.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đối chiếu từng lựa chọn với kiến thức “Nhóm bằng nhau”; loại ngay lựa chọn trái với dữ kiện của đề."
       ],
       "tags": [
         "multiplication_meaning",
@@ -2284,7 +2284,7 @@
       "explanation_vi": "2 + 2 + 2 + 2 + 2 = 10, cũng là 5 × 2.",
       "hints_vi": [
         "Nhớ kiến thức: Phép nhân là cách viết gọn của phép cộng lặp lại các nhóm có cùng số lượng.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tách dữ kiện theo “Nhóm bằng nhau”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
       ],
       "tags": [
         "multiplication_meaning",
@@ -2315,7 +2315,7 @@
       "explanation_vi": "Bốn nhóm bằng nhau, mỗi nhóm 5: 4 × 5 = 20.",
       "hints_vi": [
         "Nhớ kiến thức: Phép nhân là cách viết gọn của phép cộng lặp lại các nhóm có cùng số lượng.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Viết một phép tính hoặc quan hệ ngắn cho “Nhóm bằng nhau”, tính xong đối chiếu lại điều đề đang hỏi."
       ],
       "tags": [
         "multiplication_meaning",
@@ -2346,7 +2346,7 @@
       "explanation_vi": "10 chia đều thành 2 phần bằng nhau thì mỗi phần có 5.",
       "hints_vi": [
         "Nhớ kiến thức: Chia đều nghĩa là mỗi nhóm nhận cùng số lượng và không bỏ sót đối tượng trong bài chia hết.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Chia đều”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "division_meaning",
@@ -2377,7 +2377,7 @@
       "explanation_vi": "15 : 5 = 3 nhóm.",
       "hints_vi": [
         "Nhớ kiến thức: Chia đều nghĩa là mỗi nhóm nhận cùng số lượng và không bỏ sót đối tượng trong bài chia hết.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tách dữ kiện theo “Chia đều”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
       ],
       "tags": [
         "division_meaning",
@@ -2408,7 +2408,7 @@
       "explanation_vi": "20 : 5 = 4 nên mỗi hộp có 4 thẻ.",
       "hints_vi": [
         "Nhớ kiến thức: Chia đều nghĩa là mỗi nhóm nhận cùng số lượng và không bỏ sót đối tượng trong bài chia hết.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Viết một phép tính hoặc quan hệ ngắn cho “Chia đều”, tính xong đối chiếu lại điều đề đang hỏi."
       ],
       "tags": [
         "division_meaning",
@@ -2439,7 +2439,7 @@
       "explanation_vi": "2 là một số được nhân nên là thừa số.",
       "hints_vi": [
         "Nhớ kiến thức: Các số được nhân là thừa số; kết quả là tích.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đối chiếu từng lựa chọn với kiến thức “Thừa số và tích”; loại ngay lựa chọn trái với dữ kiện của đề."
       ],
       "tags": [
         "multiplication_components",
@@ -2492,7 +2492,7 @@
       "explanation_vi": "Kết quả của phép nhân gọi là tích.",
       "hints_vi": [
         "Nhớ kiến thức: Các số được nhân là thừa số; kết quả là tích.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tự xác định đặc điểm đúng của “Thừa số và tích” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
         "multiplication_components",
@@ -2545,7 +2545,7 @@
       "explanation_vi": "Hai số đứng hai bên dấu nhân là hai thừa số.",
       "hints_vi": [
         "Nhớ kiến thức: Các số được nhân là thừa số; kết quả là tích.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đừng đoán theo vị trí đáp án. Tự giải theo “Thừa số và tích” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
         "multiplication_components",
@@ -2598,7 +2598,7 @@
       "explanation_vi": "10 là lượng được đem chia nên là số bị chia.",
       "hints_vi": [
         "Nhớ kiến thức: Phép chia gồm số bị chia, số chia và kết quả gọi là thương.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đối chiếu từng lựa chọn với kiến thức “Số bị chia, số chia, thương”; loại ngay lựa chọn trái với dữ kiện của đề."
       ],
       "tags": [
         "division_components",
@@ -2651,7 +2651,7 @@
       "explanation_vi": "5 là số dùng để chia nên là số chia.",
       "hints_vi": [
         "Nhớ kiến thức: Phép chia gồm số bị chia, số chia và kết quả gọi là thương.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tự xác định đặc điểm đúng của “Số bị chia, số chia, thương” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
         "division_components",
@@ -2704,7 +2704,7 @@
       "explanation_vi": "Kết quả của phép chia gọi là thương.",
       "hints_vi": [
         "Nhớ kiến thức: Phép chia gồm số bị chia, số chia và kết quả gọi là thương.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đừng đoán theo vị trí đáp án. Tự giải theo “Số bị chia, số chia, thương” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
         "division_components",
@@ -2757,7 +2757,7 @@
       "explanation_vi": "Bảng nhân 2: 2 × 6 = 12.",
       "hints_vi": [
         "Nhớ kiến thức: Nhân một số với 2 là lấy hai lần số đó hoặc tạo các cặp bằng nhau.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Nhân 2”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "times_table_2",
@@ -2788,7 +2788,7 @@
       "explanation_vi": "Bảng nhân 2: 2 × 9 = 18.",
       "hints_vi": [
         "Nhớ kiến thức: Nhân một số với 2 là lấy hai lần số đó hoặc tạo các cặp bằng nhau.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tách dữ kiện theo “Nhân 2”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
       ],
       "tags": [
         "times_table_2",
@@ -2819,7 +2819,7 @@
       "explanation_vi": "7 nhóm 2 chiếc: 7 × 2 = 14.",
       "hints_vi": [
         "Nhớ kiến thức: Nhân một số với 2 là lấy hai lần số đó hoặc tạo các cặp bằng nhau.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Viết một phép tính hoặc quan hệ ngắn cho “Nhân 2”, tính xong đối chiếu lại điều đề đang hỏi."
       ],
       "tags": [
         "times_table_2",
@@ -2850,7 +2850,7 @@
       "explanation_vi": "Bảng nhân 5: 5 × 4 = 20.",
       "hints_vi": [
         "Nhớ kiến thức: Nhân một số với 5 là cộng các nhóm 5 bằng nhau.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Nhân 5”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "times_table_5",
@@ -2881,7 +2881,7 @@
       "explanation_vi": "Bảng nhân 5: 5 × 8 = 40.",
       "hints_vi": [
         "Nhớ kiến thức: Nhân một số với 5 là cộng các nhóm 5 bằng nhau.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tách dữ kiện theo “Nhân 5”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
       ],
       "tags": [
         "times_table_5",
@@ -2912,7 +2912,7 @@
       "explanation_vi": "6 nhóm 5 bút: 6 × 5 = 30.",
       "hints_vi": [
         "Nhớ kiến thức: Nhân một số với 5 là cộng các nhóm 5 bằng nhau.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Viết một phép tính hoặc quan hệ ngắn cho “Nhân 5”, tính xong đối chiếu lại điều đề đang hỏi."
       ],
       "tags": [
         "times_table_5",
@@ -2943,7 +2943,7 @@
       "explanation_vi": "Vì 2 × 8 = 16 nên 16 : 2 = 8.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng quan hệ nhân - chia để tìm thương khi số chia là 2.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Chia 2”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "divide_table_2",
@@ -2974,7 +2974,7 @@
       "explanation_vi": "Vì 2 × 10 = 20 nên 20 : 2 = 10.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng quan hệ nhân - chia để tìm thương khi số chia là 2.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tách dữ kiện theo “Chia 2”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
       ],
       "tags": [
         "divide_table_2",
@@ -3005,7 +3005,7 @@
       "explanation_vi": "18 : 2 = 9.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng quan hệ nhân - chia để tìm thương khi số chia là 2.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Viết một phép tính hoặc quan hệ ngắn cho “Chia 2”, tính xong đối chiếu lại điều đề đang hỏi."
       ],
       "tags": [
         "divide_table_2",
@@ -3036,7 +3036,7 @@
       "explanation_vi": "Vì 5 × 5 = 25 nên 25 : 5 = 5.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng quan hệ nhân - chia để tìm thương khi số chia là 5.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Chia 5”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "divide_table_5",
@@ -3067,7 +3067,7 @@
       "explanation_vi": "Vì 5 × 8 = 40 nên 40 : 5 = 8.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng quan hệ nhân - chia để tìm thương khi số chia là 5.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tách dữ kiện theo “Chia 5”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
       ],
       "tags": [
         "divide_table_5",
@@ -3098,7 +3098,7 @@
       "explanation_vi": "50 : 5 = 10 túi.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng quan hệ nhân - chia để tìm thương khi số chia là 5.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Viết một phép tính hoặc quan hệ ngắn cho “Chia 5”, tính xong đối chiếu lại điều đề đang hỏi."
       ],
       "tags": [
         "divide_table_5",
@@ -3129,7 +3129,7 @@
       "explanation_vi": "Gộp hai lượng lại là quan hệ cộng; hai nhóm 4 là 4 + 4.",
       "hints_vi": [
         "Nhớ kiến thức: Cộng gộp/thêm, trừ bớt/so sánh chênh lệch, nhân tạo nhóm bằng nhau, chia chia đều hoặc đếm số nhóm.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đối chiếu từng lựa chọn với kiến thức “Quan hệ của phép tính”; loại ngay lựa chọn trái với dữ kiện của đề."
       ],
       "tags": [
         "operation_meaning_from_visual",
@@ -3182,7 +3182,7 @@
       "explanation_vi": "Bỏ bớt một phần khỏi lượng ban đầu là phép trừ.",
       "hints_vi": [
         "Nhớ kiến thức: Cộng gộp/thêm, trừ bớt/so sánh chênh lệch, nhân tạo nhóm bằng nhau, chia chia đều hoặc đếm số nhóm.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tự xác định đặc điểm đúng của “Quan hệ của phép tính” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
         "operation_meaning_from_visual",
@@ -3235,7 +3235,7 @@
       "explanation_vi": "Nhiều nhóm bằng nhau được mô tả bằng phép nhân.",
       "hints_vi": [
         "Nhớ kiến thức: Cộng gộp/thêm, trừ bớt/so sánh chênh lệch, nhân tạo nhóm bằng nhau, chia chia đều hoặc đếm số nhóm.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đừng đoán theo vị trí đáp án. Tự giải theo “Quan hệ của phép tính” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
         "operation_meaning_from_visual",
@@ -3288,7 +3288,7 @@
       "explanation_vi": "24 + 13 = 37 vì số bút được thêm vào lượng ban đầu.",
       "hints_vi": [
         "Nhớ kiến thức: Tổng mới = số ban đầu + số được thêm.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Gạch chân số đã cho và điều cần tìm; dùng quan hệ “Thêm vào” để chọn phép tính."
       ],
       "tags": [
         "wp_one_step_add_more",
@@ -3319,7 +3319,7 @@
       "explanation_vi": "125 + 243 = 368.",
       "hints_vi": [
         "Nhớ kiến thức: Tổng mới = số ban đầu + số được thêm.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Nói lại đề theo mẫu “đã biết gì, cần tìm gì”, rồi chọn phép tính phù hợp với “Thêm vào”."
       ],
       "tags": [
         "wp_one_step_add_more",
@@ -3350,7 +3350,7 @@
       "explanation_vi": "310 + 260 = 570.",
       "hints_vi": [
         "Nhớ kiến thức: Tổng mới = số ban đầu + số được thêm.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Có thể vẽ sơ đồ hoặc chia tình huống thành nhóm; dùng “Thêm vào” để kiểm tra phép tính trước khi tính."
       ],
       "tags": [
         "wp_one_step_add_more",
@@ -3381,7 +3381,7 @@
       "explanation_vi": "45 - 12 = 33 vì 12 quả bị bớt khỏi số ban đầu.",
       "hints_vi": [
         "Nhớ kiến thức: Số còn lại = số ban đầu - số bị lấy bớt.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Gạch chân số đã cho và điều cần tìm; dùng quan hệ “Bớt đi” để chọn phép tính."
       ],
       "tags": [
         "wp_one_step_sub_less",
@@ -3412,7 +3412,7 @@
       "explanation_vi": "786 - 234 = 552.",
       "hints_vi": [
         "Nhớ kiến thức: Số còn lại = số ban đầu - số bị lấy bớt.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Nói lại đề theo mẫu “đã biết gì, cần tìm gì”, rồi chọn phép tính phù hợp với “Bớt đi”."
       ],
       "tags": [
         "wp_one_step_sub_less",
@@ -3443,7 +3443,7 @@
       "explanation_vi": "40 - 18 = 22.",
       "hints_vi": [
         "Nhớ kiến thức: Số còn lại = số ban đầu - số bị lấy bớt.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Có thể vẽ sơ đồ hoặc chia tình huống thành nhóm; dùng “Bớt đi” để kiểm tra phép tính trước khi tính."
       ],
       "tags": [
         "wp_one_step_sub_less",
@@ -3474,7 +3474,7 @@
       "explanation_vi": "Bình nhiều hơn An 7 viên nên 25 + 7 = 32.",
       "hints_vi": [
         "Nhớ kiến thức: Một lượng nhiều hơn lượng mốc k đơn vị bằng lượng mốc cộng k.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Gạch chân số đã cho và điều cần tìm; dùng quan hệ “Nhiều hơn” để chọn phép tính."
       ],
       "tags": [
         "wp_one_step_more_than",
@@ -3505,7 +3505,7 @@
       "explanation_vi": "120 + 30 = 150 cm.",
       "hints_vi": [
         "Nhớ kiến thức: Một lượng nhiều hơn lượng mốc k đơn vị bằng lượng mốc cộng k.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Nói lại đề theo mẫu “đã biết gì, cần tìm gì”, rồi chọn phép tính phù hợp với “Nhiều hơn”."
       ],
       "tags": [
         "wp_one_step_more_than",
@@ -3537,7 +3537,7 @@
       "explanation_vi": "240 + 120 = 360.",
       "hints_vi": [
         "Nhớ kiến thức: Một lượng nhiều hơn lượng mốc k đơn vị bằng lượng mốc cộng k.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Có thể vẽ sơ đồ hoặc chia tình huống thành nhóm; dùng “Nhiều hơn” để kiểm tra phép tính trước khi tính."
       ],
       "tags": [
         "wp_one_step_more_than",
@@ -3568,7 +3568,7 @@
       "explanation_vi": "Linh ít hơn Mai 8 nên 30 - 8 = 22.",
       "hints_vi": [
         "Nhớ kiến thức: Một lượng ít hơn lượng mốc k đơn vị bằng lượng mốc trừ k.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Gạch chân số đã cho và điều cần tìm; dùng quan hệ “Ít hơn” để chọn phép tính."
       ],
       "tags": [
         "wp_one_step_less_than",
@@ -3599,7 +3599,7 @@
       "explanation_vi": "90 - 20 = 70 cm.",
       "hints_vi": [
         "Nhớ kiến thức: Một lượng ít hơn lượng mốc k đơn vị bằng lượng mốc trừ k.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Nói lại đề theo mẫu “đã biết gì, cần tìm gì”, rồi chọn phép tính phù hợp với “Ít hơn”."
       ],
       "tags": [
         "wp_one_step_less_than",
@@ -3631,7 +3631,7 @@
       "explanation_vi": "650 - 230 = 420.",
       "hints_vi": [
         "Nhớ kiến thức: Một lượng ít hơn lượng mốc k đơn vị bằng lượng mốc trừ k.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Có thể vẽ sơ đồ hoặc chia tình huống thành nhóm; dùng “Ít hơn” để kiểm tra phép tính trước khi tính."
       ],
       "tags": [
         "wp_one_step_less_than",
@@ -3662,7 +3662,7 @@
       "explanation_vi": "6 nhóm 2 bạn nên 6 × 2 = 12.",
       "hints_vi": [
         "Nhớ kiến thức: Tổng số phần tử = số nhóm × số phần tử mỗi nhóm.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Gạch chân số đã cho và điều cần tìm; dùng quan hệ “Nhân trong tình huống” để chọn phép tính."
       ],
       "tags": [
         "wp_one_step_multiplication_context",
@@ -3693,7 +3693,7 @@
       "explanation_vi": "4 × 5 = 20.",
       "hints_vi": [
         "Nhớ kiến thức: Tổng số phần tử = số nhóm × số phần tử mỗi nhóm.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Nói lại đề theo mẫu “đã biết gì, cần tìm gì”, rồi chọn phép tính phù hợp với “Nhân trong tình huống”."
       ],
       "tags": [
         "wp_one_step_multiplication_context",
@@ -3724,7 +3724,7 @@
       "explanation_vi": "5 nhóm 2 bài nên 5 × 2 = 10.",
       "hints_vi": [
         "Nhớ kiến thức: Tổng số phần tử = số nhóm × số phần tử mỗi nhóm.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Có thể vẽ sơ đồ hoặc chia tình huống thành nhóm; dùng “Nhân trong tình huống” để kiểm tra phép tính trước khi tính."
       ],
       "tags": [
         "wp_one_step_multiplication_context",
@@ -3755,7 +3755,7 @@
       "explanation_vi": "14 : 2 = 7.",
       "hints_vi": [
         "Nhớ kiến thức: Thương trả lời kích thước mỗi nhóm hoặc số nhóm khi chia đều.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Gạch chân số đã cho và điều cần tìm; dùng quan hệ “Chia trong tình huống” để chọn phép tính."
       ],
       "tags": [
         "wp_one_step_division_context",
@@ -3786,7 +3786,7 @@
       "explanation_vi": "35 : 5 = 7.",
       "hints_vi": [
         "Nhớ kiến thức: Thương trả lời kích thước mỗi nhóm hoặc số nhóm khi chia đều.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Nói lại đề theo mẫu “đã biết gì, cần tìm gì”, rồi chọn phép tính phù hợp với “Chia trong tình huống”."
       ],
       "tags": [
         "wp_one_step_division_context",
@@ -3817,7 +3817,7 @@
       "explanation_vi": "20 : 5 = 4.",
       "hints_vi": [
         "Nhớ kiến thức: Thương trả lời kích thước mỗi nhóm hoặc số nhóm khi chia đều.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Có thể vẽ sơ đồ hoặc chia tình huống thành nhóm; dùng “Chia trong tình huống” để kiểm tra phép tính trước khi tính."
       ],
       "tags": [
         "wp_one_step_division_context",
@@ -3848,7 +3848,7 @@
       "explanation_vi": "Tình huống lấy bớt và hỏi còn lại nên dùng phép trừ.",
       "hints_vi": [
         "Nhớ kiến thức: Phép tính phải mô tả đúng quan hệ giữa dữ kiện và đại lượng cần tìm.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đối chiếu từng lựa chọn với kiến thức “Chọn phép tính”; loại ngay lựa chọn trái với dữ kiện của đề."
       ],
       "tags": [
         "wp_select_operation_one_step",
@@ -3901,7 +3901,7 @@
       "explanation_vi": "Nhiều nhóm bằng nhau và hỏi tổng nên dùng phép nhân.",
       "hints_vi": [
         "Nhớ kiến thức: Phép tính phải mô tả đúng quan hệ giữa dữ kiện và đại lượng cần tìm.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tự xác định đặc điểm đúng của “Chọn phép tính” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
         "wp_select_operation_one_step",
@@ -3954,7 +3954,7 @@
       "explanation_vi": "Chia đều tổng số bút thành 5 phần nên dùng phép chia.",
       "hints_vi": [
         "Nhớ kiến thức: Phép tính phải mô tả đúng quan hệ giữa dữ kiện và đại lượng cần tìm.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đừng đoán theo vị trí đáp án. Tự giải theo “Chọn phép tính” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
         "wp_select_operation_one_step",
@@ -4007,7 +4007,7 @@
       "explanation_vi": "Điểm thường được đặt tên bằng chữ cái in hoa như A.",
       "hints_vi": [
         "Nhớ kiến thức: Một điểm chỉ vị trí; tên điểm giúp phân biệt các vị trí trên hình.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đối chiếu từng lựa chọn với kiến thức “Điểm”; loại ngay lựa chọn trái với dữ kiện của đề."
       ],
       "tags": [
         "point_recognize",
@@ -4060,7 +4060,7 @@
       "explanation_vi": "Điểm dùng để chỉ vị trí và không có độ dài.",
       "hints_vi": [
         "Nhớ kiến thức: Một điểm chỉ vị trí; tên điểm giúp phân biệt các vị trí trên hình.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tự xác định đặc điểm đúng của “Điểm” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
         "point_recognize",
@@ -4113,7 +4113,7 @@
       "explanation_vi": "Mỗi tên A, B, C chỉ một điểm, nên có 3 điểm.",
       "hints_vi": [
         "Nhớ kiến thức: Một điểm chỉ vị trí; tên điểm giúp phân biệt các vị trí trên hình.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đừng đoán theo vị trí đáp án. Tự giải theo “Điểm” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
         "point_recognize",
@@ -4166,7 +4166,7 @@
       "explanation_vi": "Đoạn thẳng AB có hai đầu mút A và B.",
       "hints_vi": [
         "Nhớ kiến thức: Đoạn thẳng có hai đầu mút xác định và phần nối giữa chúng là thẳng.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đối chiếu từng lựa chọn với kiến thức “Đoạn thẳng”; loại ngay lựa chọn trái với dữ kiện của đề."
       ],
       "tags": [
         "line_segment_recognize",
@@ -4219,7 +4219,7 @@
       "explanation_vi": "Đoạn thẳng là phần thẳng nối hai điểm đầu mút.",
       "hints_vi": [
         "Nhớ kiến thức: Đoạn thẳng có hai đầu mút xác định và phần nối giữa chúng là thẳng.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tự xác định đặc điểm đúng của “Đoạn thẳng” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
         "line_segment_recognize",
@@ -4272,7 +4272,7 @@
       "explanation_vi": "Phần thẳng nối hai điểm M và N là đoạn thẳng MN.",
       "hints_vi": [
         "Nhớ kiến thức: Đoạn thẳng có hai đầu mút xác định và phần nối giữa chúng là thẳng.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đừng đoán theo vị trí đáp án. Tự giải theo “Đoạn thẳng” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
         "line_segment_recognize",
@@ -4325,7 +4325,7 @@
       "explanation_vi": "Đường cong có hình dạng uốn lượn, không giữ hướng thẳng trên toàn bộ đường.",
       "hints_vi": [
         "Nhớ kiến thức: Đường cong không giữ một hướng thẳng cố định trên toàn bộ đường.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đối chiếu từng lựa chọn với kiến thức “Đường cong”; loại ngay lựa chọn trái với dữ kiện của đề."
       ],
       "tags": [
         "curve_recognize",
@@ -4378,7 +4378,7 @@
       "explanation_vi": "Vòng cung là một đường cong.",
       "hints_vi": [
         "Nhớ kiến thức: Đường cong không giữ một hướng thẳng cố định trên toàn bộ đường.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tự xác định đặc điểm đúng của “Đường cong” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
         "curve_recognize",
@@ -4431,7 +4431,7 @@
       "explanation_vi": "Đặc điểm nhận biết là đường bị uốn và thay đổi hướng.",
       "hints_vi": [
         "Nhớ kiến thức: Đường cong không giữ một hướng thẳng cố định trên toàn bộ đường.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đừng đoán theo vị trí đáp án. Tự giải theo “Đường cong” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
         "curve_recognize",
@@ -4484,7 +4484,7 @@
       "explanation_vi": "Đường thẳng không bị giới hạn bởi hai đầu mút như đoạn thẳng.",
       "hints_vi": [
         "Nhớ kiến thức: Đường thẳng có thể kéo dài mãi theo hai hướng và không cong.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đối chiếu từng lựa chọn với kiến thức “Đường thẳng”; loại ngay lựa chọn trái với dữ kiện của đề."
       ],
       "tags": [
         "straight_line_recognize",
@@ -4537,7 +4537,7 @@
       "explanation_vi": "Đó là mô tả của đường thẳng.",
       "hints_vi": [
         "Nhớ kiến thức: Đường thẳng có thể kéo dài mãi theo hai hướng và không cong.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tự xác định đặc điểm đúng của “Đường thẳng” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
         "straight_line_recognize",
@@ -4590,7 +4590,7 @@
       "explanation_vi": "Dữ kiện đã cho xác định cả hai điểm cùng thuộc đường thẳng d.",
       "hints_vi": [
         "Nhớ kiến thức: Đường thẳng có thể kéo dài mãi theo hai hướng và không cong.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đừng đoán theo vị trí đáp án. Tự giải theo “Đường thẳng” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
         "straight_line_recognize",
@@ -4643,7 +4643,7 @@
       "explanation_vi": "Đường gấp khúc là chuỗi các đoạn thẳng nối nhau.",
       "hints_vi": [
         "Nhớ kiến thức: Một chuỗi từ hai đoạn thẳng trở lên nối đầu mút với nhau tạo thành đường gấp khúc.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đối chiếu từng lựa chọn với kiến thức “Đường gấp khúc”; loại ngay lựa chọn trái với dữ kiện của đề."
       ],
       "tags": [
         "polyline_recognize",
@@ -4696,7 +4696,7 @@
       "explanation_vi": "Ba đoạn thẳng nối tiếp tại B và C tạo một đường gấp khúc.",
       "hints_vi": [
         "Nhớ kiến thức: Một chuỗi từ hai đoạn thẳng trở lên nối đầu mút với nhau tạo thành đường gấp khúc.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tự xác định đặc điểm đúng của “Đường gấp khúc” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
         "polyline_recognize",
@@ -4749,7 +4749,7 @@
       "explanation_vi": "Một chuỗi mở 4 đoạn cần 5 điểm liên tiếp để tạo 4 đoạn.",
       "hints_vi": [
         "Nhớ kiến thức: Một chuỗi từ hai đoạn thẳng trở lên nối đầu mút với nhau tạo thành đường gấp khúc.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đừng đoán theo vị trí đáp án. Tự giải theo “Đường gấp khúc” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
         "polyline_recognize",
@@ -4802,7 +4802,7 @@
       "explanation_vi": "Ba điểm cùng nằm trên một đường thẳng là ba điểm thẳng hàng.",
       "hints_vi": [
         "Nhớ kiến thức: Các điểm thẳng hàng cùng nằm trên một đường thẳng duy nhất.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đối chiếu từng lựa chọn với kiến thức “Thẳng hàng”; loại ngay lựa chọn trái với dữ kiện của đề."
       ],
       "tags": [
         "three_collinear_points",
@@ -4855,7 +4855,7 @@
       "explanation_vi": "C không nằm trên đường qua A và B nên ba điểm không thẳng hàng.",
       "hints_vi": [
         "Nhớ kiến thức: Các điểm thẳng hàng cùng nằm trên một đường thẳng duy nhất.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tự xác định đặc điểm đúng của “Thẳng hàng” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
         "three_collinear_points",
@@ -4908,7 +4908,7 @@
       "explanation_vi": "Điều kiện trực quan là ba điểm cùng thuộc một đường thẳng.",
       "hints_vi": [
         "Nhớ kiến thức: Các điểm thẳng hàng cùng nằm trên một đường thẳng duy nhất.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đừng đoán theo vị trí đáp án. Tự giải theo “Thẳng hàng” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
         "three_collinear_points",
@@ -4961,7 +4961,7 @@
       "explanation_vi": "Theo định nghĩa, hình tứ giác là hình kín có 4 cạnh.",
       "hints_vi": [
         "Nhớ kiến thức: Một hình kín có đúng bốn cạnh là hình tứ giác.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Tứ giác”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "quadrilateral_recognize",
@@ -4992,7 +4992,7 @@
       "explanation_vi": "Hình chữ nhật có bốn cạnh và bốn đỉnh nên là tứ giác.",
       "hints_vi": [
         "Nhớ kiến thức: Một hình kín có đúng bốn cạnh là hình tứ giác.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tự xác định đặc điểm đúng của “Tứ giác” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
         "quadrilateral_recognize",
@@ -5045,7 +5045,7 @@
       "explanation_vi": "Hình kín có bốn cạnh là tứ giác.",
       "hints_vi": [
         "Nhớ kiến thức: Một hình kín có đúng bốn cạnh là hình tứ giác.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đừng đoán theo vị trí đáp án. Tự giải theo “Tứ giác” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
         "quadrilateral_recognize",
@@ -5098,7 +5098,7 @@
       "explanation_vi": "Lon nước có hai đáy tròn và mặt cong xung quanh, gần dạng khối trụ.",
       "hints_vi": [
         "Nhớ kiến thức: Khối có hai đáy tròn song song và một mặt cong xung quanh.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đối chiếu từng lựa chọn với kiến thức “Khối trụ”; loại ngay lựa chọn trái với dữ kiện của đề."
       ],
       "tags": [
         "cylinder_recognize",
@@ -5151,7 +5151,7 @@
       "explanation_vi": "Đặc trưng trực quan của khối trụ là hai đáy tròn cùng mặt cong bao quanh.",
       "hints_vi": [
         "Nhớ kiến thức: Khối có hai đáy tròn song song và một mặt cong xung quanh.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tự xác định đặc điểm đúng của “Khối trụ” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
         "cylinder_recognize",
@@ -5204,7 +5204,7 @@
       "explanation_vi": "Hai đáy của khối trụ là các hình tròn.",
       "hints_vi": [
         "Nhớ kiến thức: Khối có hai đáy tròn song song và một mặt cong xung quanh.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đừng đoán theo vị trí đáp án. Tự giải theo “Khối trụ” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
         "cylinder_recognize",
@@ -5257,7 +5257,7 @@
       "explanation_vi": "Quả bóng tròn đều theo mọi hướng, gần dạng khối cầu.",
       "hints_vi": [
         "Nhớ kiến thức: Khối tròn không có cạnh, đỉnh hay mặt phẳng đáy.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đối chiếu từng lựa chọn với kiến thức “Khối cầu”; loại ngay lựa chọn trái với dữ kiện của đề."
       ],
       "tags": [
         "sphere_recognize",
@@ -5310,7 +5310,7 @@
       "explanation_vi": "Khối cầu không có cạnh và không có đỉnh.",
       "hints_vi": [
         "Nhớ kiến thức: Khối tròn không có cạnh, đỉnh hay mặt phẳng đáy.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tự xác định đặc điểm đúng của “Khối cầu” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
         "sphere_recognize",
@@ -5363,7 +5363,7 @@
       "explanation_vi": "Khối cầu tròn đều theo mọi hướng và không có mặt đáy phẳng.",
       "hints_vi": [
         "Nhớ kiến thức: Khối tròn không có cạnh, đỉnh hay mặt phẳng đáy.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đừng đoán theo vị trí đáp án. Tự giải theo “Khối cầu” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
         "sphere_recognize",
@@ -5416,7 +5416,7 @@
       "explanation_vi": "Vị trí B = 2 + 5 = 7 cm.",
       "hints_vi": [
         "Nhớ kiến thức: Độ dài đoạn thẳng bằng hiệu vị trí hai đầu mút trên cùng một thước chia đều.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Vẽ đoạn thẳng theo độ dài”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "draw_segment_given_length",
@@ -5447,7 +5447,7 @@
       "explanation_vi": "Hai đầu mút cách nhau 9 - 1 = 8 cm.",
       "hints_vi": [
         "Nhớ kiến thức: Độ dài đoạn thẳng bằng hiệu vị trí hai đầu mút trên cùng một thước chia đều.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đặt điểm đầu và điểm cuối rõ ràng; kiểm tra khoảng cách theo “Vẽ đoạn thẳng theo độ dài” trước khi xác nhận."
       ],
       "tags": [
         "draw_segment_given_length",
@@ -5478,7 +5478,7 @@
       "explanation_vi": "3 + 6 = 9 cm.",
       "hints_vi": [
         "Nhớ kiến thức: Độ dài đoạn thẳng bằng hiệu vị trí hai đầu mút trên cùng một thước chia đều.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Viết một phép tính hoặc quan hệ ngắn cho “Vẽ đoạn thẳng theo độ dài”, tính xong đối chiếu lại điều đề đang hỏi."
       ],
       "tags": [
         "draw_segment_given_length",
@@ -5509,7 +5509,7 @@
       "explanation_vi": "Hai mảnh tam giác có thể ghép cạnh với cạnh để tạo một hình kín bốn cạnh trong cách ghép phù hợp.",
       "hints_vi": [
         "Nhớ kiến thức: Tách một hình thành các phần hoặc ghép các phần để tạo hình mới giúp nhận ra quan hệ giữa các hình.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đối chiếu từng lựa chọn với kiến thức “Ghép và tạo hình”; loại ngay lựa chọn trái với dữ kiện của đề."
       ],
       "tags": [
         "fold_cut_compose_shapes",
@@ -5562,7 +5562,7 @@
       "explanation_vi": "Một đường cắt chéo xuyên hết hình vuông chia tờ giấy thành hai mảnh.",
       "hints_vi": [
         "Nhớ kiến thức: Tách một hình thành các phần hoặc ghép các phần để tạo hình mới giúp nhận ra quan hệ giữa các hình.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tự xác định đặc điểm đúng của “Ghép và tạo hình” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
         "fold_cut_compose_shapes",
@@ -5615,7 +5615,7 @@
       "explanation_vi": "Ghép hình giúp thấy quan hệ giữa các mảnh và hình mới được tạo thành.",
       "hints_vi": [
         "Nhớ kiến thức: Tách một hình thành các phần hoặc ghép các phần để tạo hình mới giúp nhận ra quan hệ giữa các hình.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đừng đoán theo vị trí đáp án. Tự giải theo “Ghép và tạo hình” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
         "fold_cut_compose_shapes",
@@ -5668,7 +5668,7 @@
       "explanation_vi": "Với cân hoạt động đúng, phía hạ thấp hơn là phía nặng hơn.",
       "hints_vi": [
         "Nhớ kiến thức: Nặng hơn nghĩa là có khối lượng lớn hơn; nhẹ hơn nghĩa là có khối lượng nhỏ hơn.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đối chiếu từng lựa chọn với kiến thức “So sánh khối lượng”; loại ngay lựa chọn trái với dữ kiện của đề."
       ],
       "tags": [
         "heavier_lighter",
@@ -5721,7 +5721,7 @@
       "explanation_vi": "Quan hệ nặng hơn - nhẹ hơn là hai chiều đối lập.",
       "hints_vi": [
         "Nhớ kiến thức: Nặng hơn nghĩa là có khối lượng lớn hơn; nhẹ hơn nghĩa là có khối lượng nhỏ hơn.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tự xác định đặc điểm đúng của “So sánh khối lượng” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
         "heavier_lighter",
@@ -5774,7 +5774,7 @@
       "explanation_vi": "Hai đĩa cân bằng cho thấy khối lượng hai bên bằng nhau trong điều kiện cân.",
       "hints_vi": [
         "Nhớ kiến thức: Nặng hơn nghĩa là có khối lượng lớn hơn; nhẹ hơn nghĩa là có khối lượng nhỏ hơn.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đừng đoán theo vị trí đáp án. Tự giải theo “So sánh khối lượng” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
         "heavier_lighter",
@@ -5827,7 +5827,7 @@
       "explanation_vi": "Con số đi trước đơn vị kg là 5.",
       "hints_vi": [
         "Nhớ kiến thức: kg là kí hiệu của kilôgam, một đơn vị đo khối lượng thông dụng.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Kilôgam”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "mass_kg_read_write",
@@ -5859,7 +5859,7 @@
       "explanation_vi": "Kilôgam được kí hiệu là kg.",
       "hints_vi": [
         "Nhớ kiến thức: kg là kí hiệu của kilôgam, một đơn vị đo khối lượng thông dụng.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tự xác định đặc điểm đúng của “Kilôgam” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
         "mass_kg_read_write",
@@ -5912,7 +5912,7 @@
       "explanation_vi": "Cùng đơn vị kg nên 2 kg + 3 kg = 5 kg.",
       "hints_vi": [
         "Nhớ kiến thức: kg là kí hiệu của kilôgam, một đơn vị đo khối lượng thông dụng.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Xác định đại lượng cần trả lời theo “Kilôgam”, tính kết quả và kiểm tra lại cả số lẫn đơn vị."
       ],
       "tags": [
         "mass_kg_read_write",
@@ -5948,7 +5948,7 @@
       "explanation_vi": "Con số đi trước kí hiệu l là 4.",
       "hints_vi": [
         "Nhớ kiến thức: l là kí hiệu của lít, đơn vị đo dung tích.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Lít”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "capacity_liter_read_write",
@@ -5980,7 +5980,7 @@
       "explanation_vi": "Lít được kí hiệu là l.",
       "hints_vi": [
         "Nhớ kiến thức: l là kí hiệu của lít, đơn vị đo dung tích.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tự xác định đặc điểm đúng của “Lít” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
         "capacity_liter_read_write",
@@ -6033,7 +6033,7 @@
       "explanation_vi": "7 l + 2 l = 9 l.",
       "hints_vi": [
         "Nhớ kiến thức: l là kí hiệu của lít, đơn vị đo dung tích.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Viết một phép tính hoặc quan hệ ngắn cho “Lít”, tính xong đối chiếu lại điều đề đang hỏi."
       ],
       "tags": [
         "capacity_liter_read_write",
@@ -6065,7 +6065,7 @@
       "explanation_vi": "Theo quan hệ đơn vị, 1 m = 10 dm.",
       "hints_vi": [
         "Nhớ kiến thức: dm, m và km là các đơn vị độ dài với 1 m = 10 dm, 1 km = 1000 m.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Quan hệ đơn vị độ dài”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "length_dm_m_km_recognize_relation",
@@ -6097,7 +6097,7 @@
       "explanation_vi": "Theo quan hệ đơn vị, 1 km = 1000 m.",
       "hints_vi": [
         "Nhớ kiến thức: dm, m và km là các đơn vị độ dài với 1 m = 10 dm, 1 km = 1000 m.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tách dữ kiện theo “Quan hệ đơn vị độ dài”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
       ],
       "tags": [
         "length_dm_m_km_recognize_relation",
@@ -6129,7 +6129,7 @@
       "explanation_vi": "Quãng đường dài thường được đo bằng ki-lô-mét.",
       "hints_vi": [
         "Nhớ kiến thức: dm, m và km là các đơn vị độ dài với 1 m = 10 dm, 1 km = 1000 m.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đừng đoán theo vị trí đáp án. Tự giải theo “Quan hệ đơn vị độ dài” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
         "length_dm_m_km_recognize_relation",
@@ -6182,7 +6182,7 @@
       "explanation_vi": "Theo quan hệ thời gian, 1 ngày = 24 giờ.",
       "hints_vi": [
         "Nhớ kiến thức: 1 ngày = 24 giờ.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Ngày và giờ”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "time_day_24_hours",
@@ -6214,7 +6214,7 @@
       "explanation_vi": "Theo quan hệ đã học, 24 giờ liên tiếp bằng 1 ngày đầy đủ.",
       "hints_vi": [
         "Nhớ kiến thức: 1 ngày = 24 giờ.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tự xác định đặc điểm đúng của “Ngày và giờ” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
         "time_day_24_hours",
@@ -6267,7 +6267,7 @@
       "explanation_vi": "Một ngày đầy đủ có đúng 24 giờ nên phát biểu 'ít hơn 24 giờ' là sai.",
       "hints_vi": [
         "Nhớ kiến thức: 1 ngày = 24 giờ.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Thử giải hoặc kiểm chứng mệnh đề độc lập bằng “Ngày và giờ”, không dựa vào cảm giác khi đọc câu."
       ],
       "tags": [
         "time_day_24_hours",
@@ -6310,7 +6310,7 @@
       "explanation_vi": "Theo quan hệ thời gian, 1 giờ = 60 phút.",
       "hints_vi": [
         "Nhớ kiến thức: 1 giờ = 60 phút.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Giờ và phút”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "time_hour_60_minutes",
@@ -6342,7 +6342,7 @@
       "explanation_vi": "1 giờ = 60 phút; 45 phút ít hơn 60 phút nên ngắn hơn 1 giờ.",
       "hints_vi": [
         "Nhớ kiến thức: 1 giờ = 60 phút.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tự xác định đặc điểm đúng của “Giờ và phút” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
         "time_hour_60_minutes",
@@ -6395,7 +6395,7 @@
       "explanation_vi": "Theo quan hệ đã học, 60 phút bằng 1 giờ.",
       "hints_vi": [
         "Nhớ kiến thức: 1 giờ = 60 phút.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đừng đoán theo vị trí đáp án. Tự giải theo “Giờ và phút” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
         "time_hour_60_minutes",
@@ -6448,7 +6448,7 @@
       "explanation_vi": "Tháng 4 có 30 ngày.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng số ngày và vị trí ngày trên lịch để xác định ngày trước, ngày sau và số ngày trong tháng.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Đọc lịch”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "calendar_days_in_month_date",
@@ -6480,7 +6480,7 @@
       "explanation_vi": "Tháng 5 có 31 ngày.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng số ngày và vị trí ngày trên lịch để xác định ngày trước, ngày sau và số ngày trong tháng.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tách dữ kiện theo “Đọc lịch”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
       ],
       "tags": [
         "calendar_days_in_month_date",
@@ -6512,7 +6512,7 @@
       "explanation_vi": "Ngày kế tiếp tăng số ngày thêm 1 trong cùng tháng, nên là 15 tháng 9.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng số ngày và vị trí ngày trên lịch để xác định ngày trước, ngày sau và số ngày trong tháng.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đừng đoán theo vị trí đáp án. Tự giải theo “Đọc lịch” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
         "calendar_days_in_month_date",
@@ -6565,7 +6565,7 @@
       "explanation_vi": "Để nhận biết giá trị, cần đọc con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền.",
       "hints_vi": [
         "Nhớ kiến thức: Giá trị tiền được đọc theo con số in trên tờ và đơn vị đồng; bài học này chỉ rèn nhận biết, không mở rộng chuẩn số học ngoài baseline.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đối chiếu từng lựa chọn với kiến thức “Giá trị tờ tiền”; loại ngay lựa chọn trái với dữ kiện của đề."
       ],
       "tags": [
         "money_vnd_note_recognition",
@@ -6618,7 +6618,7 @@
       "explanation_vi": "Màu sắc có thể hỗ trợ quan sát nhưng cần đọc con số mệnh giá và đơn vị đồng để nhận biết giá trị.",
       "hints_vi": [
         "Nhớ kiến thức: Giá trị tiền được đọc theo con số in trên tờ và đơn vị đồng; bài học này chỉ rèn nhận biết, không mở rộng chuẩn số học ngoài baseline.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tìm một dữ kiện xác nhận hoặc bác bỏ mệnh đề theo “Giá trị tờ tiền”; chỉ một điểm sai cũng đủ chọn Sai."
       ],
       "tags": [
         "money_vnd_note_recognition",
@@ -6661,7 +6661,7 @@
       "explanation_vi": "Đọc đúng con số mệnh giá trên từng tờ rồi so sánh hai giá trị; không đoán chỉ từ màu sắc hoặc vị trí.",
       "hints_vi": [
         "Nhớ kiến thức: Giá trị tiền được đọc theo con số in trên tờ và đơn vị đồng; bài học này chỉ rèn nhận biết, không mở rộng chuẩn số học ngoài baseline.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đừng đoán theo vị trí đáp án. Tự giải theo “Giá trị tờ tiền” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
         "money_vnd_note_recognition",
@@ -6714,7 +6714,7 @@
       "explanation_vi": "8 - 0 = 8 cm.",
       "hints_vi": [
         "Nhớ kiến thức: Độ dài bằng hiệu số giữa hai vị trí đầu mút trên thước chia cm.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Đo bằng thước cm”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "measure_with_ruler_cm",
@@ -6746,7 +6746,7 @@
       "explanation_vi": "10 - 3 = 7 cm.",
       "hints_vi": [
         "Nhớ kiến thức: Độ dài bằng hiệu số giữa hai vị trí đầu mút trên thước chia cm.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tách dữ kiện theo “Đo bằng thước cm”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
       ],
       "tags": [
         "measure_with_ruler_cm",
@@ -6778,7 +6778,7 @@
       "explanation_vi": "11 - 2 = 9 cm.",
       "hints_vi": [
         "Nhớ kiến thức: Độ dài bằng hiệu số giữa hai vị trí đầu mút trên thước chia cm.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Viết một phép tính hoặc quan hệ ngắn cho “Đo bằng thước cm”, tính xong đối chiếu lại điều đề đang hỏi."
       ],
       "tags": [
         "measure_with_ruler_cm",
@@ -6810,7 +6810,7 @@
       "explanation_vi": "Hiệu giữa hai vạch liên tiếp là 2.",
       "hints_vi": [
         "Nhớ kiến thức: Mỗi vạch trên cùng một thang đều cách nhau một giá trị cố định nếu thang chia đều.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Vạch chia”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "measure_with_common_scale",
@@ -6841,7 +6841,7 @@
       "explanation_vi": "Mỗi bước tăng 10 nên vạch thiếu là 40.",
       "hints_vi": [
         "Nhớ kiến thức: Mỗi vạch trên cùng một thang đều cách nhau một giá trị cố định nếu thang chia đều.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tách dữ kiện theo “Vạch chia”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
       ],
       "tags": [
         "measure_with_common_scale",
@@ -6872,7 +6872,7 @@
       "explanation_vi": "Các vạch lần lượt 0, 5, 10, 15.",
       "hints_vi": [
         "Nhớ kiến thức: Mỗi vạch trên cùng một thang đều cách nhau một giá trị cố định nếu thang chia đều.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Viết một phép tính hoặc quan hệ ngắn cho “Vạch chia”, tính xong đối chiếu lại điều đề đang hỏi."
       ],
       "tags": [
         "measure_with_common_scale",
@@ -6903,7 +6903,7 @@
       "explanation_vi": "Kim phút ở số 3 tương ứng 15 phút; kim giờ ở khoảng sau 4 nên là 4 giờ 15 phút.",
       "hints_vi": [
         "Nhớ kiến thức: Kim phút ở số 3 tương ứng 15 phút; ở số 6 tương ứng 30 phút.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đối chiếu từng lựa chọn với kiến thức “15 phút và 30 phút trên đồng hồ”; loại ngay lựa chọn trái với dữ kiện của đề."
       ],
       "tags": [
         "clock_minute_hand_at_3_or_6",
@@ -6956,7 +6956,7 @@
       "explanation_vi": "Kim phút ở số 6 là 30 phút; kim giờ giữa 7 và 8 là 7 giờ 30 phút.",
       "hints_vi": [
         "Nhớ kiến thức: Kim phút ở số 3 tương ứng 15 phút; ở số 6 tương ứng 30 phút.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tự xác định đặc điểm đúng của “15 phút và 30 phút trên đồng hồ” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
         "clock_minute_hand_at_3_or_6",
@@ -7009,7 +7009,7 @@
       "explanation_vi": "Mỗi số trên đồng hồ ứng 5 phút; 3 × 5 = 15 phút.",
       "hints_vi": [
         "Nhớ kiến thức: Kim phút ở số 3 tương ứng 15 phút; ở số 6 tương ứng 30 phút.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đừng đoán theo vị trí đáp án. Tự giải theo “15 phút và 30 phút trên đồng hồ” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
         "clock_minute_hand_at_3_or_6",
@@ -7062,7 +7062,7 @@
       "explanation_vi": "1 m = 10 dm nên 3 m = 30 dm.",
       "hints_vi": [
         "Nhớ kiến thức: Đưa các số đo về cùng đơn vị trước khi cộng, trừ hoặc so sánh.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Tính với số đo”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "measurement_convert_calculate_learned_units",
@@ -7094,7 +7094,7 @@
       "explanation_vi": "Hai số đo cùng đơn vị kg nên cộng 2 + 3 = 5 kg.",
       "hints_vi": [
         "Nhớ kiến thức: Đưa các số đo về cùng đơn vị trước khi cộng, trừ hoặc so sánh.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tách dữ kiện theo “Tính với số đo”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
       ],
       "tags": [
         "measurement_convert_calculate_learned_units",
@@ -7126,7 +7126,7 @@
       "explanation_vi": "Hai số đo cùng đơn vị l nên 5 - 2 = 3 l.",
       "hints_vi": [
         "Nhớ kiến thức: Đưa các số đo về cùng đơn vị trước khi cộng, trừ hoặc so sánh.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Viết một phép tính hoặc quan hệ ngắn cho “Tính với số đo”, tính xong đối chiếu lại điều đề đang hỏi."
       ],
       "tags": [
         "measurement_convert_calculate_learned_units",
@@ -7158,7 +7158,7 @@
       "explanation_vi": "Bút chì là vật nhỏ, đơn vị cm và độ dài khoảng vài chục cm là hợp lý.",
       "hints_vi": [
         "Nhớ kiến thức: So sánh với mốc quen thuộc để chọn số đo và đơn vị gần đúng.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đối chiếu từng lựa chọn với kiến thức “Ước lượng số đo”; loại ngay lựa chọn trái với dữ kiện của đề."
       ],
       "tags": [
         "measurement_estimate_basic",
@@ -7211,7 +7211,7 @@
       "explanation_vi": "Cửa cao khoảng vài mét, nên 2 m là hợp lý.",
       "hints_vi": [
         "Nhớ kiến thức: So sánh với mốc quen thuộc để chọn số đo và đơn vị gần đúng.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tự xác định đặc điểm đúng của “Ước lượng số đo” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
         "measurement_estimate_basic",
@@ -7264,7 +7264,7 @@
       "explanation_vi": "Gấp đôi mốc 10 cm là khoảng 20 cm.",
       "hints_vi": [
         "Nhớ kiến thức: So sánh với mốc quen thuộc để chọn số đo và đơn vị gần đúng.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đừng đoán theo vị trí đáp án. Tự giải theo “Ước lượng số đo” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
         "measurement_estimate_basic",
@@ -7317,7 +7317,7 @@
       "explanation_vi": "4 + 6 = 10 cm.",
       "hints_vi": [
         "Nhớ kiến thức: Cộng độ dài từng đoạn thành phần để có tổng độ dài đường gấp khúc.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Độ dài đường gấp khúc”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "polyline_length_sum_segments",
@@ -7349,7 +7349,7 @@
       "explanation_vi": "3 + 5 + 2 = 10 cm.",
       "hints_vi": [
         "Nhớ kiến thức: Cộng độ dài từng đoạn thành phần để có tổng độ dài đường gấp khúc.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tách dữ kiện theo “Độ dài đường gấp khúc”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
       ],
       "tags": [
         "polyline_length_sum_segments",
@@ -7381,7 +7381,7 @@
       "explanation_vi": "7 + 4 + 6 = 17 cm.",
       "hints_vi": [
         "Nhớ kiến thức: Cộng độ dài từng đoạn thành phần để có tổng độ dài đường gấp khúc.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Viết một phép tính hoặc quan hệ ngắn cho “Độ dài đường gấp khúc”, tính xong đối chiếu lại điều đề đang hỏi."
       ],
       "tags": [
         "polyline_length_sum_segments",
@@ -7413,7 +7413,7 @@
       "explanation_vi": "2 m + 3 m = 5 m.",
       "hints_vi": [
         "Nhớ kiến thức: Một bài đo lường một bước kết hợp số đo cùng đơn vị với cộng hoặc trừ phù hợp tình huống.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Giải toán đo lường”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "measurement_real_world_one_step",
@@ -7445,7 +7445,7 @@
       "explanation_vi": "8 l - 3 l = 5 l.",
       "hints_vi": [
         "Nhớ kiến thức: Một bài đo lường một bước kết hợp số đo cùng đơn vị với cộng hoặc trừ phù hợp tình huống.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tách dữ kiện theo “Giải toán đo lường”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
       ],
       "tags": [
         "measurement_real_world_one_step",
@@ -7477,7 +7477,7 @@
       "explanation_vi": "6 kg + 4 kg = 10 kg.",
       "hints_vi": [
         "Nhớ kiến thức: Một bài đo lường một bước kết hợp số đo cùng đơn vị với cộng hoặc trừ phù hợp tình huống.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Viết một phép tính hoặc quan hệ ngắn cho “Giải toán đo lường”, tính xong đối chiếu lại điều đề đang hỏi."
       ],
       "tags": [
         "measurement_real_world_one_step",
@@ -7509,7 +7509,7 @@
       "explanation_vi": "Phân loại theo màu rồi đếm ba thẻ đỏ.",
       "hints_vi": [
         "Nhớ kiến thức: Mỗi đối tượng được xếp theo một tiêu chí rõ ràng trước khi đếm số lượng của từng nhóm.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Phân loại và kiểm đếm”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "data_collect_classify_count",
@@ -7540,7 +7540,7 @@
       "explanation_vi": "Lọc các mục 'bút' rồi đếm được 3.",
       "hints_vi": [
         "Nhớ kiến thức: Mỗi đối tượng được xếp theo một tiêu chí rõ ràng trước khi đếm số lượng của từng nhóm.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tách dữ kiện theo “Phân loại và kiểm đếm”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
       ],
       "tags": [
         "data_collect_classify_count",
@@ -7571,7 +7571,7 @@
       "explanation_vi": "Trong danh sách có hai mục 'cam'.",
       "hints_vi": [
         "Nhớ kiến thức: Mỗi đối tượng được xếp theo một tiêu chí rõ ràng trước khi đếm số lượng của từng nhóm.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Viết một phép tính hoặc quan hệ ngắn cho “Phân loại và kiểm đếm”, tính xong đối chiếu lại điều đề đang hỏi."
       ],
       "tags": [
         "data_collect_classify_count",
@@ -7602,7 +7602,7 @@
       "explanation_vi": "4 biểu tượng × 1 bạn mỗi biểu tượng = 4 bạn.",
       "hints_vi": [
         "Nhớ kiến thức: Số lượng = số biểu tượng × giá trị mỗi biểu tượng theo chú giải.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Biểu đồ tranh”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "pictograph_read_describe",
@@ -7633,7 +7633,7 @@
       "explanation_vi": "3 biểu tượng × 2 quả = 6 quả.",
       "hints_vi": [
         "Nhớ kiến thức: Số lượng = số biểu tượng × giá trị mỗi biểu tượng theo chú giải.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tách dữ kiện theo “Biểu đồ tranh”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
       ],
       "tags": [
         "pictograph_read_describe",
@@ -7664,7 +7664,7 @@
       "explanation_vi": "5 × 2 = 10 quyển.",
       "hints_vi": [
         "Nhớ kiến thức: Số lượng = số biểu tượng × giá trị mỗi biểu tượng theo chú giải.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Viết một phép tính hoặc quan hệ ngắn cho “Biểu đồ tranh”, tính xong đối chiếu lại điều đề đang hỏi."
       ],
       "tags": [
         "pictograph_read_describe",
@@ -7695,7 +7695,7 @@
       "explanation_vi": "6 - 4 = 2 bạn.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng các số đã đọc từ biểu đồ để so sánh và nêu nhận xét có căn cứ.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Khoanh các số cần dùng, áp dụng “Suy luận từ dữ liệu”, rồi viết phần số của kết quả."
       ],
       "tags": [
         "pictograph_simple_inference",
@@ -7726,7 +7726,7 @@
       "explanation_vi": "7 biểu tượng lớn hơn 5 và 3 nên Táo nhiều nhất.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng các số đã đọc từ biểu đồ để so sánh và nêu nhận xét có căn cứ.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tự xác định đặc điểm đúng của “Suy luận từ dữ liệu” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
         "pictograph_simple_inference",
@@ -7779,7 +7779,7 @@
       "explanation_vi": "B có 10 vật, A có 4 vật; 10 - 4 = 6.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng các số đã đọc từ biểu đồ để so sánh và nêu nhận xét có căn cứ.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Viết một phép tính hoặc quan hệ ngắn cho “Suy luận từ dữ liệu”, tính xong đối chiếu lại điều đề đang hỏi."
       ],
       "tags": [
         "pictograph_simple_inference",
@@ -7810,7 +7810,7 @@
       "explanation_vi": "Số 4 là một mặt có thể xuất hiện nhưng không phải lần nào cũng ra 4.",
       "hints_vi": [
         "Nhớ kiến thức: Có ít nhất một kết quả làm sự kiện xảy ra và cũng có kết quả làm nó không xảy ra.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đối chiếu từng lựa chọn với kiến thức “Có thể”; loại ngay lựa chọn trái với dữ kiện của đề."
       ],
       "tags": [
         "event_possible",
@@ -7863,7 +7863,7 @@
       "explanation_vi": "Có bóng đỏ trong túi nên có thể lấy được, nhưng còn bóng xanh nên không chắc chắn.",
       "hints_vi": [
         "Nhớ kiến thức: Có ít nhất một kết quả làm sự kiện xảy ra và cũng có kết quả làm nó không xảy ra.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tự xác định đặc điểm đúng của “Có thể” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
         "event_possible",
@@ -7916,7 +7916,7 @@
       "explanation_vi": "Số 2 có trên vòng quay nên có thể xảy ra, nhưng không phải kết quả duy nhất.",
       "hints_vi": [
         "Nhớ kiến thức: Có ít nhất một kết quả làm sự kiện xảy ra và cũng có kết quả làm nó không xảy ra.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đừng đoán theo vị trí đáp án. Tự giải theo “Có thể” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
         "event_possible",
@@ -7969,7 +7969,7 @@
       "explanation_vi": "Mọi mặt của xúc xắc đều là một số từ 1 đến 6.",
       "hints_vi": [
         "Nhớ kiến thức: Sự kiện xảy ra trong tất cả các kết quả có thể của tình huống.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đối chiếu từng lựa chọn với kiến thức “Chắc chắn”; loại ngay lựa chọn trái với dữ kiện của đề."
       ],
       "tags": [
         "event_certain",
@@ -8022,7 +8022,7 @@
       "explanation_vi": "Mọi bóng trong túi đều xanh nên lấy bóng nào cũng xanh.",
       "hints_vi": [
         "Nhớ kiến thức: Sự kiện xảy ra trong tất cả các kết quả có thể của tình huống.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tự xác định đặc điểm đúng của “Chắc chắn” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
         "event_certain",
@@ -8075,7 +8075,7 @@
       "explanation_vi": "Tất cả thẻ đều là 2 hoặc 5 nên sự kiện luôn xảy ra.",
       "hints_vi": [
         "Nhớ kiến thức: Sự kiện xảy ra trong tất cả các kết quả có thể của tình huống.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đừng đoán theo vị trí đáp án. Tự giải theo “Chắc chắn” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
         "event_certain",
@@ -8128,7 +8128,7 @@
       "explanation_vi": "Không có mặt số 8 nên sự kiện không thể xảy ra.",
       "hints_vi": [
         "Nhớ kiến thức: Không có kết quả hợp lệ nào làm sự kiện xảy ra.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đối chiếu từng lựa chọn với kiến thức “Không thể”; loại ngay lựa chọn trái với dữ kiện của đề."
       ],
       "tags": [
         "event_impossible",
@@ -8181,7 +8181,7 @@
       "explanation_vi": "Không có bóng xanh trong túi nên không thể lấy bóng xanh.",
       "hints_vi": [
         "Nhớ kiến thức: Không có kết quả hợp lệ nào làm sự kiện xảy ra.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Tự xác định đặc điểm đúng của “Không thể” trước, rồi so với từng lựa chọn để loại dần."
       ],
       "tags": [
         "event_impossible",
@@ -8234,7 +8234,7 @@
       "explanation_vi": "Số 5 không có trên vòng quay nên sự kiện không thể xảy ra.",
       "hints_vi": [
         "Nhớ kiến thức: Không có kết quả hợp lệ nào làm sự kiện xảy ra.",
-        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+        "Đừng đoán theo vị trí đáp án. Tự giải theo “Không thể” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
         "event_impossible",

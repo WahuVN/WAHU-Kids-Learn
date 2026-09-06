@@ -225,6 +225,16 @@ class MathContentDataSmoke(unittest.TestCase):
                 serialized = json.dumps(item, ensure_ascii=False)
                 self.assertEqual([], validator.grade2_operation_scope_violations(serialized))
 
+    def test_second_hints_are_actionable_not_placeholders(self):
+        second_hints = [x["hints_vi"][1] for x in self.questions]
+        self.assertNotIn(validator.GENERIC_SECOND_HINT, second_hints)
+        counts = Counter(second_hints)
+        self.assertLessEqual(max(counts.values()), 3)
+        self.assertGreaterEqual(len(counts), int(len(second_hints) * 0.85))
+        for item in self.questions:
+            with self.subTest(item=item["id"]):
+                self.assertGreaterEqual(len(item["hints_vi"][1].strip()), 40)
+
     def test_integer_answer_unit_is_display_only_metadata(self):
         unit_questions = [x for x in self.questions if "answer_unit" in x]
         self.assertEqual(23, len(unit_questions))

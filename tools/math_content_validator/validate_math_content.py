@@ -32,6 +32,7 @@ TIME_OUT_OF_SCOPE_ARITH_RE = re.compile(r"\b\d+\s*(?:×|\*|÷|/|:)\s*\d+\b")
 GRADE2_MUL_LITERAL_RE = re.compile(r"(?<!\d)(\d+)\s*(?:×|\*)\s*(\d+)(?!\d)")
 GRADE2_DIV_LITERAL_RE = re.compile(r"(?<!\d)(\d+)(?:\s*÷\s*|\s+:\s+)(\d+)(?!\d)")
 NUMERIC_CHOICE_EXPR_RE = re.compile(r"^[\d\s+\-−–*/×÷:().,]+$")
+GENERIC_SECOND_HINT = "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
 
 
 def load_json(path: Path, errors: list[str]) -> dict:
@@ -450,6 +451,7 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
     question_counts_by_skill = Counter()
     question_counts_by_difficulty = Counter()
     prompts_by_lesson: dict[str, list[tuple[str, str]]] = defaultdict(list)
+    second_hint_counts = Counter()
     correct_choice_positions_by_count: dict[int, Counter] = defaultdict(Counter)
 
     for i, q in enumerate(questions):
@@ -507,6 +509,11 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
         hints = required_list(q, "hints_vi", where, errors, 2)
         if len(hints) < 2 or any(not isinstance(x, str) or not x.strip() for x in hints):
             errors.append(f"invalid_hints:{where}")
+        else:
+            second_hint = " ".join(hints[1].split())
+            second_hint_counts[second_hint] += 1
+            if second_hint == GENERIC_SECOND_HINT:
+                errors.append(f"generic_second_hint:{where}")
         question_type = required_text(q, "question_type", where, errors)
         if question_type not in QUESTION_TYPES:
             errors.append(f"unsupported_question_type:{where}:{question_type!r}")
@@ -670,6 +677,10 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             if question_type == "true_false":
                 if len(choices) != 2 or set(choice_texts) != {"Đúng", "Sai"}:
                     errors.append(f"true_false_choices_invalid:{where}:{choice_texts!r}")
+
+    for hint_text, count in second_hint_counts.items():
+        if count > 3:
+            errors.append(f"over_reused_second_hint:{count}:{hint_text[:80]}")
 
     for choice_count, positions in correct_choice_positions_by_count.items():
         counts = [positions[index] for index in range(choice_count)]

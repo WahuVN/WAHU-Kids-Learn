@@ -22,6 +22,50 @@ def slug(skill: str) -> str:
     return skill.lower()
 
 
+def second_hint(question_type: str, difficulty: str, concept_name: str) -> str:
+    """Give a child a concrete next move without revealing the authored answer."""
+    concept = concept_name.strip()
+    hints = {
+        "multiple_choice": {
+            "basic": f"Đối chiếu từng lựa chọn với kiến thức “{concept}”; loại ngay lựa chọn trái với dữ kiện của đề.",
+            "medium": f"Tự xác định đặc điểm đúng của “{concept}” trước, rồi so với từng lựa chọn để loại dần.",
+            "application": f"Đừng đoán theo vị trí đáp án. Tự giải theo “{concept}” trước rồi mới chọn phương án khớp kết quả.",
+        },
+        "true_false": {
+            "basic": f"Kiểm tra trực tiếp mệnh đề bằng quy tắc “{concept}”, rồi mới quyết định Đúng hay Sai.",
+            "medium": f"Tìm một dữ kiện xác nhận hoặc bác bỏ mệnh đề theo “{concept}”; chỉ một điểm sai cũng đủ chọn Sai.",
+            "application": f"Thử giải hoặc kiểm chứng mệnh đề độc lập bằng “{concept}”, không dựa vào cảm giác khi đọc câu.",
+        },
+        "numeric_input": {
+            "basic": f"Khoanh các số cần dùng, áp dụng “{concept}”, rồi viết phần số của kết quả.",
+            "medium": f"Tách dữ kiện theo “{concept}”, tính từng phần cần thiết rồi kiểm tra ngược kết quả.",
+            "application": f"Viết một phép tính hoặc quan hệ ngắn cho “{concept}”, tính xong đối chiếu lại điều đề đang hỏi.",
+        },
+        "word_problem": {
+            "basic": f"Gạch chân số đã cho và điều cần tìm; dùng quan hệ “{concept}” để chọn phép tính.",
+            "medium": f"Nói lại đề theo mẫu “đã biết gì, cần tìm gì”, rồi chọn phép tính phù hợp với “{concept}”.",
+            "application": f"Có thể vẽ sơ đồ hoặc chia tình huống thành nhóm; dùng “{concept}” để kiểm tra phép tính trước khi tính.",
+        },
+        "expression_input": {
+            "basic": f"Xác định đúng các số và phép tính của “{concept}”, rồi viết biểu thức theo đúng thứ tự.",
+            "medium": f"Viết biểu thức trước khi tính; kiểm tra từng dấu phép tính có đúng với “{concept}” hay chưa.",
+            "application": f"Mô hình hóa dữ kiện thành một biểu thức duy nhất theo “{concept}”, sau đó mới tính để tự kiểm tra.",
+        },
+        "unit_input": {
+            "basic": f"Tìm phần số bằng “{concept}” trước, sau đó viết kèm đúng đơn vị mà đề yêu cầu.",
+            "medium": f"Kiểm tra số đo và đơn vị có cùng loại theo “{concept}”; tính phần số rồi ghi đơn vị ở cuối.",
+            "application": f"Xác định đại lượng cần trả lời theo “{concept}”, tính kết quả và kiểm tra lại cả số lẫn đơn vị.",
+        },
+        "interactive_measurement": {
+            "basic": f"Dùng “{concept}”: chọn hai đầu mút trên vạch đo rồi đếm số khoảng giữa hai điểm.",
+            "medium": f"Đặt điểm đầu và điểm cuối rõ ràng; kiểm tra khoảng cách theo “{concept}” trước khi xác nhận.",
+            "application": f"Thử đo lại từ hai đầu mút theo “{concept}”; kết quả phải giữ nguyên dù con kiểm tra lại lần nữa.",
+        },
+    }
+    by_type = hints.get(question_type, hints["numeric_input"])
+    return by_type.get(difficulty, by_type["medium"])
+
+
 def nq(prompt: str, answer: int, explanation: str, *, unit: str | None = None,
        numeric_min: int = 0, numeric_max: int = 1000,
        question_type: str = "numeric_input") -> dict:
@@ -630,7 +674,7 @@ def build() -> tuple[dict, dict]:
                     "explanation_vi": spec["explanation_vi"],
                     "hints_vi": [
                         "Nhớ kiến thức: " + concept_def,
-                        "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi.",
+                        second_hint(question_type, difficulty, concept_name),
                     ],
                     "tags": [skill.lower(), domain_key, difficulty, question_type, spec["answer_kind"]],
                     "validation": spec["validation"],

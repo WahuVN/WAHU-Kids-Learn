@@ -37,13 +37,12 @@
 
 ## Request 005 — Route authored question bank into real Math sessions
 
-- Trạng thái hiện tại: commit `a5119d4` đã nạp/validate đủ `question_bank_v1.json`, map 201 `ContentQuestionId`, 67 lesson × 3 câu và tạo runtime instance; smoke loader/runtime mapping PASS.
-- Khoảng trống integration: `MathLessonForm` vẫn chỉ truyền `verified_templates_v1.json` vào `MathSessionCoordinator`; `Start()` chỉ `LoadTemplates()` và `NextQuestion()` vẫn chọn `_templates` qua `AdaptiveMathSelector` rồi gọi `MathQuestionGenerator`.
-- Contract cần: session phải có đường chọn authored question từ `question_bank_v1.json` theo lesson/skill/difficulty, hoặc một policy hybrid được publish rõ; không được coi "bank loadable" là "bank đang được học".
+- Trạng thái WIP hiện tại: core path đã xuất hiện trong working tree. `MathSessionCoordinator` có `lesson` mode, load `lesson_catalog_v1.json` + `question_bank_v1.json`, lấy đúng `basic -> medium -> application` từ `PracticeSets`, đặt target theo số câu của bài và tạo runtime instance giữ `ContentQuestionId`.
+- Runtime regression hiện tại: `MathSessionPersistenceRuntimeSmoke` build x86 sạch và PASS **92 assertions**, đã cover lesson lock/unlock, authored basic/medium/application, exact open-question resume, completion score và unlock bài phụ thuộc.
+- UI handoff WIP: `MathHubForm` đã có nút `Luyện 3 câu bài này`; `MathLessonForm` nhận `targetLessonId` và mở `MathSessionCoordinator(..., lessonId)` thay vì adaptive generator path.
 - Stable identity: khi dùng authored content, giữ `ContentQuestionId` deterministic cho trace/chống lặp; `QuestionId` tiếp tục là instance ID unique để giữ idempotency attempt hiện tại.
-- Duplicate prevention: trong một session, không phát lại cùng `ContentQuestionId` chỉ vì runtime instance có GUID khác. Resume phải tái tạo recent authored IDs từ dữ liệu durable hoặc metadata có thể suy ra chắc chắn.
-- Regression cần: một session lesson-authored thực tế phải lấy câu có `ContentQuestionId`, không gọi generator cho câu đó, không lặp content ID trước khi dùng hết pool phù hợp, và resume giữ đúng câu đang mở.
-- Owner: AI2 engine/session; AI3 chỉ nối lesson-selection intent vào API session sau khi contract có.
+- Trạng thái đóng: **chưa CLOSED** cho tới khi engine/UI WIP được commit, full UI/build gate xanh, và corrupt-cache lesson-mode ở Request 007 có regression riêng. Không được coi 92 assertions hiện tại là đủ để bỏ Request 007.
+- Owner: AI2 engine/session + AI3 UI handoff.
 
 ## Request 006 — Preserve `answer_unit` as display metadata without forcing unit input
 
@@ -53,3 +52,12 @@
 - Contract cần: thêm/preserve display-only unit metadata (có thể `AnswerUnit` hoặc tương đương), để validator vẫn chấm integer nhưng UI/feedback có thể format đáp án kèm đơn vị. Metadata này phải survive load -> runtime instance -> suspend/resume JSON.
 - Regression cần: authored integer question có `answer_unit = "cm"` vẫn chấp nhận raw answer `8`, không chấp nhận nội dung sai, và outcome/display có thể render `8 cm` mà không thay `AnswerKind`.
 - Owner: AI2 model/session + AI3 presentation.
+
+## Request 007 — Corrupt authored open-question recovery must not skip lesson ordinal
+
+- Edge case hiện tại: lesson mode tăng `generated_question_count` khi phát authored question. Nếu `current_question_json` của câu đang mở bị hỏng sau đó, restore rebuild committed attempts nhưng chỉ nâng `_generatedQuestionCount` khi nó **nhỏ hơn** attempts; giá trị lớn hơn attempts vẫn được giữ.
+- Với bài 3 câu: đã commit basic (`attempts=1`), medium đang mở (`generated=2`) rồi cache medium hỏng. Restore discard cache nhưng giữ `generated=2`; `NextQuestion()` lấy `_targetQuestions[2]` = application, tức **skip medium**. Sau application có thể thành `attempts=2`, `generated=3`, pool hết dù target vẫn 3.
+- Contract cần: khi lesson-mode discard một open question chưa commit, ordinal phát câu phải rollback/reconcile về committed authored progress, để câu bị mất cache được phát lại từ stable `ContentQuestionId` đúng vị trí thay vì bị skip.
+- Không được rollback committed attempts/mastery/progress; chỉ sửa/reconcile cursor của open authored question.
+- Regression bắt buộc: tạo lesson session 3 câu, commit câu 1, mở câu 2, corrupt `current_question_json`, suspend/resume; sau restore phải có `DiscardedCorruptOpenQuestion=true`, `CompletedQuestionCount=1`, câu tiếp theo phải có đúng `ContentQuestionId` của **medium**, sau đó application; đủ 3 attempts mới complete lesson.
+- Owner: AI2 session/persistence. AI1 không sửa coordinator để tránh conflict ownership.

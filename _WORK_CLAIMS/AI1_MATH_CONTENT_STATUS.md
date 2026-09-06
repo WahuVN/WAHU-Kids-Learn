@@ -28,7 +28,7 @@ Owner: AI1 — Math Content & Data
   - interactive measurement
   - word problem
 - Semantic validator errors: **0**
-- Math content unittest: **18 / 18 PASS**
+- Math content unittest: **19 / 19 PASS**
 - Pack manifest/hash/listing check on current working tree: **PASS** (`version=1.9.0`, 3 listed files)
 
 ## Curriculum/content completeness
@@ -61,7 +61,7 @@ Static bank phủ **67/67 skill**, kể cả:
   - `FOLD_CUT_COMPOSE_SHAPES`
   - `MONEY_VND_NOTE_RECOGNITION`
 
-Hai skill này **không còn thiếu content**: lesson + curated question đã có và validator PASS. Commit AI2 `a5119d4` đã có loader/runtime mapping cho static bank, nhưng session học thật vẫn đang sinh câu qua `verified_templates_v1.json`; AI1 không sửa generator/selector/session routing lớn thuộc AI2.
+Hai skill này **không còn thiếu content**: lesson + curated question đã có và validator PASS. Working tree AI2 hiện đã có `lesson` mode dùng authored `PracticeSets` trực tiếp; adaptive mission vẫn giữ generator path. Targeted persistence smoke hiện PASS **92 assertions**. Phần còn lại là chốt/commit integration, corrupt-cache lesson-mode và display-unit contract; AI1 không sửa coordinator/selector lớn thuộc AI2.
 
 ## Validator gates implemented
 
@@ -78,6 +78,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - invalid unit metadata;
 - `answer_unit` display-only metadata sai kind/type hoặc rỗng;
 - invalid MC correct choice / duplicate choices / rationale missing;
+- hint cấp 2 placeholder/generic hoặc bị tái dùng quá mức;
 - MCQ trùng nghĩa sau normalize Unicode/case/whitespace hoặc hai biểu thức choice cho cùng giá trị số;
 - vị trí đáp án đúng bị lệch pattern; bank phải phân bố cân bằng theo số lượng choices;
 - invalid true/false shape;
@@ -108,11 +109,12 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - skill quan hệ thời gian không mở rộng thành phép nhân/chia ngoài yêu cầu cần đạt;
 - mọi phép nhân/chia literal child-facing nằm trong bảng 2 hoặc 5, kể cả distractor;
 - mọi MCQ có choice khác nhau sau normalize text và không có hai biểu thức choice cùng giá trị số;
+- 201/201 hint cấp 2 hiện actionable theo dạng câu + độ khó + concept, không còn placeholder chung;
 - vị trí đáp án đúng được cân bằng deterministic: 88 câu 4-choice = 22/22/22/22 cho A/B/C/D; 3 true/false = 2/1;
 - 23 câu integer có `answer_unit` giữ đúng contract display-only, không đổi sang unit-input;
 - 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract.
 
-Latest result: **18 tests PASS**.
+Latest result: **19 tests PASS**.
 
 ## Commits / waves
 
@@ -127,13 +129,15 @@ Latest result: **18 tests PASS**.
 - `234eafc` — `Toán: khóa phép nhân chia và nhớ mượn theo baseline`
 - `dcedca2` — `Toán: loại ambiguity trong lựa chọn trắc nghiệm`
 - `c20ca91` — `Toán: khóa contract authored session và đơn vị hiển thị`
+- `9472d63` — `Toán: cân bằng vị trí đáp án trắc nghiệm`
 
 ## Current blockers outside AI1 content ownership
 
-1. `a5119d4` đã load/map đủ 201 authored questions và smoke x86 hiện PASS **64 assertions**, nhưng `MathSessionCoordinator.NextQuestion()` vẫn chỉ chọn `_templates` rồi gọi `MathQuestionGenerator`; cần đóng Request 005 để static bank đi vào session học thật.
-2. 23 câu integer có `answer_unit` đang được content giữ làm display-only metadata, nhưng `MathAuthoredQuestionSource` chưa preserve field này; cần Request 006 để feedback có thể hiện `8 cm`, `5 kg`, `60 phút` mà vẫn chấm raw integer.
-3. Exact suspend/resume đã có engine + regression và AI3 đã nối UI tiếp tục bài; blocker cũ này đã đóng. Lesson catalog UI cũng đã được AI3 tích hợp, nên phần còn thiếu là handoff từ lesson đã chọn sang authored exercise/session policy.
-4. Legacy generator vẫn chỉ phủ 65/67 skill. Đây không còn là content absence; khi Request 005 hoàn tất, hai skill `FOLD_CUT_COMPOSE_SHAPES` và `MONEY_VND_NOTE_RECOGNITION` đã có static authored exercises để không cần template giả.
+1. Request 005 core path đã có trong working tree: targeted lesson session dùng authored bank, target đúng 3 câu, unlock/progress/resume smoke x86 PASS **92 assertions**, và UI WIP đã có `Luyện 3 câu bài này`. Chưa coi CLOSED cho tới khi integration được commit và full UI/build gate xanh.
+2. Request 007 mới: corrupt open-question ở lesson mode có thể giữ `generated_question_count > attempts`, skip câu medium và hết authored pool khi mới đủ 2/3 attempts. Cần regression + cursor reconciliation ở AI2.
+3. Request 006 vẫn mở: 23 câu integer có `answer_unit` được content giữ display-only, nhưng `MathAuthoredQuestionSource`/`MathQuestion` chưa preserve field để feedback hiện `8 cm`, `5 kg`, `60 phút` mà vẫn chấm raw integer.
+4. UI smoke build hiện gặp lỗi reference `System.Data.SQLite` khi build `WAHU.Data.csproj`; targeted persistence smoke không bị lỗi. Đây là build/dependency WIP ngoài AI1, không phải lỗi content.
+5. Legacy generator vẫn chỉ phủ 65/67 skill, nhưng lesson-authored path WIP đã cho phép hai skill `FOLD_CUT_COMPOSE_SHAPES` và `MONEY_VND_NOTE_RECOGNITION` có bài luyện thật mà không cần template giả.
 
 ## Lane verdict
 
