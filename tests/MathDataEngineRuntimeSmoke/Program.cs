@@ -17,6 +17,8 @@ namespace WAHU.MathDataEngineRuntimeSmoke
         {
             if (args != null && args.Length > 0 && string.Equals(args[0], "--commit-worker", StringComparison.Ordinal))
                 return RunCommitWorker(args);
+            if (args != null && args.Length > 0 && string.Equals(args[0], "--session-worker", StringComparison.Ordinal))
+                return RunSessionWorker(args);
 
             var root = Path.Combine(Path.GetTempPath(), "wahu-math-data-smoke-" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(root);
@@ -28,6 +30,7 @@ namespace WAHU.MathDataEngineRuntimeSmoke
                 TestTerminalSessionRejectsNewAttemptsButAllowsExactReplay(root, sourceSchema);
                 TestOptimisticSkillStateGuard(root, sourceSchema);
                 TestCrossProcessConcurrentSkillWrites(root, sourceSchema);
+                TestCrossProcessSingleActiveSessionGuard(root, sourceSchema);
                 TestExistingV1UpgradesToV3WithBackup(root, sourceSchema);
                 TestV3BackfillPreservesLegacyDuplicates(root, sourceSchema);
                 Console.WriteLine("MATH_DATA_ENGINE_RUNTIME_SMOKE_PASS assertions=" + _assertions);
@@ -338,6 +341,116 @@ namespace WAHU.MathDataEngineRuntimeSmoke
         private static string QuoteArg(string value)
         {
             return "\"" + (value ?? string.Empty).Replace("\"", "\\\"") + "\"";
+        }
+
+        private static void TestCrossProcessSingleActiveSessionGuard(string root, string sourceSchema)
+        {
+            var schemaDir = Path.Combine(root, "schema-cross-session");
+            CopySchemas(sourceSchema, schemaDir);
+            var schemaPath = Path.Combine(schemaDir, "001_initial.sql");
+            var dbPath = Path.Combine(root, "cross-session.db");
+            var database = new LearningDatabase(dbPath, schemaPath);
+            database.Initialize("DELETE");
+            var sessions = new LearnerSessionService(database);
+            var profile = sessions.EnsurePrimaryChild("Bé single active");
+            var gatePath = Path.Combine(root, "cross-session-go.flag");
+            var exePath = Assembly.GetExecutingAssembly().Location;
+
+            using (var first = StartSessionWorker(exePath, dbPath, schemaPath, profile.ChildId, gatePath))
+            using (var second = StartSessionWorker(exePath, dbPath, schemaPath, profile.ChildId, gatePath))
+            {
+                File.WriteAllText(gatePath, "go");
+                var firstExited = first.WaitForExit(20000);
+                var secondExited = second.WaitForExit(20000);
+                if (!firstExited) { try { first.Kill(); } catch { } }
+                if (!secondExited) { try { second.Kill(); } catch { } }
+                var firstOutput = first.StandardOutput.ReadToEnd() + first.StandardError.ReadToEnd();
+                var secondOutput = second.StandardOutput.ReadToEnd() + second.StandardError.ReadToEnd();
+                A(firstExited && secondExited,
+                    "cross_session_workers_exit_without_hanging_on_sqlite_lock");
+                var oneStarted = (first.ExitCode == 0 && second.ExitCode == 2) ||
+                                 (first.ExitCode == 2 && second.ExitCode == 0);
+                A(oneStarted,
+                    "cross_session_exactly_one_cold_start_wins outputs=" + firstOutput.Trim() + " | " + secondOutput.Trim());
+            }
+
+            string activeSessionId;
+            using (var c = database.OpenConnection())
+            {
+                A(Count(c, "SELECT count(*) FROM session WHERE child_id='" + profile.ChildId + "' AND planned_subject='math' AND state IN ('started','active') AND ended_at_utc IS NULL;") == 1,
+                    "cross_session_race_keeps_exactly_one_active_math_session");
+                activeSessionId = Convert.ToString(Scalar(c,
+                    "SELECT id FROM session WHERE child_id='" + profile.ChildId + "' AND planned_subject='math' AND state IN ('started','active') AND ended_at_utc IS NULL LIMIT 1;"),
+                    CultureInfo.InvariantCulture);
+                A(!string.IsNullOrWhiteSpace(activeSessionId),
+                    "cross_session_winner_is_durable");
+            }
+
+            var sequentialRejected = false;
+            try { sessions.BeginSession(profile.ChildId, "math", "LOW"); }
+            catch (InvalidOperationException) { sequentialRejected = true; }
+            A(sequentialRejected,
+                "cross_session_guard_rejects_second_active_session_in_same_process_too");
+
+            sessions.CompleteSession(activeSessionId, true, "{}", "{}");
+            var next = sessions.BeginSession(profile.ChildId, "math", "LOW");
+            A(next != null && !string.IsNullOrWhiteSpace(next.SessionId) && next.SessionId != activeSessionId,
+                "cross_session_terminal_state_releases_slot_for_next_session");
+            using (var c = database.OpenConnection())
+            {
+                A(Count(c, "SELECT count(*) FROM session WHERE child_id='" + profile.ChildId + "' AND planned_subject='math' AND state IN ('started','active') AND ended_at_utc IS NULL;") == 1,
+                    "cross_session_next_session_is_only_active_math_session");
+            }
+            sessions.CompleteSession(next.SessionId, true, "{}", "{}");
+        }
+
+        private static Process StartSessionWorker(string exePath, string dbPath, string schemaPath, string childId, string gatePath)
+        {
+            var info = new ProcessStartInfo
+            {
+                FileName = exePath,
+                Arguments = QuoteArg("--session-worker") + " " + QuoteArg(dbPath) + " " + QuoteArg(schemaPath) + " " +
+                    QuoteArg(childId) + " " + QuoteArg(gatePath),
+                WorkingDirectory = Path.GetDirectoryName(exePath),
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            };
+            var process = Process.Start(info);
+            if (process == null) throw new InvalidOperationException("Could not start MathData session worker.");
+            return process;
+        }
+
+        private static int RunSessionWorker(string[] args)
+        {
+            if (args == null || args.Length != 5) return 92;
+            var deadline = DateTime.UtcNow.AddSeconds(15);
+            while (!File.Exists(args[4]) && DateTime.UtcNow < deadline) Thread.Sleep(10);
+            if (!File.Exists(args[4])) return 93;
+
+            try
+            {
+                var database = new LearningDatabase(args[1], args[2]);
+                var session = new LearnerSessionService(database).BeginSession(args[3], "math", "LOW");
+                Console.WriteLine("CROSS_SESSION_WORKER_STARTED " + session.SessionId);
+                return 0;
+            }
+            catch (InvalidOperationException ex)
+            {
+                Console.WriteLine("CROSS_SESSION_WORKER_REJECTED " + ex.Message);
+                return 2;
+            }
+            catch (SQLiteException ex)
+            {
+                Console.WriteLine("CROSS_SESSION_WORKER_REJECTED_SQLITE " + ex.ErrorCode);
+                return 2;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("CROSS_SESSION_WORKER_FAIL " + ex);
+                return 3;
+            }
         }
 
         private static void TestExistingV1UpgradesToV3WithBackup(string root, string sourceSchema)

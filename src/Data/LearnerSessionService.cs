@@ -107,13 +107,19 @@ WHERE state IN ('started','active') AND ended_at_utc IS NULL
                 {
                     command.Transaction = transaction;
                     command.CommandText = @"INSERT INTO session(id,child_id,started_at_utc,state,planned_subject,performance_profile)
-VALUES(@id,@child,@utc,'active',@subject,@profile);";
+SELECT @id,@child,@utc,'active',@subject,@profile
+WHERE NOT EXISTS (
+    SELECT 1 FROM session
+    WHERE child_id=@child AND planned_subject=@subject
+      AND state IN ('started','active') AND ended_at_utc IS NULL
+);";
                     command.Parameters.AddWithValue("@id", id);
                     command.Parameters.AddWithValue("@child", childId);
                     command.Parameters.AddWithValue("@utc", started.ToString("o"));
                     command.Parameters.AddWithValue("@subject", subject);
                     command.Parameters.AddWithValue("@profile", performanceProfile);
-                    command.ExecuteNonQuery();
+                    if (command.ExecuteNonQuery() != 1)
+                        throw new InvalidOperationException("An active session for this child and subject already exists.");
                 }
             });
             return new LearnerSessionHandle { SessionId = id, ChildId = childId, StartedAtUtc = started, Subject = subject, PerformanceProfile = performanceProfile };

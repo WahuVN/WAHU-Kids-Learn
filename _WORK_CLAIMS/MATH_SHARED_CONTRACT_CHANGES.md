@@ -189,6 +189,17 @@ Answer transaction thất bại phải fail-closed ở cả DB lẫn coordinator
 - Nếu DB tạm thời không thể đọc lại khi recovery, behavior fallback về conservative `READY`; observation của failed write vẫn không được giữ trong RAM và lỗi commit gốc vẫn là lỗi surfaced cho caller.
 - Regression inject `RAISE(ABORT)` ở `mastery_event` sau khi attempt transaction đã bắt đầu, xác nhận attempt/key/mastery/child_skill/review đều rollback; bỏ fault rồi retry chỉ tạo một durable learning chain và `RecentAttemptCount` không chứa ghost observation.
 
+## 2026-09-07 — Single-active learner session guard (AI2)
+
+Một child không được có hơn một session active cho cùng subject, kể cả khi hai process cold-start đồng thời:
+
+- `LearnerSessionService.BeginSession` insert session bằng một `INSERT ... SELECT ... WHERE NOT EXISTS` trong cùng write transaction; check và create không tách rời.
+- Existing session cùng `child_id + planned_subject` ở state `started/active` và `ended_at_utc IS NULL` làm start mới fail trước khi session id mới trở thành durable.
+- Guard áp dụng ở persistence boundary, không phụ thuộc UI/coordinator `_submitting` hay process-local lock.
+- Session `completed/aborted/recovered` không giữ slot; sau terminal state, lần học kế tiếp được tạo bình thường.
+- True cross-process regression dùng hai executable worker độc lập cùng cold-start; invariant là đúng một session active tồn tại. Stress lặp 3 vòng bổ sung PASS.
+- Guard này ngăn duplicate runtime/progress-start chain từ race cold-start; loser hiện nhận conflict/failure và caller có thể reload/resume durable session thay vì tạo bản sao.
+
 ## Contract còn chưa chốt
 
 Các mục sau chưa được UI/content tự invent cho tới khi AI2 publish contract:
