@@ -23,6 +23,10 @@
     <Compile Include="BehaviorModels.cs" />
     <Compile Include="BehaviorThresholds.cs" />
     <Compile Include="BehaviorController.cs" />
+    <Compile Include="MathLearningModels.cs" />
+    <Compile Include="AdaptiveMathSelector.cs" />
+    <Compile Include="MathQuestionGenerator.cs" />
+    <Compile Include="MasteryReviewEngine.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

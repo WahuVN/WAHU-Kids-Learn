@@ -11,6 +11,7 @@
     <Compile Include="ContentPackValidator.cs" />
     <Compile Include="SecureContentImporter.cs" />
     <Compile Include="ContentPackCatalog.cs" />
+    <Compile Include="MathVerifiedTemplateSource.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -29,12 +29,13 @@ $msbuild = Find-FirstExisting @(
 )
 if (-not $msbuild) { throw 'Không tìm thấy MSBuild.' }
 
-Write-Host "[1/14] Restore + rebuild solution net48/x86 bằng $msbuild"
+Write-Host "[1/15] Restore + rebuild solution net48/x86 bằng $msbuild"
 & $msbuild 'WAHUKidsLearn.sln' /restore /m /t:Rebuild "/p:Configuration=$Configuration" /p:Platform=x86 /v:minimal /nologo
 if ($LASTEXITCODE -ne 0) { throw "MSBuild fail: $LASTEXITCODE" }
 
 $preflightSmoke = Join-Path $root "tests\SetupPreflightSmoke\bin\$Configuration\WAHU.SetupPreflight.Smoke.exe"
 $behaviorSmoke = Join-Path $root "tests\BehaviorRuntimeSmoke\bin\$Configuration\WAHU.BehaviorRuntimeSmoke.exe"
+$learningSessionSmoke = Join-Path $root "tests\LearningSessionRuntimeSmoke\bin\$Configuration\WAHU.LearningSessionRuntimeSmoke.exe"
 $motionSmoke = Join-Path $root "tests\MotionRuntimeSmoke\bin\$Configuration\WAHU.MotionRuntimeSmoke.exe"
 $contentSmoke = Join-Path $root "tests\ContentRuntimeSmoke\bin\$Configuration\WAHU.ContentRuntimeSmoke.exe"
 $securitySmoke = Join-Path $root "tests\SecurityRuntimeSmoke\bin\$Configuration\WAHU.SecurityRuntimeSmoke.exe"
@@ -42,8 +43,10 @@ $audioSmoke = Join-Path $root "tests\AudioRuntimeSmoke\bin\$Configuration\WAHU.A
 $performanceSmoke = Join-Path $root "tests\PerformanceRuntimeSmoke\bin\$Configuration\WAHU.PerformanceRuntimeSmoke.exe"
 $sqliteSmoke = Join-Path $root "tests\SQLiteRuntimeSmoke\bin\$Configuration\WAHU.SQLiteRuntimeSmoke.exe"
 $schemaSource = Join-Path $root 'data\schema\001_initial.sql'
+$mathTemplateSource = Join-Path $root 'content_packs\math_grade2_v1\verified_templates_v1.json'
 Require-File $preflightSmoke
 Require-File $behaviorSmoke
+Require-File $learningSessionSmoke
 Require-File $motionSmoke
 Require-File $contentSmoke
 Require-File $securitySmoke
@@ -51,36 +54,41 @@ Require-File $audioSmoke
 Require-File $performanceSmoke
 Require-File $sqliteSmoke
 Require-File $schemaSource
+Require-File $mathTemplateSource
 
-Write-Host '[2/14] Setup preflight smoke'
+Write-Host '[2/15] Setup preflight smoke'
 & $preflightSmoke
 if ($LASTEXITCODE -ne 0) { throw "SetupPreflight smoke fail: $LASTEXITCODE" }
 
-Write-Host '[3/14] Behavior runtime smoke'
+Write-Host '[3/15] Behavior runtime smoke'
 & $behaviorSmoke
 if ($LASTEXITCODE -ne 0) { throw "Behavior runtime smoke fail: $LASTEXITCODE" }
 
-Write-Host '[4/14] Motion runtime smoke'
+Write-Host '[4/15] Learning session vertical-slice smoke'
+& $learningSessionSmoke $schemaSource $mathTemplateSource
+if ($LASTEXITCODE -ne 0) { throw "Learning session runtime smoke fail: $LASTEXITCODE" }
+
+Write-Host '[5/15] Motion runtime smoke'
 & $motionSmoke
 if ($LASTEXITCODE -ne 0) { throw "Motion runtime smoke fail: $LASTEXITCODE" }
 
-Write-Host '[5/14] Content runtime + secure import smoke'
+Write-Host '[6/15] Content runtime + secure import smoke'
 & $contentSmoke
 if ($LASTEXITCODE -ne 0) { throw "Content runtime smoke fail: $LASTEXITCODE" }
 
-Write-Host '[6/14] Parent PIN security smoke'
+Write-Host '[7/15] Parent PIN security smoke'
 & $securitySmoke
 if ($LASTEXITCODE -ne 0) { throw "Security runtime smoke fail: $LASTEXITCODE" }
 
-Write-Host '[7/14] Audio runtime smoke'
+Write-Host '[8/15] Audio runtime smoke'
 & $audioSmoke
 if ($LASTEXITCODE -ne 0) { throw "Audio runtime smoke fail: $LASTEXITCODE" }
 
-Write-Host '[8/14] Performance autotune + degradation smoke'
+Write-Host '[9/15] Performance autotune + degradation smoke'
 & $performanceSmoke
 if ($LASTEXITCODE -ne 0) { throw "Performance runtime smoke fail: $LASTEXITCODE" }
 
-Write-Host '[9/14] SQLite/Data smoke + backup/restore integration'
+Write-Host '[10/15] SQLite/Data smoke + backup/restore integration'
 & $sqliteSmoke $schemaSource
 if ($LASTEXITCODE -ne 0) { throw "SQLite runtime smoke fail: $LASTEXITCODE" }
 
@@ -88,7 +96,7 @@ $publish = Join-Path $root 'build\win7_x86\publish'
 if (Test-Path $publish) { Remove-Item -LiteralPath $publish -Recurse -Force }
 New-Item -ItemType Directory -Force -Path $publish | Out-Null
 
-Write-Host '[10/14] Stage publish tree'
+Write-Host '[11/15] Stage publish tree'
 $appOut = Join-Path $root "src\App\bin\$Configuration"
 $preOut = Join-Path $root "tools\setup_preflight\bin\$Configuration"
 $runtimeFiles = @(
@@ -135,7 +143,7 @@ foreach ($name in @('WAHU.Learning.dll','WAHU.Motion.dll','WAHU.Content.dll','WA
     Require-File (Join-Path $publish $name)
 }
 
-Write-Host '[11/14] Validate staged JSON + run staged preflight'
+Write-Host '[12/15] Validate staged JSON + run staged preflight'
 Get-ChildItem -LiteralPath $publish -Recurse -Filter *.json -File | ForEach-Object {
     $null = Get-Content -Raw -LiteralPath $_.FullName | ConvertFrom-Json
 }
@@ -144,7 +152,7 @@ $reportPath = Join-Path $root 'build\preflight-publish.json'
 if ($LASTEXITCODE -ne 0) { throw "Staged preflight fail: $LASTEXITCODE" }
 $null = Get-Content -Raw -LiteralPath $reportPath | ConvertFrom-Json
 
-Write-Host '[12/14] Generate reproducible hashes + dev release manifest'
+Write-Host '[13/15] Generate reproducible hashes + dev release manifest'
 $hashPath = Join-Path $root 'build\win7_x86\SHA256SUMS.txt'
 $lines = Get-ChildItem -LiteralPath $publish -Recurse -File | Sort-Object FullName | ForEach-Object {
     $rel = $_.FullName.Substring($publish.Length).TrimStart('\')
@@ -209,6 +217,8 @@ $manifest = [ordered]@{
         preflight_smoke_assertions = 35
         behavior_runtime_smoke = 'PASS'
         behavior_runtime_smoke_assertions = 15
+        learning_session_runtime_smoke = 'PASS'
+        learning_session_runtime_smoke_assertions = 71
         motion_runtime_smoke = 'PASS'
         motion_runtime_smoke_assertions = 25
         content_runtime_smoke = 'PASS'
@@ -239,7 +249,7 @@ $manifestPath = Join-Path $root 'build\win7_x86\release_manifest_dev.json'
 $manifest | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $manifestPath -Encoding UTF8
 $null = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
 
-Write-Host '[13/14] Installer compiler discovery'
+Write-Host '[14/15] Installer compiler discovery'
 $iscc = Find-FirstExisting @(
     "$env:LOCALAPPDATA\Programs\Inno Setup 7\ISCC.exe",
     'C:\Program Files\Inno Setup 7\ISCC.exe',
@@ -251,7 +261,7 @@ if ($CompileInstaller -or $RequireInstaller) {
         if ($RequireInstaller) { throw 'Không tìm thấy ISCC.exe.' }
         Write-Warning 'ISCC.exe chưa có; bỏ qua compile installer.'
     } else {
-        Write-Host "[14/14] Compile installer bằng $iscc"
+        Write-Host "[15/15] Compile installer bằng $iscc"
         & $iscc "/DAppVersion=$AppVersion" 'setup\installer\WAHU_Kids_Learn.iss'
         if ($LASTEXITCODE -ne 0) { throw "Inno Setup compile fail: $LASTEXITCODE" }
         Require-File $installerPath
@@ -260,7 +270,7 @@ if ($CompileInstaller -or $RequireInstaller) {
         Write-Host "INSTALLER_SHA256=$installerHash"
     }
 } else {
-    Write-Host '[14/14] Installer compile chưa được yêu cầu.'
+    Write-Host '[15/15] Installer compile chưa được yêu cầu.'
 }
 
 Write-Host "BUILD_SETUP_ARTIFACTS_PASS publish=$publish"

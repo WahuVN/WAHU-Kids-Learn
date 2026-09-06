@@ -23,6 +23,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AnswerCommitService.cs" />
+    <Compile Include="AdaptiveDecisionAuditService.cs" />
+    <Compile Include="LearnerSessionService.cs" />
     <Compile Include="BehaviorDecisionAuditService.cs" />
     <Compile Include="BackupRecoveryService.cs" />
     <Compile Include="ParentSummaryService.cs" />
