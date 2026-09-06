@@ -18,6 +18,7 @@
     <ProjectReference Include="..\..\src\App\WAHUKidsLearn.csproj"><Project>{2B22CA28-446A-4B9E-A79C-AF61F7CD501C}</Project><Name>WAHUKidsLearn</Name></ProjectReference>
     <ProjectReference Include="..\..\src\Learning\WAHU.Learning.csproj"><Project>{9C1A840E-D70F-4B48-91C0-4CDA6C4E2F01}</Project><Name>WAHU.Learning</Name></ProjectReference>
     <ProjectReference Include="..\..\src\Data\WAHU.Data.csproj"><Project>{492526A2-1C03-4D76-A9E9-D2A57AB46028}</Project><Name>WAHU.Data</Name></ProjectReference>
+    <ProjectReference Include="..\..\src\Performance\WAHU.Performance.csproj"><Project>{FDD3D980-4DEE-4700-A6C1-527725D4E444}</Project><Name>WAHU.Performance</Name></ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

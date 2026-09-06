@@ -102,14 +102,21 @@ namespace WAHU.Learning
             if (template == null || string.IsNullOrWhiteSpace(template.TemplateId) || string.IsNullOrWhiteSpace(template.SkillId)) return false;
             switch (template.TemplateId)
             {
+                case "place_value_decompose_3digit":
+                case "expanded_form_3digit":
+                case "predecessor_successor":
+                case "compare_two_numbers_1000":
                 case "mental_add_within_20":
                 case "mental_sub_within_20":
                 case "times_table_2":
                 case "times_table_5":
+                case "divide_table_2_exact":
+                case "divide_table_5_exact":
                 case "add_within_1000_no_carry":
                 case "add_within_1000_one_carry":
                 case "subtract_within_1000_no_borrow":
                 case "subtract_within_1000_one_borrow":
+                case "polyline_length":
                     return true;
                 default:
                     return false;

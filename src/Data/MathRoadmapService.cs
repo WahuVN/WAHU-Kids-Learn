@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 
 namespace WAHU.Data
@@ -15,18 +14,20 @@ namespace WAHU.Data
 
     public sealed class MathRoadmapSnapshot
     {
+        public MathRoadmapGroupProgress NumberSense { get; set; }
         public MathRoadmapGroupProgress Mental20 { get; set; }
         public MathRoadmapGroupProgress Written1000 { get; set; }
         public MathRoadmapGroupProgress Tables25 { get; set; }
+        public MathRoadmapGroupProgress Measurement { get; set; }
         public int TotalTrackedAttempts
         {
             get
             {
-                return (Mental20 == null ? 0 : Mental20.Attempts) +
-                       (Written1000 == null ? 0 : Written1000.Attempts) +
-                       (Tables25 == null ? 0 : Tables25.Attempts);
+                return Attempts(NumberSense) + Attempts(Mental20) + Attempts(Written1000) + Attempts(Tables25) + Attempts(Measurement);
             }
         }
+
+        private static int Attempts(MathRoadmapGroupProgress group) { return group == null ? 0 : group.Attempts; }
     }
 
     public sealed class MathRoadmapService
@@ -41,12 +42,16 @@ namespace WAHU.Data
         public MathRoadmapSnapshot Read(string childId)
         {
             if (string.IsNullOrWhiteSpace(childId)) throw new ArgumentException("childId is required.");
+            var numberSense = NewGroup("number_sense_1000");
             var mental = NewGroup("mental_20");
             var written = NewGroup("written_1000");
             var tables = NewGroup("tables_2_5");
+            var measurement = NewGroup("measurement_geometry");
+            var numberSenseScore = 0.0;
             var mentalScore = 0.0;
             var writtenScore = 0.0;
             var tableScore = 0.0;
+            var measurementScore = 0.0;
 
             using (var connection = _database.OpenConnection())
             using (var command = connection.CreateCommand())
@@ -61,10 +66,16 @@ FROM child_skill WHERE child_id=@child AND subject='math';";
                         var skill = Convert.ToString(reader[0], CultureInfo.InvariantCulture);
                         var mastery = Clamp01(Convert.ToDouble(reader[1], CultureInfo.InvariantCulture));
                         var attempts = Math.Max(0, Convert.ToInt32(reader[2], CultureInfo.InvariantCulture));
-                        if (skill == "MENTAL_ADD_SUB_WITHIN_20")
+                        if (skill == "PLACE_VALUE_HUNDREDS_TENS_ONES" || skill == "NUM_EXPANDED_FORM_HTO" ||
+                            skill == "NUM_PREDECESSOR_SUCCESSOR" || skill == "NUM_COMPARE_0_1000")
+                            Add(numberSense, ref numberSenseScore, mastery, attempts);
+                        else if (skill == "MENTAL_ADD_SUB_WITHIN_20")
                             Add(mental, ref mentalScore, mastery, attempts);
-                        else if (skill == "TIMES_TABLE_2" || skill == "TIMES_TABLE_5")
+                        else if (skill == "TIMES_TABLE_2" || skill == "TIMES_TABLE_5" ||
+                                 skill == "DIVIDE_TABLE_2" || skill == "DIVIDE_TABLE_5")
                             Add(tables, ref tableScore, mastery, attempts);
+                        else if (skill == "POLYLINE_LENGTH_SUM_SEGMENTS")
+                            Add(measurement, ref measurementScore, mastery, attempts);
                         else if (!string.IsNullOrWhiteSpace(skill) &&
                                  (skill.StartsWith("ADD_WITHIN_1000", StringComparison.Ordinal) ||
                                   skill.StartsWith("SUB_WITHIN_1000", StringComparison.Ordinal)))
@@ -73,10 +84,19 @@ FROM child_skill WHERE child_id=@child AND subject='math';";
                 }
             }
 
+            FinalizeAverage(numberSense, numberSenseScore);
             FinalizeAverage(mental, mentalScore);
             FinalizeAverage(written, writtenScore);
             FinalizeAverage(tables, tableScore);
-            return new MathRoadmapSnapshot { Mental20 = mental, Written1000 = written, Tables25 = tables };
+            FinalizeAverage(measurement, measurementScore);
+            return new MathRoadmapSnapshot
+            {
+                NumberSense = numberSense,
+                Mental20 = mental,
+                Written1000 = written,
+                Tables25 = tables,
+                Measurement = measurement
+            };
         }
 
         private static MathRoadmapGroupProgress NewGroup(string id)

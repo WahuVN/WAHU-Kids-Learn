@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
 using WAHU.Data;
 using WAHU.Learning;
+using WAHU.Performance;
 
 namespace WAHU.ChildUiRuntimeSmoke
 {
@@ -25,6 +27,7 @@ namespace WAHU.ChildUiRuntimeSmoke
             TestGarden(appAssembly, 1.25f);
             TestCompanionAndCompletion(appAssembly);
             TestRoadmap(appAssembly);
+            TestAnswerGridLayout(appAssembly);
             TestBasicControls(appAssembly);
 
             Console.WriteLine("CHILD_UI_RUNTIME_SMOKE_PASS assertions=" + _assertions);
@@ -34,14 +37,21 @@ namespace WAHU.ChildUiRuntimeSmoke
         {
             var cases = new[]
             {
+                Q("place_value_decompose_3digit", "Số 472 gồm bao nhiêu trăm, chục và đơn vị?", 0),
+                Q("expanded_form_3digit", "Viết 604 thành tổng của trăm, chục và đơn vị.", 0),
+                Q("predecessor_successor", "Số liền trước và số liền sau của 472 là gì?", 0),
+                Q("compare_two_numbers_1000", "Điền dấu > hoặc < : 472 __ 468", 0),
                 Q("mental_add_within_20", "Tính nhẩm: 8 + 7 = ?", 15),
                 Q("mental_sub_within_20", "Tính nhẩm: 17 - 6 = ?", 11),
                 Q("times_table_2", "Tính: 2 × 6 = ?", 12),
                 Q("times_table_5", "Tính: 5 × 4 = ?", 20),
+                Q("divide_table_2_exact", "Tính: 16 : 2 = ?", 8),
+                Q("divide_table_5_exact", "Tính: 35 : 5 = ?", 7),
                 Q("add_within_1000_no_carry", "Tính: 243 + 315 = ?", 558),
                 Q("add_within_1000_one_carry", "Tính: 247 + 135 = ?", 382),
                 Q("subtract_within_1000_no_borrow", "Tính: 786 - 243 = ?", 543),
-                Q("subtract_within_1000_one_borrow", "Tính: 432 - 157 = ?", 275)
+                Q("subtract_within_1000_one_borrow", "Tính: 432 - 157 = ?", 275),
+                Q("polyline_length", "Đường gấp khúc có ba đoạn dài 8 cm, 11 cm và 6 cm. Độ dài đường gấp khúc là bao nhiêu?", 25)
             };
 
             foreach (var question in cases)
@@ -95,9 +105,11 @@ namespace WAHU.ChildUiRuntimeSmoke
         {
             var snapshot = new MathRoadmapSnapshot
             {
+                NumberSense = new MathRoadmapGroupProgress { GroupId = "number_sense_1000", SkillRows = 3, Attempts = 9, MasteryAverage = 0.61 },
                 Mental20 = new MathRoadmapGroupProgress { GroupId = "mental_20", SkillRows = 1, Attempts = 8, MasteryAverage = 0.72 },
                 Written1000 = new MathRoadmapGroupProgress { GroupId = "written_1000", SkillRows = 3, Attempts = 11, MasteryAverage = 0.54 },
-                Tables25 = new MathRoadmapGroupProgress { GroupId = "tables_2_5", SkillRows = 0, Attempts = 0, MasteryAverage = 0.0 }
+                Tables25 = new MathRoadmapGroupProgress { GroupId = "tables_2_5", SkillRows = 2, Attempts = 7, MasteryAverage = 0.66 },
+                Measurement = new MathRoadmapGroupProgress { GroupId = "measurement_geometry", SkillRows = 1, Attempts = 3, MasteryAverage = 0.47 }
             };
             foreach (var scale in new[] { 1.00f, 1.25f })
             {
@@ -106,6 +118,47 @@ namespace WAHU.ChildUiRuntimeSmoke
                     Invoke(roadmap, "SetSnapshot", snapshot);
                     RenderAndAssert(roadmap, (int)(560 * scale), (int)(96 * scale), "math_roadmap_scale_" + scale);
                 }
+            }
+        }
+
+        private static void TestAnswerGridLayout(Assembly appAssembly)
+        {
+            var tempRoot = Path.Combine(Path.GetTempPath(), "wahu-child-ui-layout-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempRoot);
+            try
+            {
+                var schema = Path.Combine(Directory.GetCurrentDirectory(), "data", "schema", "001_initial.sql");
+                var database = new LearningDatabase(Path.Combine(tempRoot, "learning.db"), schema);
+                using (var form = new WAHUKidsLearn.MathLessonForm(database, new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW }))
+                {
+                    Invoke(form, "ConfigureAnswerLayout", 2);
+                    var grid = GetField<TableLayoutPanel>(form, "_answerGrid");
+                    var buttons = GetField<Array>(form, "_answerButtons");
+                    var b0 = (Control)buttons.GetValue(0);
+                    var b1 = (Control)buttons.GetValue(1);
+                    A(Math.Abs(grid.RowStyles[0].Height - 100f) < 0.01f && Math.Abs(grid.RowStyles[1].Height) < 0.01f,
+                        "answer_layout_two_choices_full_height");
+                    A(grid.GetCellPosition(b0).Row == 0 && grid.GetCellPosition(b1).Row == 0,
+                        "answer_layout_two_choices_same_row");
+
+                    Invoke(form, "ConfigureAnswerLayout", 3);
+                    var b2 = (Control)buttons.GetValue(2);
+                    A(Math.Abs(grid.RowStyles[0].Height - 50f) < 0.01f && Math.Abs(grid.RowStyles[1].Height - 50f) < 0.01f,
+                        "answer_layout_three_choices_restores_two_rows");
+                    A(grid.GetCellPosition(b2).Row == 1 && grid.GetColumnSpan(b2) == 2,
+                        "answer_layout_three_choices_bottom_spans_columns");
+
+                    Invoke(form, "ConfigureAnswerLayout", 4);
+                    var b3 = (Control)buttons.GetValue(3);
+                    A(grid.GetColumnSpan(b2) == 1 && grid.GetCellPosition(b2).Column == 0 && grid.GetCellPosition(b2).Row == 1,
+                        "answer_layout_four_choices_resets_span");
+                    A(grid.GetCellPosition(b3).Column == 1 && grid.GetCellPosition(b3).Row == 1,
+                        "answer_layout_four_choices_restores_bottom_right");
+                }
+            }
+            finally
+            {
+                try { Directory.Delete(tempRoot, true); } catch { }
             }
         }
 
@@ -119,6 +172,13 @@ namespace WAHU.ChildUiRuntimeSmoke
                 Set(button, "VisualState", Enum.Parse(stateType, "Correct"));
                 button.Enabled = false;
                 RenderAndAssert(button, 300, 82, "answer_correct_disabled_keeps_feedback");
+            }
+            using (var longText = CreateInternalControl(appAssembly, "WAHUKidsLearn.AnswerChoiceButton"))
+            {
+                longText.Text = "4 trăm, 7 chục, 2 đơn vị";
+                longText.Font = new Font("Segoe UI", 10.5f, FontStyle.Bold, GraphicsUnit.Point);
+                Set(longText, "BadgeText", "1");
+                RenderAndAssert(longText, 360, 82, "answer_long_text_choice");
             }
             using (var progress = CreateInternalControl(appAssembly, "WAHUKidsLearn.ProgressStrip"))
             {
@@ -148,6 +208,13 @@ namespace WAHU.ChildUiRuntimeSmoke
             var info = target.GetType().GetProperty(property, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             if (info == null) throw new MissingMemberException(target.GetType().FullName, property);
             info.SetValue(target, value, null);
+        }
+
+        private static T GetField<T>(object target, string fieldName)
+        {
+            var info = target.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            if (info == null) throw new MissingFieldException(target.GetType().FullName, fieldName);
+            return (T)info.GetValue(target);
         }
 
         private static void RenderAndAssert(Control child, int width, int height, string name)

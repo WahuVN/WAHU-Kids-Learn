@@ -248,13 +248,202 @@ namespace WAHUKidsLearn
             if (_question == null || Width < 80 || Height < 40) return;
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             var values = ExtractNumbers(_question.PromptVi);
-            if (_question.TemplateId == "mental_add_within_20" || _question.TemplateId == "mental_sub_within_20")
+            if (_question.TemplateId == "place_value_decompose_3digit" || _question.TemplateId == "expanded_form_3digit")
+                DrawPlaceValueConcept(e.Graphics, values);
+            else if (_question.TemplateId == "predecessor_successor" || _question.TemplateId == "compare_two_numbers_1000")
+                DrawNumberOrder(e.Graphics, values);
+            else if (_question.TemplateId == "mental_add_within_20" || _question.TemplateId == "mental_sub_within_20")
                 DrawNumberRay(e.Graphics, values);
             else if (_question.TemplateId == "times_table_2" || _question.TemplateId == "times_table_5")
                 DrawGroups(e.Graphics, values);
+            else if (_question.TemplateId == "divide_table_2_exact" || _question.TemplateId == "divide_table_5_exact")
+                DrawDivisionGroups(e.Graphics, values);
             else if (_question.TemplateId != null && (_question.TemplateId.StartsWith("add_within_1000", StringComparison.Ordinal) ||
                      _question.TemplateId.StartsWith("subtract_within_1000", StringComparison.Ordinal)))
                 DrawPlaceValue(e.Graphics, values);
+            else if (_question.TemplateId == "polyline_length")
+                DrawPolyline(e.Graphics, values);
+        }
+
+        private void DrawPlaceValueConcept(Graphics g, int[] values)
+        {
+            if (values.Length < 1) return;
+            var n = Math.Max(0, Math.Min(999, values[0]));
+            var digits = new[] { (n / 100) % 10, (n / 10) % 10, n % 10 };
+            var headers = new[] { "Trăm", "Chục", "Đơn vị" };
+            var cellW = Math.Min(115, Math.Max(78, Width / 4));
+            var totalW = cellW * 3;
+            var left = (Width - totalW) / 2;
+            for (var i = 0; i < 3; i++)
+            {
+                var x = left + i * cellW;
+                using (var fill = new SolidBrush(i == 0 ? Color.FromArgb(241, 230, 198) : (i == 1 ? Color.FromArgb(221, 239, 224) : Color.FromArgb(220, 236, 248))))
+                using (var pen = new Pen(Color.FromArgb(204, 204, 191), 1f))
+                {
+                    var rect = new Rectangle(x + 5, 12, cellW - 10, Math.Min(72, Math.Max(50, Height - 24)));
+                    g.FillRectangle(fill, rect);
+                    g.DrawRectangle(pen, rect);
+                }
+                TextRenderer.DrawText(g, headers[i], ChildVisualTheme.Font(8.8f, FontStyle.Bold),
+                    new Rectangle(x, 14, cellW, 20), ChildVisualTheme.MutedInk,
+                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+                var valueText = _hintLevel >= 1 ? digits[i].ToString() : "?";
+                TextRenderer.DrawText(g, valueText, ChildVisualTheme.Font(18f, FontStyle.Bold),
+                    new Rectangle(x, 35, cellW, 34), ChildVisualTheme.Ink,
+                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+                if (_hintLevel >= 2)
+                {
+                    var unit = i == 0 ? digits[i] * 100 : (i == 1 ? digits[i] * 10 : digits[i]);
+                    TextRenderer.DrawText(g, "= " + unit, ChildVisualTheme.Font(8.5f),
+                        new Rectangle(x, 67, cellW, 19), ChildVisualTheme.PeachStrong,
+                        TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+                }
+            }
+        }
+
+        private void DrawNumberOrder(Graphics g, int[] values)
+        {
+            if (_question.TemplateId == "compare_two_numbers_1000")
+            {
+                if (values.Length < 2) return;
+                var a = values[0]; var b = values[1];
+                var numbers = new[] { a, b };
+                var boxW = Math.Min(190, Math.Max(120, Width / 3));
+                var gap = 36;
+                var total = boxW * 2 + gap;
+                var left = (Width - total) / 2;
+                for (var k = 0; k < 2; k++)
+                {
+                    var box = new Rectangle(left + k * (boxW + gap), 18, boxW, Math.Min(72, Height - 30));
+                    using (var brush = new SolidBrush(k == 0 ? Color.FromArgb(238, 245, 221) : Color.FromArgb(224, 239, 249)))
+                    using (var pen = new Pen(Color.FromArgb(205, 209, 195)))
+                    { g.FillRectangle(brush, box); g.DrawRectangle(pen, box); }
+                    TextRenderer.DrawText(g, numbers[k].ToString(), ChildVisualTheme.Font(18f, FontStyle.Bold), box,
+                        ChildVisualTheme.Ink, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+                    if (_hintLevel >= 1)
+                    {
+                        var h = (numbers[k] / 100) % 10; var t = (numbers[k] / 10) % 10; var o = numbers[k] % 10;
+                        TextRenderer.DrawText(g, "T " + h + " · C " + t + " · ĐV " + o, ChildVisualTheme.Font(8.2f),
+                            new Rectangle(box.Left, box.Bottom - 20, box.Width, 18), ChildVisualTheme.MutedInk,
+                            TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+                    }
+                }
+                TextRenderer.DrawText(g, "?", ChildVisualTheme.Font(20f, FontStyle.Bold),
+                    new Rectangle(left + boxW, 30, gap, 36), ChildVisualTheme.PeachStrong,
+                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+                return;
+            }
+
+            if (values.Length < 1) return;
+            var n = values[0];
+            var centerX = Width / 2;
+            var y = Height / 2 + 10;
+            var ticks = new[] { centerX - 105, centerX, centerX + 105 };
+            for (var i = 0; i < ticks.Length; i++)
+            {
+                var card = new Rectangle(ticks[i] - 34, y - 31, 68, 48);
+                var fillColor = i == 1 ? Color.FromArgb(232, 242, 224) : Color.FromArgb(240, 239, 229);
+                using (var path = ChildVisualTheme.RoundedRect(card, 12))
+                using (var brush = new SolidBrush(fillColor))
+                using (var border = new Pen(Color.FromArgb(212, 214, 201)))
+                {
+                    g.FillPath(brush, path);
+                    g.DrawPath(border, path);
+                }
+            }
+            using (var pen = new Pen(Color.FromArgb(128, 139, 137), 2f)) g.DrawLine(pen, centerX - 150, y, centerX + 150, y);
+            foreach (var x in ticks)
+            {
+                using (var pen = new Pen(Color.FromArgb(128, 139, 137), 2f)) g.DrawLine(pen, x, y - 10, x, y + 10);
+            }
+            TextRenderer.DrawText(g, n.ToString(), ChildVisualTheme.Font(15f, FontStyle.Bold),
+                new Rectangle(centerX - 45, y - 45, 90, 30), ChildVisualTheme.Ink,
+                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+            TextRenderer.DrawText(g, "−1", ChildVisualTheme.Font(9f, FontStyle.Bold),
+                new Rectangle(centerX - 150, y - 40, 90, 22), ChildVisualTheme.MintStrong,
+                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+            TextRenderer.DrawText(g, "+1", ChildVisualTheme.Font(9f, FontStyle.Bold),
+                new Rectangle(centerX + 60, y - 40, 90, 22), ChildVisualTheme.MintStrong,
+                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+            TextRenderer.DrawText(g, "?", ChildVisualTheme.Font(13f, FontStyle.Bold),
+                new Rectangle(centerX - 135, y + 12, 60, 24), ChildVisualTheme.PeachStrong,
+                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+            TextRenderer.DrawText(g, "?", ChildVisualTheme.Font(13f, FontStyle.Bold),
+                new Rectangle(centerX + 75, y + 12, 60, 24), ChildVisualTheme.PeachStrong,
+                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+        }
+
+        private void DrawDivisionGroups(Graphics g, int[] values)
+        {
+            if (values.Length < 2) return;
+            var dividend = Math.Max(1, Math.Min(50, values[0]));
+            var divisor = Math.Max(1, Math.Min(5, values[1]));
+            var cols = Math.Min(10, dividend);
+            var rows = (int)Math.Ceiling(dividend / (double)cols);
+            var spacingX = Math.Max(16, Math.Min(28, (Width - 60) / Math.Max(1, cols)));
+            var spacingY = Math.Max(18, Math.Min(26, (Height - 30) / Math.Max(1, rows)));
+            var startX = Math.Max(25, (Width - (cols - 1) * spacingX) / 2);
+            var startY = 20;
+            using (var dot = new SolidBrush(ChildVisualTheme.SkyStrong))
+            {
+                for (var i = 0; i < dividend; i++)
+                {
+                    var col = i % cols; var row = i / cols;
+                    g.FillEllipse(dot, startX + col * spacingX - 4, startY + row * spacingY - 4, 8, 8);
+                }
+            }
+            if (_hintLevel >= 1)
+            {
+                var groupCount = dividend / divisor;
+                using (var ring = new Pen(Color.FromArgb(138, 180, 122), 2f))
+                {
+                    for (var group = 0; group < groupCount; group++)
+                    {
+                        var first = group * divisor;
+                        var last = first + divisor - 1;
+                        var row1 = first / cols; var col1 = first % cols;
+                        var row2 = last / cols; var col2 = last % cols;
+                        if (row1 == row2)
+                        {
+                            var x1 = startX + col1 * spacingX - 10;
+                            var x2 = startX + col2 * spacingX + 10;
+                            g.DrawEllipse(ring, x1, startY + row1 * spacingY - 12, Math.Max(20, x2 - x1), 24);
+                        }
+                    }
+                }
+            }
+            TextRenderer.DrawText(g, "mỗi nhóm " + divisor, ChildVisualTheme.Font(8.8f, FontStyle.Bold),
+                new Rectangle(0, Math.Max(0, Height - 24), Width, 22), ChildVisualTheme.MutedInk,
+                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+        }
+
+        private void DrawPolyline(Graphics g, int[] values)
+        {
+            if (values.Length < 3) return;
+            var points = new[]
+            {
+                new Point(55, Math.Max(55, Height - 28)),
+                new Point(Math.Max(150, Width / 3), 24),
+                new Point(Math.Max(270, Width * 2 / 3), Math.Max(62, Height - 24)),
+                new Point(Math.Max(360, Width - 55), 30)
+            };
+            using (var pen = new Pen(ChildVisualTheme.SkyStrong, 4f))
+            {
+                pen.StartCap = LineCap.Round; pen.EndCap = LineCap.Round;
+                for (var i = 0; i < 3; i++) g.DrawLine(pen, points[i], points[i + 1]);
+            }
+            for (var i = 0; i < 3; i++)
+            {
+                var mx = (points[i].X + points[i + 1].X) / 2;
+                var my = (points[i].Y + points[i + 1].Y) / 2;
+                TextRenderer.DrawText(g, values[i] + " cm", ChildVisualTheme.Font(9f, FontStyle.Bold),
+                    new Rectangle(mx - 34, my - 24, 68, 21), ChildVisualTheme.PeachStrong,
+                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+            }
+            if (_hintLevel >= 1)
+                TextRenderer.DrawText(g, "cộng 3 đoạn", ChildVisualTheme.Font(9f, FontStyle.Bold),
+                    new Rectangle(0, Math.Max(0, Height - 22), Width, 20), ChildVisualTheme.MintStrong,
+                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
         }
 
         private void DrawNumberRay(Graphics g, int[] values)
@@ -696,11 +885,13 @@ namespace WAHUKidsLearn
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             var rows = new[]
             {
+                new RoadmapRow("Số đến 1000", _snapshot == null ? null : _snapshot.NumberSense, ChildVisualTheme.Sun),
                 new RoadmapRow("Nhẩm 0–20", _snapshot == null ? null : _snapshot.Mental20, ChildVisualTheme.PeachStrong),
                 new RoadmapRow("Cộng / Trừ đến 1000", _snapshot == null ? null : _snapshot.Written1000, ChildVisualTheme.MintStrong),
-                new RoadmapRow("Bảng 2 / 5", _snapshot == null ? null : _snapshot.Tables25, ChildVisualTheme.SkyStrong)
+                new RoadmapRow("Nhân / Chia 2 · 5", _snapshot == null ? null : _snapshot.Tables25, ChildVisualTheme.SkyStrong),
+                new RoadmapRow("Đo lường", _snapshot == null ? null : _snapshot.Measurement, Color.FromArgb(147, 126, 181))
             };
-            var rowH = Math.Max(28, Height / 3);
+            var rowH = Math.Max(20, Height / 5);
             for (var i = 0; i < rows.Length; i++) DrawRow(e.Graphics, rows[i], new Rectangle(0, i * rowH, Width, rowH));
         }
 
@@ -728,7 +919,8 @@ namespace WAHUKidsLearn
                 using (var brush = new SolidBrush(row.Accent)) g.FillPath(brush, path);
             }
 
-            var status = hasEvidence ? ((int)Math.Round(score * 100)) + "%" : "Chưa bắt đầu";
+            var status = !hasEvidence ? "Chưa bắt đầu" :
+                (score >= 0.80 ? "Vững" : (score >= 0.55 ? "Vững dần" : "Đang học"));
             var statusRect = new Rectangle(barRight + 5, bounds.Top + 2, statusWidth, bounds.Height - 4);
             TextRenderer.DrawText(g, status, ChildVisualTheme.Font(8.7f, hasEvidence ? FontStyle.Bold : FontStyle.Regular),
                 statusRect, hasEvidence ? row.Accent : ChildVisualTheme.MutedInk,
@@ -738,15 +930,19 @@ namespace WAHUKidsLearn
         private static string BuildAccessibleDescription(MathRoadmapSnapshot snapshot)
         {
             if (snapshot == null) return "Chưa có dữ liệu lộ trình Toán.";
-            return DescribeGroup("Nhẩm 0 đến 20", snapshot.Mental20) + "; " +
+            return DescribeGroup("Số đến 1000", snapshot.NumberSense) + "; " +
+                   DescribeGroup("Nhẩm 0 đến 20", snapshot.Mental20) + "; " +
                    DescribeGroup("Cộng trừ đến 1000", snapshot.Written1000) + "; " +
-                   DescribeGroup("Bảng 2 và 5", snapshot.Tables25) + ".";
+                   DescribeGroup("Nhân chia bảng 2 và 5", snapshot.Tables25) + "; " +
+                   DescribeGroup("Đo lường", snapshot.Measurement) + ".";
         }
 
         private static string DescribeGroup(string name, MathRoadmapGroupProgress progress)
         {
             if (progress == null || !progress.HasEvidence) return name + " chưa bắt đầu";
-            return name + " khoảng " + ((int)Math.Round(progress.MasteryAverage * 100)) + " phần trăm theo bằng chứng hiện có";
+            var score = Math.Max(0, Math.Min(1, progress.MasteryAverage));
+            var stage = score >= 0.80 ? "đã vững" : (score >= 0.55 ? "đang vững dần" : "đang học");
+            return name + " " + stage;
         }
 
         private sealed class RoadmapRow

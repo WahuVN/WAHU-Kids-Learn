@@ -17,6 +17,7 @@ namespace WAHU.Session
     {
         public bool IsCorrect { get; set; }
         public int CorrectAnswer { get; set; }
+        public string CorrectAnswerDisplay { get; set; }
         public int HintLevel { get; set; }
         public string FeedbackVi { get; set; }
         public BehaviorDecision Behavior { get; set; }

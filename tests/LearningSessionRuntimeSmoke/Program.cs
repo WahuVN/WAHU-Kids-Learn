@@ -43,14 +43,14 @@ namespace WAHU.LearningSessionRuntimeSmoke
             A(descriptors.All(x => x.Status == "VERIFIED_A_TEMPLATE"), "template_source_filters_verified_a_only");
             var refs = descriptors.Select(x => new MathTemplateRef { TemplateId = x.Id, SkillId = x.SkillId })
                 .Where(AdaptiveMathSelector.IsSupported).ToList();
-            A(refs.Count == 8, "generator_supports_eight_verified_templates");
+            A(refs.Count == 15, "generator_supports_fifteen_verified_templates");
 
             var selector = new AdaptiveMathSelector();
             var empty = new Dictionary<string, SkillSnapshot>(StringComparer.Ordinal);
             var first = selector.Select(refs, empty, new DateTime(2026, 9, 6, 10, 0, 0, DateTimeKind.Utc), new string[0], new string[0]);
             A(first != null && first.Template != null, "selector_returns_candidate");
             A(first.DifficultyFit >= 0 && first.DifficultyFit <= 1, "selector_difficulty_fit_bounded");
-            A(first.CandidateSummary.Count == 8, "selector_audits_all_candidates");
+            A(first.CandidateSummary.Count == 15, "selector_audits_all_candidates");
 
             var dueSkills = new Dictionary<string, SkillSnapshot>(StringComparer.Ordinal);
             foreach (var r in refs) dueSkills[r.SkillId] = new SkillSnapshot { SkillId = r.SkillId, MasteryScore = 0.20, Confidence = 0.20, AttemptsCount = 1, LearningState = "LEARNING" };
@@ -66,12 +66,20 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 A(!string.IsNullOrWhiteSpace(q.QuestionId), "question_id_" + r.TemplateId);
                 A(!string.IsNullOrWhiteSpace(q.PromptVi), "prompt_" + r.TemplateId);
                 A(q.Representation == ExpectedRepresentation(r.TemplateId), "representation_matches_instruction_visual_" + r.TemplateId);
-                A(q.Choices.Count == 4 && q.Choices.Distinct().Count() == 4, "four_unique_choices_" + r.TemplateId);
-                A(q.Choices.Contains(q.CorrectAnswer), "correct_choice_present_" + r.TemplateId);
+                A(q.DisplayChoices.Count >= 2 && q.DisplayChoices.Count <= 4, "choice_count_2_to_4_" + r.TemplateId);
+                A(q.DisplayChoices.Distinct(StringComparer.Ordinal).Count() == q.DisplayChoices.Count, "unique_display_choices_" + r.TemplateId);
+                A(q.DisplayChoices.Contains(q.CorrectAnswerDisplay), "correct_choice_present_" + r.TemplateId);
+                A(q.IsCorrectAnswer(q.CorrectAnswerDisplay), "correct_answer_roundtrip_" + r.TemplateId);
                 if (r.TemplateId == "add_within_1000_no_carry") A(CarryCount(ParseA(q), ParseB(q)) == 0, "add_no_carry_constraint");
                 if (r.TemplateId == "add_within_1000_one_carry") A(CarryCount(ParseA(q), ParseB(q)) == 1, "add_one_carry_constraint");
                 if (r.TemplateId == "subtract_within_1000_no_borrow") A(BorrowCount(ParseA(q), ParseB(q)) == 0, "sub_no_borrow_constraint");
                 if (r.TemplateId == "subtract_within_1000_one_borrow") A(BorrowCount(ParseA(q), ParseB(q)) == 1, "sub_one_borrow_constraint");
+                if (r.TemplateId == "compare_two_numbers_1000") A(q.UsesTextChoices && q.DisplayChoices.Count == 2, "comparison_uses_two_text_choices");
+                if (r.TemplateId == "place_value_decompose_3digit" || r.TemplateId == "expanded_form_3digit" || r.TemplateId == "predecessor_successor")
+                    A(q.UsesTextChoices && q.DisplayChoices.Count == 4, "structured_number_question_uses_four_text_choices_" + r.TemplateId);
+                if (r.TemplateId == "divide_table_2_exact" || r.TemplateId == "divide_table_5_exact")
+                    A(!q.UsesTextChoices && q.CorrectAnswer >= 1 && q.CorrectAnswer <= 10, "division_exact_answer_range_" + r.TemplateId);
+                if (r.TemplateId == "polyline_length") A(!q.UsesTextChoices && q.CorrectAnswer >= 3 && q.CorrectAnswer <= 60, "polyline_sum_range");
             }
 
             var mastery = new MasteryEngineV1();
@@ -103,11 +111,23 @@ namespace WAHU.LearningSessionRuntimeSmoke
             A(stableReview.IntervalDays >= 3, "stable_skill_gets_multi_day_review");
 
             var classifier = new MathErrorClassifierV1();
-            var carryQuestion = new MathQuestion { TemplateId = "add_within_1000_one_carry", CorrectAnswer = 85 };
+            var carryQuestion = new MathQuestion { TemplateId = "add_within_1000_one_carry", CorrectAnswer = 85, AnswerKind = "integer", CorrectAnswerText = "85" };
             A(classifier.Classify(carryQuestion, 75).ErrorType == "CARRY_MISSING", "carry_missing_pattern_detected");
-            var factQuestion = new MathQuestion { TemplateId = "times_table_2", CorrectAnswer = 12 };
+            var factQuestion = new MathQuestion { TemplateId = "times_table_2", CorrectAnswer = 12, AnswerKind = "integer", CorrectAnswerText = "12" };
             A(classifier.Classify(factQuestion, 10).ErrorType == "FACT_ERROR", "fact_error_classified");
             A(classifier.Classify(factQuestion, 12) == null, "correct_answer_has_no_error_event");
+            var compareQuestion = TextQuestion("compare_two_numbers_1000", ">", new[] { ">", "<" });
+            A(classifier.Classify(compareQuestion, "<").ErrorType == "COMPARISON_ERROR", "comparison_error_classified");
+            var placeQuestion = TextQuestion("place_value_decompose_3digit", "4 trăm, 7 chục, 2 đơn vị", new[] { "4 trăm, 7 chục, 2 đơn vị", "4 trăm, 2 chục, 7 đơn vị" });
+            A(classifier.Classify(placeQuestion, "4 trăm, 2 chục, 7 đơn vị").ErrorType == "PLACE_VALUE_ERROR", "place_value_error_classified");
+            var neighborQuestion = TextQuestion("predecessor_successor", "471 và 473", new[] { "471 và 473", "470 và 473" });
+            A(classifier.Classify(neighborQuestion, "470 và 473").ErrorType == "SEQUENCE_NEIGHBOR_ERROR", "neighbor_error_classified");
+            var divideQuestion = new MathQuestion { TemplateId = "divide_table_5_exact", CorrectAnswer = 7, AnswerKind = "integer", CorrectAnswerText = "7" };
+            A(classifier.Classify(divideQuestion, "6").ErrorType == "FACT_ERROR", "division_fact_error_classified");
+            var polylineQuestion = new MathQuestion { TemplateId = "polyline_length", CorrectAnswer = 25, AnswerKind = "integer", CorrectAnswerText = "25" };
+            A(classifier.Classify(polylineQuestion, "24").ErrorType == "MEASUREMENT_SUM_ERROR", "polyline_sum_error_classified");
+
+            TestGeneratorFuzz(refs);
             return refs;
         }
 
@@ -159,8 +179,8 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 });
 
                 var hintLevel = i == 2 ? 1 : 0;
-                var answer = i == 1 ? FirstWrongChoice(question) : question.CorrectAnswer;
-                var isCorrect = answer == question.CorrectAnswer;
+                var answer = i == 1 ? FirstWrongChoice(question) : question.CorrectAnswerDisplay;
+                var isCorrect = question.IsCorrectAnswer(answer);
                 if (isCorrect) correctCount++;
                 SkillSnapshot current;
                 if (!skills.TryGetValue(question.SkillId, out current))
@@ -258,8 +278,8 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 for (var i = 0; i < 4; i++)
                 {
                     var question = coordinator.NextQuestion();
-                    A(question != null && question.Choices.Count == 4, "coordinator_question_" + i);
-                    var answer = i == 1 ? FirstWrongChoice(question) : question.CorrectAnswer;
+                    A(question != null && question.DisplayChoices.Count >= 2 && question.DisplayChoices.Count <= 4, "coordinator_question_" + i);
+                    var answer = i == 1 ? FirstWrongChoice(question) : question.CorrectAnswerDisplay;
                     var outcome = coordinator.SubmitAnswerAt(answer, 0, "smoke", DateTime.UtcNow, 1200 + i * 100);
                     A(outcome.CompletedQuestionCount == i + 1, "coordinator_progress_" + i);
                     A(outcome.IsCorrect == (i != 1), "coordinator_correctness_" + i);
@@ -296,24 +316,129 @@ namespace WAHU.LearningSessionRuntimeSmoke
             };
         }
 
-        private static int FirstWrongChoice(MathQuestion q) { return q.Choices.First(x => x != q.CorrectAnswer); }
+        private static void TestGeneratorFuzz(IList<MathTemplateRef> refs)
+        {
+            foreach (var template in refs)
+            {
+                for (var seed = 0; seed < 50; seed++)
+                {
+                    var generator = new MathQuestionGenerator(100000 + seed * 97 + template.TemplateId.GetHashCode());
+                    var question = generator.Generate(new MathSelectionDecision
+                    {
+                        Template = template,
+                        DifficultyFit = 0.8,
+                        Reasons = new[] { "fuzz" },
+                        CandidateSummary = new[] { template.TemplateId }
+                    });
+                    RequireGeneratedContract(question);
+                }
+                A(true, "generator_fuzz_50_seeds_" + template.TemplateId);
+            }
+        }
+
+        private static void RequireGeneratedContract(MathQuestion q)
+        {
+            if (q == null || string.IsNullOrWhiteSpace(q.QuestionId) || string.IsNullOrWhiteSpace(q.PromptVi))
+                throw new Exception("FUZZ_FAIL missing identity/prompt");
+            if (q.DisplayChoices == null || q.DisplayChoices.Count < 2 || q.DisplayChoices.Count > 4)
+                throw new Exception("FUZZ_FAIL invalid choice count: " + q.TemplateId);
+            if (q.DisplayChoices.Distinct(StringComparer.Ordinal).Count() != q.DisplayChoices.Count)
+                throw new Exception("FUZZ_FAIL duplicate choices: " + q.TemplateId);
+            if (!q.DisplayChoices.Contains(q.CorrectAnswerDisplay) || !q.IsCorrectAnswer(q.CorrectAnswerDisplay))
+                throw new Exception("FUZZ_FAIL missing correct answer: " + q.TemplateId);
+            if (q.Representation != ExpectedRepresentation(q.TemplateId))
+                throw new Exception("FUZZ_FAIL representation mismatch: " + q.TemplateId);
+
+            if (q.TemplateId == "add_within_1000_no_carry" && CarryCount(ParseA(q), ParseB(q)) != 0)
+                throw new Exception("FUZZ_FAIL no-carry generator");
+            if (q.TemplateId == "add_within_1000_one_carry" && CarryCount(ParseA(q), ParseB(q)) != 1)
+                throw new Exception("FUZZ_FAIL one-carry generator");
+            if (q.TemplateId == "subtract_within_1000_no_borrow" && BorrowCount(ParseA(q), ParseB(q)) != 0)
+                throw new Exception("FUZZ_FAIL no-borrow generator");
+            if (q.TemplateId == "subtract_within_1000_one_borrow" && BorrowCount(ParseA(q), ParseB(q)) != 1)
+                throw new Exception("FUZZ_FAIL one-borrow generator");
+            if (q.TemplateId == "compare_two_numbers_1000" && (!q.UsesTextChoices || q.DisplayChoices.Count != 2))
+                throw new Exception("FUZZ_FAIL compare choice contract");
+            if (q.TemplateId == "predecessor_successor")
+            {
+                foreach (var choice in q.DisplayChoices)
+                    if (ExtractInts(choice).Any(x => x < 0 || x > 1000))
+                        throw new Exception("FUZZ_FAIL predecessor/successor distractor outside grade-2 domain");
+            }
+            if ((q.TemplateId == "place_value_decompose_3digit" || q.TemplateId == "expanded_form_3digit" || q.TemplateId == "predecessor_successor") &&
+                (!q.UsesTextChoices || q.DisplayChoices.Count != 4))
+                throw new Exception("FUZZ_FAIL structured text contract: " + q.TemplateId);
+            if (q.TemplateId == "divide_table_2_exact" || q.TemplateId == "divide_table_5_exact")
+            {
+                var values = ExtractInts(q.PromptVi);
+                if (values.Length < 2 || values[1] * q.CorrectAnswer != values[0])
+                    throw new Exception("FUZZ_FAIL exact division: " + q.TemplateId);
+            }
+            if (q.TemplateId == "polyline_length")
+            {
+                var values = ExtractInts(q.PromptVi);
+                if (values.Length < 3 || values[0] + values[1] + values[2] != q.CorrectAnswer)
+                    throw new Exception("FUZZ_FAIL polyline sum");
+            }
+        }
+
+        private static MathQuestion TextQuestion(string templateId, string correct, IList<string> choices)
+        {
+            return new MathQuestion
+            {
+                TemplateId = templateId,
+                AnswerKind = "text",
+                CorrectAnswerText = correct,
+                ChoiceTexts = choices
+            };
+        }
+
+        private static int[] ExtractInts(string text)
+        {
+            var values = new List<int>();
+            var current = -1;
+            foreach (var ch in text ?? string.Empty)
+            {
+                if (ch >= '0' && ch <= '9')
+                {
+                    if (current < 0) current = 0;
+                    current = current * 10 + (ch - '0');
+                }
+                else if (current >= 0)
+                {
+                    values.Add(current);
+                    current = -1;
+                }
+            }
+            if (current >= 0) values.Add(current);
+            return values.ToArray();
+        }
+
+        private static string FirstWrongChoice(MathQuestion q) { return q.DisplayChoices.First(x => !string.Equals(x, q.CorrectAnswerDisplay, StringComparison.Ordinal)); }
         private static void AddRecent(IList<string> list, string value) { list.Add(value); while (list.Count > 4) list.RemoveAt(0); }
 
         private static string ExpectedRepresentation(string templateId)
         {
+            if (templateId == "place_value_decompose_3digit" || templateId == "expanded_form_3digit") return "place_value_blocks";
+            if (templateId == "predecessor_successor" || templateId == "compare_two_numbers_1000") return "number_line_1000";
             if (templateId == "mental_add_within_20" || templateId == "mental_sub_within_20") return "number_ray";
             if (templateId == "times_table_2" || templateId == "times_table_5") return "equal_groups";
+            if (templateId == "divide_table_2_exact" || templateId == "divide_table_5_exact") return "equal_groups_division";
             if (templateId.StartsWith("add_within_1000", StringComparison.Ordinal) || templateId.StartsWith("subtract_within_1000", StringComparison.Ordinal)) return "place_value";
+            if (templateId == "polyline_length") return "polyline";
             return "symbolic";
         }
 
         private static bool RoadmapScoresBounded(MathRoadmapSnapshot roadmap)
         {
-            if (roadmap == null || roadmap.Mental20 == null || roadmap.Written1000 == null || roadmap.Tables25 == null) return false;
-            return roadmap.Mental20.MasteryAverage >= 0 && roadmap.Mental20.MasteryAverage <= 1 &&
-                   roadmap.Written1000.MasteryAverage >= 0 && roadmap.Written1000.MasteryAverage <= 1 &&
-                   roadmap.Tables25.MasteryAverage >= 0 && roadmap.Tables25.MasteryAverage <= 1;
+            if (roadmap == null || roadmap.NumberSense == null || roadmap.Mental20 == null || roadmap.Written1000 == null ||
+                roadmap.Tables25 == null || roadmap.Measurement == null) return false;
+            return Bounded(roadmap.NumberSense.MasteryAverage) && Bounded(roadmap.Mental20.MasteryAverage) &&
+                   Bounded(roadmap.Written1000.MasteryAverage) && Bounded(roadmap.Tables25.MasteryAverage) &&
+                   Bounded(roadmap.Measurement.MasteryAverage);
         }
+
+        private static bool Bounded(double value) { return value >= 0 && value <= 1; }
 
         private static int ParseA(MathQuestion q) { return ParseBinary(q)[0]; }
         private static int ParseB(MathQuestion q) { return ParseBinary(q)[1]; }

@@ -155,12 +155,22 @@ namespace WAHU.Session
 
         public MathAnswerOutcome SubmitAnswer(int answer, int hintLevel, string inputMethod)
         {
+            return SubmitAnswer(answer.ToString(System.Globalization.CultureInfo.InvariantCulture), hintLevel, inputMethod);
+        }
+
+        public MathAnswerOutcome SubmitAnswer(string answer, int hintLevel, string inputMethod)
+        {
             var answered = DateTime.UtcNow;
             var responseMs = (int)Math.Min(int.MaxValue, Math.Max(0, (answered - _questionStartedAtUtc).TotalMilliseconds));
             return SubmitAnswerAt(answer, hintLevel, inputMethod, answered, responseMs);
         }
 
         public MathAnswerOutcome SubmitAnswerAt(int answer, int hintLevel, string inputMethod, DateTime answeredAtUtc, int responseMs)
+        {
+            return SubmitAnswerAt(answer.ToString(System.Globalization.CultureInfo.InvariantCulture), hintLevel, inputMethod, answeredAtUtc, responseMs);
+        }
+
+        public MathAnswerOutcome SubmitAnswerAt(string answer, int hintLevel, string inputMethod, DateTime answeredAtUtc, int responseMs)
         {
             EnsureActive();
             if (_currentQuestion == null || _currentSelection == null) throw new InvalidOperationException("No active question.");
@@ -169,8 +179,9 @@ namespace WAHU.Session
             if (string.IsNullOrWhiteSpace(inputMethod)) inputMethod = "mouse";
             var answeredUtc = answeredAtUtc.Kind == DateTimeKind.Utc ? answeredAtUtc : answeredAtUtc.ToUniversalTime();
             var question = _currentQuestion;
-            var isCorrect = answer == question.CorrectAnswer;
-            var error = _errorClassifier.Classify(question, answer);
+            var normalizedAnswer = answer == null ? string.Empty : answer.Trim();
+            var isCorrect = question.IsCorrectAnswer(normalizedAnswer);
+            var error = _errorClassifier.Classify(question, normalizedAnswer);
 
             SkillSnapshot current;
             if (!_skills.TryGetValue(question.SkillId, out current) || current == null)
@@ -207,7 +218,7 @@ namespace WAHU.Session
                 Subject = "math",
                 StartedAtUtc = answeredUtc.AddMilliseconds(-responseMs),
                 AnsweredAtUtc = answeredUtc,
-                AnswerJson = _json.Serialize(new Dictionary<string, object> { { "answer", answer } }),
+                AnswerJson = _json.Serialize(new Dictionary<string, object> { { "answer", AnswerValueForJson(question, normalizedAnswer) } }),
                 IsCorrect = isCorrect,
                 ResponseMs = responseMs,
                 HintLevel = hintLevel,
@@ -290,6 +301,7 @@ namespace WAHU.Session
             {
                 IsCorrect = isCorrect,
                 CorrectAnswer = question.CorrectAnswer,
+                CorrectAnswerDisplay = question.CorrectAnswerDisplay,
                 HintLevel = hintLevel,
                 FeedbackVi = BuildFeedback(isCorrect, hintLevel, error),
                 Behavior = behaviorDecision,
@@ -404,12 +416,29 @@ namespace WAHU.Session
         {
             switch (templateId)
             {
+                case "expanded_form_3digit": return "place_value_decompose_3digit";
+                case "compare_two_numbers_1000": return "place_value_decompose_3digit";
+                case "predecessor_successor": return "compare_two_numbers_1000";
+                case "divide_table_2_exact": return "times_table_2";
+                case "divide_table_5_exact": return "times_table_5";
+                case "polyline_length": return "mental_add_within_20";
                 case "add_within_1000_one_carry": return "add_within_1000_no_carry";
                 case "subtract_within_1000_one_borrow": return "subtract_within_1000_no_borrow";
                 case "add_within_1000_no_carry": return "mental_add_within_20";
                 case "subtract_within_1000_no_borrow": return "mental_sub_within_20";
                 default: return templateId;
             }
+        }
+
+        private static object AnswerValueForJson(MathQuestion question, string answer)
+        {
+            if (question != null && !question.UsesTextChoices)
+            {
+                int numeric;
+                if (int.TryParse(answer, System.Globalization.NumberStyles.Integer,
+                    System.Globalization.CultureInfo.InvariantCulture, out numeric)) return numeric;
+            }
+            return answer ?? string.Empty;
         }
 
         private static string BuildGardenUnlockMessage(IList<string> itemIds)
@@ -435,6 +464,10 @@ namespace WAHU.Session
             if (correct) return "Đúng rồi. Gợi ý đã giúp con hoàn thành bước này.";
             if (error != null && error.ErrorType == "CARRY_MISSING") return "Chưa đúng. Con nhớ kiểm tra bước nhớ sang hàng bên trái nhé.";
             if (error != null && error.ErrorType == "BORROW_MISSING") return "Chưa đúng. Con kiểm tra lại bước mượn ở hàng cần trừ nhé.";
+            if (error != null && error.ErrorType == "PLACE_VALUE_ERROR") return "Chưa đúng. Con nhìn lại từng hàng trăm, chục và đơn vị nhé.";
+            if (error != null && error.ErrorType == "COMPARISON_ERROR") return "Chưa đúng. Mình so sánh từ hàng lớn nhất trước nhé.";
+            if (error != null && error.ErrorType == "SEQUENCE_NEIGHBOR_ERROR") return "Chưa đúng. Số liền trước kém 1 và số liền sau hơn 1 nhé.";
+            if (error != null && error.ErrorType == "MEASUREMENT_SUM_ERROR") return "Chưa đúng. Độ dài đường gấp khúc là tổng các đoạn của nó.";
             return "Chưa đúng. Mình xem gợi ý rồi thử câu tiếp theo nhé.";
         }
 

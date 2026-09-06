@@ -32,10 +32,47 @@ namespace WAHU.Learning
         public string PromptVi { get; set; }
         public int CorrectAnswer { get; set; }
         public IList<int> Choices { get; set; }
+        public string AnswerKind { get; set; }
+        public string CorrectAnswerText { get; set; }
+        public IList<string> ChoiceTexts { get; set; }
         public string Representation { get; set; }
         public string HintLevel1 { get; set; }
         public string HintLevel2 { get; set; }
         public double DifficultyFit { get; set; }
+
+        public bool UsesTextChoices
+        {
+            get { return string.Equals(AnswerKind, "text", StringComparison.Ordinal); }
+        }
+
+        public string CorrectAnswerDisplay
+        {
+            get
+            {
+                return UsesTextChoices ? (CorrectAnswerText ?? string.Empty) : CorrectAnswer.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            }
+        }
+
+        public IList<string> DisplayChoices
+        {
+            get
+            {
+                if (ChoiceTexts != null && ChoiceTexts.Count > 0) return ChoiceTexts;
+                var values = new List<string>();
+                if (Choices != null)
+                    foreach (var value in Choices) values.Add(value.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                return values;
+            }
+        }
+
+        public bool IsCorrectAnswer(string answer)
+        {
+            if (UsesTextChoices)
+                return string.Equals((answer ?? string.Empty).Trim(), (CorrectAnswerText ?? string.Empty).Trim(), StringComparison.Ordinal);
+            int parsed;
+            return int.TryParse(answer, System.Globalization.NumberStyles.Integer,
+                System.Globalization.CultureInfo.InvariantCulture, out parsed) && parsed == CorrectAnswer;
+        }
     }
 
     public sealed class MathSelectionDecision

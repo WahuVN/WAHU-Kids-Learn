@@ -135,15 +135,40 @@ namespace WAHU.Learning
 
         public MathErrorClassification Classify(MathQuestion question, int answer)
         {
+            return Classify(question, answer.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        }
+
+        public MathErrorClassification Classify(MathQuestion question, string answer)
+        {
             if (question == null) throw new ArgumentNullException("question");
-            if (answer == question.CorrectAnswer) return null;
-            var difference = Math.Abs(question.CorrectAnswer - answer);
+            if (question.IsCorrectAnswer(answer)) return null;
+
+            if (question.UsesTextChoices)
+            {
+                if (question.TemplateId == "place_value_decompose_3digit" || question.TemplateId == "expanded_form_3digit")
+                    return New("PLACE_VALUE_ERROR", 0.66, "wrong_place_value_choice");
+                if (question.TemplateId == "compare_two_numbers_1000")
+                    return New("COMPARISON_ERROR", 0.68, "wrong_comparison_symbol");
+                if (question.TemplateId == "predecessor_successor")
+                    return New("SEQUENCE_NEIGHBOR_ERROR", 0.62, "wrong_predecessor_successor_pair");
+                return New("UNKNOWN", 0.40, "wrong_text_choice_single_attempt");
+            }
+
+            int numeric;
+            if (!int.TryParse(answer, System.Globalization.NumberStyles.Integer,
+                System.Globalization.CultureInfo.InvariantCulture, out numeric))
+                return New("INPUT_FORMAT_ERROR", 0.90, "numeric_question_received_non_numeric_answer");
+            var difference = Math.Abs(question.CorrectAnswer - numeric);
             if (question.TemplateId == "add_within_1000_one_carry" && (difference == 10 || difference == 100))
                 return New("CARRY_MISSING", 0.78, "answer_matches_common_missing_carry_offset");
             if (question.TemplateId == "subtract_within_1000_one_borrow" && (difference == 10 || difference == 100))
                 return New("BORROW_MISSING", 0.76, "answer_matches_common_missing_borrow_offset");
-            if (question.TemplateId.StartsWith("mental_", StringComparison.Ordinal) || question.TemplateId.StartsWith("times_table_", StringComparison.Ordinal))
+            if (question.TemplateId.StartsWith("mental_", StringComparison.Ordinal) ||
+                question.TemplateId.StartsWith("times_table_", StringComparison.Ordinal) ||
+                question.TemplateId.StartsWith("divide_table_", StringComparison.Ordinal))
                 return New("FACT_ERROR", 0.62, "wrong_numeric_fact_answer");
+            if (question.TemplateId == "polyline_length")
+                return New("MEASUREMENT_SUM_ERROR", 0.58, "wrong_polyline_length_sum");
             return New("UNKNOWN", 0.40, "single_attempt_insufficient_for_specific_diagnosis");
         }
 

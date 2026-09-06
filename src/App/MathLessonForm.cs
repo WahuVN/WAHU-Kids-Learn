@@ -16,6 +16,7 @@ namespace WAHUKidsLearn
         private MathSessionCoordinator _coordinator;
         private MathQuestion _question;
         private readonly AnswerChoiceButton[] _answerButtons = new AnswerChoiceButton[4];
+        private TableLayoutPanel _answerGrid;
         private Label _progressText;
         private ProgressStrip _progressBar;
         private Label _prompt;
@@ -164,17 +165,17 @@ namespace WAHUKidsLearn
             questionCard.Controls.Add(questionLayout);
             root.Controls.Add(questionCard, 0, 2);
 
-            var answerGrid = new TableLayoutPanel
+            _answerGrid = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
                 ColumnCount = 2,
                 RowCount = 2,
                 Padding = new Padding(72, 4, 72, 8)
             };
-            answerGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-            answerGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-            answerGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
-            answerGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
+            _answerGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+            _answerGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+            _answerGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
+            _answerGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
             for (var i = 0; i < _answerButtons.Length; i++)
             {
                 var index = i;
@@ -189,9 +190,9 @@ namespace WAHUKidsLearn
                 };
                 button.Click += delegate { SubmitChoice(index, "mouse"); };
                 _answerButtons[i] = button;
-                answerGrid.Controls.Add(button, i % 2, i / 2);
+                _answerGrid.Controls.Add(button, i % 2, i / 2);
             }
-            root.Controls.Add(answerGrid, 0, 3);
+            root.Controls.Add(_answerGrid, 0, 3);
 
             _feedbackCard = new ChildCard
             {
@@ -290,6 +291,8 @@ namespace WAHUKidsLearn
                 _hintLevel = 0;
                 _submitting = false;
                 _prompt.Text = _question.PromptVi;
+                var promptLength = string.IsNullOrWhiteSpace(_question.PromptVi) ? 0 : _question.PromptVi.Length;
+                _prompt.Font = ChildVisualTheme.Font(promptLength > 82 ? 14.5f : (promptLength > 48 ? 18f : 30f), FontStyle.Bold);
                 _completionVisual.Visible = false;
                 _instructionVisual.Visible = true;
                 _instructionVisual.SetQuestion(_question, 0);
@@ -306,13 +309,22 @@ namespace WAHUKidsLearn
                 var questionNumber = summary.Attempts + 1;
                 _progressText.Text = "Câu " + questionNumber + " / " + MathSessionCoordinator.DefaultTargetQuestionCount;
                 _progressBar.Value = summary.Attempts;
+                var displayChoices = _question.DisplayChoices;
+                if (displayChoices == null || displayChoices.Count < 2 || displayChoices.Count > _answerButtons.Length)
+                    throw new InvalidDataException("Math question must expose 2 to 4 display choices.");
+                ConfigureAnswerLayout(displayChoices.Count);
                 for (var i = 0; i < _answerButtons.Length; i++)
                 {
-                    _answerButtons[i].Text = _question.Choices[i].ToString();
+                    var visible = i < displayChoices.Count;
+                    _answerButtons[i].Visible = visible;
+                    if (!visible) continue;
+                    var choiceText = displayChoices[i] ?? string.Empty;
+                    _answerButtons[i].Text = choiceText;
+                    _answerButtons[i].Font = ChildVisualTheme.Font(choiceText.Length > 22 ? 10.5f : (choiceText.Length > 10 ? 13f : 21f), FontStyle.Bold);
+                    _answerButtons[i].AccessibleDescription = "Lựa chọn: " + choiceText;
                     _answerButtons[i].BadgeText = (i + 1).ToString();
                     _answerButtons[i].VisualState = AnswerChoiceButton.ChoiceVisualState.Idle;
                     _answerButtons[i].Enabled = true;
-                    _answerButtons[i].Visible = true;
                 }
                 _answerButtons[0].Focus();
             }
@@ -320,6 +332,41 @@ namespace WAHUKidsLearn
             {
                 FailCurrentSession("Không thể mở câu tiếp theo. Những câu con đã làm vẫn được giữ lại.");
             }
+        }
+
+        private void ConfigureAnswerLayout(int choiceCount)
+        {
+            if (_answerGrid == null) return;
+            _answerGrid.SuspendLayout();
+            try
+            {
+                _answerGrid.SetColumnSpan(_answerButtons[0], 1);
+                _answerGrid.SetColumnSpan(_answerButtons[1], 1);
+                _answerGrid.SetColumnSpan(_answerButtons[2], 1);
+                _answerGrid.SetColumnSpan(_answerButtons[3], 1);
+
+                if (choiceCount == 2)
+                {
+                    _answerGrid.RowStyles[0].Height = 100f;
+                    _answerGrid.RowStyles[1].Height = 0f;
+                    _answerGrid.SetCellPosition(_answerButtons[0], new TableLayoutPanelCellPosition(0, 0));
+                    _answerGrid.SetCellPosition(_answerButtons[1], new TableLayoutPanelCellPosition(1, 0));
+                    _answerButtons[0].Margin = new Padding(9, 16, 9, 16);
+                    _answerButtons[1].Margin = new Padding(9, 16, 9, 16);
+                }
+                else
+                {
+                    _answerGrid.RowStyles[0].Height = 50f;
+                    _answerGrid.RowStyles[1].Height = 50f;
+                    _answerGrid.SetCellPosition(_answerButtons[0], new TableLayoutPanelCellPosition(0, 0));
+                    _answerGrid.SetCellPosition(_answerButtons[1], new TableLayoutPanelCellPosition(1, 0));
+                    _answerGrid.SetCellPosition(_answerButtons[2], new TableLayoutPanelCellPosition(0, 1));
+                    _answerGrid.SetCellPosition(_answerButtons[3], new TableLayoutPanelCellPosition(1, 1));
+                    for (var i = 0; i < _answerButtons.Length; i++) _answerButtons[i].Margin = new Padding(9);
+                    if (choiceCount == 3) _answerGrid.SetColumnSpan(_answerButtons[2], 2);
+                }
+            }
+            finally { _answerGrid.ResumeLayout(true); }
         }
 
         private void ShowHint()
@@ -343,12 +390,14 @@ namespace WAHUKidsLearn
         private void SubmitChoice(int index, string inputMode)
         {
             if (_question == null || _submitting || index < 0 || index >= _answerButtons.Length) return;
+            var choices = _question.DisplayChoices;
+            if (choices == null || index >= choices.Count) return;
             _submitting = true;
             SetAnswersEnabled(false);
             _hintButton.Enabled = false;
             try
             {
-                var selected = _question.Choices[index];
+                var selected = choices[index];
                 var outcome = _coordinator.SubmitAnswer(selected, _hintLevel, inputMode);
                 var correctIndex = FindCorrectChoiceIndex();
                 for (var i = 0; i < _answerButtons.Length; i++)
@@ -397,9 +446,11 @@ namespace WAHUKidsLearn
 
         private int FindCorrectChoiceIndex()
         {
-            if (_question == null || _question.Choices == null) return -1;
-            for (var i = 0; i < _question.Choices.Count; i++)
-                if (_question.Choices[i] == _question.CorrectAnswer) return i;
+            if (_question == null) return -1;
+            var choices = _question.DisplayChoices;
+            if (choices == null) return -1;
+            for (var i = 0; i < choices.Count; i++)
+                if (string.Equals(choices[i], _question.CorrectAnswerDisplay, StringComparison.Ordinal)) return i;
             return -1;
         }
 
