@@ -1,0 +1,3557 @@
+{
+  "schema_version": 1,
+  "catalog_id": "math_grade2_lesson_catalog_v1",
+  "subject": "math",
+  "grade": 2,
+  "curriculum_id": "vn_moet_math_grade2_tt32_2018",
+  "language": "vi",
+  "id_policy": "deterministic_ascii_lower_snake_preserve_existing_uppercase_skill_ids",
+  "chapters": [
+    {
+      "id": "m2_ch01_numbers",
+      "title_vi": "Số tự nhiên đến 1000",
+      "domain_key": "numbers"
+    },
+    {
+      "id": "m2_ch02_add_sub",
+      "title_vi": "Cộng và trừ",
+      "domain_key": "addition_subtraction"
+    },
+    {
+      "id": "m2_ch03_mul_div",
+      "title_vi": "Nhân và chia",
+      "domain_key": "multiplication_division"
+    },
+    {
+      "id": "m2_ch04_word_problems",
+      "title_vi": "Bài toán thực tế một bước",
+      "domain_key": "word_problems"
+    },
+    {
+      "id": "m2_ch05_geometry",
+      "title_vi": "Hình học trực quan",
+      "domain_key": "geometry"
+    },
+    {
+      "id": "m2_ch06_measurement",
+      "title_vi": "Đo lường",
+      "domain_key": "measurement"
+    },
+    {
+      "id": "m2_ch07_data_chance",
+      "title_vi": "Dữ liệu và khả năng xảy ra",
+      "domain_key": "statistics_probability"
+    }
+  ],
+  "topics": [
+    {
+      "id": "m2_tp01_count_place",
+      "chapter_id": "m2_ch01_numbers",
+      "title_vi": "Đếm, đọc, viết và cấu tạo số"
+    },
+    {
+      "id": "m2_tp02_compare_sort",
+      "chapter_id": "m2_ch01_numbers",
+      "title_vi": "So sánh và sắp xếp số"
+    },
+    {
+      "id": "m2_tp03_estimate_tens",
+      "chapter_id": "m2_ch01_numbers",
+      "title_vi": "Ước lượng theo chục"
+    },
+    {
+      "id": "m2_tp04_add_sub_meaning",
+      "chapter_id": "m2_ch02_add_sub",
+      "title_vi": "Thành phần phép cộng và phép trừ"
+    },
+    {
+      "id": "m2_tp05_written_add_sub",
+      "chapter_id": "m2_ch02_add_sub",
+      "title_vi": "Cộng trừ trong phạm vi 1000"
+    },
+    {
+      "id": "m2_tp06_mental_expression",
+      "chapter_id": "m2_ch02_add_sub",
+      "title_vi": "Tính nhẩm và biểu thức"
+    },
+    {
+      "id": "m2_tp07_mul_div_meaning",
+      "chapter_id": "m2_ch03_mul_div",
+      "title_vi": "Ý nghĩa và thành phần nhân chia"
+    },
+    {
+      "id": "m2_tp08_tables_2_5",
+      "chapter_id": "m2_ch03_mul_div",
+      "title_vi": "Bảng nhân chia 2 và 5"
+    },
+    {
+      "id": "m2_tp09_problem_meaning",
+      "chapter_id": "m2_ch04_word_problems",
+      "title_vi": "Chọn phép tính từ tình huống"
+    },
+    {
+      "id": "m2_tp10_problem_contexts",
+      "chapter_id": "m2_ch04_word_problems",
+      "title_vi": "Giải bài toán một bước"
+    },
+    {
+      "id": "m2_tp11_lines_shapes",
+      "chapter_id": "m2_ch05_geometry",
+      "title_vi": "Điểm, đường và hình"
+    },
+    {
+      "id": "m2_tp12_solids_construct",
+      "chapter_id": "m2_ch05_geometry",
+      "title_vi": "Khối và tạo hình"
+    },
+    {
+      "id": "m2_tp13_mass_length_capacity",
+      "chapter_id": "m2_ch06_measurement",
+      "title_vi": "Khối lượng, dung tích và độ dài"
+    },
+    {
+      "id": "m2_tp14_time_money",
+      "chapter_id": "m2_ch06_measurement",
+      "title_vi": "Thời gian, lịch và tiền Việt Nam"
+    },
+    {
+      "id": "m2_tp15_measure_practice",
+      "chapter_id": "m2_ch06_measurement",
+      "title_vi": "Đo, đổi đơn vị và giải quyết vấn đề"
+    },
+    {
+      "id": "m2_tp16_data",
+      "chapter_id": "m2_ch07_data_chance",
+      "title_vi": "Thu thập và đọc dữ liệu"
+    },
+    {
+      "id": "m2_tp17_chance",
+      "chapter_id": "m2_ch07_data_chance",
+      "title_vi": "Có thể, chắc chắn, không thể"
+    }
+  ],
+  "lessons": [
+    {
+      "id": "m2_ls_num_count_read_write_0_1000",
+      "chapter_id": "m2_ch01_numbers",
+      "topic_id": "m2_tp01_count_place",
+      "skill_id": "NUM_COUNT_READ_WRITE_0_1000",
+      "order_in_domain": 1,
+      "title_vi": "Đếm, đọc và viết số đến 1000",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: đếm, đọc và viết số đến 1000.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Mỗi số đến 1000 được đọc và viết theo giá trị của hàng trăm, hàng chục và hàng đơn vị. Khi một hàng có 0, vẫn phải giữ đúng vị trí của chữ số đó.",
+      "concepts": [
+        {
+          "id": "m2_cp_num_count_read_write_0_1000_01",
+          "name_vi": "Đọc và viết số",
+          "definition_vi": "Ghép số trăm, số chục và số đơn vị theo đúng vị trí để tạo hoặc đọc một số."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_num_count_read_write_0_1000_01",
+          "prompt_vi": "Số gồm 5 trăm, 0 chục và 7 đơn vị là số nào?",
+          "solution_steps_vi": [
+            "5 trăm là 500, 0 chục là 0 và 7 đơn vị là 7; 500 + 0 + 7 = 507.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "507"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_num_count_read_write_0_1000_01"
+        ],
+        "medium": [
+          "m2_q_num_count_read_write_0_1000_02"
+        ],
+        "application": [
+          "m2_q_num_count_read_write_0_1000_03"
+        ]
+      },
+      "prerequisite_skills": [],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_num_full_hundreds_recognize",
+      "chapter_id": "m2_ch01_numbers",
+      "topic_id": "m2_tp01_count_place",
+      "skill_id": "NUM_FULL_HUNDREDS_RECOGNIZE",
+      "order_in_domain": 2,
+      "title_vi": "Nhận biết số tròn trăm",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: nhận biết số tròn trăm.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Số tròn trăm có hàng chục và hàng đơn vị đều bằng 0, ví dụ 300, 700, 1000. Có thể xem đó là một số lượng gồm các nhóm 100 đầy đủ.",
+      "concepts": [
+        {
+          "id": "m2_cp_num_full_hundreds_recognize_01",
+          "name_vi": "Số tròn trăm",
+          "definition_vi": "Số có dạng n00 trong phạm vi 1000, với hàng chục và đơn vị bằng 0."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_num_full_hundreds_recognize_01",
+          "prompt_vi": "Số nào là số tròn trăm?",
+          "solution_steps_vi": [
+            "600 có hàng chục và hàng đơn vị đều bằng 0.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "600"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_num_full_hundreds_recognize_01"
+        ],
+        "medium": [
+          "m2_q_num_full_hundreds_recognize_02"
+        ],
+        "application": [
+          "m2_q_num_full_hundreds_recognize_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "NUM_COUNT_READ_WRITE_0_1000"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_num_predecessor_successor",
+      "chapter_id": "m2_ch01_numbers",
+      "topic_id": "m2_tp01_count_place",
+      "skill_id": "NUM_PREDECESSOR_SUCCESSOR",
+      "order_in_domain": 3,
+      "title_vi": "Số liền trước và số liền sau",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: số liền trước và số liền sau.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Số liền trước của một số nhỏ hơn số đó đúng 1; số liền sau lớn hơn đúng 1. Quy tắc này dùng được cả khi chuyển qua chục hoặc trăm.",
+      "concepts": [
+        {
+          "id": "m2_cp_num_predecessor_successor_01",
+          "name_vi": "Liền trước và liền sau",
+          "definition_vi": "Với số n, số liền trước là n - 1 và số liền sau là n + 1 khi còn trong phạm vi học."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_num_predecessor_successor_01",
+          "prompt_vi": "Số liền trước của 500 là số nào?",
+          "solution_steps_vi": [
+            "Số liền trước nhỏ hơn 500 đúng 1 nên là 499.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "499"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_num_predecessor_successor_01"
+        ],
+        "medium": [
+          "m2_q_num_predecessor_successor_02"
+        ],
+        "application": [
+          "m2_q_num_predecessor_successor_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "NUM_COUNT_READ_WRITE_0_1000"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_place_value_hundreds_tens_ones",
+      "chapter_id": "m2_ch01_numbers",
+      "topic_id": "m2_tp01_count_place",
+      "skill_id": "PLACE_VALUE_HUNDREDS_TENS_ONES",
+      "order_in_domain": 4,
+      "title_vi": "Giá trị hàng trăm, chục, đơn vị",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: giá trị hàng trăm, chục, đơn vị.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Vị trí của chữ số quyết định giá trị của nó: hàng trăm gấp 100 lần đơn vị, hàng chục gấp 10 lần đơn vị, hàng đơn vị giữ nguyên.",
+      "concepts": [
+        {
+          "id": "m2_cp_place_value_hundreds_tens_ones_01",
+          "name_vi": "Giá trị theo hàng",
+          "definition_vi": "Trong số có ba chữ số, chữ số thứ nhất là hàng trăm, thứ hai là hàng chục, thứ ba là hàng đơn vị."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_place_value_hundreds_tens_ones_01",
+          "prompt_vi": "Trong số 684, chữ số 6 có giá trị là bao nhiêu?",
+          "solution_steps_vi": [
+            "Chữ số 6 đứng ở hàng trăm nên có giá trị 600.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "600"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_place_value_hundreds_tens_ones_01"
+        ],
+        "medium": [
+          "m2_q_place_value_hundreds_tens_ones_02"
+        ],
+        "application": [
+          "m2_q_place_value_hundreds_tens_ones_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "NUM_COUNT_READ_WRITE_0_1000"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_num_expanded_form_hto",
+      "chapter_id": "m2_ch01_numbers",
+      "topic_id": "m2_tp01_count_place",
+      "skill_id": "NUM_EXPANDED_FORM_HTO",
+      "order_in_domain": 5,
+      "title_vi": "Viết số thành tổng trăm, chục, đơn vị",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: viết số thành tổng trăm, chục, đơn vị.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Một số có thể tách thành tổng giá trị của từng hàng. Ví dụ 352 = 300 + 50 + 2; nếu một hàng bằng 0 thì giá trị của hàng đó bằng 0.",
+      "concepts": [
+        {
+          "id": "m2_cp_num_expanded_form_hto_01",
+          "name_vi": "Dạng khai triển",
+          "definition_vi": "Dạng khai triển biểu diễn một số bằng tổng giá trị hàng trăm, hàng chục và hàng đơn vị."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_num_expanded_form_hto_01",
+          "prompt_vi": "Dạng khai triển đúng của 352 là gì?",
+          "solution_steps_vi": [
+            "352 có 3 trăm, 5 chục và 2 đơn vị nên bằng 300 + 50 + 2.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "300 + 50 + 2"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_num_expanded_form_hto_01"
+        ],
+        "medium": [
+          "m2_q_num_expanded_form_hto_02"
+        ],
+        "application": [
+          "m2_q_num_expanded_form_hto_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "PLACE_VALUE_HUNDREDS_TENS_ONES"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_number_ray_fill",
+      "chapter_id": "m2_ch01_numbers",
+      "topic_id": "m2_tp01_count_place",
+      "skill_id": "NUMBER_RAY_FILL",
+      "order_in_domain": 6,
+      "title_vi": "Điền số trên tia số",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: điền số trên tia số.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Các vạch trên tia số được sắp theo thứ tự tăng dần với một bước đều. Muốn điền số thiếu, xác định khoảng cách giữa hai vạch kề nhau rồi cộng hoặc trừ đúng bước đó.",
+      "concepts": [
+        {
+          "id": "m2_cp_number_ray_fill_01",
+          "name_vi": "Bước trên tia số",
+          "definition_vi": "Khoảng cách số giữa hai vạch liên tiếp là không đổi trong cùng một bài tia số."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_number_ray_fill_01",
+          "prompt_vi": "Trên tia số có các vạch 200, 300, __, 500. Số còn thiếu là gì?",
+          "solution_steps_vi": [
+            "Mỗi vạch tăng 100 nên sau 300 là 400.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "400"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_number_ray_fill_01"
+        ],
+        "medium": [
+          "m2_q_number_ray_fill_02"
+        ],
+        "application": [
+          "m2_q_number_ray_fill_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "NUM_PREDECESSOR_SUCCESSOR"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_num_compare_0_1000",
+      "chapter_id": "m2_ch01_numbers",
+      "topic_id": "m2_tp02_compare_sort",
+      "skill_id": "NUM_COMPARE_0_1000",
+      "order_in_domain": 7,
+      "title_vi": "So sánh hai số đến 1000",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: so sánh hai số đến 1000.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "So sánh từ hàng lớn nhất: hàng trăm, rồi hàng chục, rồi hàng đơn vị. Hàng đầu tiên khác nhau quyết định số nào lớn hơn.",
+      "concepts": [
+        {
+          "id": "m2_cp_num_compare_0_1000_01",
+          "name_vi": "So sánh số",
+          "definition_vi": "Dùng các dấu >, <, = sau khi so sánh lần lượt từ hàng cao nhất xuống."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_num_compare_0_1000_01",
+          "prompt_vi": "Điền dấu đúng: 608 __ 680",
+          "solution_steps_vi": [
+            "Cùng 6 trăm nhưng 0 chục nhỏ hơn 8 chục nên 608 < 680.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "<"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_num_compare_0_1000_01"
+        ],
+        "medium": [
+          "m2_q_num_compare_0_1000_02"
+        ],
+        "application": [
+          "m2_q_num_compare_0_1000_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "PLACE_VALUE_HUNDREDS_TENS_ONES"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_num_min_max_up_to_4",
+      "chapter_id": "m2_ch01_numbers",
+      "topic_id": "m2_tp02_compare_sort",
+      "skill_id": "NUM_MIN_MAX_UP_TO_4",
+      "order_in_domain": 8,
+      "title_vi": "Tìm số lớn nhất và bé nhất",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: tìm số lớn nhất và bé nhất.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Để tìm số lớn nhất hoặc bé nhất trong nhóm không quá bốn số, so sánh các số theo giá trị hàng rồi giữ lại số lớn hơn hoặc bé hơn theo yêu cầu.",
+      "concepts": [
+        {
+          "id": "m2_cp_num_min_max_up_to_4_01",
+          "name_vi": "Lớn nhất và bé nhất",
+          "definition_vi": "Số lớn nhất không nhỏ hơn số nào trong nhóm; số bé nhất không lớn hơn số nào trong nhóm."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_num_min_max_up_to_4_01",
+          "prompt_vi": "Số bé nhất trong nhóm 407, 470, 704, 740 là số nào?",
+          "solution_steps_vi": [
+            "Cả bốn số đều khác nhau; so sánh hàng trăm cho thấy 407 và 470 nhỏ hơn các số 7 trăm, rồi 407 < 470.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "407"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_num_min_max_up_to_4_01"
+        ],
+        "medium": [
+          "m2_q_num_min_max_up_to_4_02"
+        ],
+        "application": [
+          "m2_q_num_min_max_up_to_4_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "NUM_COMPARE_0_1000"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_num_sort_up_to_4",
+      "chapter_id": "m2_ch01_numbers",
+      "topic_id": "m2_tp02_compare_sort",
+      "skill_id": "NUM_SORT_UP_TO_4",
+      "order_in_domain": 9,
+      "title_vi": "Sắp xếp đến bốn số",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: sắp xếp đến bốn số.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Sắp xếp tăng dần là từ bé đến lớn; giảm dần là từ lớn đến bé. Có thể so sánh từng cặp hoặc lần lượt chọn số nhỏ nhất/lớn nhất còn lại.",
+      "concepts": [
+        {
+          "id": "m2_cp_num_sort_up_to_4_01",
+          "name_vi": "Thứ tự tăng giảm",
+          "definition_vi": "Tăng dần: mỗi số sau không nhỏ hơn số trước; giảm dần: mỗi số sau không lớn hơn số trước."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_num_sort_up_to_4_01",
+          "prompt_vi": "Sắp xếp tăng dần 320, 302, 230, 203.",
+          "solution_steps_vi": [
+            "Tăng dần là từ bé đến lớn: 203 < 230 < 302 < 320.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "203, 230, 302, 320"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_num_sort_up_to_4_01"
+        ],
+        "medium": [
+          "m2_q_num_sort_up_to_4_02"
+        ],
+        "application": [
+          "m2_q_num_sort_up_to_4_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "NUM_COMPARE_0_1000"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_estimate_objects_by_tens",
+      "chapter_id": "m2_ch01_numbers",
+      "topic_id": "m2_tp03_estimate_tens",
+      "skill_id": "ESTIMATE_OBJECTS_BY_TENS",
+      "order_in_domain": 10,
+      "title_vi": "Ước lượng số đồ vật theo chục",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: ước lượng số đồ vật theo chục.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Khi không cần đếm chính xác từng vật, có thể gom hoặc hình dung theo nhóm 10 để nói số lượng gần đúng theo chục.",
+      "concepts": [
+        {
+          "id": "m2_cp_estimate_objects_by_tens_01",
+          "name_vi": "Ước lượng theo chục",
+          "definition_vi": "Dùng các nhóm 10 làm mốc để chọn số chục gần và hợp lý với số lượng quan sát."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_estimate_objects_by_tens_01",
+          "prompt_vi": "Có 6 nhóm, mỗi nhóm khoảng 10 que tính. Ước lượng có khoảng bao nhiêu que?",
+          "solution_steps_vi": [
+            "6 nhóm chục tương ứng khoảng 60 que.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "60"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_estimate_objects_by_tens_01"
+        ],
+        "medium": [
+          "m2_q_estimate_objects_by_tens_02"
+        ],
+        "application": [
+          "m2_q_estimate_objects_by_tens_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "NUM_COUNT_READ_WRITE_0_1000"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_add_components_recognize",
+      "chapter_id": "m2_ch02_add_sub",
+      "topic_id": "m2_tp04_add_sub_meaning",
+      "skill_id": "ADD_COMPONENTS_RECOGNIZE",
+      "order_in_domain": 1,
+      "title_vi": "Nhận biết thành phần phép cộng",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: nhận biết thành phần phép cộng.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Trong phép cộng a + b = c, a và b là các số hạng, c là tổng. Đổi chỗ hai số hạng không làm thay đổi tổng.",
+      "concepts": [
+        {
+          "id": "m2_cp_add_components_recognize_01",
+          "name_vi": "Số hạng và tổng",
+          "definition_vi": "Hai số được cộng là số hạng; kết quả của phép cộng là tổng."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_add_components_recognize_01",
+          "prompt_vi": "Trong 23 + 15 = 38, số 23 được gọi là gì?",
+          "solution_steps_vi": [
+            "23 là một trong hai số được cộng nên là số hạng.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "số hạng"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_add_components_recognize_01"
+        ],
+        "medium": [
+          "m2_q_add_components_recognize_02"
+        ],
+        "application": [
+          "m2_q_add_components_recognize_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "NUM_COUNT_READ_WRITE_0_1000"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_sub_components_recognize",
+      "chapter_id": "m2_ch02_add_sub",
+      "topic_id": "m2_tp04_add_sub_meaning",
+      "skill_id": "SUB_COMPONENTS_RECOGNIZE",
+      "order_in_domain": 2,
+      "title_vi": "Nhận biết thành phần phép trừ",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: nhận biết thành phần phép trừ.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Trong phép trừ a - b = c, a là số bị trừ, b là số trừ, c là hiệu. Vai trò các thành phần không hoán đổi như phép cộng.",
+      "concepts": [
+        {
+          "id": "m2_cp_sub_components_recognize_01",
+          "name_vi": "Số bị trừ, số trừ, hiệu",
+          "definition_vi": "Phép trừ gồm số bị trừ, số trừ và kết quả gọi là hiệu."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_sub_components_recognize_01",
+          "prompt_vi": "Trong 50 - 12 = 38, số 50 được gọi là gì?",
+          "solution_steps_vi": [
+            "50 là số đứng trước dấu trừ nên là số bị trừ.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "số bị trừ"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_sub_components_recognize_01"
+        ],
+        "medium": [
+          "m2_q_sub_components_recognize_02"
+        ],
+        "application": [
+          "m2_q_sub_components_recognize_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "NUM_COUNT_READ_WRITE_0_1000"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_add_within_1000_no_carry",
+      "chapter_id": "m2_ch02_add_sub",
+      "topic_id": "m2_tp05_written_add_sub",
+      "skill_id": "ADD_WITHIN_1000_NO_CARRY",
+      "order_in_domain": 3,
+      "title_vi": "Cộng đến 1000 không nhớ",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: cộng đến 1000 không nhớ.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Đặt các hàng thẳng cột rồi cộng từ đơn vị sang chục, trăm. Với dạng không nhớ, tổng ở từng cột đều nhỏ hơn 10.",
+      "concepts": [
+        {
+          "id": "m2_cp_add_within_1000_no_carry_01",
+          "name_vi": "Cộng không nhớ",
+          "definition_vi": "Cộng từng hàng mà không tạo thêm một chục hoặc một trăm để chuyển sang cột kế tiếp."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_add_within_1000_no_carry_01",
+          "prompt_vi": "Tính 243 + 125.",
+          "solution_steps_vi": [
+            "Cộng từng hàng: 3+5=8, 4+2=6, 2+1=3; được 368.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "368"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_add_within_1000_no_carry_01"
+        ],
+        "medium": [
+          "m2_q_add_within_1000_no_carry_02"
+        ],
+        "application": [
+          "m2_q_add_within_1000_no_carry_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "PLACE_VALUE_HUNDREDS_TENS_ONES",
+        "ADD_COMPONENTS_RECOGNIZE"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_add_within_1000_one_carry_max",
+      "chapter_id": "m2_ch02_add_sub",
+      "topic_id": "m2_tp05_written_add_sub",
+      "skill_id": "ADD_WITHIN_1000_ONE_CARRY_MAX",
+      "order_in_domain": 4,
+      "title_vi": "Cộng đến 1000 có nhớ một lượt",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: cộng đến 1000 có nhớ một lượt.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Nếu tổng ở một cột từ 10 trở lên, viết phần đơn vị ở cột đó và nhớ 1 sang cột bên trái. Bài lớp 2 baseline giới hạn không quá một lượt nhớ.",
+      "concepts": [
+        {
+          "id": "m2_cp_add_within_1000_one_carry_max_01",
+          "name_vi": "Cộng có nhớ",
+          "definition_vi": "Một lượt nhớ xảy ra khi tổng của một hàng tạo thêm 1 đơn vị ở hàng kế tiếp."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_add_within_1000_one_carry_max_01",
+          "prompt_vi": "Tính 246 + 137.",
+          "solution_steps_vi": [
+            "6+7=13, viết 3 nhớ 1; 4+3+1=8; 2+1=3, nên kết quả 383.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "383"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_add_within_1000_one_carry_max_01"
+        ],
+        "medium": [
+          "m2_q_add_within_1000_one_carry_max_02"
+        ],
+        "application": [
+          "m2_q_add_within_1000_one_carry_max_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "ADD_WITHIN_1000_NO_CARRY"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_sub_within_1000_no_borrow",
+      "chapter_id": "m2_ch02_add_sub",
+      "topic_id": "m2_tp05_written_add_sub",
+      "skill_id": "SUB_WITHIN_1000_NO_BORROW",
+      "order_in_domain": 5,
+      "title_vi": "Trừ đến 1000 không mượn",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: trừ đến 1000 không mượn.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Đặt các hàng thẳng cột rồi trừ từ đơn vị sang chục, trăm. Với dạng không mượn, chữ số trên ở mỗi cột không nhỏ hơn chữ số dưới.",
+      "concepts": [
+        {
+          "id": "m2_cp_sub_within_1000_no_borrow_01",
+          "name_vi": "Trừ không mượn",
+          "definition_vi": "Trừ từng hàng trực tiếp khi mỗi chữ số của số bị trừ đủ lớn ở cột tương ứng."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_sub_within_1000_no_borrow_01",
+          "prompt_vi": "Tính 786 - 234.",
+          "solution_steps_vi": [
+            "6-4=2, 8-3=5, 7-2=5; được 552.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "552"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_sub_within_1000_no_borrow_01"
+        ],
+        "medium": [
+          "m2_q_sub_within_1000_no_borrow_02"
+        ],
+        "application": [
+          "m2_q_sub_within_1000_no_borrow_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "PLACE_VALUE_HUNDREDS_TENS_ONES",
+        "SUB_COMPONENTS_RECOGNIZE"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_sub_within_1000_one_borrow_max",
+      "chapter_id": "m2_ch02_add_sub",
+      "topic_id": "m2_tp05_written_add_sub",
+      "skill_id": "SUB_WITHIN_1000_ONE_BORROW_MAX",
+      "order_in_domain": 6,
+      "title_vi": "Trừ đến 1000 có mượn một lượt",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: trừ đến 1000 có mượn một lượt.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Khi chữ số trên nhỏ hơn chữ số dưới ở một cột, mượn 1 từ hàng bên trái, tương đương thêm 10 vào hàng đang trừ. Baseline giới hạn không quá một lượt mượn.",
+      "concepts": [
+        {
+          "id": "m2_cp_sub_within_1000_one_borrow_max_01",
+          "name_vi": "Trừ có mượn",
+          "definition_vi": "Một lượt mượn đổi 1 đơn vị của hàng lớn hơn thành 10 đơn vị ở hàng nhỏ hơn."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_sub_within_1000_one_borrow_max_01",
+          "prompt_vi": "Tính 352 - 138.",
+          "solution_steps_vi": [
+            "Mượn 1 chục: 12-8=4; còn 4 chục, 4-3=1; 3-1=2, được 214.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "214"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_sub_within_1000_one_borrow_max_01"
+        ],
+        "medium": [
+          "m2_q_sub_within_1000_one_borrow_max_02"
+        ],
+        "application": [
+          "m2_q_sub_within_1000_one_borrow_max_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "SUB_WITHIN_1000_NO_BORROW"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_add_sub_two_operators_left_to_right",
+      "chapter_id": "m2_ch02_add_sub",
+      "topic_id": "m2_tp06_mental_expression",
+      "skill_id": "ADD_SUB_TWO_OPERATORS_LEFT_TO_RIGHT",
+      "order_in_domain": 7,
+      "title_vi": "Biểu thức có hai dấu cộng trừ",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: biểu thức có hai dấu cộng trừ.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Khi biểu thức chỉ có cộng và trừ, thực hiện từ trái sang phải. Tính kết quả bước thứ nhất rồi dùng kết quả đó cho bước thứ hai.",
+      "concepts": [
+        {
+          "id": "m2_cp_add_sub_two_operators_left_to_right_01",
+          "name_vi": "Tính từ trái sang phải",
+          "definition_vi": "Biểu thức chỉ gồm + và - được tính lần lượt từ trái qua phải."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_add_sub_two_operators_left_to_right_01",
+          "prompt_vi": "Tính từ trái sang phải: 50 + 20 - 10.",
+          "solution_steps_vi": [
+            "50 + 20 = 70, rồi 70 - 10 = 60.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "60"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_add_sub_two_operators_left_to_right_01"
+        ],
+        "medium": [
+          "m2_q_add_sub_two_operators_left_to_right_02"
+        ],
+        "application": [
+          "m2_q_add_sub_two_operators_left_to_right_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "ADD_WITHIN_1000_NO_CARRY",
+        "SUB_WITHIN_1000_NO_BORROW"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_mental_add_sub_within_20",
+      "chapter_id": "m2_ch02_add_sub",
+      "topic_id": "m2_tp06_mental_expression",
+      "skill_id": "MENTAL_ADD_SUB_WITHIN_20",
+      "order_in_domain": 8,
+      "title_vi": "Cộng trừ nhẩm trong 20",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: cộng trừ nhẩm trong 20.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Dùng tách số, làm tròn 10 hoặc các cặp số quen thuộc để tính nhanh trong phạm vi 20 mà không cần đặt tính.",
+      "concepts": [
+        {
+          "id": "m2_cp_mental_add_sub_within_20_01",
+          "name_vi": "Tính nhẩm đến 20",
+          "definition_vi": "Biến đổi số thành các phần dễ cộng hoặc trừ, đặc biệt dựa vào mốc 10."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_mental_add_sub_within_20_01",
+          "prompt_vi": "Tính nhẩm 8 + 7.",
+          "solution_steps_vi": [
+            "Tách 7 thành 2 và 5: 8+2=10, rồi 10+5=15.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "15"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_mental_add_sub_within_20_01"
+        ],
+        "medium": [
+          "m2_q_mental_add_sub_within_20_02"
+        ],
+        "application": [
+          "m2_q_mental_add_sub_within_20_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "ADD_COMPONENTS_RECOGNIZE",
+        "SUB_COMPONENTS_RECOGNIZE"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_mental_add_sub_round_tens_hundreds_1000",
+      "chapter_id": "m2_ch02_add_sub",
+      "topic_id": "m2_tp06_mental_expression",
+      "skill_id": "MENTAL_ADD_SUB_ROUND_TENS_HUNDREDS_1000",
+      "order_in_domain": 9,
+      "title_vi": "Cộng trừ nhẩm số tròn chục, tròn trăm",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: cộng trừ nhẩm số tròn chục, tròn trăm.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Với số tròn chục hoặc tròn trăm, có thể tính số chục/số trăm trước rồi thêm lại chữ số 0 tương ứng.",
+      "concepts": [
+        {
+          "id": "m2_cp_mental_add_sub_round_tens_hundreds_1000_01",
+          "name_vi": "Nhẩm số tròn",
+          "definition_vi": "Xem 30 là 3 chục và 400 là 4 trăm để cộng trừ theo đơn vị chục hoặc trăm."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_mental_add_sub_round_tens_hundreds_1000_01",
+          "prompt_vi": "Tính nhẩm 30 + 40.",
+          "solution_steps_vi": [
+            "3 chục + 4 chục = 7 chục, tức 70.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "70"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_mental_add_sub_round_tens_hundreds_1000_01"
+        ],
+        "medium": [
+          "m2_q_mental_add_sub_round_tens_hundreds_1000_02"
+        ],
+        "application": [
+          "m2_q_mental_add_sub_round_tens_hundreds_1000_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "NUM_FULL_HUNDREDS_RECOGNIZE",
+        "MENTAL_ADD_SUB_WITHIN_20"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_multiplication_meaning",
+      "chapter_id": "m2_ch03_mul_div",
+      "topic_id": "m2_tp07_mul_div_meaning",
+      "skill_id": "MULTIPLICATION_MEANING",
+      "order_in_domain": 1,
+      "title_vi": "Ý nghĩa phép nhân",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: ý nghĩa phép nhân.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Phép nhân biểu diễn việc cộng nhiều nhóm bằng nhau. Ví dụ 3 nhóm, mỗi nhóm 2 vật có thể viết 2 + 2 + 2 = 6 và 3 × 2 = 6.",
+      "concepts": [
+        {
+          "id": "m2_cp_multiplication_meaning_01",
+          "name_vi": "Nhóm bằng nhau",
+          "definition_vi": "Phép nhân là cách viết gọn của phép cộng lặp lại các nhóm có cùng số lượng."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_multiplication_meaning_01",
+          "prompt_vi": "Có 3 nhóm, mỗi nhóm 2 chấm. Phép cộng lặp lại nào đúng?",
+          "solution_steps_vi": [
+            "Ba nhóm, mỗi nhóm 2 tương ứng cộng số 2 ba lần.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "2 + 2 + 2"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_multiplication_meaning_01"
+        ],
+        "medium": [
+          "m2_q_multiplication_meaning_02"
+        ],
+        "application": [
+          "m2_q_multiplication_meaning_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "MENTAL_ADD_SUB_WITHIN_20"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_division_meaning",
+      "chapter_id": "m2_ch03_mul_div",
+      "topic_id": "m2_tp07_mul_div_meaning",
+      "skill_id": "DIVISION_MEANING",
+      "order_in_domain": 2,
+      "title_vi": "Ý nghĩa phép chia",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: ý nghĩa phép chia.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Phép chia dùng khi chia đều một số lượng thành các nhóm bằng nhau hoặc khi muốn biết có bao nhiêu nhóm bằng nhau.",
+      "concepts": [
+        {
+          "id": "m2_cp_division_meaning_01",
+          "name_vi": "Chia đều",
+          "definition_vi": "Chia đều nghĩa là mỗi nhóm nhận cùng số lượng và không bỏ sót đối tượng trong bài chia hết."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_division_meaning_01",
+          "prompt_vi": "Có 10 chiếc bánh chia đều cho 2 bạn. Mỗi bạn được bao nhiêu chiếc?",
+          "solution_steps_vi": [
+            "10 chia đều thành 2 phần bằng nhau thì mỗi phần có 5.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "5"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_division_meaning_01"
+        ],
+        "medium": [
+          "m2_q_division_meaning_02"
+        ],
+        "application": [
+          "m2_q_division_meaning_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "MULTIPLICATION_MEANING"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_multiplication_components",
+      "chapter_id": "m2_ch03_mul_div",
+      "topic_id": "m2_tp07_mul_div_meaning",
+      "skill_id": "MULTIPLICATION_COMPONENTS",
+      "order_in_domain": 3,
+      "title_vi": "Thành phần phép nhân",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: thành phần phép nhân.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Trong a × b = c, a và b là các thừa số, c là tích. Tích cho biết tổng số phần tử của các nhóm bằng nhau.",
+      "concepts": [
+        {
+          "id": "m2_cp_multiplication_components_01",
+          "name_vi": "Thừa số và tích",
+          "definition_vi": "Các số được nhân là thừa số; kết quả là tích."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_multiplication_components_01",
+          "prompt_vi": "Trong 2 × 5 = 10, số 2 được gọi là gì?",
+          "solution_steps_vi": [
+            "2 là một số được nhân nên là thừa số.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "thừa số"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_multiplication_components_01"
+        ],
+        "medium": [
+          "m2_q_multiplication_components_02"
+        ],
+        "application": [
+          "m2_q_multiplication_components_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "MULTIPLICATION_MEANING"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_division_components",
+      "chapter_id": "m2_ch03_mul_div",
+      "topic_id": "m2_tp07_mul_div_meaning",
+      "skill_id": "DIVISION_COMPONENTS",
+      "order_in_domain": 4,
+      "title_vi": "Thành phần phép chia",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: thành phần phép chia.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Trong a : b = c, a là số bị chia, b là số chia, c là thương. Với bài chia hết, thương cho biết số phần mỗi nhóm hoặc số nhóm.",
+      "concepts": [
+        {
+          "id": "m2_cp_division_components_01",
+          "name_vi": "Số bị chia, số chia, thương",
+          "definition_vi": "Phép chia gồm số bị chia, số chia và kết quả gọi là thương."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_division_components_01",
+          "prompt_vi": "Trong 10 : 2 = 5, số 10 là gì?",
+          "solution_steps_vi": [
+            "10 là lượng được đem chia nên là số bị chia.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "số bị chia"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_division_components_01"
+        ],
+        "medium": [
+          "m2_q_division_components_02"
+        ],
+        "application": [
+          "m2_q_division_components_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "DIVISION_MEANING"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_times_table_2",
+      "chapter_id": "m2_ch03_mul_div",
+      "topic_id": "m2_tp08_tables_2_5",
+      "skill_id": "TIMES_TABLE_2",
+      "order_in_domain": 5,
+      "title_vi": "Bảng nhân 2",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: bảng nhân 2.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Mỗi bước của bảng nhân 2 tăng thêm 2. Có thể hiểu 2 × n là n nhóm, mỗi nhóm 2 hoặc cộng số 2 n lần.",
+      "concepts": [
+        {
+          "id": "m2_cp_times_table_2_01",
+          "name_vi": "Nhân 2",
+          "definition_vi": "Nhân một số với 2 là lấy hai lần số đó hoặc tạo các cặp bằng nhau."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_times_table_2_01",
+          "prompt_vi": "Tính 2 × 6.",
+          "solution_steps_vi": [
+            "Bảng nhân 2: 2 × 6 = 12.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "12"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_times_table_2_01"
+        ],
+        "medium": [
+          "m2_q_times_table_2_02"
+        ],
+        "application": [
+          "m2_q_times_table_2_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "MULTIPLICATION_COMPONENTS"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_times_table_5",
+      "chapter_id": "m2_ch03_mul_div",
+      "topic_id": "m2_tp08_tables_2_5",
+      "skill_id": "TIMES_TABLE_5",
+      "order_in_domain": 6,
+      "title_vi": "Bảng nhân 5",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: bảng nhân 5.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Mỗi bước của bảng nhân 5 tăng thêm 5. Các tích của 5 có chữ số tận cùng là 0 hoặc 5 trong phạm vi bảng học.",
+      "concepts": [
+        {
+          "id": "m2_cp_times_table_5_01",
+          "name_vi": "Nhân 5",
+          "definition_vi": "Nhân một số với 5 là cộng các nhóm 5 bằng nhau."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_times_table_5_01",
+          "prompt_vi": "Tính 5 × 4.",
+          "solution_steps_vi": [
+            "Bảng nhân 5: 5 × 4 = 20.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "20"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_times_table_5_01"
+        ],
+        "medium": [
+          "m2_q_times_table_5_02"
+        ],
+        "application": [
+          "m2_q_times_table_5_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "MULTIPLICATION_COMPONENTS"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_divide_table_2",
+      "chapter_id": "m2_ch03_mul_div",
+      "topic_id": "m2_tp08_tables_2_5",
+      "skill_id": "DIVIDE_TABLE_2",
+      "order_in_domain": 7,
+      "title_vi": "Bảng chia 2",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: bảng chia 2.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Bảng chia 2 là phép tính ngược của bảng nhân 2. Nếu 2 × n = a thì a : 2 = n.",
+      "concepts": [
+        {
+          "id": "m2_cp_divide_table_2_01",
+          "name_vi": "Chia 2",
+          "definition_vi": "Dùng quan hệ nhân - chia để tìm thương khi số chia là 2."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_divide_table_2_01",
+          "prompt_vi": "Tính 16 : 2.",
+          "solution_steps_vi": [
+            "Vì 2 × 8 = 16 nên 16 : 2 = 8.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "8"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_divide_table_2_01"
+        ],
+        "medium": [
+          "m2_q_divide_table_2_02"
+        ],
+        "application": [
+          "m2_q_divide_table_2_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "TIMES_TABLE_2",
+        "DIVISION_COMPONENTS"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_divide_table_5",
+      "chapter_id": "m2_ch03_mul_div",
+      "topic_id": "m2_tp08_tables_2_5",
+      "skill_id": "DIVIDE_TABLE_5",
+      "order_in_domain": 8,
+      "title_vi": "Bảng chia 5",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: bảng chia 5.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Bảng chia 5 là phép tính ngược của bảng nhân 5. Nếu 5 × n = a thì a : 5 = n.",
+      "concepts": [
+        {
+          "id": "m2_cp_divide_table_5_01",
+          "name_vi": "Chia 5",
+          "definition_vi": "Dùng quan hệ nhân - chia để tìm thương khi số chia là 5."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_divide_table_5_01",
+          "prompt_vi": "Tính 25 : 5.",
+          "solution_steps_vi": [
+            "Vì 5 × 5 = 25 nên 25 : 5 = 5.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "5"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_divide_table_5_01"
+        ],
+        "medium": [
+          "m2_q_divide_table_5_02"
+        ],
+        "application": [
+          "m2_q_divide_table_5_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "TIMES_TABLE_5",
+        "DIVISION_COMPONENTS"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_operation_meaning_from_visual",
+      "chapter_id": "m2_ch04_word_problems",
+      "topic_id": "m2_tp09_problem_meaning",
+      "skill_id": "OPERATION_MEANING_FROM_VISUAL",
+      "order_in_domain": 1,
+      "title_vi": "Nhìn tình huống để chọn phép tính",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: nhìn tình huống để chọn phép tính.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Không chỉ dựa vào từ khóa. Hãy xác định số lượng đang được gộp, bớt đi, tạo nhóm bằng nhau hay chia đều để chọn cộng, trừ, nhân hoặc chia.",
+      "concepts": [
+        {
+          "id": "m2_cp_operation_meaning_from_visual_01",
+          "name_vi": "Quan hệ của phép tính",
+          "definition_vi": "Cộng gộp/thêm, trừ bớt/so sánh chênh lệch, nhân tạo nhóm bằng nhau, chia chia đều hoặc đếm số nhóm."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_operation_meaning_from_visual_01",
+          "prompt_vi": "Hai nhóm 4 chấm được gộp lại. Phép tính nào mô tả việc gộp?",
+          "solution_steps_vi": [
+            "Gộp hai lượng lại là quan hệ cộng; hai nhóm 4 là 4 + 4.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "4 + 4"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_operation_meaning_from_visual_01"
+        ],
+        "medium": [
+          "m2_q_operation_meaning_from_visual_02"
+        ],
+        "application": [
+          "m2_q_operation_meaning_from_visual_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "ADD_COMPONENTS_RECOGNIZE",
+        "SUB_COMPONENTS_RECOGNIZE",
+        "MULTIPLICATION_MEANING",
+        "DIVISION_MEANING"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_wp_one_step_add_more",
+      "chapter_id": "m2_ch04_word_problems",
+      "topic_id": "m2_tp10_problem_contexts",
+      "skill_id": "WP_ONE_STEP_ADD_MORE",
+      "order_in_domain": 2,
+      "title_vi": "Bài toán thêm vào",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: bài toán thêm vào.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Khi một lượng ban đầu được thêm một lượng mới và hỏi tất cả có bao nhiêu, dùng phép cộng một bước.",
+      "concepts": [
+        {
+          "id": "m2_cp_wp_one_step_add_more_01",
+          "name_vi": "Thêm vào",
+          "definition_vi": "Tổng mới = số ban đầu + số được thêm."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_wp_one_step_add_more_01",
+          "prompt_vi": "Lan có 24 bút chì, được cho thêm 13 bút. Lan có tất cả bao nhiêu bút?",
+          "solution_steps_vi": [
+            "24 + 13 = 37 vì số bút được thêm vào lượng ban đầu.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "37"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_wp_one_step_add_more_01"
+        ],
+        "medium": [
+          "m2_q_wp_one_step_add_more_02"
+        ],
+        "application": [
+          "m2_q_wp_one_step_add_more_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "ADD_WITHIN_1000_NO_CARRY",
+        "OPERATION_MEANING_FROM_VISUAL"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_wp_one_step_sub_less",
+      "chapter_id": "m2_ch04_word_problems",
+      "topic_id": "m2_tp10_problem_contexts",
+      "skill_id": "WP_ONE_STEP_SUB_LESS",
+      "order_in_domain": 3,
+      "title_vi": "Bài toán bớt đi",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: bài toán bớt đi.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Khi một lượng ban đầu bị lấy bớt và hỏi còn lại, dùng phép trừ một bước.",
+      "concepts": [
+        {
+          "id": "m2_cp_wp_one_step_sub_less_01",
+          "name_vi": "Bớt đi",
+          "definition_vi": "Số còn lại = số ban đầu - số bị lấy bớt."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_wp_one_step_sub_less_01",
+          "prompt_vi": "Có 45 quả bóng, cho đi 12 quả. Còn lại bao nhiêu quả?",
+          "solution_steps_vi": [
+            "45 - 12 = 33 vì 12 quả bị bớt khỏi số ban đầu.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "33"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_wp_one_step_sub_less_01"
+        ],
+        "medium": [
+          "m2_q_wp_one_step_sub_less_02"
+        ],
+        "application": [
+          "m2_q_wp_one_step_sub_less_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "SUB_WITHIN_1000_NO_BORROW",
+        "OPERATION_MEANING_FROM_VISUAL"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_wp_one_step_more_than",
+      "chapter_id": "m2_ch04_word_problems",
+      "topic_id": "m2_tp10_problem_contexts",
+      "skill_id": "WP_ONE_STEP_MORE_THAN",
+      "order_in_domain": 4,
+      "title_vi": "Bài toán nhiều hơn một số đơn vị",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: bài toán nhiều hơn một số đơn vị.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Nếu B nhiều hơn A k đơn vị thì B = A + k. Cần xác định đúng đại lượng được hỏi trước khi cộng.",
+      "concepts": [
+        {
+          "id": "m2_cp_wp_one_step_more_than_01",
+          "name_vi": "Nhiều hơn",
+          "definition_vi": "Một lượng nhiều hơn lượng mốc k đơn vị bằng lượng mốc cộng k."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_wp_one_step_more_than_01",
+          "prompt_vi": "An có 25 viên bi. Bình có nhiều hơn An 7 viên. Bình có bao nhiêu viên?",
+          "solution_steps_vi": [
+            "Bình nhiều hơn An 7 viên nên 25 + 7 = 32.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "32"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_wp_one_step_more_than_01"
+        ],
+        "medium": [
+          "m2_q_wp_one_step_more_than_02"
+        ],
+        "application": [
+          "m2_q_wp_one_step_more_than_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "WP_ONE_STEP_ADD_MORE"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_wp_one_step_less_than",
+      "chapter_id": "m2_ch04_word_problems",
+      "topic_id": "m2_tp10_problem_contexts",
+      "skill_id": "WP_ONE_STEP_LESS_THAN",
+      "order_in_domain": 5,
+      "title_vi": "Bài toán ít hơn một số đơn vị",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: bài toán ít hơn một số đơn vị.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Nếu B ít hơn A k đơn vị thì B = A - k. Điều quan trọng là nhận ra lượng nào là mốc lớn hơn.",
+      "concepts": [
+        {
+          "id": "m2_cp_wp_one_step_less_than_01",
+          "name_vi": "Ít hơn",
+          "definition_vi": "Một lượng ít hơn lượng mốc k đơn vị bằng lượng mốc trừ k."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_wp_one_step_less_than_01",
+          "prompt_vi": "Mai có 30 nhãn dán. Linh có ít hơn Mai 8 nhãn. Linh có bao nhiêu nhãn?",
+          "solution_steps_vi": [
+            "Linh ít hơn Mai 8 nên 30 - 8 = 22.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "22"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_wp_one_step_less_than_01"
+        ],
+        "medium": [
+          "m2_q_wp_one_step_less_than_02"
+        ],
+        "application": [
+          "m2_q_wp_one_step_less_than_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "WP_ONE_STEP_SUB_LESS"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_wp_one_step_multiplication_context",
+      "chapter_id": "m2_ch04_word_problems",
+      "topic_id": "m2_tp10_problem_contexts",
+      "skill_id": "WP_ONE_STEP_MULTIPLICATION_CONTEXT",
+      "order_in_domain": 6,
+      "title_vi": "Bài toán nhóm bằng nhau dùng phép nhân",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: bài toán nhóm bằng nhau dùng phép nhân.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Khi có nhiều nhóm bằng nhau và biết số phần tử mỗi nhóm, nhân số nhóm với số phần tử mỗi nhóm.",
+      "concepts": [
+        {
+          "id": "m2_cp_wp_one_step_multiplication_context_01",
+          "name_vi": "Nhân trong tình huống",
+          "definition_vi": "Tổng số phần tử = số nhóm × số phần tử mỗi nhóm."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_wp_one_step_multiplication_context_01",
+          "prompt_vi": "Có 6 bàn, mỗi bàn 2 bạn. Có tất cả bao nhiêu bạn?",
+          "solution_steps_vi": [
+            "6 nhóm 2 bạn nên 6 × 2 = 12.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "12"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_wp_one_step_multiplication_context_01"
+        ],
+        "medium": [
+          "m2_q_wp_one_step_multiplication_context_02"
+        ],
+        "application": [
+          "m2_q_wp_one_step_multiplication_context_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "TIMES_TABLE_2",
+        "TIMES_TABLE_5",
+        "OPERATION_MEANING_FROM_VISUAL"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_wp_one_step_division_context",
+      "chapter_id": "m2_ch04_word_problems",
+      "topic_id": "m2_tp10_problem_contexts",
+      "skill_id": "WP_ONE_STEP_DIVISION_CONTEXT",
+      "order_in_domain": 7,
+      "title_vi": "Bài toán chia đều dùng phép chia",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: bài toán chia đều dùng phép chia.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Khi chia một tổng thành các phần bằng nhau, dùng phép chia để tìm số phần mỗi nhóm hoặc số nhóm.",
+      "concepts": [
+        {
+          "id": "m2_cp_wp_one_step_division_context_01",
+          "name_vi": "Chia trong tình huống",
+          "definition_vi": "Thương trả lời kích thước mỗi nhóm hoặc số nhóm khi chia đều."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_wp_one_step_division_context_01",
+          "prompt_vi": "Có 14 chiếc bánh chia đều cho 2 đĩa. Mỗi đĩa có bao nhiêu chiếc?",
+          "solution_steps_vi": [
+            "14 : 2 = 7.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "7"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_wp_one_step_division_context_01"
+        ],
+        "medium": [
+          "m2_q_wp_one_step_division_context_02"
+        ],
+        "application": [
+          "m2_q_wp_one_step_division_context_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "DIVIDE_TABLE_2",
+        "DIVIDE_TABLE_5",
+        "OPERATION_MEANING_FROM_VISUAL"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_wp_select_operation_one_step",
+      "chapter_id": "m2_ch04_word_problems",
+      "topic_id": "m2_tp09_problem_meaning",
+      "skill_id": "WP_SELECT_OPERATION_ONE_STEP",
+      "order_in_domain": 8,
+      "title_vi": "Chọn phép tính cho bài toán một bước",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: chọn phép tính cho bài toán một bước.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Đọc dữ kiện, xác định điều cần tìm và mối quan hệ giữa các lượng rồi mới chọn phép tính; không dùng một từ khóa đơn lẻ để đoán.",
+      "concepts": [
+        {
+          "id": "m2_cp_wp_select_operation_one_step_01",
+          "name_vi": "Chọn phép tính",
+          "definition_vi": "Phép tính phải mô tả đúng quan hệ giữa dữ kiện và đại lượng cần tìm."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_wp_select_operation_one_step_01",
+          "prompt_vi": "Có 36 quả, ăn 9 quả, hỏi còn lại. Chọn phép tính đúng.",
+          "solution_steps_vi": [
+            "Tình huống lấy bớt và hỏi còn lại nên dùng phép trừ.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "36 - 9"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_wp_select_operation_one_step_01"
+        ],
+        "medium": [
+          "m2_q_wp_select_operation_one_step_02"
+        ],
+        "application": [
+          "m2_q_wp_select_operation_one_step_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "OPERATION_MEANING_FROM_VISUAL"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_point_recognize",
+      "chapter_id": "m2_ch05_geometry",
+      "topic_id": "m2_tp11_lines_shapes",
+      "skill_id": "POINT_RECOGNIZE",
+      "order_in_domain": 1,
+      "title_vi": "Nhận biết điểm",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: nhận biết điểm.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Điểm biểu diễn một vị trí xác định và thường được đặt tên bằng chữ cái in hoa như A, B, C. Điểm không có độ dài.",
+      "concepts": [
+        {
+          "id": "m2_cp_point_recognize_01",
+          "name_vi": "Điểm",
+          "definition_vi": "Một điểm chỉ vị trí; tên điểm giúp phân biệt các vị trí trên hình."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_point_recognize_01",
+          "prompt_vi": "Kí hiệu nào phù hợp để đặt tên một điểm?",
+          "solution_steps_vi": [
+            "Điểm thường được đặt tên bằng chữ cái in hoa như A.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "A"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_point_recognize_01"
+        ],
+        "medium": [
+          "m2_q_point_recognize_02"
+        ],
+        "application": [
+          "m2_q_point_recognize_03"
+        ]
+      },
+      "prerequisite_skills": [],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_line_segment_recognize",
+      "chapter_id": "m2_ch05_geometry",
+      "topic_id": "m2_tp11_lines_shapes",
+      "skill_id": "LINE_SEGMENT_RECOGNIZE",
+      "order_in_domain": 2,
+      "title_vi": "Nhận biết đoạn thẳng",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: nhận biết đoạn thẳng.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Đoạn thẳng là phần thẳng nối hai điểm đầu mút. Độ dài đoạn thẳng là khoảng cách giữa hai đầu mút.",
+      "concepts": [
+        {
+          "id": "m2_cp_line_segment_recognize_01",
+          "name_vi": "Đoạn thẳng",
+          "definition_vi": "Đoạn thẳng có hai đầu mút xác định và phần nối giữa chúng là thẳng."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_line_segment_recognize_01",
+          "prompt_vi": "Đoạn thẳng AB có bao nhiêu đầu mút?",
+          "solution_steps_vi": [
+            "Đoạn thẳng AB có hai đầu mút A và B.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "2"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_line_segment_recognize_01"
+        ],
+        "medium": [
+          "m2_q_line_segment_recognize_02"
+        ],
+        "application": [
+          "m2_q_line_segment_recognize_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "POINT_RECOGNIZE"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_curve_recognize",
+      "chapter_id": "m2_ch05_geometry",
+      "topic_id": "m2_tp11_lines_shapes",
+      "skill_id": "CURVE_RECOGNIZE",
+      "order_in_domain": 3,
+      "title_vi": "Nhận biết đường cong",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: nhận biết đường cong.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Đường cong đổi hướng mềm mại và không phải là một đoạn thẳng. Có thể nhận biết bằng hình dạng uốn lượn.",
+      "concepts": [
+        {
+          "id": "m2_cp_curve_recognize_01",
+          "name_vi": "Đường cong",
+          "definition_vi": "Đường cong không giữ một hướng thẳng cố định trên toàn bộ đường."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_curve_recognize_01",
+          "prompt_vi": "Đường nào được gọi là đường cong?",
+          "solution_steps_vi": [
+            "Đường cong có hình dạng uốn lượn, không giữ hướng thẳng trên toàn bộ đường.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "Đường uốn lượn"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_curve_recognize_01"
+        ],
+        "medium": [
+          "m2_q_curve_recognize_02"
+        ],
+        "application": [
+          "m2_q_curve_recognize_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "POINT_RECOGNIZE"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_straight_line_recognize",
+      "chapter_id": "m2_ch05_geometry",
+      "topic_id": "m2_tp11_lines_shapes",
+      "skill_id": "STRAIGHT_LINE_RECOGNIZE",
+      "order_in_domain": 4,
+      "title_vi": "Nhận biết đường thẳng",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: nhận biết đường thẳng.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Đường thẳng đi theo một hướng không uốn cong và có thể kéo dài về hai phía. Khác với đoạn thẳng, đường thẳng không bị giới hạn bởi hai đầu mút.",
+      "concepts": [
+        {
+          "id": "m2_cp_straight_line_recognize_01",
+          "name_vi": "Đường thẳng",
+          "definition_vi": "Đường thẳng có thể kéo dài mãi theo hai hướng và không cong."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_straight_line_recognize_01",
+          "prompt_vi": "Đường thẳng khác đoạn thẳng ở điểm nào?",
+          "solution_steps_vi": [
+            "Đường thẳng không bị giới hạn bởi hai đầu mút như đoạn thẳng.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "Có thể kéo dài về hai phía"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_straight_line_recognize_01"
+        ],
+        "medium": [
+          "m2_q_straight_line_recognize_02"
+        ],
+        "application": [
+          "m2_q_straight_line_recognize_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "LINE_SEGMENT_RECOGNIZE"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_polyline_recognize",
+      "chapter_id": "m2_ch05_geometry",
+      "topic_id": "m2_tp11_lines_shapes",
+      "skill_id": "POLYLINE_RECOGNIZE",
+      "order_in_domain": 5,
+      "title_vi": "Nhận biết đường gấp khúc",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: nhận biết đường gấp khúc.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Đường gấp khúc được tạo bởi nhiều đoạn thẳng nối tiếp nhau tại các điểm. Mỗi chỗ nối có thể làm đường đổi hướng.",
+      "concepts": [
+        {
+          "id": "m2_cp_polyline_recognize_01",
+          "name_vi": "Đường gấp khúc",
+          "definition_vi": "Một chuỗi từ hai đoạn thẳng trở lên nối đầu mút với nhau tạo thành đường gấp khúc."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_polyline_recognize_01",
+          "prompt_vi": "Đường gấp khúc được tạo bởi gì?",
+          "solution_steps_vi": [
+            "Đường gấp khúc là chuỗi các đoạn thẳng nối nhau.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "Nhiều đoạn thẳng nối tiếp"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_polyline_recognize_01"
+        ],
+        "medium": [
+          "m2_q_polyline_recognize_02"
+        ],
+        "application": [
+          "m2_q_polyline_recognize_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "LINE_SEGMENT_RECOGNIZE"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_three_collinear_points",
+      "chapter_id": "m2_ch05_geometry",
+      "topic_id": "m2_tp11_lines_shapes",
+      "skill_id": "THREE_COLLINEAR_POINTS",
+      "order_in_domain": 6,
+      "title_vi": "Ba điểm thẳng hàng",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: ba điểm thẳng hàng.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Ba điểm thẳng hàng khi cả ba cùng nằm trên một đường thẳng. Nếu một điểm lệch khỏi đường qua hai điểm còn lại thì ba điểm không thẳng hàng.",
+      "concepts": [
+        {
+          "id": "m2_cp_three_collinear_points_01",
+          "name_vi": "Thẳng hàng",
+          "definition_vi": "Các điểm thẳng hàng cùng nằm trên một đường thẳng duy nhất."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_three_collinear_points_01",
+          "prompt_vi": "Ba điểm A, B, C cùng nằm trên một đường thẳng. Ta nói ba điểm thế nào?",
+          "solution_steps_vi": [
+            "Ba điểm cùng nằm trên một đường thẳng là ba điểm thẳng hàng.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "thẳng hàng"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_three_collinear_points_01"
+        ],
+        "medium": [
+          "m2_q_three_collinear_points_02"
+        ],
+        "application": [
+          "m2_q_three_collinear_points_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "POINT_RECOGNIZE",
+        "STRAIGHT_LINE_RECOGNIZE"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_quadrilateral_recognize",
+      "chapter_id": "m2_ch05_geometry",
+      "topic_id": "m2_tp11_lines_shapes",
+      "skill_id": "QUADRILATERAL_RECOGNIZE",
+      "order_in_domain": 7,
+      "title_vi": "Nhận biết hình tứ giác",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: nhận biết hình tứ giác.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Hình tứ giác là hình phẳng kín có bốn cạnh và bốn đỉnh. Hình vuông và hình chữ nhật đều là các ví dụ của tứ giác.",
+      "concepts": [
+        {
+          "id": "m2_cp_quadrilateral_recognize_01",
+          "name_vi": "Tứ giác",
+          "definition_vi": "Một hình kín có đúng bốn cạnh là hình tứ giác."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_quadrilateral_recognize_01",
+          "prompt_vi": "Một hình tứ giác có bao nhiêu cạnh?",
+          "solution_steps_vi": [
+            "Theo định nghĩa, hình tứ giác là hình kín có 4 cạnh.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "4"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_quadrilateral_recognize_01"
+        ],
+        "medium": [
+          "m2_q_quadrilateral_recognize_02"
+        ],
+        "application": [
+          "m2_q_quadrilateral_recognize_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "LINE_SEGMENT_RECOGNIZE"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_cylinder_recognize",
+      "chapter_id": "m2_ch05_geometry",
+      "topic_id": "m2_tp12_solids_construct",
+      "skill_id": "CYLINDER_RECOGNIZE",
+      "order_in_domain": 8,
+      "title_vi": "Nhận biết khối trụ",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: nhận biết khối trụ.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Khối trụ có hai mặt đáy tròn bằng nhau và một mặt cong bao quanh. Lon nước là một vật thể gần dạng khối trụ.",
+      "concepts": [
+        {
+          "id": "m2_cp_cylinder_recognize_01",
+          "name_vi": "Khối trụ",
+          "definition_vi": "Khối có hai đáy tròn song song và một mặt cong xung quanh."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_cylinder_recognize_01",
+          "prompt_vi": "Vật nào gần dạng khối trụ nhất?",
+          "solution_steps_vi": [
+            "Lon nước có hai đáy tròn và mặt cong xung quanh, gần dạng khối trụ.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "lon nước"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_cylinder_recognize_01"
+        ],
+        "medium": [
+          "m2_q_cylinder_recognize_02"
+        ],
+        "application": [
+          "m2_q_cylinder_recognize_03"
+        ]
+      },
+      "prerequisite_skills": [],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_sphere_recognize",
+      "chapter_id": "m2_ch05_geometry",
+      "topic_id": "m2_tp12_solids_construct",
+      "skill_id": "SPHERE_RECOGNIZE",
+      "order_in_domain": 9,
+      "title_vi": "Nhận biết khối cầu",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: nhận biết khối cầu.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Khối cầu tròn đều theo mọi hướng và không có cạnh hay đỉnh. Quả bóng là vật thể gần dạng khối cầu.",
+      "concepts": [
+        {
+          "id": "m2_cp_sphere_recognize_01",
+          "name_vi": "Khối cầu",
+          "definition_vi": "Khối tròn không có cạnh, đỉnh hay mặt phẳng đáy."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_sphere_recognize_01",
+          "prompt_vi": "Vật nào gần dạng khối cầu nhất?",
+          "solution_steps_vi": [
+            "Quả bóng tròn đều theo mọi hướng, gần dạng khối cầu.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "quả bóng"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_sphere_recognize_01"
+        ],
+        "medium": [
+          "m2_q_sphere_recognize_02"
+        ],
+        "application": [
+          "m2_q_sphere_recognize_03"
+        ]
+      },
+      "prerequisite_skills": [],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_draw_segment_given_length",
+      "chapter_id": "m2_ch05_geometry",
+      "topic_id": "m2_tp12_solids_construct",
+      "skill_id": "DRAW_SEGMENT_GIVEN_LENGTH",
+      "order_in_domain": 10,
+      "title_vi": "Tạo đoạn thẳng có độ dài cho trước",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: tạo đoạn thẳng có độ dài cho trước.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Đặt một đầu đoạn thẳng tại vạch đầu, rồi chọn đầu còn lại sao cho khoảng cách trên thước đúng bằng độ dài yêu cầu.",
+      "concepts": [
+        {
+          "id": "m2_cp_draw_segment_given_length_01",
+          "name_vi": "Vẽ đoạn thẳng theo độ dài",
+          "definition_vi": "Độ dài đoạn thẳng bằng hiệu vị trí hai đầu mút trên cùng một thước chia đều."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_draw_segment_given_length_01",
+          "prompt_vi": "Trên thước, đặt đầu A ở vạch 2 cm. Muốn AB dài 5 cm và B ở bên phải A, B ở vạch bao nhiêu?",
+          "solution_steps_vi": [
+            "Vị trí B = 2 + 5 = 7 cm.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "7"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_draw_segment_given_length_01"
+        ],
+        "medium": [
+          "m2_q_draw_segment_given_length_02"
+        ],
+        "application": [
+          "m2_q_draw_segment_given_length_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "LINE_SEGMENT_RECOGNIZE",
+        "MEASURE_WITH_RULER_CM"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_fold_cut_compose_shapes",
+      "chapter_id": "m2_ch05_geometry",
+      "topic_id": "m2_tp12_solids_construct",
+      "skill_id": "FOLD_CUT_COMPOSE_SHAPES",
+      "order_in_domain": 11,
+      "title_vi": "Gấp, cắt và ghép hình",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: gấp, cắt và ghép hình.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Có thể tạo hình mới bằng cách gấp, cắt hoặc ghép các hình đơn giản. Khi ghép, các cạnh phù hợp được đặt sát nhau mà không làm thay đổi bản chất của từng mảnh.",
+      "concepts": [
+        {
+          "id": "m2_cp_fold_cut_compose_shapes_01",
+          "name_vi": "Ghép và tạo hình",
+          "definition_vi": "Tách một hình thành các phần hoặc ghép các phần để tạo hình mới giúp nhận ra quan hệ giữa các hình."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_fold_cut_compose_shapes_01",
+          "prompt_vi": "Ghép hai tam giác vuông bằng nhau theo một cạnh phù hợp có thể tạo thành hình nào trong nhiều cách ghép?",
+          "solution_steps_vi": [
+            "Hai mảnh tam giác có thể ghép cạnh với cạnh để tạo một hình kín bốn cạnh trong cách ghép phù hợp.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "một tứ giác"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_fold_cut_compose_shapes_01"
+        ],
+        "medium": [
+          "m2_q_fold_cut_compose_shapes_02"
+        ],
+        "application": [
+          "m2_q_fold_cut_compose_shapes_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "QUADRILATERAL_RECOGNIZE"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_heavier_lighter",
+      "chapter_id": "m2_ch06_measurement",
+      "topic_id": "m2_tp13_mass_length_capacity",
+      "skill_id": "HEAVIER_LIGHTER",
+      "order_in_domain": 1,
+      "title_vi": "Nặng hơn và nhẹ hơn",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: nặng hơn và nhẹ hơn.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Khi so sánh bằng cân, phía hạ thấp hơn thường chứa vật nặng hơn; phía nâng cao hơn chứa vật nhẹ hơn nếu cân hoạt động cân bằng đúng.",
+      "concepts": [
+        {
+          "id": "m2_cp_heavier_lighter_01",
+          "name_vi": "So sánh khối lượng",
+          "definition_vi": "Nặng hơn nghĩa là có khối lượng lớn hơn; nhẹ hơn nghĩa là có khối lượng nhỏ hơn."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_heavier_lighter_01",
+          "prompt_vi": "Trên cân thăng bằng, đĩa bên trái hạ thấp hơn. Vật bên trái thường thế nào?",
+          "solution_steps_vi": [
+            "Với cân hoạt động đúng, phía hạ thấp hơn là phía nặng hơn.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "nặng hơn"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_heavier_lighter_01"
+        ],
+        "medium": [
+          "m2_q_heavier_lighter_02"
+        ],
+        "application": [
+          "m2_q_heavier_lighter_03"
+        ]
+      },
+      "prerequisite_skills": [],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_mass_kg_read_write",
+      "chapter_id": "m2_ch06_measurement",
+      "topic_id": "m2_tp13_mass_length_capacity",
+      "skill_id": "MASS_KG_READ_WRITE",
+      "order_in_domain": 2,
+      "title_vi": "Đọc và viết số đo kilôgam",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: đọc và viết số đo kilôgam.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Kilôgam, kí hiệu kg, là đơn vị dùng để đo khối lượng. Số đo phải đi cùng đúng đơn vị để biết đang nói về khối lượng.",
+      "concepts": [
+        {
+          "id": "m2_cp_mass_kg_read_write_01",
+          "name_vi": "Kilôgam",
+          "definition_vi": "kg là kí hiệu của kilôgam, một đơn vị đo khối lượng thông dụng."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_mass_kg_read_write_01",
+          "prompt_vi": "Một bao gạo ghi 5 kg. Số đo khối lượng là bao nhiêu kg?",
+          "solution_steps_vi": [
+            "Con số đi trước đơn vị kg là 5.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "5"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_mass_kg_read_write_01"
+        ],
+        "medium": [
+          "m2_q_mass_kg_read_write_02"
+        ],
+        "application": [
+          "m2_q_mass_kg_read_write_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "HEAVIER_LIGHTER"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_capacity_liter_read_write",
+      "chapter_id": "m2_ch06_measurement",
+      "topic_id": "m2_tp13_mass_length_capacity",
+      "skill_id": "CAPACITY_LITER_READ_WRITE",
+      "order_in_domain": 3,
+      "title_vi": "Đọc và viết số đo lít",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: đọc và viết số đo lít.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Lít, kí hiệu l, là đơn vị dùng để đo dung tích chất lỏng. Khi cộng hoặc trừ các số đo cùng đơn vị lít, giữ nguyên đơn vị l.",
+      "concepts": [
+        {
+          "id": "m2_cp_capacity_liter_read_write_01",
+          "name_vi": "Lít",
+          "definition_vi": "l là kí hiệu của lít, đơn vị đo dung tích."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_capacity_liter_read_write_01",
+          "prompt_vi": "Một bình ghi 4 l. Dung tích được ghi là bao nhiêu lít?",
+          "solution_steps_vi": [
+            "Con số đi trước kí hiệu l là 4.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "4"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_capacity_liter_read_write_01"
+        ],
+        "medium": [
+          "m2_q_capacity_liter_read_write_02"
+        ],
+        "application": [
+          "m2_q_capacity_liter_read_write_03"
+        ]
+      },
+      "prerequisite_skills": [],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_length_dm_m_km_recognize_relation",
+      "chapter_id": "m2_ch06_measurement",
+      "topic_id": "m2_tp13_mass_length_capacity",
+      "skill_id": "LENGTH_DM_M_KM_RECOGNIZE_RELATION",
+      "order_in_domain": 4,
+      "title_vi": "Đề-xi-mét, mét và ki-lô-mét",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: đề-xi-mét, mét và ki-lô-mét.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Các đơn vị độ dài có quan hệ: 1 m = 10 dm và 1 km = 1000 m. Chọn đơn vị phù hợp với kích thước quãng đường hoặc vật cần đo.",
+      "concepts": [
+        {
+          "id": "m2_cp_length_dm_m_km_recognize_relation_01",
+          "name_vi": "Quan hệ đơn vị độ dài",
+          "definition_vi": "dm, m và km là các đơn vị độ dài với 1 m = 10 dm, 1 km = 1000 m."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_length_dm_m_km_recognize_relation_01",
+          "prompt_vi": "1 m bằng bao nhiêu dm?",
+          "solution_steps_vi": [
+            "Theo quan hệ đơn vị, 1 m = 10 dm.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "10"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_length_dm_m_km_recognize_relation_01"
+        ],
+        "medium": [
+          "m2_q_length_dm_m_km_recognize_relation_02"
+        ],
+        "application": [
+          "m2_q_length_dm_m_km_recognize_relation_03"
+        ]
+      },
+      "prerequisite_skills": [],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_time_day_24_hours",
+      "chapter_id": "m2_ch06_measurement",
+      "topic_id": "m2_tp14_time_money",
+      "skill_id": "TIME_DAY_24_HOURS",
+      "order_in_domain": 5,
+      "title_vi": "Một ngày có 24 giờ",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: một ngày có 24 giờ.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Một ngày đầy đủ gồm 24 giờ. Có thể dùng mốc sáng, trưa, chiều, tối để liên hệ các thời điểm trong ngày.",
+      "concepts": [
+        {
+          "id": "m2_cp_time_day_24_hours_01",
+          "name_vi": "Ngày và giờ",
+          "definition_vi": "1 ngày = 24 giờ."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_time_day_24_hours_01",
+          "prompt_vi": "Một ngày đầy đủ có bao nhiêu giờ?",
+          "solution_steps_vi": [
+            "Theo quan hệ thời gian, 1 ngày = 24 giờ.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "24"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_time_day_24_hours_01"
+        ],
+        "medium": [
+          "m2_q_time_day_24_hours_02"
+        ],
+        "application": [
+          "m2_q_time_day_24_hours_03"
+        ]
+      },
+      "prerequisite_skills": [],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_time_hour_60_minutes",
+      "chapter_id": "m2_ch06_measurement",
+      "topic_id": "m2_tp14_time_money",
+      "skill_id": "TIME_HOUR_60_MINUTES",
+      "order_in_domain": 6,
+      "title_vi": "Một giờ có 60 phút",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: một giờ có 60 phút.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Phút là đơn vị nhỏ hơn giờ. Khi đủ 60 phút thì được 1 giờ.",
+      "concepts": [
+        {
+          "id": "m2_cp_time_hour_60_minutes_01",
+          "name_vi": "Giờ và phút",
+          "definition_vi": "1 giờ = 60 phút."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_time_hour_60_minutes_01",
+          "prompt_vi": "1 giờ bằng bao nhiêu phút?",
+          "solution_steps_vi": [
+            "Theo quan hệ thời gian, 1 giờ = 60 phút.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "60"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_time_hour_60_minutes_01"
+        ],
+        "medium": [
+          "m2_q_time_hour_60_minutes_02"
+        ],
+        "application": [
+          "m2_q_time_hour_60_minutes_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "TIME_DAY_24_HOURS"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_calendar_days_in_month_date",
+      "chapter_id": "m2_ch06_measurement",
+      "topic_id": "m2_tp14_time_money",
+      "skill_id": "CALENDAR_DAYS_IN_MONTH_DATE",
+      "order_in_domain": 7,
+      "title_vi": "Ngày và tháng trên lịch",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: ngày và tháng trên lịch.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Lịch cho biết thứ tự ngày trong tháng. Một số tháng có 30 ngày, một số có 31 ngày; tháng 2 có 28 hoặc 29 ngày tùy năm.",
+      "concepts": [
+        {
+          "id": "m2_cp_calendar_days_in_month_date_01",
+          "name_vi": "Đọc lịch",
+          "definition_vi": "Dùng số ngày và vị trí ngày trên lịch để xác định ngày trước, ngày sau và số ngày trong tháng."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_calendar_days_in_month_date_01",
+          "prompt_vi": "Tháng 4 có bao nhiêu ngày?",
+          "solution_steps_vi": [
+            "Tháng 4 có 30 ngày.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "30"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_calendar_days_in_month_date_01"
+        ],
+        "medium": [
+          "m2_q_calendar_days_in_month_date_02"
+        ],
+        "application": [
+          "m2_q_calendar_days_in_month_date_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "NUM_PREDECESSOR_SUCCESSOR"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_money_vnd_note_recognition",
+      "chapter_id": "m2_ch06_measurement",
+      "topic_id": "m2_tp14_time_money",
+      "skill_id": "MONEY_VND_NOTE_RECOGNITION",
+      "order_in_domain": 8,
+      "title_vi": "Nhận biết tiền Việt Nam",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: nhận biết tiền việt nam.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Trên tờ tiền, giá trị được thể hiện bằng con số và đơn vị đồng. Khi nhận biết, đọc đúng giá trị in trên tờ tiền và phân biệt với các giá trị khác.",
+      "concepts": [
+        {
+          "id": "m2_cp_money_vnd_note_recognition_01",
+          "name_vi": "Giá trị tờ tiền",
+          "definition_vi": "Giá trị tiền được đọc theo con số in trên tờ và đơn vị đồng; bài học này chỉ rèn nhận biết, không mở rộng chuẩn số học ngoài baseline."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_money_vnd_note_recognition_01",
+          "prompt_vi": "Một tờ tiền học tập có in rõ '10 000 đồng'. Giá trị in trên tờ là gì?",
+          "solution_steps_vi": [
+            "Đọc trực tiếp con số và đơn vị đồng in trên tờ tiền.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "10 000 đồng"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_money_vnd_note_recognition_01"
+        ],
+        "medium": [
+          "m2_q_money_vnd_note_recognition_02"
+        ],
+        "application": [
+          "m2_q_money_vnd_note_recognition_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "NUM_COUNT_READ_WRITE_0_1000"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_measure_with_ruler_cm",
+      "chapter_id": "m2_ch06_measurement",
+      "topic_id": "m2_tp15_measure_practice",
+      "skill_id": "MEASURE_WITH_RULER_CM",
+      "order_in_domain": 9,
+      "title_vi": "Đo độ dài bằng thước xăng-ti-mét",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: đo độ dài bằng thước xăng-ti-mét.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Đặt vạch 0 của thước trùng một đầu vật; đầu còn lại chỉ đến vạch nào thì số đo là bấy nhiêu xăng-ti-mét. Nếu không bắt đầu từ 0, lấy vị trí cuối trừ vị trí đầu.",
+      "concepts": [
+        {
+          "id": "m2_cp_measure_with_ruler_cm_01",
+          "name_vi": "Đo bằng thước cm",
+          "definition_vi": "Độ dài bằng hiệu số giữa hai vị trí đầu mút trên thước chia cm."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_measure_with_ruler_cm_01",
+          "prompt_vi": "Một đoạn thẳng bắt đầu ở vạch 0 cm và kết thúc ở vạch 8 cm. Dài bao nhiêu cm?",
+          "solution_steps_vi": [
+            "8 - 0 = 8 cm.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "8"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_measure_with_ruler_cm_01"
+        ],
+        "medium": [
+          "m2_q_measure_with_ruler_cm_02"
+        ],
+        "application": [
+          "m2_q_measure_with_ruler_cm_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "LINE_SEGMENT_RECOGNIZE"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_measure_with_common_scale",
+      "chapter_id": "m2_ch06_measurement",
+      "topic_id": "m2_tp15_measure_practice",
+      "skill_id": "MEASURE_WITH_COMMON_SCALE",
+      "order_in_domain": 10,
+      "title_vi": "Đọc dụng cụ đo có vạch chia",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: đọc dụng cụ đo có vạch chia.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Muốn đọc một dụng cụ có thang chia, trước hết xác định giá trị mỗi vạch rồi đếm số khoảng từ mốc đã biết đến vị trí cần đọc.",
+      "concepts": [
+        {
+          "id": "m2_cp_measure_with_common_scale_01",
+          "name_vi": "Vạch chia",
+          "definition_vi": "Mỗi vạch trên cùng một thang đều cách nhau một giá trị cố định nếu thang chia đều."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_measure_with_common_scale_01",
+          "prompt_vi": "Một thang đo có các vạch 0, 2, 4, 6, 8. Mỗi vạch tăng bao nhiêu đơn vị?",
+          "solution_steps_vi": [
+            "Hiệu giữa hai vạch liên tiếp là 2.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "2"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_measure_with_common_scale_01"
+        ],
+        "medium": [
+          "m2_q_measure_with_common_scale_02"
+        ],
+        "application": [
+          "m2_q_measure_with_common_scale_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "NUM_COUNT_READ_WRITE_0_1000"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_clock_minute_hand_at_3_or_6",
+      "chapter_id": "m2_ch06_measurement",
+      "topic_id": "m2_tp14_time_money",
+      "skill_id": "CLOCK_MINUTE_HAND_AT_3_OR_6",
+      "order_in_domain": 11,
+      "title_vi": "Đọc giờ khi kim phút chỉ 3 hoặc 6",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: đọc giờ khi kim phút chỉ 3 hoặc 6.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Khi kim phút chỉ số 3 là 15 phút; khi chỉ số 6 là 30 phút. Kết hợp với kim giờ để đọc giờ và phút.",
+      "concepts": [
+        {
+          "id": "m2_cp_clock_minute_hand_at_3_or_6_01",
+          "name_vi": "15 phút và 30 phút trên đồng hồ",
+          "definition_vi": "Kim phút ở số 3 tương ứng 15 phút; ở số 6 tương ứng 30 phút."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_clock_minute_hand_at_3_or_6_01",
+          "prompt_vi": "Kim phút chỉ số 3, kim giờ vừa qua số 4. Đồng hồ chỉ thời gian nào?",
+          "solution_steps_vi": [
+            "Kim phút ở số 3 tương ứng 15 phút; kim giờ ở khoảng sau 4 nên là 4 giờ 15 phút.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "4 giờ 15 phút"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_clock_minute_hand_at_3_or_6_01"
+        ],
+        "medium": [
+          "m2_q_clock_minute_hand_at_3_or_6_02"
+        ],
+        "application": [
+          "m2_q_clock_minute_hand_at_3_or_6_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "TIME_HOUR_60_MINUTES"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_measurement_convert_calculate_learned_units",
+      "chapter_id": "m2_ch06_measurement",
+      "topic_id": "m2_tp15_measure_practice",
+      "skill_id": "MEASUREMENT_CONVERT_CALCULATE_LEARNED_UNITS",
+      "order_in_domain": 12,
+      "title_vi": "Đổi và tính với đơn vị đã học",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: đổi và tính với đơn vị đã học.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Chỉ cộng trừ trực tiếp khi các số đo cùng đơn vị. Khi cần, đổi về cùng đơn vị trước rồi thực hiện phép tính.",
+      "concepts": [
+        {
+          "id": "m2_cp_measurement_convert_calculate_learned_units_01",
+          "name_vi": "Tính với số đo",
+          "definition_vi": "Đưa các số đo về cùng đơn vị trước khi cộng, trừ hoặc so sánh."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_measurement_convert_calculate_learned_units_01",
+          "prompt_vi": "3 m bằng bao nhiêu dm?",
+          "solution_steps_vi": [
+            "1 m = 10 dm nên 3 m = 30 dm.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "30"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_measurement_convert_calculate_learned_units_01"
+        ],
+        "medium": [
+          "m2_q_measurement_convert_calculate_learned_units_02"
+        ],
+        "application": [
+          "m2_q_measurement_convert_calculate_learned_units_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "MASS_KG_READ_WRITE",
+        "CAPACITY_LITER_READ_WRITE",
+        "LENGTH_DM_M_KM_RECOGNIZE_RELATION"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_measurement_estimate_basic",
+      "chapter_id": "m2_ch06_measurement",
+      "topic_id": "m2_tp15_measure_practice",
+      "skill_id": "MEASUREMENT_ESTIMATE_BASIC",
+      "order_in_domain": 13,
+      "title_vi": "Ước lượng số đo cơ bản",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: ước lượng số đo cơ bản.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Ước lượng dùng một vật hoặc độ dài quen thuộc làm mốc rồi so sánh. Kết quả cần hợp lý với kích thước thực tế, không cần đúng tuyệt đối.",
+      "concepts": [
+        {
+          "id": "m2_cp_measurement_estimate_basic_01",
+          "name_vi": "Ước lượng số đo",
+          "definition_vi": "So sánh với mốc quen thuộc để chọn số đo và đơn vị gần đúng."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_measurement_estimate_basic_01",
+          "prompt_vi": "Chiều dài một chiếc bút chì hợp lý nhất khoảng bao nhiêu?",
+          "solution_steps_vi": [
+            "Bút chì là vật nhỏ, đơn vị cm và độ dài khoảng vài chục cm là hợp lý.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "15 cm"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_measurement_estimate_basic_01"
+        ],
+        "medium": [
+          "m2_q_measurement_estimate_basic_02"
+        ],
+        "application": [
+          "m2_q_measurement_estimate_basic_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "MEASURE_WITH_RULER_CM"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_polyline_length_sum_segments",
+      "chapter_id": "m2_ch06_measurement",
+      "topic_id": "m2_tp15_measure_practice",
+      "skill_id": "POLYLINE_LENGTH_SUM_SEGMENTS",
+      "order_in_domain": 14,
+      "title_vi": "Tính độ dài đường gấp khúc",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: tính độ dài đường gấp khúc.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Độ dài đường gấp khúc bằng tổng độ dài tất cả các đoạn thẳng tạo nên đường đó, với các số đo cùng đơn vị.",
+      "concepts": [
+        {
+          "id": "m2_cp_polyline_length_sum_segments_01",
+          "name_vi": "Độ dài đường gấp khúc",
+          "definition_vi": "Cộng độ dài từng đoạn thành phần để có tổng độ dài đường gấp khúc."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_polyline_length_sum_segments_01",
+          "prompt_vi": "Đường gấp khúc có hai đoạn dài 4 cm và 6 cm. Tổng độ dài là bao nhiêu?",
+          "solution_steps_vi": [
+            "4 + 6 = 10 cm.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "10"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_polyline_length_sum_segments_01"
+        ],
+        "medium": [
+          "m2_q_polyline_length_sum_segments_02"
+        ],
+        "application": [
+          "m2_q_polyline_length_sum_segments_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "POLYLINE_RECOGNIZE",
+        "MEASURE_WITH_RULER_CM"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_measurement_real_world_one_step",
+      "chapter_id": "m2_ch06_measurement",
+      "topic_id": "m2_tp15_measure_practice",
+      "skill_id": "MEASUREMENT_REAL_WORLD_ONE_STEP",
+      "order_in_domain": 15,
+      "title_vi": "Bài toán đo lường một bước",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: bài toán đo lường một bước.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Đọc đơn vị, xác định đại lượng được thêm, bớt hoặc so sánh rồi dùng một phép tính phù hợp. Giữ đơn vị trong kết quả.",
+      "concepts": [
+        {
+          "id": "m2_cp_measurement_real_world_one_step_01",
+          "name_vi": "Giải toán đo lường",
+          "definition_vi": "Một bài đo lường một bước kết hợp số đo cùng đơn vị với cộng hoặc trừ phù hợp tình huống."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_measurement_real_world_one_step_01",
+          "prompt_vi": "Một sợi dây dài 2 m, nối thêm đoạn 3 m. Dây dài tất cả bao nhiêu mét?",
+          "solution_steps_vi": [
+            "2 m + 3 m = 5 m.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "5"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_measurement_real_world_one_step_01"
+        ],
+        "medium": [
+          "m2_q_measurement_real_world_one_step_02"
+        ],
+        "application": [
+          "m2_q_measurement_real_world_one_step_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "MEASUREMENT_CONVERT_CALCULATE_LEARNED_UNITS",
+        "WP_SELECT_OPERATION_ONE_STEP"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_data_collect_classify_count",
+      "chapter_id": "m2_ch07_data_chance",
+      "topic_id": "m2_tp16_data",
+      "skill_id": "DATA_COLLECT_CLASSIFY_COUNT",
+      "order_in_domain": 1,
+      "title_vi": "Thu thập, phân loại và kiểm đếm",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: thu thập, phân loại và kiểm đếm.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Để có dữ liệu rõ ràng, xác định tiêu chí phân loại, đưa mỗi đối tượng vào đúng nhóm rồi đếm số phần tử từng nhóm.",
+      "concepts": [
+        {
+          "id": "m2_cp_data_collect_classify_count_01",
+          "name_vi": "Phân loại và kiểm đếm",
+          "definition_vi": "Mỗi đối tượng được xếp theo một tiêu chí rõ ràng trước khi đếm số lượng của từng nhóm."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_data_collect_classify_count_01",
+          "prompt_vi": "Có các thẻ: đỏ, xanh, đỏ, vàng, đỏ. Có bao nhiêu thẻ đỏ?",
+          "solution_steps_vi": [
+            "Phân loại theo màu rồi đếm ba thẻ đỏ.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "3"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_data_collect_classify_count_01"
+        ],
+        "medium": [
+          "m2_q_data_collect_classify_count_02"
+        ],
+        "application": [
+          "m2_q_data_collect_classify_count_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "NUM_COUNT_READ_WRITE_0_1000"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_pictograph_read_describe",
+      "chapter_id": "m2_ch07_data_chance",
+      "topic_id": "m2_tp16_data",
+      "skill_id": "PICTOGRAPH_READ_DESCRIBE",
+      "order_in_domain": 2,
+      "title_vi": "Đọc và mô tả biểu đồ tranh",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: đọc và mô tả biểu đồ tranh.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Biểu đồ tranh dùng hình ảnh để biểu diễn số lượng. Luôn đọc chú giải để biết một hình tương ứng bao nhiêu đối tượng trước khi tính.",
+      "concepts": [
+        {
+          "id": "m2_cp_pictograph_read_describe_01",
+          "name_vi": "Biểu đồ tranh",
+          "definition_vi": "Số lượng = số biểu tượng × giá trị mỗi biểu tượng theo chú giải."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_pictograph_read_describe_01",
+          "prompt_vi": "Biểu đồ tranh có 4 hình ngôi sao cho nhóm A; chú giải 1 hình = 1 bạn. Nhóm A có bao nhiêu bạn?",
+          "solution_steps_vi": [
+            "4 biểu tượng × 1 bạn mỗi biểu tượng = 4 bạn.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "4"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_pictograph_read_describe_01"
+        ],
+        "medium": [
+          "m2_q_pictograph_read_describe_02"
+        ],
+        "application": [
+          "m2_q_pictograph_read_describe_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "DATA_COLLECT_CLASSIFY_COUNT"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_pictograph_simple_inference",
+      "chapter_id": "m2_ch07_data_chance",
+      "topic_id": "m2_tp16_data",
+      "skill_id": "PICTOGRAPH_SIMPLE_INFERENCE",
+      "order_in_domain": 3,
+      "title_vi": "Nhận xét từ biểu đồ tranh",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: nhận xét từ biểu đồ tranh.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Sau khi đọc đúng số lượng từng nhóm, có thể so sánh để tìm nhóm nhiều nhất, ít nhất hoặc chênh lệch đơn giản.",
+      "concepts": [
+        {
+          "id": "m2_cp_pictograph_simple_inference_01",
+          "name_vi": "Suy luận từ dữ liệu",
+          "definition_vi": "Dùng các số đã đọc từ biểu đồ để so sánh và nêu nhận xét có căn cứ."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_pictograph_simple_inference_01",
+          "prompt_vi": "Biểu đồ: nhóm A có 6 biểu tượng, nhóm B có 4 biểu tượng; 1 biểu tượng = 1 bạn. A nhiều hơn B bao nhiêu bạn?",
+          "solution_steps_vi": [
+            "6 - 4 = 2 bạn.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "2"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_pictograph_simple_inference_01"
+        ],
+        "medium": [
+          "m2_q_pictograph_simple_inference_02"
+        ],
+        "application": [
+          "m2_q_pictograph_simple_inference_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "PICTOGRAPH_READ_DESCRIBE",
+        "NUM_COMPARE_0_1000"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_event_possible",
+      "chapter_id": "m2_ch07_data_chance",
+      "topic_id": "m2_tp17_chance",
+      "skill_id": "EVENT_POSSIBLE",
+      "order_in_domain": 4,
+      "title_vi": "Sự kiện có thể xảy ra",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: sự kiện có thể xảy ra.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Một sự kiện là có thể nếu nó có ít nhất một kết quả phù hợp nhưng không bắt buộc xảy ra trong mọi lần thử.",
+      "concepts": [
+        {
+          "id": "m2_cp_event_possible_01",
+          "name_vi": "Có thể",
+          "definition_vi": "Có ít nhất một kết quả làm sự kiện xảy ra và cũng có kết quả làm nó không xảy ra."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_event_possible_01",
+          "prompt_vi": "Gieo xúc xắc có các mặt 1 đến 6. Xuất hiện số 4 là sự kiện gì?",
+          "solution_steps_vi": [
+            "Số 4 là một mặt có thể xuất hiện nhưng không phải lần nào cũng ra 4.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "có thể"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_event_possible_01"
+        ],
+        "medium": [
+          "m2_q_event_possible_02"
+        ],
+        "application": [
+          "m2_q_event_possible_03"
+        ]
+      },
+      "prerequisite_skills": [],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_event_certain",
+      "chapter_id": "m2_ch07_data_chance",
+      "topic_id": "m2_tp17_chance",
+      "skill_id": "EVENT_CERTAIN",
+      "order_in_domain": 5,
+      "title_vi": "Sự kiện chắc chắn xảy ra",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: sự kiện chắc chắn xảy ra.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Một sự kiện là chắc chắn nếu mọi kết quả có thể của tình huống đều làm sự kiện đó xảy ra.",
+      "concepts": [
+        {
+          "id": "m2_cp_event_certain_01",
+          "name_vi": "Chắc chắn",
+          "definition_vi": "Sự kiện xảy ra trong tất cả các kết quả có thể của tình huống."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_event_certain_01",
+          "prompt_vi": "Gieo xúc xắc chuẩn 1 đến 6. Kết quả là một số từ 1 đến 6. Sự kiện này là gì?",
+          "solution_steps_vi": [
+            "Mọi mặt của xúc xắc đều là một số từ 1 đến 6.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "chắc chắn"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_event_certain_01"
+        ],
+        "medium": [
+          "m2_q_event_certain_02"
+        ],
+        "application": [
+          "m2_q_event_certain_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "EVENT_POSSIBLE"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    },
+    {
+      "id": "m2_ls_event_impossible",
+      "chapter_id": "m2_ch07_data_chance",
+      "topic_id": "m2_tp17_chance",
+      "skill_id": "EVENT_IMPOSSIBLE",
+      "order_in_domain": 6,
+      "title_vi": "Sự kiện không thể xảy ra",
+      "objectives_vi": [
+        "Nhận biết và thực hiện đúng nội dung: sự kiện không thể xảy ra.",
+        "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
+      ],
+      "explanation_vi": "Một sự kiện là không thể nếu không có kết quả nào của tình huống làm sự kiện đó xảy ra.",
+      "concepts": [
+        {
+          "id": "m2_cp_event_impossible_01",
+          "name_vi": "Không thể",
+          "definition_vi": "Không có kết quả hợp lệ nào làm sự kiện xảy ra."
+        }
+      ],
+      "worked_examples": [
+        {
+          "id": "m2_ex_event_impossible_01",
+          "prompt_vi": "Gieo xúc xắc chuẩn 1 đến 6. Xuất hiện số 8 là sự kiện gì?",
+          "solution_steps_vi": [
+            "Không có mặt số 8 nên sự kiện không thể xảy ra.",
+            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+          ],
+          "answer": "không thể"
+        }
+      ],
+      "practice_sets": {
+        "basic": [
+          "m2_q_event_impossible_01"
+        ],
+        "medium": [
+          "m2_q_event_impossible_02"
+        ],
+        "application": [
+          "m2_q_event_impossible_03"
+        ]
+      },
+      "prerequisite_skills": [
+        "EVENT_POSSIBLE"
+      ],
+      "difficulty_span": [
+        "basic",
+        "medium",
+        "application"
+      ],
+      "status": "CHILD_READY"
+    }
+  ]
+}
