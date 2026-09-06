@@ -109,6 +109,24 @@ def normalize_prompt(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
+def normalize_prompt_identity(text: str) -> str:
+    text = text.lower().strip()
+    text = re.sub(r"[^\w\d]+", " ", text, flags=re.UNICODE)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def worked_example_prompt_overlap(example_prompt: str, practice_prompt: str, threshold: float = 0.96) -> str | None:
+    example = normalize_prompt_identity(example_prompt)
+    practice = normalize_prompt_identity(practice_prompt)
+    if not example or not practice:
+        return None
+    if example == practice:
+        return "exact"
+    if difflib.SequenceMatcher(None, example, practice).ratio() >= threshold:
+        return "near"
+    return None
+
+
 def grade2_operation_scope_violations(text: str) -> list[str]:
     violations: list[str] = []
     if not isinstance(text, str):
@@ -759,6 +777,27 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
                     errors.append(f"cross_lesson_question_ref:{lid}:{qid}:{q.get('lesson_id')}")
                 if q.get("difficulty") != diff:
                     errors.append(f"practice_difficulty_mismatch:{lid}:{qid}:{diff}:{q.get('difficulty')}")
+
+        practice_qids = []
+        for refs in practice.values():
+            if isinstance(refs, list):
+                practice_qids.extend(qid for qid in refs if isinstance(qid, str))
+        examples = lesson.get("worked_examples", [])
+        if isinstance(examples, list):
+            for example in examples:
+                if not isinstance(example, dict):
+                    continue
+                example_id = example.get("id", "unknown_example")
+                example_prompt = example.get("prompt_vi")
+                if not isinstance(example_prompt, str):
+                    continue
+                for qid in practice_qids:
+                    q = question_by_id.get(qid)
+                    if not isinstance(q, dict) or not isinstance(q.get("prompt_vi"), str):
+                        continue
+                    overlap = worked_example_prompt_overlap(example_prompt, q["prompt_vi"])
+                    if overlap:
+                        errors.append(f"worked_example_practice_prompt_overlap:{overlap}:{lid}:{example_id}:{qid}")
     for qid in question_ids:
         count = practice_ref_counts[qid]
         if count == 0:

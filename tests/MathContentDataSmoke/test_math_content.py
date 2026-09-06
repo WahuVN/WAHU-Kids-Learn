@@ -245,6 +245,25 @@ class MathContentDataSmoke(unittest.TestCase):
         }
         self.assertEqual([], validator.child_facing_internal_vocabulary(metadata_only))
 
+    def test_worked_examples_are_distinct_from_lesson_practice(self):
+        example_prompts = []
+        for lesson in self.lessons:
+            with self.subTest(lesson=lesson["id"]):
+                examples = lesson["worked_examples"]
+                self.assertEqual(1, len(examples))
+                example = examples[0]
+                self.assertGreaterEqual(len(example["solution_steps_vi"]), 2)
+                example_prompts.append(example["prompt_vi"])
+                practice_ids = []
+                for difficulty in ("basic", "medium", "application"):
+                    practice_ids.extend(lesson["practice_sets"][difficulty])
+                for question_id in practice_ids:
+                    overlap = validator.worked_example_prompt_overlap(
+                        example["prompt_vi"], self.question_by_id[question_id]["prompt_vi"])
+                    self.assertIsNone(overlap, msg=f"{lesson['id']} example overlaps {question_id}: {overlap}")
+        self.assertEqual(67, len(example_prompts))
+        self.assertEqual(67, len(set(example_prompts)))
+
     def test_application_questions_do_not_regress_to_single_fact_recall(self):
         subtraction = self.question_by_id["m2_q_sub_components_recognize_03"]
         division = self.question_by_id["m2_q_division_components_03"]

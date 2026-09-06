@@ -153,12 +153,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_num_count_read_write_0_1000_01",
-          "prompt_vi": "Số gồm 5 trăm, 0 chục và 7 đơn vị là số nào?",
+          "prompt_vi": "Số gồm 3 trăm, 4 chục và 2 đơn vị là số nào?",
           "solution_steps_vi": [
-            "5 trăm là 500, 0 chục là 0 và 7 đơn vị là 7; 500 + 0 + 7 = 507.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "3 trăm = 300, 4 chục = 40, 2 đơn vị = 2.",
+            "Ghép các hàng: 300 + 40 + 2 = 342."
           ],
-          "answer": "507"
+          "answer": "342"
         }
       ],
       "practice_sets": {
@@ -202,12 +202,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_num_full_hundreds_recognize_01",
-          "prompt_vi": "Số nào là số tròn trăm?",
+          "prompt_vi": "Số 300 có phải là số tròn trăm không?",
           "solution_steps_vi": [
-            "600 có hàng chục và hàng đơn vị đều bằng 0.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "300 gồm 3 trăm, 0 chục và 0 đơn vị.",
+            "Vì không có chục và đơn vị nên 300 là số tròn trăm."
           ],
-          "answer": "600"
+          "answer": "Có"
         }
       ],
       "practice_sets": {
@@ -253,12 +253,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_num_predecessor_successor_01",
-          "prompt_vi": "Số liền trước của 500 là số nào?",
+          "prompt_vi": "Số liền sau của 249 là số nào?",
           "solution_steps_vi": [
-            "Số liền trước nhỏ hơn 500 đúng 1 nên là 499.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Số liền sau lớn hơn số đã cho đúng 1 đơn vị.",
+            "249 thêm 1 được 250."
           ],
-          "answer": "499"
+          "answer": "250"
         }
       ],
       "practice_sets": {
@@ -304,12 +304,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_place_value_hundreds_tens_ones_01",
-          "prompt_vi": "Trong số 684, chữ số 6 có giá trị là bao nhiêu?",
+          "prompt_vi": "Trong số 731, chữ số 3 có giá trị là bao nhiêu?",
           "solution_steps_vi": [
-            "Chữ số 6 đứng ở hàng trăm nên có giá trị 600.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Chữ số 3 đứng ở hàng chục.",
+            "3 chục có giá trị là 30."
           ],
-          "answer": "600"
+          "answer": "30"
         }
       ],
       "practice_sets": {
@@ -355,12 +355,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_num_expanded_form_hto_01",
-          "prompt_vi": "Dạng khai triển đúng của 352 là gì?",
+          "prompt_vi": "Viết số 641 dưới dạng tổng của trăm, chục và đơn vị.",
           "solution_steps_vi": [
-            "352 có 3 trăm, 5 chục và 2 đơn vị nên bằng 300 + 50 + 2.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "641 có 6 trăm, 4 chục và 1 đơn vị.",
+            "Vậy 641 = 600 + 40 + 1."
           ],
-          "answer": "300 + 50 + 2"
+          "answer": "600 + 40 + 1"
         }
       ],
       "practice_sets": {
@@ -406,10 +406,10 @@
       "worked_examples": [
         {
           "id": "m2_ex_number_ray_fill_01",
-          "prompt_vi": "Trên tia số có các vạch 200, 300, __, 500. Số còn thiếu là gì?",
+          "prompt_vi": "Trên tia số có các vạch 100, 200, 300, __. Điền số tiếp theo.",
           "solution_steps_vi": [
-            "Mỗi vạch tăng 100 nên sau 300 là 400.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Mỗi vạch tăng đều 100.",
+            "Sau 300 thêm 100 là 400."
           ],
           "answer": "400"
         }
@@ -457,12 +457,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_num_compare_0_1000_01",
-          "prompt_vi": "Điền dấu đúng: 608 __ 680",
+          "prompt_vi": "So sánh 712 và 721.",
           "solution_steps_vi": [
-            "Cùng 6 trăm nhưng 0 chục nhỏ hơn 8 chục nên 608 < 680.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Hai số cùng có 7 trăm.",
+            "So hàng chục: 1 chục < 2 chục nên 712 < 721."
           ],
-          "answer": "<"
+          "answer": "712 < 721"
         }
       ],
       "practice_sets": {
@@ -508,12 +508,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_num_min_max_up_to_4_01",
-          "prompt_vi": "Số bé nhất trong nhóm 407, 470, 704, 740 là số nào?",
+          "prompt_vi": "Trong các số 305, 350 và 503, số nào bé nhất?",
           "solution_steps_vi": [
-            "Cả bốn số đều khác nhau; so sánh hàng trăm cho thấy 407 và 470 nhỏ hơn các số 7 trăm, rồi 407 < 470.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "305 và 350 có 3 trăm, còn 503 có 5 trăm.",
+            "Giữa 305 và 350, 0 chục < 5 chục nên 305 bé nhất."
           ],
-          "answer": "407"
+          "answer": "305"
         }
       ],
       "practice_sets": {
@@ -559,12 +559,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_num_sort_up_to_4_01",
-          "prompt_vi": "Sắp xếp tăng dần 320, 302, 230, 203.",
+          "prompt_vi": "Sắp xếp 210, 201, 120 theo thứ tự từ bé đến lớn.",
           "solution_steps_vi": [
-            "Tăng dần là từ bé đến lớn: 203 < 230 < 302 < 320.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "120 có 1 trăm nên bé nhất.",
+            "Trong 201 và 210, 0 chục < 1 chục nên 201 đứng trước 210."
           ],
-          "answer": "203, 230, 302, 320"
+          "answer": "120, 201, 210"
         }
       ],
       "practice_sets": {
@@ -610,12 +610,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_estimate_objects_by_tens_01",
-          "prompt_vi": "Có 6 nhóm, mỗi nhóm khoảng 10 que tính. Ước lượng có khoảng bao nhiêu que?",
+          "prompt_vi": "Có khoảng 9 nhóm, mỗi nhóm gần 10 nút áo. Ước lượng có khoảng bao nhiêu nút áo?",
           "solution_steps_vi": [
-            "6 nhóm chục tương ứng khoảng 60 que.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Mỗi nhóm gần một chục.",
+            "9 chục là khoảng 90 nút áo."
           ],
-          "answer": "60"
+          "answer": "khoảng 90"
         }
       ],
       "practice_sets": {
@@ -661,12 +661,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_add_components_recognize_01",
-          "prompt_vi": "Trong 23 + 15 = 38, số 23 được gọi là gì?",
+          "prompt_vi": "Trong 14 + 25 = 39, số 39 được gọi là gì?",
           "solution_steps_vi": [
-            "23 là một trong hai số được cộng nên là số hạng.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "14 và 25 là hai số được cộng nên là các số hạng.",
+            "Kết quả 39 được gọi là tổng."
           ],
-          "answer": "số hạng"
+          "answer": "tổng"
         }
       ],
       "practice_sets": {
@@ -712,12 +712,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_sub_components_recognize_01",
-          "prompt_vi": "Trong 50 - 12 = 38, số 50 được gọi là gì?",
+          "prompt_vi": "Trong 63 - 21 = 42, số 21 được gọi là gì?",
           "solution_steps_vi": [
-            "50 là số đứng trước dấu trừ nên là số bị trừ.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "63 là số bị trừ.",
+            "21 là số được lấy bớt nên gọi là số trừ; 42 là hiệu."
           ],
-          "answer": "số bị trừ"
+          "answer": "số trừ"
         }
       ],
       "practice_sets": {
@@ -763,12 +763,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_add_within_1000_no_carry_01",
-          "prompt_vi": "Tính 243 + 125.",
+          "prompt_vi": "Tính 321 + 456.",
           "solution_steps_vi": [
-            "Cộng từng hàng: 3+5=8, 4+2=6, 2+1=3; được 368.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Cộng từng hàng: 1 + 6 = 7, 2 + 5 = 7.",
+            "Hàng trăm: 3 + 4 = 7, nên kết quả là 777."
           ],
-          "answer": "368"
+          "answer": "777"
         }
       ],
       "practice_sets": {
@@ -815,12 +815,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_add_within_1000_one_carry_max_01",
-          "prompt_vi": "Tính 246 + 137.",
+          "prompt_vi": "Tính 254 + 128.",
           "solution_steps_vi": [
-            "6+7=13, viết 3 nhớ 1; 4+3+1=8; 2+1=3, nên kết quả 383.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Hàng đơn vị: 4 + 8 = 12, viết 2 và nhớ 1 chục.",
+            "Hàng chục: 5 + 2 + 1 = 8; hàng trăm: 2 + 1 = 3, được 382."
           ],
-          "answer": "383"
+          "answer": "382"
         }
       ],
       "practice_sets": {
@@ -866,12 +866,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_sub_within_1000_no_borrow_01",
-          "prompt_vi": "Tính 786 - 234.",
+          "prompt_vi": "Tính 865 - 432.",
           "solution_steps_vi": [
-            "6-4=2, 8-3=5, 7-2=5; được 552.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Trừ từng hàng: 5 - 2 = 3, 6 - 3 = 3.",
+            "Hàng trăm: 8 - 4 = 4, được 433."
           ],
-          "answer": "552"
+          "answer": "433"
         }
       ],
       "practice_sets": {
@@ -918,12 +918,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_sub_within_1000_one_borrow_max_01",
-          "prompt_vi": "Tính 352 - 138.",
+          "prompt_vi": "Tính 463 - 127.",
           "solution_steps_vi": [
-            "Mượn 1 chục: 12-8=4; còn 4 chục, 4-3=1; 3-1=2, được 214.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Hàng đơn vị: 3 không trừ được 7, mượn 1 chục để có 13 - 7 = 6.",
+            "Còn 5 chục: 5 - 2 = 3; hàng trăm: 4 - 1 = 3, được 336."
           ],
-          "answer": "214"
+          "answer": "336"
         }
       ],
       "practice_sets": {
@@ -969,10 +969,10 @@
       "worked_examples": [
         {
           "id": "m2_ex_add_sub_two_operators_left_to_right_01",
-          "prompt_vi": "Tính từ trái sang phải: 50 + 20 - 10.",
+          "prompt_vi": "Bắt đầu từ 70, cộng 20 rồi bớt 30. Kết quả cuối cùng là bao nhiêu?",
           "solution_steps_vi": [
-            "50 + 20 = 70, rồi 70 - 10 = 60.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Làm theo đúng thứ tự đã nêu: 70 + 20 = 90.",
+            "Sau đó 90 - 30 = 60."
           ],
           "answer": "60"
         }
@@ -1021,10 +1021,10 @@
       "worked_examples": [
         {
           "id": "m2_ex_mental_add_sub_within_20_01",
-          "prompt_vi": "Tính nhẩm 8 + 7.",
+          "prompt_vi": "Tính nhẩm 9 + 6.",
           "solution_steps_vi": [
-            "Tách 7 thành 2 và 5: 8+2=10, rồi 10+5=15.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Tách 6 thành 1 và 5 để làm tròn 10.",
+            "9 + 1 = 10, rồi 10 + 5 = 15."
           ],
           "answer": "15"
         }
@@ -1073,12 +1073,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_mental_add_sub_round_tens_hundreds_1000_01",
-          "prompt_vi": "Tính nhẩm 30 + 40.",
+          "prompt_vi": "Tính nhẩm 600 + 300.",
           "solution_steps_vi": [
-            "3 chục + 4 chục = 7 chục, tức 70.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "6 trăm + 3 trăm = 9 trăm.",
+            "9 trăm là 900."
           ],
-          "answer": "70"
+          "answer": "900"
         }
       ],
       "practice_sets": {
@@ -1125,12 +1125,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_multiplication_meaning_01",
-          "prompt_vi": "Có 3 nhóm, mỗi nhóm 2 chấm. Phép cộng lặp lại nào đúng?",
+          "prompt_vi": "Có 4 nhóm, mỗi nhóm 2 chấm. Viết phép cộng lặp lại và phép nhân tương ứng.",
           "solution_steps_vi": [
-            "Ba nhóm, mỗi nhóm 2 tương ứng cộng số 2 ba lần.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Có 4 nhóm bằng nhau nên cộng số 2 bốn lần: 2 + 2 + 2 + 2 = 8.",
+            "Viết gọn bằng phép nhân: 4 × 2 = 8."
           ],
-          "answer": "2 + 2 + 2"
+          "answer": "2 + 2 + 2 + 2 = 8; 4 × 2 = 8"
         }
       ],
       "practice_sets": {
@@ -1176,12 +1176,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_division_meaning_01",
-          "prompt_vi": "Có 10 chiếc bánh chia đều cho 2 bạn. Mỗi bạn được bao nhiêu chiếc?",
+          "prompt_vi": "Có 12 chiếc kẹo chia đều cho 2 bạn. Mỗi bạn được bao nhiêu chiếc?",
           "solution_steps_vi": [
-            "10 chia đều thành 2 phần bằng nhau thì mỗi phần có 5.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Chia 12 thành 2 phần bằng nhau.",
+            "12 : 2 = 6 nên mỗi bạn được 6 chiếc."
           ],
-          "answer": "5"
+          "answer": "6"
         }
       ],
       "practice_sets": {
@@ -1227,12 +1227,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_multiplication_components_01",
-          "prompt_vi": "Trong 2 × 5 = 10, số 2 được gọi là gì?",
+          "prompt_vi": "Trong 5 × 3 = 15, các thừa số và tích là những số nào?",
           "solution_steps_vi": [
-            "2 là một số được nhân nên là thừa số.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Hai số được nhân là 5 và 3 nên chúng là các thừa số.",
+            "Kết quả 15 được gọi là tích."
           ],
-          "answer": "thừa số"
+          "answer": "5 và 3 là thừa số; 15 là tích"
         }
       ],
       "practice_sets": {
@@ -1278,12 +1278,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_division_components_01",
-          "prompt_vi": "Trong 10 : 2 = 5, số 10 là gì?",
+          "prompt_vi": "Trong 20 : 2 = 10, hãy gọi tên ba thành phần.",
           "solution_steps_vi": [
-            "10 là lượng được đem chia nên là số bị chia.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "20 là lượng được đem chia nên là số bị chia; 2 là số dùng để chia.",
+            "Kết quả 10 được gọi là thương."
           ],
-          "answer": "số bị chia"
+          "answer": "20 là số bị chia; 2 là số chia; 10 là thương"
         }
       ],
       "practice_sets": {
@@ -1329,12 +1329,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_times_table_2_01",
-          "prompt_vi": "Tính 2 × 6.",
+          "prompt_vi": "Tính 2 × 4.",
           "solution_steps_vi": [
-            "Bảng nhân 2: 2 × 6 = 12.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Bốn nhóm 2 là 2 + 2 + 2 + 2.",
+            "Tổng bằng 8 nên 2 × 4 = 8."
           ],
-          "answer": "12"
+          "answer": "8"
         }
       ],
       "practice_sets": {
@@ -1380,12 +1380,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_times_table_5_01",
-          "prompt_vi": "Tính 5 × 4.",
+          "prompt_vi": "Tính 5 × 3.",
           "solution_steps_vi": [
-            "Bảng nhân 5: 5 × 4 = 20.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Ba nhóm 5 là 5 + 5 + 5.",
+            "Tổng bằng 15 nên 5 × 3 = 15."
           ],
-          "answer": "20"
+          "answer": "15"
         }
       ],
       "practice_sets": {
@@ -1431,12 +1431,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_divide_table_2_01",
-          "prompt_vi": "Tính 16 : 2.",
+          "prompt_vi": "Tính 12 : 2.",
           "solution_steps_vi": [
-            "Vì 2 × 8 = 16 nên 16 : 2 = 8.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Tìm số mà 2 nhân với số đó bằng 12.",
+            "Vì 2 × 6 = 12 nên 12 : 2 = 6."
           ],
-          "answer": "8"
+          "answer": "6"
         }
       ],
       "practice_sets": {
@@ -1483,12 +1483,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_divide_table_5_01",
-          "prompt_vi": "Tính 25 : 5.",
+          "prompt_vi": "Tính 30 : 5.",
           "solution_steps_vi": [
-            "Vì 5 × 5 = 25 nên 25 : 5 = 5.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Tìm số mà 5 nhân với số đó bằng 30.",
+            "Vì 5 × 6 = 30 nên 30 : 5 = 6."
           ],
-          "answer": "5"
+          "answer": "6"
         }
       ],
       "practice_sets": {
@@ -1535,12 +1535,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_operation_meaning_from_visual_01",
-          "prompt_vi": "Hai nhóm 4 chấm được gộp lại. Phép tính nào mô tả việc gộp?",
+          "prompt_vi": "Có 4 nhóm bằng nhau, mỗi nhóm 2 hình tròn. Phép tính nào mô tả tình huống?",
           "solution_steps_vi": [
-            "Gộp hai lượng lại là quan hệ cộng; hai nhóm 4 là 4 + 4.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Các nhóm có số lượng bằng nhau nên dùng phép nhân.",
+            "Có 4 nhóm, mỗi nhóm 2 nên viết 4 × 2."
           ],
-          "answer": "4 + 4"
+          "answer": "4 × 2"
         }
       ],
       "practice_sets": {
@@ -1589,12 +1589,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_wp_one_step_add_more_01",
-          "prompt_vi": "Lan có 24 bút chì, được cho thêm 13 bút. Lan có tất cả bao nhiêu bút?",
+          "prompt_vi": "Minh có 32 thẻ, được cho thêm 15 thẻ. Minh có tất cả bao nhiêu thẻ?",
           "solution_steps_vi": [
-            "24 + 13 = 37 vì số bút được thêm vào lượng ban đầu.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Tình huống thêm vào nên dùng phép cộng.",
+            "32 + 15 = 47 thẻ."
           ],
-          "answer": "37"
+          "answer": "47"
         }
       ],
       "practice_sets": {
@@ -1641,12 +1641,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_wp_one_step_sub_less_01",
-          "prompt_vi": "Có 45 quả bóng, cho đi 12 quả. Còn lại bao nhiêu quả?",
+          "prompt_vi": "Một giá sách có 63 quyển. Cô lấy xuống 21 quyển. Trên giá còn bao nhiêu quyển?",
           "solution_steps_vi": [
-            "45 - 12 = 33 vì 12 quả bị bớt khỏi số ban đầu.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Số sách trên giá giảm đi nên dùng phép trừ.",
+            "63 - 21 = 42 quyển."
           ],
-          "answer": "33"
+          "answer": "42"
         }
       ],
       "practice_sets": {
@@ -1693,12 +1693,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_wp_one_step_more_than_01",
-          "prompt_vi": "An có 25 viên bi. Bình có nhiều hơn An 7 viên. Bình có bao nhiêu viên?",
+          "prompt_vi": "Hà có 40 nhãn dán. Nam có nhiều hơn Hà 6 nhãn. Nam có bao nhiêu nhãn?",
           "solution_steps_vi": [
-            "Bình nhiều hơn An 7 viên nên 25 + 7 = 32.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Nam nhiều hơn Hà 6 nên lấy số của Hà cộng 6.",
+            "40 + 6 = 46 nhãn dán."
           ],
-          "answer": "32"
+          "answer": "46"
         }
       ],
       "practice_sets": {
@@ -1744,12 +1744,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_wp_one_step_less_than_01",
-          "prompt_vi": "Mai có 30 nhãn dán. Linh có ít hơn Mai 8 nhãn. Linh có bao nhiêu nhãn?",
+          "prompt_vi": "Hộp A có 52 viên bi. Hộp B ít hơn hộp A 7 viên. Hộp B có bao nhiêu viên?",
           "solution_steps_vi": [
-            "Linh ít hơn Mai 8 nên 30 - 8 = 22.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Hộp B ít hơn 7 nên lấy số của hộp A trừ 7.",
+            "52 - 7 = 45 viên bi."
           ],
-          "answer": "22"
+          "answer": "45"
         }
       ],
       "practice_sets": {
@@ -1795,12 +1795,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_wp_one_step_multiplication_context_01",
-          "prompt_vi": "Có 6 bàn, mỗi bàn 2 bạn. Có tất cả bao nhiêu bạn?",
+          "prompt_vi": "Có 3 hộp, mỗi hộp 2 chiếc bút. Có tất cả bao nhiêu chiếc bút?",
           "solution_steps_vi": [
-            "6 nhóm 2 bạn nên 6 × 2 = 12.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Có 3 nhóm bằng nhau, mỗi nhóm 2.",
+            "3 × 2 = 6 chiếc bút."
           ],
-          "answer": "12"
+          "answer": "6"
         }
       ],
       "practice_sets": {
@@ -1848,12 +1848,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_wp_one_step_division_context_01",
-          "prompt_vi": "Có 14 chiếc bánh chia đều cho 2 đĩa. Mỗi đĩa có bao nhiêu chiếc?",
+          "prompt_vi": "Có 10 chiếc bút, xếp mỗi hộp 5 chiếc. Cần bao nhiêu hộp?",
           "solution_steps_vi": [
-            "14 : 2 = 7.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Ta cần tìm số nhóm 5 có trong 10.",
+            "10 : 5 = 2 nên cần 2 hộp."
           ],
-          "answer": "7"
+          "answer": "2"
         }
       ],
       "practice_sets": {
@@ -1901,12 +1901,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_wp_select_operation_one_step_01",
-          "prompt_vi": "Có 10 quả, ăn 2 quả, hỏi còn lại. Chọn phép tính đúng.",
+          "prompt_vi": "Có 18 chiếc bánh chia đều cho 2 đĩa. Muốn tìm số bánh mỗi đĩa, chọn phép tính nào?",
           "solution_steps_vi": [
-            "Tình huống lấy bớt và hỏi còn lại nên dùng phép trừ.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Đang chia một tổng thành 2 phần bằng nhau nên dùng phép chia.",
+            "Phép tính phù hợp là 18 : 2."
           ],
-          "answer": "10 - 2"
+          "answer": "18 : 2"
         }
       ],
       "practice_sets": {
@@ -1952,12 +1952,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_point_recognize_01",
-          "prompt_vi": "Kí hiệu nào phù hợp để đặt tên một điểm?",
+          "prompt_vi": "Trên hình có hai vị trí được đánh dấu P và Q. Có bao nhiêu điểm được đặt tên?",
           "solution_steps_vi": [
-            "Điểm thường được đặt tên bằng chữ cái in hoa như A.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Mỗi chữ P và Q đặt tên cho một vị trí.",
+            "Vậy có 2 điểm được đặt tên."
           ],
-          "answer": "A"
+          "answer": "2"
         }
       ],
       "practice_sets": {
@@ -2001,12 +2001,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_line_segment_recognize_01",
-          "prompt_vi": "Đoạn thẳng AB có bao nhiêu đầu mút?",
+          "prompt_vi": "Nối thẳng điểm C với điểm D bằng phần thẳng giới hạn bởi hai điểm. Hình đó gọi là gì?",
           "solution_steps_vi": [
-            "Đoạn thẳng AB có hai đầu mút A và B.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "C và D là hai đầu mút xác định.",
+            "Phần thẳng nối hai đầu mút là đoạn thẳng CD."
           ],
-          "answer": "2"
+          "answer": "đoạn thẳng CD"
         }
       ],
       "practice_sets": {
@@ -2052,12 +2052,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_curve_recognize_01",
-          "prompt_vi": "Đường nào được gọi là đường cong?",
+          "prompt_vi": "Một nét vẽ uốn thành hình vòng cung thuộc loại đường nào?",
           "solution_steps_vi": [
-            "Đường cong có hình dạng uốn lượn, không giữ hướng thẳng trên toàn bộ đường.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Nét vẽ đổi hướng và không giữ thẳng.",
+            "Vì vậy đó là một đường cong."
           ],
-          "answer": "Đường uốn lượn"
+          "answer": "đường cong"
         }
       ],
       "practice_sets": {
@@ -2103,12 +2103,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_straight_line_recognize_01",
-          "prompt_vi": "Đường thẳng khác đoạn thẳng ở điểm nào?",
+          "prompt_vi": "Một nét không cong và có thể kéo dài mãi về hai phía gọi là gì?",
           "solution_steps_vi": [
-            "Đường thẳng không bị giới hạn bởi hai đầu mút như đoạn thẳng.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Nét không uốn cong nên có hướng thẳng.",
+            "Có thể kéo dài về hai phía nên đó là đường thẳng."
           ],
-          "answer": "Có thể kéo dài về hai phía"
+          "answer": "đường thẳng"
         }
       ],
       "practice_sets": {
@@ -2154,12 +2154,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_polyline_recognize_01",
-          "prompt_vi": "Đường gấp khúc được tạo bởi gì?",
+          "prompt_vi": "Hai đoạn AB và BC nối tiếp nhau tại B tạo thành loại đường nào?",
           "solution_steps_vi": [
-            "Đường gấp khúc là chuỗi các đoạn thẳng nối nhau.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "AB và BC là hai đoạn thẳng nối tiếp tại điểm B.",
+            "Chuỗi các đoạn nối tiếp tạo thành đường gấp khúc ABC."
           ],
-          "answer": "Nhiều đoạn thẳng nối tiếp"
+          "answer": "đường gấp khúc ABC"
         }
       ],
       "practice_sets": {
@@ -2205,10 +2205,10 @@
       "worked_examples": [
         {
           "id": "m2_ex_three_collinear_points_01",
-          "prompt_vi": "Ba điểm A, B, C cùng nằm trên một đường thẳng. Ta nói ba điểm thế nào?",
+          "prompt_vi": "Ba điểm P, Q, R đều nằm trên cùng mép thẳng của một chiếc thước. Ba điểm này thế nào?",
           "solution_steps_vi": [
-            "Ba điểm cùng nằm trên một đường thẳng là ba điểm thẳng hàng.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Cả ba điểm cùng nằm trên một đường thẳng.",
+            "Vì vậy P, Q, R là ba điểm thẳng hàng."
           ],
           "answer": "thẳng hàng"
         }
@@ -2257,12 +2257,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_quadrilateral_recognize_01",
-          "prompt_vi": "Một hình tứ giác có bao nhiêu cạnh?",
+          "prompt_vi": "Một hình kín có đúng 4 cạnh và 4 đỉnh được gọi chung là gì?",
           "solution_steps_vi": [
-            "Theo định nghĩa, hình tứ giác là hình kín có 4 cạnh.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Đếm được đúng 4 cạnh của hình kín.",
+            "Hình kín có 4 cạnh là hình tứ giác."
           ],
-          "answer": "4"
+          "answer": "hình tứ giác"
         }
       ],
       "practice_sets": {
@@ -2308,12 +2308,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_cylinder_recognize_01",
-          "prompt_vi": "Vật nào gần dạng khối trụ nhất?",
+          "prompt_vi": "Một chiếc hộp có hai đáy tròn bằng nhau và mặt cong bao quanh gần dạng khối gì?",
           "solution_steps_vi": [
-            "Lon nước có hai đáy tròn và mặt cong xung quanh, gần dạng khối trụ.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Hai mặt đáy đều là hình tròn và song song.",
+            "Đặc điểm đó phù hợp với khối trụ."
           ],
-          "answer": "lon nước"
+          "answer": "khối trụ"
         }
       ],
       "practice_sets": {
@@ -2357,12 +2357,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_sphere_recognize_01",
-          "prompt_vi": "Vật nào gần dạng khối cầu nhất?",
+          "prompt_vi": "Một viên bi tròn đều, không có cạnh hay đỉnh, gần dạng khối gì?",
           "solution_steps_vi": [
-            "Quả bóng tròn đều theo mọi hướng, gần dạng khối cầu.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Vật tròn đều theo mọi hướng và không có cạnh, đỉnh.",
+            "Đó là đặc điểm của khối cầu."
           ],
-          "answer": "quả bóng"
+          "answer": "khối cầu"
         }
       ],
       "practice_sets": {
@@ -2406,10 +2406,10 @@
       "worked_examples": [
         {
           "id": "m2_ex_draw_segment_given_length_01",
-          "prompt_vi": "Trên thước, đặt đầu A ở vạch 2 cm. Muốn AB dài 5 cm và B ở bên phải A, B ở vạch bao nhiêu?",
+          "prompt_vi": "Trên thước, một đầu đoạn thẳng ở vạch 4 cm. Muốn đoạn dài 3 cm về bên phải, đầu kia ở vạch nào?",
           "solution_steps_vi": [
-            "Vị trí B = 2 + 5 = 7 cm.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Đầu kia ở bên phải nên cộng thêm độ dài 3 cm.",
+            "4 + 3 = 7, nên chọn vạch 7 cm."
           ],
           "answer": "7"
         }
@@ -2457,12 +2457,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_fold_cut_compose_shapes_01",
-          "prompt_vi": "Ghép hai tam giác vuông bằng nhau theo một cạnh phù hợp có thể tạo thành hình nào trong nhiều cách ghép?",
+          "prompt_vi": "Ghép hai hình vuông nhỏ bằng nhau sát theo một cạnh, không chồng lên nhau. Có thể tạo thành hình gì?",
           "solution_steps_vi": [
-            "Hai mảnh tam giác có thể ghép cạnh với cạnh để tạo một hình kín bốn cạnh trong cách ghép phù hợp.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Đặt hai cạnh bằng nhau sát nhau để hai mảnh liền thành một hình kín.",
+            "Hai hình vuông ghép cạnh theo cách này tạo thành một hình chữ nhật."
           ],
-          "answer": "một tứ giác"
+          "answer": "một hình chữ nhật"
         }
       ],
       "practice_sets": {
@@ -2508,10 +2508,10 @@
       "worked_examples": [
         {
           "id": "m2_ex_heavier_lighter_01",
-          "prompt_vi": "Trên cân thăng bằng, đĩa bên trái hạ thấp hơn. Vật bên trái thường thế nào?",
+          "prompt_vi": "Trên cân hai đĩa, đĩa bên phải hạ thấp hơn. Vật bên phải thường thế nào so với vật bên trái?",
           "solution_steps_vi": [
-            "Với cân hoạt động đúng, phía hạ thấp hơn là phía nặng hơn.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Phía nặng hơn làm đĩa cân hạ thấp hơn.",
+            "Đĩa bên phải thấp hơn nên vật bên phải nặng hơn."
           ],
           "answer": "nặng hơn"
         }
@@ -2557,12 +2557,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_mass_kg_read_write_01",
-          "prompt_vi": "Một bao gạo ghi 5 kg. Số đo khối lượng là bao nhiêu kg?",
+          "prompt_vi": "Một thùng hàng ghi 6 kg. Số đo khối lượng được đọc thế nào?",
           "solution_steps_vi": [
-            "Con số đi trước đơn vị kg là 5.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Đọc số 6 trước.",
+            "Giữ đơn vị khối lượng kg, nên đọc là 6 kg."
           ],
-          "answer": "5"
+          "answer": "6 kg"
         }
       ],
       "practice_sets": {
@@ -2608,12 +2608,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_capacity_liter_read_write_01",
-          "prompt_vi": "Một bình ghi 4 l. Dung tích được ghi là bao nhiêu lít?",
+          "prompt_vi": "Một can nước ghi 3 l. Số đo dung tích được đọc thế nào?",
           "solution_steps_vi": [
-            "Con số đi trước kí hiệu l là 4.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Đọc số 3 trước.",
+            "Kí hiệu l là lít, nên đọc là 3 lít."
           ],
-          "answer": "4"
+          "answer": "3 lít"
         }
       ],
       "practice_sets": {
@@ -2657,12 +2657,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_length_dm_m_km_recognize_relation_01",
-          "prompt_vi": "1 m bằng bao nhiêu dm?",
+          "prompt_vi": "2 m bằng bao nhiêu dm?",
           "solution_steps_vi": [
-            "Theo quan hệ đơn vị, 1 m = 10 dm.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "1 m = 10 dm.",
+            "Vậy 2 m gồm hai nhóm 10 dm, bằng 20 dm."
           ],
-          "answer": "10"
+          "answer": "20 dm"
         }
       ],
       "practice_sets": {
@@ -2706,12 +2706,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_time_day_24_hours_01",
-          "prompt_vi": "Một ngày đầy đủ có bao nhiêu giờ?",
+          "prompt_vi": "Khoảng thời gian từ 0 giờ đến đủ 24 giờ liên tiếp bằng bao nhiêu ngày đầy đủ?",
           "solution_steps_vi": [
-            "Theo quan hệ thời gian, 1 ngày = 24 giờ.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Một ngày đầy đủ có 24 giờ.",
+            "Vì khoảng thời gian đủ 24 giờ nên bằng 1 ngày."
           ],
-          "answer": "24"
+          "answer": "1 ngày"
         }
       ],
       "practice_sets": {
@@ -2755,12 +2755,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_time_hour_60_minutes_01",
-          "prompt_vi": "1 giờ bằng bao nhiêu phút?",
+          "prompt_vi": "60 phút bằng bao nhiêu giờ?",
           "solution_steps_vi": [
-            "Theo quan hệ thời gian, 1 giờ = 60 phút.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Một giờ gồm 60 phút.",
+            "Vì đã đủ 60 phút nên bằng 1 giờ."
           ],
-          "answer": "60"
+          "answer": "1 giờ"
         }
       ],
       "practice_sets": {
@@ -2806,12 +2806,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_calendar_days_in_month_date_01",
-          "prompt_vi": "Tháng 4 có bao nhiêu ngày?",
+          "prompt_vi": "Ngày sau ngày 20 tháng 6 là ngày nào?",
           "solution_steps_vi": [
-            "Tháng 4 có 30 ngày.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Ngày kế tiếp tăng số ngày thêm 1.",
+            "Sau ngày 20 là ngày 21, vẫn trong tháng 6."
           ],
-          "answer": "30"
+          "answer": "21 tháng 6"
         }
       ],
       "practice_sets": {
@@ -2857,12 +2857,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_money_vnd_note_recognition_01",
-          "prompt_vi": "Khi xem hình một tờ tiền Việt Nam, thông tin nào cần đọc để nhận biết giá trị?",
+          "prompt_vi": "Khi so sánh hai hình tờ tiền, nên đọc thông tin nào trước để biết tờ nào có giá trị lớn hơn?",
           "solution_steps_vi": [
-            "Để nhận biết giá trị, cần đọc con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Không dựa riêng vào màu sắc hay kích thước.",
+            "Đọc con số mệnh giá cùng đơn vị đồng rồi mới so sánh giá trị."
           ],
-          "answer": "Con số mệnh giá và chữ đồng trên tờ"
+          "answer": "con số mệnh giá và đơn vị đồng"
         }
       ],
       "practice_sets": {
@@ -2908,12 +2908,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_measure_with_ruler_cm_01",
-          "prompt_vi": "Một đoạn thẳng bắt đầu ở vạch 0 cm và kết thúc ở vạch 8 cm. Dài bao nhiêu cm?",
+          "prompt_vi": "Một đoạn thẳng bắt đầu ở vạch 1 cm và kết thúc ở vạch 6 cm. Độ dài là bao nhiêu?",
           "solution_steps_vi": [
-            "8 - 0 = 8 cm.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Đoạn không bắt đầu từ 0 nên lấy vị trí cuối trừ vị trí đầu.",
+            "6 - 1 = 5 cm."
           ],
-          "answer": "8"
+          "answer": "5 cm"
         }
       ],
       "practice_sets": {
@@ -2959,12 +2959,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_measure_with_common_scale_01",
-          "prompt_vi": "Một thang đo có các vạch 0, 2, 4, 6, 8. Mỗi vạch tăng bao nhiêu đơn vị?",
+          "prompt_vi": "Một thang chia đều có các vạch 0, 5, 10, 15, __. Vạch tiếp theo là bao nhiêu?",
           "solution_steps_vi": [
-            "Hiệu giữa hai vạch liên tiếp là 2.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Mỗi vạch tăng 5 đơn vị.",
+            "Sau 15 thêm 5 là 20."
           ],
-          "answer": "2"
+          "answer": "20"
         }
       ],
       "practice_sets": {
@@ -3010,12 +3010,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_clock_minute_hand_at_3_or_6_01",
-          "prompt_vi": "Kim phút chỉ số 3, kim giờ vừa qua số 4. Đồng hồ chỉ thời gian nào?",
+          "prompt_vi": "Lúc 6 giờ 15 phút, kim phút phải chỉ vào số nào trên mặt đồng hồ?",
           "solution_steps_vi": [
-            "Kim phút ở số 3 tương ứng 15 phút; kim giờ ở khoảng sau 4 nên là 4 giờ 15 phút.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "15 phút tương ứng với kim phút ở số 3.",
+            "Vì vậy lúc 6 giờ 15 phút, kim phút chỉ số 3."
           ],
-          "answer": "4 giờ 15 phút"
+          "answer": "số 3"
         }
       ],
       "practice_sets": {
@@ -3061,12 +3061,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_measurement_convert_calculate_learned_units_01",
-          "prompt_vi": "3 m bằng bao nhiêu dm?",
+          "prompt_vi": "4 kg + 1 kg bằng bao nhiêu kilôgam?",
           "solution_steps_vi": [
-            "1 m = 10 dm nên 3 m = 30 dm.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Hai số đo cùng đơn vị kg nên cộng phần số.",
+            "4 + 1 = 5, giữ đơn vị kg."
           ],
-          "answer": "30"
+          "answer": "5 kg"
         }
       ],
       "practice_sets": {
@@ -3114,12 +3114,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_measurement_estimate_basic_01",
-          "prompt_vi": "Chiều dài một chiếc bút chì hợp lý nhất khoảng bao nhiêu?",
+          "prompt_vi": "Một quyển vở học sinh rộng khoảng bao nhiêu là hợp lý: vài xăng-ti-mét, khoảng 20 cm hay vài ki-lô-mét?",
           "solution_steps_vi": [
-            "Bút chì là vật nhỏ, đơn vị cm và độ dài khoảng vài chục cm là hợp lý.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Quyển vở là đồ vật nhỏ cầm trên tay nên dùng cm.",
+            "Độ rộng khoảng vài chục cm là hợp lý, nên chọn khoảng 20 cm."
           ],
-          "answer": "15 cm"
+          "answer": "khoảng 20 cm"
         }
       ],
       "practice_sets": {
@@ -3165,12 +3165,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_polyline_length_sum_segments_01",
-          "prompt_vi": "Đường gấp khúc có hai đoạn dài 4 cm và 6 cm. Tổng độ dài là bao nhiêu?",
+          "prompt_vi": "Một đường gấp khúc có ba đoạn dài 2 cm, 3 cm và 4 cm. Tổng độ dài là bao nhiêu?",
           "solution_steps_vi": [
-            "4 + 6 = 10 cm.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Cộng độ dài tất cả các đoạn cùng đơn vị.",
+            "2 + 3 + 4 = 9 cm."
           ],
-          "answer": "10"
+          "answer": "9 cm"
         }
       ],
       "practice_sets": {
@@ -3217,12 +3217,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_measurement_real_world_one_step_01",
-          "prompt_vi": "Một sợi dây dài 2 m, nối thêm đoạn 3 m. Dây dài tất cả bao nhiêu mét?",
+          "prompt_vi": "Một sợi dây dài 4 m, nối thêm đoạn 2 m. Dây dài tất cả bao nhiêu?",
           "solution_steps_vi": [
-            "2 m + 3 m = 5 m.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Hai độ dài cùng đơn vị mét và được nối thêm nên dùng phép cộng.",
+            "4 + 2 = 6 m."
           ],
-          "answer": "5"
+          "answer": "6 m"
         }
       ],
       "practice_sets": {
@@ -3269,10 +3269,10 @@
       "worked_examples": [
         {
           "id": "m2_ex_data_collect_classify_count_01",
-          "prompt_vi": "Có các thẻ: đỏ, xanh, đỏ, vàng, đỏ. Có bao nhiêu thẻ đỏ?",
+          "prompt_vi": "Các thẻ có màu: xanh, đỏ, xanh, xanh, vàng. Có bao nhiêu thẻ xanh?",
           "solution_steps_vi": [
-            "Phân loại theo màu rồi đếm ba thẻ đỏ.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Chọn đúng nhóm có màu xanh.",
+            "Đếm được 3 thẻ xanh."
           ],
           "answer": "3"
         }
@@ -3320,12 +3320,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_pictograph_read_describe_01",
-          "prompt_vi": "Biểu đồ tranh có 4 hình ngôi sao cho nhóm A; chú giải 1 hình = 1 bạn. Nhóm A có bao nhiêu bạn?",
+          "prompt_vi": "Một hàng biểu đồ có 4 biểu tượng; chú giải 1 biểu tượng = 2 quyển sách. Hàng đó biểu diễn bao nhiêu quyển?",
           "solution_steps_vi": [
-            "4 biểu tượng × 1 bạn mỗi biểu tượng = 4 bạn.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Mỗi biểu tượng đại diện 2 quyển sách.",
+            "4 nhóm 2 quyển cho tổng cộng 8 quyển."
           ],
-          "answer": "4"
+          "answer": "8"
         }
       ],
       "practice_sets": {
@@ -3371,10 +3371,10 @@
       "worked_examples": [
         {
           "id": "m2_ex_pictograph_simple_inference_01",
-          "prompt_vi": "Biểu đồ: nhóm A có 6 biểu tượng, nhóm B có 4 biểu tượng; 1 biểu tượng = 1 bạn. A nhiều hơn B bao nhiêu bạn?",
+          "prompt_vi": "Biểu đồ có nhóm A 3 biểu tượng và nhóm B 5 biểu tượng; mỗi biểu tượng = 1 vật. B nhiều hơn A bao nhiêu vật?",
           "solution_steps_vi": [
-            "6 - 4 = 2 bạn.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Đọc được A có 3 vật và B có 5 vật.",
+            "Lấy 5 - 3 = 2, nên B nhiều hơn A 2 vật."
           ],
           "answer": "2"
         }
@@ -3423,10 +3423,10 @@
       "worked_examples": [
         {
           "id": "m2_ex_event_possible_01",
-          "prompt_vi": "Gieo xúc xắc có các mặt 1 đến 6. Xuất hiện số 4 là sự kiện gì?",
+          "prompt_vi": "Trong túi có bóng đỏ và bóng xanh. Lấy ngẫu nhiên một bóng, lấy được bóng xanh là sự kiện gì?",
           "solution_steps_vi": [
-            "Số 4 là một mặt có thể xuất hiện nhưng không phải lần nào cũng ra 4.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Trong túi có ít nhất một bóng xanh nên kết quả này có thể xuất hiện.",
+            "Nhưng còn bóng màu khác nên nó không chắc chắn xảy ra."
           ],
           "answer": "có thể"
         }
@@ -3472,10 +3472,10 @@
       "worked_examples": [
         {
           "id": "m2_ex_event_certain_01",
-          "prompt_vi": "Gieo xúc xắc chuẩn 1 đến 6. Kết quả là một số từ 1 đến 6. Sự kiện này là gì?",
+          "prompt_vi": "Một hộp chỉ chứa thẻ số 1 và 2. Rút một thẻ, số rút được là 1 hoặc 2. Sự kiện này thế nào?",
           "solution_steps_vi": [
-            "Mọi mặt của xúc xắc đều là một số từ 1 đến 6.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Mọi thẻ trong hộp đều mang số 1 hoặc 2.",
+            "Vì mọi kết quả đều phù hợp nên sự kiện chắc chắn xảy ra."
           ],
           "answer": "chắc chắn"
         }
@@ -3523,10 +3523,10 @@
       "worked_examples": [
         {
           "id": "m2_ex_event_impossible_01",
-          "prompt_vi": "Gieo xúc xắc chuẩn 1 đến 6. Xuất hiện số 8 là sự kiện gì?",
+          "prompt_vi": "Trong túi chỉ có bóng vàng. Lấy ngẫu nhiên một bóng màu tím là sự kiện gì?",
           "solution_steps_vi": [
-            "Không có mặt số 8 nên sự kiện không thể xảy ra.",
-            "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
+            "Trong túi không có bóng tím.",
+            "Không có kết quả nào phù hợp nên sự kiện không thể xảy ra."
           ],
           "answer": "không thể"
         }

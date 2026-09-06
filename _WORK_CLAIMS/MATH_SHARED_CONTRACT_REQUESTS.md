@@ -39,9 +39,9 @@
 
 - Engine core đã được commit vào `main` tại `656a94b`: `MathSessionCoordinator` có `lesson` mode, load `lesson_catalog_v1.json` + `question_bank_v1.json`, lấy đúng `basic -> medium -> application` từ `PracticeSets`, đặt target theo số câu của bài và tạo runtime instance giữ `ContentQuestionId`.
 - Runtime regression hiện tại: `MathSessionPersistenceRuntimeSmoke` build x86 sạch và PASS **92 assertions**, đã cover lesson lock/unlock, authored basic/medium/application, exact open-question resume, completion score và unlock bài phụ thuộc.
-- UI handoff vẫn là WIP chưa commit: `MathHubForm` đã có nút `Luyện 3 câu bài này`; `MathLessonForm` nhận `targetLessonId` và mở `MathSessionCoordinator(..., lessonId)` thay vì adaptive generator path.
+- UI handoff đã được commit tại `1436705`: `MathHubForm` có `Luyện 3 câu bài này`; `MathLessonForm` nhận `targetLessonId`, mở `MathSessionCoordinator(..., lessonId)` và render đủ 201 authored questions qua 109 typed + 91 choice + 1 interaction surface.
 - Stable identity: khi dùng authored content, giữ `ContentQuestionId` deterministic cho trace/chống lặp; `QuestionId` tiếp tục là instance ID unique để giữ idempotency attempt hiện tại.
-- Trạng thái đóng: **chưa CLOSED** cho tới khi engine/UI WIP được commit, full UI/build gate xanh, và corrupt-cache lesson-mode ở Request 007 có regression riêng. Không được coi 92 assertions hiện tại là đủ để bỏ Request 007.
+- Trạng thái functional integration: **CLOSED cho normal path** — engine + UI đều đã commit; Child UI PASS **1133 assertions**, all-201 sweep PASS và Flow 5 prerequisite unlock PASS. Release-clean full solution vẫn bị production Data/SQLite toolchain chặn. Request 007 vẫn mở độc lập cho corrupt-cache recovery; không được dùng normal-path PASS để bỏ edge case này.
 - Owner: AI2 engine/session + AI3 UI handoff.
 
 ## Request 006 — Preserve `answer_unit` as display metadata without forcing unit input
