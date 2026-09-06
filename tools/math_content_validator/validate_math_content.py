@@ -33,6 +33,7 @@ GRADE2_MUL_LITERAL_RE = re.compile(r"(?<!\d)(\d+)\s*(?:×|\*)\s*(\d+)(?!\d)")
 GRADE2_DIV_LITERAL_RE = re.compile(r"(?<!\d)(\d+)(?:\s*÷\s*|\s+:\s+)(\d+)(?!\d)")
 NUMERIC_CHOICE_EXPR_RE = re.compile(r"^[\d\s+\-−–*/×÷:().,]+$")
 MIN_QUESTION_EXPLANATION_CHARS = 32
+MAX_HINT_CHARS = 130
 GENERIC_SECOND_HINT = "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
 GENERIC_SECOND_OBJECTIVE = "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
 GENERIC_DISTRACTOR_RATIONALE = "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
@@ -44,6 +45,27 @@ CHILD_FACING_KEYS = {
 INTERNAL_CHILD_VOCAB_RE = re.compile(
     r"(?i)(?<![A-Za-z])(?:baseline|runtime|mapping|template|deterministic|numeric|metadata|validator|contract|engine|json|source|prompt)(?![A-Za-z])"
 )
+
+
+def redundant_prerequisite_edges(graph: dict[str, list[str]]) -> list[tuple[str, str]]:
+    redundant: list[tuple[str, str]] = []
+
+    def ancestors(start: str) -> set[str]:
+        seen: set[str] = set()
+        stack = list(graph.get(start, []))
+        while stack:
+            node = stack.pop()
+            if node in seen:
+                continue
+            seen.add(node)
+            stack.extend(graph.get(node, []))
+        return seen
+
+    for skill, prereqs in graph.items():
+        for prereq in prereqs:
+            if any(prereq in ancestors(other) for other in prereqs if other != prereq):
+                redundant.append((skill, prereq))
+    return redundant
 
 
 def load_json(path: Path, errors: list[str]) -> dict:
@@ -551,6 +573,9 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
     cycle = find_cycle(prereq_graph)
     if cycle:
         errors.append("prerequisite_cycle:" + "->".join(cycle))
+    else:
+        for skill, prereq in redundant_prerequisite_edges(prereq_graph):
+            errors.append(f"redundant_direct_prerequisite:{skill}:{prereq}")
 
     chapter_position = {x.get("id"): i for i, x in enumerate(chapters) if isinstance(x, dict)}
     topic_position = {x.get("id"): i for i, x in enumerate(topics) if isinstance(x, dict)}
@@ -643,6 +668,8 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             errors.append(f"invalid_hints:{where}")
         else:
             for hint_index, hint_text in enumerate(hints):
+                if len(hint_text.strip()) > MAX_HINT_CHARS:
+                    errors.append(f"hint_too_long:{where}:{hint_index + 1}:{len(hint_text.strip())}")
                 if hint_reveals_unseen_answer(q, hint_text):
                     errors.append(f"hint_reveals_unseen_answer:{where}:{hint_index + 1}")
             second_hint = " ".join(hints[1].split())

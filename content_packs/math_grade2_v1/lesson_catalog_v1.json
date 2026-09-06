@@ -1555,9 +1555,6 @@
         ]
       },
       "prerequisite_skills": [
-        "ADD_COMPONENTS_RECOGNIZE",
-        "SUB_COMPONENTS_RECOGNIZE",
-        "MULTIPLICATION_MEANING",
         "DIVISION_MEANING"
       ],
       "difficulty_span": [
@@ -2225,7 +2222,6 @@
         ]
       },
       "prerequisite_skills": [
-        "POINT_RECOGNIZE",
         "STRAIGHT_LINE_RECOGNIZE"
       ],
       "difficulty_span": [
@@ -2851,7 +2847,7 @@
         {
           "id": "m2_cp_money_vnd_note_recognition_01",
           "name_vi": "Giá trị tờ tiền",
-          "definition_vi": "Giá trị tiền được đọc theo con số in trên tờ và đơn vị đồng; bài học này tập trung vào cách nhận biết giá trị được ghi."
+          "definition_vi": "Giá trị tiền được đọc theo con số mệnh giá và đơn vị đồng in trên tờ; không đoán chỉ từ màu sắc."
         }
       ],
       "worked_examples": [

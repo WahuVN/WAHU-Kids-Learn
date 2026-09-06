@@ -100,23 +100,23 @@ def answer_safe_hint(candidate: str, prompt: str, answer: object, answer_kind: s
     if not hint_reveals_unseen_answer(prompt, candidate, answer, answer_kind, question_type):
         return candidate
     focus = " ".join(prompt.split())
-    if len(focus) > 110:
-        focus = focus[:107].rstrip() + "…"
+    if len(focus) > 54:
+        focus = focus[:51].rstrip() + "…"
     first = {
-        "multiple_choice": f"Đọc lại dữ kiện “{focus}”. Xác định vai trò hoặc đặc điểm đang được hỏi trước khi nhìn các lựa chọn.",
-        "numeric_input": f"Đọc lại dữ kiện “{focus}”. Xác định các số đã biết và điều cần tìm trước khi chọn phép tính.",
-        "word_problem": f"Đọc lại tình huống “{focus}”. Nói rõ đã biết gì và cần tìm gì trước khi chọn phép tính.",
-        "expression_input": f"Đọc lại yêu cầu “{focus}”. Xác định đúng thứ tự các phép tính trước khi viết biểu thức.",
-        "unit_input": f"Đọc lại yêu cầu “{focus}”. Xác định đại lượng cần tìm và đơn vị phải ghi ở kết quả.",
-        "interactive_measurement": f"Đọc lại yêu cầu “{focus}”. Xác định hai đầu mút và độ dài cần tạo trước khi thao tác.",
+        "multiple_choice": f"Nhìn lại “{focus}”. Xác định điều đề hỏi rồi đối chiếu từng dữ kiện.",
+        "numeric_input": f"Nhìn lại “{focus}”. Tách số đã biết và điều cần tìm trước khi tính.",
+        "word_problem": f"Nhìn lại “{focus}”. Nói rõ đã biết gì và cần tìm gì trước khi tính.",
+        "expression_input": f"Nhìn lại “{focus}”. Xác định thứ tự phép tính trước khi viết biểu thức.",
+        "unit_input": f"Nhìn lại “{focus}”. Xác định đại lượng cần tìm và đơn vị phải ghi.",
+        "interactive_measurement": f"Nhìn lại “{focus}”. Xác định hai đầu mút và độ dài cần tạo.",
     }
     second = {
-        "multiple_choice": f"Với “{focus}”, loại từng lựa chọn không khớp dữ kiện; chỉ giữ phương án thỏa tất cả chi tiết.",
-        "numeric_input": f"Với “{focus}”, viết một phép tính ngắn từ dữ kiện rồi kiểm tra kết quả theo điều đề đang hỏi.",
-        "word_problem": f"Với “{focus}”, chọn phép tính theo sự thay đổi hoặc quan hệ trong tình huống rồi kiểm tra ngược kết quả.",
-        "expression_input": f"Với “{focus}”, viết biểu thức theo đúng thứ tự rồi tính từng bước để tự kiểm tra.",
-        "unit_input": f"Với “{focus}”, tính phần số trước rồi kiểm tra lại đơn vị ở cuối đáp án.",
-        "interactive_measurement": f"Với “{focus}”, đặt hai đầu mút rồi đo lại khoảng cách trước khi xác nhận.",
+        "multiple_choice": f"Từ “{focus}”, loại phương án trái dữ kiện rồi kiểm tra lựa chọn còn lại.",
+        "numeric_input": f"Từ “{focus}”, viết phép tính ngắn rồi kiểm tra kết quả theo điều đề hỏi.",
+        "word_problem": f"Từ “{focus}”, chọn phép tính đúng quan hệ rồi kiểm tra ngược kết quả.",
+        "expression_input": f"Từ “{focus}”, viết biểu thức đúng thứ tự rồi tính lại từng bước.",
+        "unit_input": f"Từ “{focus}”, tính phần số rồi kiểm tra đơn vị ở cuối đáp án.",
+        "interactive_measurement": f"Từ “{focus}”, đặt hai đầu mút rồi đo lại trước khi xác nhận.",
     }
     table = first if level == 1 else second
     return table.get(question_type, table["numeric_input"])
@@ -343,7 +343,7 @@ LESSON_INFO = {
     "DIVIDE_TABLE_2": ("m2_tp08_tables_2_5", "Bảng chia 2", "Bảng chia 2 là phép tính ngược của bảng nhân 2. Nếu 2 × n = a thì a : 2 = n.", "Chia 2", "Dùng quan hệ nhân - chia để tìm thương khi số chia là 2.", ["TIMES_TABLE_2", "DIVISION_COMPONENTS"]),
     "DIVIDE_TABLE_5": ("m2_tp08_tables_2_5", "Bảng chia 5", "Bảng chia 5 là phép tính ngược của bảng nhân 5. Nếu 5 × n = a thì a : 5 = n.", "Chia 5", "Dùng quan hệ nhân - chia để tìm thương khi số chia là 5.", ["TIMES_TABLE_5", "DIVISION_COMPONENTS"]),
 
-    "OPERATION_MEANING_FROM_VISUAL": ("m2_tp09_problem_meaning", "Nhìn tình huống để chọn phép tính", "Không chỉ dựa vào từ khóa. Hãy xác định số lượng đang được gộp, bớt đi, tạo nhóm bằng nhau hay chia đều để chọn cộng, trừ, nhân hoặc chia.", "Quan hệ của phép tính", "Cộng gộp/thêm, trừ bớt/so sánh chênh lệch, nhân tạo nhóm bằng nhau, chia chia đều hoặc đếm số nhóm.", ["ADD_COMPONENTS_RECOGNIZE", "SUB_COMPONENTS_RECOGNIZE", "MULTIPLICATION_MEANING", "DIVISION_MEANING"]),
+    "OPERATION_MEANING_FROM_VISUAL": ("m2_tp09_problem_meaning", "Nhìn tình huống để chọn phép tính", "Không chỉ dựa vào từ khóa. Hãy xác định số lượng đang được gộp, bớt đi, tạo nhóm bằng nhau hay chia đều để chọn cộng, trừ, nhân hoặc chia.", "Quan hệ của phép tính", "Cộng gộp/thêm, trừ bớt/so sánh chênh lệch, nhân tạo nhóm bằng nhau, chia chia đều hoặc đếm số nhóm.", ["DIVISION_MEANING"]),
     "WP_ONE_STEP_ADD_MORE": ("m2_tp10_problem_contexts", "Bài toán thêm vào", "Khi một lượng ban đầu được thêm một lượng mới và hỏi tất cả có bao nhiêu, dùng phép cộng một bước.", "Thêm vào", "Tổng mới = số ban đầu + số được thêm.", ["ADD_WITHIN_1000_NO_CARRY", "OPERATION_MEANING_FROM_VISUAL"]),
     "WP_ONE_STEP_SUB_LESS": ("m2_tp10_problem_contexts", "Bài toán bớt đi", "Khi một lượng ban đầu bị lấy bớt và hỏi còn lại, dùng phép trừ một bước.", "Bớt đi", "Số còn lại = số ban đầu - số bị lấy bớt.", ["SUB_WITHIN_1000_NO_BORROW", "OPERATION_MEANING_FROM_VISUAL"]),
     "WP_ONE_STEP_MORE_THAN": ("m2_tp10_problem_contexts", "Bài toán nhiều hơn một số đơn vị", "Nếu B nhiều hơn A k đơn vị thì B = A + k. Cần xác định đúng đại lượng được hỏi trước khi cộng.", "Nhiều hơn", "Một lượng nhiều hơn lượng mốc k đơn vị bằng lượng mốc cộng k.", ["WP_ONE_STEP_ADD_MORE"]),
@@ -357,7 +357,7 @@ LESSON_INFO = {
     "CURVE_RECOGNIZE": ("m2_tp11_lines_shapes", "Nhận biết đường cong", "Đường cong đổi hướng mềm mại và không phải là một đoạn thẳng. Có thể nhận biết bằng hình dạng uốn lượn.", "Đường cong", "Đường cong không giữ một hướng thẳng cố định trên toàn bộ đường.", ["POINT_RECOGNIZE"]),
     "STRAIGHT_LINE_RECOGNIZE": ("m2_tp11_lines_shapes", "Nhận biết đường thẳng", "Đường thẳng đi theo một hướng không uốn cong và có thể kéo dài về hai phía. Khác với đoạn thẳng, đường thẳng không bị giới hạn bởi hai đầu mút.", "Đường thẳng", "Đường thẳng có thể kéo dài mãi theo hai hướng và không cong.", ["LINE_SEGMENT_RECOGNIZE"]),
     "POLYLINE_RECOGNIZE": ("m2_tp11_lines_shapes", "Nhận biết đường gấp khúc", "Đường gấp khúc được tạo bởi nhiều đoạn thẳng nối tiếp nhau tại các điểm. Mỗi chỗ nối có thể làm đường đổi hướng.", "Đường gấp khúc", "Một chuỗi từ hai đoạn thẳng trở lên nối đầu mút với nhau tạo thành đường gấp khúc.", ["LINE_SEGMENT_RECOGNIZE"]),
-    "THREE_COLLINEAR_POINTS": ("m2_tp11_lines_shapes", "Ba điểm thẳng hàng", "Ba điểm thẳng hàng khi cả ba cùng nằm trên một đường thẳng. Nếu một điểm lệch khỏi đường qua hai điểm còn lại thì ba điểm không thẳng hàng.", "Thẳng hàng", "Các điểm thẳng hàng cùng nằm trên một đường thẳng duy nhất.", ["POINT_RECOGNIZE", "STRAIGHT_LINE_RECOGNIZE"]),
+    "THREE_COLLINEAR_POINTS": ("m2_tp11_lines_shapes", "Ba điểm thẳng hàng", "Ba điểm thẳng hàng khi cả ba cùng nằm trên một đường thẳng. Nếu một điểm lệch khỏi đường qua hai điểm còn lại thì ba điểm không thẳng hàng.", "Thẳng hàng", "Các điểm thẳng hàng cùng nằm trên một đường thẳng duy nhất.", ["STRAIGHT_LINE_RECOGNIZE"]),
     "QUADRILATERAL_RECOGNIZE": ("m2_tp11_lines_shapes", "Nhận biết hình tứ giác", "Hình tứ giác là hình phẳng kín có bốn cạnh và bốn đỉnh. Hình vuông và hình chữ nhật đều là các ví dụ của tứ giác.", "Tứ giác", "Một hình kín có đúng bốn cạnh là hình tứ giác.", ["LINE_SEGMENT_RECOGNIZE"]),
     "CYLINDER_RECOGNIZE": ("m2_tp12_solids_construct", "Nhận biết khối trụ", "Khối trụ có hai mặt đáy tròn bằng nhau và một mặt cong bao quanh. Lon nước là một vật thể gần dạng khối trụ.", "Khối trụ", "Khối có hai đáy tròn song song và một mặt cong xung quanh.", []),
     "SPHERE_RECOGNIZE": ("m2_tp12_solids_construct", "Nhận biết khối cầu", "Khối cầu tròn đều theo mọi hướng và không có cạnh hay đỉnh. Quả bóng là vật thể gần dạng khối cầu.", "Khối cầu", "Khối tròn không có cạnh, đỉnh hay mặt phẳng đáy.", []),
@@ -371,7 +371,7 @@ LESSON_INFO = {
     "TIME_DAY_24_HOURS": ("m2_tp14_time_money", "Một ngày có 24 giờ", "Một ngày đầy đủ gồm 24 giờ. Có thể dùng mốc sáng, trưa, chiều, tối để liên hệ các thời điểm trong ngày.", "Ngày và giờ", "1 ngày = 24 giờ.", []),
     "TIME_HOUR_60_MINUTES": ("m2_tp14_time_money", "Một giờ có 60 phút", "Phút là đơn vị nhỏ hơn giờ. Khi đủ 60 phút thì được 1 giờ.", "Giờ và phút", "1 giờ = 60 phút.", ["TIME_DAY_24_HOURS"]),
     "CALENDAR_DAYS_IN_MONTH_DATE": ("m2_tp14_time_money", "Ngày và tháng trên lịch", "Lịch cho biết thứ tự ngày trong tháng. Một số tháng có 30 ngày, một số có 31 ngày; tháng 2 có 28 hoặc 29 ngày tùy năm.", "Đọc lịch", "Dùng số ngày và vị trí ngày trên lịch để xác định ngày trước, ngày sau và số ngày trong tháng.", ["NUM_PREDECESSOR_SUCCESSOR"]),
-    "MONEY_VND_NOTE_RECOGNITION": ("m2_tp14_time_money", "Nhận biết tiền Việt Nam", "Trên tờ tiền, giá trị được thể hiện bằng con số và đơn vị đồng. Khi nhận biết, đọc đúng giá trị in trên tờ tiền và phân biệt với các giá trị khác.", "Giá trị tờ tiền", "Giá trị tiền được đọc theo con số in trên tờ và đơn vị đồng; bài học này tập trung vào cách nhận biết giá trị được ghi.", ["NUM_COUNT_READ_WRITE_0_1000"]),
+    "MONEY_VND_NOTE_RECOGNITION": ("m2_tp14_time_money", "Nhận biết tiền Việt Nam", "Trên tờ tiền, giá trị được thể hiện bằng con số và đơn vị đồng. Khi nhận biết, đọc đúng giá trị in trên tờ tiền và phân biệt với các giá trị khác.", "Giá trị tờ tiền", "Giá trị tiền được đọc theo con số mệnh giá và đơn vị đồng in trên tờ; không đoán chỉ từ màu sắc.", ["NUM_COUNT_READ_WRITE_0_1000"]),
     "MEASURE_WITH_RULER_CM": ("m2_tp15_measure_practice", "Đo độ dài bằng thước xăng-ti-mét", "Đặt vạch 0 của thước trùng một đầu vật; đầu còn lại chỉ đến vạch nào thì số đo là bấy nhiêu xăng-ti-mét. Nếu không bắt đầu từ 0, lấy vị trí cuối trừ vị trí đầu.", "Đo bằng thước cm", "Độ dài bằng hiệu số giữa hai vị trí đầu mút trên thước chia cm.", ["LINE_SEGMENT_RECOGNIZE"]),
     "MEASURE_WITH_COMMON_SCALE": ("m2_tp15_measure_practice", "Đọc dụng cụ đo có vạch chia", "Muốn đọc một dụng cụ có thang chia, trước hết xác định giá trị mỗi vạch rồi đếm số khoảng từ mốc đã biết đến vị trí cần đọc.", "Vạch chia", "Mỗi vạch trên cùng một thang đều cách nhau một giá trị cố định nếu thang chia đều.", ["NUM_COUNT_READ_WRITE_0_1000"]),
     "CLOCK_MINUTE_HAND_AT_3_OR_6": ("m2_tp14_time_money", "Đọc giờ khi kim phút chỉ 3 hoặc 6", "Khi kim phút chỉ số 3 là 15 phút; khi chỉ số 6 là 30 phút. Kết hợp với kim giờ để đọc giờ và phút.", "15 phút và 30 phút trên đồng hồ", "Kim phút ở số 3 tương ứng 15 phút; ở số 6 tương ứng 30 phút.", ["TIME_HOUR_60_MINUTES"]),

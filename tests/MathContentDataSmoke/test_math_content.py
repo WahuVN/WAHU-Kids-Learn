@@ -165,6 +165,7 @@ class MathContentDataSmoke(unittest.TestCase):
                 self.assertIn(prereq, self.skills)
                 self.assertLess(order_key(lesson_by_skill[prereq]), order_key(lesson_by_skill[skill]))
         self.assertIsNone(validator.find_cycle(graph))
+        self.assertEqual([], validator.redundant_prerequisite_edges(graph))
 
     def test_balanced_difficulty_coverage(self):
         counts = Counter(q["difficulty"] for q in self.questions)
@@ -240,6 +241,7 @@ class MathContentDataSmoke(unittest.TestCase):
         for item in self.questions:
             for index, hint in enumerate(item["hints_vi"], 1):
                 with self.subTest(item=item["id"], hint=index):
+                    self.assertLessEqual(len(hint.strip()), validator.MAX_HINT_CHARS)
                     self.assertFalse(validator.hint_reveals_unseen_answer(item, hint))
 
     def test_second_hints_are_actionable_not_placeholders(self):
