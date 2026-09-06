@@ -1,0 +1,315 @@
+{
+  "retrieved_at": "2026-09-06",
+  "sources": [
+    {
+      "id": "MS_NET48_REQUIREMENTS",
+      "tier": "PRIMARY_VENDOR",
+      "title": ".NET Framework system requirements",
+      "publisher": "Microsoft",
+      "url": "https://learn.microsoft.com/en-us/dotnet/framework/get-started/system-requirements",
+      "supports": [
+        "Windows 7 SP1 compatibility",
+        ".NET Framework 4.8 baseline"
+      ]
+    },
+    {
+      "id": "MS_NET48_INSTALL",
+      "tier": "PRIMARY_VENDOR",
+      "title": "Install .NET Framework on Windows",
+      "publisher": "Microsoft",
+      "url": "https://learn.microsoft.com/en-us/dotnet/framework/install/on-windows-and-server",
+      "supports": [
+        ".NET Framework 4.8 is the latest supported Framework version for Windows 7 SP1"
+      ]
+    },
+    {
+      "id": "MS_NET_RELEASE_DETECTION",
+      "tier": "PRIMARY_VENDOR",
+      "title": "Determine which .NET Framework versions are installed",
+      "publisher": "Microsoft",
+      "url": "https://learn.microsoft.com/en-us/dotnet/framework/install/how-to-determine-which-versions-are-installed",
+      "supports": [
+        "Release registry key detection",
+        ".NET Framework 4.8 minimum Release 528040",
+        "compare with >="
+      ]
+    },
+    {
+      "id": "MS_WIN7_SHA2",
+      "tier": "PRIMARY_VENDOR",
+      "title": "2019 SHA-2 Code Signing Support requirement for Windows and WSUS",
+      "publisher": "Microsoft",
+      "url": "https://support.microsoft.com/en-us/servicing/os/windows/2020/09/2019-sha-2-code-signing-support-requirement-for-windows-and-wsus",
+      "supports": [
+        "Windows 7 SP1 SHA-2 readiness",
+        "KB4490628 servicing stack",
+        "KB4474419 SHA-2 update",
+        "restart prerequisite"
+      ]
+    },
+    {
+      "id": "MS_WINFORMS_TIMER",
+      "tier": "PRIMARY_VENDOR",
+      "title": "System.Windows.Forms.Timer",
+      "publisher": "Microsoft",
+      "url": "https://learn.microsoft.com/en-us/dotnet/api/system.windows.forms.timer?view=netframework-4.8.1",
+      "supports": [
+        "WinForms Timer is single-threaded",
+        "timer accuracy is limited",
+        "do not use 33ms interval as a precise 30 FPS clock"
+      ]
+    },
+    {
+      "id": "MS_WINFORMS_ACCESSIBILITY",
+      "tier": "PRIMARY_VENDOR",
+      "title": "Provide accessibility information for controls",
+      "publisher": "Microsoft",
+      "url": "https://learn.microsoft.com/en-us/dotnet/desktop/winforms/controls/provide-accessibility-information",
+      "supports": [
+        "AccessibleName",
+        "AccessibleDescription",
+        "AccessibleRole",
+        "custom-control accessibility semantics"
+      ]
+    },
+    {
+      "id": "W3C_WCAG22",
+      "tier": "STANDARD",
+      "title": "Web Content Accessibility Guidelines (WCAG) 2.2",
+      "publisher": "W3C",
+      "url": "https://www.w3.org/TR/WCAG22/",
+      "supports": [
+        "Target Size minimum reference",
+        "Dragging Movements alternative",
+        "Pause Stop Hide",
+        "Animation from Interactions"
+      ]
+    },
+    {
+      "id": "SQLITE_WAL",
+      "tier": "PRIMARY_VENDOR",
+      "title": "Write-Ahead Logging",
+      "publisher": "SQLite",
+      "url": "https://www.sqlite.org/wal.html",
+      "supports": [
+        "WAL behavior",
+        "WAL file is part of database state",
+        "WAL is unsuitable for network filesystem sharing"
+      ]
+    },
+    {
+      "id": "SQLITE_BACKUP_API",
+      "tier": "PRIMARY_VENDOR",
+      "title": "Online Backup API",
+      "publisher": "SQLite",
+      "url": "https://www.sqlite.org/c3ref/backup_finish.html",
+      "supports": [
+        "safe live database snapshot",
+        "online backup semantics"
+      ]
+    },
+    {
+      "id": "SQLITE_PRAGMA",
+      "tier": "PRIMARY_VENDOR",
+      "title": "PRAGMA Statements",
+      "publisher": "SQLite",
+      "url": "https://sqlite.org/pragma.html",
+      "supports": [
+        "quick_check",
+        "integrity_check",
+        "foreign_key_check",
+        "integrity_check does not replace foreign_key_check"
+      ]
+    },
+    {
+      "id": "SQLITE_DOTNET_OFFICIAL",
+      "tier": "PRIMARY_VENDOR",
+      "title": "System.Data.SQLite",
+      "publisher": "SQLite/System.Data.SQLite project",
+      "url": "https://system.data.sqlite.org/home/doc/trunk/readme.htm",
+      "supports": [
+        "official ADO.NET SQLite provider"
+      ]
+    },
+    {
+      "id": "NAUDIO_221_NUGET",
+      "tier": "PRIMARY_PACKAGE",
+      "title": "NAudio 2.2.1",
+      "publisher": "NuGet / NAudio",
+      "url": "https://www.nuget.org/packages/NAudio/2.2.1",
+      "supports": [
+        "NAudio 2.2.1 targets .NET Framework 4.7.2",
+        "compatible candidate for net48 after smoke test"
+      ]
+    },
+    {
+      "id": "NAUDIO_MODERNIZATION",
+      "tier": "PRIMARY_PROJECT",
+      "title": "NAudio modernization",
+      "publisher": "NAudio",
+      "url": "https://github.com/naudio/NAudio/blob/main/Docs/Architecture/MODERNIZATION.md",
+      "supports": [
+        "NAudio 3 no longer targets .NET Framework",
+        "legacy .NET Framework applications should remain on verified 2.x"
+      ]
+    },
+    {
+      "id": "INNO_DOWNLOAD",
+      "tier": "PRIMARY_VENDOR",
+      "title": "Inno Setup Downloads",
+      "publisher": "JRSoftware",
+      "url": "https://jrsoftware.org/isdl.php",
+      "supports": [
+        "Inno Setup 7.1.x toolchain baseline"
+      ]
+    },
+    {
+      "id": "INNO_64BIT",
+      "tier": "PRIMARY_VENDOR",
+      "title": "64-bit Inno Setup",
+      "publisher": "JRSoftware",
+      "url": "https://jrsoftware.org/ishelp/topic_64bit.htm",
+      "supports": [
+        "Inno Setup 7",
+        "32-bit installer default",
+        "SetupArchitecture behavior"
+      ]
+    },
+    {
+      "id": "INNO_ARCH_ALLOWED",
+      "tier": "PRIMARY_VENDOR",
+      "title": "ArchitecturesAllowed",
+      "publisher": "JRSoftware",
+      "url": "https://jrsoftware.org/ishelp/topic_setup_architecturesallowed.htm",
+      "supports": [
+        "32-bit application installer architecture behavior"
+      ]
+    },
+    {
+      "id": "INNO_CLOSE_APPS",
+      "tier": "PRIMARY_VENDOR",
+      "title": "CloseApplications",
+      "publisher": "JRSoftware",
+      "url": "https://jrsoftware.org/ishelp/topic_setup_closeapplications.htm",
+      "supports": [
+        "Windows Restart Manager behavior",
+        "application close policy"
+      ]
+    },
+    {
+      "id": "INNO_RESTART_APPS",
+      "tier": "PRIMARY_VENDOR",
+      "title": "RestartApplications",
+      "publisher": "JRSoftware",
+      "url": "https://jrsoftware.org/ishelp/topic_setup_restartapplications.htm",
+      "supports": [
+        "RestartApplications=no behavior"
+      ]
+    },
+    {
+      "id": "INNO_SIGNTOOL",
+      "tier": "PRIMARY_VENDOR",
+      "title": "SignTool",
+      "publisher": "JRSoftware",
+      "url": "https://jrsoftware.org/ishelp/topic_setup_signtool.htm",
+      "supports": [
+        "signing Setup",
+        "signing uninstaller",
+        "external configured signing tool"
+      ]
+    },
+    {
+      "id": "INNO_SIGNED_UNINSTALLER",
+      "tier": "PRIMARY_VENDOR",
+      "title": "SignedUninstaller",
+      "publisher": "JRSoftware",
+      "url": "https://jrsoftware.org/ishelp/topic_setup_signeduninstaller.htm",
+      "supports": [
+        "signed uninstaller generation and verification policy"
+      ]
+    },
+    {
+      "id": "MS_CERT_TRUST_MANAGEMENT",
+      "tier": "PRIMARY_VENDOR",
+      "title": "Certificates and Trust Management in Windows",
+      "publisher": "Microsoft",
+      "url": "https://learn.microsoft.com/en-us/windows-server/identity/ad-cs/certificate-trust",
+      "supports": [
+        "trusted root CTL management",
+        "disconnected-environment trust planning",
+        "generateSSTFromWU reference"
+      ]
+    },
+    {
+      "id": "MS_WIN7_DISCONNECTED_CERTS",
+      "tier": "PRIMARY_VENDOR_LEGACY",
+      "title": "Automatic updater of untrusted certificates for Windows 7",
+      "publisher": "Microsoft",
+      "url": "https://support.microsoft.com/en-us/topic/an-automatic-updater-of-untrusted-certificates-is-available-for-windows-vista-windows-server-2008-windows-7-and-windows-server-2008-r2-117bc163-d9e0-63ad-5a79-e61f38be8b77",
+      "supports": [
+        "disconnected Windows 7 systems do not benefit from online CTL updates",
+        "certificate validation may incur network retrieval timeouts",
+        "offline administrators must manage trusted roots explicitly"
+      ]
+    },
+    {
+      "id": "INNO_ISSIG",
+      "tier": "PRIMARY_VENDOR",
+      "title": "ISSigTool and .issig signatures",
+      "publisher": "JRSoftware",
+      "url": "https://jrsoftware.org/ishelp/topic_issig.htm",
+      "supports": [
+        ".issig integrity/signature semantics",
+        ".issig is distinct from Authenticode publisher identity"
+      ]
+    },
+    {
+      "id": "SQLITE_DOTNET_NUGET_204",
+      "tier": "PRIMARY_PACKAGE",
+      "title": "System.Data.SQLite 2.0.4",
+      "publisher": "SQLite / NuGet",
+      "url": "https://www.nuget.org/packages/System.Data.SQLite/2.0.4",
+      "supports": [
+        "2.0.4 current package as of 2026-09-06",
+        "published 2026-08-04",
+        "net471 target is compatible with net48",
+        "1.0.119 is deprecated because it has critical bugs"
+      ]
+    },
+    {
+      "id": "SQLITE_DOTNET_BUILD_2X",
+      "tier": "PRIMARY_VENDOR",
+      "title": "System.Data.SQLite Build Procedures",
+      "publisher": "SQLite/System.Data.SQLite project",
+      "url": "https://system.data.sqlite.org/home/doc/trunk/www/build.md",
+      "supports": [
+        "System.Data.SQLite 2.x requires e_sqlite3 shared library",
+        "SourceGear.sqlite3 is an official convenience package option for e_sqlite3"
+      ]
+    },
+    {
+      "id": "SOURCEGEAR_SQLITE3_3534",
+      "tier": "PRIMARY_PACKAGE",
+      "title": "SourceGear.sqlite3 3.53.4",
+      "publisher": "SourceGear / NuGet",
+      "url": "https://www.nuget.org/packages/SourceGear.sqlite3/3.53.4",
+      "supports": [
+        "SQLite 3.53.4 native builds",
+        "net471 compatible package assets",
+        "e_sqlite3 base name",
+        "win-x86 native binary"
+      ]
+    },
+    {
+      "id": "SQLITE_DOTNET_10119_DEPRECATED",
+      "tier": "PRIMARY_PACKAGE_LEGACY",
+      "title": "System.Data.SQLite 1.0.119",
+      "publisher": "SQLite / NuGet",
+      "url": "https://www.nuget.org/packages/System.Data.SQLite/1.0.119",
+      "supports": [
+        "legacy version is deprecated because it has critical bugs",
+        "must not remain the V1 dependency lock"
+      ]
+    }
+  ]
+}
