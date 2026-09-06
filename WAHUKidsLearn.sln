@@ -1,0 +1,48 @@
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WAHU.Platform", "src\Platform\WAHU.Platform.csproj", "{2759F943-D509-4130-9E79-B3E28C1CDC88}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WAHU.Data", "src\Data\WAHU.Data.csproj", "{492526A2-1C03-4D76-A9E9-D2A57AB46028}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WAHUKidsLearn", "src\App\WAHUKidsLearn.csproj", "{2B22CA28-446A-4B9E-A79C-AF61F7CD501C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WAHU.SetupPreflight", "tools\setup_preflight\WAHU.SetupPreflight.csproj", "{E903A150-71DA-4026-AE15-9BC6CDDDA027}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WAHU.SetupPreflight.Smoke", "tests\SetupPreflightSmoke\WAHU.SetupPreflight.Smoke.csproj", "{8397270D-CB78-4741-B9BB-DCB16047D70A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WAHU.SQLiteRuntimeSmoke", "tests\SQLiteRuntimeSmoke\WAHU.SQLiteRuntimeSmoke.csproj", "{C0D9BD09-7B61-44DB-B0BD-0EF8BC9280ED}"
+EndProject
+Global
+    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+        Debug|x86 = Debug|x86
+        Release|x86 = Release|x86
+    EndGlobalSection
+    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+        {2759F943-D509-4130-9E79-B3E28C1CDC88}.Debug|x86.ActiveCfg = Debug|x86
+        {2759F943-D509-4130-9E79-B3E28C1CDC88}.Debug|x86.Build.0 = Debug|x86
+        {2759F943-D509-4130-9E79-B3E28C1CDC88}.Release|x86.ActiveCfg = Release|x86
+        {2759F943-D509-4130-9E79-B3E28C1CDC88}.Release|x86.Build.0 = Release|x86
+        {492526A2-1C03-4D76-A9E9-D2A57AB46028}.Debug|x86.ActiveCfg = Debug|x86
+        {492526A2-1C03-4D76-A9E9-D2A57AB46028}.Debug|x86.Build.0 = Debug|x86
+        {492526A2-1C03-4D76-A9E9-D2A57AB46028}.Release|x86.ActiveCfg = Release|x86
+        {492526A2-1C03-4D76-A9E9-D2A57AB46028}.Release|x86.Build.0 = Release|x86
+        {2B22CA28-446A-4B9E-A79C-AF61F7CD501C}.Debug|x86.ActiveCfg = Debug|x86
+        {2B22CA28-446A-4B9E-A79C-AF61F7CD501C}.Debug|x86.Build.0 = Debug|x86
+        {2B22CA28-446A-4B9E-A79C-AF61F7CD501C}.Release|x86.ActiveCfg = Release|x86
+        {2B22CA28-446A-4B9E-A79C-AF61F7CD501C}.Release|x86.Build.0 = Release|x86
+        {E903A150-71DA-4026-AE15-9BC6CDDDA027}.Debug|x86.ActiveCfg = Debug|x86
+        {E903A150-71DA-4026-AE15-9BC6CDDDA027}.Debug|x86.Build.0 = Debug|x86
+        {E903A150-71DA-4026-AE15-9BC6CDDDA027}.Release|x86.ActiveCfg = Release|x86
+        {E903A150-71DA-4026-AE15-9BC6CDDDA027}.Release|x86.Build.0 = Release|x86
+        {8397270D-CB78-4741-B9BB-DCB16047D70A}.Debug|x86.ActiveCfg = Debug|x86
+        {8397270D-CB78-4741-B9BB-DCB16047D70A}.Debug|x86.Build.0 = Debug|x86
+        {8397270D-CB78-4741-B9BB-DCB16047D70A}.Release|x86.ActiveCfg = Release|x86
+        {8397270D-CB78-4741-B9BB-DCB16047D70A}.Release|x86.Build.0 = Release|x86
+        {C0D9BD09-7B61-44DB-B0BD-0EF8BC9280ED}.Debug|x86.ActiveCfg = Debug|x86
+        {C0D9BD09-7B61-44DB-B0BD-0EF8BC9280ED}.Debug|x86.Build.0 = Debug|x86
+        {C0D9BD09-7B61-44DB-B0BD-0EF8BC9280ED}.Release|x86.ActiveCfg = Release|x86
+        {C0D9BD09-7B61-44DB-B0BD-0EF8BC9280ED}.Release|x86.Build.0 = Release|x86
+    EndGlobalSection
+EndGlobal
