@@ -60,6 +60,7 @@ try {
         'WAHU.Motion.dll',
         'WAHU.Content.dll',
         'WAHU.Audio.dll',
+        'WAHU.Security.dll',
         'WAHU.Performance.dll',
         'WAHU.Data.dll',
         'System.Data.SQLite.dll',
