@@ -1,0 +1,13 @@
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup><Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration><Platform Condition=" '$(Platform)' == '' ">x86</Platform><ProjectGuid>{8CE8FBA0-80F3-4C27-8D40-75E16BE71A9A}</ProjectGuid><OutputType>Library</OutputType><RootNamespace>WAHU.Session</RootNamespace><AssemblyName>WAHU.Session</AssemblyName><TargetFrameworkVersion>v4.8</TargetFrameworkVersion><FileAlignment>512</FileAlignment><Deterministic>true</Deterministic></PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' "><DebugSymbols>true</DebugSymbols><DebugType>full</DebugType><Optimize>false</Optimize><OutputPath>bin\Debug\</OutputPath><DefineConstants>DEBUG;TRACE</DefineConstants><PlatformTarget>x86</PlatformTarget></PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' "><DebugType>pdbonly</DebugType><Optimize>true</Optimize><OutputPath>bin\Release\</OutputPath><DefineConstants>TRACE</DefineConstants><PlatformTarget>x86</PlatformTarget></PropertyGroup>
+  <ItemGroup><Reference Include="System" /><Reference Include="System.Core" /><Reference Include="System.Web.Extensions" /></ItemGroup>
+  <ItemGroup><Compile Include="MathSessionModels.cs" /><Compile Include="MathSessionCoordinator.cs" /></ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Content\WAHU.Content.csproj"><Project>{2A3E6A62-F17E-4D44-BFC0-18FD2300F8C2}</Project><Name>WAHU.Content</Name></ProjectReference>
+    <ProjectReference Include="..\Learning\WAHU.Learning.csproj"><Project>{9C1A840E-D70F-4B48-91C0-4CDA6C4E2F01}</Project><Name>WAHU.Learning</Name></ProjectReference>
+    <ProjectReference Include="..\Data\WAHU.Data.csproj"><Project>{492526A2-1C03-4D76-A9E9-D2A57AB46028}</Project><Name>WAHU.Data</Name></ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

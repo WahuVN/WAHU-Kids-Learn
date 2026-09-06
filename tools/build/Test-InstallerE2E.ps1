@@ -62,6 +62,7 @@ try {
         'WAHU.Audio.dll',
         'WAHU.Security.dll',
         'WAHU.Performance.dll',
+        'WAHU.Session.dll',
         'WAHU.Data.dll',
         'System.Data.SQLite.dll',
         'e_sqlite3.dll',

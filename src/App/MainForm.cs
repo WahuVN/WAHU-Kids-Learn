@@ -63,7 +63,7 @@ namespace WAHUKidsLearn
             var subtitle = new Label
             {
                 Dock = DockStyle.Fill,
-                Text = "Học Toán và Tiếng Anh theo từng nhiệm vụ nhỏ",
+                Text = "Luyện Toán lớp 2 theo từng nhiệm vụ nhỏ",
                 TextAlign = ContentAlignment.MiddleCenter,
                 Font = new Font(Font.FontFamily, 16f),
                 AccessibleName = "Giới thiệu ứng dụng"
@@ -72,17 +72,25 @@ namespace WAHUKidsLearn
             {
                 Anchor = AnchorStyles.None,
                 Size = new Size(320, 96),
-                Text = "Bắt đầu",
+                Text = "Bắt đầu Toán",
                 Font = new Font(Font.FontFamily, 20f, FontStyle.Bold),
-                AccessibleName = "Bắt đầu học",
-                AccessibleDescription = "Mở phiên học."
+                AccessibleName = "Bắt đầu học Toán",
+                AccessibleDescription = "Mở phiên học Toán lớp 2."
             };
             start.Enabled = IsLearnerReady();
             start.Click += delegate
             {
-                MessageBox.Show(this,
-                    "Nền học tập đã sẵn sàng. Phần phiên học Toán/Tiếng Anh đang được nối vào nút này.",
-                    "WAHU Kids Learn", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                try
+                {
+                    using (var lesson = new MathLessonForm(_learningDatabase, _performance))
+                        lesson.ShowDialog(this);
+                }
+                catch
+                {
+                    MessageBox.Show(this,
+                        "Chưa thể mở buổi Toán lúc này. Nhờ người lớn mở mục Phụ huynh để kiểm tra nhé.",
+                        "WAHU Kids Learn", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
             };
 
             var parent = new Button

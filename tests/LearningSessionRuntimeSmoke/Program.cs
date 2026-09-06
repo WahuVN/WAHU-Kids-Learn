@@ -7,6 +7,7 @@ using System.Web.Script.Serialization;
 using WAHU.Content;
 using WAHU.Data;
 using WAHU.Learning;
+using WAHU.Session;
 
 namespace WAHU.LearningSessionRuntimeSmoke
 {
@@ -29,6 +30,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
             try
             {
                 TestDatabaseVerticalSlice(temp, schema, refs);
+                TestCoordinator(temp, schema, templates);
                 Console.WriteLine("LEARNING_SESSION_RUNTIME_SMOKE_PASS assertions=" + _assertions);
             }
             finally { Directory.Delete(temp, true); }
@@ -231,6 +233,42 @@ namespace WAHU.LearningSessionRuntimeSmoke
             A(parent.SessionCount == 2 && parent.AttemptCount == 6, "parent_summary_sees_recovered_and_completed_sessions");
             A(parent.SkillCount > 0, "parent_summary_sees_skill_state");
             A(correctCount == 5, "vertical_slice_fixture_correctness_expected");
+        }
+
+        private static void TestCoordinator(string tempRoot, string schemaPath, string templatePath)
+        {
+            var root = Path.Combine(tempRoot, "coordinator");
+            var schemaDir = Path.Combine(root, "schema");
+            Directory.CreateDirectory(schemaDir);
+            File.Copy(schemaPath, Path.Combine(schemaDir, "001_initial.sql"), true);
+            File.Copy(Path.Combine(Path.GetDirectoryName(schemaPath), "002_attempt_immutability.sql"), Path.Combine(schemaDir, "002_attempt_immutability.sql"), true);
+            var database = new LearningDatabase(Path.Combine(root, "learning.db"), Path.Combine(schemaDir, "001_initial.sql"));
+            database.Initialize("DELETE");
+
+            using (var coordinator = new MathSessionCoordinator(database, templatePath, "LOW", 4242, 4))
+            {
+                var started = coordinator.Start("Bé coordinator");
+                A(coordinator.IsActive, "coordinator_active_after_start");
+                A(started.TargetQuestionCount == 4, "coordinator_target_question_count");
+                A(started.RecoveredDanglingSessions == 0, "coordinator_clean_start_no_dangling_session");
+                for (var i = 0; i < 4; i++)
+                {
+                    var question = coordinator.NextQuestion();
+                    A(question != null && question.Choices.Count == 4, "coordinator_question_" + i);
+                    var answer = i == 1 ? FirstWrongChoice(question) : question.CorrectAnswer;
+                    var outcome = coordinator.SubmitAnswerAt(answer, 0, "smoke", DateTime.UtcNow, 1200 + i * 100);
+                    A(outcome.CompletedQuestionCount == i + 1, "coordinator_progress_" + i);
+                    A(outcome.IsCorrect == (i != 1), "coordinator_correctness_" + i);
+                }
+                A(coordinator.NextQuestion() == null, "coordinator_stops_at_target_count");
+                var summary = coordinator.Complete();
+                A(summary.Attempts == 4, "coordinator_summary_attempts");
+                A(summary.Correct == 3 && summary.Wrong == 1, "coordinator_summary_correct_wrong");
+                A(!coordinator.IsActive, "coordinator_inactive_after_complete");
+            }
+            var parent = ParentSummaryService.Read(database);
+            A(parent.SessionCount == 1 && parent.AttemptCount == 4, "coordinator_persists_parent_summary");
+            A(Count(database, "SELECT count(*) FROM adaptive_decision_event;") == 4, "coordinator_persists_adaptive_audit");
         }
 
         private static SkillSnapshot Apply(SkillSnapshot current, MasteryUpdate update, DateTime now, DateTime? due = null, bool success = true)

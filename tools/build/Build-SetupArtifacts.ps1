@@ -109,6 +109,7 @@ $runtimeFiles = @(
     'WAHU.Audio.dll',
     'WAHU.Security.dll',
     'WAHU.Performance.dll',
+    'WAHU.Session.dll',
     'WAHU.Data.dll',
     'System.Data.SQLite.dll',
     'e_sqlite3.dll'
@@ -139,7 +140,7 @@ Copy-Item 'assets\verified_vectors' (Join-Path $publish 'assets') -Recurse -Forc
 Copy-Item 'data\schema\*.sql' (Join-Path $publish 'data\schema') -Force
 
 # Hard deployment guards: these must be in the actual staged installer payload.
-foreach ($name in @('WAHU.Learning.dll','WAHU.Motion.dll','WAHU.Content.dll','WAHU.Audio.dll','WAHU.Security.dll','WAHU.Performance.dll','WAHU.Data.dll','System.Data.SQLite.dll','e_sqlite3.dll','data\schema\001_initial.sql','data\schema\002_attempt_immutability.sql')) {
+foreach ($name in @('WAHU.Learning.dll','WAHU.Motion.dll','WAHU.Content.dll','WAHU.Audio.dll','WAHU.Security.dll','WAHU.Performance.dll','WAHU.Session.dll','WAHU.Data.dll','System.Data.SQLite.dll','e_sqlite3.dll','data\schema\001_initial.sql','data\schema\002_attempt_immutability.sql')) {
     Require-File (Join-Path $publish $name)
 }
 
@@ -218,7 +219,7 @@ $manifest = [ordered]@{
         behavior_runtime_smoke = 'PASS'
         behavior_runtime_smoke_assertions = 15
         learning_session_runtime_smoke = 'PASS'
-        learning_session_runtime_smoke_assertions = 71
+        learning_session_runtime_smoke_assertions = 92
         motion_runtime_smoke = 'PASS'
         motion_runtime_smoke_assertions = 25
         content_runtime_smoke = 'PASS'
