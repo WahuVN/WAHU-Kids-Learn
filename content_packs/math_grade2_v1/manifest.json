@@ -10,6 +10,14 @@
                   {
                       "path":  "verified_templates_v1.json",
                       "sha256":  "0DFE4D9DBE0B4BB2EA7A8A3723DE445544019143B8A95EFB532BADF2E5DF7887"
+                  },
+                  {
+                      "path":  "lesson_catalog_v1.json",
+                      "sha256":  "B0FC4AC8B5C9811D9F68DC5AACD97867DAAF84C77F3754908A9598F0DD407C2F"
+                  },
+                  {
+                      "path":  "question_bank_v1.json",
+                      "sha256":  "3C4F34C586A5785722BA2D65D2FB1B0661089A4BD44EFDB0354009992A706C63"
                   }
               ]
 }
