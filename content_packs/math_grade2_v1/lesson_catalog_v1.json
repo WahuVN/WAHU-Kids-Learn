@@ -1901,12 +1901,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_wp_select_operation_one_step_01",
-          "prompt_vi": "Có 36 quả, ăn 9 quả, hỏi còn lại. Chọn phép tính đúng.",
+          "prompt_vi": "Có 10 quả, ăn 2 quả, hỏi còn lại. Chọn phép tính đúng.",
           "solution_steps_vi": [
             "Tình huống lấy bớt và hỏi còn lại nên dùng phép trừ.",
             "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
           ],
-          "answer": "36 - 9"
+          "answer": "10 - 2"
         }
       ],
       "practice_sets": {

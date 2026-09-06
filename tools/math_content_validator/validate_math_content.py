@@ -23,9 +23,13 @@ DIFFICULTIES = {"basic", "medium", "application"}
 ENGINE_ANSWER_KINDS = {"integer", "interaction_integer", "number", "decimal", "fraction", "text", "unit", "expression"}
 GRADE2_USED_ANSWER_KINDS = {"integer", "interaction_integer", "text", "unit", "expression"}
 QUESTION_TYPES = {"numeric_input", "multiple_choice", "true_false", "expression_input", "unit_input", "interactive_measurement", "word_problem"}
+ADD_CARRY_RULES = {"ADD_WITHIN_1000_NO_CARRY": 0, "ADD_WITHIN_1000_ONE_CARRY_MAX": 1}
+SUB_BORROW_RULES = {"SUB_WITHIN_1000_NO_BORROW": 0, "SUB_WITHIN_1000_ONE_BORROW_MAX": 1}
 MONEY_DENOMINATION_RE = re.compile(r"\b\d[\d\s.,]*\s*đồng\b", re.IGNORECASE)
 TIME_RELATION_SKILLS = {"TIME_DAY_24_HOURS", "TIME_HOUR_60_MINUTES"}
 TIME_OUT_OF_SCOPE_ARITH_RE = re.compile(r"\b\d+\s*(?:×|\*|÷|/|:)\s*\d+\b")
+GRADE2_MUL_LITERAL_RE = re.compile(r"(?<!\d)(\d+)\s*(?:×|\*)\s*(\d+)(?!\d)")
+GRADE2_DIV_LITERAL_RE = re.compile(r"(?<!\d)(\d+)(?:\s*÷\s*|\s+:\s+)(\d+)(?!\d)")
 
 
 def load_json(path: Path, errors: list[str]) -> dict:
@@ -71,6 +75,51 @@ def normalize_prompt(text: str) -> str:
     text = re.sub(r"\d+", "#", text)
     text = re.sub(r"[^\w#]+", " ", text, flags=re.UNICODE)
     return re.sub(r"\s+", " ", text).strip()
+
+
+def grade2_operation_scope_violations(text: str) -> list[str]:
+    violations: list[str] = []
+    if not isinstance(text, str):
+        return violations
+    for match in GRADE2_MUL_LITERAL_RE.finditer(text):
+        a, b = int(match.group(1)), int(match.group(2))
+        if not ((a in {2, 5} and 0 <= b <= 10) or (b in {2, 5} and 0 <= a <= 10)):
+            violations.append(f"mul:{a}x{b}")
+    for match in GRADE2_DIV_LITERAL_RE.finditer(text):
+        dividend, divisor = int(match.group(1)), int(match.group(2))
+        if divisor not in {2, 5} or dividend % divisor != 0 or dividend // divisor > 10:
+            violations.append(f"div:{dividend}:{divisor}")
+    return violations
+
+
+def addition_carry_count(a: int, b: int) -> int:
+    carry = 0
+    count = 0
+    while a > 0 or b > 0:
+        total = a % 10 + b % 10 + carry
+        carry = 1 if total >= 10 else 0
+        count += carry
+        a //= 10
+        b //= 10
+    return count
+
+
+def subtraction_borrow_count(a: int, b: int) -> int:
+    if a < b:
+        raise ValueError("negative_subtraction")
+    borrow = 0
+    count = 0
+    while a > 0 or b > 0:
+        top = a % 10 - borrow
+        bottom = b % 10
+        if top < bottom:
+            borrow = 1
+            count += 1
+        else:
+            borrow = 0
+        a //= 10
+        b //= 10
+    return count
 
 
 def eval_restricted_expression(text: str) -> Fraction:
@@ -287,6 +336,13 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
                 errors.append(f"skill_domain_mismatch:{where}:{skill}:{chapter_domain[cid]}:{expected_domain}")
         required_text(lesson, "title_vi", where, errors)
         required_text(lesson, "explanation_vi", where, errors)
+        serialized_lesson = json.dumps(lesson, ensure_ascii=False)
+        for violation in grade2_operation_scope_violations(serialized_lesson):
+            errors.append(f"out_of_scope_grade2_operation:{where}:{violation}")
+        if skill == "MONEY_VND_NOTE_RECOGNITION" and MONEY_DENOMINATION_RE.search(serialized_lesson):
+            errors.append(f"unsourced_money_denomination:{where}")
+        if skill in TIME_RELATION_SKILLS and TIME_OUT_OF_SCOPE_ARITH_RE.search(serialized_lesson):
+            errors.append(f"out_of_scope_time_arithmetic:{where}")
         if len(required_list(lesson, "objectives_vi", where, errors, 2)) < 2:
             errors.append(f"insufficient_objectives:{where}")
         concepts = required_list(lesson, "concepts", where, errors)
@@ -403,14 +459,32 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
         if prompt:
             prompts_by_lesson[lid].append((qid, prompt))
         explanation = required_text(q, "explanation_vi", where, errors)
-        if skill == "MONEY_VND_NOTE_RECOGNITION":
-            serialized_money_item = json.dumps(q, ensure_ascii=False)
-            if MONEY_DENOMINATION_RE.search(serialized_money_item):
-                errors.append(f"unsourced_money_denomination:{where}")
-        if skill in TIME_RELATION_SKILLS:
-            serialized_time_item = json.dumps(q, ensure_ascii=False)
-            if TIME_OUT_OF_SCOPE_ARITH_RE.search(serialized_time_item):
-                errors.append(f"out_of_scope_time_arithmetic:{where}")
+        serialized_question = json.dumps(q, ensure_ascii=False)
+        for violation in grade2_operation_scope_violations(serialized_question):
+            errors.append(f"out_of_scope_grade2_operation:{where}:{violation}")
+        if skill == "MONEY_VND_NOTE_RECOGNITION" and MONEY_DENOMINATION_RE.search(serialized_question):
+            errors.append(f"unsourced_money_denomination:{where}")
+        if skill in TIME_RELATION_SKILLS and TIME_OUT_OF_SCOPE_ARITH_RE.search(serialized_question):
+            errors.append(f"out_of_scope_time_arithmetic:{where}")
+        if skill in ADD_CARRY_RULES or skill in SUB_BORROW_RULES:
+            operands = [int(x) for x in re.findall(r"\d+", prompt)]
+            if len(operands) < 2:
+                errors.append(f"missing_written_arithmetic_operands:{where}:{skill}")
+            else:
+                a, b = operands[0], operands[1]
+                answer = q.get("correct_answer")
+                if skill in ADD_CARRY_RULES:
+                    expected = a + b
+                    actual_transfers = addition_carry_count(a, b)
+                    expected_transfers = ADD_CARRY_RULES[skill]
+                else:
+                    expected = a - b
+                    actual_transfers = subtraction_borrow_count(a, b) if a >= b else -1
+                    expected_transfers = SUB_BORROW_RULES[skill]
+                if answer != expected:
+                    errors.append(f"written_arithmetic_answer_mismatch:{where}:{a}:{b}:{answer}:{expected}")
+                if actual_transfers != expected_transfers:
+                    errors.append(f"written_arithmetic_transfer_count:{where}:{skill}:{actual_transfers}:{expected_transfers}")
         hints = required_list(q, "hints_vi", where, errors, 2)
         if len(hints) < 2 or any(not isinstance(x, str) or not x.strip() for x in hints):
             errors.append(f"invalid_hints:{where}")

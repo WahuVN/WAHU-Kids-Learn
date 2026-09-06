@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 import sys
 import unittest
 from collections import Counter
@@ -207,6 +208,40 @@ class MathContentDataSmoke(unittest.TestCase):
             with self.subTest(item=item["id"]):
                 serialized = json.dumps(item, ensure_ascii=False)
                 self.assertIsNone(validator.TIME_OUT_OF_SCOPE_ARITH_RE.search(serialized))
+
+    def test_mul_div_literals_stay_inside_tables_2_and_5(self):
+        self.assertEqual([], validator.grade2_operation_scope_violations("2 × 10; 4 × 5; 20 : 2; 50 : 5"))
+        self.assertEqual([], validator.grade2_operation_scope_violations("Giữ hàng chục bằng 0: 400 + 0 + 9 = 409."))
+        for sample, marker in (
+            ("36 × 9", "mul:36x9"),
+            ("30 × 5", "mul:30x5"),
+            ("10 : 3", "div:10:3"),
+            ("5 : 2", "div:5:2"),
+            ("60 : 5", "div:60:5"),
+        ):
+            self.assertIn(marker, validator.grade2_operation_scope_violations(sample))
+        for item in self.lessons + self.questions:
+            with self.subTest(item=item["id"]):
+                serialized = json.dumps(item, ensure_ascii=False)
+                self.assertEqual([], validator.grade2_operation_scope_violations(serialized))
+
+    def test_written_add_sub_transfer_counts_match_skill_contract(self):
+        constrained = [
+            x for x in self.questions
+            if x["skill_id"] in validator.ADD_CARRY_RULES or x["skill_id"] in validator.SUB_BORROW_RULES
+        ]
+        self.assertEqual(12, len(constrained))
+        for item in constrained:
+            with self.subTest(item=item["id"]):
+                operands = [int(x) for x in re.findall(r"\d+", item["prompt_vi"])]
+                self.assertGreaterEqual(len(operands), 2)
+                a, b = operands[0], operands[1]
+                if item["skill_id"] in validator.ADD_CARRY_RULES:
+                    self.assertEqual(a + b, item["correct_answer"])
+                    self.assertEqual(validator.ADD_CARRY_RULES[item["skill_id"]], validator.addition_carry_count(a, b))
+                else:
+                    self.assertEqual(a - b, item["correct_answer"])
+                    self.assertEqual(validator.SUB_BORROW_RULES[item["skill_id"]], validator.subtraction_borrow_count(a, b))
 
 
 if __name__ == "__main__":

@@ -374,9 +374,9 @@ Q = {
     ],
 
     "OPERATION_MEANING_FROM_VISUAL": [
-        mc("Hai nhóm 4 chấm được gộp lại. Phép tính nào mô tả việc gộp?", "4 + 4", ["4 - 4", "4 : 4", "4 - 2"], "Gộp hai lượng lại là quan hệ cộng; hai nhóm 4 là 4 + 4."),
-        mc("Có 10 chấm, gạch bỏ 3 chấm. Phép tính nào mô tả tình huống?", "10 - 3", ["10 + 3", "10 : 3", "3 - 10"], "Bỏ bớt một phần khỏi lượng ban đầu là phép trừ."),
-        mc("Có 5 nhóm bằng nhau, mỗi nhóm 2 chấm. Phép tính nào phù hợp nhất?", "5 × 2", ["5 + 2", "5 - 2", "5 : 2"], "Nhiều nhóm bằng nhau được mô tả bằng phép nhân."),
+        mc("Hai nhóm 4 chấm được gộp lại. Phép tính nào mô tả việc gộp?", "4 + 4", ["4 - 4", "4 : 2", "4 - 2"], "Gộp hai lượng lại là quan hệ cộng; hai nhóm 4 là 4 + 4."),
+        mc("Có 10 chấm, gạch bỏ 3 chấm. Phép tính nào mô tả tình huống?", "10 - 3", ["10 + 3", "10 : 2", "3 - 10"], "Bỏ bớt một phần khỏi lượng ban đầu là phép trừ."),
+        mc("Có 5 nhóm bằng nhau, mỗi nhóm 2 chấm. Phép tính nào phù hợp nhất?", "5 × 2", ["5 + 2", "5 - 2", "10 : 5"], "Nhiều nhóm bằng nhau được mô tả bằng phép nhân."),
     ],
     "WP_ONE_STEP_ADD_MORE": [
         nq("Lan có 24 bút chì, được cho thêm 13 bút. Lan có tất cả bao nhiêu bút?", 37, "24 + 13 = 37 vì số bút được thêm vào lượng ban đầu."),
@@ -409,9 +409,9 @@ Q = {
         nq("20 học sinh chia đều thành 5 nhóm. Mỗi nhóm có bao nhiêu học sinh?", 4, "20 : 5 = 4."),
     ],
     "WP_SELECT_OPERATION_ONE_STEP": [
-        mc("Có 36 quả, ăn 9 quả, hỏi còn lại. Chọn phép tính đúng.", "36 - 9", ["36 + 9", "36 × 9", "36 : 9"], "Tình huống lấy bớt và hỏi còn lại nên dùng phép trừ."),
-        mc("Có 5 giỏ, mỗi giỏ 2 quả, hỏi tất cả. Chọn phép tính đúng.", "5 × 2", ["5 + 2", "5 - 2", "5 : 2"], "Nhiều nhóm bằng nhau và hỏi tổng nên dùng phép nhân."),
-        mc("Có 30 bút chia đều cho 5 bạn, hỏi mỗi bạn được bao nhiêu. Chọn phép tính đúng.", "30 : 5", ["30 + 5", "30 - 5", "30 × 5"], "Chia đều tổng số bút thành 5 phần nên dùng phép chia."),
+        mc("Có 10 quả, ăn 2 quả, hỏi còn lại. Chọn phép tính đúng.", "10 - 2", ["10 + 2", "10 × 2", "10 : 2"], "Tình huống lấy bớt và hỏi còn lại nên dùng phép trừ."),
+        mc("Có 5 giỏ, mỗi giỏ 2 quả, hỏi tất cả. Chọn phép tính đúng.", "5 × 2", ["5 + 2", "5 - 2", "10 : 5"], "Nhiều nhóm bằng nhau và hỏi tổng nên dùng phép nhân."),
+        mc("Có 30 bút chia đều cho 5 bạn, hỏi mỗi bạn được bao nhiêu. Chọn phép tính đúng.", "30 : 5", ["30 + 5", "30 - 5", "5 + 5"], "Chia đều tổng số bút thành 5 phần nên dùng phép chia."),
     ],
 
     "POINT_RECOGNIZE": [

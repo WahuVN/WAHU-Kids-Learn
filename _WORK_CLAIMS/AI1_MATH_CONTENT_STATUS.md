@@ -28,7 +28,7 @@ Owner: AI1 — Math Content & Data
   - interactive measurement
   - word problem
 - Semantic validator errors: **0**
-- Math content unittest: **13 / 13 PASS**
+- Math content unittest: **15 / 15 PASS**
 - Pack manifest/hash/listing check on current working tree: **PASS** (`version=1.9.0`, 3 listed files)
 
 ## Curriculum/content completeness
@@ -80,6 +80,8 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - invalid true/false shape;
 - mệnh giá tiền Việt Nam bị hard-code khi chưa có source/book mapping;
 - phép nhân/chia mở rộng không thuộc skill quan hệ thời gian `1 ngày = 24 giờ`, `1 giờ = 60 phút`;
+- phép nhân/chia literal ngoài bảng 2 và 5, kể cả trong distractor/rationale/worked example;
+- số lượt nhớ/mượn không khớp contract `NO_CARRY/NO_BORROW` hoặc `_ONE_*_MAX`;
 - answer kind ngoài Grade-2 bank;
 - question type không hợp contract;
 - exact/near duplicate prompt trong cùng lesson;
@@ -100,9 +102,11 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - answer kinds/question types đúng contract;
 - expression validator fail-closed, kể cả divide-by-zero và payload không phải arithmetic;
 - nội dung tiền Việt Nam không hard-code mệnh giá khi chưa có source/book mapping;
-- skill quan hệ thời gian không mở rộng thành phép nhân/chia ngoài yêu cầu cần đạt.
+- skill quan hệ thời gian không mở rộng thành phép nhân/chia ngoài yêu cầu cần đạt;
+- mọi phép nhân/chia literal child-facing nằm trong bảng 2 hoặc 5, kể cả distractor;
+- 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract.
 
-Latest result: **13 tests PASS**.
+Latest result: **15 tests PASS**.
 
 ## Commits / waves
 
@@ -113,6 +117,7 @@ Latest result: **13 tests PASS**.
 - `e4a6217` — `Toán: chuẩn hóa question bank theo contract engine`
 - `ad5db15` — `Toán: chốt status content và test biểu thức fail-closed`
 - `c7e0b0e` — `Toán: bỏ mệnh giá tiền chưa map nguồn khỏi nội dung`
+- `2ac3027` — `Toán: siết hard guard thời gian và thứ tự prerequisite`
 
 ## Current blockers outside AI1 content ownership
 

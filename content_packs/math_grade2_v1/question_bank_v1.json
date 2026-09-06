@@ -3157,7 +3157,7 @@
         },
         {
           "id": "c",
-          "text": "4 : 4",
+          "text": "4 : 2",
           "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
         },
         {
@@ -3210,7 +3210,7 @@
         },
         {
           "id": "c",
-          "text": "10 : 3",
+          "text": "10 : 2",
           "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
         },
         {
@@ -3268,7 +3268,7 @@
         },
         {
           "id": "d",
-          "text": "5 : 2",
+          "text": "10 : 5",
           "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
         }
       ]
@@ -3839,11 +3839,11 @@
       "skill_id": "WP_SELECT_OPERATION_ONE_STEP",
       "difficulty": "basic",
       "question_type": "multiple_choice",
-      "prompt_vi": "Có 36 quả, ăn 9 quả, hỏi còn lại. Chọn phép tính đúng.",
+      "prompt_vi": "Có 10 quả, ăn 2 quả, hỏi còn lại. Chọn phép tính đúng.",
       "answer_kind": "text",
-      "correct_answer": "36 - 9",
+      "correct_answer": "10 - 2",
       "accepted_answers": [
-        "36 - 9"
+        "10 - 2"
       ],
       "explanation_vi": "Tình huống lấy bớt và hỏi còn lại nên dùng phép trừ.",
       "hints_vi": [
@@ -3866,22 +3866,22 @@
       "choices": [
         {
           "id": "a",
-          "text": "36 - 9",
+          "text": "10 - 2",
           "rationale_vi": "Tình huống lấy bớt và hỏi còn lại nên dùng phép trừ."
         },
         {
           "id": "b",
-          "text": "36 + 9",
+          "text": "10 + 2",
           "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
         },
         {
           "id": "c",
-          "text": "36 × 9",
+          "text": "10 × 2",
           "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
         },
         {
           "id": "d",
-          "text": "36 : 9",
+          "text": "10 : 2",
           "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
         }
       ]
@@ -3934,7 +3934,7 @@
         },
         {
           "id": "d",
-          "text": "5 : 2",
+          "text": "10 : 5",
           "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
         }
       ]
@@ -3987,7 +3987,7 @@
         },
         {
           "id": "d",
-          "text": "30 × 5",
+          "text": "5 + 5",
           "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
         }
       ]
