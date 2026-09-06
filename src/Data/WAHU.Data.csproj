@@ -1,0 +1,42 @@
+﻿<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProjectGuid>{492526A2-1C03-4D76-A9E9-D2A57AB46028}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>WAHU.Data</RootNamespace>
+    <AssemblyName>WAHU.Data</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols><DebugType>full</DebugType><Optimize>false</Optimize><OutputPath>bin\Debug\</OutputPath><DefineConstants>DEBUG;TRACE</DefineConstants><PlatformTarget>x86</PlatformTarget><Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <DebugType>pdbonly</DebugType><Optimize>true</Optimize><OutputPath>bin\Release\</OutputPath><DefineConstants>TRACE</DefineConstants><PlatformTarget>x86</PlatformTarget><Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" /><Reference Include="System.Core" /><Reference Include="System.Data" /><Reference Include="System.Transactions" /><Reference Include="System.Xml" /><Reference Include="System.Web.Extensions" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AnswerCommitService.cs" />
+    <Compile Include="DatabaseHealth.cs" />
+    <Compile Include="LearningDatabase.cs" />
+    <Compile Include="ManagedBackupService.cs" />
+    <Compile Include="MigrationManager.cs" />
+    <Compile Include="SerializedWriteCoordinator.cs" />
+    <Compile Include="SQLiteBackupService.cs" />
+    <Compile Include="SQLiteConnectionFactory.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Data.SQLite" Version="2.0.4" />
+    <PackageReference Include="SourceGear.sqlite3" Version="3.53.4" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Platform\WAHU.Platform.csproj"><Project>{2759F943-D509-4130-9E79-B3E28C1CDC88}</Project><Name>WAHU.Platform</Name></ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
