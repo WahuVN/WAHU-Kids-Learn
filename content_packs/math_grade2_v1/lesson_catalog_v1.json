@@ -139,7 +139,7 @@
       "order_in_domain": 1,
       "title_vi": "Đếm, đọc và viết số đến 1000",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: đếm, đọc và viết số đến 1000.",
+        "Vận dụng kiến thức về đọc và viết số để chọn hoặc tìm kết quả đúng.",
         "Phân biệt và giải thích đúng đọc và viết số khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Mỗi số đến 1000 được đọc và viết theo giá trị của hàng trăm, hàng chục và hàng đơn vị. Khi một hàng có 0, vẫn phải giữ đúng vị trí của chữ số đó.",
@@ -188,7 +188,7 @@
       "order_in_domain": 2,
       "title_vi": "Nhận biết số tròn trăm",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: nhận biết số tròn trăm.",
+        "Chọn đúng mô tả hoặc kết luận về số tròn trăm trong tình huống đơn giản.",
         "Phân biệt và giải thích đúng số tròn trăm khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Số tròn trăm có hàng chục và hàng đơn vị đều bằng 0, ví dụ 300, 700, 1000. Có thể xem đó là một số lượng gồm các nhóm 100 đầy đủ.",
@@ -239,7 +239,7 @@
       "order_in_domain": 3,
       "title_vi": "Số liền trước và số liền sau",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: số liền trước và số liền sau.",
+        "Vận dụng kiến thức về liền trước và liền sau để tìm kết quả đúng trong bài tập cơ bản.",
         "Vận dụng liền trước và liền sau với dữ kiện mới, nêu cách tìm kết quả và tự kiểm tra bằng quy tắc đã học."
       ],
       "explanation_vi": "Số liền trước của một số nhỏ hơn số đó đúng 1; số liền sau lớn hơn đúng 1. Quy tắc này dùng được cả khi chuyển qua chục hoặc trăm.",
@@ -290,7 +290,7 @@
       "order_in_domain": 4,
       "title_vi": "Giá trị hàng trăm, chục, đơn vị",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: giá trị hàng trăm, chục, đơn vị.",
+        "Vận dụng kiến thức về giá trị theo hàng để tìm kết quả đúng trong bài tập cơ bản.",
         "Vận dụng giá trị theo hàng với dữ kiện mới, nêu cách tìm kết quả và tự kiểm tra bằng quy tắc đã học."
       ],
       "explanation_vi": "Vị trí của chữ số quyết định giá trị của nó: hàng trăm gấp 100 lần đơn vị, hàng chục gấp 10 lần đơn vị, hàng đơn vị giữ nguyên.",
@@ -341,7 +341,7 @@
       "order_in_domain": 5,
       "title_vi": "Viết số thành tổng trăm, chục, đơn vị",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: viết số thành tổng trăm, chục, đơn vị.",
+        "Vận dụng kiến thức về dạng khai triển để chọn hoặc tìm kết quả đúng.",
         "Phân biệt và giải thích đúng dạng khai triển khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Một số có thể tách thành tổng giá trị của từng hàng. Ví dụ 352 = 300 + 50 + 2; nếu một hàng bằng 0 thì giá trị của hàng đó bằng 0.",
@@ -392,7 +392,7 @@
       "order_in_domain": 6,
       "title_vi": "Điền số trên tia số",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: điền số trên tia số.",
+        "Vận dụng kiến thức về bước trên tia số để tìm kết quả đúng trong bài tập cơ bản.",
         "Vận dụng bước trên tia số với dữ kiện mới, nêu cách tìm kết quả và tự kiểm tra bằng quy tắc đã học."
       ],
       "explanation_vi": "Các vạch trên tia số được sắp theo thứ tự tăng dần với một bước đều. Muốn điền số thiếu, xác định khoảng cách giữa hai vạch kề nhau rồi cộng hoặc trừ đúng bước đó.",
@@ -443,7 +443,7 @@
       "order_in_domain": 7,
       "title_vi": "So sánh hai số đến 1000",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: so sánh hai số đến 1000.",
+        "Chọn đúng mô tả hoặc kết luận về so sánh số trong tình huống đơn giản.",
         "Phân biệt và giải thích đúng so sánh số khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "So sánh từ hàng lớn nhất: hàng trăm, rồi hàng chục, rồi hàng đơn vị. Hàng đầu tiên khác nhau quyết định số nào lớn hơn.",
@@ -494,7 +494,7 @@
       "order_in_domain": 8,
       "title_vi": "Tìm số lớn nhất và bé nhất",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: tìm số lớn nhất và bé nhất.",
+        "Vận dụng kiến thức về lớn nhất và bé nhất để tìm kết quả đúng trong bài tập cơ bản.",
         "Vận dụng lớn nhất và bé nhất với dữ kiện mới, nêu cách tìm kết quả và tự kiểm tra bằng quy tắc đã học."
       ],
       "explanation_vi": "Để tìm số lớn nhất hoặc bé nhất trong nhóm không quá bốn số, so sánh các số theo giá trị hàng rồi giữ lại số lớn hơn hoặc bé hơn theo yêu cầu.",
@@ -545,7 +545,7 @@
       "order_in_domain": 9,
       "title_vi": "Sắp xếp đến bốn số",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: sắp xếp đến bốn số.",
+        "Chọn đúng mô tả hoặc kết luận về thứ tự tăng giảm trong tình huống đơn giản.",
         "Phân biệt và giải thích đúng thứ tự tăng giảm khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Sắp xếp tăng dần là từ bé đến lớn; giảm dần là từ lớn đến bé. Có thể so sánh từng cặp hoặc lần lượt chọn số nhỏ nhất/lớn nhất còn lại.",
@@ -596,7 +596,7 @@
       "order_in_domain": 10,
       "title_vi": "Ước lượng số đồ vật theo chục",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: ước lượng số đồ vật theo chục.",
+        "Vận dụng kiến thức về ước lượng theo chục để chọn hoặc tìm kết quả đúng.",
         "Phân biệt và giải thích đúng ước lượng theo chục khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Khi không cần đếm chính xác từng vật, có thể gom hoặc hình dung theo nhóm 10 để nói số lượng gần đúng theo chục.",
@@ -647,7 +647,7 @@
       "order_in_domain": 1,
       "title_vi": "Nhận biết thành phần phép cộng",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: nhận biết thành phần phép cộng.",
+        "Chọn đúng mô tả hoặc kết luận về số hạng và tổng trong tình huống đơn giản.",
         "Phân biệt và giải thích đúng số hạng và tổng khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Trong phép cộng a + b = c, a và b là các số hạng, c là tổng. Đổi chỗ hai số hạng không làm thay đổi tổng.",
@@ -698,7 +698,7 @@
       "order_in_domain": 2,
       "title_vi": "Nhận biết thành phần phép trừ",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: nhận biết thành phần phép trừ.",
+        "Chọn đúng mô tả hoặc kết luận về số bị trừ, số trừ, hiệu trong tình huống đơn giản.",
         "Phân biệt và giải thích đúng số bị trừ, số trừ, hiệu khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Trong phép trừ a - b = c, a là số bị trừ, b là số trừ, c là hiệu. Vai trò các thành phần không hoán đổi như phép cộng.",
@@ -749,7 +749,7 @@
       "order_in_domain": 3,
       "title_vi": "Cộng đến 1000 không nhớ",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: cộng đến 1000 không nhớ.",
+        "Vận dụng kiến thức về cộng không nhớ để tìm kết quả đúng trong bài tập cơ bản.",
         "Vận dụng cộng không nhớ với dữ kiện mới, nêu cách tìm kết quả và tự kiểm tra bằng quy tắc đã học."
       ],
       "explanation_vi": "Đặt các hàng thẳng cột rồi cộng từ đơn vị sang chục, trăm. Với dạng không nhớ, tổng ở từng cột đều nhỏ hơn 10.",
@@ -801,7 +801,7 @@
       "order_in_domain": 4,
       "title_vi": "Cộng đến 1000 có nhớ một lượt",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: cộng đến 1000 có nhớ một lượt.",
+        "Vận dụng kiến thức về cộng có nhớ để tìm kết quả đúng trong bài tập cơ bản.",
         "Vận dụng cộng có nhớ với dữ kiện mới, nêu cách tìm kết quả và tự kiểm tra bằng quy tắc đã học."
       ],
       "explanation_vi": "Nếu tổng ở một cột từ 10 trở lên, viết phần đơn vị ở cột đó và nhớ 1 sang cột bên trái. Trong các bài này, chỉ có nhiều nhất một cột cần nhớ.",
@@ -852,7 +852,7 @@
       "order_in_domain": 5,
       "title_vi": "Trừ đến 1000 không mượn",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: trừ đến 1000 không mượn.",
+        "Vận dụng kiến thức về trừ không mượn để tìm kết quả đúng trong bài tập cơ bản.",
         "Vận dụng trừ không mượn với dữ kiện mới, nêu cách tìm kết quả và tự kiểm tra bằng quy tắc đã học."
       ],
       "explanation_vi": "Đặt các hàng thẳng cột rồi trừ từ đơn vị sang chục, trăm. Với dạng không mượn, chữ số trên ở mỗi cột không nhỏ hơn chữ số dưới.",
@@ -904,7 +904,7 @@
       "order_in_domain": 6,
       "title_vi": "Trừ đến 1000 có mượn một lượt",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: trừ đến 1000 có mượn một lượt.",
+        "Vận dụng kiến thức về trừ có mượn để tìm kết quả đúng trong bài tập cơ bản.",
         "Vận dụng trừ có mượn với dữ kiện mới, nêu cách tìm kết quả và tự kiểm tra bằng quy tắc đã học."
       ],
       "explanation_vi": "Khi chữ số trên nhỏ hơn chữ số dưới ở một cột, mượn 1 từ hàng bên trái, tương đương thêm 10 vào hàng đang trừ. Trong các bài này, chỉ có nhiều nhất một cột cần mượn.",
@@ -955,7 +955,7 @@
       "order_in_domain": 7,
       "title_vi": "Biểu thức có hai dấu cộng trừ",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: biểu thức có hai dấu cộng trừ.",
+        "Vận dụng quy tắc tính từ trái sang phải để viết hoặc tính biểu thức đúng thứ tự.",
         "Vận dụng tính từ trái sang phải để lập hoặc tính biểu thức đúng thứ tự và tự kiểm tra kết quả."
       ],
       "explanation_vi": "Khi biểu thức chỉ có cộng và trừ, thực hiện từ trái sang phải. Tính kết quả bước thứ nhất rồi dùng kết quả đó cho bước thứ hai.",
@@ -1007,7 +1007,7 @@
       "order_in_domain": 8,
       "title_vi": "Cộng trừ nhẩm trong 20",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: cộng trừ nhẩm trong 20.",
+        "Vận dụng kiến thức về tính nhẩm đến 20 để tìm kết quả đúng trong bài tập cơ bản.",
         "Vận dụng tính nhẩm đến 20 với dữ kiện mới, nêu cách tìm kết quả và tự kiểm tra bằng quy tắc đã học."
       ],
       "explanation_vi": "Dùng tách số, làm tròn 10 hoặc các cặp số quen thuộc để tính nhanh trong phạm vi 20 mà không cần đặt tính.",
@@ -1059,7 +1059,7 @@
       "order_in_domain": 9,
       "title_vi": "Cộng trừ nhẩm số tròn chục, tròn trăm",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: cộng trừ nhẩm số tròn chục, tròn trăm.",
+        "Vận dụng kiến thức về nhẩm số tròn để tìm kết quả đúng trong bài tập cơ bản.",
         "Vận dụng nhẩm số tròn với dữ kiện mới, nêu cách tìm kết quả và tự kiểm tra bằng quy tắc đã học."
       ],
       "explanation_vi": "Với số tròn chục hoặc tròn trăm, có thể tính số chục/số trăm trước rồi thêm lại chữ số 0 tương ứng.",
@@ -1111,7 +1111,7 @@
       "order_in_domain": 1,
       "title_vi": "Ý nghĩa phép nhân",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: ý nghĩa phép nhân.",
+        "Vận dụng kiến thức về nhóm bằng nhau để chọn hoặc tìm kết quả đúng.",
         "Phân biệt và giải thích đúng nhóm bằng nhau khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Phép nhân biểu diễn việc cộng nhiều nhóm bằng nhau. Ví dụ 3 nhóm, mỗi nhóm 2 vật có thể viết 2 + 2 + 2 = 6 và 3 × 2 = 6.",
@@ -1162,7 +1162,7 @@
       "order_in_domain": 2,
       "title_vi": "Ý nghĩa phép chia",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: ý nghĩa phép chia.",
+        "Vận dụng kiến thức về chia đều để tìm kết quả đúng trong bài tập cơ bản.",
         "Vận dụng chia đều với dữ kiện mới, nêu cách tìm kết quả và tự kiểm tra bằng quy tắc đã học."
       ],
       "explanation_vi": "Phép chia dùng khi chia đều một số lượng thành các nhóm bằng nhau hoặc khi muốn biết có bao nhiêu nhóm bằng nhau.",
@@ -1213,7 +1213,7 @@
       "order_in_domain": 3,
       "title_vi": "Thành phần phép nhân",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: thành phần phép nhân.",
+        "Chọn đúng mô tả hoặc kết luận về thừa số và tích trong tình huống đơn giản.",
         "Phân biệt và giải thích đúng thừa số và tích khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Trong a × b = c, a và b là các thừa số, c là tích. Tích cho biết tổng số phần tử của các nhóm bằng nhau.",
@@ -1264,7 +1264,7 @@
       "order_in_domain": 4,
       "title_vi": "Thành phần phép chia",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: thành phần phép chia.",
+        "Chọn đúng mô tả hoặc kết luận về số bị chia, số chia, thương trong tình huống đơn giản.",
         "Phân biệt và giải thích đúng số bị chia, số chia, thương khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Trong a : b = c, a là số bị chia, b là số chia, c là thương. Với bài chia hết, thương cho biết số phần mỗi nhóm hoặc số nhóm.",
@@ -1315,7 +1315,7 @@
       "order_in_domain": 5,
       "title_vi": "Bảng nhân 2",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: bảng nhân 2.",
+        "Vận dụng kiến thức về nhân 2 để tìm kết quả đúng trong bài tập cơ bản.",
         "Vận dụng nhân 2 với dữ kiện mới, nêu cách tìm kết quả và tự kiểm tra bằng quy tắc đã học."
       ],
       "explanation_vi": "Mỗi bước của bảng nhân 2 tăng thêm 2. Có thể hiểu 2 × n là n nhóm, mỗi nhóm 2 hoặc cộng số 2 n lần.",
@@ -1366,7 +1366,7 @@
       "order_in_domain": 6,
       "title_vi": "Bảng nhân 5",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: bảng nhân 5.",
+        "Vận dụng kiến thức về nhân 5 để tìm kết quả đúng trong bài tập cơ bản.",
         "Vận dụng nhân 5 với dữ kiện mới, nêu cách tìm kết quả và tự kiểm tra bằng quy tắc đã học."
       ],
       "explanation_vi": "Mỗi bước của bảng nhân 5 tăng thêm 5. Các tích của 5 có chữ số tận cùng là 0 hoặc 5 trong phạm vi bảng học.",
@@ -1417,7 +1417,7 @@
       "order_in_domain": 7,
       "title_vi": "Bảng chia 2",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: bảng chia 2.",
+        "Vận dụng kiến thức về chia 2 để tìm kết quả đúng trong bài tập cơ bản.",
         "Vận dụng chia 2 với dữ kiện mới, nêu cách tìm kết quả và tự kiểm tra bằng quy tắc đã học."
       ],
       "explanation_vi": "Bảng chia 2 là phép tính ngược của bảng nhân 2. Nếu 2 × n = a thì a : 2 = n.",
@@ -1469,7 +1469,7 @@
       "order_in_domain": 8,
       "title_vi": "Bảng chia 5",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: bảng chia 5.",
+        "Vận dụng kiến thức về chia 5 để tìm kết quả đúng trong bài tập cơ bản.",
         "Vận dụng chia 5 với dữ kiện mới, nêu cách tìm kết quả và tự kiểm tra bằng quy tắc đã học."
       ],
       "explanation_vi": "Bảng chia 5 là phép tính ngược của bảng nhân 5. Nếu 5 × n = a thì a : 5 = n.",
@@ -1521,7 +1521,7 @@
       "order_in_domain": 1,
       "title_vi": "Nhìn tình huống để chọn phép tính",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: nhìn tình huống để chọn phép tính.",
+        "Chọn đúng mô tả hoặc kết luận về quan hệ của phép tính trong tình huống đơn giản.",
         "Phân biệt và giải thích đúng quan hệ của phép tính khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Không chỉ dựa vào từ khóa. Hãy xác định số lượng đang được gộp, bớt đi, tạo nhóm bằng nhau hay chia đều để chọn cộng, trừ, nhân hoặc chia.",
@@ -1572,7 +1572,7 @@
       "order_in_domain": 2,
       "title_vi": "Bài toán thêm vào",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: bài toán thêm vào.",
+        "Giải được bài toán một bước về thêm vào bằng phép tính phù hợp.",
         "Vận dụng thêm vào để chọn phép tính, giải một bài toán một bước và kiểm tra kết quả theo dữ kiện."
       ],
       "explanation_vi": "Khi một lượng ban đầu được thêm một lượng mới và hỏi tất cả có bao nhiêu, dùng phép cộng một bước.",
@@ -1624,7 +1624,7 @@
       "order_in_domain": 3,
       "title_vi": "Bài toán bớt đi",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: bài toán bớt đi.",
+        "Giải được bài toán một bước về bớt đi bằng phép tính phù hợp.",
         "Vận dụng bớt đi để chọn phép tính, giải một bài toán một bước và kiểm tra kết quả theo dữ kiện."
       ],
       "explanation_vi": "Khi một lượng ban đầu bị lấy bớt và hỏi còn lại, dùng phép trừ một bước.",
@@ -1676,7 +1676,7 @@
       "order_in_domain": 4,
       "title_vi": "Bài toán nhiều hơn một số đơn vị",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: bài toán nhiều hơn một số đơn vị.",
+        "Giải được bài toán một bước về nhiều hơn bằng phép tính phù hợp.",
         "Vận dụng nhiều hơn để chọn phép tính, giải một bài toán một bước và kiểm tra kết quả theo dữ kiện."
       ],
       "explanation_vi": "Nếu B nhiều hơn A k đơn vị thì B = A + k. Cần xác định đúng đại lượng được hỏi trước khi cộng.",
@@ -1727,7 +1727,7 @@
       "order_in_domain": 5,
       "title_vi": "Bài toán ít hơn một số đơn vị",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: bài toán ít hơn một số đơn vị.",
+        "Giải được bài toán một bước về ít hơn bằng phép tính phù hợp.",
         "Vận dụng ít hơn để chọn phép tính, giải một bài toán một bước và kiểm tra kết quả theo dữ kiện."
       ],
       "explanation_vi": "Nếu B ít hơn A k đơn vị thì B = A - k. Điều quan trọng là nhận ra lượng nào là mốc lớn hơn.",
@@ -1778,7 +1778,7 @@
       "order_in_domain": 6,
       "title_vi": "Bài toán nhóm bằng nhau dùng phép nhân",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: bài toán nhóm bằng nhau dùng phép nhân.",
+        "Giải được bài toán một bước về nhân trong tình huống bằng phép tính phù hợp.",
         "Vận dụng nhân trong tình huống để chọn phép tính, giải một bài toán một bước và kiểm tra kết quả theo dữ kiện."
       ],
       "explanation_vi": "Khi có nhiều nhóm bằng nhau và biết số phần tử mỗi nhóm, nhân số nhóm với số phần tử mỗi nhóm.",
@@ -1831,7 +1831,7 @@
       "order_in_domain": 7,
       "title_vi": "Bài toán chia đều dùng phép chia",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: bài toán chia đều dùng phép chia.",
+        "Giải được bài toán một bước về chia trong tình huống bằng phép tính phù hợp.",
         "Vận dụng chia trong tình huống để chọn phép tính, giải một bài toán một bước và kiểm tra kết quả theo dữ kiện."
       ],
       "explanation_vi": "Khi chia một tổng thành các phần bằng nhau, dùng phép chia để tìm số phần mỗi nhóm hoặc số nhóm.",
@@ -1884,7 +1884,7 @@
       "order_in_domain": 8,
       "title_vi": "Chọn phép tính cho bài toán một bước",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: chọn phép tính cho bài toán một bước.",
+        "Biết cách chọn phép tính đúng cho một tình huống một bước cơ bản.",
         "Phân biệt và giải thích đúng chọn phép tính khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Đọc dữ kiện, xác định điều cần tìm và mối quan hệ giữa các lượng rồi mới chọn phép tính; không dùng một từ khóa đơn lẻ để đoán.",
@@ -1935,7 +1935,7 @@
       "order_in_domain": 1,
       "title_vi": "Nhận biết điểm",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: nhận biết điểm.",
+        "Chọn đúng mô tả hoặc kết luận về điểm trong tình huống đơn giản.",
         "Phân biệt và giải thích đúng điểm khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Điểm biểu diễn một vị trí xác định và thường được đặt tên bằng chữ cái in hoa như A, B, C. Điểm không có độ dài.",
@@ -1984,7 +1984,7 @@
       "order_in_domain": 2,
       "title_vi": "Nhận biết đoạn thẳng",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: nhận biết đoạn thẳng.",
+        "Chọn đúng mô tả hoặc kết luận về đoạn thẳng trong tình huống đơn giản.",
         "Phân biệt và giải thích đúng đoạn thẳng khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Đoạn thẳng là phần thẳng nối hai điểm đầu mút. Độ dài đoạn thẳng là khoảng cách giữa hai đầu mút.",
@@ -2035,7 +2035,7 @@
       "order_in_domain": 3,
       "title_vi": "Nhận biết đường cong",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: nhận biết đường cong.",
+        "Chọn đúng mô tả hoặc kết luận về đường cong trong tình huống đơn giản.",
         "Phân biệt và giải thích đúng đường cong khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Đường cong đổi hướng mềm mại và không phải là một đoạn thẳng. Có thể nhận biết bằng hình dạng uốn lượn.",
@@ -2086,7 +2086,7 @@
       "order_in_domain": 4,
       "title_vi": "Nhận biết đường thẳng",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: nhận biết đường thẳng.",
+        "Chọn đúng mô tả hoặc kết luận về đường thẳng trong tình huống đơn giản.",
         "Phân biệt và giải thích đúng đường thẳng khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Đường thẳng đi theo một hướng không uốn cong và có thể kéo dài về hai phía. Khác với đoạn thẳng, đường thẳng không bị giới hạn bởi hai đầu mút.",
@@ -2137,7 +2137,7 @@
       "order_in_domain": 5,
       "title_vi": "Nhận biết đường gấp khúc",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: nhận biết đường gấp khúc.",
+        "Chọn đúng mô tả hoặc kết luận về đường gấp khúc trong tình huống đơn giản.",
         "Phân biệt và giải thích đúng đường gấp khúc khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Đường gấp khúc được tạo bởi nhiều đoạn thẳng nối tiếp nhau tại các điểm. Mỗi chỗ nối có thể làm đường đổi hướng.",
@@ -2188,7 +2188,7 @@
       "order_in_domain": 6,
       "title_vi": "Ba điểm thẳng hàng",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: ba điểm thẳng hàng.",
+        "Chọn đúng mô tả hoặc kết luận về thẳng hàng trong tình huống đơn giản.",
         "Phân biệt và giải thích đúng thẳng hàng khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Ba điểm thẳng hàng khi cả ba cùng nằm trên một đường thẳng. Nếu một điểm lệch khỏi đường qua hai điểm còn lại thì ba điểm không thẳng hàng.",
@@ -2239,7 +2239,7 @@
       "order_in_domain": 7,
       "title_vi": "Nhận biết hình tứ giác",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: nhận biết hình tứ giác.",
+        "Vận dụng kiến thức về tứ giác để chọn hoặc tìm kết quả đúng.",
         "Phân biệt và giải thích đúng tứ giác khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Hình tứ giác là hình phẳng kín có bốn cạnh và bốn đỉnh. Hình vuông và hình chữ nhật đều là các ví dụ của tứ giác.",
@@ -2290,7 +2290,7 @@
       "order_in_domain": 8,
       "title_vi": "Nhận biết khối trụ",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: nhận biết khối trụ.",
+        "Chọn đúng mô tả hoặc kết luận về khối trụ trong tình huống đơn giản.",
         "Phân biệt và giải thích đúng khối trụ khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Khối trụ có hai mặt đáy tròn bằng nhau và một mặt cong bao quanh. Lon nước là một vật thể gần dạng khối trụ.",
@@ -2339,7 +2339,7 @@
       "order_in_domain": 9,
       "title_vi": "Nhận biết khối cầu",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: nhận biết khối cầu.",
+        "Chọn đúng mô tả hoặc kết luận về khối cầu trong tình huống đơn giản.",
         "Phân biệt và giải thích đúng khối cầu khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Khối cầu tròn đều theo mọi hướng và không có cạnh hay đỉnh. Quả bóng là vật thể gần dạng khối cầu.",
@@ -2388,7 +2388,7 @@
       "order_in_domain": 10,
       "title_vi": "Tạo đoạn thẳng có độ dài cho trước",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: tạo đoạn thẳng có độ dài cho trước.",
+        "Thực hành vẽ đoạn thẳng theo độ dài trên vạch đo và kiểm tra độ dài tạo được.",
         "Vận dụng vẽ đoạn thẳng theo độ dài để thao tác trên vạch đo và kiểm tra kết quả bằng cách đo lại."
       ],
       "explanation_vi": "Đặt một đầu đoạn thẳng tại vạch đầu, rồi chọn đầu còn lại sao cho khoảng cách trên thước đúng bằng độ dài yêu cầu.",
@@ -2439,7 +2439,7 @@
       "order_in_domain": 11,
       "title_vi": "Gấp, cắt và ghép hình",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: gấp, cắt và ghép hình.",
+        "Chọn đúng mô tả hoặc kết luận về ghép và tạo hình trong tình huống đơn giản.",
         "Phân biệt và giải thích đúng ghép và tạo hình khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Có thể tạo hình mới bằng cách gấp, cắt hoặc ghép các hình đơn giản. Khi ghép, các cạnh phù hợp được đặt sát nhau mà không làm thay đổi bản chất của từng mảnh.",
@@ -2490,7 +2490,7 @@
       "order_in_domain": 1,
       "title_vi": "Nặng hơn và nhẹ hơn",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: nặng hơn và nhẹ hơn.",
+        "Chọn đúng mô tả hoặc kết luận về so sánh khối lượng trong tình huống đơn giản.",
         "Phân biệt và giải thích đúng so sánh khối lượng khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Khi so sánh bằng cân, phía hạ thấp hơn thường chứa vật nặng hơn; phía nâng cao hơn chứa vật nhẹ hơn nếu cân hoạt động cân bằng đúng.",
@@ -2539,7 +2539,7 @@
       "order_in_domain": 2,
       "title_vi": "Đọc và viết số đo kilôgam",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: đọc và viết số đo kilôgam.",
+        "Dùng đơn vị kilôgam để tìm số đo và ghi đúng phần số cùng đơn vị.",
         "Vận dụng kilôgam để tìm số đo trong tình huống mới và ghi đúng đơn vị của kết quả."
       ],
       "explanation_vi": "Kilôgam, kí hiệu kg, là đơn vị dùng để đo khối lượng. Số đo phải đi cùng đúng đơn vị để biết đang nói về khối lượng.",
@@ -2590,7 +2590,7 @@
       "order_in_domain": 3,
       "title_vi": "Đọc và viết số đo lít",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: đọc và viết số đo lít.",
+        "Vận dụng kiến thức về lít để chọn hoặc tìm kết quả đúng.",
         "Phân biệt và giải thích đúng lít khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Lít, kí hiệu l, là đơn vị dùng để đo dung tích chất lỏng. Khi cộng hoặc trừ các số đo cùng đơn vị lít, giữ nguyên đơn vị l.",
@@ -2639,7 +2639,7 @@
       "order_in_domain": 4,
       "title_vi": "Đề-xi-mét, mét và ki-lô-mét",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: đề-xi-mét, mét và ki-lô-mét.",
+        "Vận dụng kiến thức về quan hệ đơn vị độ dài để chọn hoặc tìm kết quả đúng.",
         "Phân biệt và giải thích đúng quan hệ đơn vị độ dài khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Các đơn vị độ dài có quan hệ: 1 m = 10 dm và 1 km = 1000 m. Chọn đơn vị phù hợp với kích thước quãng đường hoặc vật cần đo.",
@@ -2688,7 +2688,7 @@
       "order_in_domain": 5,
       "title_vi": "Một ngày có 24 giờ",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: một ngày có 24 giờ.",
+        "Vận dụng kiến thức về ngày và giờ để chọn hoặc tìm kết quả đúng.",
         "Phân biệt và giải thích đúng ngày và giờ khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Một ngày đầy đủ gồm 24 giờ. Có thể dùng mốc sáng, trưa, chiều, tối để liên hệ các thời điểm trong ngày.",
@@ -2737,7 +2737,7 @@
       "order_in_domain": 6,
       "title_vi": "Một giờ có 60 phút",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: một giờ có 60 phút.",
+        "Vận dụng kiến thức về giờ và phút để chọn hoặc tìm kết quả đúng.",
         "Phân biệt và giải thích đúng giờ và phút khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Phút là đơn vị nhỏ hơn giờ. Khi đủ 60 phút thì được 1 giờ.",
@@ -2788,7 +2788,7 @@
       "order_in_domain": 7,
       "title_vi": "Ngày và tháng trên lịch",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: ngày và tháng trên lịch.",
+        "Vận dụng kiến thức về đọc lịch để chọn hoặc tìm kết quả đúng.",
         "Phân biệt và giải thích đúng đọc lịch khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Lịch cho biết thứ tự ngày trong tháng. Một số tháng có 30 ngày, một số có 31 ngày; tháng 2 có 28 hoặc 29 ngày tùy năm.",
@@ -2839,7 +2839,7 @@
       "order_in_domain": 8,
       "title_vi": "Nhận biết tiền Việt Nam",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: nhận biết tiền việt nam.",
+        "Chọn đúng mô tả hoặc kết luận về giá trị tờ tiền trong tình huống đơn giản.",
         "Phân biệt và giải thích đúng giá trị tờ tiền khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Trên tờ tiền, giá trị được thể hiện bằng con số và đơn vị đồng. Khi nhận biết, đọc đúng giá trị in trên tờ tiền và phân biệt với các giá trị khác.",
@@ -2890,7 +2890,7 @@
       "order_in_domain": 9,
       "title_vi": "Đo độ dài bằng thước xăng-ti-mét",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: đo độ dài bằng thước xăng-ti-mét.",
+        "Vận dụng kiến thức về đo bằng thước cm để tìm kết quả đúng trong bài tập cơ bản.",
         "Vận dụng đo bằng thước cm với dữ kiện mới, nêu cách tìm kết quả và tự kiểm tra bằng quy tắc đã học."
       ],
       "explanation_vi": "Đặt vạch 0 của thước trùng một đầu vật; đầu còn lại chỉ đến vạch nào thì số đo là bấy nhiêu xăng-ti-mét. Nếu không bắt đầu từ 0, lấy vị trí cuối trừ vị trí đầu.",
@@ -2941,7 +2941,7 @@
       "order_in_domain": 10,
       "title_vi": "Đọc dụng cụ đo có vạch chia",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: đọc dụng cụ đo có vạch chia.",
+        "Vận dụng kiến thức về vạch chia để tìm kết quả đúng trong bài tập cơ bản.",
         "Vận dụng vạch chia với dữ kiện mới, nêu cách tìm kết quả và tự kiểm tra bằng quy tắc đã học."
       ],
       "explanation_vi": "Muốn đọc một dụng cụ có thang chia, trước hết xác định giá trị mỗi vạch rồi đếm số khoảng từ mốc đã biết đến vị trí cần đọc.",
@@ -2992,7 +2992,7 @@
       "order_in_domain": 11,
       "title_vi": "Đọc giờ khi kim phút chỉ 3 hoặc 6",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: đọc giờ khi kim phút chỉ 3 hoặc 6.",
+        "Chọn đúng mô tả hoặc kết luận về 15 phút và 30 phút trên đồng hồ trong tình huống đơn giản.",
         "Phân biệt và giải thích đúng 15 phút và 30 phút trên đồng hồ khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Khi kim phút chỉ số 3 là 15 phút; khi chỉ số 6 là 30 phút. Kết hợp với kim giờ để đọc giờ và phút.",
@@ -3043,7 +3043,7 @@
       "order_in_domain": 12,
       "title_vi": "Đổi và tính với đơn vị đã học",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: đổi và tính với đơn vị đã học.",
+        "Vận dụng kiến thức về tính với số đo để tìm kết quả đúng trong bài tập cơ bản.",
         "Vận dụng tính với số đo với dữ kiện mới, nêu cách tìm kết quả và tự kiểm tra bằng quy tắc đã học."
       ],
       "explanation_vi": "Chỉ cộng trừ trực tiếp khi các số đo cùng đơn vị. Khi cần, đổi về cùng đơn vị trước rồi thực hiện phép tính.",
@@ -3096,7 +3096,7 @@
       "order_in_domain": 13,
       "title_vi": "Ước lượng số đo cơ bản",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: ước lượng số đo cơ bản.",
+        "Chọn đúng mô tả hoặc kết luận về ước lượng số đo trong tình huống đơn giản.",
         "Phân biệt và giải thích đúng ước lượng số đo khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Ước lượng dùng một vật hoặc độ dài quen thuộc làm mốc rồi so sánh. Kết quả cần hợp lý với kích thước thực tế, không cần đúng tuyệt đối.",
@@ -3147,7 +3147,7 @@
       "order_in_domain": 14,
       "title_vi": "Tính độ dài đường gấp khúc",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: tính độ dài đường gấp khúc.",
+        "Vận dụng kiến thức về độ dài đường gấp khúc để tìm kết quả đúng trong bài tập cơ bản.",
         "Vận dụng độ dài đường gấp khúc với dữ kiện mới, nêu cách tìm kết quả và tự kiểm tra bằng quy tắc đã học."
       ],
       "explanation_vi": "Độ dài đường gấp khúc bằng tổng độ dài tất cả các đoạn thẳng tạo nên đường đó, với các số đo cùng đơn vị.",
@@ -3199,7 +3199,7 @@
       "order_in_domain": 15,
       "title_vi": "Bài toán đo lường một bước",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: bài toán đo lường một bước.",
+        "Vận dụng kiến thức về giải toán đo lường để tìm kết quả đúng trong bài tập cơ bản.",
         "Vận dụng giải toán đo lường với dữ kiện mới, nêu cách tìm kết quả và tự kiểm tra bằng quy tắc đã học."
       ],
       "explanation_vi": "Đọc đơn vị, xác định đại lượng được thêm, bớt hoặc so sánh rồi dùng một phép tính phù hợp. Giữ đơn vị trong kết quả.",
@@ -3251,7 +3251,7 @@
       "order_in_domain": 1,
       "title_vi": "Thu thập, phân loại và kiểm đếm",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: thu thập, phân loại và kiểm đếm.",
+        "Vận dụng kiến thức về phân loại và kiểm đếm để tìm kết quả đúng trong bài tập cơ bản.",
         "Vận dụng phân loại và kiểm đếm với dữ kiện mới, nêu cách tìm kết quả và tự kiểm tra bằng quy tắc đã học."
       ],
       "explanation_vi": "Để có dữ liệu rõ ràng, xác định tiêu chí phân loại, đưa mỗi đối tượng vào đúng nhóm rồi đếm số phần tử từng nhóm.",
@@ -3302,7 +3302,7 @@
       "order_in_domain": 2,
       "title_vi": "Đọc và mô tả biểu đồ tranh",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: đọc và mô tả biểu đồ tranh.",
+        "Vận dụng kiến thức về biểu đồ tranh để tìm kết quả đúng trong bài tập cơ bản.",
         "Vận dụng biểu đồ tranh với dữ kiện mới, nêu cách tìm kết quả và tự kiểm tra bằng quy tắc đã học."
       ],
       "explanation_vi": "Biểu đồ tranh dùng hình ảnh để biểu diễn số lượng. Luôn đọc chú giải để biết một hình tương ứng bao nhiêu đối tượng trước khi tính.",
@@ -3353,7 +3353,7 @@
       "order_in_domain": 3,
       "title_vi": "Nhận xét từ biểu đồ tranh",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: nhận xét từ biểu đồ tranh.",
+        "Vận dụng kiến thức về suy luận từ dữ liệu để chọn hoặc tìm kết quả đúng.",
         "Phân biệt và giải thích đúng suy luận từ dữ liệu khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Sau khi đọc đúng số lượng từng nhóm, có thể so sánh để tìm nhóm nhiều nhất, ít nhất hoặc chênh lệch đơn giản.",
@@ -3405,7 +3405,7 @@
       "order_in_domain": 4,
       "title_vi": "Sự kiện có thể xảy ra",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: sự kiện có thể xảy ra.",
+        "Phân loại đúng sự kiện có thể từ các kết quả có thể xảy ra.",
         "Phân biệt và giải thích đúng có thể khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Một sự kiện là có thể nếu nó có ít nhất một kết quả phù hợp nhưng không bắt buộc xảy ra trong mọi lần thử.",
@@ -3454,7 +3454,7 @@
       "order_in_domain": 5,
       "title_vi": "Sự kiện chắc chắn xảy ra",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: sự kiện chắc chắn xảy ra.",
+        "Phân loại đúng sự kiện chắc chắn từ các kết quả có thể xảy ra.",
         "Phân biệt và giải thích đúng chắc chắn khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Một sự kiện là chắc chắn nếu mọi kết quả có thể của tình huống đều làm sự kiện đó xảy ra.",
@@ -3505,7 +3505,7 @@
       "order_in_domain": 6,
       "title_vi": "Sự kiện không thể xảy ra",
       "objectives_vi": [
-        "Nhận biết và thực hiện đúng nội dung: sự kiện không thể xảy ra.",
+        "Phân loại đúng sự kiện không thể từ các kết quả có thể xảy ra.",
         "Phân biệt và giải thích đúng không thể khi gặp một ví dụ hoặc tình huống mới."
       ],
       "explanation_vi": "Một sự kiện là không thể nếu không có kết quả nào của tình huống làm sự kiện đó xảy ra.",

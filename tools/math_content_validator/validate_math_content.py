@@ -39,6 +39,7 @@ NUMERIC_EQUALITY_RES = (
 MIN_QUESTION_EXPLANATION_CHARS = 32
 MAX_HINT_CHARS = 130
 GENERIC_SECOND_HINT = "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+GENERIC_FIRST_OBJECTIVE_PREFIX = "Nhận biết và thực hiện đúng nội dung:"
 GENERIC_SECOND_OBJECTIVE = "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
 GENERIC_DISTRACTOR_RATIONALE = "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
 CHILD_FACING_KEYS = {
@@ -483,6 +484,7 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
     prereq_graph: dict[str, list[str]] = {}
     referenced_question_ids: list[str] = []
     lesson_skill_counts = Counter()
+    first_objective_counts = Counter()
     second_objective_counts = Counter()
 
     for i, lesson in enumerate(lessons):
@@ -531,6 +533,10 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
         elif not all(isinstance(objective, str) and objective.strip() for objective in objectives):
             errors.append(f"invalid_objective_text:{where}")
         else:
+            first_objective = " ".join(objectives[0].split())
+            first_objective_counts[first_objective] += 1
+            if first_objective.startswith(GENERIC_FIRST_OBJECTIVE_PREFIX):
+                errors.append(f"generic_first_objective:{where}")
             second_objective = " ".join(objectives[1].split())
             second_objective_counts[second_objective] += 1
             if second_objective == GENERIC_SECOND_OBJECTIVE:
@@ -604,6 +610,9 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
     for skill, count in lesson_skill_counts.items():
         if count != 1:
             errors.append(f"lesson_skill_count:{skill}:{count}")
+    for objective_text, count in first_objective_counts.items():
+        if count > 3:
+            errors.append(f"over_reused_first_objective:{count}:{objective_text[:80]}")
     for objective_text, count in second_objective_counts.items():
         if count > 3:
             errors.append(f"over_reused_second_objective:{count}:{objective_text[:80]}")

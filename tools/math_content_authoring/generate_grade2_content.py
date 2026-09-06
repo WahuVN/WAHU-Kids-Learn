@@ -22,6 +22,31 @@ def slug(skill: str) -> str:
     return skill.lower()
 
 
+def first_objective(question_types: list[str], concept_name: str) -> str:
+    """Describe the first concrete learning outcome instead of repeating the lesson title."""
+    concept = concept_name.strip().lower()
+    types = set(question_types)
+    if "interactive_measurement" in types:
+        return f"Thực hành {concept} trên vạch đo và kiểm tra độ dài tạo được."
+    if "unit_input" in types:
+        return f"Dùng đơn vị {concept} để tìm số đo và ghi đúng phần số cùng đơn vị."
+    if "expression_input" in types:
+        return f"Vận dụng quy tắc {concept} để viết hoặc tính biểu thức đúng thứ tự."
+    if "word_problem" in types:
+        return f"Giải được bài toán một bước về {concept} bằng phép tính phù hợp."
+    if concept in {"có thể", "chắc chắn", "không thể"}:
+        return f"Phân loại đúng sự kiện {concept} từ các kết quả có thể xảy ra."
+    if concept == "chọn phép tính":
+        return "Biết cách chọn phép tính đúng cho một tình huống một bước cơ bản."
+    has_choice = bool(types & {"multiple_choice", "true_false"})
+    has_numeric = "numeric_input" in types
+    if has_choice and has_numeric:
+        return f"Vận dụng kiến thức về {concept} để chọn hoặc tìm kết quả đúng."
+    if has_choice:
+        return f"Chọn đúng mô tả hoặc kết luận về {concept} trong tình huống đơn giản."
+    return f"Vận dụng kiến thức về {concept} để tìm kết quả đúng trong bài tập cơ bản."
+
+
 def second_objective(question_types: list[str], concept_name: str) -> str:
     """Create a lesson-specific second objective from the concept and authored practice surfaces."""
     concept = concept_name.strip().lower()
@@ -1049,7 +1074,7 @@ def build() -> tuple[dict, dict]:
                 "order_in_domain": order,
                 "title_vi": title,
                 "objectives_vi": [
-                    "Nhận biết và thực hiện đúng nội dung: " + title.lower() + ".",
+                    first_objective(lesson_question_types, concept_name),
                     second_objective(lesson_question_types, concept_name),
                 ],
                 "explanation_vi": explanation,
