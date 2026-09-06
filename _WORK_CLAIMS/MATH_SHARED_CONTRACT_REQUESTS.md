@@ -37,9 +37,9 @@
 
 ## Request 005 — Route authored question bank into real Math sessions
 
-- Trạng thái WIP hiện tại: core path đã xuất hiện trong working tree. `MathSessionCoordinator` có `lesson` mode, load `lesson_catalog_v1.json` + `question_bank_v1.json`, lấy đúng `basic -> medium -> application` từ `PracticeSets`, đặt target theo số câu của bài và tạo runtime instance giữ `ContentQuestionId`.
+- Engine core đã được commit vào `main` tại `656a94b`: `MathSessionCoordinator` có `lesson` mode, load `lesson_catalog_v1.json` + `question_bank_v1.json`, lấy đúng `basic -> medium -> application` từ `PracticeSets`, đặt target theo số câu của bài và tạo runtime instance giữ `ContentQuestionId`.
 - Runtime regression hiện tại: `MathSessionPersistenceRuntimeSmoke` build x86 sạch và PASS **92 assertions**, đã cover lesson lock/unlock, authored basic/medium/application, exact open-question resume, completion score và unlock bài phụ thuộc.
-- UI handoff WIP: `MathHubForm` đã có nút `Luyện 3 câu bài này`; `MathLessonForm` nhận `targetLessonId` và mở `MathSessionCoordinator(..., lessonId)` thay vì adaptive generator path.
+- UI handoff vẫn là WIP chưa commit: `MathHubForm` đã có nút `Luyện 3 câu bài này`; `MathLessonForm` nhận `targetLessonId` và mở `MathSessionCoordinator(..., lessonId)` thay vì adaptive generator path.
 - Stable identity: khi dùng authored content, giữ `ContentQuestionId` deterministic cho trace/chống lặp; `QuestionId` tiếp tục là instance ID unique để giữ idempotency attempt hiện tại.
 - Trạng thái đóng: **chưa CLOSED** cho tới khi engine/UI WIP được commit, full UI/build gate xanh, và corrupt-cache lesson-mode ở Request 007 có regression riêng. Không được coi 92 assertions hiện tại là đủ để bỏ Request 007.
 - Owner: AI2 engine/session + AI3 UI handoff.

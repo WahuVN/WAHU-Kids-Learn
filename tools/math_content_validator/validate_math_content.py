@@ -33,6 +33,7 @@ GRADE2_MUL_LITERAL_RE = re.compile(r"(?<!\d)(\d+)\s*(?:×|\*)\s*(\d+)(?!\d)")
 GRADE2_DIV_LITERAL_RE = re.compile(r"(?<!\d)(\d+)(?:\s*÷\s*|\s+:\s+)(\d+)(?!\d)")
 NUMERIC_CHOICE_EXPR_RE = re.compile(r"^[\d\s+\-−–*/×÷:().,]+$")
 GENERIC_SECOND_HINT = "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+GENERIC_DISTRACTOR_RATIONALE = "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
 
 
 def load_json(path: Path, errors: list[str]) -> dict:
@@ -452,6 +453,7 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
     question_counts_by_difficulty = Counter()
     prompts_by_lesson: dict[str, list[tuple[str, str]]] = defaultdict(list)
     second_hint_counts = Counter()
+    distractor_rationale_counts = Counter()
     correct_choice_positions_by_count: dict[int, Counter] = defaultdict(Counter)
 
     for i, q in enumerate(questions):
@@ -636,14 +638,15 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
                 choices = []
             choice_ids = []
             choice_texts = []
+            choice_rationales = []
             for j, choice in enumerate(choices):
                 cwhere = f"{where}.choice[{j}]"
                 if not isinstance(choice, dict):
                     errors.append(f"choice_not_object:{cwhere}"); continue
                 cid = required_text(choice, "id", cwhere, errors)
                 text = required_text(choice, "text", cwhere, errors)
-                required_text(choice, "rationale_vi", cwhere, errors)
-                choice_ids.append(cid); choice_texts.append(text)
+                rationale = required_text(choice, "rationale_vi", cwhere, errors)
+                choice_ids.append(cid); choice_texts.append(text); choice_rationales.append(rationale)
             if len(choice_ids) != len(set(choice_ids)):
                 errors.append(f"duplicate_choice_id:{where}")
             if len(choice_texts) != len(set(choice_texts)):
@@ -668,6 +671,13 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
                 correct_choice_positions_by_count[len(choice_ids)][correct_index] += 1
                 if correct_text != choice_texts[correct_index]:
                     errors.append(f"correct_choice_text_mismatch:{where}:{correct_id}:{correct_text!r}")
+            for cid, rationale in zip(choice_ids, choice_rationales):
+                if cid == correct_id:
+                    continue
+                normalized_rationale = " ".join(rationale.split())
+                distractor_rationale_counts[normalized_rationale] += 1
+                if normalized_rationale == GENERIC_DISTRACTOR_RATIONALE:
+                    errors.append(f"generic_distractor_rationale:{where}:{cid}")
             if correct_text not in accepted:
                 errors.append(f"correct_choice_text_not_accepted:{where}:{correct_text}")
             if validation.get("single_correct") is not True:
@@ -681,6 +691,10 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
     for hint_text, count in second_hint_counts.items():
         if count > 3:
             errors.append(f"over_reused_second_hint:{count}:{hint_text[:80]}")
+
+    for rationale_text, count in distractor_rationale_counts.items():
+        if count > 3:
+            errors.append(f"over_reused_distractor_rationale:{count}:{rationale_text[:80]}")
 
     for choice_count, positions in correct_choice_positions_by_count.items():
         counts = [positions[index] for index in range(choice_count)]

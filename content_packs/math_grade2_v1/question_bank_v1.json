@@ -101,17 +101,17 @@
         {
           "id": "b",
           "text": "bốn trăm hai",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“bốn trăm hai” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Đọc và viết số” rồi thử lại."
         },
         {
           "id": "c",
           "text": "bốn mươi hai",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “bốn mươi hai”, có ít nhất một bước của “Đọc và viết số” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "hai trăm bốn mươi",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“hai trăm bốn mươi” là phương án nhiễu gần đúng. Tự làm theo “Đọc và viết số” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "a"
@@ -180,7 +180,7 @@
         {
           "id": "a",
           "text": "610",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“610” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Số tròn trăm” rồi thử lại."
         },
         {
           "id": "b",
@@ -190,12 +190,12 @@
         {
           "id": "c",
           "text": "606",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “606”, có ít nhất một bước của “Số tròn trăm” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "660",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“660” là phương án nhiễu gần đúng. Tự làm theo “Số tròn trăm” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "b"
@@ -238,7 +238,7 @@
         {
           "id": "b",
           "text": "Sai",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“Sai” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Số tròn trăm” rồi thử lại."
         }
       ],
       "correct_choice_id": "a"
@@ -276,12 +276,12 @@
         {
           "id": "a",
           "text": "750",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“750” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Số tròn trăm” rồi thử lại."
         },
         {
           "id": "b",
           "text": "705",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “705”, có ít nhất một bước của “Số tròn trăm” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
@@ -291,7 +291,7 @@
         {
           "id": "d",
           "text": "570",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“570” là phương án nhiễu gần đúng. Tự làm theo “Số tròn trăm” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "c"
@@ -515,17 +515,17 @@
         {
           "id": "a",
           "text": "300 + 5 + 2",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“300 + 5 + 2” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Dạng khai triển” rồi thử lại."
         },
         {
           "id": "b",
           "text": "30 + 50 + 2",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “30 + 50 + 2”, có ít nhất một bước của “Dạng khai triển” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
           "text": "300 + 50 + 20",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“300 + 50 + 20” là phương án nhiễu gần đúng. Tự làm theo “Dạng khai triển” rồi so kết quả với lựa chọn này."
         },
         {
           "id": "d",
@@ -604,17 +604,17 @@
         {
           "id": "b",
           "text": "90 + 8",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“90 + 8” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Dạng khai triển” rồi thử lại."
         },
         {
           "id": "c",
           "text": "900 + 80",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “900 + 80”, có ít nhất một bước của “Dạng khai triển” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "900 + 8 + 80",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“900 + 8 + 80” là phương án nhiễu gần đúng. Tự làm theo “Dạng khai triển” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "a"
@@ -745,7 +745,7 @@
         {
           "id": "a",
           "text": ">",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“>” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “So sánh số” rồi thử lại."
         },
         {
           "id": "b",
@@ -755,12 +755,12 @@
         {
           "id": "c",
           "text": "=",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “=”, có ít nhất một bước của “So sánh số” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "+",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“+” là phương án nhiễu gần đúng. Tự làm theo “So sánh số” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "b"
@@ -798,12 +798,12 @@
         {
           "id": "a",
           "text": "<",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“<” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “So sánh số” rồi thử lại."
         },
         {
           "id": "b",
           "text": "=",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “=”, có ít nhất một bước của “So sánh số” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
@@ -813,7 +813,7 @@
         {
           "id": "d",
           "text": "-",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“-” là phương án nhiễu gần đúng. Tự làm theo “So sánh số” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "c"
@@ -851,17 +851,17 @@
         {
           "id": "a",
           "text": "399 > 403",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“399 > 403” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “So sánh số” rồi thử lại."
         },
         {
           "id": "b",
           "text": "399 = 403",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “399 = 403”, có ít nhất một bước của “So sánh số” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
           "text": "399 + 403",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“399 + 403” là phương án nhiễu gần đúng. Tự làm theo “So sánh số” rồi so kết quả với lựa chọn này."
         },
         {
           "id": "d",
@@ -1002,17 +1002,17 @@
         {
           "id": "b",
           "text": "320, 302, 230, 203",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“320, 302, 230, 203” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Thứ tự tăng giảm” rồi thử lại."
         },
         {
           "id": "c",
           "text": "203, 302, 230, 320",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “203, 302, 230, 320”, có ít nhất một bước của “Thứ tự tăng giảm” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "230, 203, 320, 302",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“230, 203, 320, 302” là phương án nhiễu gần đúng. Tự làm theo “Thứ tự tăng giảm” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "a"
@@ -1050,7 +1050,7 @@
         {
           "id": "a",
           "text": "405, 450, 504, 540",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“405, 450, 504, 540” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Thứ tự tăng giảm” rồi thử lại."
         },
         {
           "id": "b",
@@ -1060,12 +1060,12 @@
         {
           "id": "c",
           "text": "540, 450, 504, 405",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “540, 450, 504, 405”, có ít nhất một bước của “Thứ tự tăng giảm” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "504, 540, 405, 450",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“504, 540, 405, 450” là phương án nhiễu gần đúng. Tự làm theo “Thứ tự tăng giảm” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "b"
@@ -1103,12 +1103,12 @@
         {
           "id": "a",
           "text": "111, 110, 101, 100",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“111, 110, 101, 100” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Thứ tự tăng giảm” rồi thử lại."
         },
         {
           "id": "b",
           "text": "100, 110, 101, 111",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “100, 110, 101, 111”, có ít nhất một bước của “Thứ tự tăng giảm” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
@@ -1118,7 +1118,7 @@
         {
           "id": "d",
           "text": "101, 100, 111, 110",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“101, 100, 111, 110” là phương án nhiễu gần đúng. Tự làm theo “Thứ tự tăng giảm” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "c"
@@ -1218,17 +1218,17 @@
         {
           "id": "a",
           "text": "khoảng 7",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“khoảng 7” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Ước lượng theo chục” rồi thử lại."
         },
         {
           "id": "b",
           "text": "khoảng 700",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “khoảng 700”, có ít nhất một bước của “Ước lượng theo chục” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
           "text": "khoảng 20",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“khoảng 20” là phương án nhiễu gần đúng. Tự làm theo “Ước lượng theo chục” rồi so kết quả với lựa chọn này."
         },
         {
           "id": "d",
@@ -1276,17 +1276,17 @@
         {
           "id": "b",
           "text": "tổng",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“tổng” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Số hạng và tổng” rồi thử lại."
         },
         {
           "id": "c",
           "text": "hiệu",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “hiệu”, có ít nhất một bước của “Số hạng và tổng” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "số bị trừ",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“số bị trừ” là phương án nhiễu gần đúng. Tự làm theo “Số hạng và tổng” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "a"
@@ -1324,7 +1324,7 @@
         {
           "id": "a",
           "text": "số hạng",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“số hạng” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Số hạng và tổng” rồi thử lại."
         },
         {
           "id": "b",
@@ -1334,12 +1334,12 @@
         {
           "id": "c",
           "text": "số trừ",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “số trừ”, có ít nhất một bước của “Số hạng và tổng” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "thương",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“thương” là phương án nhiễu gần đúng. Tự làm theo “Số hạng và tổng” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "b"
@@ -1377,12 +1377,12 @@
         {
           "id": "a",
           "text": "230 và 350",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“230 và 350” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Số hạng và tổng” rồi thử lại."
         },
         {
           "id": "b",
           "text": "120 và 350",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “120 và 350”, có ít nhất một bước của “Số hạng và tổng” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
@@ -1392,7 +1392,7 @@
         {
           "id": "d",
           "text": "350 và 350",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“350 và 350” là phương án nhiễu gần đúng. Tự làm theo “Số hạng và tổng” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "c"
@@ -1430,17 +1430,17 @@
         {
           "id": "a",
           "text": "số trừ",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“số trừ” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Số bị trừ, số trừ, hiệu” rồi thử lại."
         },
         {
           "id": "b",
           "text": "hiệu",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “hiệu”, có ít nhất một bước của “Số bị trừ, số trừ, hiệu” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
           "text": "tổng",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“tổng” là phương án nhiễu gần đúng. Tự làm theo “Số bị trừ, số trừ, hiệu” rồi so kết quả với lựa chọn này."
         },
         {
           "id": "d",
@@ -1488,17 +1488,17 @@
         {
           "id": "b",
           "text": "số bị trừ",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“số bị trừ” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Số bị trừ, số trừ, hiệu” rồi thử lại."
         },
         {
           "id": "c",
           "text": "hiệu",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “hiệu”, có ít nhất một bước của “Số bị trừ, số trừ, hiệu” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "số hạng",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“số hạng” là phương án nhiễu gần đúng. Tự làm theo “Số bị trừ, số trừ, hiệu” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "a"
@@ -1536,7 +1536,7 @@
         {
           "id": "a",
           "text": "số trừ",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“số trừ” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Số bị trừ, số trừ, hiệu” rồi thử lại."
         },
         {
           "id": "b",
@@ -1546,12 +1546,12 @@
         {
           "id": "c",
           "text": "số bị trừ",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “số bị trừ”, có ít nhất một bước của “Số bị trừ, số trừ, hiệu” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "tích",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“tích” là phương án nhiễu gần đúng. Tự làm theo “Số bị trừ, số trừ, hiệu” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "b"
@@ -2249,12 +2249,12 @@
         {
           "id": "a",
           "text": "2 + 2 + 2 + 2",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“2 + 2 + 2 + 2” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Nhóm bằng nhau” rồi thử lại."
         },
         {
           "id": "b",
           "text": "2 + 3",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “2 + 3”, có ít nhất một bước của “Nhóm bằng nhau” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
@@ -2264,7 +2264,7 @@
         {
           "id": "d",
           "text": "3 + 2 + 2",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“3 + 2 + 2” là phương án nhiễu gần đúng. Tự làm theo “Nhóm bằng nhau” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "c"
@@ -2457,17 +2457,17 @@
         {
           "id": "a",
           "text": "tích",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“tích” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Thừa số và tích” rồi thử lại."
         },
         {
           "id": "b",
           "text": "thương",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “thương”, có ít nhất một bước của “Thừa số và tích” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
           "text": "số bị chia",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“số bị chia” là phương án nhiễu gần đúng. Tự làm theo “Thừa số và tích” rồi so kết quả với lựa chọn này."
         },
         {
           "id": "d",
@@ -2515,17 +2515,17 @@
         {
           "id": "b",
           "text": "thừa số",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“thừa số” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Thừa số và tích” rồi thử lại."
         },
         {
           "id": "c",
           "text": "hiệu",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “hiệu”, có ít nhất một bước của “Thừa số và tích” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "số chia",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“số chia” là phương án nhiễu gần đúng. Tự làm theo “Thừa số và tích” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "a"
@@ -2563,7 +2563,7 @@
         {
           "id": "a",
           "text": "8 và 16",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“8 và 16” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Thừa số và tích” rồi thử lại."
         },
         {
           "id": "b",
@@ -2573,12 +2573,12 @@
         {
           "id": "c",
           "text": "2 và 16",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “2 và 16”, có ít nhất một bước của “Thừa số và tích” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "16 và 16",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“16 và 16” là phương án nhiễu gần đúng. Tự làm theo “Thừa số và tích” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "b"
@@ -2616,12 +2616,12 @@
         {
           "id": "a",
           "text": "số chia",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“số chia” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Số bị chia, số chia, thương” rồi thử lại."
         },
         {
           "id": "b",
           "text": "thương",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “thương”, có ít nhất một bước của “Số bị chia, số chia, thương” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
@@ -2631,7 +2631,7 @@
         {
           "id": "d",
           "text": "tích",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“tích” là phương án nhiễu gần đúng. Tự làm theo “Số bị chia, số chia, thương” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "c"
@@ -2669,17 +2669,17 @@
         {
           "id": "a",
           "text": "số bị chia",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“số bị chia” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Số bị chia, số chia, thương” rồi thử lại."
         },
         {
           "id": "b",
           "text": "thương",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “thương”, có ít nhất một bước của “Số bị chia, số chia, thương” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
           "text": "số hạng",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“số hạng” là phương án nhiễu gần đúng. Tự làm theo “Số bị chia, số chia, thương” rồi so kết quả với lựa chọn này."
         },
         {
           "id": "d",
@@ -2727,17 +2727,17 @@
         {
           "id": "b",
           "text": "số bị chia",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“số bị chia” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Số bị chia, số chia, thương” rồi thử lại."
         },
         {
           "id": "c",
           "text": "số chia",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “số chia”, có ít nhất một bước của “Số bị chia, số chia, thương” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "tích",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“tích” là phương án nhiễu gần đúng. Tự làm theo “Số bị chia, số chia, thương” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "a"
@@ -3147,7 +3147,7 @@
         {
           "id": "a",
           "text": "4 - 4",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“4 - 4” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Quan hệ của phép tính” rồi thử lại."
         },
         {
           "id": "b",
@@ -3157,12 +3157,12 @@
         {
           "id": "c",
           "text": "4 : 2",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “4 : 2”, có ít nhất một bước của “Quan hệ của phép tính” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "4 + 2",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“4 + 2” là phương án nhiễu gần đúng. Tự làm theo “Quan hệ của phép tính” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "b"
@@ -3200,12 +3200,12 @@
         {
           "id": "a",
           "text": "10 + 3",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“10 + 3” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Quan hệ của phép tính” rồi thử lại."
         },
         {
           "id": "b",
           "text": "10 : 2",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “10 : 2”, có ít nhất một bước của “Quan hệ của phép tính” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
@@ -3215,7 +3215,7 @@
         {
           "id": "d",
           "text": "3 - 10",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“3 - 10” là phương án nhiễu gần đúng. Tự làm theo “Quan hệ của phép tính” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "c"
@@ -3253,17 +3253,17 @@
         {
           "id": "a",
           "text": "5 + 2",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“5 + 2” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Quan hệ của phép tính” rồi thử lại."
         },
         {
           "id": "b",
           "text": "5 - 2",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “5 - 2”, có ít nhất một bước của “Quan hệ của phép tính” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
           "text": "10 : 5",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“10 : 5” là phương án nhiễu gần đúng. Tự làm theo “Quan hệ của phép tính” rồi so kết quả với lựa chọn này."
         },
         {
           "id": "d",
@@ -3871,17 +3871,17 @@
         {
           "id": "b",
           "text": "10 + 2",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“10 + 2” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Chọn phép tính” rồi thử lại."
         },
         {
           "id": "c",
           "text": "10 × 2",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “10 × 2”, có ít nhất một bước của “Chọn phép tính” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "10 : 2",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“10 : 2” là phương án nhiễu gần đúng. Tự làm theo “Chọn phép tính” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "a"
@@ -3919,7 +3919,7 @@
         {
           "id": "a",
           "text": "5 + 2",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“5 + 2” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Chọn phép tính” rồi thử lại."
         },
         {
           "id": "b",
@@ -3929,12 +3929,12 @@
         {
           "id": "c",
           "text": "5 - 2",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “5 - 2”, có ít nhất một bước của “Chọn phép tính” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "10 : 5",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“10 : 5” là phương án nhiễu gần đúng. Tự làm theo “Chọn phép tính” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "b"
@@ -3972,12 +3972,12 @@
         {
           "id": "a",
           "text": "30 + 5",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“30 + 5” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Chọn phép tính” rồi thử lại."
         },
         {
           "id": "b",
           "text": "30 - 5",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “30 - 5”, có ít nhất một bước của “Chọn phép tính” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
@@ -3987,7 +3987,7 @@
         {
           "id": "d",
           "text": "5 + 5",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“5 + 5” là phương án nhiễu gần đúng. Tự làm theo “Chọn phép tính” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "c"
@@ -4025,17 +4025,17 @@
         {
           "id": "a",
           "text": "5 cm",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“5 cm” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Điểm” rồi thử lại."
         },
         {
           "id": "b",
           "text": "2 kg",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “2 kg”, có ít nhất một bước của “Điểm” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
           "text": "10 l",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“10 l” là phương án nhiễu gần đúng. Tự làm theo “Điểm” rồi so kết quả với lựa chọn này."
         },
         {
           "id": "d",
@@ -4083,17 +4083,17 @@
         {
           "id": "b",
           "text": "Điểm có độ dài 5 cm",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“Điểm có độ dài 5 cm” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Điểm” rồi thử lại."
         },
         {
           "id": "c",
           "text": "Điểm luôn là một hình tròn lớn",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “Điểm luôn là một hình tròn lớn”, có ít nhất một bước của “Điểm” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "Điểm có hai đầu mút",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“Điểm có hai đầu mút” là phương án nhiễu gần đúng. Tự làm theo “Điểm” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "a"
@@ -4131,7 +4131,7 @@
         {
           "id": "a",
           "text": "1",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“1” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Điểm” rồi thử lại."
         },
         {
           "id": "b",
@@ -4141,12 +4141,12 @@
         {
           "id": "c",
           "text": "2",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “2”, có ít nhất một bước của “Điểm” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "4",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“4” là phương án nhiễu gần đúng. Tự làm theo “Điểm” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "b"
@@ -4184,12 +4184,12 @@
         {
           "id": "a",
           "text": "0",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“0” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Đoạn thẳng” rồi thử lại."
         },
         {
           "id": "b",
           "text": "1",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “1”, có ít nhất một bước của “Đoạn thẳng” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
@@ -4199,7 +4199,7 @@
         {
           "id": "d",
           "text": "3",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“3” là phương án nhiễu gần đúng. Tự làm theo “Đoạn thẳng” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "c"
@@ -4237,17 +4237,17 @@
         {
           "id": "a",
           "text": "Đường uốn cong không có đầu",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“Đường uốn cong không có đầu” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Đoạn thẳng” rồi thử lại."
         },
         {
           "id": "b",
           "text": "Khối tròn",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “Khối tròn”, có ít nhất một bước của “Đoạn thẳng” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
           "text": "Một điểm duy nhất",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“Một điểm duy nhất” là phương án nhiễu gần đúng. Tự làm theo “Đoạn thẳng” rồi so kết quả với lựa chọn này."
         },
         {
           "id": "d",
@@ -4295,17 +4295,17 @@
         {
           "id": "b",
           "text": "khối cầu",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“khối cầu” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Đoạn thẳng” rồi thử lại."
         },
         {
           "id": "c",
           "text": "đường cong",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “đường cong”, có ít nhất một bước của “Đoạn thẳng” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "điểm MN",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“điểm MN” là phương án nhiễu gần đúng. Tự làm theo “Đoạn thẳng” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "a"
@@ -4343,7 +4343,7 @@
         {
           "id": "a",
           "text": "Đường đi thẳng không đổi hướng",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“Đường đi thẳng không đổi hướng” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Đường cong” rồi thử lại."
         },
         {
           "id": "b",
@@ -4353,12 +4353,12 @@
         {
           "id": "c",
           "text": "Một điểm",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “Một điểm”, có ít nhất một bước của “Đường cong” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "Một đoạn chỉ có hai đầu mút nhưng luôn thẳng",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“Một đoạn chỉ có hai đầu mút nhưng luôn thẳng” là phương án nhiễu gần đúng. Tự làm theo “Đường cong” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "b"
@@ -4396,12 +4396,12 @@
         {
           "id": "a",
           "text": "đường thẳng",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“đường thẳng” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Đường cong” rồi thử lại."
         },
         {
           "id": "b",
           "text": "đoạn thẳng",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “đoạn thẳng”, có ít nhất một bước của “Đường cong” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
@@ -4411,7 +4411,7 @@
         {
           "id": "d",
           "text": "điểm",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“điểm” là phương án nhiễu gần đúng. Tự làm theo “Đường cong” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "c"
@@ -4449,17 +4449,17 @@
         {
           "id": "a",
           "text": "Đường cong luôn có bốn cạnh",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“Đường cong luôn có bốn cạnh” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Đường cong” rồi thử lại."
         },
         {
           "id": "b",
           "text": "Đường cong là khối cầu",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “Đường cong là khối cầu”, có ít nhất một bước của “Đường cong” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
           "text": "Đường cong luôn kéo thẳng về hai phía",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“Đường cong luôn kéo thẳng về hai phía” là phương án nhiễu gần đúng. Tự làm theo “Đường cong” rồi so kết quả với lựa chọn này."
         },
         {
           "id": "d",
@@ -4507,17 +4507,17 @@
         {
           "id": "b",
           "text": "Luôn cong",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“Luôn cong” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Đường thẳng” rồi thử lại."
         },
         {
           "id": "c",
           "text": "Có đúng bốn cạnh",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “Có đúng bốn cạnh”, có ít nhất một bước của “Đường thẳng” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "Là một khối",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“Là một khối” là phương án nhiễu gần đúng. Tự làm theo “Đường thẳng” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "a"
@@ -4555,7 +4555,7 @@
         {
           "id": "a",
           "text": "đường cong",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“đường cong” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Đường thẳng” rồi thử lại."
         },
         {
           "id": "b",
@@ -4565,12 +4565,12 @@
         {
           "id": "c",
           "text": "khối trụ",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “khối trụ”, có ít nhất một bước của “Đường thẳng” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "điểm",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“điểm” là phương án nhiễu gần đúng. Tự làm theo “Đường thẳng” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "b"
@@ -4608,12 +4608,12 @@
         {
           "id": "a",
           "text": "d là khối cầu",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“d là khối cầu” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Đường thẳng” rồi thử lại."
         },
         {
           "id": "b",
           "text": "A là một đoạn thẳng",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “A là một đoạn thẳng”, có ít nhất một bước của “Đường thẳng” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
@@ -4623,7 +4623,7 @@
         {
           "id": "d",
           "text": "B có độ dài",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“B có độ dài” là phương án nhiễu gần đúng. Tự làm theo “Đường thẳng” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "c"
@@ -4661,17 +4661,17 @@
         {
           "id": "a",
           "text": "Chỉ một điểm",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“Chỉ một điểm” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Đường gấp khúc” rồi thử lại."
         },
         {
           "id": "b",
           "text": "Chỉ một đường cong",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “Chỉ một đường cong”, có ít nhất một bước của “Đường gấp khúc” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
           "text": "Một khối cầu",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“Một khối cầu” là phương án nhiễu gần đúng. Tự làm theo “Đường gấp khúc” rồi so kết quả với lựa chọn này."
         },
         {
           "id": "d",
@@ -4719,17 +4719,17 @@
         {
           "id": "b",
           "text": "khối trụ",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“khối trụ” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Đường gấp khúc” rồi thử lại."
         },
         {
           "id": "c",
           "text": "đường cong tròn",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “đường cong tròn”, có ít nhất một bước của “Đường gấp khúc” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "một điểm",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“một điểm” là phương án nhiễu gần đúng. Tự làm theo “Đường gấp khúc” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "a"
@@ -4767,7 +4767,7 @@
         {
           "id": "a",
           "text": "2",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“2” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Đường gấp khúc” rồi thử lại."
         },
         {
           "id": "b",
@@ -4777,12 +4777,12 @@
         {
           "id": "c",
           "text": "3",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “3”, có ít nhất một bước của “Đường gấp khúc” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "4",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“4” là phương án nhiễu gần đúng. Tự làm theo “Đường gấp khúc” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "b"
@@ -4820,12 +4820,12 @@
         {
           "id": "a",
           "text": "vuông góc",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“vuông góc” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Thẳng hàng” rồi thử lại."
         },
         {
           "id": "b",
           "text": "cong",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “cong”, có ít nhất một bước của “Thẳng hàng” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
@@ -4835,7 +4835,7 @@
         {
           "id": "d",
           "text": "tạo khối cầu",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“tạo khối cầu” là phương án nhiễu gần đúng. Tự làm theo “Thẳng hàng” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "c"
@@ -4873,17 +4873,17 @@
         {
           "id": "a",
           "text": "có",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“có” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Thẳng hàng” rồi thử lại."
         },
         {
           "id": "b",
           "text": "luôn luôn",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “luôn luôn”, có ít nhất một bước của “Thẳng hàng” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
           "text": "không đủ vì điểm không có tên",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“không đủ vì điểm không có tên” là phương án nhiễu gần đúng. Tự làm theo “Thẳng hàng” rồi so kết quả với lựa chọn này."
         },
         {
           "id": "d",
@@ -4931,17 +4931,17 @@
         {
           "id": "b",
           "text": "Cả ba có cùng tên",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“Cả ba có cùng tên” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Thẳng hàng” rồi thử lại."
         },
         {
           "id": "c",
           "text": "Có hai điểm trùng nhau",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “Có hai điểm trùng nhau”, có ít nhất một bước của “Thẳng hàng” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "Có một hình tròn bên cạnh",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“Có một hình tròn bên cạnh” là phương án nhiễu gần đúng. Tự làm theo “Thẳng hàng” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "a"
@@ -5010,7 +5010,7 @@
         {
           "id": "a",
           "text": "hình tam giác",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“hình tam giác” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Tứ giác” rồi thử lại."
         },
         {
           "id": "b",
@@ -5020,12 +5020,12 @@
         {
           "id": "c",
           "text": "khối cầu",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “khối cầu”, có ít nhất một bước của “Tứ giác” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "đường cong",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“đường cong” là phương án nhiễu gần đúng. Tự làm theo “Tứ giác” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "b"
@@ -5063,12 +5063,12 @@
         {
           "id": "a",
           "text": "hình tam giác",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“hình tam giác” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Tứ giác” rồi thử lại."
         },
         {
           "id": "b",
           "text": "đường gấp khúc mở",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “đường gấp khúc mở”, có ít nhất một bước của “Tứ giác” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
@@ -5078,7 +5078,7 @@
         {
           "id": "d",
           "text": "khối trụ",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“khối trụ” là phương án nhiễu gần đúng. Tự làm theo “Tứ giác” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "c"
@@ -5116,17 +5116,17 @@
         {
           "id": "a",
           "text": "quả bóng",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“quả bóng” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Khối trụ” rồi thử lại."
         },
         {
           "id": "b",
           "text": "tờ giấy phẳng",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “tờ giấy phẳng”, có ít nhất một bước của “Khối trụ” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
           "text": "điểm A",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“điểm A” là phương án nhiễu gần đúng. Tự làm theo “Khối trụ” rồi so kết quả với lựa chọn này."
         },
         {
           "id": "d",
@@ -5174,17 +5174,17 @@
         {
           "id": "b",
           "text": "Không có mặt nào",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“Không có mặt nào” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Khối trụ” rồi thử lại."
         },
         {
           "id": "c",
           "text": "Chỉ có một điểm",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “Chỉ có một điểm”, có ít nhất một bước của “Khối trụ” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "Bốn cạnh phẳng",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“Bốn cạnh phẳng” là phương án nhiễu gần đúng. Tự làm theo “Khối trụ” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "a"
@@ -5222,7 +5222,7 @@
         {
           "id": "a",
           "text": "tam giác",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“tam giác” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Khối trụ” rồi thử lại."
         },
         {
           "id": "b",
@@ -5232,12 +5232,12 @@
         {
           "id": "c",
           "text": "đường thẳng",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “đường thẳng”, có ít nhất một bước của “Khối trụ” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "điểm",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“điểm” là phương án nhiễu gần đúng. Tự làm theo “Khối trụ” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "b"
@@ -5275,12 +5275,12 @@
         {
           "id": "a",
           "text": "lon nước",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“lon nước” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Khối cầu” rồi thử lại."
         },
         {
           "id": "b",
           "text": "hộp chữ nhật",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “hộp chữ nhật”, có ít nhất một bước của “Khối cầu” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
@@ -5290,7 +5290,7 @@
         {
           "id": "d",
           "text": "thước thẳng",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“thước thẳng” là phương án nhiễu gần đúng. Tự làm theo “Khối cầu” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "c"
@@ -5328,17 +5328,17 @@
         {
           "id": "a",
           "text": "có 1 cạnh",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“có 1 cạnh” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Khối cầu” rồi thử lại."
         },
         {
           "id": "b",
           "text": "có 2 đỉnh",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “có 2 đỉnh”, có ít nhất một bước của “Khối cầu” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
           "text": "có 4 cạnh",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“có 4 cạnh” là phương án nhiễu gần đúng. Tự làm theo “Khối cầu” rồi so kết quả với lựa chọn này."
         },
         {
           "id": "d",
@@ -5386,17 +5386,17 @@
         {
           "id": "b",
           "text": "Có hai đáy tròn",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“Có hai đáy tròn” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Khối cầu” rồi thử lại."
         },
         {
           "id": "c",
           "text": "Có bốn cạnh",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “Có bốn cạnh”, có ít nhất một bước của “Khối cầu” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "Là một đoạn thẳng",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“Là một đoạn thẳng” là phương án nhiễu gần đúng. Tự làm theo “Khối cầu” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "a"
@@ -5527,7 +5527,7 @@
         {
           "id": "a",
           "text": "một điểm",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“một điểm” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Ghép và tạo hình” rồi thử lại."
         },
         {
           "id": "b",
@@ -5537,12 +5537,12 @@
         {
           "id": "c",
           "text": "một khối cầu",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “một khối cầu”, có ít nhất một bước của “Ghép và tạo hình” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "một đường thẳng vô hạn",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“một đường thẳng vô hạn” là phương án nhiễu gần đúng. Tự làm theo “Ghép và tạo hình” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "b"
@@ -5580,12 +5580,12 @@
         {
           "id": "a",
           "text": "1",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“1” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Ghép và tạo hình” rồi thử lại."
         },
         {
           "id": "b",
           "text": "3",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “3”, có ít nhất một bước của “Ghép và tạo hình” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
@@ -5595,7 +5595,7 @@
         {
           "id": "d",
           "text": "4",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“4” là phương án nhiễu gần đúng. Tự làm theo “Ghép và tạo hình” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "c"
@@ -5633,17 +5633,17 @@
         {
           "id": "a",
           "text": "Làm thay đổi giá trị số của hình",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“Làm thay đổi giá trị số của hình” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Ghép và tạo hình” rồi thử lại."
         },
         {
           "id": "b",
           "text": "Biến mọi hình thành khối cầu",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “Biến mọi hình thành khối cầu”, có ít nhất một bước của “Ghép và tạo hình” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
           "text": "Bỏ qua cạnh của các mảnh",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“Bỏ qua cạnh của các mảnh” là phương án nhiễu gần đúng. Tự làm theo “Ghép và tạo hình” rồi so kết quả với lựa chọn này."
         },
         {
           "id": "d",
@@ -5691,17 +5691,17 @@
         {
           "id": "b",
           "text": "nhẹ hơn",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“nhẹ hơn” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “So sánh khối lượng” rồi thử lại."
         },
         {
           "id": "c",
           "text": "bằng 0 kg",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “bằng 0 kg”, có ít nhất một bước của “So sánh khối lượng” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "không có khối lượng",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“không có khối lượng” là phương án nhiễu gần đúng. Tự làm theo “So sánh khối lượng” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "a"
@@ -5739,7 +5739,7 @@
         {
           "id": "a",
           "text": "nặng hơn",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“nặng hơn” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “So sánh khối lượng” rồi thử lại."
         },
         {
           "id": "b",
@@ -5749,12 +5749,12 @@
         {
           "id": "c",
           "text": "bằng nhau chắc chắn",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “bằng nhau chắc chắn”, có ít nhất một bước của “So sánh khối lượng” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "không đo được",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“không đo được” là phương án nhiễu gần đúng. Tự làm theo “So sánh khối lượng” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "b"
@@ -5792,12 +5792,12 @@
         {
           "id": "a",
           "text": "Bên trái nặng hơn",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“Bên trái nặng hơn” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “So sánh khối lượng” rồi thử lại."
         },
         {
           "id": "b",
           "text": "Bên phải nặng hơn",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “Bên phải nặng hơn”, có ít nhất một bước của “So sánh khối lượng” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
@@ -5807,7 +5807,7 @@
         {
           "id": "d",
           "text": "Không bên nào có khối lượng",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“Không bên nào có khối lượng” là phương án nhiễu gần đúng. Tự làm theo “So sánh khối lượng” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "c"
@@ -5877,17 +5877,17 @@
         {
           "id": "a",
           "text": "km",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“km” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Kilôgam” rồi thử lại."
         },
         {
           "id": "b",
           "text": "l",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “l”, có ít nhất một bước của “Kilôgam” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
           "text": "cm",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“cm” là phương án nhiễu gần đúng. Tự làm theo “Kilôgam” rồi so kết quả với lựa chọn này."
         },
         {
           "id": "d",
@@ -6003,17 +6003,17 @@
         {
           "id": "b",
           "text": "kg",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“kg” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Lít” rồi thử lại."
         },
         {
           "id": "c",
           "text": "km",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “km”, có ít nhất một bước của “Lít” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "dm",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“dm” là phương án nhiễu gần đúng. Tự làm theo “Lít” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "a"
@@ -6147,7 +6147,7 @@
         {
           "id": "a",
           "text": "dm",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“dm” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Quan hệ đơn vị độ dài” rồi thử lại."
         },
         {
           "id": "b",
@@ -6157,12 +6157,12 @@
         {
           "id": "c",
           "text": "cm",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “cm”, có ít nhất một bước của “Quan hệ đơn vị độ dài” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "kg",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“kg” là phương án nhiễu gần đúng. Tự làm theo “Quan hệ đơn vị độ dài” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "b"
@@ -6232,12 +6232,12 @@
         {
           "id": "a",
           "text": "2 ngày",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“2 ngày” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Ngày và giờ” rồi thử lại."
         },
         {
           "id": "b",
           "text": "10 ngày",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “10 ngày”, có ít nhất một bước của “Ngày và giờ” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
@@ -6247,7 +6247,7 @@
         {
           "id": "d",
           "text": "không thể biết",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“không thể biết” là phương án nhiễu gần đúng. Tự làm theo “Ngày và giờ” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "c"
@@ -6285,7 +6285,7 @@
         {
           "id": "a",
           "text": "Đúng",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“Đúng” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Ngày và giờ” rồi thử lại."
         },
         {
           "id": "b",
@@ -6360,17 +6360,17 @@
         {
           "id": "a",
           "text": "dài hơn",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“dài hơn” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Giờ và phút” rồi thử lại."
         },
         {
           "id": "b",
           "text": "bằng nhau",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “bằng nhau”, có ít nhất một bước của “Giờ và phút” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
           "text": "không so sánh được",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“không so sánh được” là phương án nhiễu gần đúng. Tự làm theo “Giờ và phút” rồi so kết quả với lựa chọn này."
         },
         {
           "id": "d",
@@ -6418,17 +6418,17 @@
         {
           "id": "b",
           "text": "1 ngày",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“1 ngày” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Giờ và phút” rồi thử lại."
         },
         {
           "id": "c",
           "text": "30 phút",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “30 phút”, có ít nhất một bước của “Giờ và phút” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "không thể biết",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“không thể biết” là phương án nhiễu gần đúng. Tự làm theo “Giờ và phút” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "a"
@@ -6530,7 +6530,7 @@
         {
           "id": "a",
           "text": "13 tháng 9",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“13 tháng 9” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Đọc lịch” rồi thử lại."
         },
         {
           "id": "b",
@@ -6540,12 +6540,12 @@
         {
           "id": "c",
           "text": "14 tháng 10",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “14 tháng 10”, có ít nhất một bước của “Đọc lịch” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "16 tháng 9",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“16 tháng 9” là phương án nhiễu gần đúng. Tự làm theo “Đọc lịch” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "b"
@@ -6583,12 +6583,12 @@
         {
           "id": "a",
           "text": "Màu yêu thích của người xem",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“Màu yêu thích của người xem” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Giá trị tờ tiền” rồi thử lại."
         },
         {
           "id": "b",
           "text": "Số trang của sách bên cạnh",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “Số trang của sách bên cạnh”, có ít nhất một bước của “Giá trị tờ tiền” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
@@ -6598,7 +6598,7 @@
         {
           "id": "d",
           "text": "Chiều dài của bàn học",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“Chiều dài của bàn học” là phương án nhiễu gần đúng. Tự làm theo “Giá trị tờ tiền” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "c"
@@ -6641,7 +6641,7 @@
         {
           "id": "b",
           "text": "Đúng",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“Đúng” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Giá trị tờ tiền” rồi thử lại."
         }
       ],
       "correct_choice_id": "a"
@@ -6679,17 +6679,17 @@
         {
           "id": "a",
           "text": "Chọn tờ có màu mình thích hơn",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“Chọn tờ có màu mình thích hơn” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Giá trị tờ tiền” rồi thử lại."
         },
         {
           "id": "b",
           "text": "Chọn tờ nằm bên trái",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “Chọn tờ nằm bên trái”, có ít nhất một bước của “Giá trị tờ tiền” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
           "text": "Đếm số chữ xuất hiện trên mỗi tờ",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“Đếm số chữ xuất hiện trên mỗi tờ” là phương án nhiễu gần đúng. Tự làm theo “Giá trị tờ tiền” rồi so kết quả với lựa chọn này."
         },
         {
           "id": "d",
@@ -6926,17 +6926,17 @@
         {
           "id": "b",
           "text": "4 giờ 30 phút",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“4 giờ 30 phút” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “15 phút và 30 phút trên đồng hồ” rồi thử lại."
         },
         {
           "id": "c",
           "text": "3 giờ 4 phút",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “3 giờ 4 phút”, có ít nhất một bước của “15 phút và 30 phút trên đồng hồ” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "4 giờ 3 phút",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“4 giờ 3 phút” là phương án nhiễu gần đúng. Tự làm theo “15 phút và 30 phút trên đồng hồ” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "a"
@@ -6974,7 +6974,7 @@
         {
           "id": "a",
           "text": "7 giờ 15 phút",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“7 giờ 15 phút” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “15 phút và 30 phút trên đồng hồ” rồi thử lại."
         },
         {
           "id": "b",
@@ -6984,12 +6984,12 @@
         {
           "id": "c",
           "text": "6 giờ 7 phút",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “6 giờ 7 phút”, có ít nhất một bước của “15 phút và 30 phút trên đồng hồ” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "8 giờ 30 phút",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“8 giờ 30 phút” là phương án nhiễu gần đúng. Tự làm theo “15 phút và 30 phút trên đồng hồ” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "b"
@@ -7027,12 +7027,12 @@
         {
           "id": "a",
           "text": "3 phút",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“3 phút” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “15 phút và 30 phút trên đồng hồ” rồi thử lại."
         },
         {
           "id": "b",
           "text": "30 phút",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “30 phút”, có ít nhất một bước của “15 phút và 30 phút trên đồng hồ” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
@@ -7042,7 +7042,7 @@
         {
           "id": "d",
           "text": "60 phút",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“60 phút” là phương án nhiễu gần đúng. Tự làm theo “15 phút và 30 phút trên đồng hồ” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "c"
@@ -7176,17 +7176,17 @@
         {
           "id": "a",
           "text": "15 km",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“15 km” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Ước lượng số đo” rồi thử lại."
         },
         {
           "id": "b",
           "text": "15 m",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “15 m”, có ít nhất một bước của “Ước lượng số đo” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
           "text": "150 m",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“150 m” là phương án nhiễu gần đúng. Tự làm theo “Ước lượng số đo” rồi so kết quả với lựa chọn này."
         },
         {
           "id": "d",
@@ -7234,17 +7234,17 @@
         {
           "id": "b",
           "text": "2 cm",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“2 cm” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Ước lượng số đo” rồi thử lại."
         },
         {
           "id": "c",
           "text": "2 km",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “2 km”, có ít nhất một bước của “Ước lượng số đo” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "20 km",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“20 km” là phương án nhiễu gần đúng. Tự làm theo “Ước lượng số đo” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "a"
@@ -7282,7 +7282,7 @@
         {
           "id": "a",
           "text": "5 cm",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“5 cm” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Ước lượng số đo” rồi thử lại."
         },
         {
           "id": "b",
@@ -7292,12 +7292,12 @@
         {
           "id": "c",
           "text": "100 cm",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “100 cm”, có ít nhất một bước của “Ước lượng số đo” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "2 km",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“2 km” là phương án nhiễu gần đúng. Tự làm theo “Ước lượng số đo” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "b"
@@ -7744,12 +7744,12 @@
         {
           "id": "a",
           "text": "Cam",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“Cam” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Suy luận từ dữ liệu” rồi thử lại."
         },
         {
           "id": "b",
           "text": "Chuối",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “Chuối”, có ít nhất một bước của “Suy luận từ dữ liệu” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
@@ -7759,7 +7759,7 @@
         {
           "id": "d",
           "text": "Cả ba bằng nhau",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“Cả ba bằng nhau” là phương án nhiễu gần đúng. Tự làm theo “Suy luận từ dữ liệu” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "c"
@@ -7828,17 +7828,17 @@
         {
           "id": "a",
           "text": "chắc chắn",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“chắc chắn” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Có thể” rồi thử lại."
         },
         {
           "id": "b",
           "text": "không thể",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “không thể”, có ít nhất một bước của “Có thể” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
           "text": "bằng nhau",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“bằng nhau” là phương án nhiễu gần đúng. Tự làm theo “Có thể” rồi so kết quả với lựa chọn này."
         },
         {
           "id": "d",
@@ -7886,17 +7886,17 @@
         {
           "id": "b",
           "text": "chắc chắn",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“chắc chắn” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Có thể” rồi thử lại."
         },
         {
           "id": "c",
           "text": "không thể",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “không thể”, có ít nhất một bước của “Có thể” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "luôn sai",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“luôn sai” là phương án nhiễu gần đúng. Tự làm theo “Có thể” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "a"
@@ -7934,7 +7934,7 @@
         {
           "id": "a",
           "text": "chắc chắn",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“chắc chắn” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Có thể” rồi thử lại."
         },
         {
           "id": "b",
@@ -7944,12 +7944,12 @@
         {
           "id": "c",
           "text": "không thể",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “không thể”, có ít nhất một bước của “Có thể” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "không có kết quả",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“không có kết quả” là phương án nhiễu gần đúng. Tự làm theo “Có thể” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "b"
@@ -7987,12 +7987,12 @@
         {
           "id": "a",
           "text": "có thể nhưng không chắc",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“có thể nhưng không chắc” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Chắc chắn” rồi thử lại."
         },
         {
           "id": "b",
           "text": "không thể",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “không thể”, có ít nhất một bước của “Chắc chắn” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
@@ -8002,7 +8002,7 @@
         {
           "id": "d",
           "text": "sai",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“sai” là phương án nhiễu gần đúng. Tự làm theo “Chắc chắn” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "c"
@@ -8040,17 +8040,17 @@
         {
           "id": "a",
           "text": "không thể",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“không thể” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Chắc chắn” rồi thử lại."
         },
         {
           "id": "b",
           "text": "có thể nhưng không chắc",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “có thể nhưng không chắc”, có ít nhất một bước của “Chắc chắn” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
           "text": "không có màu",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“không có màu” là phương án nhiễu gần đúng. Tự làm theo “Chắc chắn” rồi so kết quả với lựa chọn này."
         },
         {
           "id": "d",
@@ -8098,17 +8098,17 @@
         {
           "id": "b",
           "text": "không thể",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“không thể” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Chắc chắn” rồi thử lại."
         },
         {
           "id": "c",
           "text": "chỉ có thể",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “chỉ có thể”, có ít nhất một bước của “Chắc chắn” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "không xác định",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“không xác định” là phương án nhiễu gần đúng. Tự làm theo “Chắc chắn” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "a"
@@ -8146,7 +8146,7 @@
         {
           "id": "a",
           "text": "có thể",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“có thể” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Không thể” rồi thử lại."
         },
         {
           "id": "b",
@@ -8156,12 +8156,12 @@
         {
           "id": "c",
           "text": "chắc chắn",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “chắc chắn”, có ít nhất một bước của “Không thể” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "d",
           "text": "luôn đúng",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“luôn đúng” là phương án nhiễu gần đúng. Tự làm theo “Không thể” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "b"
@@ -8199,12 +8199,12 @@
         {
           "id": "a",
           "text": "chắc chắn",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“chắc chắn” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Không thể” rồi thử lại."
         },
         {
           "id": "b",
           "text": "có thể",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “có thể”, có ít nhất một bước của “Không thể” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
@@ -8214,7 +8214,7 @@
         {
           "id": "d",
           "text": "bằng nhau",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“bằng nhau” là phương án nhiễu gần đúng. Tự làm theo “Không thể” rồi so kết quả với lựa chọn này."
         }
       ],
       "correct_choice_id": "c"
@@ -8252,17 +8252,17 @@
         {
           "id": "a",
           "text": "có thể",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“có thể” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Không thể” rồi thử lại."
         },
         {
           "id": "b",
           "text": "chắc chắn",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "Nếu chọn “chắc chắn”, có ít nhất một bước của “Không thể” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
         },
         {
           "id": "c",
           "text": "luôn xảy ra",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+          "rationale_vi": "“luôn xảy ra” là phương án nhiễu gần đúng. Tự làm theo “Không thể” rồi so kết quả với lựa chọn này."
         },
         {
           "id": "d",

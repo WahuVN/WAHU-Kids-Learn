@@ -28,7 +28,7 @@ Owner: AI1 — Math Content & Data
   - interactive measurement
   - word problem
 - Semantic validator errors: **0**
-- Math content unittest: **19 / 19 PASS**
+- Math content unittest: **20 / 20 PASS**
 - Pack manifest/hash/listing check on current working tree: **PASS** (`version=1.9.0`, 3 listed files)
 
 ## Curriculum/content completeness
@@ -61,7 +61,7 @@ Static bank phủ **67/67 skill**, kể cả:
   - `FOLD_CUT_COMPOSE_SHAPES`
   - `MONEY_VND_NOTE_RECOGNITION`
 
-Hai skill này **không còn thiếu content**: lesson + curated question đã có và validator PASS. Working tree AI2 hiện đã có `lesson` mode dùng authored `PracticeSets` trực tiếp; adaptive mission vẫn giữ generator path. Targeted persistence smoke hiện PASS **92 assertions**. Phần còn lại là chốt/commit integration, corrupt-cache lesson-mode và display-unit contract; AI1 không sửa coordinator/selector lớn thuộc AI2.
+Hai skill này **không còn thiếu content**: lesson + curated question đã có và validator PASS. Engine lesson-mode dùng authored `PracticeSets` trực tiếp đã được commit tại `656a94b`; adaptive mission vẫn giữ generator path. Targeted persistence smoke hiện PASS **92 assertions**. Phần còn lại là UI handoff chưa commit, corrupt-cache lesson-mode và display-unit contract; AI1 không sửa coordinator/selector lớn thuộc AI2.
 
 ## Validator gates implemented
 
@@ -78,6 +78,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - invalid unit metadata;
 - `answer_unit` display-only metadata sai kind/type hoặc rỗng;
 - invalid MC correct choice / duplicate choices / rationale missing;
+- distractor rationale placeholder/generic hoặc bị tái dùng quá mức;
 - hint cấp 2 placeholder/generic hoặc bị tái dùng quá mức;
 - MCQ trùng nghĩa sau normalize Unicode/case/whitespace hoặc hai biểu thức choice cho cùng giá trị số;
 - vị trí đáp án đúng bị lệch pattern; bank phải phân bố cân bằng theo số lượng choices;
@@ -110,11 +111,12 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - mọi phép nhân/chia literal child-facing nằm trong bảng 2 hoặc 5, kể cả distractor;
 - mọi MCQ có choice khác nhau sau normalize text và không có hai biểu thức choice cùng giá trị số;
 - 201/201 hint cấp 2 hiện actionable theo dạng câu + độ khó + concept, không còn placeholder chung;
+- 267 distractor có **253 rationale khác nhau**, max lặp 3 và placeholder chung = 0;
 - vị trí đáp án đúng được cân bằng deterministic: 88 câu 4-choice = 22/22/22/22 cho A/B/C/D; 3 true/false = 2/1;
 - 23 câu integer có `answer_unit` giữ đúng contract display-only, không đổi sang unit-input;
 - 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract.
 
-Latest result: **19 tests PASS**.
+Latest result: **20 tests PASS**.
 
 ## Commits / waves
 
@@ -130,10 +132,11 @@ Latest result: **19 tests PASS**.
 - `dcedca2` — `Toán: loại ambiguity trong lựa chọn trắc nghiệm`
 - `c20ca91` — `Toán: khóa contract authored session và đơn vị hiển thị`
 - `9472d63` — `Toán: cân bằng vị trí đáp án trắc nghiệm`
+- `0bfabc5` — `Toán: nâng chất lượng gợi ý cho 201 câu`
 
 ## Current blockers outside AI1 content ownership
 
-1. Request 005 core path đã có trong working tree: targeted lesson session dùng authored bank, target đúng 3 câu, unlock/progress/resume smoke x86 PASS **92 assertions**, và UI WIP đã có `Luyện 3 câu bài này`. Chưa coi CLOSED cho tới khi integration được commit và full UI/build gate xanh.
+1. Request 005 engine core đã được commit tại `656a94b`: targeted lesson session dùng authored bank, target đúng 3 câu, unlock/progress/resume smoke x86 PASS **92 assertions**. UI handoff `Luyện 3 câu bài này` vẫn là WIP chưa commit; chưa coi Request 005 CLOSED cho tới khi UI/build gate xanh và Request 007 được khóa regression.
 2. Request 007 mới: corrupt open-question ở lesson mode có thể giữ `generated_question_count > attempts`, skip câu medium và hết authored pool khi mới đủ 2/3 attempts. Cần regression + cursor reconciliation ở AI2.
 3. Request 006 vẫn mở: 23 câu integer có `answer_unit` được content giữ display-only, nhưng `MathAuthoredQuestionSource`/`MathQuestion` chưa preserve field để feedback hiện `8 cm`, `5 kg`, `60 phút` mà vẫn chấm raw integer.
 4. UI smoke build hiện gặp lỗi reference `System.Data.SQLite` khi build `WAHU.Data.csproj`; targeted persistence smoke không bị lỗi. Đây là build/dependency WIP ngoài AI1, không phải lỗi content.

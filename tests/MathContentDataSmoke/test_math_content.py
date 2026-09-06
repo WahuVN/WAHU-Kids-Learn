@@ -235,6 +235,22 @@ class MathContentDataSmoke(unittest.TestCase):
             with self.subTest(item=item["id"]):
                 self.assertGreaterEqual(len(item["hints_vi"][1].strip()), 40)
 
+    def test_distractor_rationales_are_specific_not_placeholders(self):
+        rationales = []
+        for item in self.questions:
+            choices = item.get("choices", [])
+            if not choices:
+                continue
+            for choice in choices:
+                if choice["id"] != item["correct_choice_id"]:
+                    rationales.append(choice["rationale_vi"])
+        self.assertEqual(267, len(rationales))
+        self.assertNotIn(validator.GENERIC_DISTRACTOR_RATIONALE, rationales)
+        counts = Counter(rationales)
+        self.assertLessEqual(max(counts.values()), 3)
+        self.assertGreaterEqual(len(counts), int(len(rationales) * 0.9))
+        self.assertTrue(all(len(x.strip()) >= 50 for x in rationales))
+
     def test_integer_answer_unit_is_display_only_metadata(self):
         unit_questions = [x for x in self.questions if "answer_unit" in x]
         self.assertEqual(23, len(unit_questions))

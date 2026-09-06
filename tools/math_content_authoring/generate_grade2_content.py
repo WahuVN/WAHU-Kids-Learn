@@ -66,6 +66,17 @@ def second_hint(question_type: str, difficulty: str, concept_name: str) -> str:
     return by_type.get(difficulty, by_type["medium"])
 
 
+def distractor_rationale(choice_text: str, concept_name: str, position: int) -> str:
+    """Explain why a distractor needs re-checking without leaking the correct choice."""
+    concept = concept_name.strip()
+    templates = [
+        f"“{choice_text}” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “{concept}” rồi thử lại.",
+        f"Nếu chọn “{choice_text}”, có ít nhất một bước của “{concept}” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên.",
+        f"“{choice_text}” là phương án nhiễu gần đúng. Tự làm theo “{concept}” rồi so kết quả với lựa chọn này.",
+    ]
+    return templates[position % len(templates)]
+
+
 def nq(prompt: str, answer: int, explanation: str, *, unit: str | None = None,
        numeric_min: int = 0, numeric_max: int = 1000,
        question_type: str = "numeric_input") -> dict:
@@ -696,8 +707,12 @@ def build() -> tuple[dict, dict]:
                     target = choice_position_counts.get(count, 0) % count
                     choice_position_counts[count] = choice_position_counts.get(count, 0) + 1
                     ordered = distractors[:target] + [correct] + distractors[target:]
+                    distractor_index = 0
                     for index, choice in enumerate(ordered):
                         choice["id"] = chr(ord("a") + index)
+                        if choice is not correct:
+                            choice["rationale_vi"] = distractor_rationale(choice["text"], concept_name, distractor_index)
+                            distractor_index += 1
                     q["choices"] = ordered
                     q["correct_choice_id"] = ordered[target]["id"]
                 questions.append(q)
