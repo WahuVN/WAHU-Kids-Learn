@@ -225,7 +225,7 @@ $manifest = [ordered]@{
     }
     gates = [ordered]@{
         preflight_smoke = 'PASS'
-        preflight_smoke_assertions = 39
+        preflight_smoke_assertions = 42
         behavior_runtime_smoke = 'PASS'
         behavior_runtime_smoke_assertions = 15
         learning_session_runtime_smoke = 'PASS'
@@ -241,7 +241,7 @@ $manifest = [ordered]@{
         performance_runtime_smoke = 'PASS'
         performance_runtime_smoke_assertions = 13
         update_runtime_smoke = 'PASS'
-        update_runtime_smoke_assertions = 18
+        update_runtime_smoke_assertions = 33
         sqlite_runtime_smoke = 'PASS'
         backup_restore_smoke = 'PASS'
         staged_payload_guard = 'PASS'

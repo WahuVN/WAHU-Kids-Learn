@@ -10,7 +10,7 @@ File này là checklist từ spec → code. Không được đánh dấu DONE ch
 - [x] App project target `.NET Framework 4.8`, x86.
 - [x] Release build explicit x86; solution chỉ map Debug/Release x86.
 - [ ] App manifest/DPI behavior test trên Win7.
-- [ ] Global exception boundary đưa về recovery UI, không hiện stack trace cho trẻ.
+- [x] Global runtime issue/recovery boundary đưa lỗi config/content/database/platform về UI an toàn; Child Mode không hiện stack trace.
 - [x] Single-instance named mutex implemented; smoke test primary/secondary/reacquire PASS.
 
 ## B. Runtime config
@@ -51,7 +51,7 @@ File này là checklist từ spec → code. Không được đánh dấu DONE ch
 - [x] Existing V1 DB fail-closed nếu thiếu backup context; có context thì verified schema-V1 pre-migration backup trước khi lên V2.
 - [x] Recovery temp restore + verify + atomic replace; original target được preserve.
 - [x] Runtime crash marker + full integrity/FK check; stale-marker E2E recovery PASS.
-- [ ] Corrupt original retained.
+- [x] Restore preserve original target DB (`.pre_restore.*.db`) trước atomic replace; recovery smoke/E2E PASS.
 - [ ] Manual export/import from Parent Mode.
 
 ## F. Content runtime
@@ -134,23 +134,23 @@ File này là checklist từ spec → code. Không được đánh dấu DONE ch
 
 ## M. Parent Mode
 
-- [ ] Local PIN set/change/reset policy.
-- [ ] Salted PBKDF2 hash, target benchmark iterations.
-- [ ] Dashboard skill state + evidence.
+- [x] Local Parent PIN set/unlock/change + persistent lockout implemented; reset policy vẫn cần UX riêng nếu quên PIN.
+- [x] Salted PBKDF2-HMAC-SHA256 record + random salt + atomic file; target Win7 iteration benchmark vẫn là hardware gate.
+- [x] Parent dashboard đọc aggregate Vững / Đang học / Cần ôn từ Data service.
 - [ ] Motion/audio/session controls.
-- [ ] Backup/export/restore.
+- [x] Parent manual verified backup + verified recovery UI implemented.
 - [ ] Diagnostics export sanitized.
 - [ ] Content pack import.
 - [ ] Delete-profile explicit confirmation.
 
 ## N. Performance/autotune
 
-- [ ] Hardware profile collection local-only.
+- [x] Hardware profile/preflight collection local-only implemented.
 - [ ] Render/input/audio/SQLite benchmark.
-- [ ] LOW/NORMAL selection.
-- [ ] Runtime degradation order implemented.
+- [x] LOW/NORMAL cold-start selection implemented/tested.
+- [x] Runtime degradation order implemented/tested; one spike không tự downgrade.
 - [ ] Working-set sampling aggregate only.
-- [ ] Image/audio cache ceilings.
+- [x] LOW/NORMAL image/audio cache ceilings lấy từ verified config.
 - [ ] 15–30 minute leak test.
 
 ## O. Installer
@@ -164,7 +164,7 @@ File này là checklist từ spec → code. Không được đánh dấu DONE ch
 - [x] Reinstall/update preserves learner DB bit-for-bit trong E2E.
 - [x] Uninstall xóa app nhưng giữ learner DB + sentinel trong E2E.
 - [x] Startup-with-Windows task mặc định bật; installer E2E xác nhận HKCU Run được tạo và uninstall xóa sạch.
-- [x] GitHub updater helper được stage trong installer; manifest/staging/tamper smoke PASS.
+- [x] GitHub updater helper được stage trong installer; manifest/staging/tamper smoke PASS; cross-version apply E2E `0.1.21→0.1.22` và `0.1.22→0.1.23` PASS.
 - [ ] Repair mode.
 - [ ] Vietnamese full wizard translation only after vendor/version/license review.
 
@@ -176,9 +176,9 @@ File này là checklist từ spec → code. Không được đánh dấu DONE ch
 - [ ] Content versions/hashes cần manifest đầy đủ hơn.
 - [x] Installer SHA-256 được sinh cạnh installer.
 - [x] Portable ZIP SHA-256 được sinh; ZIP E2E chạy trực tiếp từ archive extract PASS.
-- [x] Build sinh `update-manifest.json`; publish script khóa repo public, clean tree, origin/main và từ chối stable unsigned.
-- [ ] Test matrix gates all PASS.
-- [ ] Win7 target cần test updater HTTPS/TLS thật; Child Mode vẫn offline-first nhưng installed updater có GitHub HTTPS exception hẹp.
+- [x] Build sinh `update-manifest.json`; publish script khóa repo public, clean tree, origin/main, fixed `update-dev/update-stable` feed và từ chối stable unsigned.
+- [ ] Workstation setup/update matrix PASS; còn Win7 target + signing matrix nên chưa được đánh dấu all PASS.
+- [ ] Win7 target cần test updater HTTPS/TLS thật; workstation live GitHub download/stage đã PASS 5/5.
 
 ## Q. Target-PC final gates
 

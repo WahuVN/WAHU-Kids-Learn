@@ -109,8 +109,10 @@ namespace WAHU.SetupPreflight.Smoke
             Assert(bundle.PrimaryChildTargetPx == 64, "runtime_config_child_target_64");
             Assert(bundle.LowMotionFpsCap == 18 && bundle.NormalMotionFpsCap == 30, "runtime_config_motion_caps");
             Assert(bundle.UpdateEnabled && bundle.UpdateCheckOnStartup && bundle.UpdateAutoDownload, "runtime_config_update_enabled");
+            Assert(bundle.UpdateFailureRetryHours == 1 && bundle.UpdateCheckIntervalHours == 6, "runtime_config_update_retry_policy");
+            Assert(bundle.UpdateStagedRetentionDays == 7 && bundle.UpdateDownloadTempRetentionHours == 24, "runtime_config_update_retention_policy");
             Assert(bundle.LaunchWithWindowsDefault, "runtime_config_startup_default");
-            Assert(bundle.UpdateManifestUrl == "https://github.com/WahuVN/WAHU-Kids-Learn/releases/latest/download/update-manifest.json", "runtime_config_update_feed_locked");
+            Assert(bundle.UpdateManifestUrl == "https://github.com/WahuVN/WAHU-Kids-Learn/releases/download/update-dev/update-manifest.json", "runtime_config_update_feed_locked");
 
             var portableBase = Path.Combine(Path.GetTempPath(), "wahu-portable-config-" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(portableBase);
@@ -146,8 +148,12 @@ namespace WAHU.SetupPreflight.Smoke
                 File.Copy(Path.Combine(source, "logging_policy_v1.json"), Path.Combine(temp, "logging_policy_v1.json"), true);
                 var updatePath = Path.Combine(temp, "update_policy_v1.json");
                 var updateText = File.ReadAllText(updatePath);
-                File.WriteAllText(updatePath, updateText.Replace("WahuVN/WAHU-Kids-Learn/releases/latest", "evil/example/releases/latest"));
+                File.WriteAllText(updatePath, updateText.Replace("WahuVN/WAHU-Kids-Learn/releases/download/update-dev", "evil/example/releases/download/update-dev"));
                 AssertConfigRejected(temp, "runtime_config_update_feed_tamper_rejected");
+                File.Copy(Path.Combine(source, "update_policy_v1.json"), updatePath, true);
+                updateText = File.ReadAllText(updatePath);
+                File.WriteAllText(updatePath, updateText.Replace("\"feed_tag\": \"update-dev\"", "\"feed_tag\": \"update-evil\""));
+                AssertConfigRejected(temp, "runtime_config_update_feed_tag_tamper_rejected");
                 File.Copy(Path.Combine(source, "update_policy_v1.json"), updatePath, true);
                 var pathsPath = Path.Combine(temp, "paths_v1.json");
                 var paths = File.ReadAllText(pathsPath);

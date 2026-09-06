@@ -1,251 +1,232 @@
-# SETUP AUDIT STATUS
+﻿# SETUP AUDIT STATUS
 
 Cập nhật: 2026-09-06
 
-## Scope
+## Phạm vi
 
-Audit này kiểm **source + setup + build pipeline + runtime config + SQLite/Data + portable ZIP + installer E2E trên workstation hiện tại**. Audit không thay thế smoke-test trên Windows 7 thật/VM mục tiêu và không cho phép claim production-ready khi chưa có signing/certificate/target evidence.
+Audit này kiểm source, solution, runtime config, SQLite/Data, updater, portable ZIP, Inno installer và các luồng E2E trên workstation hiện tại. Audit **không** thay thế test trên Windows 7 SP1 thật/VM mục tiêu và không cho phép claim production-ready khi chưa có production certificate/signing evidence.
 
-## PASS — source/repository
+## PASS — repository / solution / toolchain
+
+- Repository: `WahuVN/WAHU-Kids-Learn`, visibility **PUBLIC**, branch `main`.
+- `.NET Framework 4.8`, app/runtime x86.
+- `WAHUKidsLearn.sln` chỉ còn `Debug|x86` và `Release|x86`; 180 mapping AnyCPU/x64 thừa đã được loại và full solution rebuild PASS.
+- Inno Setup 7.1.0 compile PASS.
+- Build output/bin/obj/UserData/learner DB không được track vào Git.
+- NuGet lock hiện dùng `System.Data.SQLite 2.0.4` + `SourceGear.sqlite3 3.53.4`; không có active dependency `System.Data.SQLite.Core`/`SQLite.Interop.dll`.
+
+## PASS — automated runtime gates
 
 ```text
-TRACKED_SOURCE_FILES_AFTER_AUDIT_COMMIT = 133
-SOURCE_JSON_FILES                     = 25
-PACKAGE_LOCKS                         = 2
-BUILD/BIN/OBJ/USERDATA                = IGNORED
+SETUP_PREFLIGHT_SMOKE_PASS      = 42 / 42
+BEHAVIOR_RUNTIME_SMOKE_PASS     = 15 / 15
+LEARNING_SESSION_SMOKE_PASS     = 92 / 92
+MOTION_RUNTIME_SMOKE_PASS       = 25 / 25
+CONTENT_RUNTIME_SMOKE_PASS      = 20 / 20
+SECURITY_RUNTIME_SMOKE_PASS     = 19 / 19
+AUDIO_RUNTIME_SMOKE_PASS        = 14 / 14
+PERFORMANCE_RUNTIME_SMOKE_PASS  = 13 / 13
+UPDATE_RUNTIME_SMOKE_PASS       = 33 / 33
+UPDATE_LIVE_SMOKE_PASS          = 5 / 5
+SQLITE_RUNTIME_SMOKE_PASS       = 160 / 160
 ```
 
-NuGet lock:
+`UPDATE_LIVE_SMOKE` đã tải thật manifest + installer từ GitHub Releases, đi qua HTTPS redirect, UTF-8 BOM handling, size limits, SHA-256 verification và staged-state reload.
+
+## PASS — runtime config / update policy
+
+Runtime load 10 config bắt buộc và fail-closed khi safety-critical config bị sửa.
+
+Update policy hiện khóa:
+
+```text
+provider                  = github_releases
+repo                      = WahuVN/WAHU-Kids-Learn
+channel                   = dev
+feed_tag                  = update-dev
+manifest                  = https://github.com/WahuVN/WAHU-Kids-Learn/releases/download/update-dev/update-manifest.json
+startup_check             = true
+normal_check_interval     = 6h
+failure_retry             = 1h
+auto_download             = true
+auto_install_next_start   = true
+staged_retention          = 7d
+download_temp_retention   = 24h
+portable_binary_update    = false
+```
+
+Các invariant đã test:
+- HTTPS only; wrong origin / HTTP / bad SHA rejected.
+- Stable unsigned manifest rejected trước staging.
+- Final redirect host phải là GitHub/release-assets host đã allowlist.
+- Manual check bypass được throttle; background/manual check được serialize để tránh tải trùng.
+- Manifest UTF-8 BOM hợp lệ.
+- Update temp/staged/helper cleanup có retention và không follow reparse point ra ngoài update root.
+- Portable không tự thay binary.
+
+## PASS — updater helper negative gates
+
+`WAHU.Updater.exe` là WinExe để không bật cửa sổ console khi cập nhật. Exit contract đã test bằng process wait thật:
+
+```text
+--self-test                  => exit 0
+missing/invalid arguments    => exit 2
+installer SHA changed        => exit 1, installer KHÔNG chạy
+production unsigned          => exit 1, installer KHÔNG chạy
+successful update            => exit 0
+```
+
+Helper kiểm lại SHA-256 ngay trước install. Stable production còn chạy Authenticode verification trước Inno.
+
+## PASS — updater apply E2E thật
+
+Đã chạy cross-version bằng chính installed app + staged installer + external helper:
+
+```text
+0.1.21-dev -> 0.1.22-dev = PASS
+0.1.22-dev -> 0.1.23-dev = PASS
+```
+
+Đã test cả hai preference:
+- startup cùng Windows **TẮT** trước update -> vẫn TẮT sau update;
+- startup cùng Windows **BẬT** trước update -> vẫn BẬT sau update.
+
+Mỗi update E2E xác minh:
+1. cài phiên bản cũ bằng Inno;
+2. bootstrap learner DB khỏe;
+3. stage installer mới qua `UpdateStagingService` + SHA-256;
+4. app cũ phát hiện staged update;
+5. tạo verified pre-update SQLite backup;
+6. app thoát, `WAHU.Updater.exe` chạy ngoài process;
+7. helper hash lại installer và chạy Inno silent;
+8. app mới được mở với `--post-update`;
+9. `updated_to:<version>` được ghi;
+10. staged state + installer được cleanup;
+11. learner sentinel và learner DB còn nguyên;
+12. DB mới vẫn `integrity=ok`, `foreign_key_issues=0`;
+13. verified pre-update backup metadata/DB SHA-256 khớp;
+14. uninstall phiên bản mới vẫn giữ learner data.
+
+## PASS — installer E2E
+
+Candidate gần nhất đã test: `0.1.23-dev`.
+
+```text
+install_exit                           = 0
+installed_file_count                   = 52
+startup_default                        = PASS
+preflight_exit                         = 0
+bootstrap_exit                         = 0
+crash-marker recovery                  = PASS
+config tamper network=true             = exit 42 / CONFIG_INVALID
+config restore                         = PASS
+reinstall                              = PASS
+learner DB hash across reinstall       = unchanged
+startup disabled preserved reinstall   = PASS
+uninstall                              = PASS
+app binary removed                     = PASS
+learner DB/sentinel preserved          = PASS
+startup registry removed uninstall     = PASS
+```
+
+Installer `0.1.23-dev` test hash:
+
+```text
+SHA-256 = 91C79C4A4F37479C11EB2ED088CAF7EB9FA66F8B6C6730E9105DCE9614816262
+```
+
+## PASS — portable E2E
+
+Candidate gần nhất đã test: `0.1.23-dev`.
+
+```text
+first_bootstrap_exit      = 0
+second_bootstrap_exit     = 0
+storage_mode              = PORTABLE
+schema_version            = 2
+portable DB               = ./UserData/data/learning.db
+installed LOCALAPPDATA    = untouched
+TEST_RESULT               = PASS
+```
+
+Portable ZIP test hash:
+
+```text
+SHA-256 = E7497032DF3547D9560803E79A4C86F5F05C9A46A22AC675D29CD04028127D4D
+```
+
+## PASS — release / manifest guards
+
+- `update-manifest.json` version/bytes/SHA-256 khớp installer được build.
+- Technical GitHub feed `update-dev` tồn tại và có đúng asset `update-manifest.json`.
+- `Publish-GitHubRelease.ps1` parser PASS.
+- Publish script từ chối working tree dirty (`REFUSE_RELEASE_DIRTY_TREE`).
+- Publish script yêu cầu HEAD local == `origin/main` trước release.
+- Dev/stable dùng fixed channel feed riêng, không phụ thuộc `releases/latest`.
+
+## PASS — production negative gates
+
+Dev artefact cố ý unsigned:
+
+```text
+WAHU.SetupPreflight --production => expected 12, actual 12
+SignTool verify installer         => unsigned / exit 1
+Updater --production true         => Authenticode reject / exit 1
+```
+
+Do đó unsigned dev build không thể đi nhầm đường production.
+
+## PASS — SQLite/Data durability liên quan setup
 
 ```text
 System.Data.SQLite = 2.0.4
-SourceGear.sqlite3 = 3.53.4
+SQLite engine      = 3.53.4
+Current schema     = V2
 ```
 
-Không còn active lock `System.Data.SQLite.Core 1.0.119` hay `SQLite.Interop.dll`.
+Đã có evidence cho migration checksum, pre-migration backup, Online Backup, 5 recent + 4 weekly rotation, restore verified, serialized writes, atomic answer commit, attempt immutability, crash marker và recovery.
 
-GitHub repository:
+## PENDING — bắt buộc test trên target thật/VM
 
-```text
-WahuVN/WAHU-Kids-Learn
-visibility = PRIVATE
-branch     = main
-```
-
-Lịch sử được chia theo công đoạn riêng: repo hygiene → research/spec → content/policy → setup spec → runtime config → platform/preflight → data/SQLite → app/bootstrap → build/release → audit.
-
-## PASS — solution/build
-
-- `WAHUKidsLearn.sln`, `.NET Framework 4.8`, x86.
-- Full `/restore + rebuild` PASS.
-- NuGet lock-file restore PASS.
-- App manifest có Win7 supportedOS + system-DPI-aware.
-- Runtime build identity được inject qua `config/install_manifest_v1.json`.
-- Runtime hiện load **9 config bắt buộc** và fail-closed nếu safety-critical config sai.
-
-## PASS — Platform/preflight
-
-```text
-SETUP_PREFLIGHT_SMOKE_PASS assertions=35
-```
-
-Đã test:
-- Win7 RTM reject / Win7 SP1 accept classifier;
-- .NET Framework 4.8 Release boundary;
-- SHA-256 known vector;
-- real OS/net48 probe;
-- unsigned signature detection;
-- named mutex: primary/secondary/reacquire;
-- runtime marker: clean create/remove + stale marker recovery;
-- runtime config schema/invariant validation;
-- installed/portable path isolation;
-- portable path traversal reject;
-- build identity config.
-
-## PASS — SQLite/Data runtime
-
-Development lock:
-
-```text
-System.Data.SQLite 2.0.4
-SourceGear.sqlite3 3.53.4
-e_sqlite3.dll x86
-SQLite engine 3.53.4
-Current learner schema V2
-```
-
-```text
-SQLITE_RUNTIME_SMOKE_PASS assertions=135
-```
-
-Đã test:
-- schema V1 bootstrap + migration V2;
-- migration SHA-256/history validation;
-- migration V1/V2 tamper reject;
-- existing V1 DB **không được migrate nếu thiếu backup context**;
-- verified pre-migration schema-V1 backup trước khi V1 → V2;
-- DELETE + WAL provider smoke;
-- foreign keys + bounded busy timeout;
-- serialized write coordinator, 12 concurrent writers với `maxActive=1`;
-- `AnswerCommitService` commit attempt + error/mastery + child_skill + review trong một transaction;
-- late CHECK-constraint failure rollback toàn bộ logical answer batch;
-- reward `source_key` idempotency;
-- attempt immutability trigger chặn `UPDATE attempt`;
-- correction append qua `attempt_correction_event`;
-- SQLite Online Backup API;
-- backup reopen + integrity/FK checks;
-- managed metadata + SHA-256 verification;
-- 8-week rotation giữ đúng 5 recent + 4 weekly;
-- pre-migration backup không bị rotation xóa;
-- metadata/hash tamper reject;
-- verified restore + preserve original target DB.
-
-## PASS — latest dev build 0.1.7
-
-Build command chạy sạch toàn pipeline và Inno Setup 7.1.0 compile thành công.
-
-Latest installer:
-
-```text
-build\installer\WAHU-Kids-Learn-Setup-win7-x86-0.1.7-dev.exe
-SHA256 = 7FBA8032FC39A8890215BEF400F54A8FB13095D509DDD1D7B44BE90F90FDE7EB
-```
-
-Latest portable ZIP:
-
-```text
-build\portable\WAHU-Kids-Learn-Portable-win7-x86-0.1.7-dev.zip
-SHA256 = AD955822030C99178BD4A5061A57624C748305B428E608B434AFE828ABF2838B
-```
-
-Generated artefacts được `.gitignore` loại khỏi repository.
-
-## PASS — Portable ZIP E2E
-
-```text
-first_bootstrap_exit       = 0
-second_bootstrap_exit      = 0
-storage_mode               = PORTABLE
-schema_version             = 2
-migration_version          = 2
-portable_db_bytes          = 208896
-installed_root_before      = False
-installed_db_before/after  = none
-TEST_RESULT                = PASS
-```
-
-Đã xác minh:
-- test chạy từ **ZIP đã giải nén**, không dựa staging folder;
-- `portable.mode` được nhận đúng;
-- data tạo dưới `./UserData`;
-- second boot không recreate schema;
-- portable không tạo/sửa `%LOCALAPPDATA%\WAHU Kids Learn`;
-- app version trong runtime config khớp `0.1.7-dev`.
-
-## PASS — Installer E2E
-
-```text
-install_exit                    = 0
-installed_file_count            = 41
-preflight_exit                  = 0
-bootstrap_exit                  = 0
-recovery_bootstrap_exit         = 0
-config_tamper_exit              = 42
-config_restored_bootstrap_exit  = 0
-reinstall_exit                  = 0
-uninstall_exit                  = 0
-app_removed_after_uninstall     = True
-db_preserved_after_uninstall    = True
-sentinel_preserved              = True
-TEST_RESULT                     = PASS
-```
-
-Đã xác minh:
-- installed payload có provider/native DLL và cả migration `001 + 002`;
-- app bootstrap tạo learner DB schema V2;
-- clean boot không để stale marker;
-- simulated stale crash marker được phát hiện và dọn;
-- safety config tamper `network=true` → exit 42 / `CONFIG_INVALID` trước khi DB bị thay đổi;
-- restore config → bootstrap sạch;
-- learner DB hash không đổi qua reinstall;
-- uninstall xóa app nhưng giữ learner data;
-- injected runtime app version khớp build version.
-
-## PASS — production unsigned negative gate
-
-Dev binary cố ý unsigned:
-
-```text
-WAHU.SetupPreflight --production
-expected exit = 12
-actual exit   = 12
-GATE          = PASS
-```
-
-Production gate không cho unsigned build giả làm production.
-
-## PENDING — chưa được phép claim PASS
-
-### Windows 7 target evidence
-
-Chưa chạy trên target thật/VM đã khóa:
-- Win7 SP1 x86;
-- Win7 SP1 x64 chạy x86 app;
-- clean/legacy SHA-2 update states;
-- `System.Data.SQLite 2.0.4 + e_sqlite3.dll` native load trên Win7;
+Chưa được claim PASS cho:
+- Windows 7 SP1 x86;
+- Windows 7 SP1 x64 chạy app x86;
+- SHA-2 legacy/updated images;
+- SQLite native load trên Win7;
 - 2 GB RAM + HDD cũ;
-- 1024×768;
-- 96/120 DPI;
+- 1024×768, DPI 96/120;
 - audio/no-audio/mic;
 - sleep/wake;
-- process-kill giữa session/backup/migration;
-- WAL filesystem/crash benchmark;
-- portable USB surprise-removal test.
+- process kill giữa update/backup/session;
+- portable USB surprise-removal;
+- updater HTTPS/TLS thực tế trên Win7.
 
-### Production signing
+## PENDING — production signing
 
-Chưa có production certificate/toolchain secret:
+Chưa có production certificate/toolchain secret để chứng minh:
 - Authenticode SHA-256;
 - RFC3161 SHA-256 timestamp;
 - signed installer/uninstaller;
-- disconnected Win7 certificate-chain trust test.
+- disconnected Win7 publisher-chain trust.
 
-### Product/runtime subsystem còn thiếu
-
-- global exception/recovery UI cho Child Mode;
-- runtime override + config migration layer;
-- secure content-pack parser/import adversarial implementation;
-- asset render/cache pipeline;
-- MotionScheduler/WahuTween/SpriteSheet runtime;
-- BehaviorController runtime;
-- audio runtime;
-- full Child/Parent learning UI;
-- Parent Mode PIN/backup UI;
-- performance autotune/leak/target hardware gates.
-
-## Release status
+## Trạng thái release
 
 ```text
-SETUP_DESIGN_LOCK                  = PASS
-SOURCE_CONFIG_VALIDATION           = PASS
-NET48_X86_BUILD                    = PASS
-PREFLIGHT_PLATFORM_SMOKE           = PASS_35_ASSERTIONS
-RUNTIME_CONFIG_FAIL_CLOSED         = PASS
-SQLITE_DATA_RUNTIME_SMOKE          = PASS_135_ASSERTIONS
-SQLITE_SCHEMA_V2_MIGRATION         = PASS_DEV_WORKSTATION
-PRE_MIGRATION_BACKUP               = PASS
-BACKUP_ROTATION_5_PLUS_4           = PASS
-ANSWER_TRANSACTION_ATOMICITY       = PASS
-ATTEMPT_IMMUTABILITY               = PASS
-SINGLE_INSTANCE_RUNTIME            = PASS
-UNCLEAN_SESSION_MARKER             = PASS
-PORTABLE_ISOLATION_E2E             = PASS
-INNO_SETUP_COMPILE                 = PASS
-INSTALLER_E2E_CURRENT_WORKSTATION  = PASS
-PRODUCTION_UNSIGNED_REJECTION      = PASS
-WIN7_TARGET_SMOKE                  = PENDING_HARDWARE
-PRODUCTION_SIGNING                 = PENDING_CERT_TOOLCHAIN
-V1_RELEASE_READY                   = NO
+SETUP_SOURCE_BUILD                   = PASS
+SOLUTION_X86_ONLY                    = PASS
+RUNTIME_CONFIG_FAIL_CLOSED           = PASS
+SQLITE_DATA_DURABILITY               = PASS
+PORTABLE_E2E                         = PASS
+INSTALLER_E2E                        = PASS
+GITHUB_UPDATE_LIVE_DOWNLOAD          = PASS
+CROSS_VERSION_UPDATE_APPLY           = PASS
+UPDATE_STARTUP_PREF_ON_OFF           = PASS
+UPDATE_PRE_BACKUP                    = PASS
+UPDATE_STAGING_CLEANUP               = PASS
+PRODUCTION_UNSIGNED_REJECTION        = PASS
+WIN7_TARGET_SMOKE                    = PENDING_HARDWARE
+PRODUCTION_SIGNING                   = PENDING_CERT_TOOLCHAIN
+SETUP_PRODUCTION_READY               = NO
 ```
 
-`V1_RELEASE_READY=NO` là trạng thái đúng: setup/data/deployment nền đã có regression evidence mạnh, nhưng chưa đủ target Win7, signing và các subsystem học tập/UI để phát hành V1.
+Setup/update hiện có automated evidence mạnh trên workstation, nhưng `SETUP_PRODUCTION_READY=NO` vẫn là trạng thái đúng cho tới khi đóng Win7 target + signing gates.

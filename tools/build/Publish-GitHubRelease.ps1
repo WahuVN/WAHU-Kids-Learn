@@ -83,6 +83,8 @@ if (-not $SkipE2E) {
 
 $tag = "v$AppVersion"
 $title = "WAHU Kids Learn $AppVersion"
+$feedTag = if ($isDev) { 'update-dev' } else { 'update-stable' }
+$feedUrl = "https://github.com/WahuVN/WAHU-Kids-Learn/releases/download/$feedTag/update-manifest.json"
 $notes = @"
 WAHU Kids Learn $AppVersion
 
@@ -91,6 +93,7 @@ WAHU Kids Learn $AppVersion
 - Installer SHA-256: $actualInstallerSha
 - Git commit: $localHead
 - Update channel: $($update.channel)
+- Channel feed: $feedUrl
 
 Learner data is stored outside the application directory and is preserved across reinstall/update by design.
 "@
@@ -103,27 +106,41 @@ try {
     & gh release view $tag --repo WahuVN/WAHU-Kids-Learn 1>$null 2>$null
     $exists = ($LASTEXITCODE -eq 0)
 }
-finally {
-    $ErrorActionPreference = $previousErrorActionPreference
-}
+finally { $ErrorActionPreference = $previousErrorActionPreference }
 
 if ($exists) {
     if (-not $ReplaceExistingAssets) { throw "Release $tag đã tồn tại. Dùng -ReplaceExistingAssets nếu chủ động thay asset cùng tag." }
-    foreach ($asset in $assets) {
-        $name = Split-Path $asset -Leaf
-        & gh release delete-asset $tag $name --repo WahuVN/WAHU-Kids-Learn --yes 2>$null
-    }
-    & gh release edit $tag --repo WahuVN/WAHU-Kids-Learn --title $title --notes $notes --latest
+    & gh release edit $tag --repo WahuVN/WAHU-Kids-Learn --title $title --notes $notes $(if($isDev){'--prerelease'}else{'--latest'})
     if ($LASTEXITCODE -ne 0) { throw 'gh release edit thất bại.' }
     & gh release upload $tag @assets --repo WahuVN/WAHU-Kids-Learn --clobber
     if ($LASTEXITCODE -ne 0) { throw 'gh release upload thất bại.' }
 } else {
     $args = @('release','create',$tag) + $assets + @('--repo','WahuVN/WAHU-Kids-Learn','--target',$localHead,'--title',$title,'--notes',$notes)
-    $args += '--latest'
+    if ($isDev) { $args += @('--prerelease','--latest=false') } else { $args += '--latest' }
     & gh @args
     if ($LASTEXITCODE -ne 0) { throw 'gh release create thất bại.' }
 }
 
+# Fixed technical release used as the channel pointer. Only update-manifest.json is mutable here.
+$feedExists = $false
+$previousErrorActionPreference = $ErrorActionPreference
+try {
+    $ErrorActionPreference = 'Continue'
+    & gh release view $feedTag --repo WahuVN/WAHU-Kids-Learn 1>$null 2>$null
+    $feedExists = ($LASTEXITCODE -eq 0)
+}
+finally { $ErrorActionPreference = $previousErrorActionPreference }
+
+if (-not $feedExists) {
+    & gh release create $feedTag $updateManifest --repo WahuVN/WAHU-Kids-Learn --target $localHead --title "WAHU Update Feed - $($update.channel)" --notes "Technical update pointer for the $($update.channel) channel." --prerelease --latest=false
+    if ($LASTEXITCODE -ne 0) { throw 'Không tạo được channel update feed.' }
+} else {
+    & gh release upload $feedTag $updateManifest --repo WahuVN/WAHU-Kids-Learn --clobber
+    if ($LASTEXITCODE -ne 0) { throw 'Không cập nhật được channel update feed.' }
+}
+
 $published = (& gh release view $tag --repo WahuVN/WAHU-Kids-Learn --json url -q .url).Trim()
+$feedAsset = (& gh release view $feedTag --repo WahuVN/WAHU-Kids-Learn --json assets -q '.assets[] | select(.name=="update-manifest.json") | .name').Trim()
+if ($feedAsset -ne 'update-manifest.json') { throw 'Channel feed không có update-manifest.json sau publish.' }
 Write-Host "GITHUB_RELEASE_PASS tag=$tag url=$published"
-Write-Host "UPDATE_FEED=https://github.com/WahuVN/WAHU-Kids-Learn/releases/latest/download/update-manifest.json"
+Write-Host "UPDATE_FEED=$feedUrl"
