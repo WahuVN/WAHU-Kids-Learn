@@ -14,6 +14,7 @@ namespace WAHU.Session
         public const string PackId = "math_grade2_verified_templates_v1";
         public const string PackVersion = "1.8.0";
         public const int DefaultTargetQuestionCount = 8;
+        public const int MaxAttemptsPerQuestion = 2;
 
         private readonly LearningDatabase _database;
         private readonly string _templatePath;
@@ -61,9 +62,14 @@ namespace WAHU.Session
         private int _targetQuestionCount;
         private int _generatedQuestionCount;
         private int _attempts;
+        private int _answerAttempts;
         private int _correct;
+        private int _independentCorrect;
         private int _hintedCorrect;
+        private int _retriedQuestions;
+        private int _retriedCorrect;
         private int _wrong;
+        private int _currentAttemptIndex = 1;
 
         public MathSessionCoordinator(LearningDatabase database, string templatePath, string performanceProfile, int seed)
             : this(database, templatePath, performanceProfile, seed, DefaultTargetQuestionCount, null) { }
@@ -176,7 +182,9 @@ namespace WAHU.Session
                 SessionMode = _sessionMode,
                 TargetLessonId = _targetLessonId,
                 TargetLessonTitleVi = _targetLesson == null ? null : _targetLesson.TitleVi,
-                LessonAccess = string.IsNullOrWhiteSpace(_targetLessonId) ? null : CurrentLessonAccess()
+                LessonAccess = string.IsNullOrWhiteSpace(_targetLessonId) ? null : CurrentLessonAccess(),
+                RetryPending = _currentQuestion != null && _currentAttemptIndex > 1,
+                CurrentAttemptIndex = _currentQuestion == null ? 1 : _currentAttemptIndex
             };
         }
 
@@ -226,6 +234,7 @@ namespace WAHU.Session
                 _currentQuestion = generator.Generate(_currentSelection);
             }
             _questionStartedAtUtc = DateTime.UtcNow;
+            _currentAttemptIndex = 1;
             _generatedQuestionCount = nextOrdinal;
 
             try
@@ -290,11 +299,61 @@ namespace WAHU.Session
         {
             lock (_submitGate)
             {
-                return SubmitAnswerAtCore(answer, hintLevel, inputMethod, answeredAtUtc, responseMs);
+                return SubmitAnswerAtCore(answer, hintLevel, inputMethod, answeredAtUtc, responseMs, false, 1);
             }
         }
 
-        private MathAnswerOutcome SubmitAnswerAtCore(string answer, int hintLevel, string inputMethod, DateTime answeredAtUtc, int responseMs)
+        public MathAnswerOutcome SubmitAnswerWithRetry(int answer, int hintLevel, string inputMethod)
+        {
+            return SubmitAnswerWithRetry(answer.ToString(System.Globalization.CultureInfo.InvariantCulture), hintLevel, inputMethod);
+        }
+
+        public MathAnswerOutcome SubmitAnswerWithRetry(string answer, int hintLevel, string inputMethod)
+        {
+            var answered = DateTime.UtcNow;
+            var responseMs = (int)Math.Min(int.MaxValue, Math.Max(0, (answered - _questionStartedAtUtc).TotalMilliseconds));
+            return SubmitAnswerWithRetryAt(answer, hintLevel, inputMethod, answered, responseMs);
+        }
+
+        public MathAnswerOutcome SubmitAnswerWithRetryAt(int answer, int hintLevel, string inputMethod, DateTime answeredAtUtc, int responseMs)
+        {
+            return SubmitAnswerWithRetryAt(answer.ToString(System.Globalization.CultureInfo.InvariantCulture), hintLevel, inputMethod, answeredAtUtc, responseMs);
+        }
+
+        public MathAnswerOutcome SubmitAnswerWithRetryAt(string answer, int hintLevel, string inputMethod, DateTime answeredAtUtc, int responseMs)
+        {
+            lock (_submitGate)
+            {
+                return SubmitAnswerAtCore(answer, hintLevel, inputMethod, answeredAtUtc, responseMs, true, 1);
+            }
+        }
+
+        public MathAnswerOutcome SubmitRetryAnswer(int answer, int hintLevel, string inputMethod)
+        {
+            return SubmitRetryAnswer(answer.ToString(System.Globalization.CultureInfo.InvariantCulture), hintLevel, inputMethod);
+        }
+
+        public MathAnswerOutcome SubmitRetryAnswer(string answer, int hintLevel, string inputMethod)
+        {
+            var answered = DateTime.UtcNow;
+            var responseMs = (int)Math.Min(int.MaxValue, Math.Max(0, (answered - _questionStartedAtUtc).TotalMilliseconds));
+            return SubmitRetryAnswerAt(answer, hintLevel, inputMethod, answered, responseMs);
+        }
+
+        public MathAnswerOutcome SubmitRetryAnswerAt(int answer, int hintLevel, string inputMethod, DateTime answeredAtUtc, int responseMs)
+        {
+            return SubmitRetryAnswerAt(answer.ToString(System.Globalization.CultureInfo.InvariantCulture), hintLevel, inputMethod, answeredAtUtc, responseMs);
+        }
+
+        public MathAnswerOutcome SubmitRetryAnswerAt(string answer, int hintLevel, string inputMethod, DateTime answeredAtUtc, int responseMs)
+        {
+            lock (_submitGate)
+            {
+                return SubmitAnswerAtCore(answer, hintLevel, inputMethod, answeredAtUtc, responseMs, true, 2);
+            }
+        }
+
+        private MathAnswerOutcome SubmitAnswerAtCore(string answer, int hintLevel, string inputMethod, DateTime answeredAtUtc, int responseMs, bool retryEnabled, int expectedAttemptIndex)
         {
             EnsureActive();
             if (_currentQuestion == null || _currentSelection == null) throw new InvalidOperationException("No active question.");
@@ -306,6 +365,13 @@ namespace WAHU.Session
             var normalizedAnswer = answer == null ? string.Empty : answer.Trim();
             var isCorrect = question.IsCorrectAnswer(normalizedAnswer);
             var error = _errorClassifier.Classify(question, normalizedAnswer);
+            var attemptIndex = _currentAttemptIndex;
+            if (attemptIndex < 1 || attemptIndex > MaxAttemptsPerQuestion)
+                throw new InvalidOperationException("Invalid Math question attempt index.");
+            if (expectedAttemptIndex != attemptIndex)
+                throw new InvalidOperationException("Math answer intent does not match the current attempt_index.");
+            if (!retryEnabled && attemptIndex > 1)
+                throw new InvalidOperationException("A retry-pending Math question must use SubmitRetryAnswer.");
 
             SkillSnapshot current;
             if (!_skills.TryGetValue(question.SkillId, out current) || current == null)
@@ -326,8 +392,22 @@ namespace WAHU.Session
                 MasteryScore = current.MasteryScore,
                 SessionElapsedMinutes = Math.Max(0, (answeredUtc - _session.StartedAtUtc).TotalMinutes)
             });
-            var mastery = _mastery.Evaluate(current, isCorrect, hintLevel, false, behaviorDecision.ProtectMasteryFromNegativeUpdate);
-            var review = _scheduler.Schedule(answeredUtc, mastery, isCorrect, hintLevel);
+            var suggestPositiveEndBeforeFinalize = behaviorDecision.State == BehaviorState.FATIGUED_LIKELY && _attempts >= 4;
+            var retryPending = retryEnabled && !isCorrect && attemptIndex < MaxAttemptsPerQuestion && !suggestPositiveEndBeforeFinalize;
+            var finalizesQuestion = !retryPending;
+            var masteryHintLevel = attemptIndex > 1 ? Math.Max(1, hintLevel) : hintLevel;
+            MasteryUpdate mastery = null;
+            ReviewUpdate review = null;
+            if (finalizesQuestion)
+            {
+                mastery = _mastery.Evaluate(current, isCorrect, masteryHintLevel, false, behaviorDecision.ProtectMasteryFromNegativeUpdate);
+                if (attemptIndex > 1)
+                {
+                    if (mastery.Reasons == null) mastery.Reasons = new List<string>();
+                    mastery.Reasons.Add("retry_assisted_attempt");
+                }
+                review = _scheduler.Schedule(answeredUtc, mastery, isCorrect, masteryHintLevel);
+            }
             var attemptId = "attempt-" + Guid.NewGuid().ToString("N");
 
             var commit = _answerCommit.Commit(new AnswerCommitRequest
@@ -348,7 +428,7 @@ namespace WAHU.Session
                 HintLevel = hintLevel,
                 Representation = question.Representation,
                 InputMethod = inputMethod,
-                AttemptIndex = 1,
+                AttemptIndex = attemptIndex,
                 ListenCount = 0,
                 Error = error == null ? null : new ErrorEventWrite
                 {
@@ -358,7 +438,7 @@ namespace WAHU.Session
                     EvidenceJson = _json.Serialize(error.Evidence),
                     ClassifierVersion = MathErrorClassifierV1.Version
                 },
-                Mastery = new MasteryEventWrite
+                Mastery = mastery == null ? null : new MasteryEventWrite
                 {
                     Id = "mastery-" + Guid.NewGuid().ToString("N"),
                     EventType = mastery.EventType,
@@ -369,7 +449,7 @@ namespace WAHU.Session
                     ReasonJson = _json.Serialize(mastery.Reasons),
                     MasteryEngineVersion = MasteryEngineV1.Version
                 },
-                ChildSkill = new ChildSkillWrite
+                ChildSkill = mastery == null ? null : new ChildSkillWrite
                 {
                     MasteryScore = mastery.ScoreAfter,
                     Confidence = mastery.ConfidenceAfter,
@@ -383,7 +463,7 @@ namespace WAHU.Session
                     LearningState = mastery.LearningState,
                     MasteryEngineVersion = MasteryEngineV1.Version
                 },
-                Review = new ReviewScheduleWrite
+                Review = review == null ? null : new ReviewScheduleWrite
                 {
                     DueAtUtc = review.DueAtUtc,
                     IntervalDays = review.IntervalDays,
@@ -412,32 +492,73 @@ namespace WAHU.Session
                 // Best-effort diagnostic only. Learning state is already committed atomically.
             }
 
+            bool questionCompleted;
+            bool canRetry;
             if (commit.AlreadyCommitted)
             {
+                var committedAttempts = _runtime.LoadCommittedAttempts(_session.SessionId);
                 _skills = _sessionService.LoadSkillSnapshots(_profile.ChildId, "math");
-                RebuildFromCommittedAttempts(_runtime.LoadCommittedAttempts(_session.SessionId));
-                if (string.Equals(_sessionMode, "adaptive", StringComparison.Ordinal) && behaviorDecision.TriggerPrerequisiteRepair)
+                RebuildFromCommittedAttempts(committedAttempts);
+                var nextAttemptIndex = NextAttemptIndexForQuestion(committedAttempts, question.QuestionId);
+                questionCompleted = nextAttemptIndex == 0;
+                canRetry = retryEnabled && !questionCompleted && nextAttemptIndex <= MaxAttemptsPerQuestion;
+                if (questionCompleted && string.Equals(_sessionMode, "adaptive", StringComparison.Ordinal) &&
+                    _lastBehavior != null && _lastBehavior.TriggerPrerequisiteRepair)
                     _forcedRepairTemplateId = RepairTemplateFor(question);
+                if (!questionCompleted) _currentAttemptIndex = nextAttemptIndex;
             }
             else
             {
-                _skills[question.SkillId] = Apply(current, mastery, answeredUtc, review.DueAtUtc, isCorrect);
-                ApplyMasteryChange(question.SkillId, mastery.ScoreBefore, mastery.ScoreAfter);
-                AddRecent(_recentTemplates, question.TemplateId);
-                AddRecent(_recentSkills, question.SkillId);
-                _distinctSkills.Add(question.SkillId);
-                _attempts++;
-                if (isCorrect) { _correct++; if (hintLevel > 0) _hintedCorrect++; } else _wrong++;
+                _answerAttempts++;
                 _lastBehavior = behaviorDecision;
-                if (string.Equals(_sessionMode, "adaptive", StringComparison.Ordinal) && behaviorDecision.TriggerPrerequisiteRepair)
-                    _forcedRepairTemplateId = RepairTemplateFor(question);
+                questionCompleted = finalizesQuestion;
+                canRetry = retryPending;
+                if (questionCompleted)
+                {
+                    _skills[question.SkillId] = Apply(current, mastery, answeredUtc, review.DueAtUtc, isCorrect);
+                    ApplyMasteryChange(question.SkillId, mastery.ScoreBefore, mastery.ScoreAfter);
+                    AddRecent(_recentTemplates, question.TemplateId);
+                    AddRecent(_recentSkills, question.SkillId);
+                    _distinctSkills.Add(question.SkillId);
+                    _attempts++;
+                    if (attemptIndex > 1) _retriedQuestions++;
+                    if (isCorrect)
+                    {
+                        _correct++;
+                        if (attemptIndex == 1 && hintLevel <= 0) _independentCorrect++;
+                        if (hintLevel > 0) _hintedCorrect++;
+                        if (attemptIndex > 1) _retriedCorrect++;
+                    }
+                    else _wrong++;
+                    if (string.Equals(_sessionMode, "adaptive", StringComparison.Ordinal) && behaviorDecision.TriggerPrerequisiteRepair)
+                        _forcedRepairTemplateId = RepairTemplateFor(question);
+                }
+                else
+                {
+                    _currentAttemptIndex = attemptIndex + 1;
+                }
             }
 
-            try { _runtime.SaveCheckpoint(_session.SessionId, _generatedQuestionCount, _forcedRepairTemplateId); }
-            catch
+            if (questionCompleted)
             {
-                // Attempt is already durable. A stale open-question checkpoint is safe because resume
-                // checks attempt_commit_key before showing it again.
+                try { _runtime.SaveCheckpoint(_session.SessionId, _generatedQuestionCount, _forcedRepairTemplateId); }
+                catch
+                {
+                    // Final attempt is already durable. Resume detects the final mastery-bearing attempt and drops stale cache.
+                }
+            }
+            else
+            {
+                _questionStartedAtUtc = answeredUtc;
+                try
+                {
+                    _runtime.SaveOpenQuestion(_session.SessionId, _generatedQuestionCount, _json.Serialize(question),
+                        SerializeSelection(_currentSelection), _questionStartedAtUtc, _forcedRepairTemplateId);
+                }
+                catch
+                {
+                    // The original open-question checkpoint is still usable; retry index is reconstructed from durable attempts.
+                }
             }
 
             var outcome = new MathAnswerOutcome
@@ -446,7 +567,7 @@ namespace WAHU.Session
                 CorrectAnswer = question.CorrectAnswer,
                 CorrectAnswerDisplay = question.CorrectAnswerDisplay,
                 HintLevel = hintLevel,
-                FeedbackVi = BuildFeedback(isCorrect, hintLevel, error),
+                FeedbackVi = canRetry ? BuildRetryFeedback(error) : BuildFeedback(isCorrect, masteryHintLevel, error),
                 Behavior = behaviorDecision,
                 Mastery = mastery,
                 Review = review,
@@ -454,10 +575,19 @@ namespace WAHU.Session
                 OfferBreak = behaviorDecision.Actions != null && behaviorDecision.Actions.Contains("offer_break"),
                 SuggestPositiveEnd = behaviorDecision.State == BehaviorState.FATIGUED_LIKELY && _attempts >= 4,
                 CompletedQuestionCount = _attempts,
-                TargetQuestionCount = _targetQuestionCount
+                TargetQuestionCount = _targetQuestionCount,
+                AttemptIndex = attemptIndex,
+                QuestionCompleted = questionCompleted,
+                CanRetry = canRetry,
+                IsRetry = attemptIndex > 1,
+                IndependentSuccess = questionCompleted && isCorrect && attemptIndex == 1 && hintLevel <= 0
             };
-            _currentQuestion = null;
-            _currentSelection = null;
+            if (questionCompleted)
+            {
+                _currentQuestion = null;
+                _currentSelection = null;
+                _currentAttemptIndex = 1;
+            }
             return outcome;
         }
 
@@ -468,8 +598,11 @@ namespace WAHU.Session
             var summary = BuildSummary(ended);
             var summaryData = new Dictionary<string, object>
             {
-                { "attempts", summary.Attempts }, { "correct", summary.Correct }, { "hinted_correct", summary.HintedCorrect },
-                { "wrong", summary.Wrong }, { "distinct_skills", summary.DistinctSkills }, { "subject", "math" },
+                { "attempts", summary.Attempts }, { "answer_attempts", summary.AnswerAttempts },
+                { "correct", summary.Correct }, { "independent_correct", summary.IndependentCorrect },
+                { "hinted_correct", summary.HintedCorrect }, { "retried_questions", summary.RetriedQuestions },
+                { "retried_correct", summary.RetriedCorrect }, { "wrong", summary.Wrong },
+                { "distinct_skills", summary.DistinctSkills }, { "subject", "math" },
                 { "session_mode", _sessionMode }, { "mastery_changes", summary.MasteryChanges ?? new List<MathSkillMasteryChange>() },
                 { "improved_skill_count", summary.ImprovedSkillCount }
             };
@@ -668,7 +801,8 @@ namespace WAHU.Session
             _skills = _sessionService.LoadSkillSnapshots(_profile.ChildId, "math");
             _active = true;
 
-            RebuildFromCommittedAttempts(_runtime.LoadCommittedAttempts(_session.SessionId));
+            var committedAttempts = _runtime.LoadCommittedAttempts(_session.SessionId);
+            RebuildFromCommittedAttempts(committedAttempts);
             if (_generatedQuestionCount < _attempts) _generatedQuestionCount = _attempts;
 
             if (string.IsNullOrWhiteSpace(runtime.CurrentQuestionJson))
@@ -687,7 +821,8 @@ namespace WAHU.Session
                 var question = _json.Deserialize<MathQuestion>(runtime.CurrentQuestionJson);
                 if (!IsUsableRestoredQuestion(question)) throw new InvalidOperationException("Invalid cached Math question.");
 
-                if (_runtime.HasCommittedAttempt(_session.SessionId, question.QuestionId, 1))
+                var nextAttemptIndex = NextAttemptIndexForQuestion(committedAttempts, question.QuestionId);
+                if (nextAttemptIndex == 0)
                 {
                     if (string.Equals(_sessionMode, "adaptive", StringComparison.Ordinal) &&
                         _lastBehavior != null && _lastBehavior.TriggerPrerequisiteRepair)
@@ -698,6 +833,7 @@ namespace WAHU.Session
 
                 _currentQuestion = question;
                 _currentSelection = DeserializeSelection(runtime.CurrentSelectionJson, question);
+                _currentAttemptIndex = nextAttemptIndex;
                 _questionStartedAtUtc = runtime.QuestionStartedAtUtc ?? DateTime.UtcNow;
                 restoredOpenQuestion = true;
             }
@@ -713,8 +849,42 @@ namespace WAHU.Session
 
         private void ReconcileTargetedGeneratedOrdinalAfterDiscard()
         {
+            _currentAttemptIndex = 1;
             if (!string.Equals(_sessionMode, "lesson", StringComparison.Ordinal)) return;
             _generatedQuestionCount = Math.Max(0, Math.Min(_targetQuestionCount, _attempts));
+        }
+
+        private static int NextAttemptIndexForQuestion(IList<MathCommittedAttemptSnapshot> attempts, string questionId)
+        {
+            if (string.IsNullOrWhiteSpace(questionId)) throw new ArgumentException("questionId");
+            var matches = (attempts ?? new List<MathCommittedAttemptSnapshot>())
+                .Where(x => string.Equals(x.QuestionId, questionId, StringComparison.Ordinal))
+                .OrderBy(x => x.AttemptIndex)
+                .ToList();
+            if (matches.Count == 0) return 1;
+
+            var expected = 1;
+            var finalized = false;
+            foreach (var attempt in matches)
+            {
+                if (attempt.AttemptIndex != expected)
+                    throw new InvalidDataException("Persisted Math retry attempt_index sequence is not contiguous.");
+                if (finalized)
+                    throw new InvalidDataException("Persisted Math retry has attempts after finalization.");
+                if (attempt.MasteryScoreAfter.HasValue)
+                {
+                    finalized = true;
+                }
+                else if (attempt.IsCorrect)
+                {
+                    throw new InvalidDataException("Persisted pending Math retry cannot already be correct without finalization.");
+                }
+                expected++;
+            }
+            if (finalized) return 0;
+            if (matches.Count >= MaxAttemptsPerQuestion)
+                throw new InvalidDataException("Persisted Math retry exhausted attempts without a final mastery event.");
+            return matches.Count + 1;
         }
 
         private void RebuildFromCommittedAttempts(IList<MathCommittedAttemptSnapshot> attempts)
@@ -724,35 +894,31 @@ namespace WAHU.Session
             _distinctSkills.Clear();
             _masteryChanges.Clear();
             _attempts = 0;
+            _answerAttempts = 0;
             _correct = 0;
+            _independentCorrect = 0;
             _hintedCorrect = 0;
+            _retriedQuestions = 0;
+            _retriedCorrect = 0;
             _wrong = 0;
             _behavior = new BehaviorController();
             _lastBehavior = null;
 
             if (attempts == null) return;
+            var finalizedQuestionIds = new HashSet<string>(StringComparer.Ordinal);
             foreach (var attempt in attempts)
             {
-                _attempts++;
-                if (attempt.IsCorrect)
-                {
-                    _correct++;
-                    if (attempt.HintLevel > 0) _hintedCorrect++;
-                }
-                else _wrong++;
+                if (attempt.AttemptIndex < 1 || attempt.AttemptIndex > MaxAttemptsPerQuestion)
+                    throw new InvalidDataException("Persisted Math attempt_index is outside retry policy.");
+                _answerAttempts++;
 
-                _distinctSkills.Add(attempt.SkillId);
-                AddRecent(_recentSkills, attempt.SkillId);
-                var templateId = TemplateIdFromQuestionId(attempt.QuestionId);
-                if (!string.IsNullOrWhiteSpace(templateId)) AddRecent(_recentTemplates, templateId);
-                if (attempt.MasteryScoreAfter.HasValue)
+                var behaviorMastery = attempt.MasteryScoreBefore;
+                if (!attempt.MasteryScoreAfter.HasValue)
                 {
-                    var reconstructedDelta = attempt.MasteryScoreAfter.Value - attempt.MasteryScoreBefore;
-                    if (attempt.MasteryDelta.HasValue && Math.Abs(attempt.MasteryDelta.Value - reconstructedDelta) > 0.0000001)
-                        throw new InvalidDataException("Persisted Math mastery event delta is inconsistent with score_before/score_after.");
-                    ApplyMasteryChange(attempt.SkillId, attempt.MasteryScoreBefore, attempt.MasteryScoreAfter.Value);
+                    SkillSnapshot pendingSkill;
+                    if (_skills != null && _skills.TryGetValue(attempt.SkillId, out pendingSkill) && pendingSkill != null)
+                        behaviorMastery = pendingSkill.MasteryScore;
                 }
-
                 _lastBehavior = _behavior.Observe(new BehaviorObservation
                 {
                     SkillId = attempt.SkillId,
@@ -765,9 +931,33 @@ namespace WAHU.Session
                     InputMiss = false,
                     ErrorType = attempt.ErrorType,
                     Representation = attempt.Representation,
-                    MasteryScore = Math.Max(0.0, Math.Min(1.0, attempt.MasteryScoreBefore)),
+                    MasteryScore = Math.Max(0.0, Math.Min(1.0, behaviorMastery)),
                     SessionElapsedMinutes = Math.Max(0, (attempt.AnsweredAtUtc - _session.StartedAtUtc).TotalMinutes)
                 });
+
+                if (!attempt.MasteryScoreAfter.HasValue) continue;
+                if (!finalizedQuestionIds.Add(attempt.QuestionId))
+                    throw new InvalidDataException("Persisted Math question has multiple final mastery-bearing attempts.");
+
+                _attempts++;
+                if (attempt.AttemptIndex > 1) _retriedQuestions++;
+                if (attempt.IsCorrect)
+                {
+                    _correct++;
+                    if (attempt.AttemptIndex == 1 && attempt.HintLevel <= 0) _independentCorrect++;
+                    if (attempt.HintLevel > 0) _hintedCorrect++;
+                    if (attempt.AttemptIndex > 1) _retriedCorrect++;
+                }
+                else _wrong++;
+
+                _distinctSkills.Add(attempt.SkillId);
+                AddRecent(_recentSkills, attempt.SkillId);
+                var templateId = TemplateIdFromQuestionId(attempt.QuestionId);
+                if (!string.IsNullOrWhiteSpace(templateId)) AddRecent(_recentTemplates, templateId);
+                var reconstructedDelta = attempt.MasteryScoreAfter.Value - attempt.MasteryScoreBefore;
+                if (attempt.MasteryDelta.HasValue && Math.Abs(attempt.MasteryDelta.Value - reconstructedDelta) > 0.0000001)
+                    throw new InvalidDataException("Persisted Math mastery event delta is inconsistent with score_before/score_after.");
+                ApplyMasteryChange(attempt.SkillId, attempt.MasteryScoreBefore, attempt.MasteryScoreAfter.Value);
             }
         }
 
@@ -892,8 +1082,12 @@ namespace WAHU.Session
             return new MathSessionSummary
             {
                 Attempts = _attempts,
+                AnswerAttempts = _answerAttempts,
                 Correct = _correct,
+                IndependentCorrect = _independentCorrect,
                 HintedCorrect = _hintedCorrect,
+                RetriedQuestions = _retriedQuestions,
+                RetriedCorrect = _retriedCorrect,
                 Wrong = _wrong,
                 DistinctSkills = _distinctSkills.Count,
                 FinalBehaviorState = _lastBehavior == null ? BehaviorState.READY : _lastBehavior.State,
@@ -1099,6 +1293,13 @@ namespace WAHU.Session
                 }
             }
             return names.Count == 0 ? "Khu vườn vừa có thêm một món mới." : "Mở khóa: " + string.Join(", ", names) + ".";
+        }
+
+        private static string BuildRetryFeedback(MathErrorClassification error)
+        {
+            if (error == null)
+                return "Chưa đúng. Con xem gợi ý rồi thử lại chính câu này nhé.";
+            return BuildFeedback(false, 1, error) + " Con thử lại chính câu này nhé.";
         }
 
         private static string BuildFeedback(bool correct, int hintLevel, MathErrorClassification error)

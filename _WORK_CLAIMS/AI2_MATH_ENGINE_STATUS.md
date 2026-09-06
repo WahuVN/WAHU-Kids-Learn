@@ -20,7 +20,7 @@ Branch: `main`
 
 - `tests/MathEngineRuntimeSmoke`: PASS — **47 assertions**.
 - `tests/MathDataEngineRuntimeSmoke`: PASS — **35 assertions**.
-- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **111 assertions** (authored bank + targeted lesson + prerequisite unlock + exact resume + mastery delta + next lesson + corrupt authored cursor recovery).
+- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **140 assertions** (authored bank + targeted lesson + prerequisite unlock + exact resume + mastery delta + next lesson + corrupt authored cursor recovery + retry/resume/anti-double-submit).
 - `tests/SQLiteRuntimeSmoke`: PASS — **166 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
 - `tests/LearningSessionRuntimeSmoke`: PASS — **794 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
 - PowerShell release/build scripts: schema V4 payload/bootstrap expectations đã cập nhật; parse/build gate PASS.
@@ -40,7 +40,8 @@ Branch: `main`
 - lesson-targeted session: PASS — constructor nhận `lessonId`, engine lấy đúng authored practice set của lesson theo thứ tự basic → medium → application.
 - prerequisite guard: PASS — lesson bị khóa bị chặn ngay ở coordinator, kể cả caller bypass UI.
 - targeted exact resume: PASS — persist/restore `session_mode=lesson`, `target_lesson_id`, committed counters và exact open authored question.
-- retry/skip: **chưa có API first-class**; hiện mỗi submit kết thúc question; prerequisite repair tự động chỉ áp dụng cho adaptive session, không chen câu ngoài lesson-targeted set.
+- retry: PASS first-class opt-in — initial intent và explicit retry intent tách riêng, tối đa 2 attempts/question; pending retry survive suspend/resume, duplicate initial intent không tự tiêu attempt 2. API one-shot cũ vẫn backward-compatible.
+- skip: **chưa có API first-class**; prerequisite repair tự động chỉ áp dụng cho adaptive session, không chen câu ngoài lesson-targeted set.
 
 ## Persistence
 
@@ -60,6 +61,7 @@ Branch: `main`
 ## Progress / mastery
 
 - independent vs hinted mastery: PASS baseline.
+- retry/first-try scoring: PASS — first-wrong pending không đổi mastery; retry finalize đúng một mastery update; retry-correct dùng assisted weight và không tính independent; explicit hint vẫn được theo dõi riêng.
 - review scheduling: PASS baseline.
 - completed-session garden reward idempotent: PASS.
 - attempt replay không nhân mastery/child_skill/review: PASS.
@@ -74,9 +76,9 @@ Branch: `main`
 
 ## Known edge cases
 
-PASS: `0`, số âm, số rất lớn, decimal, fraction, malformed, empty, divide-by-zero, unit, expression safety, duplicate event, same-payload replay, conflict payload, app close giữa lesson, exact resume, stale cached open question, corrupted cached question, V1/V2/V3/V4 migration, locked lesson direct-start, targeted suspend/resume, prerequisite completion → unlock.
+PASS: `0`, số âm, số rất lớn, decimal, fraction, malformed, empty, divide-by-zero, unit, expression safety, duplicate event, same-payload replay, conflict payload, app close giữa lesson, exact resume, stale cached open question, corrupted cached question, V1/V2/V3/V4 migration, locked lesson direct-start, targeted suspend/resume, prerequisite completion → unlock, retry suspend/resume, retry-correct/retry-wrong, duplicate initial retry intent.
 
-Còn phải làm: retry semantics, hint/first-try scoring semantics, skip policy nếu product cho phép, numeric XP/daily streak nếu product cần, stale-state/concurrency regression mở rộng và network/write-failure behavior ở integration boundary. Lesson-target/completion/score/prerequisite unlock + mastery-delta/next-lesson result contract đã đóng.
+Còn phải làm: skip policy nếu product cho phép, numeric XP/daily streak nếu product cần, stale-state/concurrency regression mở rộng và network/write-failure behavior ở integration boundary. Lesson-target/completion/score/prerequisite unlock + mastery-delta/next-lesson + retry/first-try/hint scoring contract đã đóng.
 
 ## Commits
 
@@ -87,7 +89,8 @@ Còn phải làm: retry semantics, hint/first-try scoring semantics, skip policy
 - `a5119d4` — `feat(toán): nạp ngân hàng 201 câu theo bài học` — pushed.
 - `656a94b` — `feat(toán): thêm phiên học theo bài và mở khóa prerequisite` — pushed.
 - `8b32944` — `feat(toán): publish mastery delta và bài tiếp theo` — pushed.
-- Request 007 corrupt authored cursor recovery — regression PASS và được chốt trong wave selective hiện tại.
+- `7f79367` — `fix(toán): khôi phục đúng câu authored khi cache hỏng` — pushed.
+- retry / first-try / hint scoring contract — đang chốt selective commit hiện tại.
 
 ## Blocker / coordination
 

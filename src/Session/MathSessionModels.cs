@@ -19,6 +19,8 @@ namespace WAHU.Session
         public string TargetLessonId { get; set; }
         public string TargetLessonTitleVi { get; set; }
         public MathLessonAccessSnapshot LessonAccess { get; set; }
+        public bool RetryPending { get; set; }
+        public int CurrentAttemptIndex { get; set; }
     }
 
     public sealed class MathAnswerOutcome
@@ -36,6 +38,11 @@ namespace WAHU.Session
         public bool SuggestPositiveEnd { get; set; }
         public int CompletedQuestionCount { get; set; }
         public int TargetQuestionCount { get; set; }
+        public int AttemptIndex { get; set; }
+        public bool QuestionCompleted { get; set; }
+        public bool CanRetry { get; set; }
+        public bool IsRetry { get; set; }
+        public bool IndependentSuccess { get; set; }
     }
 
     public sealed class MathSkillMasteryChange
@@ -49,8 +56,12 @@ namespace WAHU.Session
     public sealed class MathSessionSummary
     {
         public int Attempts { get; set; }
+        public int AnswerAttempts { get; set; }
         public int Correct { get; set; }
+        public int IndependentCorrect { get; set; }
         public int HintedCorrect { get; set; }
+        public int RetriedQuestions { get; set; }
+        public int RetriedCorrect { get; set; }
         public int Wrong { get; set; }
         public int DistinctSkills { get; set; }
         public BehaviorState FinalBehaviorState { get; set; }

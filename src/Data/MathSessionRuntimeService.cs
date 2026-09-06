@@ -30,6 +30,7 @@ namespace WAHU.Data
         public bool IsCorrect { get; set; }
         public int ResponseMs { get; set; }
         public int HintLevel { get; set; }
+        public int AttemptIndex { get; set; }
         public string Representation { get; set; }
         public DateTime AnsweredAtUtc { get; set; }
         public double MasteryScoreBefore { get; set; }
@@ -214,7 +215,7 @@ WHERE session_id=@session AND question_id=@question AND attempt_index=@attemptIn
             using (var connection = _database.OpenConnection())
             using (var command = connection.CreateCommand())
             {
-                command.CommandText = @"SELECT a.id,a.question_id,a.skill_id,a.is_correct,a.response_ms,a.hint_level,
+                command.CommandText = @"SELECT a.id,a.question_id,a.skill_id,a.is_correct,a.response_ms,a.hint_level,a.attempt_index,
 a.representation,a.answered_at_utc,
 COALESCE((SELECT m.score_before FROM mastery_event m WHERE m.attempt_id=a.id ORDER BY m.created_at_utc ASC LIMIT 1),0.25),
 (SELECT m.score_after FROM mastery_event m WHERE m.attempt_id=a.id ORDER BY m.created_at_utc ASC LIMIT 1),
@@ -236,12 +237,13 @@ ORDER BY a.answered_at_utc ASC,a.started_at_utc ASC,a.id ASC;";
                             IsCorrect = Convert.ToInt32(reader[3], CultureInfo.InvariantCulture) != 0,
                             ResponseMs = reader[4] == DBNull.Value ? 0 : Convert.ToInt32(reader[4], CultureInfo.InvariantCulture),
                             HintLevel = Convert.ToInt32(reader[5], CultureInfo.InvariantCulture),
-                            Representation = NullableText(reader[6]),
-                            AnsweredAtUtc = ReadUtc(reader[7]),
-                            MasteryScoreBefore = Convert.ToDouble(reader[8], CultureInfo.InvariantCulture),
-                            MasteryScoreAfter = NullableDouble(reader[9]),
-                            MasteryDelta = NullableDouble(reader[10]),
-                            ErrorType = NullableText(reader[11])
+                            AttemptIndex = Convert.ToInt32(reader[6], CultureInfo.InvariantCulture),
+                            Representation = NullableText(reader[7]),
+                            AnsweredAtUtc = ReadUtc(reader[8]),
+                            MasteryScoreBefore = Convert.ToDouble(reader[9], CultureInfo.InvariantCulture),
+                            MasteryScoreAfter = NullableDouble(reader[10]),
+                            MasteryDelta = NullableDouble(reader[11]),
+                            ErrorType = NullableText(reader[12])
                         });
                     }
                 }

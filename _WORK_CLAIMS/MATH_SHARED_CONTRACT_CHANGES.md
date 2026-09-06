@@ -140,13 +140,27 @@ Targeted lesson không được bỏ qua authored ordinal khi cache câu đang m
 - Adaptive session giữ behavior recovery cũ; cursor rollback này chỉ áp dụng targeted lesson.
 - Regression `MathSessionPersistenceRuntimeSmoke` khóa cả durable cursor sau reconcile và đúng `ContentQuestionId` medium/application.
 
+## 2026-09-07 — Retry / first-try / hint scoring contract (AI2)
+
+Retry là opt-in engine contract; API one-shot hiện tại vẫn giữ nguyên để không đổi hành vi UI cũ:
+
+- `SubmitAnswer(...)` / `SubmitAnswerAt(...)`: one-shot, một submit luôn finalize câu như trước.
+- `SubmitAnswerWithRetry(...)`: **initial intent** cho attempt 1; nếu sai và chưa fatigue-stop thì giữ nguyên câu để retry.
+- `SubmitRetryAnswer(...)`: **explicit retry intent** cho attempt 2. Engine reject initial intent gửi trùng khi câu đang chờ retry, nên double-submit không tự tiêu retry.
+- `MaxAttemptsPerQuestion = 2`; semantic key vẫn là `(session_id, question_id, attempt_index)` với `attempt_index` lần lượt 1 rồi 2.
+- Sai attempt 1 trong retry flow vẫn ghi immutable `attempt` + error/behavior evidence, nhưng **không** ghi `mastery_event`, không update `child_skill`, `review_schedule`, lesson score hoặc completed-question progress.
+- Attempt 2 finalize đúng một lần. Retry đúng dùng assisted mastery weight tối thiểu tương đương hint level 1 và reason `retry_assisted_attempt`; không được tính là independent success. Retry sai chỉ tạo **một** negative mastery update ở attempt finalize.
+- Suspend/resume phục hồi đúng cùng `QuestionId`; `MathSessionStartResult.RetryPending=true` và `CurrentAttemptIndex=2` khi đang chờ retry.
+- `MathAnswerOutcome` publish `AttemptIndex`, `QuestionCompleted`, `CanRetry`, `IsRetry`, `IndependentSuccess`; `Mastery/Review` có thể `null` ở first-wrong pending retry.
+- `MathSessionSummary.Attempts` tiếp tục nghĩa là **completed questions** để backward-compatible. Thêm `AnswerAttempts`, `IndependentCorrect`, `RetriedQuestions`, `RetriedCorrect`.
+- `HintedCorrect` chỉ đếm success có **gợi ý thật sự được mở**; retry-correct không hint nằm ở `RetriedCorrect`, không được UI suy `independent = correct - hinted` nữa. UI phải dùng `IndependentCorrect`/`RetriedCorrect` khi hiển thị result retry-aware.
+- Resume/rebuild lấy final question state từ mastery-bearing attempt; pending first-wrong không làm tăng completed-question count và không double mastery.
+
 ## Contract còn chưa chốt
 
 Các mục sau chưa được UI/content tự invent cho tới khi AI2 publish contract:
 
-- retry cùng question và `attempt_index` semantics;
 - skip policy;
-- first-try / retry / hint scoring;
 - numeric XP nếu product thật sự cần;
 - daily streak first-class contract.
 

@@ -31,6 +31,8 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestAuthoredQuestionBank(questionBankPath);
                 TestTargetedLessonUnlockAndResume(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedCorruptOpenQuestionReplaysAuthoredOrdinal(root, schemaPath, templatePath, lessonCatalogPath);
+                TestRetryAwareAnswerFlow(root, schemaPath, templatePath);
+                TestRetryWrongFinalizesOnce(root, schemaPath, templatePath);
                 TestResumeOpenQuestionAndComplete(root, schemaPath, templatePath);
                 TestCommittedStaleQuestionIsNotReplayed(root, schemaPath, templatePath);
                 TestCorruptOpenQuestionRecoversWithoutProgressReset(root, schemaPath, templatePath);
@@ -303,6 +305,130 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 A(summary.LessonCompleted && summary.Attempts == 3 && summary.TargetLessonId == lesson.Id,
                     "targeted_corrupt_resume_completes_only_after_full_authored_set");
             }
+        }
+
+        private static void TestRetryAwareAnswerFlow(string root, string schemaPath, string templatePath)
+        {
+            var database = NewDatabase(Path.Combine(root, "retry-resume.db"), schemaPath);
+            string sessionId;
+            string childId;
+            string questionId;
+            string skillId;
+
+            using (var first = new MathSessionCoordinator(database, templatePath, "LOW", 8201, 2))
+            {
+                var start = first.Start("Bé retry");
+                sessionId = start.SessionId;
+                childId = start.ChildId;
+                var question = first.NextQuestion();
+                questionId = question.QuestionId;
+                skillId = question.SkillId;
+                var wrong = WrongAnswer(question);
+                var firstWrong = first.SubmitAnswerWithRetryAt(wrong, 0, "smoke", DateTime.UtcNow, 800);
+                A(!firstWrong.IsCorrect && !firstWrong.QuestionCompleted && firstWrong.CanRetry && firstWrong.AttemptIndex == 1,
+                    "retry_first_wrong_stays_on_same_question");
+                A(firstWrong.Mastery == null && firstWrong.Review == null && firstWrong.CompletedQuestionCount == 0,
+                    "retry_first_wrong_does_not_update_learning_progress");
+                A(first.Summary.Attempts == 0 && first.Summary.AnswerAttempts == 1,
+                    "retry_first_wrong_counts_answer_attempt_not_completed_question");
+                A(first.NextQuestion().QuestionId == questionId,
+                    "retry_first_wrong_next_question_is_same_open_question");
+                A(Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + sessionId + "' AND question_id='" + questionId + "' AND attempt_index=1;") == 1,
+                    "retry_first_wrong_persists_attempt_index_one");
+                A(Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + sessionId + "';") == 0,
+                    "retry_first_wrong_writes_no_mastery_event");
+                var duplicateInitialRejected = false;
+                try
+                {
+                    first.SubmitAnswerWithRetryAt(wrong, 0, "smoke", DateTime.UtcNow, 810);
+                }
+                catch (InvalidOperationException)
+                {
+                    duplicateInitialRejected = true;
+                }
+                A(duplicateInitialRejected && Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + sessionId + "' AND question_id='" + questionId + "';") == 1,
+                    "retry_duplicate_initial_intent_cannot_consume_attempt_two");
+                first.Suspend("retry_resume_test");
+            }
+
+            using (var resumed = new MathSessionCoordinator(database, templatePath, "NORMAL", 9999, 9))
+            {
+                var start = resumed.Start("Bé retry");
+                A(start.ResumedExistingSession && start.RestoredOpenQuestion && start.RetryPending && start.CurrentAttemptIndex == 2,
+                    "retry_resume_restores_pending_attempt_two");
+                A(start.CompletedQuestionCount == 0 && resumed.Summary.Attempts == 0 && resumed.Summary.AnswerAttempts == 1,
+                    "retry_resume_reconstructs_answer_attempt_without_completed_progress");
+                var question = resumed.NextQuestion();
+                A(question.QuestionId == questionId,
+                    "retry_resume_keeps_exact_question_id");
+
+                var retryCorrect = resumed.SubmitRetryAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 900);
+                A(retryCorrect.IsCorrect && retryCorrect.QuestionCompleted && !retryCorrect.CanRetry && retryCorrect.AttemptIndex == 2 && retryCorrect.IsRetry,
+                    "retry_second_attempt_correct_finalizes_question");
+                A(!retryCorrect.IndependentSuccess && retryCorrect.Mastery != null && retryCorrect.Review != null,
+                    "retry_correct_is_assisted_not_independent");
+                A(retryCorrect.Mastery.Reasons != null && retryCorrect.Mastery.Reasons.Contains("retry_assisted_attempt"),
+                    "retry_correct_mastery_records_retry_reason");
+                var afterRetry = resumed.Summary;
+                A(afterRetry.Attempts == 1 && afterRetry.AnswerAttempts == 2 && afterRetry.Correct == 1,
+                    "retry_correct_counts_one_completed_question_from_two_answers");
+                A(afterRetry.IndependentCorrect == 0 && afterRetry.RetriedQuestions == 1 && afterRetry.RetriedCorrect == 1,
+                    "retry_correct_summary_separates_independent_and_retry_success");
+                A(Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + sessionId + "' AND question_id='" + questionId + "' AND attempt_index IN (1,2);") == 2,
+                    "retry_correct_persists_two_semantic_attempt_indices");
+                A(Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + sessionId + "';") == 1,
+                    "retry_correct_writes_exactly_one_mastery_event");
+                A(Count(database, "SELECT count(*) FROM child_skill WHERE child_id='" + childId + "' AND skill_id='" + skillId + "' AND independent_success_count=0 AND hinted_success_count=1;") == 1,
+                    "retry_correct_updates_assisted_mastery_bucket_once");
+
+                var q2 = resumed.NextQuestion();
+                var direct = resumed.SubmitAnswerWithRetryAt(q2.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 950);
+                A(direct.QuestionCompleted && direct.AttemptIndex == 1 && direct.IndependentSuccess,
+                    "retry_api_first_try_correct_remains_independent");
+                A(resumed.Summary.Attempts == 2 && resumed.Summary.AnswerAttempts == 3 && resumed.Summary.IndependentCorrect == 1,
+                    "retry_api_mixes_retry_and_first_try_without_progress_inflation");
+                var summary = resumed.Complete();
+                A(summary.Attempts == 2 && summary.AnswerAttempts == 3 && summary.RetriedCorrect == 1,
+                    "retry_completed_session_keeps_question_and_answer_attempt_counters");
+            }
+        }
+
+        private static void TestRetryWrongFinalizesOnce(string root, string schemaPath, string templatePath)
+        {
+            var database = NewDatabase(Path.Combine(root, "retry-wrong.db"), schemaPath);
+            string sessionId;
+            using (var coordinator = new MathSessionCoordinator(database, templatePath, "LOW", 8202, 1))
+            {
+                var start = coordinator.Start("Bé retry wrong");
+                sessionId = start.SessionId;
+                var question = coordinator.NextQuestion();
+                var wrong = WrongAnswer(question);
+                var firstWrong = coordinator.SubmitAnswerWithRetryAt(wrong, 0, "smoke", DateTime.UtcNow, 700);
+                A(firstWrong.CanRetry && !firstWrong.QuestionCompleted && coordinator.Summary.Attempts == 0,
+                    "retry_wrong_first_attempt_waits_for_retry");
+
+                var retryWrong = coordinator.SubmitRetryAnswerAt(wrong, 0, "smoke", DateTime.UtcNow, 750);
+                A(!retryWrong.IsCorrect && retryWrong.QuestionCompleted && !retryWrong.CanRetry && retryWrong.AttemptIndex == 2,
+                    "retry_wrong_second_attempt_finalizes_failure");
+                A(retryWrong.Mastery != null && retryWrong.Mastery.Delta <= 0 && retryWrong.Review != null,
+                    "retry_wrong_applies_one_final_negative_mastery_update");
+                var summary = coordinator.Summary;
+                A(summary.Attempts == 1 && summary.AnswerAttempts == 2 && summary.Correct == 0 && summary.Wrong == 1 && summary.RetriedQuestions == 1,
+                    "retry_wrong_summary_counts_one_failed_question_from_two_answers");
+                A(Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + sessionId + "';") == 1,
+                    "retry_wrong_writes_exactly_one_mastery_event");
+                A(coordinator.NextQuestion() == null,
+                    "retry_wrong_finalized_question_consumes_target_once");
+                coordinator.Complete();
+            }
+        }
+
+        private static string WrongAnswer(MathQuestion question)
+        {
+            if (question == null) throw new ArgumentNullException("question");
+            foreach (var candidate in new[] { "__wahu_wrong_answer__", "-999999999", "999999999" })
+                if (!question.IsCorrectAnswer(candidate)) return candidate;
+            throw new InvalidOperationException("Could not construct a guaranteed wrong Math answer for smoke test.");
         }
 
         private static void TestResumeOpenQuestionAndComplete(string root, string schemaPath, string templatePath)
