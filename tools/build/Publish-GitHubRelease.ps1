@@ -110,7 +110,9 @@ finally { $ErrorActionPreference = $previousErrorActionPreference }
 
 if ($exists) {
     if (-not $ReplaceExistingAssets) { throw "Release $tag đã tồn tại. Dùng -ReplaceExistingAssets nếu chủ động thay asset cùng tag." }
-    & gh release edit $tag --repo WahuVN/WAHU-Kids-Learn --title $title --notes $notes $(if($isDev){'--prerelease'}else{'--latest'})
+    $editArgs = @('release','edit',$tag,'--repo','WahuVN/WAHU-Kids-Learn','--title',$title,'--notes',$notes)
+    if ($isDev) { $editArgs += '--prerelease' } else { $editArgs += '--latest' }
+    & gh @editArgs
     if ($LASTEXITCODE -ne 0) { throw 'gh release edit thất bại.' }
     & gh release upload $tag @assets --repo WahuVN/WAHU-Kids-Learn --clobber
     if ($LASTEXITCODE -ne 0) { throw 'gh release upload thất bại.' }
@@ -140,7 +142,8 @@ if (-not $feedExists) {
 }
 
 $published = (& gh release view $tag --repo WahuVN/WAHU-Kids-Learn --json url -q .url).Trim()
-$feedAsset = (& gh release view $feedTag --repo WahuVN/WAHU-Kids-Learn --json assets -q '.assets[] | select(.name=="update-manifest.json") | .name').Trim()
-if ($feedAsset -ne 'update-manifest.json') { throw 'Channel feed không có update-manifest.json sau publish.' }
+$feedJson = (& gh release view $feedTag --repo WahuVN/WAHU-Kids-Learn --json assets) | ConvertFrom-Json
+$feedAssets = @($feedJson.assets | Where-Object { $_.name -eq 'update-manifest.json' })
+if ($feedAssets.Count -ne 1) { throw 'Channel feed không có đúng một update-manifest.json sau publish.' }
 Write-Host "GITHUB_RELEASE_PASS tag=$tag url=$published"
 Write-Host "UPDATE_FEED=$feedUrl"
