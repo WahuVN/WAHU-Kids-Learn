@@ -1,0 +1,83 @@
+# Build output
+/build/
+[Bb]in/
+[Oo]bj/
+.vs/
+.vscode/
+.idea/
+
+# Visual Studio / user-specific
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.csproj.user
+
+# NuGet transient caches (keep packages.lock.json)
+packages/
+.nuget/
+project.assets.json
+project.nuget.cache
+*.nuget.dgspec.json
+*.nuget.g.props
+*.nuget.g.targets
+
+# Runtime learner data / portable user data
+UserData/
+**/UserData/
+*.db
+*.db-wal
+*.db-shm
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Logs / diagnostics / temporary outputs
+*.log
+*.tmp
+*.temp
+*.bak
+*.dmp
+*.etl
+TestResults/
+coverage/
+
+# Compiled binaries/debug symbols
+*.exe
+*.dll
+*.pdb
+*.ilk
+*.obj
+*.cache
+
+# Generated installers / archives
+*.msi
+*.msix
+*.appx
+*.zip
+*.7z
+*.rar
+*.sha256
+SHA256SUMS.txt
+PORTABLE_SHA256SUMS.txt
+
+# OS noise
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Secrets / signing material
+*.pfx
+*.p12
+*.pvk
+*.snk
+*.key
+*.pem
+*.cer
+*.crt
+.env
+.env.*
+secrets/
+
+# Keep source lockfiles
+!packages.lock.json
