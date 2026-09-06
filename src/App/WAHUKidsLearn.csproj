@@ -8,7 +8,7 @@
   <ItemGroup><Reference Include="System" /><Reference Include="System.Core" /><Reference Include="System.Drawing" /><Reference Include="System.Windows.Forms" /></ItemGroup>
   <ItemGroup><Compile Include="Program.cs" /><Compile Include="MainForm.cs" /></ItemGroup>
   <ItemGroup><None Include="App.config" /><None Include="app.manifest" /></ItemGroup>
-  <ItemGroup><ProjectReference Include="..\Platform\WAHU.Platform.csproj"><Project>{2759F943-D509-4130-9E79-B3E28C1CDC88}</Project><Name>WAHU.Platform</Name></ProjectReference><ProjectReference Include="..\Learning\WAHU.Learning.csproj"><Project>{9C1A840E-D70F-4B48-91C0-4CDA6C4E2F01}</Project><Name>WAHU.Learning</Name></ProjectReference><ProjectReference Include="..\Data\WAHU.Data.csproj"><Project>{492526A2-1C03-4D76-A9E9-D2A57AB46028}</Project><Name>WAHU.Data</Name></ProjectReference></ItemGroup>
+  <ItemGroup><ProjectReference Include="..\Platform\WAHU.Platform.csproj"><Project>{2759F943-D509-4130-9E79-B3E28C1CDC88}</Project><Name>WAHU.Platform</Name></ProjectReference><ProjectReference Include="..\Learning\WAHU.Learning.csproj"><Project>{9C1A840E-D70F-4B48-91C0-4CDA6C4E2F01}</Project><Name>WAHU.Learning</Name></ProjectReference><ProjectReference Include="..\Motion\WAHU.Motion.csproj"><Project>{D5FE13A9-CC7F-4398-92AE-4D3C6B688F80}</Project><Name>WAHU.Motion</Name></ProjectReference><ProjectReference Include="..\Data\WAHU.Data.csproj"><Project>{492526A2-1C03-4D76-A9E9-D2A57AB46028}</Project><Name>WAHU.Data</Name></ProjectReference></ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
 
