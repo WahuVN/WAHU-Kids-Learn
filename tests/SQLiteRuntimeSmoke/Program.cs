@@ -2,6 +2,7 @@ using System;
 using System.Data.SQLite;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using WAHU.Data;
@@ -328,6 +329,27 @@ VALUES('math_grade2_v1','1','math',2,'builtin','VERIFIED',1,'ABCDEF','content_pa
                 Assert(Convert.ToInt32(Scalar(c, "SELECT count(*) FROM parent_note WHERE id='post-backup-note';"), CultureInfo.InvariantCulture) == 0, "managed_restore_reverted_post_backup_mutation");
                 Assert(Convert.ToInt32(Scalar(c, "SELECT count(*) FROM attempt;"), CultureInfo.InvariantCulture) == 1, "managed_restore_learning_data_preserved");
             }
+
+            File.WriteAllText(Path.Combine(backupsRoot, "malformed.json"), "not-json");
+            var recoveryCandidates = BackupRecoveryService.FindVerifiedBackups(backupsRoot);
+            Assert(recoveryCandidates.Count >= 10, "recovery_discovery_finds_verified_backups");
+            Assert(recoveryCandidates.All(x => x.CreatedAtUtc != default(DateTime)), "recovery_candidates_have_created_time");
+            Assert(recoveryCandidates[0].CreatedAtUtc >= recoveryCandidates[recoveryCandidates.Count - 1].CreatedAtUtc, "recovery_candidates_sorted_newest_first");
+            Assert(!recoveryCandidates.Any(x => string.Equals(Path.GetFileName(x.MetadataPath), "malformed.json", StringComparison.OrdinalIgnoreCase)), "recovery_discovery_ignores_malformed_metadata");
+
+            File.WriteAllBytes(dbPath, new byte[] { 0x57, 0x41, 0x48, 0x55, 0x00, 0x01, 0x02, 0x03 });
+            bool corruptRejectedByHealth = false;
+            try { SQLiteBackupService.VerifyPath(dbPath); }
+            catch { corruptRejectedByHealth = true; }
+            Assert(corruptRejectedByHealth, "recovery_fixture_current_db_is_corrupt");
+
+            var recovery = BackupRecoveryService.RestoreNewestVerified(backupsRoot, dbPath);
+            Assert(recovery.Candidate != null && recovery.Restore != null, "recovery_newest_verified_selected");
+            Assert(recovery.Restore.Health.IsHealthy, "recovery_restored_health_ok");
+            Assert(!string.IsNullOrWhiteSpace(recovery.Restore.PreservedOriginalPath) && File.Exists(recovery.Restore.PreservedOriginalPath), "recovery_preserves_corrupt_original");
+            Assert(new FileInfo(recovery.Restore.PreservedOriginalPath).Length == 8, "recovery_preserved_original_bytes");
+            using (var c = database.OpenConnection())
+                Assert(Convert.ToInt32(Scalar(c, "SELECT count(*) FROM attempt;"), CultureInfo.InvariantCulture) == 1, "recovery_restores_learning_data");
         }
 
 

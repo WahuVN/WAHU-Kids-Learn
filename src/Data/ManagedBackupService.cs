@@ -40,6 +40,7 @@ namespace WAHU.Data
         public string ExpectedSha256 { get; set; }
         public string ActualSha256 { get; set; }
         public int SchemaVersion { get; set; }
+        public DateTime CreatedAtUtc { get; set; }
         public DatabaseHealthResult Health { get; set; }
     }
 
@@ -149,6 +150,8 @@ namespace WAHU.Data
             var databaseFile = RequiredString(root, "database_file");
             var expectedHash = RequiredString(root, "database_sha256");
             var schemaVersion = RequiredInt(root, "database_schema_version");
+            var createdAtUtc = DateTime.Parse(RequiredString(root, "created_at_utc"), CultureInfo.InvariantCulture,
+                DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal);
             var verified = RequiredBool(root, "verified");
             if (!verified) throw new InvalidDataException("Backup metadata chưa được đánh dấu verified.");
 
@@ -177,6 +180,7 @@ namespace WAHU.Data
                 ExpectedSha256 = expectedHash,
                 ActualSha256 = actualHash,
                 SchemaVersion = actualSchema,
+                CreatedAtUtc = createdAtUtc,
                 Health = health
             };
         }
