@@ -83,11 +83,12 @@ try {
     Assert ($app.ExitCode -eq 0) "app bootstrap smoke exit $($app.ExitCode)"
     Assert (Test-Path -LiteralPath $bootstrapReport) 'bootstrap report missing'
     $bootstrapText = Get-Content -Raw -LiteralPath $bootstrapReport
-    foreach ($needle in @('result=PASS','previous_run_unclean=False','storage_mode=INSTALLED','config_files=9','config_journal=DELETE','config_low_fps_cap=18','config_normal_fps_cap=30','provider_version=2.0.4.0','sqlite_version=3.53.4','journal=DELETE','schema_version=2','migration_version=2','pre_migration_backup=none','integrity=ok','foreign_key_issues=0','verified_content_packs=2','performance_profile=','performance_motion_fps_cap=','performance_max_animated_regions=','performance_image_cache_mb=','performance_audio_cache_mb=','performance_evidence=')) {
+    foreach ($needle in @('result=PASS','previous_run_unclean=False','storage_mode=INSTALLED','config_files=9','config_journal=DELETE','config_low_fps_cap=18','config_normal_fps_cap=30','provider_version=2.0.4.0','sqlite_version=3.53.4','journal=DELETE','schema_version=2','migration_version=2','pre_migration_backup=none','integrity=ok','foreign_key_issues=0','verified_content_packs=2','performance_profile=','performance_motion_fps_cap=','performance_max_animated_regions=','performance_image_cache_mb=','performance_audio_cache_mb=','performance_evidence=','parent_pin_configured=False')) {
         Assert ($bootstrapText.Contains($needle)) "bootstrap report missing: $needle"
     }
     Assert ($bootstrapText.Contains('app_version=' + $AppVersion)) 'installed runtime app_version mismatch'
     Assert ($bootstrapText -match 'migration_sha256=[0-9A-F]{64}') 'bootstrap migration SHA-256 missing/invalid'
+    Assert (-not (Test-Path -LiteralPath (Join-Path $dataDir 'security\parent_pin.json'))) 'bootstrap unexpectedly created Parent PIN record'
     $runtimeMarker = Join-Path $dataDir 'recovery\runtime.running'
     Assert (-not (Test-Path -LiteralPath $runtimeMarker)) 'clean bootstrap left stale runtime marker'
 

@@ -42,11 +42,12 @@ namespace WAHUKidsLearn
                         WriteBootstrapFailure(GetArgValue(args, "--out"), "CONFIG_INVALID", ex);
                         return 42;
                     }
+                    WriteStartupDiagnostic(applicationBase, portableMode, "CONFIG_INVALID", ex);
                     MessageBox.Show(
-                        "Cấu hình ứng dụng không hợp lệ hoặc bị thiếu.\r\n\r\n" + ex.Message,
-                        "WAHU Kids Learn — lỗi cấu hình",
+                        "Ứng dụng chưa thể mở vì một số tệp cài đặt bị thiếu hoặc đã thay đổi.\r\n\r\nDữ liệu học chưa bị xóa. Hãy nhờ người lớn cài lại hoặc kiểm tra WAHU Kids Learn.",
+                        "WAHU Kids Learn",
                         MessageBoxButtons.OK,
-                        MessageBoxIcon.Error);
+                        MessageBoxIcon.Warning);
                     return 42;
                 }
 
@@ -62,18 +63,31 @@ namespace WAHUKidsLearn
                     PreflightReport preflight = null;
                     DatabaseBootstrapResult database = null;
                     RuntimePerformanceSettings performance = null;
-                    string databaseError = null;
+                    RuntimeBootstrapIssue issue = null;
+                    var learningDatabase = CreateLearningDatabase(config);
                     try
                     {
                         int verifiedContentPackCount;
-                        BootstrapRuntime(config, out preflight, out database, out verifiedContentPackCount, out performance);
+                        BootstrapRuntime(config, learningDatabase, out preflight, out database, out verifiedContentPackCount, out performance);
+                    }
+                    catch (RuntimeBootstrapException ex)
+                    {
+                        issue = ex.ToIssue();
+                        WriteRuntimeDiagnostic(config, issue);
                     }
                     catch (Exception ex)
                     {
-                        databaseError = ex.GetType().Name + ": " + ex.Message;
+                        issue = new RuntimeBootstrapIssue
+                        {
+                            Kind = RuntimeIssueKind.PlatformUnavailable,
+                            ChildMessage = "Ứng dụng cần người lớn kiểm tra trước khi học.",
+                            TechnicalMessage = ex.GetType().Name + ": " + ex.Message,
+                            CanRecoverDatabase = false
+                        };
+                        WriteRuntimeDiagnostic(config, issue);
                     }
 
-                    Application.Run(new MainForm(preflight, database, databaseError, runtimeMarker.PreviousRunUnclean, performance));
+                    Application.Run(new MainForm(config, learningDatabase, preflight, database, issue, runtimeMarker.PreviousRunUnclean, performance));
                     return 0;
                 }
             }
@@ -91,7 +105,8 @@ namespace WAHUKidsLearn
                 DatabaseBootstrapResult database;
                 int verifiedContentPackCount;
                 RuntimePerformanceSettings performance;
-                BootstrapRuntime(config, out preflight, out database, out verifiedContentPackCount, out performance);
+                var learningDatabase = CreateLearningDatabase(config);
+                BootstrapRuntime(config, learningDatabase, out preflight, out database, out verifiedContentPackCount, out performance);
                 var parent = Path.GetDirectoryName(outPath);
                 if (!string.IsNullOrWhiteSpace(parent)) Directory.CreateDirectory(parent);
                 File.WriteAllLines(outPath, new[]
@@ -128,7 +143,8 @@ namespace WAHUKidsLearn
                     "performance_image_cache_mb=" + (performance.ImageCacheBytes / (1024L * 1024L)),
                     "performance_audio_cache_mb=" + (performance.AudioCacheBytes / (1024L * 1024L)),
                     "performance_decorative_outside_focus=" + performance.DecorativeMotionAllowedOutsideLearningFocus,
-                    "performance_evidence=" + string.Join(",", performance.Evidence ?? new string[0])
+                    "performance_evidence=" + string.Join(",", performance.Evidence ?? new string[0]),
+                    "parent_pin_configured=" + File.Exists(Path.Combine(config.UserRoot, "security", "parent_pin.json"))
                 });
                 return database.Health != null && database.Health.IsHealthy ? 0 : 31;
             }
@@ -139,21 +155,72 @@ namespace WAHUKidsLearn
             }
         }
 
-        private static void BootstrapRuntime(RuntimeConfigBundle config, out PreflightReport preflight, out DatabaseBootstrapResult database, out int verifiedContentPackCount, out RuntimePerformanceSettings performance)
+        private static void BootstrapRuntime(RuntimeConfigBundle config, LearningDatabase learningDatabase, out PreflightReport preflight, out DatabaseBootstrapResult database, out int verifiedContentPackCount, out RuntimePerformanceSettings performance)
         {
             if (config == null) throw new ArgumentNullException("config");
-            preflight = PreflightProbe.Collect(Application.ExecutablePath);
-            JsonReportWriter.Write(preflight, Path.Combine(config.UserRoot, "diagnostics", "preflight.json"));
+            if (learningDatabase == null) throw new ArgumentNullException("learningDatabase");
 
-            var autotuner = new PerformanceAutotuner();
-            var performanceDecision = autotuner.Select(preflight);
-            performance = autotuner.BuildRuntimeSettings(config, performanceDecision);
+            try
+            {
+                preflight = PreflightProbe.Collect(Application.ExecutablePath);
+                JsonReportWriter.Write(preflight, Path.Combine(config.UserRoot, "diagnostics", "preflight.json"));
+            }
+            catch (Exception ex)
+            {
+                throw new RuntimeBootstrapException(RuntimeIssueKind.PlatformUnavailable,
+                    "Ứng dụng cần người lớn kiểm tra máy trước khi học.", ex);
+            }
 
-            verifiedContentPackCount = ValidateBundledContent();
+            try
+            {
+                var autotuner = new PerformanceAutotuner();
+                var performanceDecision = autotuner.Select(preflight);
+                performance = autotuner.BuildRuntimeSettings(config, performanceDecision);
+            }
+            catch
+            {
+                performance = BuildLowPerformanceFallback(config);
+            }
 
+            try
+            {
+                verifiedContentPackCount = ValidateBundledContent();
+            }
+            catch (Exception ex)
+            {
+                throw new RuntimeBootstrapException(RuntimeIssueKind.ContentInvalid,
+                    "Nội dung học chưa sẵn sàng. Hãy nhờ người lớn kiểm tra ứng dụng.", ex);
+            }
+
+            try
+            {
+                database = learningDatabase.Initialize(config.DatabaseJournalMode, config.BackupsDirectory, config.AppVersion);
+            }
+            catch (Exception ex)
+            {
+                throw new RuntimeBootstrapException(RuntimeIssueKind.DatabaseUnavailable,
+                    "Dữ liệu học đang cần người lớn phục hồi hoặc kiểm tra.", ex);
+            }
+        }
+
+        private static LearningDatabase CreateLearningDatabase(RuntimeConfigBundle config)
+        {
             var schemaPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data", "schema", "001_initial.sql");
-            var learningDb = new LearningDatabase(config.DatabasePath, schemaPath);
-            database = learningDb.Initialize(config.DatabaseJournalMode, config.BackupsDirectory, config.AppVersion);
+            return new LearningDatabase(config.DatabasePath, schemaPath);
+        }
+
+        private static RuntimePerformanceSettings BuildLowPerformanceFallback(RuntimeConfigBundle config)
+        {
+            return new RuntimePerformanceSettings
+            {
+                Profile = PerformanceProfileKind.LOW,
+                MotionFpsCap = config.LowMotionFpsCap,
+                MaxAnimatedRegions = config.LowMaxAnimatedRegions,
+                ImageCacheBytes = (long)config.LowImageCacheMb * 1024L * 1024L,
+                AudioCacheBytes = (long)config.LowAudioCacheMb * 1024L * 1024L,
+                DecorativeMotionAllowedOutsideLearningFocus = false,
+                Evidence = new string[] { "autotune_error_fallback_low" }
+            };
         }
 
         private static int ValidateBundledContent()
@@ -185,6 +252,44 @@ namespace WAHUKidsLearn
                     "code=" + code,
                     "error_type=" + ex.GetType().Name,
                     "error=" + ex.Message
+                });
+            }
+            catch { }
+        }
+
+        private static void WriteStartupDiagnostic(string applicationBase, bool portableMode, string code, Exception ex)
+        {
+            try
+            {
+                var root = portableMode
+                    ? Path.Combine(applicationBase, "UserData", "diagnostics")
+                    : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "WAHU Kids Learn", "diagnostics");
+                Directory.CreateDirectory(root);
+                File.WriteAllLines(Path.Combine(root, "startup-error.txt"), new[]
+                {
+                    "captured_at_utc=" + DateTime.UtcNow.ToString("o"),
+                    "code=" + code,
+                    "application_base=" + applicationBase,
+                    "error_type=" + ex.GetType().Name,
+                    "error=" + ex.Message
+                });
+            }
+            catch { }
+        }
+
+        private static void WriteRuntimeDiagnostic(RuntimeConfigBundle config, RuntimeBootstrapIssue issue)
+        {
+            if (config == null || issue == null) return;
+            try
+            {
+                var directory = Path.Combine(config.UserRoot, "diagnostics");
+                Directory.CreateDirectory(directory);
+                File.WriteAllLines(Path.Combine(directory, "runtime-issue.txt"), new[]
+                {
+                    "captured_at_utc=" + DateTime.UtcNow.ToString("o"),
+                    "kind=" + issue.Kind,
+                    "can_recover_database=" + issue.CanRecoverDatabase,
+                    "technical=" + (issue.TechnicalMessage ?? string.Empty)
                 });
             }
             catch { }

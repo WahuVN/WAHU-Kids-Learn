@@ -85,7 +85,7 @@ try {
         'migration_version=2',
         'pre_migration_backup=none',
         'integrity=ok',
-        'foreign_key_issues=0','verified_content_packs=2','performance_profile=','performance_motion_fps_cap=','performance_max_animated_regions=','performance_image_cache_mb=','performance_audio_cache_mb=','performance_evidence='
+        'foreign_key_issues=0','verified_content_packs=2','performance_profile=','performance_motion_fps_cap=','performance_max_animated_regions=','performance_image_cache_mb=','performance_audio_cache_mb=','performance_evidence=','parent_pin_configured=False'
     )) {
         Assert ($text.Contains($needle)) "portable report missing: $needle"
     }
@@ -94,6 +94,7 @@ try {
 
     $portableUserRoot = Join-Path $extractRoot 'UserData'
     $portableDb = Join-Path $portableUserRoot 'data\learning.db'
+    Assert (-not (Test-Path -LiteralPath (Join-Path $portableUserRoot 'security\parent_pin.json'))) 'portable bootstrap unexpectedly created Parent PIN record'
     $portableRecoveryMarker = Join-Path $portableUserRoot 'recovery\runtime.running'
     Assert ($text.Contains('config_user_root=' + $portableUserRoot)) 'portable config_user_root mismatch'
     Assert ($text.Contains('config_database_path=' + $portableDb)) 'portable config_database_path mismatch'
