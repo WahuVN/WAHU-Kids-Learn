@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using System.IO;
+using System.Threading;
 using System.Windows.Forms;
 using WAHU.Content;
 using WAHU.Data;
@@ -87,6 +88,15 @@ namespace WAHUKidsLearn
                         WriteRuntimeDiagnostic(config, issue);
                     }
 
+                    if (issue == null && database != null && database.Health != null && database.Health.IsHealthy &&
+                        !portableMode && !runtimeMarker.PreviousRunUnclean && config.UpdateAutoInstallOnNextStart)
+                    {
+                        if (TryLaunchStagedUpdate(config, learningDatabase, applicationBase)) return 0;
+                    }
+
+                    if (issue == null && !portableMode && config.UpdateEnabled && config.UpdateCheckOnStartup)
+                        QueueBackgroundUpdateCheck(config);
+
                     Application.Run(new MainForm(config, learningDatabase, preflight, database, issue, runtimeMarker.PreviousRunUnclean, performance));
                     return 0;
                 }
@@ -120,6 +130,11 @@ namespace WAHUKidsLearn
                     "config_backups_path=" + config.BackupsDirectory,
                     "config_database_path=" + config.DatabasePath,
                     "config_journal=" + config.DatabaseJournalMode,
+                    "update_enabled=" + config.UpdateEnabled,
+                    "update_channel=" + config.UpdateChannel,
+                    "update_manifest_url=" + config.UpdateManifestUrl,
+                    "update_installed_mode_only=" + (!config.PortableMode),
+                    "startup_default=" + config.LaunchWithWindowsDefault,
                     "config_low_fps_cap=" + config.LowMotionFpsCap,
                     "config_normal_fps_cap=" + config.NormalMotionFpsCap,
                     "compatibility=" + preflight.CompatibilityLevel,
@@ -201,6 +216,51 @@ namespace WAHUKidsLearn
                 throw new RuntimeBootstrapException(RuntimeIssueKind.DatabaseUnavailable,
                     "Dữ liệu học đang cần người lớn phục hồi hoặc kiểm tra.", ex);
             }
+        }
+
+        private static bool TryLaunchStagedUpdate(RuntimeConfigBundle config, LearningDatabase learningDatabase, string applicationBase)
+        {
+            StagedUpdate staged;
+            if (!UpdateStagingService.TryGetStagedUpdate(config, config.AppVersion, out staged)) return false;
+            try
+            {
+                var backupDir = Path.Combine(config.BackupsDirectory, "pre_update");
+                var backup = learningDatabase.CreateManualBackup(backupDir, config.AppVersion);
+                if (backup == null || backup.Health == null || !backup.Health.IsHealthy)
+                    throw new InvalidDataException("Pre-update backup verification failed.");
+                string error;
+                if (!UpdateLaunchService.TryLaunch(config, staged, applicationBase, Application.ExecutablePath, out error))
+                    throw new InvalidOperationException("Updater helper launch failed: " + error);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    Directory.CreateDirectory(config.UpdatesDirectory);
+                    File.WriteAllLines(Path.Combine(config.UpdatesDirectory, "update-launch-error.txt"), new[]
+                    {
+                        "captured_at_utc=" + DateTime.UtcNow.ToString("o"),
+                        "error_type=" + ex.GetType().Name,
+                        "error=" + ex.Message
+                    });
+                }
+                catch { }
+                return false;
+            }
+        }
+
+        private static void QueueBackgroundUpdateCheck(RuntimeConfigBundle config)
+        {
+            ThreadPool.QueueUserWorkItem(delegate
+            {
+                try
+                {
+                    string result;
+                    new GitHubUpdateClient().TryCheckAndStage(config, config.AppVersion, out result);
+                }
+                catch { }
+            });
         }
 
         private static LearningDatabase CreateLearningDatabase(RuntimeConfigBundle config)

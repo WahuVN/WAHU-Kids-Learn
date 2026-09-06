@@ -30,6 +30,10 @@
     <Compile Include="SingleInstanceGuard.cs" />
     <Compile Include="RuntimeSessionMarker.cs" />
     <Compile Include="RuntimeConfigBundle.cs" />
+    <Compile Include="UpdateManifest.cs" />
+    <Compile Include="UpdateStagingService.cs" />
+    <Compile Include="GitHubUpdateClient.cs" />
+    <Compile Include="UpdateLaunchService.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

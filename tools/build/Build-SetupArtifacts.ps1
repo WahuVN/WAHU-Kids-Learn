@@ -41,6 +41,7 @@ $contentSmoke = Join-Path $root "tests\ContentRuntimeSmoke\bin\$Configuration\WA
 $securitySmoke = Join-Path $root "tests\SecurityRuntimeSmoke\bin\$Configuration\WAHU.SecurityRuntimeSmoke.exe"
 $audioSmoke = Join-Path $root "tests\AudioRuntimeSmoke\bin\$Configuration\WAHU.AudioRuntimeSmoke.exe"
 $performanceSmoke = Join-Path $root "tests\PerformanceRuntimeSmoke\bin\$Configuration\WAHU.PerformanceRuntimeSmoke.exe"
+$updateSmoke = Join-Path $root "tests\UpdateRuntimeSmoke\bin\$Configuration\WAHU.UpdateRuntimeSmoke.exe"
 $sqliteSmoke = Join-Path $root "tests\SQLiteRuntimeSmoke\bin\$Configuration\WAHU.SQLiteRuntimeSmoke.exe"
 $schemaSource = Join-Path $root 'data\schema\001_initial.sql'
 $mathTemplateSource = Join-Path $root 'content_packs\math_grade2_v1\verified_templates_v1.json'
@@ -52,6 +53,7 @@ Require-File $contentSmoke
 Require-File $securitySmoke
 Require-File $audioSmoke
 Require-File $performanceSmoke
+Require-File $updateSmoke
 Require-File $sqliteSmoke
 Require-File $schemaSource
 Require-File $mathTemplateSource
@@ -88,6 +90,10 @@ Write-Host '[9/15] Performance autotune + degradation smoke'
 & $performanceSmoke
 if ($LASTEXITCODE -ne 0) { throw "Performance runtime smoke fail: $LASTEXITCODE" }
 
+Write-Host '[9b/15] GitHub updater manifest/staging smoke'
+& $updateSmoke
+if ($LASTEXITCODE -ne 0) { throw "Update runtime smoke fail: $LASTEXITCODE" }
+
 Write-Host '[10/15] SQLite/Data smoke + backup/restore integration'
 & $sqliteSmoke $schemaSource
 if ($LASTEXITCODE -ne 0) { throw "SQLite runtime smoke fail: $LASTEXITCODE" }
@@ -99,6 +105,7 @@ New-Item -ItemType Directory -Force -Path $publish | Out-Null
 Write-Host '[11/15] Stage publish tree'
 $appOut = Join-Path $root "src\App\bin\$Configuration"
 $preOut = Join-Path $root "tools\setup_preflight\bin\$Configuration"
+$updaterOut = Join-Path $root "src\Updater\bin\$Configuration"
 $runtimeFiles = @(
     'WAHUKidsLearn.exe',
     'WAHUKidsLearn.exe.config',
@@ -124,6 +131,9 @@ foreach ($name in @('WAHU.SetupPreflight.exe','WAHU.SetupPreflight.exe.config'))
     Require-File $src
     Copy-Item -LiteralPath $src -Destination $publish -Force
 }
+$updaterExe = Join-Path $updaterOut 'WAHU.Updater.exe'
+Require-File $updaterExe
+Copy-Item -LiteralPath $updaterExe -Destination $publish -Force
 
 $dirs = @('config','policies','content_packs','curriculum','assets','data\schema')
 foreach ($d in $dirs) { New-Item -ItemType Directory -Force -Path (Join-Path $publish $d) | Out-Null }
@@ -140,7 +150,7 @@ Copy-Item 'assets\verified_vectors' (Join-Path $publish 'assets') -Recurse -Forc
 Copy-Item 'data\schema\*.sql' (Join-Path $publish 'data\schema') -Force
 
 # Hard deployment guards: these must be in the actual staged installer payload.
-foreach ($name in @('WAHU.Learning.dll','WAHU.Motion.dll','WAHU.Content.dll','WAHU.Audio.dll','WAHU.Security.dll','WAHU.Performance.dll','WAHU.Session.dll','WAHU.Data.dll','System.Data.SQLite.dll','e_sqlite3.dll','data\schema\001_initial.sql','data\schema\002_attempt_immutability.sql')) {
+foreach ($name in @('WAHU.Learning.dll','WAHU.Motion.dll','WAHU.Content.dll','WAHU.Audio.dll','WAHU.Security.dll','WAHU.Performance.dll','WAHU.Session.dll','WAHU.Data.dll','WAHU.Updater.exe','System.Data.SQLite.dll','e_sqlite3.dll','data\schema\001_initial.sql','data\schema\002_attempt_immutability.sql')) {
     Require-File (Join-Path $publish $name)
 }
 
@@ -215,7 +225,7 @@ $manifest = [ordered]@{
     }
     gates = [ordered]@{
         preflight_smoke = 'PASS'
-        preflight_smoke_assertions = 35
+        preflight_smoke_assertions = 39
         behavior_runtime_smoke = 'PASS'
         behavior_runtime_smoke_assertions = 15
         learning_session_runtime_smoke = 'PASS'
@@ -230,6 +240,8 @@ $manifest = [ordered]@{
         audio_runtime_smoke_assertions = 14
         performance_runtime_smoke = 'PASS'
         performance_runtime_smoke_assertions = 13
+        update_runtime_smoke = 'PASS'
+        update_runtime_smoke_assertions = 18
         sqlite_runtime_smoke = 'PASS'
         backup_restore_smoke = 'PASS'
         staged_payload_guard = 'PASS'
@@ -269,6 +281,26 @@ if ($CompileInstaller -or $RequireInstaller) {
         $installerHash = Sha256 $installerPath
         Set-Content -LiteralPath (Join-Path $root "build\installer\WAHU-Kids-Learn-Setup-win7-x86-$AppVersion.sha256") -Value "$installerHash  $(Split-Path $installerPath -Leaf)" -Encoding ASCII
         Write-Host "INSTALLER_SHA256=$installerHash"
+
+        $updateReleaseDir = Join-Path $root 'build\release'
+        New-Item -ItemType Directory -Force -Path $updateReleaseDir | Out-Null
+        $updateChannel = if ($AppVersion -match '-dev($|[.-])') { 'dev' } else { 'stable' }
+        if ($updateChannel -eq 'stable') { throw 'Stable update feed requires the production signing pipeline; unsigned stable manifest is forbidden.' }
+        $installerFileName = Split-Path $installerPath -Leaf
+        $updateManifest = [ordered]@{
+            schema_version = 1
+            app_version = $AppVersion
+            channel = $updateChannel
+            installer_url = "https://github.com/WahuVN/WAHU-Kids-Learn/releases/download/v$AppVersion/$installerFileName"
+            installer_sha256 = $installerHash
+            installer_bytes = (Get-Item -LiteralPath $installerPath).Length
+            production_signed = $false
+            min_windows = '6.1sp1'
+        }
+        $updateManifestPath = Join-Path $updateReleaseDir 'update-manifest.json'
+        $updateManifest | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $updateManifestPath -Encoding UTF8
+        $null = Get-Content -Raw -LiteralPath $updateManifestPath | ConvertFrom-Json
+        Write-Host "UPDATE_MANIFEST=$updateManifestPath"
     }
 } else {
     Write-Host '[15/15] Installer compile chưa được yêu cầu.'

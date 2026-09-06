@@ -28,6 +28,7 @@ function Remove-TestArtifacts {
     if (Test-Path -LiteralPath $dataDir) {
         if (Test-Path -LiteralPath $ownerMarker) { Remove-Item -LiteralPath $dataDir -Recurse -Force -ErrorAction SilentlyContinue }
     }
+    Remove-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -Name 'WAHU Kids Learn' -ErrorAction SilentlyContinue
     $shortcut = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\WAHU Kids Learn.lnk'
     if (Test-Path -LiteralPath $shortcut) { Remove-Item -LiteralPath $shortcut -Force -ErrorAction SilentlyContinue }
     if (Test-Path -LiteralPath $bootstrapReport) { Remove-Item -LiteralPath $bootstrapReport -Force -ErrorAction SilentlyContinue }
@@ -49,7 +50,7 @@ try {
     New-Item -ItemType Directory -Force -Path $dataDir | Out-Null
     'owned-by-tools/build/Test-InstallerE2E.ps1' | Set-Content -LiteralPath $ownerMarker -Encoding ASCII
 
-    $install = Start-Process -FilePath $InstallerPath -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/SP-','/TASKS=""') -PassThru -Wait
+    $install = Start-Process -FilePath $InstallerPath -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/SP-','/TASKS="startup"') -PassThru -Wait
     $result.install_exit = $install.ExitCode
     Assert ($install.ExitCode -eq 0) "install exit $($install.ExitCode)"
 
@@ -64,6 +65,7 @@ try {
         'WAHU.Performance.dll',
         'WAHU.Session.dll',
         'WAHU.Data.dll',
+        'WAHU.Updater.exe',
         'System.Data.SQLite.dll',
         'e_sqlite3.dll',
         'data\schema\001_initial.sql',
@@ -74,6 +76,9 @@ try {
     )
     foreach ($rel in $required) { Assert (Test-Path -LiteralPath (Join-Path $appDir $rel)) "installed payload missing: $rel" }
     $result.installed_file_count = (Get-ChildItem -LiteralPath $appDir -Recurse -File).Count
+    $runValue = (Get-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -Name 'WAHU Kids Learn' -ErrorAction Stop).'WAHU Kids Learn'
+    Assert ($runValue -like '*WAHUKidsLearn.exe*--startup*') 'startup Run registry value missing/invalid'
+    $result.startup_registry_present = $true
 
     & (Join-Path $appDir 'WAHU.SetupPreflight.exe') --out (Join-Path $env:TEMP 'wahu-preflight-installed.json') --signature-target (Join-Path $appDir 'WAHUKidsLearn.exe')
     $result.preflight_exit = $LASTEXITCODE
@@ -84,7 +89,7 @@ try {
     Assert ($app.ExitCode -eq 0) "app bootstrap smoke exit $($app.ExitCode)"
     Assert (Test-Path -LiteralPath $bootstrapReport) 'bootstrap report missing'
     $bootstrapText = Get-Content -Raw -LiteralPath $bootstrapReport
-    foreach ($needle in @('result=PASS','previous_run_unclean=False','storage_mode=INSTALLED','config_files=9','config_journal=DELETE','config_low_fps_cap=18','config_normal_fps_cap=30','provider_version=2.0.4.0','sqlite_version=3.53.4','journal=DELETE','schema_version=2','migration_version=2','pre_migration_backup=none','integrity=ok','foreign_key_issues=0','verified_content_packs=2','performance_profile=','performance_motion_fps_cap=','performance_max_animated_regions=','performance_image_cache_mb=','performance_audio_cache_mb=','performance_evidence=','parent_pin_configured=False')) {
+    foreach ($needle in @('result=PASS','previous_run_unclean=False','storage_mode=INSTALLED','config_files=10','config_journal=DELETE','update_enabled=True','update_channel=dev','update_manifest_url=https://github.com/WahuVN/WAHU-Kids-Learn/releases/latest/download/update-manifest.json','update_installed_mode_only=True','startup_default=True','config_low_fps_cap=18','config_normal_fps_cap=30','provider_version=2.0.4.0','sqlite_version=3.53.4','journal=DELETE','schema_version=2','migration_version=2','pre_migration_backup=none','integrity=ok','foreign_key_issues=0','verified_content_packs=2','performance_profile=','performance_motion_fps_cap=','performance_max_animated_regions=','performance_image_cache_mb=','performance_audio_cache_mb=','performance_evidence=','parent_pin_configured=False')) {
         Assert ($bootstrapText.Contains($needle)) "bootstrap report missing: $needle"
     }
     Assert ($bootstrapText.Contains('app_version=' + $AppVersion)) 'installed runtime app_version mismatch'
@@ -149,7 +154,7 @@ try {
     $sentinel = Join-Path $dataDir 'data\e2e-preserve-sentinel.txt'
     'do-not-delete-by-installer-or-uninstaller' | Set-Content -LiteralPath $sentinel -Encoding ASCII
 
-    $reinstall = Start-Process -FilePath $InstallerPath -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/SP-','/TASKS=""') -PassThru -Wait
+    $reinstall = Start-Process -FilePath $InstallerPath -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/SP-','/TASKS="startup"') -PassThru -Wait
     $result.reinstall_exit = $reinstall.ExitCode
     Assert ($reinstall.ExitCode -eq 0) "reinstall exit $($reinstall.ExitCode)"
     Assert (Test-Path -LiteralPath $dbPath) 'learner DB lost on reinstall'
@@ -169,6 +174,9 @@ try {
     Assert $result.app_removed_after_uninstall 'app binary remained after uninstall'
     Assert $result.db_preserved_after_uninstall 'learner DB removed by uninstall'
     Assert $result.sentinel_preserved_after_uninstall 'learner sentinel removed by uninstall'
+    $runAfterUninstall = (Get-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -Name 'WAHU Kids Learn' -ErrorAction SilentlyContinue).'WAHU Kids Learn'
+    Assert ([string]::IsNullOrWhiteSpace($runAfterUninstall)) 'startup Run registry value remained after uninstall'
+    $result.startup_registry_removed_after_uninstall = $true
 
     $result.test_result = 'PASS'
 }

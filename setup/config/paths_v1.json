@@ -11,11 +11,13 @@
     "logs": "%LOCALAPPDATA%\\WAHU Kids Learn\\logs",
     "backups": "%LOCALAPPDATA%\\WAHU Kids Learn\\backups",
     "temp": "%LOCALAPPDATA%\\WAHU Kids Learn\\temp",
-    "recovery": "%LOCALAPPDATA%\\WAHU Kids Learn\\recovery"
+    "recovery": "%LOCALAPPDATA%\\WAHU Kids Learn\\recovery",
+    "updates": "%LOCALAPPDATA%\\WAHU Kids Learn\\updates"
   },
   "portable": {
     "user_root": ".\\UserData",
-    "database": ".\\UserData\\data\\learning.db"
+    "database": ".\\UserData\\data\\learning.db",
+    "updates": ".\\UserData\\updates"
   },
   "manual_export_default": "%USERPROFILE%\\Documents\\WAHU Kids Learn"
 }

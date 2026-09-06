@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "enabled": true,
+  "installed_mode_only": true,
+  "check_on_startup": true,
+  "check_interval_hours": 6,
+  "auto_download": true,
+  "auto_install_on_next_start": true,
+  "source": {
+    "provider": "github_releases",
+    "owner": "WahuVN",
+    "repository": "WAHU-Kids-Learn",
+    "manifest_url": "https://github.com/WahuVN/WAHU-Kids-Learn/releases/latest/download/update-manifest.json",
+    "channel": "dev"
+  },
+  "transport": {
+    "https_only": true,
+    "connect_timeout_ms": 3500,
+    "read_timeout_ms": 10000,
+    "download_timeout_ms": 120000,
+    "max_manifest_kb": 64,
+    "max_installer_mb": 300
+  },
+  "verification": {
+    "sha256_required": true,
+    "authenticode_required_for_production": true,
+    "allow_unsigned_dev_builds": true
+  },
+  "startup": {
+    "launch_with_windows_default": true,
+    "installer_task_name": "startup"
+  }
+}

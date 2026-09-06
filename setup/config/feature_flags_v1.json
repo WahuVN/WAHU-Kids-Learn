@@ -1,7 +1,8 @@
 {
   "schema_version": 1,
   "network": false,
-  "auto_update_internet": false,
+  "auto_update_internet": true,
+  "update_network_only": true,
   "remote_analytics": false,
   "ads": false,
   "public_leaderboard": false,

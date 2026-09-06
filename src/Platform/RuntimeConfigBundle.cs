@@ -27,6 +27,7 @@ namespace WAHU.Platform
         public string RecoveryDirectory { get; private set; }
         public string BackupsDirectory { get; private set; }
         public string TempDirectory { get; private set; }
+        public string UpdatesDirectory { get; private set; }
         public bool PortableMode { get; private set; }
         public string StorageMode { get { return PortableMode ? "PORTABLE" : "INSTALLED"; } }
         public string DatabaseJournalMode { get; private set; }
@@ -42,6 +43,21 @@ namespace WAHU.Platform
         public int NormalImageCacheMb { get; private set; }
         public int LowAudioCacheMb { get; private set; }
         public int NormalAudioCacheMb { get; private set; }
+        public bool UpdateEnabled { get; private set; }
+        public bool UpdateCheckOnStartup { get; private set; }
+        public bool UpdateAutoDownload { get; private set; }
+        public bool UpdateAutoInstallOnNextStart { get; private set; }
+        public int UpdateCheckIntervalHours { get; private set; }
+        public int UpdateConnectTimeoutMs { get; private set; }
+        public int UpdateReadTimeoutMs { get; private set; }
+        public int UpdateDownloadTimeoutMs { get; private set; }
+        public long UpdateMaxManifestBytes { get; private set; }
+        public long UpdateMaxInstallerBytes { get; private set; }
+        public string UpdateManifestUrl { get; private set; }
+        public string UpdateChannel { get; private set; }
+        public bool UpdateAuthenticodeRequiredForProduction { get; private set; }
+        public bool UpdateAllowUnsignedDevBuilds { get; private set; }
+        public bool LaunchWithWindowsDefault { get; private set; }
         public IReadOnlyDictionary<string, string> FileSha256 { get { return _hashes; } }
 
         public static RuntimeConfigBundle Load(string configDirectory)
@@ -61,7 +77,7 @@ namespace WAHU.Platform
             {
                 "runtime_defaults_v1.json", "database_runtime_v1.json", "paths_v1.json", "feature_flags_v1.json",
                 "accessibility_policy_v1.json", "performance_profiles_v1.json", "logging_policy_v1.json", "content_limits_v1.json",
-                "install_manifest_v1.json"
+                "install_manifest_v1.json", "update_policy_v1.json"
             };
 
             var bundle = new RuntimeConfigBundle
@@ -93,6 +109,7 @@ namespace WAHU.Platform
             ValidateSchema(docs["logging_policy_v1.json"], 1, "logging_policy_v1.json");
             ValidateSchema(docs["content_limits_v1.json"], 1, "content_limits_v1.json");
             ValidateSchema(docs["install_manifest_v1.json"], 2, "install_manifest_v1.json");
+            ValidateSchema(docs["update_policy_v1.json"], 1, "update_policy_v1.json");
 
             ValidateRuntimeDefaults(bundle, docs["runtime_defaults_v1.json"]);
             ValidateDatabase(bundle, docs["database_runtime_v1.json"]);
@@ -103,6 +120,7 @@ namespace WAHU.Platform
             ValidateLogging(docs["logging_policy_v1.json"]);
             ValidateContentLimits(docs["content_limits_v1.json"]);
             ValidateInstallManifest(bundle, docs["install_manifest_v1.json"]);
+            ValidateUpdatePolicy(bundle, docs["update_policy_v1.json"]);
             return bundle;
         }
 
@@ -116,7 +134,7 @@ namespace WAHU.Platform
             if (bundle.DesignWidth != 1024 || bundle.DesignHeight != 768) throw new RuntimeConfigException("V1 design canvas phải là 1024x768.");
             RequireString(display, "dpi_awareness", "system"); RequireBool(display, "win7_manifest_dpiAware", true);
             var privacy = Obj(root, "privacy");
-            RequireBool(privacy, "network_enabled", false); RequireBool(privacy, "analytics_enabled", false);
+            RequireBool(privacy, "network_enabled", false); RequireString(privacy, "update_network_exception", "github_release_feed_only"); RequireBool(privacy, "analytics_enabled", false);
             RequireBool(privacy, "ads_enabled", false); RequireBool(privacy, "cloud_required", false);
             RequireBool(privacy, "collect_only_required_data", true);
         }
@@ -150,7 +168,9 @@ namespace WAHU.Platform
                 bundle.RecoveryDirectory = Path.Combine(bundle.UserRoot, "recovery");
                 bundle.BackupsDirectory = Path.Combine(bundle.UserRoot, "backups");
                 bundle.TempDirectory = Path.Combine(bundle.UserRoot, "temp");
-                if (!IsPathUnder(bundle.UserRoot, bundle.DatabasePath))
+                RequireString(portable, "updates", @".\UserData\updates");
+                bundle.UpdatesDirectory = ResolvePortablePath(applicationBaseDirectory, String(portable, "updates"));
+                if (!IsPathUnder(bundle.UserRoot, bundle.DatabasePath) || !IsPathUnder(bundle.UserRoot, bundle.UpdatesDirectory))
                     throw new RuntimeConfigException("Portable database phải nằm dưới portable UserData.");
                 return;
             }
@@ -162,17 +182,76 @@ namespace WAHU.Platform
             RequireString(installed, "recovery", expectedRoot + @"\recovery");
             RequireString(installed, "backups", expectedRoot + @"\backups");
             RequireString(installed, "temp", expectedRoot + @"\temp");
+            RequireString(installed, "updates", expectedRoot + @"\updates");
             bundle.UserRoot = ExpandAllowedPath(String(installed, "user_root"));
             bundle.DatabasePath = ExpandAllowedPath(String(installed, "database"));
             bundle.RecoveryDirectory = ExpandAllowedPath(String(installed, "recovery"));
             bundle.BackupsDirectory = ExpandAllowedPath(String(installed, "backups"));
             bundle.TempDirectory = ExpandAllowedPath(String(installed, "temp"));
+            bundle.UpdatesDirectory = ExpandAllowedPath(String(installed, "updates"));
         }
 
         private static void ValidateFeatureFlags(Dictionary<string, object> root)
         {
-            foreach (var key in new[] { "network", "auto_update_internet", "remote_analytics", "ads", "public_leaderboard", "loss_based_streak", "lootbox", "live_ai_child_mode", "camera_emotion_detection", "biometric_detection", "background_video", "lottie_runtime", "webview_runtime", "ai_pronunciation_score" }) RequireBool(root, key, false);
+            foreach (var key in new[] { "network", "remote_analytics", "ads", "public_leaderboard", "loss_based_streak", "lootbox", "live_ai_child_mode", "camera_emotion_detection", "biometric_detection", "background_video", "lottie_runtime", "webview_runtime", "ai_pronunciation_score" }) RequireBool(root, key, false);
+            RequireBool(root, "auto_update_internet", true); RequireBool(root, "update_network_only", true);
             RequireBool(root, "parent_mode", true); RequireBool(root, "offline_content_import", true); RequireBool(root, "backup_restore", true); RequireBool(root, "reduced_motion", true);
+        }
+
+
+        private static void ValidateUpdatePolicy(RuntimeConfigBundle bundle, Dictionary<string, object> root)
+        {
+            bundle.UpdateEnabled = Bool(root, "enabled");
+            RequireBool(root, "installed_mode_only", true);
+            bundle.UpdateCheckOnStartup = Bool(root, "check_on_startup");
+            bundle.UpdateCheckIntervalHours = Int(root, "check_interval_hours");
+            bundle.UpdateAutoDownload = Bool(root, "auto_download");
+            bundle.UpdateAutoInstallOnNextStart = Bool(root, "auto_install_on_next_start");
+            if (!bundle.UpdateEnabled || !bundle.UpdateCheckOnStartup || !bundle.UpdateAutoDownload || !bundle.UpdateAutoInstallOnNextStart)
+                throw new RuntimeConfigException("V1 updater phải bật check/download/install-next-start theo policy đã khóa.");
+            if (bundle.UpdateCheckIntervalHours < 1 || bundle.UpdateCheckIntervalHours > 168)
+                throw new RuntimeConfigException("check_interval_hours ngoài khoảng 1..168.");
+
+            var source = Obj(root, "source");
+            RequireString(source, "provider", "github_releases");
+            RequireString(source, "owner", "WahuVN");
+            RequireString(source, "repository", "WAHU-Kids-Learn");
+            bundle.UpdateManifestUrl = String(source, "manifest_url");
+            var expectedManifest = "https://github.com/WahuVN/WAHU-Kids-Learn/releases/latest/download/update-manifest.json";
+            if (!string.Equals(bundle.UpdateManifestUrl, expectedManifest, StringComparison.Ordinal))
+                throw new RuntimeConfigException("update manifest URL không đúng GitHub release feed đã khóa.");
+            bundle.UpdateChannel = String(source, "channel");
+            if (bundle.UpdateChannel != "dev" && bundle.UpdateChannel != "stable")
+                throw new RuntimeConfigException("update channel chỉ hỗ trợ dev/stable.");
+
+            var transport = Obj(root, "transport");
+            RequireBool(transport, "https_only", true);
+            bundle.UpdateConnectTimeoutMs = Int(transport, "connect_timeout_ms");
+            bundle.UpdateReadTimeoutMs = Int(transport, "read_timeout_ms");
+            bundle.UpdateDownloadTimeoutMs = Int(transport, "download_timeout_ms");
+            bundle.UpdateMaxManifestBytes = (long)Int(transport, "max_manifest_kb") * 1024L;
+            bundle.UpdateMaxInstallerBytes = (long)Int(transport, "max_installer_mb") * 1024L * 1024L;
+            if (bundle.UpdateConnectTimeoutMs < 1000 || bundle.UpdateConnectTimeoutMs > 15000 ||
+                bundle.UpdateReadTimeoutMs < 2000 || bundle.UpdateReadTimeoutMs > 60000 ||
+                bundle.UpdateDownloadTimeoutMs < 10000 || bundle.UpdateDownloadTimeoutMs > 600000)
+                throw new RuntimeConfigException("Updater timeout policy không hợp lệ.");
+            if (bundle.UpdateMaxManifestBytes < 4096 || bundle.UpdateMaxManifestBytes > 1024L * 1024L)
+                throw new RuntimeConfigException("Updater manifest size limit không hợp lệ.");
+            if (bundle.UpdateMaxInstallerBytes < 10L * 1024L * 1024L || bundle.UpdateMaxInstallerBytes > 1024L * 1024L * 1024L)
+                throw new RuntimeConfigException("Updater installer size limit không hợp lệ.");
+
+            var verification = Obj(root, "verification");
+            RequireBool(verification, "sha256_required", true);
+            bundle.UpdateAuthenticodeRequiredForProduction = Bool(verification, "authenticode_required_for_production");
+            bundle.UpdateAllowUnsignedDevBuilds = Bool(verification, "allow_unsigned_dev_builds");
+            if (!bundle.UpdateAuthenticodeRequiredForProduction)
+                throw new RuntimeConfigException("Production updater bắt buộc Authenticode.");
+
+            var startup = Obj(root, "startup");
+            bundle.LaunchWithWindowsDefault = Bool(startup, "launch_with_windows_default");
+            RequireString(startup, "installer_task_name", "startup");
+            if (!bundle.LaunchWithWindowsDefault)
+                throw new RuntimeConfigException("V1 installer policy yêu cầu startup task mặc định bật.");
         }
 
         private static void ValidateAccessibility(RuntimeConfigBundle bundle, Dictionary<string, object> root)

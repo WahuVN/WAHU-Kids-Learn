@@ -1,4 +1,4 @@
-# 16 — SETUP IMPLEMENTATION CHECKLIST
+﻿# 16 — SETUP IMPLEMENTATION CHECKLIST
 
 Cập nhật: 2026-09-06
 
@@ -15,7 +15,7 @@ File này là checklist từ spec → code. Không được đánh dấu DONE ch
 
 ## B. Runtime config
 
-- [x] Loader đọc shipped runtime config; build/portable/installer E2E xác nhận 9 file config bắt buộc được stage và load.
+- [x] Loader đọc shipped runtime config; build/portable/installer E2E xác nhận 10 file config bắt buộc (gồm `update_policy_v1.json`) được stage và load.
 - [x] Validate schema/version + invariant an toàn lúc startup; malformed/schema tamper bị reject.
 - [x] Safety-critical config fail-closed; `network=true` installed E2E trả exit 42 / `CONFIG_INVALID` trước khi sửa DB.
 - [ ] Runtime override tách khỏi shipped defaults.
@@ -163,19 +163,22 @@ File này là checklist từ spec → code. Không được đánh dấu DONE ch
 - [x] App-only close filter `WAHUKidsLearn.exe`.
 - [x] Reinstall/update preserves learner DB bit-for-bit trong E2E.
 - [x] Uninstall xóa app nhưng giữ learner DB + sentinel trong E2E.
+- [x] Startup-with-Windows task mặc định bật; installer E2E xác nhận HKCU Run được tạo và uninstall xóa sạch.
+- [x] GitHub updater helper được stage trong installer; manifest/staging/tamper smoke PASS.
 - [ ] Repair mode.
 - [ ] Vietnamese full wizard translation only after vendor/version/license review.
 
 ## P. Release/reproducibility
 
 - [x] Dev release manifest populated với build/runtime/DB gates.
-- [ ] Git commit recorded (chỉ có giá trị khi root là Git workspace).
+- [x] Git commit được ghi vào build manifest; publish script còn bắt buộc clean tree + HEAD == origin/main.
 - [ ] Dependency hashes có trong manifest nhưng license inventory vẫn cần hoàn thiện.
 - [ ] Content versions/hashes cần manifest đầy đủ hơn.
 - [x] Installer SHA-256 được sinh cạnh installer.
 - [x] Portable ZIP SHA-256 được sinh; ZIP E2E chạy trực tiếp từ archive extract PASS.
+- [x] Build sinh `update-manifest.json`; publish script khóa repo public, clean tree, origin/main và từ chối stable unsigned.
 - [ ] Test matrix gates all PASS.
-- [ ] No Internet dependency trên Win7 clean target chưa test; runtime/config hiện offline-first và không có download động.
+- [ ] Win7 target cần test updater HTTPS/TLS thật; Child Mode vẫn offline-first nhưng installed updater có GitHub HTTPS exception hẹp.
 
 ## Q. Target-PC final gates
 

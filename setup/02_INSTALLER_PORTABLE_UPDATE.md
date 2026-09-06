@@ -30,6 +30,10 @@ Lợi ích:
 
 .NET Framework 4.8 nếu thiếu vẫn cần quyền admin để cài prerequisite.
 
+### Khởi động cùng Windows
+
+Installer có task `startup` **mặc định được chọn**. Task ghi HKCU `Software\Microsoft\Windows\CurrentVersion\Run` với `WAHUKidsLearn.exe --startup`, không cần quyền admin. Uninstall phải xóa value này; installer E2E kiểm cả create/remove. Người lớn có thể bỏ chọn task khi cài nếu không muốn tự khởi động.
+
 ## 3. .NET preflight
 
 Check registry release key:
@@ -77,14 +81,29 @@ Portable mode:
 - banner Parent Mode cảnh báo không tháo USB khi app đang ghi;
 - không phải mode khuyến nghị cho trẻ dùng hàng ngày.
 
-## 7. Update V1
+## 7. Update V1 — GitHub Releases, fail-safe
 
-Không auto-update Internet.
+V1 cho phép **auto-update binary ở installed mode** qua đúng release feed công khai của dự án:
 
-Update hợp lệ:
-- chạy installer mới;
-- USB release folder;
-- Parent Mode import signed/hashed content pack.
+```text
+https://github.com/WahuVN/WAHU-Kids-Learn/releases/latest/download/update-manifest.json
+```
+
+Đây là ngoại lệ network hẹp; Child Mode, analytics, ads, content runtime và learner data vẫn không có network chung.
+
+Flow:
+1. startup app bình thường, không chờ mạng;
+2. background worker tối đa mỗi 6 giờ thử tải manifest qua HTTPS;
+3. manifest phải đúng owner/repo/channel, URL installer đúng GitHub Releases của repo, size nằm trong policy;
+4. installer tải vào `%LOCALAPPDATA%\WAHU Kids Learn\updates`, kiểm SHA-256 trước khi stage;
+5. lần khởi động kế tiếp, chỉ khi DB bootstrap/integrity khỏe và phiên trước đóng sạch, tạo verified pre-update backup;
+6. copy `WAHU.Updater.exe` ra ngoài install dir, app thoát;
+7. helper hash lại installer, production còn phải qua Authenticode cache-only, rồi chạy Inno silent;
+8. cài thành công thì mở app lại; lỗi update không xóa learner data và không chặn Child Mode ở lần check mạng.
+
+Portable mode **không tự cập nhật binary** để tránh ghi đè ứng dụng trên USB/removable media. Có thể thay portable ZIP thủ công.
+
+Dev channel hiện cho unsigned installer nhưng SHA-256 bắt buộc. Stable channel bị release pipeline từ chối nếu chưa `production_signed=true` và Authenticode gate chưa PASS.
 
 App version và content version độc lập.
 

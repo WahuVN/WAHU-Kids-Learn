@@ -16,13 +16,22 @@ Không xây hệ thống enterprise/network security không cần thiết.
 
 ## 2. Network
 
-V1:
+V1 vẫn offline-first và không có network chung cho Child Mode:
 - không mở port;
 - không local web server;
 - không analytics endpoint;
 - không ads SDK;
-- không background updater;
-- không auto-download content.
+- không auto-download lesson/content pack cho Child Mode;
+- **chỉ updater installed-mode** được outbound HTTPS tới release feed khóa cứng `WahuVN/WAHU-Kids-Learn`.
+
+Updater không gửi learner data/nickname/attempt/diagnostics lên GitHub. Request chỉ lấy release manifest và installer. Mất mạng/TLS/GitHub lỗi phải fail-safe: app vẫn học offline, không hiện lỗi kỹ thuật cho trẻ và chỉ throttle lần check kế tiếp.
+
+Update trust:
+- SHA-256 installer luôn bắt buộc;
+- URL/owner/repo/channel/size được validate fail-closed;
+- stable production bắt buộc Authenticode/cache-only trust trước khi chạy installer;
+- updater helper chạy ngoài process app để không tự ghi đè executable đang sử dụng;
+- learner DB được verified-backup trước khi cài staged update.
 
 ## 3. Parent PIN
 

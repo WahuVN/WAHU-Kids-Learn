@@ -61,6 +61,7 @@ Name: "{localappdata}\WAHU Kids Learn\logs"
 Name: "{localappdata}\WAHU Kids Learn\backups"
 Name: "{localappdata}\WAHU Kids Learn\temp"
 Name: "{localappdata}\WAHU Kids Learn\recovery"
+Name: "{localappdata}\WAHU Kids Learn\updates"
 
 [Icons]
 Name: "{autoprograms}\WAHU Kids Learn"; Filename: "{app}\{#AppExeName}"
@@ -68,6 +69,10 @@ Name: "{autodesktop}\WAHU Kids Learn"; Filename: "{app}\{#AppExeName}"; Tasks: d
 
 [Tasks]
 Name: "desktopicon"; Description: "Tạo biểu tượng ngoài màn hình"; GroupDescription: "Biểu tượng:"; Flags: unchecked
+Name: "startup"; Description: "Khởi động WAHU Kids Learn cùng Windows"; GroupDescription: "Khởi động:"
+
+[Registry]
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "WAHU Kids Learn"; ValueData: """{app}\{#AppExeName}"" --startup"; Flags: uninsdeletevalue; Tasks: startup
 
 [Run]
 Filename: "{app}\{#AppExeName}"; Description: "Mở WAHU Kids Learn"; Flags: nowait postinstall skipifsilent; Check: IsNet48OrLater

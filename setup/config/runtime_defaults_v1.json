@@ -44,6 +44,7 @@
   },
   "privacy": {
     "network_enabled": false,
+    "update_network_exception": "github_release_feed_only",
     "analytics_enabled": false,
     "ads_enabled": false,
     "cloud_required": false,

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -101,13 +101,16 @@ namespace WAHU.SetupPreflight.Smoke
         {
             var source = FindConfigDirectory();
             var bundle = RuntimeConfigBundle.Load(source);
-            Assert(bundle.FileSha256.Count == 9, "runtime_config_nine_required_files");
+            Assert(bundle.FileSha256.Count == 10, "runtime_config_ten_required_files");
             Assert(bundle.AppVersion == "0.1.0-dev", "runtime_config_source_app_version");
             Assert(bundle.DatabaseJournalMode == "DELETE", "runtime_config_delete_journal");
             Assert(bundle.DatabasePath.EndsWith(@"WAHU Kids Learn\data\learning.db", StringComparison.OrdinalIgnoreCase), "runtime_config_database_path");
             Assert(bundle.BackupsDirectory.EndsWith(@"WAHU Kids Learn\backups", StringComparison.OrdinalIgnoreCase), "runtime_config_installed_backup_path");
             Assert(bundle.PrimaryChildTargetPx == 64, "runtime_config_child_target_64");
             Assert(bundle.LowMotionFpsCap == 18 && bundle.NormalMotionFpsCap == 30, "runtime_config_motion_caps");
+            Assert(bundle.UpdateEnabled && bundle.UpdateCheckOnStartup && bundle.UpdateAutoDownload, "runtime_config_update_enabled");
+            Assert(bundle.LaunchWithWindowsDefault, "runtime_config_startup_default");
+            Assert(bundle.UpdateManifestUrl == "https://github.com/WahuVN/WAHU-Kids-Learn/releases/latest/download/update-manifest.json", "runtime_config_update_feed_locked");
 
             var portableBase = Path.Combine(Path.GetTempPath(), "wahu-portable-config-" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(portableBase);
@@ -141,6 +144,11 @@ namespace WAHU.SetupPreflight.Smoke
                 AssertConfigRejected(temp, "runtime_config_missing_required_file_rejected");
 
                 File.Copy(Path.Combine(source, "logging_policy_v1.json"), Path.Combine(temp, "logging_policy_v1.json"), true);
+                var updatePath = Path.Combine(temp, "update_policy_v1.json");
+                var updateText = File.ReadAllText(updatePath);
+                File.WriteAllText(updatePath, updateText.Replace("WahuVN/WAHU-Kids-Learn/releases/latest", "evil/example/releases/latest"));
+                AssertConfigRejected(temp, "runtime_config_update_feed_tamper_rejected");
+                File.Copy(Path.Combine(source, "update_policy_v1.json"), updatePath, true);
                 var pathsPath = Path.Combine(temp, "paths_v1.json");
                 var paths = File.ReadAllText(pathsPath);
                 File.WriteAllText(pathsPath, paths.Replace("\"user_root\": \".\\\\UserData\"", "\"user_root\": \"..\\\\escape\""));
