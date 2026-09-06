@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
+using WAHU.Content;
 using WAHU.Data;
 using WAHU.Learning;
 using WAHU.Performance;
@@ -27,6 +28,7 @@ namespace WAHU.ChildUiRuntimeSmoke
             TestGarden(appAssembly, 1.25f);
             TestCompanionAndCompletion(appAssembly);
             TestRoadmap(appAssembly);
+            TestMathCatalogAndHub(appAssembly);
             TestAnswerGridLayout(appAssembly);
             TestInteractiveSegmentAnswer(appAssembly);
             TestBasicControls(appAssembly);
@@ -174,6 +176,109 @@ namespace WAHU.ChildUiRuntimeSmoke
                     Invoke(roadmap, "SetSnapshot", snapshot);
                     RenderAndAssert(roadmap, (int)(560 * scale), (int)(132 * scale), "math_roadmap_scale_" + scale);
                 }
+            }
+        }
+
+        private static void TestMathCatalogAndHub(Assembly appAssembly)
+        {
+            var catalogPath = Path.Combine(Directory.GetCurrentDirectory(), "content_packs", "math_grade2_v1", "lesson_catalog_v1.json");
+            var catalog = new MathLessonCatalogSource().Load(catalogPath);
+            A(catalog.Grade == 2, "math_catalog_grade2");
+            A(catalog.Chapters.Count == 7, "math_catalog_seven_chapters");
+            A(catalog.Topics.Count == 17, "math_catalog_seventeen_topics");
+            A(catalog.Lessons.Count == 67, "math_catalog_sixty_seven_lessons");
+            A(catalog.FindChapter("m2_ch01_numbers") != null, "math_catalog_first_chapter_resolves");
+            A(catalog.FindLesson("m2_ls_num_count_read_write_0_1000") != null, "math_catalog_first_lesson_resolves");
+            var firstLesson = catalog.FindLesson("m2_ls_num_count_read_write_0_1000");
+            A(firstLesson.ObjectivesVi.Count >= 2, "math_catalog_lesson_has_objectives");
+            A(firstLesson.Concepts.Count > 0, "math_catalog_lesson_has_concept");
+            A(firstLesson.WorkedExamples.Count > 0, "math_catalog_lesson_has_worked_example");
+            A(firstLesson.PracticeSets.TotalCount == 3, "math_catalog_lesson_has_three_practice_questions");
+            A(catalog.FindLessonBySkill(firstLesson.SkillId).Id == firstLesson.Id, "math_catalog_skill_maps_to_lesson");
+
+            var tempRoot = Path.Combine(Path.GetTempPath(), "wahu-child-ui-math-hub-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempRoot);
+            try
+            {
+                var sourceSchemaDir = Path.Combine(Directory.GetCurrentDirectory(), "data", "schema");
+                var schemaDir = Path.Combine(tempRoot, "schema");
+                Directory.CreateDirectory(schemaDir);
+                foreach (var source in Directory.GetFiles(sourceSchemaDir, "*.sql"))
+                    File.Copy(source, Path.Combine(schemaDir, Path.GetFileName(source)), true);
+                var schema = Path.Combine(schemaDir, "001_initial.sql");
+                var database = new LearningDatabase(Path.Combine(tempRoot, "learning.db"), schema);
+                database.Initialize("DELETE");
+                new LearnerSessionService(database).EnsurePrimaryChild("Bé học");
+
+                var ctor = typeof(WAHUKidsLearn.MathHubForm).GetConstructor(
+                    BindingFlags.Instance | BindingFlags.NonPublic,
+                    null,
+                    new[] { typeof(LearningDatabase), typeof(RuntimePerformanceSettings), typeof(string) },
+                    null);
+                A(ctor != null, "math_hub_test_constructor_available");
+
+                using (var form = (WAHUKidsLearn.MathHubForm)ctor.Invoke(new object[]
+                {
+                    database,
+                    new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW },
+                    catalogPath
+                }))
+                {
+                    Invoke(form, "LoadCatalogAndProgress");
+                    A(Get<int>(form, "ChapterCount") == 7, "math_hub_loads_seven_chapters");
+                    A(Get<int>(form, "TopicCount") == 17, "math_hub_loads_seventeen_topics");
+                    A(Get<int>(form, "LessonCount") == 67, "math_hub_loads_sixty_seven_lessons");
+                    A(!string.IsNullOrWhiteSpace(Get<string>(form, "SelectedLessonId")), "math_hub_selects_first_lesson");
+
+                    var summary = GetField<Label>(form, "_summary");
+                    A(summary.Text.IndexOf("67 bài học", StringComparison.Ordinal) >= 0, "math_hub_summary_shows_lesson_count");
+                    var chapterFlow = GetField<FlowLayoutPanel>(form, "_chapterFlow");
+                    var lessonFlow = GetField<FlowLayoutPanel>(form, "_lessonFlow");
+                    var detailFlow = GetField<FlowLayoutPanel>(form, "_detailFlow");
+                    A(chapterFlow.Controls.Count == 7, "math_hub_renders_all_chapter_buttons");
+                    A(lessonFlow.Controls.Count > 2, "math_hub_renders_topics_and_lessons");
+                    A(ContainsControlText(detailFlow, "Mục tiêu"), "math_hub_detail_shows_objectives_section");
+                    A(ContainsControlText(detailFlow, "Kiến thức cần nhớ"), "math_hub_detail_shows_concept_section");
+                    A(ContainsControlText(detailFlow, "Ví dụ có lời giải"), "math_hub_detail_shows_example_section");
+                    A(ContainsControlText(detailFlow, "Luyện tập"), "math_hub_detail_shows_practice_section");
+                    A(ContainsControlText(detailFlow, "3 câu trong ngân hàng bài học"), "math_hub_detail_shows_practice_count");
+
+                    var firstChapterButton = chapterFlow.Controls[0] as Button;
+                    A(firstChapterButton != null && !string.IsNullOrWhiteSpace(firstChapterButton.AccessibleName),
+                        "math_hub_chapter_button_accessible_name");
+                    var firstLessonButton = FindFirstButton(lessonFlow);
+                    A(firstLessonButton != null && !string.IsNullOrWhiteSpace(firstLessonButton.AccessibleDescription),
+                        "math_hub_lesson_button_accessible_description");
+                    var mission = GetField<Button>(form, "_missionButton");
+                    A(!string.IsNullOrWhiteSpace(mission.AccessibleName), "math_hub_mission_button_accessible_name");
+                    A(mission.TabStop, "math_hub_mission_button_keyboard_focusable");
+
+                    RenderFormAndAssert(form, 1180, 760, "math_hub_default_window");
+                    RenderFormAndAssert(form, 900, 640, "math_hub_min_window");
+                }
+
+                using (var missing = (WAHUKidsLearn.MathHubForm)ctor.Invoke(new object[]
+                {
+                    database,
+                    new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW },
+                    Path.Combine(tempRoot, "missing_lesson_catalog.json")
+                }))
+                {
+                    Invoke(missing, "LoadCatalogAndProgress");
+                    A(Get<int>(missing, "ChapterCount") == 0, "math_hub_missing_catalog_has_zero_chapters");
+                    A(GetField<Label>(missing, "_summary").Text.IndexOf("kiểm tra lại", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "math_hub_missing_catalog_child_safe_summary");
+                    A(GetField<Label>(missing, "_detailEmpty").Text.IndexOf("Chưa thể mở", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "math_hub_missing_catalog_child_safe_detail");
+                    A(GetField<Control>(missing, "_detailFlow").Visible == false,
+                        "math_hub_missing_catalog_hides_detail_flow");
+                    A(GetField<Button>(missing, "_missionButton").Enabled,
+                        "math_hub_missing_catalog_keeps_adaptive_mission_available");
+                }
+            }
+            finally
+            {
+                try { Directory.Delete(tempRoot, true); } catch { }
             }
         }
 
@@ -341,6 +446,59 @@ namespace WAHU.ChildUiRuntimeSmoke
             var info = target.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             if (info == null) throw new MissingFieldException(target.GetType().FullName, fieldName);
             return (T)info.GetValue(target);
+        }
+
+        private static bool ContainsControlText(Control root, string needle)
+        {
+            if (root == null || string.IsNullOrWhiteSpace(needle)) return false;
+            if (!string.IsNullOrWhiteSpace(root.Text) && root.Text.IndexOf(needle, StringComparison.OrdinalIgnoreCase) >= 0)
+                return true;
+            foreach (Control child in root.Controls)
+                if (ContainsControlText(child, needle)) return true;
+            return false;
+        }
+
+        private static Button FindFirstButton(Control root)
+        {
+            if (root == null) return null;
+            var button = root as Button;
+            if (button != null) return button;
+            foreach (Control child in root.Controls)
+            {
+                var found = FindFirstButton(child);
+                if (found != null) return found;
+            }
+            return null;
+        }
+
+        private static void RenderFormAndAssert(Form form, int width, int height, string name)
+        {
+            A(width >= form.MinimumSize.Width && height >= form.MinimumSize.Height, name + "_meets_minimum_size");
+            form.ClientSize = new Size(width, height);
+            CreateAndLayoutTree(form);
+            A(form.Controls.Count > 0, name + "_has_root_control");
+            var root = form.Controls[0];
+            A(root.Width > 0 && root.Height > 0, name + "_root_positive_bounds");
+            A(Math.Abs(root.Width - form.ClientSize.Width) <= 2, name + "_root_fills_width");
+            A(Math.Abs(root.Height - form.ClientSize.Height) <= 2, name + "_root_fills_height");
+            A(CountSizedControls(root) >= 15, name + "_keeps_sized_layout_tree");
+        }
+
+        private static void CreateAndLayoutTree(Control root)
+        {
+            if (root == null) return;
+            root.CreateControl();
+            root.PerformLayout();
+            foreach (Control child in root.Controls) CreateAndLayoutTree(child);
+            root.PerformLayout();
+        }
+
+        private static int CountSizedControls(Control root)
+        {
+            if (root == null) return 0;
+            var count = root.Width > 0 && root.Height > 0 ? 1 : 0;
+            foreach (Control child in root.Controls) count += CountSizedControls(child);
+            return count;
         }
 
         private static void RenderAndAssert(Control child, int width, int height, string name)

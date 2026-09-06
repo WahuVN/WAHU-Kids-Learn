@@ -12,6 +12,7 @@
     <Compile Include="SecureContentImporter.cs" />
     <Compile Include="ContentPackCatalog.cs" />
     <Compile Include="MathVerifiedTemplateSource.cs" />
+    <Compile Include="MathLessonCatalogSource.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

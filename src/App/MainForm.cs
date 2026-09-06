@@ -237,18 +237,18 @@ namespace WAHUKidsLearn
             {
                 Dock = DockStyle.Fill,
                 Margin = new Padding(0, 8, 0, 6),
-                Text = "Bắt đầu Toán",
-                BadgeText = "8",
+                Text = "Mở Toán lớp 2",
+                BadgeText = "67",
                 Font = ChildVisualTheme.Font(16f, FontStyle.Bold),
                 FillColor = ChildVisualTheme.MintStrong,
                 HoverColor = Color.FromArgb(90, 156, 103),
                 PressedColor = Color.FromArgb(75, 139, 88),
                 Radius = 20,
-                AccessibleName = "Bắt đầu học Toán",
-                AccessibleDescription = "Mở phiên học Toán lớp 2 gồm khoảng tám câu."
+                AccessibleName = "Mở thư viện Toán lớp 2",
+                AccessibleDescription = "Mở bảy chương và sáu mươi bảy bài học Toán lớp 2."
             };
             _mathButton.Enabled = IsLearnerReady();
-            _mathButton.Click += delegate { OpenMathLesson(); };
+            _mathButton.Click += delegate { OpenMathHub(); };
             missionLayout.Controls.Add(_mathButton, 0, 3);
             missionLayout.Controls.Add(new Label
             {
@@ -330,19 +330,19 @@ namespace WAHUKidsLearn
             Controls.Add(root);
         }
 
-        private void OpenMathLesson()
+        private void OpenMathHub()
         {
             if (!IsLearnerReady()) return;
             try
             {
-                using (var lesson = new MathLessonForm(_learningDatabase, _performance))
-                    lesson.ShowDialog(this);
+                using (var hub = new MathHubForm(_learningDatabase, _performance))
+                    hub.ShowDialog(this);
                 RefreshHomeProgress();
             }
             catch
             {
                 MessageBox.Show(this,
-                    "Chưa thể mở buổi Toán lúc này. Nhờ người lớn mở mục Phụ huynh để kiểm tra nhé.",
+                    "Chưa thể mở thư viện Toán lúc này. Nhờ người lớn mở mục Phụ huynh để kiểm tra nhé.",
                     "WAHU Kids Learn", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
