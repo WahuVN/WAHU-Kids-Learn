@@ -23,6 +23,7 @@ DIFFICULTIES = {"basic", "medium", "application"}
 ENGINE_ANSWER_KINDS = {"integer", "interaction_integer", "number", "decimal", "fraction", "text", "unit", "expression"}
 GRADE2_USED_ANSWER_KINDS = {"integer", "interaction_integer", "text", "unit", "expression"}
 QUESTION_TYPES = {"numeric_input", "multiple_choice", "true_false", "expression_input", "unit_input", "interactive_measurement", "word_problem"}
+MONEY_DENOMINATION_RE = re.compile(r"\b\d[\d\s.,]*\s*đồng\b", re.IGNORECASE)
 
 
 def load_json(path: Path, errors: list[str]) -> dict:
@@ -377,6 +378,10 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
         if prompt:
             prompts_by_lesson[lid].append((qid, prompt))
         explanation = required_text(q, "explanation_vi", where, errors)
+        if skill == "MONEY_VND_NOTE_RECOGNITION":
+            serialized_money_item = json.dumps(q, ensure_ascii=False)
+            if MONEY_DENOMINATION_RE.search(serialized_money_item):
+                errors.append(f"unsourced_money_denomination:{where}")
         hints = required_list(q, "hints_vi", where, errors, 2)
         if len(hints) < 2 or any(not isinstance(x, str) or not x.strip() for x in hints):
             errors.append(f"invalid_hints:{where}")

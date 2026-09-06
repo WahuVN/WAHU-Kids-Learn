@@ -6524,13 +6524,13 @@
       "skill_id": "MONEY_VND_NOTE_RECOGNITION",
       "difficulty": "basic",
       "question_type": "multiple_choice",
-      "prompt_vi": "Một tờ tiền học tập có in rõ '10 000 đồng'. Giá trị in trên tờ là gì?",
+      "prompt_vi": "Khi xem hình một tờ tiền Việt Nam, thông tin nào cần đọc để nhận biết giá trị?",
       "answer_kind": "text",
-      "correct_answer": "10 000 đồng",
+      "correct_answer": "Con số mệnh giá và chữ đồng trên tờ",
       "accepted_answers": [
-        "10 000 đồng"
+        "Con số mệnh giá và chữ đồng trên tờ"
       ],
-      "explanation_vi": "Đọc trực tiếp con số và đơn vị đồng in trên tờ tiền.",
+      "explanation_vi": "Để nhận biết giá trị, cần đọc con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền.",
       "hints_vi": [
         "Nhớ kiến thức: Giá trị tiền được đọc theo con số in trên tờ và đơn vị đồng; bài học này chỉ rèn nhận biết, không mở rộng chuẩn số học ngoài baseline.",
         "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
@@ -6551,22 +6551,22 @@
       "choices": [
         {
           "id": "a",
-          "text": "10 000 đồng",
-          "rationale_vi": "Đọc trực tiếp con số và đơn vị đồng in trên tờ tiền."
+          "text": "Con số mệnh giá và chữ đồng trên tờ",
+          "rationale_vi": "Để nhận biết giá trị, cần đọc con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền."
         },
         {
           "id": "b",
-          "text": "1 000 đồng",
+          "text": "Màu yêu thích của người xem",
           "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
         },
         {
           "id": "c",
-          "text": "100 đồng",
+          "text": "Số trang của sách bên cạnh",
           "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
         },
         {
           "id": "d",
-          "text": "10 đồng",
+          "text": "Chiều dài của bàn học",
           "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
         }
       ]
@@ -6576,14 +6576,14 @@
       "lesson_id": "m2_ls_money_vnd_note_recognition",
       "skill_id": "MONEY_VND_NOTE_RECOGNITION",
       "difficulty": "medium",
-      "question_type": "multiple_choice",
-      "prompt_vi": "Khi nhận biết giá trị một tờ tiền Việt Nam, thông tin nào quan trọng nhất?",
+      "question_type": "true_false",
+      "prompt_vi": "Chỉ nhìn màu sắc là đủ để xác định chắc chắn giá trị của một tờ tiền Việt Nam.",
       "answer_kind": "text",
-      "correct_answer": "Con số mệnh giá và chữ đồng in trên tờ",
+      "correct_answer": "Sai",
       "accepted_answers": [
-        "Con số mệnh giá và chữ đồng in trên tờ"
+        "Sai"
       ],
-      "explanation_vi": "Giá trị được nhận biết từ mệnh giá và đơn vị đồng thể hiện trên tờ tiền.",
+      "explanation_vi": "Màu sắc có thể hỗ trợ quan sát nhưng cần đọc con số mệnh giá và đơn vị đồng để nhận biết giá trị.",
       "hints_vi": [
         "Nhớ kiến thức: Giá trị tiền được đọc theo con số in trên tờ và đơn vị đồng; bài học này chỉ rèn nhận biết, không mở rộng chuẩn số học ngoài baseline.",
         "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
@@ -6592,11 +6592,11 @@
         "money_vnd_note_recognition",
         "measurement",
         "medium",
-        "multiple_choice",
+        "true_false",
         "text"
       ],
       "validation": {
-        "choice_count": 4,
+        "choice_count": 2,
         "single_correct": true
       },
       "status": "CHILD_READY",
@@ -6604,22 +6604,12 @@
       "choices": [
         {
           "id": "a",
-          "text": "Con số mệnh giá và chữ đồng in trên tờ",
-          "rationale_vi": "Giá trị được nhận biết từ mệnh giá và đơn vị đồng thể hiện trên tờ tiền."
+          "text": "Sai",
+          "rationale_vi": "Màu sắc có thể hỗ trợ quan sát nhưng cần đọc con số mệnh giá và đơn vị đồng để nhận biết giá trị."
         },
         {
           "id": "b",
-          "text": "Màu yêu thích của người xem",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
-        },
-        {
-          "id": "c",
-          "text": "Kích thước bàn học",
-          "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
-        },
-        {
-          "id": "d",
-          "text": "Số trang của sách",
+          "text": "Đúng",
           "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
         }
       ]
@@ -6630,13 +6620,13 @@
       "skill_id": "MONEY_VND_NOTE_RECOGNITION",
       "difficulty": "application",
       "question_type": "multiple_choice",
-      "prompt_vi": "Hai thẻ mô phỏng ghi '20 000 đồng' và '10 000 đồng'. Thẻ nào ghi giá trị lớn hơn?",
+      "prompt_vi": "Có hai hình tờ tiền A và B với con số mệnh giá khác nhau. Muốn biết tờ nào có giá trị lớn hơn, bước nào phù hợp nhất?",
       "answer_kind": "text",
-      "correct_answer": "20 000 đồng",
+      "correct_answer": "Đọc và so sánh con số mệnh giá trên hai tờ",
       "accepted_answers": [
-        "20 000 đồng"
+        "Đọc và so sánh con số mệnh giá trên hai tờ"
       ],
-      "explanation_vi": "20 000 lớn hơn 10 000 nên thẻ 20 000 đồng ghi giá trị lớn hơn.",
+      "explanation_vi": "Đọc đúng con số mệnh giá trên từng tờ rồi so sánh hai giá trị; không đoán chỉ từ màu sắc hoặc vị trí.",
       "hints_vi": [
         "Nhớ kiến thức: Giá trị tiền được đọc theo con số in trên tờ và đơn vị đồng; bài học này chỉ rèn nhận biết, không mở rộng chuẩn số học ngoài baseline.",
         "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
@@ -6657,22 +6647,22 @@
       "choices": [
         {
           "id": "a",
-          "text": "20 000 đồng",
-          "rationale_vi": "20 000 lớn hơn 10 000 nên thẻ 20 000 đồng ghi giá trị lớn hơn."
+          "text": "Đọc và so sánh con số mệnh giá trên hai tờ",
+          "rationale_vi": "Đọc đúng con số mệnh giá trên từng tờ rồi so sánh hai giá trị; không đoán chỉ từ màu sắc hoặc vị trí."
         },
         {
           "id": "b",
-          "text": "10 000 đồng",
+          "text": "Chọn tờ có màu mình thích hơn",
           "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
         },
         {
           "id": "c",
-          "text": "Hai thẻ bằng nhau",
+          "text": "Chọn tờ nằm bên trái",
           "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
         },
         {
           "id": "d",
-          "text": "Không thể đọc vì có chữ đồng",
+          "text": "Đếm số chữ xuất hiện trên mỗi tờ",
           "rationale_vi": "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
         }
       ]

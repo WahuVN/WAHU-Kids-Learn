@@ -2858,12 +2858,12 @@
       "worked_examples": [
         {
           "id": "m2_ex_money_vnd_note_recognition_01",
-          "prompt_vi": "Một tờ tiền học tập có in rõ '10 000 đồng'. Giá trị in trên tờ là gì?",
+          "prompt_vi": "Khi xem hình một tờ tiền Việt Nam, thông tin nào cần đọc để nhận biết giá trị?",
           "solution_steps_vi": [
-            "Đọc trực tiếp con số và đơn vị đồng in trên tờ tiền.",
+            "Để nhận biết giá trị, cần đọc con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền.",
             "Đối chiếu kết quả với yêu cầu và đơn vị của câu hỏi."
           ],
-          "answer": "10 000 đồng"
+          "answer": "Con số mệnh giá và chữ đồng trên tờ"
         }
       ],
       "practice_sets": {

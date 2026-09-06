@@ -28,7 +28,7 @@ Owner: AI1 — Math Content & Data
   - interactive measurement
   - word problem
 - Semantic validator errors: **0**
-- Math content unittest: **11 / 11 PASS**
+- Math content unittest: **12 / 12 PASS**
 - Pack manifest/hash/listing check on current working tree: **PASS** (`version=1.9.0`, 3 listed files)
 
 ## Curriculum/content completeness
@@ -78,6 +78,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - invalid unit metadata;
 - invalid MC correct choice / duplicate choices / rationale missing;
 - invalid true/false shape;
+- mệnh giá tiền Việt Nam bị hard-code khi chưa có source/book mapping;
 - answer kind ngoài Grade-2 bank;
 - question type không hợp contract;
 - exact/near duplicate prompt trong cùng lesson;
@@ -96,9 +97,10 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - difficulty cân bằng;
 - authoring deterministic;
 - answer kinds/question types đúng contract;
-- expression validator fail-closed, kể cả divide-by-zero và payload không phải arithmetic.
+- expression validator fail-closed, kể cả divide-by-zero và payload không phải arithmetic;
+- nội dung tiền Việt Nam không hard-code mệnh giá khi chưa có source/book mapping.
 
-Latest result: **11 tests PASS**.
+Latest result: **12 tests PASS**.
 
 ## Commits / waves
 

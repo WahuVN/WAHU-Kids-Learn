@@ -506,9 +506,9 @@ Q = {
         mc("Ngày sau ngày 14 tháng 9 là ngày nào?", "15 tháng 9", ["13 tháng 9", "14 tháng 10", "16 tháng 9"], "Ngày kế tiếp tăng số ngày thêm 1 trong cùng tháng, nên là 15 tháng 9."),
     ],
     "MONEY_VND_NOTE_RECOGNITION": [
-        mc("Một tờ tiền học tập có in rõ '10 000 đồng'. Giá trị in trên tờ là gì?", "10 000 đồng", ["1 000 đồng", "100 đồng", "10 đồng"], "Đọc trực tiếp con số và đơn vị đồng in trên tờ tiền."),
-        mc("Khi nhận biết giá trị một tờ tiền Việt Nam, thông tin nào quan trọng nhất?", "Con số mệnh giá và chữ đồng in trên tờ", ["Màu yêu thích của người xem", "Kích thước bàn học", "Số trang của sách"], "Giá trị được nhận biết từ mệnh giá và đơn vị đồng thể hiện trên tờ tiền."),
-        mc("Hai thẻ mô phỏng ghi '20 000 đồng' và '10 000 đồng'. Thẻ nào ghi giá trị lớn hơn?", "20 000 đồng", ["10 000 đồng", "Hai thẻ bằng nhau", "Không thể đọc vì có chữ đồng"], "20 000 lớn hơn 10 000 nên thẻ 20 000 đồng ghi giá trị lớn hơn."),
+        mc("Khi xem hình một tờ tiền Việt Nam, thông tin nào cần đọc để nhận biết giá trị?", "Con số mệnh giá và chữ đồng trên tờ", ["Màu yêu thích của người xem", "Số trang của sách bên cạnh", "Chiều dài của bàn học"], "Để nhận biết giá trị, cần đọc con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền."),
+        tf("Chỉ nhìn màu sắc là đủ để xác định chắc chắn giá trị của một tờ tiền Việt Nam.", False, "Màu sắc có thể hỗ trợ quan sát nhưng cần đọc con số mệnh giá và đơn vị đồng để nhận biết giá trị."),
+        mc("Có hai hình tờ tiền A và B với con số mệnh giá khác nhau. Muốn biết tờ nào có giá trị lớn hơn, bước nào phù hợp nhất?", "Đọc và so sánh con số mệnh giá trên hai tờ", ["Chọn tờ có màu mình thích hơn", "Chọn tờ nằm bên trái", "Đếm số chữ xuất hiện trên mỗi tờ"], "Đọc đúng con số mệnh giá trên từng tờ rồi so sánh hai giá trị; không đoán chỉ từ màu sắc hoặc vị trí."),
     ],
     "MEASURE_WITH_RULER_CM": [
         nq("Một đoạn thẳng bắt đầu ở vạch 0 cm và kết thúc ở vạch 8 cm. Dài bao nhiêu cm?", 8, "8 - 0 = 8 cm.", unit="cm"),

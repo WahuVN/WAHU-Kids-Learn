@@ -181,6 +181,17 @@ class MathContentDataSmoke(unittest.TestCase):
         with self.assertRaises((SyntaxError, ValueError)):
             validator.eval_restricted_expression("__import__('os').system('echo bad')")
 
+    def test_money_content_does_not_hardcode_unsourced_denomination(self):
+        self.assertIsNotNone(validator.MONEY_DENOMINATION_RE.search("10 000 đồng"))
+        money_lessons = [x for x in self.lessons if x["skill_id"] == "MONEY_VND_NOTE_RECOGNITION"]
+        money_questions = [x for x in self.questions if x["skill_id"] == "MONEY_VND_NOTE_RECOGNITION"]
+        self.assertEqual(1, len(money_lessons))
+        self.assertEqual(3, len(money_questions))
+        for item in money_lessons + money_questions:
+            with self.subTest(item=item["id"]):
+                serialized = json.dumps(item, ensure_ascii=False)
+                self.assertIsNone(validator.MONEY_DENOMINATION_RE.search(serialized))
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
