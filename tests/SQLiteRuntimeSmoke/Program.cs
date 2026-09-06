@@ -5,6 +5,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using WAHU.Data;
+using WAHU.Learning;
 
 namespace WAHU.SQLiteRuntimeSmoke
 {
@@ -36,6 +37,7 @@ namespace WAHU.SQLiteRuntimeSmoke
                     TestManagedBackupLifecycle(root, schemaPath);
                     TestExistingV1MigrationWithPreBackup(root, schemaPath);
                     TestAnswerCommitAtomicity(root, schemaPath);
+                    TestBehaviorDecisionAudit(root, schemaPath);
                 }
                 finally
                 {
@@ -568,6 +570,80 @@ VALUES('corr-1','attempt-1','metadata_fix','{""response_ms"":1200}','{""response
                 Assert(Convert.ToInt32(Scalar(c, "SELECT count(*) FROM child_skill WHERE child_id='answer-child' AND skill_id='SUB_2DIGIT_WITH_BORROW';"), CultureInfo.InvariantCulture) == 0, "answer_commit_failed_skill_rolled_back");
                 Assert(Convert.ToInt32(Scalar(c, "SELECT count(*) FROM review_schedule WHERE child_id='answer-child' AND skill_id='SUB_2DIGIT_WITH_BORROW';"), CultureInfo.InvariantCulture) == 0, "answer_commit_failed_review_absent");
             }
+        }
+
+
+        private static void TestBehaviorDecisionAudit(string root, string schemaPath)
+        {
+            var dbPath = Path.Combine(root, "behavior-audit.db");
+            var database = new LearningDatabase(dbPath, schemaPath);
+            var init = database.Initialize("DELETE");
+            Assert(init.SchemaVersion == 2, "behavior_audit_schema_v2");
+            var now = DateTime.UtcNow;
+            using (var c = database.OpenConnection())
+            {
+                Exec(c, null,
+                    "INSERT INTO child(id,display_name,grade_level,created_at_utc,updated_at_utc) VALUES('behavior-child','Bé behavior',2,@t,@t);",
+                    "@t", now.ToString("o"));
+                Exec(c, null,
+                    "INSERT INTO session(id,child_id,started_at_utc,state,planned_subject,performance_profile) VALUES('behavior-session','behavior-child',@t,'active','math','LOW');",
+                    "@t", now.ToString("o"));
+            }
+
+            var service = new BehaviorDecisionAuditService(database);
+            service.Record(new BehaviorDecisionAuditRequest
+            {
+                Id = "behavior-event-1",
+                SessionId = "behavior-session",
+                ChildId = "behavior-child",
+                Decision = new BehaviorDecision
+                {
+                    State = BehaviorState.STRAINED,
+                    CandidateState = BehaviorState.STRAINED,
+                    Confidence = 0.77,
+                    Evidence = new[] { "recent_errors", "hint_use_rising" },
+                    Actions = new[] { "reduce_extraneous_load", "small_cue" }
+                },
+                ControllerVersion = "behavior-v1",
+                CreatedAtUtc = now
+            });
+
+            using (var c = database.OpenConnection())
+            {
+                Assert(Convert.ToInt32(Scalar(c, "SELECT count(*) FROM behavior_state_event WHERE id='behavior-event-1';"), CultureInfo.InvariantCulture) == 1, "behavior_audit_row_written");
+                Assert(Convert.ToString(Scalar(c, "SELECT state_label FROM behavior_state_event WHERE id='behavior-event-1';"), CultureInfo.InvariantCulture) == "STRAINED", "behavior_audit_state_written");
+                Assert(Math.Abs(Convert.ToDouble(Scalar(c, "SELECT confidence FROM behavior_state_event WHERE id='behavior-event-1';"), CultureInfo.InvariantCulture) - 0.77) < 0.0001, "behavior_audit_confidence_written");
+                var evidence = Convert.ToString(Scalar(c, "SELECT evidence_json FROM behavior_state_event WHERE id='behavior-event-1';"), CultureInfo.InvariantCulture);
+                var action = Convert.ToString(Scalar(c, "SELECT action_taken FROM behavior_state_event WHERE id='behavior-event-1';"), CultureInfo.InvariantCulture);
+                Assert(evidence.Contains("recent_errors") && evidence.Contains("hint_use_rising"), "behavior_audit_evidence_json_written");
+                Assert(action.Contains("reduce_extraneous_load") && action.Contains("small_cue"), "behavior_audit_actions_json_written");
+                Assert(Convert.ToString(Scalar(c, "SELECT controller_version FROM behavior_state_event WHERE id='behavior-event-1';"), CultureInfo.InvariantCulture) == "behavior-v1", "behavior_audit_controller_version_written");
+            }
+
+            var fkRejected = false;
+            try
+            {
+                service.Record(new BehaviorDecisionAuditRequest
+                {
+                    Id = "behavior-event-invalid-attempt",
+                    SessionId = "behavior-session",
+                    ChildId = "behavior-child",
+                    AttemptId = "attempt-does-not-exist",
+                    Decision = new BehaviorDecision
+                    {
+                        State = BehaviorState.READY,
+                        Confidence = 0.5,
+                        Evidence = new[] { "normal" },
+                        Actions = new[] { "normal_instruction" }
+                    },
+                    ControllerVersion = "behavior-v1",
+                    CreatedAtUtc = now.AddSeconds(1)
+                });
+            }
+            catch (SQLiteException) { fkRejected = true; }
+            Assert(fkRejected, "behavior_audit_invalid_attempt_fk_rejected");
+            using (var c = database.OpenConnection())
+                Assert(Convert.ToInt32(Scalar(c, "SELECT count(*) FROM behavior_state_event;"), CultureInfo.InvariantCulture) == 1, "behavior_audit_fk_failure_leaves_no_row");
         }
 
         private static void InsertLearningFixture(SQLiteConnection c)
