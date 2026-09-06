@@ -233,6 +233,9 @@ namespace WAHU.LearningSessionRuntimeSmoke
             var parent = ParentSummaryService.Read(database);
             A(parent.SessionCount == 2 && parent.AttemptCount == 6, "parent_summary_sees_recovered_and_completed_sessions");
             A(parent.SkillCount > 0, "parent_summary_sees_skill_state");
+            var roadmap = new MathRoadmapService(database).Read(profile.ChildId);
+            A(roadmap.TotalTrackedAttempts == 6, "math_roadmap_tracks_all_supported_vertical_slice_attempts");
+            A(RoadmapScoresBounded(roadmap), "math_roadmap_mastery_scores_bounded");
             A(correctCount == 5, "vertical_slice_fixture_correctness_expected");
         }
 
@@ -302,6 +305,14 @@ namespace WAHU.LearningSessionRuntimeSmoke
             if (templateId == "times_table_2" || templateId == "times_table_5") return "equal_groups";
             if (templateId.StartsWith("add_within_1000", StringComparison.Ordinal) || templateId.StartsWith("subtract_within_1000", StringComparison.Ordinal)) return "place_value";
             return "symbolic";
+        }
+
+        private static bool RoadmapScoresBounded(MathRoadmapSnapshot roadmap)
+        {
+            if (roadmap == null || roadmap.Mental20 == null || roadmap.Written1000 == null || roadmap.Tables25 == null) return false;
+            return roadmap.Mental20.MasteryAverage >= 0 && roadmap.Mental20.MasteryAverage <= 1 &&
+                   roadmap.Written1000.MasteryAverage >= 0 && roadmap.Written1000.MasteryAverage <= 1 &&
+                   roadmap.Tables25.MasteryAverage >= 0 && roadmap.Tables25.MasteryAverage <= 1;
         }
 
         private static int ParseA(MathQuestion q) { return ParseBinary(q)[0]; }

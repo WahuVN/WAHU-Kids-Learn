@@ -20,6 +20,7 @@ namespace WAHUKidsLearn
         private readonly RuntimePerformanceSettings _performance;
         private readonly ParentPinStore _pinStore;
         private GardenWorldControl _garden;
+        private MathRoadmapControl _mathRoadmap;
         private Label _gardenProgress;
         private Label _missionSummary;
         private ChildActionButton _mathButton;
@@ -122,10 +123,11 @@ namespace WAHUKidsLearn
                 BorderColor = Color.FromArgb(222, 220, 207),
                 Radius = 26
             };
-            var gardenLayout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 3 };
+            var gardenLayout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 4 };
             gardenLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 48));
             gardenLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            gardenLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 48));
+            gardenLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 132));
+            gardenLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 44));
             gardenLayout.Controls.Add(new Label
             {
                 Dock = DockStyle.Fill,
@@ -138,16 +140,43 @@ namespace WAHUKidsLearn
             }, 0, 0);
             _garden = new GardenWorldControl { Dock = DockStyle.Fill, Margin = new Padding(3), GrowthLevel = 1 };
             gardenLayout.Controls.Add(_garden, 0, 1);
+
+            var roadmapCard = new ChildCard
+            {
+                Dock = DockStyle.Fill,
+                Margin = new Padding(6, 4, 6, 6),
+                Padding = new Padding(12, 7, 12, 7),
+                CardColor = Color.FromArgb(248, 247, 239),
+                BorderColor = Color.FromArgb(228, 225, 212),
+                Radius = 18
+            };
+            var roadmapLayout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 2 };
+            roadmapLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 27));
+            roadmapLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+            roadmapLayout.Controls.Add(new Label
+            {
+                Dock = DockStyle.Fill,
+                Text = "Lộ trình Toán",
+                TextAlign = ContentAlignment.MiddleLeft,
+                ForeColor = ChildVisualTheme.Ink,
+                Font = ChildVisualTheme.Font(10.5f, FontStyle.Bold),
+                AccessibleName = "Lộ trình Toán lớp 2"
+            }, 0, 0);
+            _mathRoadmap = new MathRoadmapControl { Dock = DockStyle.Fill };
+            roadmapLayout.Controls.Add(_mathRoadmap, 0, 1);
+            roadmapCard.Controls.Add(roadmapLayout);
+            gardenLayout.Controls.Add(roadmapCard, 0, 2);
+
             _gardenProgress = new Label
             {
                 Dock = DockStyle.Fill,
                 Text = "Làm vài câu Toán để khu vườn lớn dần nhé.",
                 TextAlign = ContentAlignment.MiddleCenter,
                 ForeColor = ChildVisualTheme.MutedInk,
-                Font = ChildVisualTheme.Font(10.5f),
+                Font = ChildVisualTheme.Font(10f),
                 AccessibleName = "Tiến bộ khu vườn"
             };
-            gardenLayout.Controls.Add(_gardenProgress, 0, 2);
+            gardenLayout.Controls.Add(_gardenProgress, 0, 3);
             gardenCard.Controls.Add(gardenLayout);
             root.Controls.Add(gardenCard, 0, 1);
 
@@ -325,6 +354,8 @@ namespace WAHUKidsLearn
             {
                 var summary = ParentSummaryService.Read(_learningDatabase);
                 var world = new GameWorldRewardService(_learningDatabase).ReadProgress(LearnerSessionService.PrimaryChildId);
+                var roadmap = new MathRoadmapService(_learningDatabase).Read(LearnerSessionService.PrimaryChildId);
+                _mathRoadmap.SetSnapshot(roadmap);
                 var growth = Math.Min(8, Math.Max(1, 1 + world.GrowthSteps));
                 _garden.GrowthLevel = growth;
                 _garden.HasSeedling = world.UnlockedItems.Contains("garden_seedling");

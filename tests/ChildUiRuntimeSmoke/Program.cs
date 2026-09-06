@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Reflection;
 using System.Windows.Forms;
+using WAHU.Data;
 using WAHU.Learning;
 
 namespace WAHU.ChildUiRuntimeSmoke
@@ -23,6 +24,7 @@ namespace WAHU.ChildUiRuntimeSmoke
             TestGarden(appAssembly, 1.00f);
             TestGarden(appAssembly, 1.25f);
             TestCompanionAndCompletion(appAssembly);
+            TestRoadmap(appAssembly);
             TestBasicControls(appAssembly);
 
             Console.WriteLine("CHILD_UI_RUNTIME_SMOKE_PASS assertions=" + _assertions);
@@ -85,6 +87,24 @@ namespace WAHU.ChildUiRuntimeSmoke
                 {
                     Invoke(completion, "SetProgress", 3, "garden_flower_patch", 3, "garden_lantern");
                     RenderAndAssert(completion, (int)(620 * scale), (int)(100 * scale), "completion_reward_scale_" + scale);
+                }
+            }
+        }
+
+        private static void TestRoadmap(Assembly appAssembly)
+        {
+            var snapshot = new MathRoadmapSnapshot
+            {
+                Mental20 = new MathRoadmapGroupProgress { GroupId = "mental_20", SkillRows = 1, Attempts = 8, MasteryAverage = 0.72 },
+                Written1000 = new MathRoadmapGroupProgress { GroupId = "written_1000", SkillRows = 3, Attempts = 11, MasteryAverage = 0.54 },
+                Tables25 = new MathRoadmapGroupProgress { GroupId = "tables_2_5", SkillRows = 0, Attempts = 0, MasteryAverage = 0.0 }
+            };
+            foreach (var scale in new[] { 1.00f, 1.25f })
+            {
+                using (var roadmap = CreateInternalControl(appAssembly, "WAHUKidsLearn.MathRoadmapControl"))
+                {
+                    Invoke(roadmap, "SetSnapshot", snapshot);
+                    RenderAndAssert(roadmap, (int)(560 * scale), (int)(96 * scale), "math_roadmap_scale_" + scale);
                 }
             }
         }

@@ -2,6 +2,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
+using WAHU.Data;
 using WAHU.Learning;
 
 namespace WAHUKidsLearn
@@ -666,6 +667,100 @@ namespace WAHUKidsLearn
                 case "garden_bench": return "Ghế nhỏ";
                 default: return "mốc khu vườn";
             }
+        }
+    }
+
+    internal sealed class MathRoadmapControl : Control
+    {
+        private MathRoadmapSnapshot _snapshot;
+
+        public MathRoadmapControl()
+        {
+            SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint |
+                     ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw |
+                     ControlStyles.SupportsTransparentBackColor, true);
+            BackColor = Color.Transparent;
+            AccessibleName = "Lộ trình Toán";
+        }
+
+        public void SetSnapshot(MathRoadmapSnapshot snapshot)
+        {
+            _snapshot = snapshot;
+            AccessibleDescription = BuildAccessibleDescription(snapshot);
+            Invalidate();
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            var rows = new[]
+            {
+                new RoadmapRow("Nhẩm 0–20", _snapshot == null ? null : _snapshot.Mental20, ChildVisualTheme.PeachStrong),
+                new RoadmapRow("Cộng / Trừ đến 1000", _snapshot == null ? null : _snapshot.Written1000, ChildVisualTheme.MintStrong),
+                new RoadmapRow("Bảng 2 / 5", _snapshot == null ? null : _snapshot.Tables25, ChildVisualTheme.SkyStrong)
+            };
+            var rowH = Math.Max(28, Height / 3);
+            for (var i = 0; i < rows.Length; i++) DrawRow(e.Graphics, rows[i], new Rectangle(0, i * rowH, Width, rowH));
+        }
+
+        private static void DrawRow(Graphics g, RoadmapRow row, Rectangle bounds)
+        {
+            var titleWidth = Math.Min(176, Math.Max(112, bounds.Width / 3));
+            var titleRect = new Rectangle(bounds.Left + 4, bounds.Top + 2, titleWidth - 8, bounds.Height - 4);
+            TextRenderer.DrawText(g, row.Title, ChildVisualTheme.Font(9.3f, FontStyle.Bold), titleRect,
+                ChildVisualTheme.Ink, TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+
+            var statusWidth = Math.Min(96, Math.Max(72, bounds.Width / 5));
+            var barLeft = bounds.Left + titleWidth;
+            var barRight = Math.Max(barLeft + 24, bounds.Right - statusWidth - 6);
+            var track = new Rectangle(barLeft, bounds.Top + bounds.Height / 2 - 5, Math.Max(20, barRight - barLeft), 10);
+            using (var path = ChildVisualTheme.RoundedRect(track, 5))
+            using (var bg = new SolidBrush(Color.FromArgb(229, 229, 220))) g.FillPath(bg, path);
+
+            var hasEvidence = row.Progress != null && row.Progress.HasEvidence;
+            var score = hasEvidence ? Math.Max(0, Math.Min(1, row.Progress.MasteryAverage)) : 0.0;
+            var fillWidth = (int)Math.Round(track.Width * score);
+            if (fillWidth >= 4)
+            {
+                var fill = new Rectangle(track.Left, track.Top, Math.Min(track.Width, fillWidth), track.Height);
+                using (var path = ChildVisualTheme.RoundedRect(fill, 5))
+                using (var brush = new SolidBrush(row.Accent)) g.FillPath(brush, path);
+            }
+
+            var status = hasEvidence ? ((int)Math.Round(score * 100)) + "%" : "Chưa bắt đầu";
+            var statusRect = new Rectangle(barRight + 5, bounds.Top + 2, statusWidth, bounds.Height - 4);
+            TextRenderer.DrawText(g, status, ChildVisualTheme.Font(8.7f, hasEvidence ? FontStyle.Bold : FontStyle.Regular),
+                statusRect, hasEvidence ? row.Accent : ChildVisualTheme.MutedInk,
+                TextFormatFlags.Right | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+        }
+
+        private static string BuildAccessibleDescription(MathRoadmapSnapshot snapshot)
+        {
+            if (snapshot == null) return "Chưa có dữ liệu lộ trình Toán.";
+            return DescribeGroup("Nhẩm 0 đến 20", snapshot.Mental20) + "; " +
+                   DescribeGroup("Cộng trừ đến 1000", snapshot.Written1000) + "; " +
+                   DescribeGroup("Bảng 2 và 5", snapshot.Tables25) + ".";
+        }
+
+        private static string DescribeGroup(string name, MathRoadmapGroupProgress progress)
+        {
+            if (progress == null || !progress.HasEvidence) return name + " chưa bắt đầu";
+            return name + " khoảng " + ((int)Math.Round(progress.MasteryAverage * 100)) + " phần trăm theo bằng chứng hiện có";
+        }
+
+        private sealed class RoadmapRow
+        {
+            public RoadmapRow(string title, MathRoadmapGroupProgress progress, Color accent)
+            {
+                Title = title;
+                Progress = progress;
+                Accent = accent;
+            }
+
+            public string Title { get; private set; }
+            public MathRoadmapGroupProgress Progress { get; private set; }
+            public Color Accent { get; private set; }
         }
     }
 

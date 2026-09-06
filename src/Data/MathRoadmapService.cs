@@ -1,0 +1,106 @@
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+
+namespace WAHU.Data
+{
+    public sealed class MathRoadmapGroupProgress
+    {
+        public string GroupId { get; set; }
+        public int SkillRows { get; set; }
+        public int Attempts { get; set; }
+        public double MasteryAverage { get; set; }
+        public bool HasEvidence { get { return Attempts > 0 && SkillRows > 0; } }
+    }
+
+    public sealed class MathRoadmapSnapshot
+    {
+        public MathRoadmapGroupProgress Mental20 { get; set; }
+        public MathRoadmapGroupProgress Written1000 { get; set; }
+        public MathRoadmapGroupProgress Tables25 { get; set; }
+        public int TotalTrackedAttempts
+        {
+            get
+            {
+                return (Mental20 == null ? 0 : Mental20.Attempts) +
+                       (Written1000 == null ? 0 : Written1000.Attempts) +
+                       (Tables25 == null ? 0 : Tables25.Attempts);
+            }
+        }
+    }
+
+    public sealed class MathRoadmapService
+    {
+        private readonly LearningDatabase _database;
+
+        public MathRoadmapService(LearningDatabase database)
+        {
+            _database = database ?? throw new ArgumentNullException("database");
+        }
+
+        public MathRoadmapSnapshot Read(string childId)
+        {
+            if (string.IsNullOrWhiteSpace(childId)) throw new ArgumentException("childId is required.");
+            var mental = NewGroup("mental_20");
+            var written = NewGroup("written_1000");
+            var tables = NewGroup("tables_2_5");
+            var mentalScore = 0.0;
+            var writtenScore = 0.0;
+            var tableScore = 0.0;
+
+            using (var connection = _database.OpenConnection())
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = @"SELECT skill_id,mastery_score,attempts_count
+FROM child_skill WHERE child_id=@child AND subject='math';";
+                command.Parameters.AddWithValue("@child", childId);
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var skill = Convert.ToString(reader[0], CultureInfo.InvariantCulture);
+                        var mastery = Clamp01(Convert.ToDouble(reader[1], CultureInfo.InvariantCulture));
+                        var attempts = Math.Max(0, Convert.ToInt32(reader[2], CultureInfo.InvariantCulture));
+                        if (skill == "MENTAL_ADD_SUB_WITHIN_20")
+                            Add(mental, ref mentalScore, mastery, attempts);
+                        else if (skill == "TIMES_TABLE_2" || skill == "TIMES_TABLE_5")
+                            Add(tables, ref tableScore, mastery, attempts);
+                        else if (!string.IsNullOrWhiteSpace(skill) &&
+                                 (skill.StartsWith("ADD_WITHIN_1000", StringComparison.Ordinal) ||
+                                  skill.StartsWith("SUB_WITHIN_1000", StringComparison.Ordinal)))
+                            Add(written, ref writtenScore, mastery, attempts);
+                    }
+                }
+            }
+
+            FinalizeAverage(mental, mentalScore);
+            FinalizeAverage(written, writtenScore);
+            FinalizeAverage(tables, tableScore);
+            return new MathRoadmapSnapshot { Mental20 = mental, Written1000 = written, Tables25 = tables };
+        }
+
+        private static MathRoadmapGroupProgress NewGroup(string id)
+        {
+            return new MathRoadmapGroupProgress { GroupId = id, SkillRows = 0, Attempts = 0, MasteryAverage = 0.0 };
+        }
+
+        private static void Add(MathRoadmapGroupProgress group, ref double scoreSum, double mastery, int attempts)
+        {
+            group.SkillRows++;
+            group.Attempts += attempts;
+            scoreSum += mastery;
+        }
+
+        private static void FinalizeAverage(MathRoadmapGroupProgress group, double sum)
+        {
+            group.MasteryAverage = group.SkillRows <= 0 ? 0.0 : Clamp01(sum / group.SkillRows);
+        }
+
+        private static double Clamp01(double value)
+        {
+            if (value < 0) return 0;
+            if (value > 1) return 1;
+            return value;
+        }
+    }
+}
