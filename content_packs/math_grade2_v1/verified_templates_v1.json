@@ -551,6 +551,54 @@
                                      },
                           "prompt_vi":  "Có {total} chiếc bánh chia đều cho {divisor} bạn. Mỗi bạn được bao nhiêu chiếc bánh?",
                           "answer_expression":  "quotient"
+                      },
+                      {
+                          "id":  "add_components_recognize",
+                          "skill":  "ADD_COMPONENTS_RECOGNIZE",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Nhận biết số hạng và tổng trong phép cộng."
+                      },
+                      {
+                          "id":  "sub_components_recognize",
+                          "skill":  "SUB_COMPONENTS_RECOGNIZE",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Nhận biết số bị trừ, số trừ và hiệu trong phép trừ."
+                      },
+                      {
+                          "id":  "multiplication_meaning_groups",
+                          "skill":  "MULTIPLICATION_MEANING",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Chọn phép nhân biểu diễn đúng các nhóm bằng nhau."
+                      },
+                      {
+                          "id":  "division_meaning_share",
+                          "skill":  "DIVISION_MEANING",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Chọn phép chia biểu diễn đúng việc chia đều."
+                      },
+                      {
+                          "id":  "multiplication_components_recognize",
+                          "skill":  "MULTIPLICATION_COMPONENTS",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Nhận biết thừa số và tích trong phép nhân."
+                      },
+                      {
+                          "id":  "division_components_recognize",
+                          "skill":  "DIVISION_COMPONENTS",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Nhận biết số bị chia, số chia và thương trong phép chia."
+                      },
+                      {
+                          "id":  "operation_meaning_from_visual",
+                          "skill":  "OPERATION_MEANING_FROM_VISUAL",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Quan sát mô hình và chọn phép tính phù hợp."
+                      },
+                      {
+                          "id":  "word_problem_select_operation_one_step",
+                          "skill":  "WP_SELECT_OPERATION_ONE_STEP",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Đọc bài toán một bước và chọn phép tính phù hợp."
                       }
                   ]
 }

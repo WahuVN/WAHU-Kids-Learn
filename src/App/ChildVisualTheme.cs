@@ -248,7 +248,11 @@ namespace WAHUKidsLearn
             if (_question == null || Width < 80 || Height < 40) return;
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             var values = ExtractNumbers(_question.PromptVi);
-            if (_question.TemplateId != null && _question.TemplateId.StartsWith("word_problem_", StringComparison.Ordinal))
+            if (_question.Representation == "equation_components")
+                DrawEquationComponents(e.Graphics);
+            else if (_question.Representation == "operation_model")
+                DrawWordProblemModel(e.Graphics);
+            else if (_question.TemplateId != null && _question.TemplateId.StartsWith("word_problem_", StringComparison.Ordinal))
                 DrawWordProblemModel(e.Graphics);
             else if (_question.TemplateId == "clock_read_minute_hand_3_or_6")
                 DrawClock(e.Graphics);
@@ -273,6 +277,47 @@ namespace WAHUKidsLearn
                 DrawPlaceValue(e.Graphics, values);
             else if (_question.TemplateId == "polyline_length")
                 DrawPolyline(e.Graphics, values);
+        }
+
+        private void DrawEquationComponents(Graphics g)
+        {
+            var parts = (_question.IllustrationData ?? string.Empty).Split('|');
+            int a, b, result, target;
+            if (parts.Length < 6 || parts[0] != "equationparts" ||
+                !int.TryParse(parts[2], out a) || !int.TryParse(parts[3], out b) ||
+                !int.TryParse(parts[4], out result) || !int.TryParse(parts[5], out target)) return;
+
+            var op = parts[1] == "add" ? "+" : parts[1] == "sub" ? "−" : parts[1] == "mul" ? "×" : ":";
+            var stage = new Rectangle(Math.Max(12, Width / 8), 8, Math.Max(170, Width * 3 / 4), Math.Max(62, Height - 22));
+            using (var path = ChildVisualTheme.RoundedRect(stage, 18))
+            using (var fill = new SolidBrush(Color.FromArgb(248, 249, 242)))
+            using (var border = new Pen(Color.FromArgb(218, 225, 214), 1f))
+            { g.FillPath(fill, path); g.DrawPath(border, path); }
+
+            var slots = new[] { a.ToString(), op, b.ToString(), "=", result.ToString() };
+            var tokenW = Math.Max(38, Math.Min(72, (stage.Width - 28) / 5));
+            var totalW = tokenW * 5;
+            var startX = stage.Left + (stage.Width - totalW) / 2;
+            var y = stage.Top + 16;
+            for (var i = 0; i < slots.Length; i++)
+            {
+                var rect = new Rectangle(startX + i * tokenW, y, tokenW, 34);
+                var isTarget = (target == 0 && i == 0) || (target == 1 && i == 2) || (target == 2 && i == 4);
+                if (isTarget)
+                {
+                    using (var path = ChildVisualTheme.RoundedRect(rect, 11))
+                    using (var fill = new SolidBrush(Color.FromArgb(244, 229, 199)))
+                    using (var border = new Pen(ChildVisualTheme.PeachStrong, 2f))
+                    { g.FillPath(fill, path); g.DrawPath(border, path); }
+                }
+                DrawCentered(g, slots[i], rect, isTarget ? ChildVisualTheme.PeachStrong : ChildVisualTheme.Ink, isTarget ? 12f : 11f);
+            }
+
+            DrawCentered(g, "Số cần gọi tên", new Rectangle(stage.Left, y + 38, stage.Width, 18), ChildVisualTheme.MutedInk, 8f);
+            if (_hintLevel >= 1)
+                DrawCentered(g, "Nhìn vị trí của số trong phép tính.", new Rectangle(stage.Left, stage.Bottom - 23, stage.Width, 18), ChildVisualTheme.MutedInk, 8f);
+            if (_hintLevel >= 2)
+                DrawCentered(g, "Gọi tên theo vai trò của số, không cần tính lại.", new Rectangle(stage.Left, stage.Bottom - 23, stage.Width, 18), ChildVisualTheme.PeachStrong, 8.4f);
         }
 
         private void DrawWordProblemModel(Graphics g)

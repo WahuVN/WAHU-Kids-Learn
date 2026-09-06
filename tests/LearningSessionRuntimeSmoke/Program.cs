@@ -40,7 +40,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
         private static IList<MathTemplateRef> TestVerifiedContentAndCore(string templatePath)
         {
             var descriptors = new MathVerifiedTemplateSource().Load(templatePath);
-            A(descriptors.Count == 39, "verified_template_source_flattens_all_verified_variants");
+            A(descriptors.Count == 47, "verified_template_source_flattens_all_verified_variants");
             A(descriptors.All(x => x.Status == "VERIFIED_A_TEMPLATE"), "template_source_filters_verified_a_only");
             var refs = descriptors.Select(x => new MathTemplateRef
             {
@@ -51,7 +51,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 StatementVi = x.StatementVi,
                 AnswerText = x.AnswerText
             }).Where(AdaptiveMathSelector.IsSupported).ToList();
-            A(refs.Count == 39, "generator_supports_all_thirty_nine_verified_runtime_candidates");
+            A(refs.Count == 47, "generator_supports_all_forty_seven_verified_runtime_candidates");
             var chanceRefs = refs.Where(x => x.TemplateId.StartsWith("possible_certain_impossible_die__", StringComparison.Ordinal)).ToList();
             A(chanceRefs.Count == 3, "compound_probability_template_flattens_three_variants");
             A(chanceRefs.All(x => x.SourceTemplateId == "possible_certain_impossible_die" &&
@@ -72,21 +72,30 @@ namespace WAHU.LearningSessionRuntimeSmoke
                                      !string.IsNullOrWhiteSpace(x.StatementVi) && !string.IsNullOrWhiteSpace(x.AnswerText)),
                 "pictograph_variant_provenance_preserved");
             var wordRefs = refs.Where(x => x.TemplateId.StartsWith("word_problem_", StringComparison.Ordinal)).ToList();
-            A(wordRefs.Count == 6, "word_problem_pack_has_six_one_step_relations");
-            A(wordRefs.Select(x => x.SkillId).Distinct(StringComparer.Ordinal).Count() == 6,
-                "word_problem_relations_map_to_six_distinct_skills");
+            A(wordRefs.Count == 7, "word_problem_pack_has_six_result_relations_plus_operation_selection");
+            A(wordRefs.Select(x => x.SkillId).Distinct(StringComparer.Ordinal).Count() == 7,
+                "word_problem_runtime_candidates_map_to_seven_distinct_skills");
             A(new HashSet<string>(wordRefs.Select(x => x.TemplateId), StringComparer.Ordinal).SetEquals(new[]
             {
                 "word_problem_add_more", "word_problem_sub_less", "word_problem_more_than", "word_problem_less_than",
-                "word_problem_multiply_groups_2_5", "word_problem_divide_groups_2_5"
+                "word_problem_multiply_groups_2_5", "word_problem_divide_groups_2_5", "word_problem_select_operation_one_step"
             }), "word_problem_expected_template_ids_present");
+            var operationConceptRefs = refs.Where(x => new[]
+            {
+                "add_components_recognize", "sub_components_recognize", "multiplication_meaning_groups", "division_meaning_share",
+                "multiplication_components_recognize", "division_components_recognize", "operation_meaning_from_visual",
+                "word_problem_select_operation_one_step"
+            }.Contains(x.TemplateId)).ToList();
+            A(operationConceptRefs.Count == 8, "operation_concept_pack_has_eight_verified_candidates");
+            A(operationConceptRefs.Select(x => x.SkillId).Distinct(StringComparer.Ordinal).Count() == 8,
+                "operation_concept_candidates_map_to_eight_distinct_skills");
 
             var selector = new AdaptiveMathSelector();
             var empty = new Dictionary<string, SkillSnapshot>(StringComparer.Ordinal);
             var first = selector.Select(refs, empty, new DateTime(2026, 9, 6, 10, 0, 0, DateTimeKind.Utc), new string[0], new string[0]);
             A(first != null && first.Template != null, "selector_returns_candidate");
             A(first.DifficultyFit >= 0 && first.DifficultyFit <= 1, "selector_difficulty_fit_bounded");
-            A(first.CandidateSummary.Count == 39, "selector_audits_all_candidates");
+            A(first.CandidateSummary.Count == 47, "selector_audits_all_candidates");
 
             var dueSkills = new Dictionary<string, SkillSnapshot>(StringComparer.Ordinal);
             foreach (var r in refs) dueSkills[r.SkillId] = new SkillSnapshot { SkillId = r.SkillId, MasteryScore = 0.20, Confidence = 0.20, AttemptsCount = 1, LearningState = "LEARNING" };
@@ -130,7 +139,9 @@ namespace WAHU.LearningSessionRuntimeSmoke
                     A(q.UsesTextChoices && q.DisplayChoices.Count >= 3 && (q.IllustrationData ?? string.Empty).StartsWith("pictograph|", StringComparison.Ordinal) &&
                       !q.PromptVi.Contains("3 mèo") && !q.PromptVi.Contains("2 chó") && !q.PromptVi.Contains("4 thỏ"),
                       "pictograph_visual_data_not_leaked_into_prompt_" + r.TemplateId);
-                if (r.TemplateId.StartsWith("word_problem_", StringComparison.Ordinal))
+                if (IsOperationConceptTemplate(r.TemplateId))
+                    A(ValidateOperationConceptContract(q), "operation_concept_contract_" + r.TemplateId);
+                if (r.TemplateId.StartsWith("word_problem_", StringComparison.Ordinal) && r.TemplateId != "word_problem_select_operation_one_step")
                     A(ValidateWordProblemContract(q), "word_problem_relation_contract_" + r.TemplateId);
             }
 
@@ -201,6 +212,22 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 "word_problem_divide_5_repairs_to_table_5");
             A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "word_problem_divide_groups_2_5", IllustrationData = "wordshare|12|2" }) == "times_table_2",
                 "word_problem_divide_2_repairs_to_table_2");
+            var componentQuestion = TextQuestion("add_components_recognize", "số hạng", new[] { "số hạng", "tổng", "hiệu" });
+            A(classifier.Classify(componentQuestion, "tổng").ErrorType == "OPERATION_COMPONENT_ERROR", "operation_component_error_classified");
+            var meaningQuestion = TextQuestion("operation_meaning_from_visual", "nhân", new[] { "cộng", "trừ", "nhân", "chia" });
+            A(classifier.Classify(meaningQuestion, "cộng").ErrorType == "OPERATION_MEANING_ERROR", "operation_meaning_error_classified");
+            A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "add_components_recognize" }) == "mental_add_within_20",
+                "add_components_repair_to_mental_add");
+            A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "sub_components_recognize" }) == "mental_sub_within_20",
+                "sub_components_repair_to_mental_sub");
+            A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "multiplication_components_recognize", IllustrationData = "equationparts|mul|5|4|20|0" }) == "times_table_5",
+                "multiplication_components_factor5_repair_to_table5");
+            A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "division_components_recognize", IllustrationData = "equationparts|div|20|5|4|1" }) == "times_table_5",
+                "division_components_divisor5_repair_to_table5");
+            A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "operation_meaning_from_visual", IllustrationData = "wordbar|sub|30|8" }) == "mental_sub_within_20",
+                "operation_visual_sub_repairs_to_mental_sub");
+            A(RepairTemplateForSmoke(new MathQuestion { TemplateId = "word_problem_select_operation_one_step", IllustrationData = "wordgroups|5|4" }) == "times_table_5",
+                "word_problem_operation_selection_repairs_from_visual_relation");
 
             TestGeneratorFuzz(refs);
             return refs;
@@ -249,7 +276,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 adaptiveAudit.Record(new AdaptiveDecisionAuditRequest
                 {
                     Id = "adaptive-" + Guid.NewGuid().ToString("N"), SessionId = session.SessionId, ChildId = profile.ChildId,
-                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.2.0", Question = question, Selection = selection,
+                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.3.0", Question = question, Selection = selection,
                     Behavior = lastBehavior, CreatedAtUtc = DateTime.UtcNow
                 });
 
@@ -276,7 +303,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 answerCommit.Commit(new AnswerCommitRequest
                 {
                     AttemptId = attemptId, SessionId = session.SessionId, ChildId = profile.ChildId,
-                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.2.0", QuestionId = question.QuestionId,
+                    PackId = "math_grade2_verified_templates_v1", PackVersion = "1.3.0", QuestionId = question.QuestionId,
                     SkillId = question.SkillId, Subject = "math", StartedAtUtc = answered.AddMilliseconds(-responseMs), AnsweredAtUtc = answered,
                     AnswerJson = Json.Serialize(new Dictionary<string, object> { { "answer", answer } }), IsCorrect = isCorrect,
                     ResponseMs = responseMs, HintLevel = hintLevel, Representation = question.Representation, InputMethod = "mouse",
@@ -348,6 +375,33 @@ VALUES(@child,'WP_ONE_STEP_MORE_THAN','math',0.62,0.55,3,2,1,0,'LEARNING',@engin
                 "math_roadmap_groups_word_problem_attempts_into_operations_and_problems");
             A(roadmapWithWordProblem.TotalTrackedAttempts == roadmap.TotalTrackedAttempts + 3,
                 "math_roadmap_total_includes_word_problem_attempts");
+            var writtenBeforeConcepts = roadmapWithWordProblem.Written1000.Attempts;
+            var tablesBeforeConcepts = roadmapWithWordProblem.Tables25.Attempts;
+            var addComponentAttemptsBefore = ReadSkillAttempts(database, profile.ChildId, "ADD_COMPONENTS_RECOGNIZE");
+            var multiplicationComponentAttemptsBefore = ReadSkillAttempts(database, profile.ChildId, "MULTIPLICATION_COMPONENTS");
+            using (var connection = database.OpenConnection())
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = @"INSERT OR REPLACE INTO child_skill
+(child_id,skill_id,subject,mastery_score,confidence,attempts_count,independent_success_count,hinted_success_count,transfer_success_count,learning_state,mastery_engine_version,updated_at_utc)
+VALUES(@child,'ADD_COMPONENTS_RECOGNIZE','math',0.58,0.50,@addAttempts,1,1,0,'LEARNING',@engine,@updated);
+INSERT OR REPLACE INTO child_skill
+(child_id,skill_id,subject,mastery_score,confidence,attempts_count,independent_success_count,hinted_success_count,transfer_success_count,learning_state,mastery_engine_version,updated_at_utc)
+VALUES(@child,'MULTIPLICATION_COMPONENTS','math',0.64,0.56,@mulAttempts,3,1,0,'LEARNING',@engine,@updated);";
+                command.Parameters.AddWithValue("@child", profile.ChildId);
+                command.Parameters.AddWithValue("@addAttempts", addComponentAttemptsBefore + 2);
+                command.Parameters.AddWithValue("@mulAttempts", multiplicationComponentAttemptsBefore + 4);
+                command.Parameters.AddWithValue("@engine", MasteryEngineV1.Version);
+                command.Parameters.AddWithValue("@updated", DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture));
+                command.ExecuteNonQuery();
+            }
+            var roadmapWithConcepts = new MathRoadmapService(database).Read(profile.ChildId);
+            A(roadmapWithConcepts.Written1000.Attempts == writtenBeforeConcepts + 2,
+                "math_roadmap_groups_add_components_into_operations_and_problems");
+            A(roadmapWithConcepts.Tables25.Attempts == tablesBeforeConcepts + 4,
+                "math_roadmap_groups_multiplication_components_into_tables");
+            A(roadmapWithConcepts.TotalTrackedAttempts == roadmapWithWordProblem.TotalTrackedAttempts + 6,
+                "math_roadmap_total_includes_operation_concept_attempts");
             A(correctCount == 5, "vertical_slice_fixture_correctness_expected");
         }
 
@@ -498,8 +552,78 @@ VALUES(@child,'WP_ONE_STEP_MORE_THAN','math',0.62,0.55,3,2,1,0,'LEARNING',@engin
                     q.PromptVi.Contains("3 mèo") || q.PromptVi.Contains("2 chó") || q.PromptVi.Contains("4 thỏ"))
                     throw new Exception("FUZZ_FAIL pictograph visual contract");
             }
-            if (q.TemplateId.StartsWith("word_problem_", StringComparison.Ordinal) && !ValidateWordProblemContract(q))
+            if (IsOperationConceptTemplate(q.TemplateId) && !ValidateOperationConceptContract(q))
+                throw new Exception("FUZZ_FAIL operation concept contract: " + q.TemplateId);
+            if (q.TemplateId.StartsWith("word_problem_", StringComparison.Ordinal) && q.TemplateId != "word_problem_select_operation_one_step" && !ValidateWordProblemContract(q))
                 throw new Exception("FUZZ_FAIL word problem relation contract: " + q.TemplateId);
+        }
+
+        private static bool IsOperationConceptTemplate(string templateId)
+        {
+            switch (templateId)
+            {
+                case "add_components_recognize":
+                case "sub_components_recognize":
+                case "multiplication_meaning_groups":
+                case "division_meaning_share":
+                case "multiplication_components_recognize":
+                case "division_components_recognize":
+                case "operation_meaning_from_visual":
+                case "word_problem_select_operation_one_step":
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private static bool ValidateOperationConceptContract(MathQuestion q)
+        {
+            if (q == null || !q.UsesTextChoices || q.DisplayChoices == null || q.DisplayChoices.Count < 3 || q.DisplayChoices.Count > 4)
+                return false;
+            var parts = (q.IllustrationData ?? string.Empty).Split('|');
+            if (q.TemplateId == "add_components_recognize" || q.TemplateId == "sub_components_recognize" ||
+                q.TemplateId == "multiplication_components_recognize" || q.TemplateId == "division_components_recognize")
+            {
+                int a, b, result, target;
+                if (q.Representation != "equation_components" || parts.Length != 6 || parts[0] != "equationparts" ||
+                    !int.TryParse(parts[2], out a) || !int.TryParse(parts[3], out b) || !int.TryParse(parts[4], out result) ||
+                    !int.TryParse(parts[5], out target) || target < 0 || target > 2) return false;
+                if (parts[1] == "add")
+                    return result == a + b && (q.CorrectAnswerDisplay == "số hạng" || q.CorrectAnswerDisplay == "tổng");
+                if (parts[1] == "sub")
+                    return result == a - b && (q.CorrectAnswerDisplay == "số bị trừ" || q.CorrectAnswerDisplay == "số trừ" || q.CorrectAnswerDisplay == "hiệu");
+                if (parts[1] == "mul")
+                    return result == a * b && (a == 2 || a == 5) && (q.CorrectAnswerDisplay == "thừa số" || q.CorrectAnswerDisplay == "tích");
+                if (parts[1] == "div")
+                    return b != 0 && a == b * result && (b == 2 || b == 5) &&
+                           (q.CorrectAnswerDisplay == "số bị chia" || q.CorrectAnswerDisplay == "số chia" || q.CorrectAnswerDisplay == "thương");
+                return false;
+            }
+
+            if (q.TemplateId == "multiplication_meaning_groups")
+            {
+                int factor, groups;
+                return q.Representation == "operation_model" && parts.Length == 3 && parts[0] == "wordgroups" &&
+                       int.TryParse(parts[1], out factor) && int.TryParse(parts[2], out groups) && (factor == 2 || factor == 5) && groups >= 2 && groups <= 9 &&
+                       q.DisplayChoices.Count == 4 && q.CorrectAnswerDisplay == groups + " × " + factor;
+            }
+            if (q.TemplateId == "division_meaning_share")
+            {
+                int total, divisor;
+                return q.Representation == "operation_model" && parts.Length == 3 && parts[0] == "wordshare" &&
+                       int.TryParse(parts[1], out total) && int.TryParse(parts[2], out divisor) && (divisor == 2 || divisor == 5) && total % divisor == 0 &&
+                       q.DisplayChoices.Count == 4 && q.CorrectAnswerDisplay == total + " : " + divisor;
+            }
+
+            var expectedOperations = new HashSet<string>(new[] { "cộng", "trừ", "nhân", "chia" }, StringComparer.Ordinal);
+            if (q.TemplateId == "operation_meaning_from_visual" || q.TemplateId == "word_problem_select_operation_one_step")
+            {
+                var expectedRepresentation = q.TemplateId == "operation_meaning_from_visual" ? "operation_model" : "word_problem_model";
+                if (q.Representation != expectedRepresentation || q.DisplayChoices.Count != 4 ||
+                    !expectedOperations.SetEquals(q.DisplayChoices) || !expectedOperations.Contains(q.CorrectAnswerDisplay)) return false;
+                return parts.Length >= 3 && (parts[0] == "wordbar" || parts[0] == "wordgroups" || parts[0] == "wordshare");
+            }
+            return false;
         }
 
         private static bool ValidateWordProblemContract(MathQuestion q)
@@ -583,6 +707,10 @@ VALUES(@child,'WP_ONE_STEP_MORE_THAN','math',0.62,0.55,3,2,1,0,'LEARNING',@engin
 
         private static string ExpectedRepresentation(string templateId)
         {
+            if (templateId == "add_components_recognize" || templateId == "sub_components_recognize" ||
+                templateId == "multiplication_components_recognize" || templateId == "division_components_recognize") return "equation_components";
+            if (templateId == "multiplication_meaning_groups" || templateId == "division_meaning_share" ||
+                templateId == "operation_meaning_from_visual") return "operation_model";
             if (!string.IsNullOrWhiteSpace(templateId) && templateId.StartsWith("word_problem_", StringComparison.Ordinal)) return "word_problem_model";
             if (!string.IsNullOrWhiteSpace(templateId) && templateId.StartsWith("possible_certain_impossible_die__", StringComparison.Ordinal)) return "die_outcomes";
             if (!string.IsNullOrWhiteSpace(templateId) && templateId.StartsWith("geometry_identify_basic__", StringComparison.Ordinal)) return "geometry_basic";
@@ -647,6 +775,18 @@ VALUES(@child,'WP_ONE_STEP_MORE_THAN','math',0.62,0.55,3,2,1,0,'LEARNING',@engin
         {
             using (var c = database.OpenConnection()) using (var cmd = c.CreateCommand())
             { cmd.CommandText = "SELECT state FROM session WHERE id=@id;"; cmd.Parameters.AddWithValue("@id", id); return Convert.ToString(cmd.ExecuteScalar(), CultureInfo.InvariantCulture); }
+        }
+
+        private static int ReadSkillAttempts(LearningDatabase database, string childId, string skillId)
+        {
+            using (var c = database.OpenConnection()) using (var cmd = c.CreateCommand())
+            {
+                cmd.CommandText = "SELECT COALESCE(attempts_count,0) FROM child_skill WHERE child_id=@child AND skill_id=@skill;";
+                cmd.Parameters.AddWithValue("@child", childId);
+                cmd.Parameters.AddWithValue("@skill", skillId);
+                var value = cmd.ExecuteScalar();
+                return value == null || value == DBNull.Value ? 0 : Convert.ToInt32(value, CultureInfo.InvariantCulture);
+            }
         }
 
         private static int Count(LearningDatabase database, string sql)

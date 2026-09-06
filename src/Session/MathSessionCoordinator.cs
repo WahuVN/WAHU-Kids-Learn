@@ -11,7 +11,7 @@ namespace WAHU.Session
     public sealed class MathSessionCoordinator : IDisposable
     {
         public const string PackId = "math_grade2_verified_templates_v1";
-        public const string PackVersion = "1.2.0";
+        public const string PackVersion = "1.3.0";
         public const int DefaultTargetQuestionCount = 8;
 
         private readonly LearningDatabase _database;
@@ -449,8 +449,52 @@ namespace WAHU.Session
                     var divisor = ReadIllustrationInt(question.IllustrationData, "wordshare", 2);
                     return divisor == 5 ? "times_table_5" : "times_table_2";
                 }
+                case "add_components_recognize": return "mental_add_within_20";
+                case "sub_components_recognize": return "mental_sub_within_20";
+                case "multiplication_components_recognize":
+                {
+                    var factor = ReadIllustrationInt(question.IllustrationData, "equationparts", 2);
+                    return factor == 5 ? "times_table_5" : "times_table_2";
+                }
+                case "division_components_recognize":
+                {
+                    var divisor = ReadIllustrationInt(question.IllustrationData, "equationparts", 3);
+                    return divisor == 5 ? "times_table_5" : "times_table_2";
+                }
+                case "multiplication_meaning_groups":
+                {
+                    var factor = ReadIllustrationInt(question.IllustrationData, "wordgroups", 1);
+                    return factor == 5 ? "times_table_5" : "times_table_2";
+                }
+                case "division_meaning_share":
+                {
+                    var divisor = ReadIllustrationInt(question.IllustrationData, "wordshare", 2);
+                    return divisor == 5 ? "times_table_5" : "times_table_2";
+                }
+                case "operation_meaning_from_visual":
+                case "word_problem_select_operation_one_step":
+                    return RepairByOperationModel(question);
                 default: return templateId;
             }
+        }
+
+        private static string RepairByOperationModel(MathQuestion question)
+        {
+            var parts = (question == null ? string.Empty : question.IllustrationData ?? string.Empty).Split('|');
+            if (parts.Length < 2) return null;
+            if (parts[0] == "wordbar")
+                return parts[1] == "add" || parts[1] == "more" ? "mental_add_within_20" : "mental_sub_within_20";
+            if (parts[0] == "wordgroups")
+            {
+                var factor = ReadIllustrationInt(question.IllustrationData, "wordgroups", 1);
+                return factor == 5 ? "times_table_5" : "times_table_2";
+            }
+            if (parts[0] == "wordshare")
+            {
+                var divisor = ReadIllustrationInt(question.IllustrationData, "wordshare", 2);
+                return divisor == 5 ? "times_table_5" : "times_table_2";
+            }
+            return null;
         }
 
         private static int ReadIllustrationInt(string data, string prefix, int index)
@@ -505,6 +549,8 @@ namespace WAHU.Session
             if (error != null && error.ErrorType == "GEOMETRY_RECOGNITION_ERROR") return "Chưa đúng. Con nhìn lại đặc điểm của hình: nét, đầu mút, số cạnh hoặc dạng khối nhé.";
             if (error != null && error.ErrorType == "PICTOGRAPH_READ_ERROR") return "Chưa đúng. Con đếm lại từng hình trong biểu đồ rồi so sánh nhé.";
             if (error != null && error.ErrorType == "WORD_PROBLEM_RELATION_ERROR") return "Chưa đúng. Con xác định điều đã biết, điều cần tìm rồi nhìn lại sơ đồ quan hệ nhé.";
+            if (error != null && error.ErrorType == "OPERATION_COMPONENT_ERROR") return "Chưa đúng. Con nhìn vị trí của số trong phép tính rồi gọi tên theo vai trò nhé.";
+            if (error != null && error.ErrorType == "OPERATION_MEANING_ERROR") return "Chưa đúng. Con nhìn lại mô hình: gộp, bớt, nhóm bằng nhau hay chia đều nhé.";
             if (error != null && error.ErrorType == "EVENT_CLASSIFICATION_ERROR") return "Chưa đúng. Con đối chiếu câu này với tất cả kết quả có thể của xúc xắc nhé.";
             return "Chưa đúng. Mình xem gợi ý rồi thử câu tiếp theo nhé.";
         }

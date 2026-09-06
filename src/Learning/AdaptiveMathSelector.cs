@@ -130,6 +130,14 @@ namespace WAHU.Learning
                 case "word_problem_less_than":
                 case "word_problem_multiply_groups_2_5":
                 case "word_problem_divide_groups_2_5":
+                case "add_components_recognize":
+                case "sub_components_recognize":
+                case "multiplication_meaning_groups":
+                case "division_meaning_share":
+                case "multiplication_components_recognize":
+                case "division_components_recognize":
+                case "operation_meaning_from_visual":
+                case "word_problem_select_operation_one_step":
                     return true;
                 default:
                     return false;

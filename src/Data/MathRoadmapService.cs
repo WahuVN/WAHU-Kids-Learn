@@ -75,7 +75,9 @@ FROM child_skill WHERE child_id=@child AND subject='math';";
                         else if (skill == "MENTAL_ADD_SUB_WITHIN_20")
                             Add(mental, ref mentalScore, mastery, attempts);
                         else if (skill == "TIMES_TABLE_2" || skill == "TIMES_TABLE_5" ||
-                                 skill == "DIVIDE_TABLE_2" || skill == "DIVIDE_TABLE_5")
+                                 skill == "DIVIDE_TABLE_2" || skill == "DIVIDE_TABLE_5" ||
+                                 skill == "MULTIPLICATION_MEANING" || skill == "DIVISION_MEANING" ||
+                                 skill == "MULTIPLICATION_COMPONENTS" || skill == "DIVISION_COMPONENTS")
                             Add(tables, ref tableScore, mastery, attempts);
                         else if (skill == "POLYLINE_LENGTH_SUM_SEGMENTS" || skill == "CLOCK_MINUTE_HAND_AT_3_OR_6" || IsGeometrySkill(skill))
                             Add(measurement, ref measurementScore, mastery, attempts);
@@ -85,7 +87,9 @@ FROM child_skill WHERE child_id=@child AND subject='math';";
                         else if (!string.IsNullOrWhiteSpace(skill) &&
                                  (skill.StartsWith("ADD_WITHIN_1000", StringComparison.Ordinal) ||
                                   skill.StartsWith("SUB_WITHIN_1000", StringComparison.Ordinal) ||
-                                  skill.StartsWith("WP_ONE_STEP_", StringComparison.Ordinal)))
+                                  skill.StartsWith("WP_ONE_STEP_", StringComparison.Ordinal) ||
+                                  skill == "ADD_COMPONENTS_RECOGNIZE" || skill == "SUB_COMPONENTS_RECOGNIZE" ||
+                                  skill == "OPERATION_MEANING_FROM_VISUAL" || skill == "WP_SELECT_OPERATION_ONE_STEP"))
                             Add(written, ref writtenScore, mastery, attempts);
                     }
                 }

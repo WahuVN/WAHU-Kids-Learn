@@ -37,6 +37,14 @@ namespace WAHU.ChildUiRuntimeSmoke
         {
             var cases = new[]
             {
+                QV("add_components_recognize", "ADD_COMPONENTS_RECOGNIZE", "Trong phép tính 23 + 7 = 30, số 23 được gọi là gì?", "số hạng", "equationparts|add|23|7|30|0", "equation_components"),
+                QV("sub_components_recognize", "SUB_COMPONENTS_RECOGNIZE", "Trong phép tính 41 - 12 = 29, số 12 được gọi là gì?", "số trừ", "equationparts|sub|41|12|29|1", "equation_components"),
+                QV("multiplication_components_recognize", "MULTIPLICATION_COMPONENTS", "Trong phép tính 5 × 4 = 20, số 20 được gọi là gì?", "tích", "equationparts|mul|5|4|20|2", "equation_components"),
+                QV("division_components_recognize", "DIVISION_COMPONENTS", "Trong phép tính 20 : 5 = 4, số 5 được gọi là gì?", "số chia", "equationparts|div|20|5|4|1", "equation_components"),
+                QV("multiplication_meaning_groups", "MULTIPLICATION_MEANING", "Quan sát các nhóm bằng nhau. Phép nhân nào biểu diễn đúng mô hình?", "4 × 5", "wordgroups|5|4", "operation_model"),
+                QV("division_meaning_share", "DIVISION_MEANING", "Quan sát việc chia đều. Phép chia nào biểu diễn đúng mô hình?", "20 : 5", "wordshare|20|5", "operation_model"),
+                QV("operation_meaning_from_visual", "OPERATION_MEANING_FROM_VISUAL", "Quan sát mô hình. Mô hình phù hợp nhất với phép tính nào?", "nhân", "wordgroups|5|4", "operation_model"),
+                QV("word_problem_select_operation_one_step", "WP_SELECT_OPERATION_ONE_STEP", "Có 20 chiếc bánh chia đều cho 5 bạn. Phép tính nào phù hợp?", "chia", "wordshare|20|5", "word_problem_model"),
                 QWP("word_problem_add_more", "WP_ONE_STEP_ADD_MORE", "Lan có 23 nhãn vở. Mẹ cho thêm 7 nhãn vở. Lan có tất cả bao nhiêu nhãn vở?", 30, "wordbar|add|23|7"),
                 QWP("word_problem_sub_less", "WP_ONE_STEP_SUB_LESS", "Lan có 41 nhãn vở. Lan cho bạn 12 nhãn vở. Lan còn lại bao nhiêu nhãn vở?", 29, "wordbar|sub|41|12"),
                 QWP("word_problem_more_than", "WP_ONE_STEP_MORE_THAN", "Mai có 18 bông hoa. Lan có nhiều hơn Mai 6 bông hoa. Lan có bao nhiêu bông hoa?", 24, "wordbar|more|18|6"),

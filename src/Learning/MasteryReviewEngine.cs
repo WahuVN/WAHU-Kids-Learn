@@ -159,6 +159,12 @@ namespace WAHU.Learning
                     return New("COMPARISON_ERROR", 0.68, "wrong_comparison_symbol");
                 if (question.TemplateId == "predecessor_successor")
                     return New("SEQUENCE_NEIGHBOR_ERROR", 0.62, "wrong_predecessor_successor_pair");
+                if (question.TemplateId == "add_components_recognize" || question.TemplateId == "sub_components_recognize" ||
+                    question.TemplateId == "multiplication_components_recognize" || question.TemplateId == "division_components_recognize")
+                    return New("OPERATION_COMPONENT_ERROR", 0.64, "wrong_operation_component_role_choice");
+                if (question.TemplateId == "multiplication_meaning_groups" || question.TemplateId == "division_meaning_share" ||
+                    question.TemplateId == "operation_meaning_from_visual" || question.TemplateId == "word_problem_select_operation_one_step")
+                    return New("OPERATION_MEANING_ERROR", 0.60, "wrong_operation_meaning_or_selection_choice");
                 return New("UNKNOWN", 0.40, "wrong_text_choice_single_attempt");
             }
 

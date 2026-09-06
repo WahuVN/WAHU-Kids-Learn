@@ -56,6 +56,14 @@ namespace WAHU.Learning
                     case "word_problem_less_than": question = WordProblemLessThan(decision.Template); break;
                     case "word_problem_multiply_groups_2_5": question = WordProblemMultiply(decision.Template); break;
                     case "word_problem_divide_groups_2_5": question = WordProblemDivide(decision.Template); break;
+                    case "add_components_recognize": question = AddComponents(decision.Template); break;
+                    case "sub_components_recognize": question = SubComponents(decision.Template); break;
+                    case "multiplication_meaning_groups": question = MultiplicationMeaning(decision.Template); break;
+                    case "division_meaning_share": question = DivisionMeaning(decision.Template); break;
+                    case "multiplication_components_recognize": question = MultiplicationComponents(decision.Template); break;
+                    case "division_components_recognize": question = DivisionComponents(decision.Template); break;
+                    case "operation_meaning_from_visual": question = OperationMeaningFromVisual(decision.Template); break;
+                    case "word_problem_select_operation_one_step": question = WordProblemSelectOperation(decision.Template); break;
                     default: throw new InvalidOperationException("Unsupported VERIFIED math template: " + decision.Template.TemplateId);
                 }
             }
@@ -249,6 +257,211 @@ namespace WAHU.Learning
         private static string ClockText(int hour, int minute)
         {
             return hour.ToString(CultureInfo.InvariantCulture) + " giờ " + minute.ToString("00", CultureInfo.InvariantCulture) + " phút";
+        }
+
+        private MathQuestion AddComponents(MathTemplateRef template)
+        {
+            var a = _random.Next(1, 61);
+            var b = _random.Next(1, 41);
+            while (a + b > 100) b = _random.Next(1, 41);
+            var result = a + b;
+            var target = _random.Next(0, 3);
+            var value = target == 0 ? a : (target == 1 ? b : result);
+            var answer = target < 2 ? "số hạng" : "tổng";
+            var question = NewTextQuestion(template,
+                "Trong phép tính " + a + " + " + b + " = " + result + ", số " + value + " được gọi là gì?",
+                answer, Shuffle(new List<string> { "số hạng", "tổng", "hiệu", "số trừ" }),
+                "Hai số đứng trước dấu bằng trong phép cộng là các số hạng.",
+                "Kết quả của phép cộng được gọi là tổng.");
+            question.IllustrationData = "equationparts|add|" + a + "|" + b + "|" + result + "|" + target;
+            return question;
+        }
+
+        private MathQuestion SubComponents(MathTemplateRef template)
+        {
+            var a = _random.Next(10, 101);
+            var b = _random.Next(1, a);
+            while (a - b == b) b = _random.Next(1, a);
+            var result = a - b;
+            var target = _random.Next(0, 3);
+            var value = target == 0 ? a : (target == 1 ? b : result);
+            var answer = target == 0 ? "số bị trừ" : (target == 1 ? "số trừ" : "hiệu");
+            var question = NewTextQuestion(template,
+                "Trong phép tính " + a + " - " + b + " = " + result + ", số " + value + " được gọi là gì?",
+                answer, Shuffle(new List<string> { "số bị trừ", "số trừ", "hiệu", "tổng" }),
+                "Trong phép trừ, số đứng trước dấu trừ là số bị trừ; số đứng sau dấu trừ là số trừ.",
+                "Kết quả của phép trừ được gọi là hiệu.");
+            question.IllustrationData = "equationparts|sub|" + a + "|" + b + "|" + result + "|" + target;
+            return question;
+        }
+
+        private MathQuestion MultiplicationComponents(MathTemplateRef template)
+        {
+            var factor = _random.Next(0, 2) == 0 ? 2 : 5;
+            var other = _random.Next(2, 11);
+            var result = factor * other;
+            var target = _random.Next(0, 3);
+            var value = target == 0 ? factor : (target == 1 ? other : result);
+            var answer = target < 2 ? "thừa số" : "tích";
+            var question = NewTextQuestion(template,
+                "Trong phép tính " + factor + " × " + other + " = " + result + ", số " + value + " được gọi là gì?",
+                answer, Shuffle(new List<string> { "thừa số", "tích", "số chia", "thương" }),
+                "Hai số được nhân với nhau gọi là các thừa số.",
+                "Kết quả của phép nhân được gọi là tích.");
+            question.IllustrationData = "equationparts|mul|" + factor + "|" + other + "|" + result + "|" + target;
+            return question;
+        }
+
+        private MathQuestion DivisionComponents(MathTemplateRef template)
+        {
+            var divisor = _random.Next(0, 2) == 0 ? 2 : 5;
+            var quotient = _random.Next(1, 11);
+            while (quotient == divisor) quotient = _random.Next(1, 11);
+            var total = divisor * quotient;
+            var target = _random.Next(0, 3);
+            var value = target == 0 ? total : (target == 1 ? divisor : quotient);
+            var answer = target == 0 ? "số bị chia" : (target == 1 ? "số chia" : "thương");
+            var question = NewTextQuestion(template,
+                "Trong phép tính " + total + " : " + divisor + " = " + quotient + ", số " + value + " được gọi là gì?",
+                answer, Shuffle(new List<string> { "số bị chia", "số chia", "thương", "thừa số" }),
+                "Trong phép chia, số đứng trước dấu chia là số bị chia; số đứng sau dấu chia là số chia.",
+                "Kết quả của phép chia được gọi là thương.");
+            question.IllustrationData = "equationparts|div|" + total + "|" + divisor + "|" + quotient + "|" + target;
+            return question;
+        }
+
+        private MathQuestion MultiplicationMeaning(MathTemplateRef template)
+        {
+            var factor = _random.Next(0, 2) == 0 ? 2 : 5;
+            var groups = _random.Next(2, 10);
+            var correct = groups + " × " + factor;
+            var otherFactor = factor == 2 ? 5 : 2;
+            var choices = new List<string>
+            {
+                correct,
+                (groups + 1) + " × " + factor,
+                groups + " × " + otherFactor,
+                (groups - 1) + " × " + factor
+            };
+            var question = NewTextQuestion(template,
+                "Quan sát các nhóm bằng nhau. Phép nhân nào biểu diễn đúng mô hình?",
+                correct, Shuffle(choices.Distinct(StringComparer.Ordinal).ToList()),
+                "Đếm số nhóm và số vật trong mỗi nhóm.",
+                "Viết: số nhóm × số vật trong mỗi nhóm.");
+            question.IllustrationData = "wordgroups|" + factor + "|" + groups;
+            return question;
+        }
+
+        private MathQuestion DivisionMeaning(MathTemplateRef template)
+        {
+            var divisor = _random.Next(0, 2) == 0 ? 2 : 5;
+            var otherDivisor = divisor == 2 ? 5 : 2;
+            var quotient = _random.Next(1, 11);
+            while (quotient == divisor || quotient == otherDivisor) quotient = _random.Next(1, 11);
+            var total = divisor * quotient;
+            var correct = total + " : " + divisor;
+            var choices = new List<string>
+            {
+                correct,
+                (total + divisor) + " : " + divisor,
+                total + " : " + quotient,
+                total + " : " + otherDivisor
+            };
+            var question = NewTextQuestion(template,
+                "Quan sát việc chia đều. Phép chia nào biểu diễn đúng mô hình?",
+                correct, TakeAndShuffle(choices, 4),
+                "Nhìn tổng số vật và số phần bằng nhau.",
+                "Viết: tổng số vật : số phần bằng nhau.");
+            question.IllustrationData = "wordshare|" + total + "|" + divisor;
+            return question;
+        }
+
+        private MathQuestion OperationMeaningFromVisual(MathTemplateRef template)
+        {
+            var relation = _random.Next(0, 4);
+            string answer;
+            string data;
+            if (relation == 0)
+            {
+                var a = _random.Next(5, 31); var b = _random.Next(1, 21);
+                answer = "cộng"; data = "wordbar|add|" + a + "|" + b;
+            }
+            else if (relation == 1)
+            {
+                var a = _random.Next(10, 51); var b = _random.Next(1, a);
+                answer = "trừ"; data = "wordbar|sub|" + a + "|" + b;
+            }
+            else if (relation == 2)
+            {
+                var factor = _random.Next(0, 2) == 0 ? 2 : 5; var groups = _random.Next(2, 9);
+                answer = "nhân"; data = "wordgroups|" + factor + "|" + groups;
+            }
+            else
+            {
+                var divisor = _random.Next(0, 2) == 0 ? 2 : 5; var quotient = _random.Next(1, 9);
+                answer = "chia"; data = "wordshare|" + (divisor * quotient) + "|" + divisor;
+            }
+            var question = NewTextQuestion(template,
+                "Quan sát mô hình. Mô hình phù hợp nhất với phép tính nào?",
+                answer, Shuffle(OperationChoices()),
+                "Xác định mô hình đang gộp, bớt, tạo các nhóm bằng nhau hay chia đều.",
+                "Gộp → cộng; bớt → trừ; nhóm bằng nhau → nhân; chia thành phần bằng nhau → chia.");
+            question.IllustrationData = data;
+            return question;
+        }
+
+        private MathQuestion WordProblemSelectOperation(MathTemplateRef template)
+        {
+            var relation = _random.Next(0, 6);
+            string answer;
+            string data;
+            string prompt;
+            if (relation == 0)
+            {
+                var a = _random.Next(5, 41); var b = _random.Next(1, 31);
+                answer = "cộng"; data = "wordbar|add|" + a + "|" + b;
+                prompt = "Lan có " + a + " nhãn vở, được cho thêm " + b + " nhãn. Muốn tìm tất cả, phép tính nào phù hợp?";
+            }
+            else if (relation == 1)
+            {
+                var a = _random.Next(10, 61); var b = _random.Next(1, a);
+                answer = "trừ"; data = "wordbar|sub|" + a + "|" + b;
+                prompt = "Lan có " + a + " nhãn vở, cho bạn " + b + " nhãn. Muốn tìm số còn lại, phép tính nào phù hợp?";
+            }
+            else if (relation == 2)
+            {
+                var a = _random.Next(5, 41); var b = _random.Next(1, 21);
+                answer = "cộng"; data = "wordbar|more|" + a + "|" + b;
+                prompt = "Mai có " + a + " bông hoa. Lan nhiều hơn Mai " + b + " bông. Muốn tìm số hoa của Lan, phép tính nào phù hợp?";
+            }
+            else if (relation == 3)
+            {
+                var a = _random.Next(10, 61); var b = _random.Next(1, a);
+                answer = "trừ"; data = "wordbar|less|" + a + "|" + b;
+                prompt = "Lan có " + a + " bông hoa. Mai ít hơn Lan " + b + " bông. Muốn tìm số hoa của Mai, phép tính nào phù hợp?";
+            }
+            else if (relation == 4)
+            {
+                var factor = _random.Next(0, 2) == 0 ? 2 : 5; var groups = _random.Next(2, 9);
+                answer = "nhân"; data = "wordgroups|" + factor + "|" + groups;
+                prompt = "Có " + groups + " giỏ, mỗi giỏ " + factor + " quả. Muốn tìm tất cả số quả, phép tính nào phù hợp?";
+            }
+            else
+            {
+                var divisor = _random.Next(0, 2) == 0 ? 2 : 5; var quotient = _random.Next(1, 9); var total = divisor * quotient;
+                answer = "chia"; data = "wordshare|" + total + "|" + divisor;
+                prompt = "Có " + total + " chiếc bánh chia đều cho " + divisor + " bạn. Muốn tìm mỗi bạn được bao nhiêu, phép tính nào phù hợp?";
+            }
+            var question = NewTextQuestion(template, prompt, answer, Shuffle(OperationChoices()),
+                "Xác định dữ kiện, điều cần tìm và quan hệ giữa chúng trước khi chọn phép tính.",
+                "Gộp/nhiều hơn → cộng; bớt/ít hơn → trừ; nhóm đều → nhân; chia đều → chia.");
+            question.IllustrationData = data;
+            return question;
+        }
+
+        private static List<string> OperationChoices()
+        {
+            return new List<string> { "cộng", "trừ", "nhân", "chia" };
         }
 
         private MathQuestion WordProblemAddMore(MathTemplateRef template)
@@ -452,6 +665,12 @@ namespace WAHU.Learning
 
         private static string RepresentationFor(string templateId)
         {
+            if (templateId == "add_components_recognize" || templateId == "sub_components_recognize" ||
+                templateId == "multiplication_components_recognize" || templateId == "division_components_recognize")
+                return "equation_components";
+            if (templateId == "multiplication_meaning_groups" || templateId == "division_meaning_share" ||
+                templateId == "operation_meaning_from_visual")
+                return "operation_model";
             if (!string.IsNullOrWhiteSpace(templateId) && templateId.StartsWith("word_problem_", StringComparison.Ordinal))
                 return "word_problem_model";
             if (!string.IsNullOrWhiteSpace(templateId) && templateId.StartsWith("possible_certain_impossible_die__", StringComparison.Ordinal))
