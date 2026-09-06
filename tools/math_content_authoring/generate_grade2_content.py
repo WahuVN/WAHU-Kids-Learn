@@ -57,6 +57,23 @@ def deepen_explanation(explanation: str, question_type: str, concept_name: str) 
     return text + suffixes.get(question_type, suffixes["numeric_input"])
 
 
+def normalize_answer_evidence(text: object) -> str:
+    value = str(text).lower().strip().replace("×", "x").replace("÷", ":")
+    value = re.sub(r"[^\w\d]+", " ", value, flags=re.UNICODE)
+    return re.sub(r"\s+", " ", value).strip()
+
+
+def explanation_with_answer(explanation: str, answer_display: object) -> str:
+    text = explanation.strip()
+    answer = str(answer_display).strip()
+    if not answer:
+        return text
+    evidence = normalize_answer_evidence(answer)
+    if evidence and evidence in normalize_answer_evidence(text):
+        return text
+    return text + f" Vậy đáp án là {answer}."
+
+
 def second_hint(question_type: str, difficulty: str, concept_name: str) -> str:
     """Give a child a concrete next move without revealing the authored answer."""
     concept = concept_name.strip()
@@ -912,6 +929,11 @@ def build() -> tuple[dict, dict]:
                 question_type = spec["question_type"]
                 if domain_key == "word_problems" and question_type == "numeric_input":
                     question_type = "word_problem"
+                answer_display = str(spec["correct_answer"])
+                if spec["answer_kind"] == "integer" and spec.get("answer_unit"):
+                    answer_display += " " + str(spec["answer_unit"])
+                question_explanation = explanation_with_answer(
+                    deepen_explanation(spec["explanation_vi"], question_type, concept_name), answer_display)
                 q = {
                     "id": qid,
                     "lesson_id": lesson_id,
@@ -922,7 +944,7 @@ def build() -> tuple[dict, dict]:
                     "answer_kind": spec["answer_kind"],
                     "correct_answer": spec["correct_answer"],
                     "accepted_answers": spec["accepted_answers"],
-                    "explanation_vi": deepen_explanation(spec["explanation_vi"], question_type, concept_name),
+                    "explanation_vi": question_explanation,
                     "hints_vi": [
                         "Nhớ kiến thức: " + concept_def,
                         second_hint(question_type, difficulty, concept_name),

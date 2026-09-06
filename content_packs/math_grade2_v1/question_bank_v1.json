@@ -212,7 +212,7 @@
       "accepted_answers": [
         "Đúng"
       ],
-      "explanation_vi": "700 có hàng chục và hàng đơn vị đều bằng 0 nên đây là số tròn trăm.",
+      "explanation_vi": "700 có hàng chục và hàng đơn vị đều bằng 0 nên đây là số tròn trăm. Vậy đáp án là Đúng.",
       "hints_vi": [
         "Nhớ kiến thức: Số có dạng n00 trong phạm vi 1000, với hàng chục và đơn vị bằng 0.",
         "Tìm một dữ kiện xác nhận hoặc bác bỏ mệnh đề theo “Số tròn trăm”; chỉ một điểm sai cũng đủ chọn Sai."
@@ -233,7 +233,7 @@
         {
           "id": "a",
           "text": "Đúng",
-          "rationale_vi": "700 có hàng chục và hàng đơn vị đều bằng 0 nên đây là số tròn trăm."
+          "rationale_vi": "700 có hàng chục và hàng đơn vị đều bằng 0 nên đây là số tròn trăm. Vậy đáp án là Đúng."
         },
         {
           "id": "b",
@@ -578,7 +578,7 @@
       "accepted_answers": [
         "908 = 900 + 8"
       ],
-      "explanation_vi": "908 có 9 trăm, 0 chục và 8 đơn vị; hàng chục bằng 0 nên dạng đúng là 900 + 8.",
+      "explanation_vi": "908 có 9 trăm, 0 chục và 8 đơn vị; hàng chục bằng 0 nên dạng đúng là 900 + 8. Vậy đáp án là 908 = 900 + 8.",
       "hints_vi": [
         "Nhớ kiến thức: Dạng khai triển biểu diễn một số bằng tổng giá trị hàng trăm, hàng chục và hàng đơn vị.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Dạng khai triển” trước rồi mới chọn phương án khớp kết quả."
@@ -599,7 +599,7 @@
         {
           "id": "a",
           "text": "908 = 900 + 8",
-          "rationale_vi": "908 có 9 trăm, 0 chục và 8 đơn vị; hàng chục bằng 0 nên dạng đúng là 900 + 8."
+          "rationale_vi": "908 có 9 trăm, 0 chục và 8 đơn vị; hàng chục bằng 0 nên dạng đúng là 900 + 8. Vậy đáp án là 908 = 900 + 8."
         },
         {
           "id": "b",
@@ -724,7 +724,7 @@
       "accepted_answers": [
         "<"
       ],
-      "explanation_vi": "Cùng 6 trăm nhưng 0 chục nhỏ hơn 8 chục nên 608 < 680.",
+      "explanation_vi": "Cùng 6 trăm nhưng 0 chục nhỏ hơn 8 chục nên 608 < 680. Vậy đáp án là <.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng các dấu >, <, = sau khi so sánh lần lượt từ hàng cao nhất xuống.",
         "Đối chiếu từng lựa chọn với kiến thức “So sánh số”; loại ngay lựa chọn trái với dữ kiện của đề."
@@ -750,7 +750,7 @@
         {
           "id": "b",
           "text": "<",
-          "rationale_vi": "Cùng 6 trăm nhưng 0 chục nhỏ hơn 8 chục nên 608 < 680."
+          "rationale_vi": "Cùng 6 trăm nhưng 0 chục nhỏ hơn 8 chục nên 608 < 680. Vậy đáp án là <."
         },
         {
           "id": "c",
@@ -777,7 +777,7 @@
       "accepted_answers": [
         ">"
       ],
-      "explanation_vi": "Cùng 9 trăm; 4 chục lớn hơn 2 chục nên 945 > 925.",
+      "explanation_vi": "Cùng 9 trăm; 4 chục lớn hơn 2 chục nên 945 > 925. Vậy đáp án là >.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng các dấu >, <, = sau khi so sánh lần lượt từ hàng cao nhất xuống.",
         "Tự xác định đặc điểm đúng của “So sánh số” trước, rồi so với từng lựa chọn để loại dần."
@@ -808,7 +808,7 @@
         {
           "id": "c",
           "text": ">",
-          "rationale_vi": "Cùng 9 trăm; 4 chục lớn hơn 2 chục nên 945 > 925."
+          "rationale_vi": "Cùng 9 trăm; 4 chục lớn hơn 2 chục nên 945 > 925. Vậy đáp án là >."
         },
         {
           "id": "d",
@@ -1197,7 +1197,7 @@
       "accepted_answers": [
         "khoảng 70"
       ],
-      "explanation_vi": "73 gần 70 hơn 80 khi ước lượng theo chục gần nhất.",
+      "explanation_vi": "73 gần 70 hơn 80 khi ước lượng theo chục gần nhất. Vậy đáp án là khoảng 70.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng các nhóm 10 làm mốc để chọn số chục gần và hợp lý với số lượng quan sát.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Ước lượng theo chục” trước rồi mới chọn phương án khớp kết quả."
@@ -1233,7 +1233,7 @@
         {
           "id": "d",
           "text": "khoảng 70",
-          "rationale_vi": "73 gần 70 hơn 80 khi ước lượng theo chục gần nhất."
+          "rationale_vi": "73 gần 70 hơn 80 khi ước lượng theo chục gần nhất. Vậy đáp án là khoảng 70."
         }
       ],
       "correct_choice_id": "d"
@@ -1356,7 +1356,7 @@
       "accepted_answers": [
         "120 và 230"
       ],
-      "explanation_vi": "Hai số đứng trước dấu bằng và được nối bằng dấu + là hai số hạng.",
+      "explanation_vi": "Hai số đứng trước dấu bằng và được nối bằng dấu + là hai số hạng. Vậy đáp án là 120 và 230.",
       "hints_vi": [
         "Nhớ kiến thức: Hai số được cộng là số hạng; kết quả của phép cộng là tổng.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Số hạng và tổng” trước rồi mới chọn phương án khớp kết quả."
@@ -1387,7 +1387,7 @@
         {
           "id": "c",
           "text": "120 và 230",
-          "rationale_vi": "Hai số đứng trước dấu bằng và được nối bằng dấu + là hai số hạng."
+          "rationale_vi": "Hai số đứng trước dấu bằng và được nối bằng dấu + là hai số hạng. Vậy đáp án là 120 và 230."
         },
         {
           "id": "d",
@@ -1515,7 +1515,7 @@
       "accepted_answers": [
         "số bị trừ và hiệu"
       ],
-      "explanation_vi": "Trong phép trừ, 90 là số bị trừ còn kết quả 55 là hiệu.",
+      "explanation_vi": "Trong phép trừ, 90 là số bị trừ còn kết quả 55 là hiệu. Vậy đáp án là số bị trừ và hiệu.",
       "hints_vi": [
         "Nhớ kiến thức: Phép trừ gồm số bị trừ, số trừ và kết quả gọi là hiệu.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Số bị trừ, số trừ, hiệu” trước rồi mới chọn phương án khớp kết quả."
@@ -1541,7 +1541,7 @@
         {
           "id": "b",
           "text": "số bị trừ và hiệu",
-          "rationale_vi": "Trong phép trừ, 90 là số bị trừ còn kết quả 55 là hiệu."
+          "rationale_vi": "Trong phép trừ, 90 là số bị trừ còn kết quả 55 là hiệu. Vậy đáp án là số bị trừ và hiệu."
         },
         {
           "id": "c",
@@ -1971,7 +1971,7 @@
       "accepted_answers": [
         "75"
       ],
-      "explanation_vi": "100 - 30 = 70, rồi 70 + 5 = 75. Thứ tự các bước phải đúng với tính từ trái sang phải; tính lại từng bước sẽ kiểm tra được kết quả.",
+      "explanation_vi": "100 - 30 = 70, rồi 70 + 5 = 75. Thứ tự các bước phải đúng với tính từ trái sang phải; tính lại từng bước sẽ kiểm tra được kết quả. Vậy đáp án là 100 - 30 + 5.",
       "hints_vi": [
         "Nhớ kiến thức: Biểu thức chỉ gồm + và - được tính lần lượt từ trái qua phải.",
         "Viết biểu thức trước khi tính; kiểm tra từng dấu phép tính có đúng với “Tính từ trái sang phải” hay chưa."
@@ -2228,7 +2228,7 @@
       "accepted_answers": [
         "2 + 2 + 2"
       ],
-      "explanation_vi": "Ba nhóm, mỗi nhóm 2 tương ứng cộng số 2 ba lần.",
+      "explanation_vi": "Ba nhóm, mỗi nhóm 2 tương ứng cộng số 2 ba lần. Vậy đáp án là 2 + 2 + 2.",
       "hints_vi": [
         "Nhớ kiến thức: Phép nhân là cách viết gọn của phép cộng lặp lại các nhóm có cùng số lượng.",
         "Đối chiếu từng lựa chọn với kiến thức “Nhóm bằng nhau”; loại ngay lựa chọn trái với dữ kiện của đề."
@@ -2259,7 +2259,7 @@
         {
           "id": "c",
           "text": "2 + 2 + 2",
-          "rationale_vi": "Ba nhóm, mỗi nhóm 2 tương ứng cộng số 2 ba lần."
+          "rationale_vi": "Ba nhóm, mỗi nhóm 2 tương ứng cộng số 2 ba lần. Vậy đáp án là 2 + 2 + 2."
         },
         {
           "id": "d",
@@ -2542,7 +2542,7 @@
       "accepted_answers": [
         "2 và 8"
       ],
-      "explanation_vi": "Hai số đứng hai bên dấu nhân là hai thừa số.",
+      "explanation_vi": "Hai số đứng hai bên dấu nhân là hai thừa số. Vậy đáp án là 2 và 8.",
       "hints_vi": [
         "Nhớ kiến thức: Các số được nhân là thừa số; kết quả là tích.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Thừa số và tích” trước rồi mới chọn phương án khớp kết quả."
@@ -2568,7 +2568,7 @@
         {
           "id": "b",
           "text": "2 và 8",
-          "rationale_vi": "Hai số đứng hai bên dấu nhân là hai thừa số."
+          "rationale_vi": "Hai số đứng hai bên dấu nhân là hai thừa số. Vậy đáp án là 2 và 8."
         },
         {
           "id": "c",
@@ -2701,7 +2701,7 @@
       "accepted_answers": [
         "số bị chia và thương"
       ],
-      "explanation_vi": "Trong phép chia, 18 là số bị chia còn kết quả 9 là thương.",
+      "explanation_vi": "Trong phép chia, 18 là số bị chia còn kết quả 9 là thương. Vậy đáp án là số bị chia và thương.",
       "hints_vi": [
         "Nhớ kiến thức: Phép chia gồm số bị chia, số chia và kết quả gọi là thương.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Số bị chia, số chia, thương” trước rồi mới chọn phương án khớp kết quả."
@@ -2722,7 +2722,7 @@
         {
           "id": "a",
           "text": "số bị chia và thương",
-          "rationale_vi": "Trong phép chia, 18 là số bị chia còn kết quả 9 là thương."
+          "rationale_vi": "Trong phép chia, 18 là số bị chia còn kết quả 9 là thương. Vậy đáp án là số bị chia và thương."
         },
         {
           "id": "b",
@@ -3179,7 +3179,7 @@
       "accepted_answers": [
         "10 - 3"
       ],
-      "explanation_vi": "Bỏ bớt một phần khỏi lượng ban đầu là phép trừ.",
+      "explanation_vi": "Bỏ bớt một phần khỏi lượng ban đầu là phép trừ. Vậy đáp án là 10 - 3.",
       "hints_vi": [
         "Nhớ kiến thức: Cộng gộp/thêm, trừ bớt/so sánh chênh lệch, nhân tạo nhóm bằng nhau, chia chia đều hoặc đếm số nhóm.",
         "Tự xác định đặc điểm đúng của “Quan hệ của phép tính” trước, rồi so với từng lựa chọn để loại dần."
@@ -3210,7 +3210,7 @@
         {
           "id": "c",
           "text": "10 - 3",
-          "rationale_vi": "Bỏ bớt một phần khỏi lượng ban đầu là phép trừ."
+          "rationale_vi": "Bỏ bớt một phần khỏi lượng ban đầu là phép trừ. Vậy đáp án là 10 - 3."
         },
         {
           "id": "d",
@@ -3232,7 +3232,7 @@
       "accepted_answers": [
         "5 × 2"
       ],
-      "explanation_vi": "Nhiều nhóm bằng nhau được mô tả bằng phép nhân.",
+      "explanation_vi": "Nhiều nhóm bằng nhau được mô tả bằng phép nhân. Vậy đáp án là 5 × 2.",
       "hints_vi": [
         "Nhớ kiến thức: Cộng gộp/thêm, trừ bớt/so sánh chênh lệch, nhân tạo nhóm bằng nhau, chia chia đều hoặc đếm số nhóm.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Quan hệ của phép tính” trước rồi mới chọn phương án khớp kết quả."
@@ -3268,7 +3268,7 @@
         {
           "id": "d",
           "text": "5 × 2",
-          "rationale_vi": "Nhiều nhóm bằng nhau được mô tả bằng phép nhân."
+          "rationale_vi": "Nhiều nhóm bằng nhau được mô tả bằng phép nhân. Vậy đáp án là 5 × 2."
         }
       ],
       "correct_choice_id": "d"
@@ -3845,7 +3845,7 @@
       "accepted_answers": [
         "10 - 2"
       ],
-      "explanation_vi": "Tình huống lấy bớt và hỏi còn lại nên dùng phép trừ.",
+      "explanation_vi": "Tình huống lấy bớt và hỏi còn lại nên dùng phép trừ. Vậy đáp án là 10 - 2.",
       "hints_vi": [
         "Nhớ kiến thức: Phép tính phải mô tả đúng quan hệ giữa dữ kiện và đại lượng cần tìm.",
         "Đối chiếu từng lựa chọn với kiến thức “Chọn phép tính”; loại ngay lựa chọn trái với dữ kiện của đề."
@@ -3866,7 +3866,7 @@
         {
           "id": "a",
           "text": "10 - 2",
-          "rationale_vi": "Tình huống lấy bớt và hỏi còn lại nên dùng phép trừ."
+          "rationale_vi": "Tình huống lấy bớt và hỏi còn lại nên dùng phép trừ. Vậy đáp án là 10 - 2."
         },
         {
           "id": "b",
@@ -3898,7 +3898,7 @@
       "accepted_answers": [
         "5 × 2"
       ],
-      "explanation_vi": "Nhiều nhóm bằng nhau và hỏi tổng nên dùng phép nhân.",
+      "explanation_vi": "Nhiều nhóm bằng nhau và hỏi tổng nên dùng phép nhân. Vậy đáp án là 5 × 2.",
       "hints_vi": [
         "Nhớ kiến thức: Phép tính phải mô tả đúng quan hệ giữa dữ kiện và đại lượng cần tìm.",
         "Tự xác định đặc điểm đúng của “Chọn phép tính” trước, rồi so với từng lựa chọn để loại dần."
@@ -3924,7 +3924,7 @@
         {
           "id": "b",
           "text": "5 × 2",
-          "rationale_vi": "Nhiều nhóm bằng nhau và hỏi tổng nên dùng phép nhân."
+          "rationale_vi": "Nhiều nhóm bằng nhau và hỏi tổng nên dùng phép nhân. Vậy đáp án là 5 × 2."
         },
         {
           "id": "c",
@@ -3951,7 +3951,7 @@
       "accepted_answers": [
         "30 : 5"
       ],
-      "explanation_vi": "Chia đều tổng số bút thành 5 phần nên dùng phép chia.",
+      "explanation_vi": "Chia đều tổng số bút thành 5 phần nên dùng phép chia. Vậy đáp án là 30 : 5.",
       "hints_vi": [
         "Nhớ kiến thức: Phép tính phải mô tả đúng quan hệ giữa dữ kiện và đại lượng cần tìm.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Chọn phép tính” trước rồi mới chọn phương án khớp kết quả."
@@ -3982,7 +3982,7 @@
         {
           "id": "c",
           "text": "30 : 5",
-          "rationale_vi": "Chia đều tổng số bút thành 5 phần nên dùng phép chia."
+          "rationale_vi": "Chia đều tổng số bút thành 5 phần nên dùng phép chia. Vậy đáp án là 30 : 5."
         },
         {
           "id": "d",
@@ -4057,7 +4057,7 @@
       "accepted_answers": [
         "Điểm biểu diễn một vị trí"
       ],
-      "explanation_vi": "Điểm dùng để chỉ vị trí và không có độ dài.",
+      "explanation_vi": "Điểm dùng để chỉ vị trí và không có độ dài. Vậy đáp án là Điểm biểu diễn một vị trí.",
       "hints_vi": [
         "Nhớ kiến thức: Một điểm chỉ vị trí; tên điểm giúp phân biệt các vị trí trên hình.",
         "Tự xác định đặc điểm đúng của “Điểm” trước, rồi so với từng lựa chọn để loại dần."
@@ -4078,7 +4078,7 @@
         {
           "id": "a",
           "text": "Điểm biểu diễn một vị trí",
-          "rationale_vi": "Điểm dùng để chỉ vị trí và không có độ dài."
+          "rationale_vi": "Điểm dùng để chỉ vị trí và không có độ dài. Vậy đáp án là Điểm biểu diễn một vị trí."
         },
         {
           "id": "b",
@@ -4163,7 +4163,7 @@
       "accepted_answers": [
         "2"
       ],
-      "explanation_vi": "Đoạn thẳng AB có hai đầu mút A và B.",
+      "explanation_vi": "Đoạn thẳng AB có hai đầu mút A và B. Vậy đáp án là 2.",
       "hints_vi": [
         "Nhớ kiến thức: Đoạn thẳng có hai đầu mút xác định và phần nối giữa chúng là thẳng.",
         "Đối chiếu từng lựa chọn với kiến thức “Đoạn thẳng”; loại ngay lựa chọn trái với dữ kiện của đề."
@@ -4194,7 +4194,7 @@
         {
           "id": "c",
           "text": "2",
-          "rationale_vi": "Đoạn thẳng AB có hai đầu mút A và B."
+          "rationale_vi": "Đoạn thẳng AB có hai đầu mút A và B. Vậy đáp án là 2."
         },
         {
           "id": "d",
@@ -4216,7 +4216,7 @@
       "accepted_answers": [
         "Phần thẳng nối hai đầu mút"
       ],
-      "explanation_vi": "Đoạn thẳng là phần thẳng nối hai điểm đầu mút.",
+      "explanation_vi": "Đoạn thẳng là phần thẳng nối hai điểm đầu mút. Vậy đáp án là Phần thẳng nối hai đầu mút.",
       "hints_vi": [
         "Nhớ kiến thức: Đoạn thẳng có hai đầu mút xác định và phần nối giữa chúng là thẳng.",
         "Tự xác định đặc điểm đúng của “Đoạn thẳng” trước, rồi so với từng lựa chọn để loại dần."
@@ -4252,7 +4252,7 @@
         {
           "id": "d",
           "text": "Phần thẳng nối hai đầu mút",
-          "rationale_vi": "Đoạn thẳng là phần thẳng nối hai điểm đầu mút."
+          "rationale_vi": "Đoạn thẳng là phần thẳng nối hai điểm đầu mút. Vậy đáp án là Phần thẳng nối hai đầu mút."
         }
       ],
       "correct_choice_id": "d"
@@ -4322,7 +4322,7 @@
       "accepted_answers": [
         "Đường uốn lượn"
       ],
-      "explanation_vi": "Đường cong có hình dạng uốn lượn, không giữ hướng thẳng trên toàn bộ đường.",
+      "explanation_vi": "Đường cong có hình dạng uốn lượn, không giữ hướng thẳng trên toàn bộ đường. Vậy đáp án là Đường uốn lượn.",
       "hints_vi": [
         "Nhớ kiến thức: Đường cong không giữ một hướng thẳng cố định trên toàn bộ đường.",
         "Đối chiếu từng lựa chọn với kiến thức “Đường cong”; loại ngay lựa chọn trái với dữ kiện của đề."
@@ -4348,7 +4348,7 @@
         {
           "id": "b",
           "text": "Đường uốn lượn",
-          "rationale_vi": "Đường cong có hình dạng uốn lượn, không giữ hướng thẳng trên toàn bộ đường."
+          "rationale_vi": "Đường cong có hình dạng uốn lượn, không giữ hướng thẳng trên toàn bộ đường. Vậy đáp án là Đường uốn lượn."
         },
         {
           "id": "c",
@@ -4428,7 +4428,7 @@
       "accepted_answers": [
         "Đường cong có thể đổi hướng mềm mại"
       ],
-      "explanation_vi": "Đặc điểm nhận biết là đường bị uốn và thay đổi hướng.",
+      "explanation_vi": "Đặc điểm nhận biết là đường bị uốn và thay đổi hướng. Vậy đáp án là Đường cong có thể đổi hướng mềm mại.",
       "hints_vi": [
         "Nhớ kiến thức: Đường cong không giữ một hướng thẳng cố định trên toàn bộ đường.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Đường cong” trước rồi mới chọn phương án khớp kết quả."
@@ -4464,7 +4464,7 @@
         {
           "id": "d",
           "text": "Đường cong có thể đổi hướng mềm mại",
-          "rationale_vi": "Đặc điểm nhận biết là đường bị uốn và thay đổi hướng."
+          "rationale_vi": "Đặc điểm nhận biết là đường bị uốn và thay đổi hướng. Vậy đáp án là Đường cong có thể đổi hướng mềm mại."
         }
       ],
       "correct_choice_id": "d"
@@ -4481,7 +4481,7 @@
       "accepted_answers": [
         "Có thể kéo dài về hai phía"
       ],
-      "explanation_vi": "Đường thẳng không bị giới hạn bởi hai đầu mút như đoạn thẳng.",
+      "explanation_vi": "Đường thẳng không bị giới hạn bởi hai đầu mút như đoạn thẳng. Vậy đáp án là Có thể kéo dài về hai phía.",
       "hints_vi": [
         "Nhớ kiến thức: Đường thẳng có thể kéo dài mãi theo hai hướng và không cong.",
         "Đối chiếu từng lựa chọn với kiến thức “Đường thẳng”; loại ngay lựa chọn trái với dữ kiện của đề."
@@ -4502,7 +4502,7 @@
         {
           "id": "a",
           "text": "Có thể kéo dài về hai phía",
-          "rationale_vi": "Đường thẳng không bị giới hạn bởi hai đầu mút như đoạn thẳng."
+          "rationale_vi": "Đường thẳng không bị giới hạn bởi hai đầu mút như đoạn thẳng. Vậy đáp án là Có thể kéo dài về hai phía."
         },
         {
           "id": "b",
@@ -4587,7 +4587,7 @@
       "accepted_answers": [
         "A và B nằm trên d"
       ],
-      "explanation_vi": "Dữ kiện đã cho xác định cả hai điểm cùng thuộc đường thẳng d.",
+      "explanation_vi": "Dữ kiện đã cho xác định cả hai điểm cùng thuộc đường thẳng d. Vậy đáp án là A và B nằm trên d.",
       "hints_vi": [
         "Nhớ kiến thức: Đường thẳng có thể kéo dài mãi theo hai hướng và không cong.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Đường thẳng” trước rồi mới chọn phương án khớp kết quả."
@@ -4618,7 +4618,7 @@
         {
           "id": "c",
           "text": "A và B nằm trên d",
-          "rationale_vi": "Dữ kiện đã cho xác định cả hai điểm cùng thuộc đường thẳng d."
+          "rationale_vi": "Dữ kiện đã cho xác định cả hai điểm cùng thuộc đường thẳng d. Vậy đáp án là A và B nằm trên d."
         },
         {
           "id": "d",
@@ -4640,7 +4640,7 @@
       "accepted_answers": [
         "Nhiều đoạn thẳng nối tiếp"
       ],
-      "explanation_vi": "Đường gấp khúc là chuỗi các đoạn thẳng nối nhau.",
+      "explanation_vi": "Đường gấp khúc là chuỗi các đoạn thẳng nối nhau. Vậy đáp án là Nhiều đoạn thẳng nối tiếp.",
       "hints_vi": [
         "Nhớ kiến thức: Một chuỗi từ hai đoạn thẳng trở lên nối đầu mút với nhau tạo thành đường gấp khúc.",
         "Đối chiếu từng lựa chọn với kiến thức “Đường gấp khúc”; loại ngay lựa chọn trái với dữ kiện của đề."
@@ -4676,7 +4676,7 @@
         {
           "id": "d",
           "text": "Nhiều đoạn thẳng nối tiếp",
-          "rationale_vi": "Đường gấp khúc là chuỗi các đoạn thẳng nối nhau."
+          "rationale_vi": "Đường gấp khúc là chuỗi các đoạn thẳng nối nhau. Vậy đáp án là Nhiều đoạn thẳng nối tiếp."
         }
       ],
       "correct_choice_id": "d"
@@ -4693,7 +4693,7 @@
       "accepted_answers": [
         "đường gấp khúc ABCD"
       ],
-      "explanation_vi": "Ba đoạn thẳng nối tiếp tại B và C tạo một đường gấp khúc.",
+      "explanation_vi": "Ba đoạn thẳng nối tiếp tại B và C tạo một đường gấp khúc. Vậy đáp án là đường gấp khúc ABCD.",
       "hints_vi": [
         "Nhớ kiến thức: Một chuỗi từ hai đoạn thẳng trở lên nối đầu mút với nhau tạo thành đường gấp khúc.",
         "Tự xác định đặc điểm đúng của “Đường gấp khúc” trước, rồi so với từng lựa chọn để loại dần."
@@ -4714,7 +4714,7 @@
         {
           "id": "a",
           "text": "đường gấp khúc ABCD",
-          "rationale_vi": "Ba đoạn thẳng nối tiếp tại B và C tạo một đường gấp khúc."
+          "rationale_vi": "Ba đoạn thẳng nối tiếp tại B và C tạo một đường gấp khúc. Vậy đáp án là đường gấp khúc ABCD."
         },
         {
           "id": "b",
@@ -4905,7 +4905,7 @@
       "accepted_answers": [
         "Cả ba có cùng nằm trên một đường thẳng"
       ],
-      "explanation_vi": "Điều kiện trực quan là ba điểm cùng thuộc một đường thẳng.",
+      "explanation_vi": "Điều kiện trực quan là ba điểm cùng thuộc một đường thẳng. Vậy đáp án là Cả ba có cùng nằm trên một đường thẳng.",
       "hints_vi": [
         "Nhớ kiến thức: Các điểm thẳng hàng cùng nằm trên một đường thẳng duy nhất.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Thẳng hàng” trước rồi mới chọn phương án khớp kết quả."
@@ -4926,7 +4926,7 @@
         {
           "id": "a",
           "text": "Cả ba có cùng nằm trên một đường thẳng",
-          "rationale_vi": "Điều kiện trực quan là ba điểm cùng thuộc một đường thẳng."
+          "rationale_vi": "Điều kiện trực quan là ba điểm cùng thuộc một đường thẳng. Vậy đáp án là Cả ba có cùng nằm trên một đường thẳng."
         },
         {
           "id": "b",
@@ -5042,7 +5042,7 @@
       "accepted_answers": [
         "hình tứ giác"
       ],
-      "explanation_vi": "Hình kín có bốn cạnh là tứ giác.",
+      "explanation_vi": "Hình kín có bốn cạnh là tứ giác. Vậy đáp án là hình tứ giác.",
       "hints_vi": [
         "Nhớ kiến thức: Một hình kín có đúng bốn cạnh là hình tứ giác.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Tứ giác” trước rồi mới chọn phương án khớp kết quả."
@@ -5073,7 +5073,7 @@
         {
           "id": "c",
           "text": "hình tứ giác",
-          "rationale_vi": "Hình kín có bốn cạnh là tứ giác."
+          "rationale_vi": "Hình kín có bốn cạnh là tứ giác. Vậy đáp án là hình tứ giác."
         },
         {
           "id": "d",
@@ -5148,7 +5148,7 @@
       "accepted_answers": [
         "Hai đáy tròn và một mặt cong xung quanh"
       ],
-      "explanation_vi": "Đặc trưng trực quan của khối trụ là hai đáy tròn cùng mặt cong bao quanh.",
+      "explanation_vi": "Đặc trưng trực quan của khối trụ là hai đáy tròn cùng mặt cong bao quanh. Vậy đáp án là Hai đáy tròn và một mặt cong xung quanh.",
       "hints_vi": [
         "Nhớ kiến thức: Khối có hai đáy tròn song song và một mặt cong xung quanh.",
         "Tự xác định đặc điểm đúng của “Khối trụ” trước, rồi so với từng lựa chọn để loại dần."
@@ -5169,7 +5169,7 @@
         {
           "id": "a",
           "text": "Hai đáy tròn và một mặt cong xung quanh",
-          "rationale_vi": "Đặc trưng trực quan của khối trụ là hai đáy tròn cùng mặt cong bao quanh."
+          "rationale_vi": "Đặc trưng trực quan của khối trụ là hai đáy tròn cùng mặt cong bao quanh. Vậy đáp án là Hai đáy tròn và một mặt cong xung quanh."
         },
         {
           "id": "b",
@@ -5360,7 +5360,7 @@
       "accepted_answers": [
         "Tròn đều và không có đáy phẳng"
       ],
-      "explanation_vi": "Khối cầu tròn đều theo mọi hướng và không có mặt đáy phẳng.",
+      "explanation_vi": "Khối cầu tròn đều theo mọi hướng và không có mặt đáy phẳng. Vậy đáp án là Tròn đều và không có đáy phẳng.",
       "hints_vi": [
         "Nhớ kiến thức: Khối tròn không có cạnh, đỉnh hay mặt phẳng đáy.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Khối cầu” trước rồi mới chọn phương án khớp kết quả."
@@ -5381,7 +5381,7 @@
         {
           "id": "a",
           "text": "Tròn đều và không có đáy phẳng",
-          "rationale_vi": "Khối cầu tròn đều theo mọi hướng và không có mặt đáy phẳng."
+          "rationale_vi": "Khối cầu tròn đều theo mọi hướng và không có mặt đáy phẳng. Vậy đáp án là Tròn đều và không có đáy phẳng."
         },
         {
           "id": "b",
@@ -5506,7 +5506,7 @@
       "accepted_answers": [
         "một tứ giác"
       ],
-      "explanation_vi": "Hai mảnh tam giác có thể ghép cạnh với cạnh để tạo một hình kín bốn cạnh trong cách ghép phù hợp.",
+      "explanation_vi": "Hai mảnh tam giác có thể ghép cạnh với cạnh để tạo một hình kín bốn cạnh trong cách ghép phù hợp. Vậy đáp án là một tứ giác.",
       "hints_vi": [
         "Nhớ kiến thức: Tách một hình thành các phần hoặc ghép các phần để tạo hình mới giúp nhận ra quan hệ giữa các hình.",
         "Đối chiếu từng lựa chọn với kiến thức “Ghép và tạo hình”; loại ngay lựa chọn trái với dữ kiện của đề."
@@ -5532,7 +5532,7 @@
         {
           "id": "b",
           "text": "một tứ giác",
-          "rationale_vi": "Hai mảnh tam giác có thể ghép cạnh với cạnh để tạo một hình kín bốn cạnh trong cách ghép phù hợp."
+          "rationale_vi": "Hai mảnh tam giác có thể ghép cạnh với cạnh để tạo một hình kín bốn cạnh trong cách ghép phù hợp. Vậy đáp án là một tứ giác."
         },
         {
           "id": "c",
@@ -5559,7 +5559,7 @@
       "accepted_answers": [
         "2"
       ],
-      "explanation_vi": "Một đường cắt chéo xuyên hết hình vuông chia tờ giấy thành hai mảnh.",
+      "explanation_vi": "Một đường cắt chéo xuyên hết hình vuông chia tờ giấy thành hai mảnh. Vậy đáp án là 2.",
       "hints_vi": [
         "Nhớ kiến thức: Tách một hình thành các phần hoặc ghép các phần để tạo hình mới giúp nhận ra quan hệ giữa các hình.",
         "Tự xác định đặc điểm đúng của “Ghép và tạo hình” trước, rồi so với từng lựa chọn để loại dần."
@@ -5590,7 +5590,7 @@
         {
           "id": "c",
           "text": "2",
-          "rationale_vi": "Một đường cắt chéo xuyên hết hình vuông chia tờ giấy thành hai mảnh."
+          "rationale_vi": "Một đường cắt chéo xuyên hết hình vuông chia tờ giấy thành hai mảnh. Vậy đáp án là 2."
         },
         {
           "id": "d",
@@ -5612,7 +5612,7 @@
       "accepted_answers": [
         "Đặt hai cạnh phù hợp sát nhau để hai mảnh không chồng lên nhau"
       ],
-      "explanation_vi": "Muốn tạo một hình kín mới, cần ghép các cạnh phù hợp sát nhau mà không chồng hai mảnh lên nhau.",
+      "explanation_vi": "Muốn tạo một hình kín mới, cần ghép các cạnh phù hợp sát nhau mà không chồng hai mảnh lên nhau. Vậy đáp án là Đặt hai cạnh phù hợp sát nhau để hai mảnh không chồng lên nhau.",
       "hints_vi": [
         "Nhớ kiến thức: Tách một hình thành các phần hoặc ghép các phần để tạo hình mới giúp nhận ra quan hệ giữa các hình.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Ghép và tạo hình” trước rồi mới chọn phương án khớp kết quả."
@@ -5648,7 +5648,7 @@
         {
           "id": "d",
           "text": "Đặt hai cạnh phù hợp sát nhau để hai mảnh không chồng lên nhau",
-          "rationale_vi": "Muốn tạo một hình kín mới, cần ghép các cạnh phù hợp sát nhau mà không chồng hai mảnh lên nhau."
+          "rationale_vi": "Muốn tạo một hình kín mới, cần ghép các cạnh phù hợp sát nhau mà không chồng hai mảnh lên nhau. Vậy đáp án là Đặt hai cạnh phù hợp sát nhau để hai mảnh không chồng lên nhau."
         }
       ],
       "correct_choice_id": "d"
@@ -5771,7 +5771,7 @@
       "accepted_answers": [
         "Hai bên có khối lượng bằng nhau trong phép cân đó"
       ],
-      "explanation_vi": "Hai đĩa cân bằng cho thấy khối lượng hai bên bằng nhau trong điều kiện cân.",
+      "explanation_vi": "Hai đĩa cân bằng cho thấy khối lượng hai bên bằng nhau trong điều kiện cân. Vậy đáp án là Hai bên có khối lượng bằng nhau trong phép cân đó.",
       "hints_vi": [
         "Nhớ kiến thức: Nặng hơn nghĩa là có khối lượng lớn hơn; nhẹ hơn nghĩa là có khối lượng nhỏ hơn.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “So sánh khối lượng” trước rồi mới chọn phương án khớp kết quả."
@@ -5802,7 +5802,7 @@
         {
           "id": "c",
           "text": "Hai bên có khối lượng bằng nhau trong phép cân đó",
-          "rationale_vi": "Hai đĩa cân bằng cho thấy khối lượng hai bên bằng nhau trong điều kiện cân."
+          "rationale_vi": "Hai đĩa cân bằng cho thấy khối lượng hai bên bằng nhau trong điều kiện cân. Vậy đáp án là Hai bên có khối lượng bằng nhau trong phép cân đó."
         },
         {
           "id": "d",
@@ -5824,7 +5824,7 @@
       "accepted_answers": [
         "5"
       ],
-      "explanation_vi": "Con số đi trước đơn vị kg là 5. Kết quả này theo đúng quy tắc kilôgam; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "Con số đi trước đơn vị kg là 5. Kết quả này theo đúng quy tắc kilôgam; hãy đối chiếu lại với các số đã cho. Vậy đáp án là 5 kg.",
       "hints_vi": [
         "Nhớ kiến thức: kg là kí hiệu của kilôgam, một đơn vị đo khối lượng thông dụng.",
         "Khoanh các số cần dùng, áp dụng “Kilôgam”, rồi viết phần số của kết quả."
@@ -5945,7 +5945,7 @@
       "accepted_answers": [
         "4"
       ],
-      "explanation_vi": "Con số đi trước kí hiệu l là 4. Kết quả này theo đúng quy tắc lít; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "Con số đi trước kí hiệu l là 4. Kết quả này theo đúng quy tắc lít; hãy đối chiếu lại với các số đã cho. Vậy đáp án là 4 l.",
       "hints_vi": [
         "Nhớ kiến thức: l là kí hiệu của lít, đơn vị đo dung tích.",
         "Khoanh các số cần dùng, áp dụng “Lít”, rồi viết phần số của kết quả."
@@ -6126,7 +6126,7 @@
       "accepted_answers": [
         "km"
       ],
-      "explanation_vi": "Quãng đường dài thường được đo bằng ki-lô-mét.",
+      "explanation_vi": "Quãng đường dài thường được đo bằng ki-lô-mét. Vậy đáp án là km.",
       "hints_vi": [
         "Nhớ kiến thức: dm, m và km là các đơn vị độ dài với 1 m = 10 dm, 1 km = 1000 m.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Quan hệ đơn vị độ dài” trước rồi mới chọn phương án khớp kết quả."
@@ -6152,7 +6152,7 @@
         {
           "id": "b",
           "text": "km",
-          "rationale_vi": "Quãng đường dài thường được đo bằng ki-lô-mét."
+          "rationale_vi": "Quãng đường dài thường được đo bằng ki-lô-mét. Vậy đáp án là km."
         },
         {
           "id": "c",
@@ -6562,7 +6562,7 @@
       "accepted_answers": [
         "Con số mệnh giá và chữ đồng trên tờ"
       ],
-      "explanation_vi": "Để nhận biết giá trị, cần đọc con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền.",
+      "explanation_vi": "Để nhận biết giá trị, cần đọc con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền. Vậy đáp án là Con số mệnh giá và chữ đồng trên tờ.",
       "hints_vi": [
         "Nhớ kiến thức: Giá trị tiền được đọc theo con số in trên tờ và đơn vị đồng; bài học này tập trung vào cách nhận biết giá trị được ghi.",
         "Đối chiếu từng lựa chọn với kiến thức “Giá trị tờ tiền”; loại ngay lựa chọn trái với dữ kiện của đề."
@@ -6593,7 +6593,7 @@
         {
           "id": "c",
           "text": "Con số mệnh giá và chữ đồng trên tờ",
-          "rationale_vi": "Để nhận biết giá trị, cần đọc con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền."
+          "rationale_vi": "Để nhận biết giá trị, cần đọc con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền. Vậy đáp án là Con số mệnh giá và chữ đồng trên tờ."
         },
         {
           "id": "d",
@@ -6615,7 +6615,7 @@
       "accepted_answers": [
         "Sai"
       ],
-      "explanation_vi": "Màu sắc có thể hỗ trợ quan sát nhưng cần đọc con số mệnh giá và đơn vị đồng để nhận biết giá trị.",
+      "explanation_vi": "Màu sắc có thể hỗ trợ quan sát nhưng cần đọc con số mệnh giá và đơn vị đồng để nhận biết giá trị. Vậy đáp án là Sai.",
       "hints_vi": [
         "Nhớ kiến thức: Giá trị tiền được đọc theo con số in trên tờ và đơn vị đồng; bài học này tập trung vào cách nhận biết giá trị được ghi.",
         "Tìm một dữ kiện xác nhận hoặc bác bỏ mệnh đề theo “Giá trị tờ tiền”; chỉ một điểm sai cũng đủ chọn Sai."
@@ -6636,7 +6636,7 @@
         {
           "id": "a",
           "text": "Sai",
-          "rationale_vi": "Màu sắc có thể hỗ trợ quan sát nhưng cần đọc con số mệnh giá và đơn vị đồng để nhận biết giá trị."
+          "rationale_vi": "Màu sắc có thể hỗ trợ quan sát nhưng cần đọc con số mệnh giá và đơn vị đồng để nhận biết giá trị. Vậy đáp án là Sai."
         },
         {
           "id": "b",
@@ -6658,7 +6658,7 @@
       "accepted_answers": [
         "Đọc và so sánh con số mệnh giá trên hai tờ"
       ],
-      "explanation_vi": "Đọc đúng con số mệnh giá trên từng tờ rồi so sánh hai giá trị; không đoán chỉ từ màu sắc hoặc vị trí.",
+      "explanation_vi": "Đọc đúng con số mệnh giá trên từng tờ rồi so sánh hai giá trị; không đoán chỉ từ màu sắc hoặc vị trí. Vậy đáp án là Đọc và so sánh con số mệnh giá trên hai tờ.",
       "hints_vi": [
         "Nhớ kiến thức: Giá trị tiền được đọc theo con số in trên tờ và đơn vị đồng; bài học này tập trung vào cách nhận biết giá trị được ghi.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Giá trị tờ tiền” trước rồi mới chọn phương án khớp kết quả."
@@ -6694,7 +6694,7 @@
         {
           "id": "d",
           "text": "Đọc và so sánh con số mệnh giá trên hai tờ",
-          "rationale_vi": "Đọc đúng con số mệnh giá trên từng tờ rồi so sánh hai giá trị; không đoán chỉ từ màu sắc hoặc vị trí."
+          "rationale_vi": "Đọc đúng con số mệnh giá trên từng tờ rồi so sánh hai giá trị; không đoán chỉ từ màu sắc hoặc vị trí. Vậy đáp án là Đọc và so sánh con số mệnh giá trên hai tờ."
         }
       ],
       "correct_choice_id": "d"
@@ -7155,7 +7155,7 @@
       "accepted_answers": [
         "15 cm"
       ],
-      "explanation_vi": "Bút chì là vật nhỏ, đơn vị cm và độ dài khoảng vài chục cm là hợp lý.",
+      "explanation_vi": "Bút chì là vật nhỏ, đơn vị cm và độ dài khoảng vài chục cm là hợp lý. Vậy đáp án là 15 cm.",
       "hints_vi": [
         "Nhớ kiến thức: So sánh với mốc quen thuộc để chọn số đo và đơn vị gần đúng.",
         "Đối chiếu từng lựa chọn với kiến thức “Ước lượng số đo”; loại ngay lựa chọn trái với dữ kiện của đề."
@@ -7191,7 +7191,7 @@
         {
           "id": "d",
           "text": "15 cm",
-          "rationale_vi": "Bút chì là vật nhỏ, đơn vị cm và độ dài khoảng vài chục cm là hợp lý."
+          "rationale_vi": "Bút chì là vật nhỏ, đơn vị cm và độ dài khoảng vài chục cm là hợp lý. Vậy đáp án là 15 cm."
         }
       ],
       "correct_choice_id": "d"
@@ -7474,7 +7474,7 @@
       "accepted_answers": [
         "10"
       ],
-      "explanation_vi": "Hai đại lượng đều là khối lượng nên cộng 6 + 4 = 10 và giữ đơn vị kg; đơn vị m của Bình là sai.",
+      "explanation_vi": "Hai đại lượng đều là khối lượng nên cộng 6 + 4 = 10 và giữ đơn vị kg; đơn vị m của Bình là sai. Vậy đáp án là 10 kg.",
       "hints_vi": [
         "Nhớ kiến thức: Một bài đo lường một bước kết hợp số đo cùng đơn vị với cộng hoặc trừ phù hợp tình huống.",
         "Viết một phép tính hoặc quan hệ ngắn cho “Giải toán đo lường”, tính xong đối chiếu lại điều đề đang hỏi."
@@ -7506,7 +7506,7 @@
       "accepted_answers": [
         "3"
       ],
-      "explanation_vi": "Phân loại theo màu rồi đếm ba thẻ đỏ.",
+      "explanation_vi": "Phân loại theo màu rồi đếm ba thẻ đỏ. Vậy đáp án là 3.",
       "hints_vi": [
         "Nhớ kiến thức: Mỗi đối tượng được xếp theo một tiêu chí rõ ràng trước khi đếm số lượng của từng nhóm.",
         "Khoanh các số cần dùng, áp dụng “Phân loại và kiểm đếm”, rồi viết phần số của kết quả."
@@ -7568,7 +7568,7 @@
       "accepted_answers": [
         "2"
       ],
-      "explanation_vi": "Trong danh sách có hai mục 'cam'.",
+      "explanation_vi": "Trong danh sách có hai mục 'cam'. Vậy đáp án là 2.",
       "hints_vi": [
         "Nhớ kiến thức: Mỗi đối tượng được xếp theo một tiêu chí rõ ràng trước khi đếm số lượng của từng nhóm.",
         "Viết một phép tính hoặc quan hệ ngắn cho “Phân loại và kiểm đếm”, tính xong đối chiếu lại điều đề đang hỏi."
@@ -7966,7 +7966,7 @@
       "accepted_answers": [
         "chắc chắn"
       ],
-      "explanation_vi": "Mọi mặt của xúc xắc đều là một số từ 1 đến 6.",
+      "explanation_vi": "Mọi mặt của xúc xắc đều là một số từ 1 đến 6. Vậy đáp án là chắc chắn.",
       "hints_vi": [
         "Nhớ kiến thức: Sự kiện xảy ra trong tất cả các kết quả có thể của tình huống.",
         "Đối chiếu từng lựa chọn với kiến thức “Chắc chắn”; loại ngay lựa chọn trái với dữ kiện của đề."
@@ -7997,7 +7997,7 @@
         {
           "id": "c",
           "text": "chắc chắn",
-          "rationale_vi": "Mọi mặt của xúc xắc đều là một số từ 1 đến 6."
+          "rationale_vi": "Mọi mặt của xúc xắc đều là một số từ 1 đến 6. Vậy đáp án là chắc chắn."
         },
         {
           "id": "d",
@@ -8019,7 +8019,7 @@
       "accepted_answers": [
         "chắc chắn"
       ],
-      "explanation_vi": "Mọi bóng trong túi đều xanh nên lấy bóng nào cũng xanh.",
+      "explanation_vi": "Mọi bóng trong túi đều xanh nên lấy bóng nào cũng xanh. Vậy đáp án là chắc chắn.",
       "hints_vi": [
         "Nhớ kiến thức: Sự kiện xảy ra trong tất cả các kết quả có thể của tình huống.",
         "Tự xác định đặc điểm đúng của “Chắc chắn” trước, rồi so với từng lựa chọn để loại dần."
@@ -8055,7 +8055,7 @@
         {
           "id": "d",
           "text": "chắc chắn",
-          "rationale_vi": "Mọi bóng trong túi đều xanh nên lấy bóng nào cũng xanh."
+          "rationale_vi": "Mọi bóng trong túi đều xanh nên lấy bóng nào cũng xanh. Vậy đáp án là chắc chắn."
         }
       ],
       "correct_choice_id": "d"
@@ -8072,7 +8072,7 @@
       "accepted_answers": [
         "chắc chắn"
       ],
-      "explanation_vi": "Tất cả thẻ đều là 2 hoặc 5 nên sự kiện luôn xảy ra.",
+      "explanation_vi": "Tất cả thẻ đều là 2 hoặc 5 nên sự kiện luôn xảy ra. Vậy đáp án là chắc chắn.",
       "hints_vi": [
         "Nhớ kiến thức: Sự kiện xảy ra trong tất cả các kết quả có thể của tình huống.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Chắc chắn” trước rồi mới chọn phương án khớp kết quả."
@@ -8093,7 +8093,7 @@
         {
           "id": "a",
           "text": "chắc chắn",
-          "rationale_vi": "Tất cả thẻ đều là 2 hoặc 5 nên sự kiện luôn xảy ra."
+          "rationale_vi": "Tất cả thẻ đều là 2 hoặc 5 nên sự kiện luôn xảy ra. Vậy đáp án là chắc chắn."
         },
         {
           "id": "b",

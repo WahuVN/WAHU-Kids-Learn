@@ -142,6 +142,25 @@ def worked_example_prompt_overlap(example_prompt: str, practice_prompt: str, thr
     return None
 
 
+def question_answer_display(question: dict) -> str:
+    answer = question.get("correct_answer")
+    if answer is None:
+        return ""
+    display = str(answer).strip()
+    if question.get("answer_kind") == "integer" and isinstance(question.get("answer_unit"), str) and question["answer_unit"].strip():
+        display += " " + question["answer_unit"].strip()
+    return display
+
+
+def explanation_states_answer(question: dict, explanation: str) -> bool:
+    answer_display = question_answer_display(question)
+    answer_evidence = normalize_prompt_identity(answer_display)
+    explanation_evidence = normalize_prompt_identity(explanation)
+    if answer_evidence:
+        return answer_evidence in explanation_evidence
+    return bool(answer_display and answer_display in explanation)
+
+
 def grade2_operation_scope_violations(text: str) -> list[str]:
     violations: list[str] = []
     if not isinstance(text, str):
@@ -566,6 +585,8 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
         explanation = required_text(q, "explanation_vi", where, errors)
         if explanation and len(explanation) < MIN_QUESTION_EXPLANATION_CHARS:
             errors.append(f"question_explanation_too_short:{where}:{len(explanation)}")
+        if explanation and not explanation_states_answer(q, explanation):
+            errors.append(f"question_explanation_missing_answer_evidence:{where}:{question_answer_display(q)[:80]}")
         serialized_question = json.dumps(q, ensure_ascii=False)
         for violation in grade2_operation_scope_violations(serialized_question):
             errors.append(f"out_of_scope_grade2_operation:{where}:{violation}")

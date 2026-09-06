@@ -124,7 +124,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - child-facing lesson/question text có **0 internal-engine vocabulary**; metadata kỹ thuật như `application`, `numeric_input`, `deterministic` vẫn được phép;
 - **67/67 worked example unique**, mỗi ví dụ có ít nhất 2 bước giải, **0 exact/near overlap** với 201 câu practice và 67/67 solution chốt đáp án tường minh;
 - mục tiêu học thứ hai đạt **67/67 unique**, gắn concept + dạng vận dụng của từng lesson, placeholder chung = 0;
-- 201/201 `explanation_vi` unique và dài ít nhất 32 ký tự; **57 lời giải quá ngắn đã được nâng lên 0**, MCQ giữ correct-rationale đồng bộ với explanation;
+- 201/201 `explanation_vi` unique và dài ít nhất 32 ký tự; **57 lời giải quá ngắn đã được nâng lên 0**, MCQ giữ correct-rationale đồng bộ với explanation; **201/201 lời giải có evidence của đáp án**, 44 câu thiếu kết luận tường minh đã được nâng về 0;
 - toàn ngân hàng đạt **0 exact duplicate + 0 cross-lesson near-duplicate ≥ 0.95**; 2 cặp near-duplicate đã được viết lại theo ngữ cảnh khác;
 - 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract.
 
@@ -153,6 +153,7 @@ Latest result: **27 tests PASS**.
 - `45aa6e8` — `Toán: đặc thù hóa mục tiêu cho 67 bài học`
 - `5e05fcc` — `Toán: nâng chiều sâu lời giải cho ngân hàng câu hỏi`
 - `d7aea5d` — `Toán: loại câu gần trùng giữa các bài học`
+- `896f2f0` — `Toán: nâng độ khó vận dụng theo hướng chuyển giao`
 
 ## Current blockers outside AI1 content ownership
 
