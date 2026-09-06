@@ -165,18 +165,36 @@ Upstream contract: `8b32944`.
 - Synthetic result regression khóa 25% → 55% / +30 điểm phần trăm và next-lesson title.
 - Flow 5 E2E khóa result support nhận mastery + immediate next lesson thật sau 3 authored questions.
 
-## 9. Verification gates
+## 9. AI3-007 — full lesson-detail/access sweep
 
-Current clean HEAD `9682572` + đúng 2 file AI3-006:
+AI3 thêm regression chọn lần lượt toàn bộ 67 lesson qua `MathHubForm.SelectLessonInCatalog()`.
+
+Mỗi lesson phải thỏa đồng thời:
+
+- selected lesson ID đúng catalog;
+- detail render title, `Mục tiêu`, `Ví dụ có lời giải`;
+- practice count đúng `PracticeSets.TotalCount`;
+- practice CTA tồn tại và có accessible description;
+- CTA `Enabled` khớp trực tiếp `MathLessonAccessSnapshot.IsUnlocked` từ engine-owned access map.
+
+Gate này không tự suy luận prerequisite/unlock ở frontend và không mở session 67 lần; nó khóa toàn bộ presentation path + access binding với chi phí test hợp lý.
+
+## 10. Verification gates
+
+Current clean HEAD `7c9a9ea` + đúng 1 file AI3-007:
 
 - App Release x86 targeted build: **PASS**.
-- ChildUiRuntimeSmoke: **PASS — 1138 assertions**.
-- MathSessionPersistenceRuntimeSmoke: **PASS — 99 assertions**.
-- MathContentDataSmoke: **PASS — 23/23**.
+- ChildUiRuntimeSmoke: **PASS — 1475 assertions**.
+- MathSessionPersistenceRuntimeSmoke: **PASS — 140 assertions**.
+- MathContentDataSmoke: **PASS — 25/25**.
 - `git diff --check`: **PASS**.
-- Data/Session/Learning/Content source không đổi giữa upstream advanced-result `8b32944` và `9682572`; clean dependency artifacts tái dùng có kiểm chứng.
+- 67/67 lesson-detail/access sweep: **PASS**.
+- 201/201 authored answer-surface sweep: **PASS**.
+- Request 007 corrupt-medium ordinal recovery có regression chính thức và đã push tại `7f79367`.
+- Retry/first-try scoring contract đã push tại `7c9a9ea`; UI retry chưa consume trong AI3-007 và được tách sang wave kế tiếp.
+- Generated `draw_segment_given_length` vẫn chỉ ở WIP AI2; chưa coi P1-02 CLOSED trước upstream commit.
 
-## 10. Remaining blockers
+## 11. Remaining blockers
 
 ### P1-01 — production Data/SQLite clean build
 
@@ -196,7 +214,7 @@ Static audit tại HEAD:
 - Artifact mới nhất hiện có `0.1.41-dev` là build từ `e299c41`, database schema 2. Publish tree + portable ZIP có verified templates nhưng thiếu lesson catalog, question bank và schema V4; artifact này là **STALE**, không phải release evidence cho Math hiện tại.
 - Request 008 đã mở cho release lane: hard-guard đủ ba Math runtime JSON và rebuild artifact schema V4; sau đó chạy portable/installer upgrade E2E giữ learner DB/lesson progress.
 
-## 11. Next AI3 actions
+## 12. Next AI3 actions
 
 1. Theo dõi release lane đóng Request 008 và production SQLite build blocker; không sửa `tools/build/*` khi đang có owner/WIP khác.
 2. Khi có artifact schema V4 mới, chạy portable/installer Math payload + relaunch/reinstall regression.

@@ -265,6 +265,32 @@ namespace WAHU.ChildUiRuntimeSmoke
                     var prerequisiteLesson = catalog.FindLessonBySkill(lockedLesson.PrerequisiteSkills[0]);
                     A(prerequisiteLesson != null && lockedPractice.AccessibleDescription.IndexOf(prerequisiteLesson.TitleVi, StringComparison.OrdinalIgnoreCase) >= 0,
                         "math_hub_locked_practice_names_missing_prerequisite");
+                    var accessMap = GetField<object>(form, "_lessonAccess") as System.Collections.IDictionary;
+                    A(accessMap != null && accessMap.Count == catalog.Lessons.Count,
+                        "math_hub_access_snapshot_covers_all_lessons");
+                    var sweptLessons = 0;
+                    foreach (var lessonDescriptor in catalog.Lessons)
+                    {
+                        Invoke(form, "SelectLessonInCatalog", lessonDescriptor);
+                        A(Get<string>(form, "SelectedLessonId") == lessonDescriptor.Id,
+                            "math_hub_sweep_selects_lesson_" + lessonDescriptor.Id);
+                        A(ContainsControlText(detailFlow, lessonDescriptor.TitleVi) &&
+                            ContainsControlText(detailFlow, "Mục tiêu") &&
+                            ContainsControlText(detailFlow, "Ví dụ có lời giải"),
+                            "math_hub_sweep_renders_detail_" + lessonDescriptor.Id);
+                        A(ContainsControlText(detailFlow, lessonDescriptor.PracticeSets.TotalCount + " câu trong ngân hàng bài học"),
+                            "math_hub_sweep_renders_practice_count_" + lessonDescriptor.Id);
+                        var lessonPractice = detailFlow.Controls.OfType<Button>()
+                            .FirstOrDefault(x => string.Equals(x.AccessibleName, "Luyện tập bài " + lessonDescriptor.TitleVi, StringComparison.Ordinal));
+                        A(lessonPractice != null && !string.IsNullOrWhiteSpace(lessonPractice.AccessibleDescription),
+                            "math_hub_sweep_practice_accessible_" + lessonDescriptor.Id);
+                        var access = accessMap[lessonDescriptor.Id];
+                        A(access != null && lessonPractice.Enabled == Get<bool>(access, "IsUnlocked"),
+                            "math_hub_sweep_practice_matches_unlock_" + lessonDescriptor.Id);
+                        sweptLessons++;
+                    }
+                    A(sweptLessons == 67, "math_hub_sweeps_all_sixty_seven_lessons");
+
                     Invoke(form, "SelectLessonInCatalog", firstLesson);
 
                     var firstChapterButton = chapterFlow.Controls[0] as Button;

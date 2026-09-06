@@ -5,16 +5,16 @@ Definition: % dưới đây đo theo Definition of Done strict của Math, khôn
 
 ## Overall
 
-- **Content: 98%** — 7 chương, 17 chủ đề, 67 lesson, 201 câu authored, prerequisite graph, difficulty progression, distractor rationale, worked-example separation và semantic validator đều có. `MathContentDataSmoke`: **23/23 PASS** tại clean HEAD `9682572`.
-- **Engine: 94%** — answer validation/equivalence, mastery/review/reward, idempotency, exact suspend/resume, authored bank, schema V4 lesson progress, lesson-targeted session, prerequisite unlock, targeted score/best score, mastery delta, next lesson và targeted resume đều có contract first-class. Clean `MathSessionPersistenceRuntimeSmoke`: **99 assertions PASS**.
-- **UI: 97%** — Math Hub, chapter/topic/lesson, theory/example, adaptive mission, lesson-targeted practice, locked/unlocked, exact resume, choice/typed/interaction answers, result counters + lesson score/best score + mastery delta + next lesson đều consume contract thật.
-- **Test: 94%** — Child UI **1138 assertions PASS**; all-201 authored render sweep PASS; targeted Flow 5 + advanced-result UI E2E PASS; persistence targeted/resume/result **99 assertions PASS**; content **23/23 PASS**. Full old-style solution build vẫn còn blocker Data/SQLite.
+- **Content: 98%** — 7 chương, 17 chủ đề, 67 lesson, 201 câu authored, prerequisite graph, difficulty progression, distractor rationale, worked-example separation, lesson-specific objectives và semantic validator đều có. `MathContentDataSmoke`: **25/25 PASS** tại clean HEAD `7c9a9ea`.
+- **Engine: 95%** — answer validation/equivalence, mastery/review/reward, idempotency, exact suspend/resume, authored bank, schema V4 lesson progress, lesson-targeted session, prerequisite unlock, targeted score/best score, mastery delta, next lesson, corrupt authored cursor recovery và retry/first-try scoring đều có contract first-class. Clean persistence gate tại `7c9a9ea`: **140 assertions PASS**. Generator segment vẫn chờ commit ổn định riêng.
+- **UI: 98%** — Math Hub, toàn bộ 67 lesson detail, theory/example, adaptive mission, lesson-targeted practice, locked/unlocked, exact resume, choice/typed/interaction answers, result counters + lesson score/best score + mastery delta + next lesson đều consume contract thật.
+- **Test: 96%** — Child UI **1475 assertions PASS**; 67/67 lesson-detail/access sweep PASS; 201/201 authored answer-surface sweep PASS; targeted Flow 5 + advanced-result UI E2E PASS; persistence **140 assertions PASS**; content **25/25 PASS**. Full old-style solution build vẫn còn blocker Data/SQLite.
 - **E2E: 90%** — Home → Math Hub → lesson → targeted authored practice → result → mastery/next-lesson presentation → persisted lesson progress → Hub refresh → prerequisite unlock PASS; exact resume PASS; adaptive mission baseline PASS. Chưa có release-clean full solution/packaging gate.
-- **Tổng Math: ~92%** theo strict production Definition of Done hiện tại.
+- **Tổng Math: ~94%** theo strict production Definition of Done hiện tại.
 
 ## P0
 
-- Không phát hiện P0 Math UI/integration mới trong wave AI3-006.
+- Không phát hiện P0 Math UI/integration mới trong wave AI3-007.
 
 ## P1 còn mở
 
@@ -32,19 +32,21 @@ Definition: % dưới đây đo theo Definition of Done strict của Math, khôn
 - **Flow 5:** CLOSED AI3-005 — hoàn thành prerequisite qua UI thật → lesson progress 100% persisted → Hub reload → bài phụ thuộc unlock.
 - **Advanced result presentation:** CLOSED AI3-006 — mastery hiện tại/delta và `NextLessonTitleVi` hiển thị trực tiếp từ summary `8b32944`; adaptive mission dùng `ImprovedSkillCount`; không tự tính XP hay next lesson.
 - **Result route mismatch:** CLOSED AI3-004 — `Về thư viện Toán` đúng route thực tế.
+- **Corrupt authored resume ordinal:** CLOSED upstream `7f79367` — cache câu medium hỏng được rollback cursor về committed ordinal, phát lại medium rồi application; đủ 3 attempts mới complete lesson.
 
 ## Current verified gates
 
-- Current workspace: App Release x86 targeted build **PASS**; ChildUiRuntimeSmoke **1138 assertions PASS**.
+- Current workspace: ChildUiRuntimeSmoke **1475 assertions PASS**.
+- 67/67 lesson-detail/access sweep: **PASS** — mỗi lesson select được, title/objective/example/practice render, CTA accessibility tồn tại và `Enabled` khớp `MathLessonAccessSnapshot.IsUnlocked`.
 - All-201 authored answer-surface sweep: **PASS — 201/201**.
 - Targeted lesson Flow 5 + advanced result presentation: **PASS**.
-- Clean detached worktree tại `9682572` + đúng 2 file AI3-006:
+- Clean detached worktree tại `7c9a9ea` + đúng 1 file AI3-007:
   - App Release x86: **PASS**.
-  - MathSessionPersistenceRuntimeSmoke: **PASS — 99 assertions**.
-  - ChildUiRuntimeSmoke: **PASS — 1138 assertions**.
-  - MathContentDataSmoke: **PASS — 23/23**.
+  - ChildUiRuntimeSmoke: **PASS — 1475 assertions**.
+  - MathSessionPersistenceRuntimeSmoke: **PASS — 140 assertions**.
+  - MathContentDataSmoke: **PASS — 25/25**.
   - `git diff --check`: **PASS**.
-- Data/Session source không đổi giữa advanced-result commit `8b32944` và clean HEAD `9682572`; clean SDK artifacts đã được tái dùng có kiểm chứng.
+- Request 007 đã có regression chính thức trong `7f79367`; retry/first-try scoring được phủ thêm trong `7c9a9ea`. Generated segment vẫn chỉ ở WIP AI2 nên chưa tính CLOSED.
 - `WAHUKidsLearn.sln` old-style Release x86 clean build: **chưa đạt gate** vì production Data/SQLite reference/toolchain.
 
 ## Integration waves
@@ -80,6 +82,15 @@ Commit `3905c09` — `Toán UI: hiển thị tiến bộ và bài tiếp theo`.
 - `NextLessonId` + `NextLessonTitleVi` chỉ được presentation khi engine publish đủ cặp; UI không tự tìm bài khác hoặc tự mở lesson.
 - Flow 5 E2E xác nhận support label nhận mastery + immediate next lesson thật từ coordinator.
 - Numeric XP vẫn không hiển thị vì chưa có product contract first-class.
+
+### AI3-007 — sweep 67 lesson detail/access
+Source test đã qua clean gate tại `7c9a9ea`, đang chốt commit.
+
+- Chọn lần lượt toàn bộ 67 lesson qua `SelectLessonInCatalog()` trên Hub thật.
+- Mỗi lesson phải render title + mục tiêu + ví dụ + đúng practice count.
+- Mỗi practice CTA phải có accessible description.
+- `Enabled` của CTA phải khớp first-class `MathLessonAccessSnapshot.IsUnlocked`; không suy luận lock ở test/UI.
+- Clean detached `7c9a9ea`: Child UI **1475 assertions PASS**, persistence **140 assertions PASS**, content **25/25 PASS**.
 
 ## Next integration gates
 
