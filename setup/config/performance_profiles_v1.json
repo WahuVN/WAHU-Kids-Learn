@@ -1,0 +1,43 @@
+{
+  "schema_version": 2,
+  "timing": {
+    "fps_values_are_render_caps": true,
+    "elapsed_time_source": "System.Diagnostics.Stopwatch",
+    "coalesce_ui_updates": true,
+    "max_pending_ui_updates": 1,
+    "skip_intermediate_frames_under_load": true
+  },
+  "profiles": {
+    "LOW": {
+      "motion_fps_cap": 18,
+      "decorative_motion": "off",
+      "max_animated_regions": 1,
+      "particles": "off",
+      "shadow_quality": "low",
+      "image_cache_mb": 48,
+      "audio_cache_mb": 12,
+      "sprite_idle_frame_skip": 2,
+      "pre_rendered_png_preferred": true
+    },
+    "NORMAL": {
+      "motion_fps_cap": 30,
+      "decorative_motion": "off_during_question",
+      "max_animated_regions": 2,
+      "particles": "milestone_small_only",
+      "shadow_quality": "normal_lightweight",
+      "image_cache_mb": 96,
+      "audio_cache_mb": 24,
+      "sprite_idle_frame_skip": 0,
+      "pre_rendered_png_preferred": true
+    }
+  },
+  "runtime_degradation_order": [
+    "disable_decorative",
+    "reduce_idle_fps",
+    "stop_offscreen_animation",
+    "skip_tween_intermediate_frames",
+    "evict_derived_cache",
+    "temporary_low_motion"
+  ],
+  "never_sacrifice": ["input_dispatch", "answer_commit", "pause_exit", "instructional_final_state"]
+}

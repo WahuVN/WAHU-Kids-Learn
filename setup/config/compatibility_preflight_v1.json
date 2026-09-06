@@ -1,0 +1,47 @@
+{
+  "schema_version": 2,
+  "windows": {
+    "minimum": "6.1sp1",
+    "supported_os_label": "Windows 7 SP1 or later within V1 target policy",
+    "legacy_sha2_readiness": {
+      "states": ["PASS", "WARN", "UNKNOWN"],
+      "historical_evidence_kbs": ["KB4490628", "KB4474419"],
+      "treat_exact_kb_absence_as_hard_failure": false,
+      "production_signature_self_test_required": true,
+      "network_remediation_allowed": false
+    }
+  },
+  "dotnet": {
+    "framework": "4.8",
+    "release_key_min": 528040,
+    "comparison": ">="
+  },
+  "signature_trust": {
+    "separate_digest_valid_from_chain_trusted": true,
+    "states": ["TRUSTED", "UNTRUSTED", "UNKNOWN", "NOT_RUN"],
+    "production_certificate_chain_offline_test_required": true,
+    "child_app_may_enable_root_auto_update": false,
+    "child_installer_may_import_arbitrary_root_ca": false,
+    "validation_timeout_policy": "BOUNDED_AND_TARGET_TESTED",
+    "disconnected_root_management": "ADMIN_OR_QA_WORKFLOW_ONLY"
+  },
+  "native_dependencies": {
+    "sqlite_core_1_0_119_visual_cpp_runtime": "STATICALLY_LINKED_PER_VENDOR_PACKAGE_DOCS",
+    "bundle_vcpp_redist_only_for_sqlite": false,
+    "clean_machine_native_smoke_required": true
+  },
+  "release_readiness": {
+    "levels": [
+      "UNSUPPORTED_OS",
+      "WIN7_SP1_BASE",
+      "WIN7_SP1_SHA2_READINESS_UNKNOWN",
+      "WIN7_SP1_RUNTIME_COMPATIBLE",
+      "TARGET_SMOKE_VERIFIED"
+    ],
+    "claim_target_ready_requires": "TARGET_SMOKE_VERIFIED"
+  },
+  "offline": {
+    "installer_must_not_download_prerequisites": true,
+    "official_prerequisite_hash_required_if_bundled": true
+  }
+}

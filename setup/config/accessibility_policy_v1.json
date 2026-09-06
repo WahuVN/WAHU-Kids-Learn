@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "dpi": {
+    "awareness": "system",
+    "win7_manifest_dpiAware": true,
+    "design_dpi": 96,
+    "required_test_dpi": [96, 120],
+    "per_monitor_v2_required": false
+  },
+  "pointer": {
+    "child_primary_target_px_at_96dpi": 64,
+    "child_secondary_target_px_at_96dpi": 56,
+    "wcag22_reference_floor_css_px": 24,
+    "precision_drag_required": false,
+    "nonessential_drag_requires_single_pointer_alternative": true
+  },
+  "motion": {
+    "modes": ["normal", "reduced", "minimal"],
+    "decorative_during_read_listen_think": false,
+    "nonessential_interaction_animation_disableable": true,
+    "essential_instructional_information_preserved_in_reduced_modes": true
+  },
+  "semantics": {
+    "prefer_standard_winforms_controls": true,
+    "custom_controls_require_accessible_name": true,
+    "custom_controls_require_accessible_role": true,
+    "accessible_description_when_meaningful": true,
+    "picturebox_mouseclick_only_button_forbidden": true
+  },
+  "visual": {
+    "color_only_state_forbidden": true,
+    "high_contrast_parent_surface_test_required": true,
+    "classic_theme_smoke_test_required": true
+  }
+}

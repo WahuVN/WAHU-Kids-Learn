@@ -1,0 +1,65 @@
+{
+  "schema_version": 3,
+  "provider": {
+    "name": "System.Data.SQLite",
+    "version": "2.0.4",
+    "target_framework": "net48",
+    "platform": "x86",
+    "orm": "none"
+  },
+  "native_sqlite": {
+    "package": "SourceGear.sqlite3",
+    "package_version": "3.53.4",
+    "engine_version": "3.53.4",
+    "binary": "e_sqlite3.dll",
+    "pe_machine": "0x014C",
+    "platform": "x86"
+  },
+  "connection": {
+    "foreign_keys": true,
+    "busy_timeout_ms": 2500,
+    "write_coordinator": "single",
+    "parameterized_sql_required": true,
+    "pooling": false
+  },
+  "journal": {
+    "default": "DELETE",
+    "wal_allowed_only_after_target_verification": true,
+    "preferred_if_verified": "WAL",
+    "checkpoint_policy": "safe_points_not_per_attempt",
+    "wal_file_is_persistent_state_when_present": true,
+    "network_shared_filesystem_for_wal_forbidden": true,
+    "portable_usb_benchmark_separately": true
+  },
+  "integrity": {
+    "full_integrity_check_each_startup": false,
+    "normal_startup": ["schema_metadata", "essential_query_sanity"],
+    "quick_check": "optional_cadence_or_suspicion",
+    "integrity_check_after_unclean_shutdown_or_recovery": true,
+    "foreign_key_check_after_unclean_shutdown_or_recovery": true
+  },
+  "backup": {
+    "preferred_method": "SQLITE_ONLINE_BACKUP_API",
+    "closed_clean_copy_allowed": true,
+    "raw_hot_copy_main_db_forbidden": true,
+    "verify_snapshot_can_open": true,
+    "verified_restore_temp_before_replace": true,
+    "preserve_original_before_restore": true,
+    "recent_keep": 5,
+    "weekly_keep": 4,
+    "pre_migration_required": true,
+    "hash": "SHA-256"
+  },
+  "data_policy": {
+    "attempts_immutable": true,
+    "static_question_bank_in_learner_db": false,
+    "reward_source_key_idempotent": true,
+    "timestamps_storage": "UTC_ISO8601"
+  },
+  "evidence": {
+    "workstation_net48_x86_provider_load": "PASS",
+    "sqlite_runtime_smoke_assertions": 135,
+    "online_backup_restore_smoke": "PASS",
+    "win7_target_smoke": "PENDING"
+  }
+}

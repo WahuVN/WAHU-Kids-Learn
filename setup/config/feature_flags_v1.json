@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "network": false,
+  "auto_update_internet": false,
+  "remote_analytics": false,
+  "ads": false,
+  "public_leaderboard": false,
+  "loss_based_streak": false,
+  "lootbox": false,
+  "live_ai_child_mode": false,
+  "camera_emotion_detection": false,
+  "biometric_detection": false,
+  "background_video": false,
+  "lottie_runtime": false,
+  "webview_runtime": false,
+  "parent_mode": true,
+  "offline_content_import": true,
+  "backup_restore": true,
+  "reduced_motion": true,
+  "microphone_optional": true,
+  "speaking_record_replay": true,
+  "ai_pronunciation_score": false
+}

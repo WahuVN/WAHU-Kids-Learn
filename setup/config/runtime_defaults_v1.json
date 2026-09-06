@@ -1,0 +1,52 @@
+{
+  "schema_version": 2,
+  "app": {
+    "name": "WAHU Kids Learn",
+    "target_framework": "net48",
+    "primary_platform": "x86",
+    "min_windows": "6.1sp1",
+    "offline_first": true
+  },
+  "display": {
+    "design_width": 1024,
+    "design_height": 768,
+    "design_dpi": 96,
+    "dpi_awareness": "system",
+    "win7_manifest_dpiAware": true,
+    "auto_scale_mode": "Dpi_if_win7_visual_regression_passes",
+    "required_test_dpi": [96, 120],
+    "primary_font": "Segoe UI",
+    "fallback_font": "Arial"
+  },
+  "accessibility": {
+    "primary_child_target_px_at_96dpi": 64,
+    "secondary_child_target_px_at_96dpi": 56,
+    "nonessential_drag_requires_non_drag_alternative": true,
+    "color_only_feedback_forbidden": true,
+    "motion_modes": ["normal", "reduced", "minimal"]
+  },
+  "audio": {
+    "voice_enabled": true,
+    "sfx_enabled": true,
+    "music_enabled": false,
+    "microphone_enabled_by_default": false
+  },
+  "session": {
+    "warm_start_minutes_target": 2,
+    "math_focus_minutes_target": 8,
+    "micro_break_minutes_target": 1,
+    "english_focus_minutes_target": 8,
+    "review_minutes_target": 3,
+    "closure_minutes_target": 2,
+    "soft_break_offer_after_focus_minutes": 10,
+    "normal_session_max_minutes": 30,
+    "no_streak": true
+  },
+  "privacy": {
+    "network_enabled": false,
+    "analytics_enabled": false,
+    "ads_enabled": false,
+    "cloud_required": false,
+    "collect_only_required_data": true
+  }
+}

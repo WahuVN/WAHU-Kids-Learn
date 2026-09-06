@@ -1,0 +1,49 @@
+{
+  "schema_version": 2,
+  "installer": {
+    "tool": "Inno Setup",
+    "baseline_version": "7.1.0",
+    "setup_architecture": "x86",
+    "min_windows": "6.1sp1",
+    "privileges": "lowest",
+    "install_scope": "current_user"
+  },
+  "runtime": {
+    "framework": ".NET Framework 4.8",
+    "framework_min_release_key": 528040,
+    "platform": "x86"
+  },
+  "dependencies": [
+    {
+      "name": "System.Data.SQLite",
+      "version": "2.0.4",
+      "scope": "runtime",
+      "required": true
+    },
+    {
+      "name": "SourceGear.sqlite3",
+      "version": "3.53.4",
+      "runtime_binary": "e_sqlite3.dll",
+      "platform": "x86",
+      "scope": "runtime",
+      "required": true
+    }
+  ],
+  "optional_runtime": [
+    {
+      "name": "NAudio",
+      "version_line": "2.x",
+      "required": false,
+      "reason": "advanced recording/compressed playback only"
+    }
+  ],
+  "not_allowed_core": [
+    "Electron",
+    "WebView2",
+    "Lottie runtime",
+    "SkiaSharp runtime",
+    "Unity",
+    "Godot"
+  ],
+  "app_version": "0.1.0-dev"
+}

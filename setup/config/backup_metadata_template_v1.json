@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "backup_id": null,
+  "backup_type": null,
+  "created_at_utc": null,
+  "database_file": "learning.db",
+  "database_sha256": null,
+  "app_version": null,
+  "database_schema_version": null,
+  "active_content_packs": [],
+  "hardware_profile_version": 1,
+  "verified": false,
+  "verification": {
+    "sqlite_open": null,
+    "integrity_check": null,
+    "hash_match": null
+  }
+}

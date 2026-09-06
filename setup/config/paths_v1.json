@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "installed": {
+    "app_dir": "%LOCALAPPDATA%\\Programs\\WAHU Kids Learn",
+    "user_root": "%LOCALAPPDATA%\\WAHU Kids Learn",
+    "config_dir": "%LOCALAPPDATA%\\WAHU Kids Learn\\config",
+    "data_dir": "%LOCALAPPDATA%\\WAHU Kids Learn\\data",
+    "database": "%LOCALAPPDATA%\\WAHU Kids Learn\\data\\learning.db",
+    "user_content": "%LOCALAPPDATA%\\WAHU Kids Learn\\content_user",
+    "cache": "%LOCALAPPDATA%\\WAHU Kids Learn\\cache",
+    "logs": "%LOCALAPPDATA%\\WAHU Kids Learn\\logs",
+    "backups": "%LOCALAPPDATA%\\WAHU Kids Learn\\backups",
+    "temp": "%LOCALAPPDATA%\\WAHU Kids Learn\\temp",
+    "recovery": "%LOCALAPPDATA%\\WAHU Kids Learn\\recovery"
+  },
+  "portable": {
+    "user_root": ".\\UserData",
+    "database": ".\\UserData\\data\\learning.db"
+  },
+  "manual_export_default": "%USERPROFILE%\\Documents\\WAHU Kids Learn"
+}

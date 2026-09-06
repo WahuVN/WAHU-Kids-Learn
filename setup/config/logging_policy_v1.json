@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "default_level": "INFO",
+  "debug_parent_only": true,
+  "rotation": {
+    "max_files": 5,
+    "max_mb_each": 2
+  },
+  "remote_upload": false,
+  "forbidden_fields": [
+    "child_display_name",
+    "raw_voice_recording",
+    "parent_note_text",
+    "password_or_pin",
+    "precise_location"
+  ],
+  "performance_sampling": {
+    "per_frame_disk_log": false,
+    "aggregate_only": true
+  }
+}

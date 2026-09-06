@@ -1,0 +1,46 @@
+{
+  "schema_version": 2,
+  "app_version": null,
+  "git_commit": null,
+  "build_timestamp_utc": null,
+  "target_framework": "net48",
+  "platform": "x86",
+  "min_windows": "6.1sp1",
+  "compiler": {
+    "name": null,
+    "version": null
+  },
+  "installer": {
+    "name": "Inno Setup",
+    "version": null
+  },
+  "database_schema_version": 2,
+  "dependencies": [
+    {
+      "name": "System.Data.SQLite",
+      "version": "2.0.4",
+      "sha256": null,
+      "license": "Public Domain"
+    },
+    {
+      "name": "SourceGear.sqlite3",
+      "version": "3.53.4",
+      "runtime_binary": "e_sqlite3.dll",
+      "sha256": null,
+      "license": null
+    }
+  ],
+  "content_packs": [],
+  "files": [],
+  "release_gates": {
+    "preflight_smoke": null,
+    "sqlite_runtime_smoke": null,
+    "content_validation": null,
+    "migration_tests": null,
+    "backup_restore": null,
+    "installer_smoke": null,
+    "win7_x86_smoke": null,
+    "win7_x64_x86app_smoke": null,
+    "production_signing": null
+  }
+}

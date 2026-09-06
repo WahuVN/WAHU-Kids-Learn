@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "pack": {
+    "max_compressed_mb": 300,
+    "max_uncompressed_mb": 650,
+    "max_files": 12000,
+    "max_path_chars_internal": 180,
+    "executable_entries_allowed": false
+  },
+  "image": {
+    "instructional_max_width": 1600,
+    "instructional_max_height": 1200,
+    "preferred_runtime_width_at_baseline": 1024,
+    "preferred_runtime_height_at_baseline": 768,
+    "sprite_atlas_max_width": 2048,
+    "sprite_atlas_max_height": 2048
+  },
+  "audio": {
+    "sfx_recommended_max_seconds": 3,
+    "word_phrase_recommended_max_seconds": 8,
+    "story_clip_recommended_max_seconds": 30,
+    "channels_preferred": 1
+  },
+  "runtime": {
+    "simultaneous_instructional_images": 4,
+    "simultaneous_decorative_animations_normal": 1,
+    "simultaneous_decorative_animations_low": 0
+  },
+  "note": "Engineering limits; revise only after target-PC benchmark and content-size analysis."
+}
