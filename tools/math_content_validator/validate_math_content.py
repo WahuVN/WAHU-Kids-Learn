@@ -32,6 +32,10 @@ TIME_OUT_OF_SCOPE_ARITH_RE = re.compile(r"\b\d+\s*(?:×|\*|÷|/|:)\s*\d+\b")
 GRADE2_MUL_LITERAL_RE = re.compile(r"(?<!\d)(\d+)\s*(?:×|\*)\s*(\d+)(?!\d)")
 GRADE2_DIV_LITERAL_RE = re.compile(r"(?<!\d)(\d+)(?:\s*÷\s*|\s+:\s+)(\d+)(?!\d)")
 NUMERIC_CHOICE_EXPR_RE = re.compile(r"^[\d\s+\-−–*/×÷:().,]+$")
+NUMERIC_EQUALITY_RES = (
+    re.compile(r"(?<!\d)((?:\d+\s*(?:[+\-×*÷])\s*)+\d+)\s*=\s*(-?\d+)(?!\d)"),
+    re.compile(r"(?<!\d)((?:\d+\s+:\s+)+\d+)\s*=\s*(-?\d+)(?!\d)"),
+)
 MIN_QUESTION_EXPLANATION_CHARS = 32
 MAX_HINT_CHARS = 130
 GENERIC_SECOND_HINT = "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
@@ -292,6 +296,33 @@ def eval_restricted_expression(text: str) -> Fraction:
     return walk(tree)
 
 
+def invalid_numeric_equalities(text: str) -> list[tuple[str, int, Fraction]]:
+    if not isinstance(text, str) or not text:
+        return []
+    violations: list[tuple[str, int, Fraction]] = []
+    seen: set[tuple[int, int]] = set()
+    for pattern in NUMERIC_EQUALITY_RES:
+        for match in pattern.finditer(text):
+            span = (match.start(), match.end())
+            if span in seen:
+                continue
+            seen.add(span)
+            expression = re.sub(r"\s+:\s+", " / ", match.group(1).strip())
+            expected = int(match.group(2))
+            try:
+                actual = eval_restricted_expression(expression)
+            except (ArithmeticError, SyntaxError, ValueError, TypeError):
+                actual = Fraction(expected + 1, 1)
+            if actual != Fraction(expected, 1):
+                violations.append((match.group(1).strip(), expected, actual))
+    return violations
+
+
+def validate_numeric_equalities(text: str, where: str, errors: list[str]) -> None:
+    for expression, expected, actual in invalid_numeric_equalities(text):
+        errors.append(f"invalid_instructional_numeric_equality:{where}:{expression}={expected}:actual={actual}")
+
+
 def normalize_choice_text(text: str) -> str:
     if not isinstance(text, str):
         return ""
@@ -485,7 +516,8 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             if chapter_domain[cid] != expected_domain:
                 errors.append(f"skill_domain_mismatch:{where}:{skill}:{chapter_domain[cid]}:{expected_domain}")
         required_text(lesson, "title_vi", where, errors)
-        required_text(lesson, "explanation_vi", where, errors)
+        lesson_explanation = required_text(lesson, "explanation_vi", where, errors)
+        validate_numeric_equalities(lesson_explanation, where + ".explanation_vi", errors)
         serialized_lesson = json.dumps(lesson, ensure_ascii=False)
         for violation in grade2_operation_scope_violations(serialized_lesson):
             errors.append(f"out_of_scope_grade2_operation:{where}:{violation}")
@@ -512,7 +544,8 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             if x:
                 concept_ids.add(x); all_ids.append((x, cwhere))
             required_text(concept, "name_vi", cwhere, errors)
-            required_text(concept, "definition_vi", cwhere, errors)
+            concept_definition = required_text(concept, "definition_vi", cwhere, errors)
+            validate_numeric_equalities(concept_definition, cwhere + ".definition_vi", errors)
         examples = required_list(lesson, "worked_examples", where, errors)
         for j, example in enumerate(examples):
             ewhere = f"{where}.example[{j}]"
@@ -523,7 +556,12 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
                 example_ids.add(x); all_ids.append((x, ewhere))
             required_text(example, "prompt_vi", ewhere, errors)
             answer = required_text(example, "answer", ewhere, errors)
+            validate_numeric_equalities(answer, ewhere + ".answer", errors)
             solution_steps = required_list(example, "solution_steps_vi", ewhere, errors)
+            if solution_steps:
+                for step_index, step in enumerate(solution_steps):
+                    if isinstance(step, str):
+                        validate_numeric_equalities(step, f"{ewhere}.solution_steps_vi[{step_index}]", errors)
             if answer and solution_steps and all(isinstance(step, str) for step in solution_steps):
                 answer_evidence = normalize_prompt_identity(answer)
                 solution_evidence = normalize_prompt_identity(" ".join(solution_steps))
@@ -633,6 +671,7 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             prompts_by_lesson[lid].append((qid, prompt))
             all_question_prompts.append((lid, qid, prompt))
         explanation = required_text(q, "explanation_vi", where, errors)
+        validate_numeric_equalities(explanation, where + ".explanation_vi", errors)
         if explanation and len(explanation) < MIN_QUESTION_EXPLANATION_CHARS:
             errors.append(f"question_explanation_too_short:{where}:{len(explanation)}")
         if explanation and not explanation_states_answer(q, explanation):

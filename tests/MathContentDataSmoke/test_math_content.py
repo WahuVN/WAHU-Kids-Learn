@@ -193,6 +193,23 @@ class MathContentDataSmoke(unittest.TestCase):
         self.assertEqual(required_types, set(self.bank["question_types"]))
         self.assertTrue(all(question_types[x] > 0 for x in required_types))
 
+    def test_instructional_numeric_equalities_are_correct(self):
+        self.assertEqual([], validator.invalid_numeric_equalities("500 + 0 + 7 = 507."))
+        self.assertEqual([], validator.invalid_numeric_equalities("20 : 5 = 4."))
+        self.assertNotEqual([], validator.invalid_numeric_equalities("500 + 0 + 7 = 508."))
+        self.assertNotEqual([], validator.invalid_numeric_equalities("20 : 5 = 5."))
+
+        for lesson in self.lessons:
+            self.assertEqual([], validator.invalid_numeric_equalities(lesson["explanation_vi"]))
+            for concept in lesson["concepts"]:
+                self.assertEqual([], validator.invalid_numeric_equalities(concept["definition_vi"]))
+            for example in lesson["worked_examples"]:
+                self.assertEqual([], validator.invalid_numeric_equalities(example["answer"]))
+                for step in example["solution_steps_vi"]:
+                    self.assertEqual([], validator.invalid_numeric_equalities(step))
+        for item in self.questions:
+            self.assertEqual([], validator.invalid_numeric_equalities(item["explanation_vi"]))
+
     def test_expression_validator_fails_closed(self):
         self.assertEqual(validator.Fraction(75, 1), validator.eval_restricted_expression("100 - 30 + 5"))
         with self.assertRaises(ZeroDivisionError):
