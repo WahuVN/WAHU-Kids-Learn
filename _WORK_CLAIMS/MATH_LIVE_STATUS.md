@@ -20,7 +20,7 @@ Definition: % dưới đây đo theo Definition of Done strict của Math, khôn
 
 1. **Production clean build Data/SQLite:** `WAHU.Data.csproj` old-style net48 vẫn là blocker của full clean solution build trên `dotnet msbuild`. SDK-style x86/net48 harness compile cùng production Data source + SQLite thật PASS nhưng chưa thay thế production clean build gate.
 2. **Adaptive segment generator:** UI interaction contract và authored interaction đều render được; case generator `draw_segment_given_length` đang thấy trong WIP Learning nhưng chưa nằm trong HEAD ổn định. Child UI smoke chỉ test UI contract; generator behavior thuộc engine smoke AI2.
-3. **Release packaging/E2E:** cần xác nhận installer/portable đóng gói schema V4 + lesson catalog + question bank + verified templates và upgrade không làm mất lesson progress.
+3. **Release packaging/E2E:** static packaging path đã xác nhận copy đệ quy `content_packs` + `data/schema` và installer copy toàn publish tree, nhưng artifact mới nhất hiện có `0.1.41-dev` là build cũ từ `e299c41` / schema 2 nên thiếu lesson catalog, question bank và schema V4. Portable/Installer E2E hiện cũng chưa hard-guard 3 Math runtime JSON; đã mở Request 008 cho release lane.
 
 ## Blocker đã đóng
 
@@ -73,7 +73,7 @@ Commit `1436705` — `Toán UI: hoàn thiện luyện theo bài và toàn bộ d
 - 201-question sweep và Flow 5 UI E2E PASS.
 
 ### AI3-006 — mastery delta + bài tiếp theo
-Source đã qua clean gate, đang chốt commit.
+Commit `3905c09` — `Toán UI: hiển thị tiến bộ và bài tiếp theo`.
 
 - Targeted result hiển thị `TargetSkillMasteryAfter` theo %, và `TargetSkillMasteryDelta` dương theo điểm phần trăm.
 - Adaptive result dùng `ImprovedSkillCount` thay vì tự suy ra mastery change.
@@ -83,7 +83,7 @@ Source đã qua clean gate, đang chốt commit.
 
 ## Next integration gates
 
-1. Chốt/push AI3-006.
-2. Kiểm release packaging/installer/portable có schema V4 + Math catalog/bank/templates và upgrade giữ lesson progress.
-3. Đóng production SQLite reference/toolchain và chạy full clean solution + toàn bộ smoke/E2E release gate.
-4. Theo dõi AI2 commit generator `draw_segment_given_length`, rồi khóa engine-owned adaptive interaction regression.
+1. Release lane đóng Request 008: hard-guard 3 Math runtime JSON trong staged payload + portable/installer E2E, rồi rebuild artifact schema V4 từ commit hiện tại.
+2. Đóng production SQLite reference/toolchain và chạy full clean solution + toàn bộ smoke/E2E release gate.
+3. Theo dõi AI2 commit generator `draw_segment_given_length`, rồi khóa engine-owned adaptive interaction regression.
+4. Khi có artifact mới, chạy portable/installer upgrade regression và xác nhận learner DB + lesson progress không mất.

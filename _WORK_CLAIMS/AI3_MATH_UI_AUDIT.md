@@ -188,11 +188,17 @@ Authored `interaction_integer` + UI control pass. Child UI không test `MathQues
 
 ### P1-03 — release packaging/E2E
 
-Cần xác nhận installer/portable đóng gói schema V4 + `lesson_catalog_v1.json` + `question_bank_v1.json` + `verified_templates_v1.json`, và upgrade/relaunch không làm mất lesson progress.
+Static audit tại HEAD:
+
+- `Build-SetupArtifacts.ps1` copy đệ quy toàn bộ `content_packs\\*` và `data\\schema\\*.sql`; hard deployment guard đã có schema `004_math_lesson_progress.sql`.
+- Inno Setup dùng `recursesubdirs/createallsubdirs` trên toàn staged publish tree; portable cũng copy toàn publish tree trước khi zip.
+- Nhưng `Test-PortableE2E.ps1` và `Test-InstallerE2E.ps1` mới guard Math `manifest.json`, chưa guard `lesson_catalog_v1.json`, `question_bank_v1.json`, `verified_templates_v1.json`.
+- Artifact mới nhất hiện có `0.1.41-dev` là build từ `e299c41`, database schema 2. Publish tree + portable ZIP có verified templates nhưng thiếu lesson catalog, question bank và schema V4; artifact này là **STALE**, không phải release evidence cho Math hiện tại.
+- Request 008 đã mở cho release lane: hard-guard đủ ba Math runtime JSON và rebuild artifact schema V4; sau đó chạy portable/installer upgrade E2E giữ learner DB/lesson progress.
 
 ## 11. Next AI3 actions
 
-1. Commit/push AI3-006.
-2. Audit packaging/installer/portable Math runtime files + schema V4.
-3. Khi production SQLite build blocker đóng: full clean solution + complete Math smoke/E2E release gate.
-4. Khi AI2 commit generator `draw_segment_given_length`, chạy engine-owned adaptive interaction regression rồi cập nhật status.
+1. Theo dõi release lane đóng Request 008 và production SQLite build blocker; không sửa `tools/build/*` khi đang có owner/WIP khác.
+2. Khi có artifact schema V4 mới, chạy portable/installer Math payload + relaunch/reinstall regression.
+3. Khi AI2 commit generator `draw_segment_given_length`, chạy engine-owned adaptive interaction regression rồi cập nhật status.
+4. Sau các gate trên, chạy full Math release regression và chốt strict DoD.

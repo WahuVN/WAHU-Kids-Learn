@@ -61,3 +61,13 @@
 - Không được rollback committed attempts/mastery/progress; chỉ sửa/reconcile cursor của open authored question.
 - Regression bắt buộc: tạo lesson session 3 câu, commit câu 1, mở câu 2, corrupt `current_question_json`, suspend/resume; sau restore phải có `DiscardedCorruptOpenQuestion=true`, `CompletedQuestionCount=1`, câu tiếp theo phải có đúng `ContentQuestionId` của **medium**, sau đó application; đủ 3 attempts mới complete lesson.
 - Owner: AI2 session/persistence. AI1 không sửa coordinator để tránh conflict ownership.
+
+## Request 008 — Release payload must hard-guard Math lesson runtime files
+
+- Packaging logic ở stable HEAD đã đúng hướng: `Build-SetupArtifacts.ps1` copy đệ quy toàn bộ `content_packs\\*` và `data\\schema\\*.sql`; Inno Setup cũng copy đệ quy toàn bộ staged publish tree. Schema `004_math_lesson_progress.sql` đã nằm trong hard deployment guard.
+- Tuy nhiên release E2E hiện chỉ bắt buộc `content_packs\\math_grade2_v1\\manifest.json`, chưa bắt buộc ba file runtime mà Math Hub/targeted lesson thật sự cần: `lesson_catalog_v1.json`, `question_bank_v1.json`, `verified_templates_v1.json`.
+- Evidence artifact hiện có: `build/win7_x86/release_manifest_dev.json` là build `0.1.41-dev` từ commit `e299c41`, database schema 2. Publish tree và portable ZIP của artifact này có `verified_templates_v1.json` nhưng **không có** `lesson_catalog_v1.json`, `question_bank_v1.json` hoặc `004_math_lesson_progress.sql`; đây là artifact cũ, không được dùng làm release evidence cho Math hiện tại.
+- Contract/gate cần ở release lane: staged publish guard phải `Require-File` cả ba Math runtime JSON; `Test-PortableE2E.ps1` và `Test-InstallerE2E.ps1` phải thêm cả ba vào required payload list, cùng schema V4 hiện có.
+- Gate mạnh hơn nên mở app từ portable/installed payload và xác nhận Math catalog load được 7 chương / 17 chủ đề / 67 bài, authored bank load đủ 201 câu; không chỉ kiểm file tồn tại.
+- Khi rebuild release artifact mới, release manifest phải có database schema version 4 và git commit chứa `1436705`/sau đó; portable + installer phải giữ learner DB/lesson progress qua relaunch/reinstall theo policy hiện tại.
+- Owner: release/build lane. AI3 chỉ audit/integration regression, không sửa `tools/build/*` khi file đang có owner/WIP khác.
