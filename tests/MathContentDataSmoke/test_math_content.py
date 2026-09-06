@@ -270,6 +270,32 @@ class MathContentDataSmoke(unittest.TestCase):
                     overlaps.append((id_a, id_b))
         self.assertEqual([], overlaps)
 
+    def test_accepted_answers_fail_closed(self):
+        for item in self.questions:
+            with self.subTest(item=item["id"]):
+                accepted = item["accepted_answers"]
+                normalized = [re.sub(r"\s+", " ", value.strip().casefold()) for value in accepted]
+                self.assertEqual(len(normalized), len(set(normalized)))
+                kind = item["answer_kind"]
+                if kind in {"integer", "interaction_integer"}:
+                    for value in accepted:
+                        self.assertIsNotNone(re.fullmatch(r"[+-]?\d+", value.strip()))
+                        self.assertEqual(item["correct_answer"], int(value.strip()))
+                elif kind == "text":
+                    correct = validator.normalize_choice_text(item["correct_answer"])
+                    self.assertTrue(all(validator.normalize_choice_text(value) == correct for value in accepted))
+                elif kind == "unit":
+                    expected = validator.Fraction(item["validation"]["expected_numeric"], 1)
+                    allowed_units = {re.sub(r"\s+", " ", unit.strip().lower()).rstrip(".") for unit in item["accepted_units"]}
+                    for value in accepted:
+                        number, unit = validator.parse_unit_answer(value)
+                        self.assertEqual(expected, number)
+                        self.assertIn(unit, allowed_units)
+                elif kind == "expression":
+                    expected = validator.Fraction(item["validation"]["expected_numeric"], 1)
+                    for value in accepted:
+                        self.assertEqual(expected, validator.eval_restricted_expression(value))
+
     def test_question_explanations_are_instructional(self):
         for item in self.questions:
             with self.subTest(item=item["id"]):

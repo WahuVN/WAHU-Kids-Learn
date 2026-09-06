@@ -644,6 +644,9 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
         if not isinstance(accepted, list) or not accepted or any(not isinstance(x, str) or not x.strip() for x in accepted):
             errors.append(f"missing_accepted_answer:{where}")
             accepted = []
+        normalized_accepted = [re.sub(r"\s+", " ", x.strip().casefold()) for x in accepted]
+        if len(normalized_accepted) != len(set(normalized_accepted)):
+            errors.append(f"duplicate_accepted_answer:{where}")
         validation = q.get("validation")
         if not isinstance(validation, dict):
             errors.append(f"missing_validation:{where}")
@@ -665,6 +668,12 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
                 validate_numeric_range(validation, Fraction(answer, 1), where, errors)
                 if str(answer) not in accepted:
                     errors.append(f"numeric_answer_not_accepted:{where}:{answer}")
+                for accepted_answer in accepted:
+                    if not re.fullmatch(r"[+-]?\d+", accepted_answer.strip()):
+                        errors.append(f"numeric_accepted_answer_invalid:{where}:{accepted_answer!r}")
+                        continue
+                    if int(accepted_answer.strip()) != answer:
+                        errors.append(f"numeric_accepted_answer_wrong_value:{where}:{accepted_answer!r}:{answer}")
             if validation.get("integer_required") is not True:
                 errors.append(f"numeric_integer_required_missing:{where}")
             if kind == "interaction_integer" and question_type != "interactive_measurement":
@@ -733,6 +742,16 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
                     errors.append(f"unit_not_accepted:{where}:{unit}")
             if q.get("correct_answer") not in accepted:
                 errors.append(f"unit_correct_answer_not_accepted:{where}")
+            for accepted_answer in accepted:
+                try:
+                    accepted_number, accepted_unit = parse_unit_answer(accepted_answer)
+                except (ValueError, ZeroDivisionError) as exc:
+                    errors.append(f"malformed_accepted_unit_answer:{where}:{accepted_answer!r}:{type(exc).__name__}")
+                    continue
+                if expected_fraction is not None and accepted_number != expected_fraction:
+                    errors.append(f"accepted_unit_numeric_mismatch:{where}:{accepted_answer!r}")
+                if accepted_unit not in normalized_units:
+                    errors.append(f"accepted_unit_not_allowed:{where}:{accepted_answer!r}:{accepted_unit}")
 
         elif kind == "text":
             if question_type not in {"multiple_choice", "true_false"}:
@@ -785,6 +804,10 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
                     errors.append(f"generic_distractor_rationale:{where}:{cid}")
             if correct_text not in accepted:
                 errors.append(f"correct_choice_text_not_accepted:{where}:{correct_text}")
+            normalized_correct_text = normalize_choice_text(correct_text) if isinstance(correct_text, str) else ""
+            for accepted_answer in accepted:
+                if normalize_choice_text(accepted_answer) != normalized_correct_text:
+                    errors.append(f"accepted_text_not_correct_choice:{where}:{accepted_answer!r}")
             if validation.get("single_correct") is not True:
                 errors.append(f"mc_single_correct_missing:{where}")
             if validation.get("choice_count") != len(choices):

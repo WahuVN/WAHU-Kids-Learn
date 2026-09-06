@@ -28,7 +28,7 @@ Owner: AI1 — Math Content & Data
   - interactive measurement
   - word problem
 - Semantic validator errors: **0**
-- Math content unittest: **27 / 27 PASS**
+- Math content unittest: **28 / 28 PASS**
 - Pack manifest/hash/listing check on current working tree: **PASS** (`version=1.9.0`, 3 listed files)
 
 ## Curriculum/content completeness
@@ -61,7 +61,7 @@ Static bank phủ **67/67 skill**, kể cả:
   - `FOLD_CUT_COMPOSE_SHAPES`
   - `MONEY_VND_NOTE_RECOGNITION`
 
-Hai skill này **không còn thiếu content**: lesson + curated question đã có và validator PASS. Engine lesson-mode dùng authored `PracticeSets` trực tiếp đã được commit tại `656a94b`; UI targeted lesson + toàn bộ authored answer surfaces đã được commit tại `1436705`; adaptive mission vẫn giữ generator path. Targeted persistence smoke PASS **92 assertions**, Child UI PASS **1133 assertions**. Phần còn lại là corrupt-cache lesson-mode, display-unit contract và full production SQLite build gate; AI1 không sửa coordinator/selector lớn thuộc AI2.
+Hai skill này **không còn thiếu content**: lesson + curated question đã có và validator PASS. Engine lesson-mode dùng authored `PracticeSets` trực tiếp đã được commit tại `656a94b`; UI targeted lesson + toàn bộ authored answer surfaces đã được commit tại `1436705`; adaptive mission vẫn giữ generator path. Targeted persistence smoke PASS **99 assertions**, Child UI PASS **1475 assertions**. Phần còn lại là corrupt-cache lesson-mode, display-unit contract và full production SQLite build gate; AI1 không sửa coordinator/selector lớn thuộc AI2.
 
 ## Validator gates implemented
 
@@ -74,6 +74,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - invalid difficulty / practice-set mismatch;
 - invalid numeric range;
 - missing answer / accepted answer;
+- accepted answer bị trùng hoặc mở rộng sang giá trị sai; integer/interaction phải đúng cùng giá trị số, text phải đúng canonical choice, unit phải đúng cả số + đơn vị, expression phải tương đương expected numeric;
 - malformed expression / divide by zero / unsupported expression nodes;
 - invalid unit metadata;
 - `answer_unit` display-only metadata sai kind/type hoặc rỗng;
@@ -111,6 +112,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - difficulty cân bằng;
 - authoring deterministic;
 - answer kinds/question types đúng contract;
+- accepted-answer contract fail-closed cho integer/interaction/text/unit/expression, không cho phép extra accepted value sai;
 - expression validator fail-closed, kể cả divide-by-zero và payload không phải arithmetic;
 - nội dung tiền Việt Nam không hard-code mệnh giá khi chưa có source/book mapping;
 - skill quan hệ thời gian không mở rộng thành phép nhân/chia ngoài yêu cầu cần đạt;
@@ -128,7 +130,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - toàn ngân hàng đạt **0 exact duplicate + 0 cross-lesson near-duplicate ≥ 0.95**; 2 cặp near-duplicate đã được viết lại theo ngữ cảnh khác;
 - 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract.
 
-Latest result: **27 tests PASS**.
+Latest result: **28 tests PASS**.
 
 ## Commits / waves
 
@@ -154,11 +156,12 @@ Latest result: **27 tests PASS**.
 - `5e05fcc` — `Toán: nâng chiều sâu lời giải cho ngân hàng câu hỏi`
 - `d7aea5d` — `Toán: loại câu gần trùng giữa các bài học`
 - `896f2f0` — `Toán: nâng độ khó vận dụng theo hướng chuyển giao`
+- `7d56516` — `Toán: chốt đáp án tường minh trong mọi lời giải`
 
 ## Current blockers outside AI1 content ownership
 
 1. Request 005 functional path đã được commit end-to-end: engine `656a94b` + UI `1436705`. Targeted lesson dùng authored bank đúng 3 câu, all-201 answer-surface sweep PASS, Child UI **1475 assertions PASS**, Flow 5 prerequisite unlock PASS và persistence **99 assertions PASS**. Release-clean full solution vẫn bị SQLite/toolchain chặn; Request 007 vẫn là recovery edge riêng cần khóa regression.
-2. Request 007 hiện **PASS trong staged AI2 WIP**: targeted corrupt regression xác nhận cursor rollback 2→1, phát lại đúng medium, sau đó application, đủ 3 attempts mới complete; persistence smoke hiện **99 assertions PASS**. Chưa coi CLOSED cho tới khi AI2 commit thay đổi này.
+2. Request 007 **CLOSED** tại `7f79367`: targeted corrupt regression xác nhận cursor rollback 2→1, phát lại đúng medium, sau đó application, đủ 3 attempts mới complete; persistence smoke hiện **99 assertions PASS**.
 3. Request 006 vẫn mở: 23 câu integer có `answer_unit` được content giữ display-only, nhưng `MathAuthoredQuestionSource`/`MathQuestion` chưa preserve field để feedback hiện `8 cm`, `5 kg`, `60 phút` mà vẫn chấm raw integer.
 4. UI smoke build hiện gặp lỗi reference `System.Data.SQLite` khi build `WAHU.Data.csproj`; targeted persistence smoke không bị lỗi. Đây là build/dependency WIP ngoài AI1, không phải lỗi content.
 5. Legacy generator vẫn chỉ phủ 65/67 skill, nhưng lesson-authored path WIP đã cho phép hai skill `FOLD_CUT_COMPOSE_SHAPES` và `MONEY_VND_NOTE_RECOGNITION` có bài luyện thật mà không cần template giả.
