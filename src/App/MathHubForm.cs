@@ -28,7 +28,9 @@ namespace WAHUKidsLearn
         private FlowLayoutPanel _detailFlow;
         private Label _summary;
         private Label _detailEmpty;
+        private ChildActionButton _continueLessonButton;
         private ChildActionButton _missionButton;
+        private MathLessonDescriptor _continueLesson;
 
         public MathHubForm(LearningDatabase database, RuntimePerformanceSettings performance)
             : this(database, performance, ResolveCatalogPath())
@@ -60,6 +62,7 @@ namespace WAHUKidsLearn
         internal int TopicCount { get { return _catalog == null || _catalog.Topics == null ? 0 : _catalog.Topics.Count; } }
         internal int LessonCount { get { return _catalog == null || _catalog.Lessons == null ? 0 : _catalog.Lessons.Count; } }
         internal string SelectedLessonId { get { return _selectedLesson == null ? null : _selectedLesson.Id; } }
+        internal string ContinueLessonId { get { return _continueLesson == null ? null : _continueLesson.Id; } }
 
         internal void LoadCatalogAndProgress()
         {
@@ -70,7 +73,9 @@ namespace WAHUKidsLearn
                 _summary.Text = _catalog.Chapters.Count + " chương  •  " + _catalog.Topics.Count + " chủ đề  •  " +
                     _catalog.Lessons.Count + " bài học";
                 PopulateChapters();
-                if (_catalog.Chapters.Count > 0) SelectChapter(_catalog.Chapters[0]);
+                RefreshContinueLessonState();
+                if (_continueLesson != null) SelectLessonInCatalog(_continueLesson);
+                else if (_catalog.Chapters.Count > 0) SelectChapter(_catalog.Chapters[0]);
             }
             catch
             {
@@ -81,6 +86,13 @@ namespace WAHUKidsLearn
                 _lessonFlow.Controls.Clear();
                 _detailFlow.Controls.Clear();
                 _detailFlow.Visible = false;
+                _continueLesson = null;
+                if (_continueLessonButton != null)
+                {
+                    _continueLessonButton.Text = "Chưa có bài đang học";
+                    _continueLessonButton.Enabled = false;
+                    _continueLessonButton.AccessibleDescription = "Chưa có bài học đang học dở để tiếp tục.";
+                }
                 _summary.Text = "Nội dung bài học đang cần được kiểm tra lại.";
                 _detailEmpty.Text = "Chưa thể mở thư viện bài học lúc này. Con vẫn có thể làm nhiệm vụ Toán hôm nay.";
                 _detailEmpty.Visible = true;
@@ -219,9 +231,10 @@ namespace WAHUKidsLearn
 
         private Control BuildFooter()
         {
-            var footer = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1, Padding = new Padding(4, 8, 2, 2) };
-            footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 66));
-            footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 34));
+            var footer = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, RowCount = 1, Padding = new Padding(4, 8, 2, 2) };
+            footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40));
+            footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 28));
+            footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 32));
             footer.Controls.Add(new Label
             {
                 Dock = DockStyle.Fill,
@@ -232,6 +245,24 @@ namespace WAHUKidsLearn
                 Padding = new Padding(8, 0, 12, 0),
                 AccessibleName = "Cách luyện Toán hôm nay"
             }, 0, 0);
+
+            _continueLessonButton = new ChildActionButton
+            {
+                Dock = DockStyle.Fill,
+                Margin = new Padding(8, 2, 8, 2),
+                Text = "Chưa có bài đang học",
+                FillColor = Color.FromArgb(226, 239, 247),
+                HoverColor = Color.FromArgb(210, 230, 241),
+                PressedColor = Color.FromArgb(194, 219, 233),
+                TextColor = ChildVisualTheme.SkyStrong,
+                Font = ChildVisualTheme.Font(10.2f, FontStyle.Bold),
+                Radius = 18,
+                AccessibleName = "Tiếp tục bài Toán đang học",
+                AccessibleDescription = "Chưa có bài học đang học dở để tiếp tục.",
+                Enabled = false
+            };
+            _continueLessonButton.Click += delegate { ContinueCurrentLesson(); };
+            footer.Controls.Add(_continueLessonButton, 1, 0);
 
             _missionButton = new ChildActionButton
             {
@@ -248,7 +279,7 @@ namespace WAHUKidsLearn
                 AccessibleDescription = "Mở nhiệm vụ Toán thích ứng gồm khoảng tám câu."
             };
             _missionButton.Click += delegate { OpenAdaptiveMission(); };
-            footer.Controls.Add(_missionButton, 1, 0);
+            footer.Controls.Add(_missionButton, 2, 0);
             return footer;
         }
 
@@ -313,10 +344,11 @@ namespace WAHUKidsLearn
                 {
                     var chapter = _catalog.Chapters[i];
                     var lessonCount = _catalog.Lessons.Count(x => string.Equals(x.ChapterId, chapter.Id, StringComparison.Ordinal));
+                    var progress = ChapterProgressText(chapter, lessonCount);
                     var captured = chapter;
-                    var button = CreateCatalogButton((i + 1) + ". " + chapter.TitleVi + "\r\n" + lessonCount + " bài học", 72);
+                    var button = CreateCatalogButton((i + 1) + ". " + chapter.TitleVi + "\r\n" + progress, 72);
                     button.AccessibleName = "Chương " + (i + 1) + ": " + chapter.TitleVi;
-                    button.AccessibleDescription = lessonCount + " bài học. Nhấn Enter để mở chương.";
+                    button.AccessibleDescription = progress + ". Nhấn Enter để mở chương.";
                     button.Click += delegate { SelectChapter(captured); };
                     _chapterButtons[chapter.Id] = button;
                     _chapterFlow.Controls.Add(button);
@@ -518,6 +550,77 @@ namespace WAHUKidsLearn
             button.ForeColor = StateColor(snapshot);
         }
 
+        private string ChapterProgressText(MathChapterDescriptor chapter, int lessonCount)
+        {
+            if (chapter == null || _catalog == null) return lessonCount + " bài học";
+            var lessons = _catalog.Lessons.Where(x => string.Equals(x.ChapterId, chapter.Id, StringComparison.Ordinal)).ToList();
+            var attempted = 0;
+            var stable = 0;
+            foreach (var lesson in lessons)
+            {
+                var snapshot = Skill(lesson.SkillId);
+                if (snapshot == null || snapshot.AttemptsCount <= 0) continue;
+                attempted++;
+                if (string.Equals(snapshot.LearningState, "STABLE", StringComparison.OrdinalIgnoreCase)) stable++;
+            }
+            if (attempted <= 0) return lessonCount + " bài học";
+            return lessonCount + " bài • " + attempted + " đã học" + (stable > 0 ? " • " + stable + " vững" : string.Empty);
+        }
+
+        private MathLessonDescriptor FindContinueLesson()
+        {
+            if (_catalog == null || _catalog.Lessons == null || _skills == null || _skills.Count == 0) return null;
+            var active = new List<MathLessonDescriptor>();
+            var studied = new List<MathLessonDescriptor>();
+            foreach (var lesson in _catalog.Lessons)
+            {
+                var snapshot = Skill(lesson.SkillId);
+                if (snapshot == null || snapshot.AttemptsCount <= 0) continue;
+                studied.Add(lesson);
+                if (!string.Equals(snapshot.LearningState, "STABLE", StringComparison.OrdinalIgnoreCase)) active.Add(lesson);
+            }
+            var candidates = active.Count > 0 ? active : studied;
+            return candidates
+                .OrderByDescending(x =>
+                {
+                    var snapshot = Skill(x.SkillId);
+                    return snapshot != null && snapshot.LastSeenAtUtc.HasValue ? snapshot.LastSeenAtUtc.Value : DateTime.MinValue;
+                })
+                .ThenBy(x => x.OrderInDomain)
+                .FirstOrDefault();
+        }
+
+        private void RefreshContinueLessonState()
+        {
+            _continueLesson = FindContinueLesson();
+            if (_continueLessonButton == null) return;
+            if (_continueLesson == null)
+            {
+                _continueLessonButton.Text = "Chưa có bài đang học";
+                _continueLessonButton.Enabled = false;
+                _continueLessonButton.AccessibleDescription = "Chưa có bài học đang học dở để tiếp tục.";
+                return;
+            }
+            _continueLessonButton.Text = "Tiếp tục bài đang học";
+            _continueLessonButton.Enabled = true;
+            _continueLessonButton.AccessibleDescription = "Mở lại bài " + _continueLesson.TitleVi + ".";
+        }
+
+        private void ContinueCurrentLesson()
+        {
+            if (_continueLesson == null) return;
+            SelectLessonInCatalog(_continueLesson);
+        }
+
+        private void SelectLessonInCatalog(MathLessonDescriptor lesson)
+        {
+            if (lesson == null || _catalog == null) return;
+            var chapter = _catalog.FindChapter(lesson.ChapterId);
+            if (chapter != null && (_selectedChapter == null || !string.Equals(_selectedChapter.Id, chapter.Id, StringComparison.Ordinal)))
+                SelectChapter(chapter);
+            SelectLesson(lesson);
+        }
+
         private string LessonStateText(MathLessonDescriptor lesson)
         {
             var snapshot = Skill(lesson.SkillId);
@@ -646,6 +749,8 @@ namespace WAHUKidsLearn
                 var selectedLessonId = _selectedLesson == null ? null : _selectedLesson.Id;
                 using (var lesson = new MathLessonForm(_database, _performance)) lesson.ShowDialog(this);
                 RefreshSkillProgress();
+                PopulateChapters();
+                RefreshContinueLessonState();
                 if (_catalog != null && !string.IsNullOrWhiteSpace(selectedChapterId))
                 {
                     var refreshedChapter = _catalog.FindChapter(selectedChapterId);

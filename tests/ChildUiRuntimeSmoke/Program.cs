@@ -29,6 +29,7 @@ namespace WAHU.ChildUiRuntimeSmoke
             TestCompanionAndCompletion(appAssembly);
             TestRoadmap(appAssembly);
             TestMathCatalogAndHub(appAssembly);
+            TestResumePresentation(appAssembly);
             TestAnswerGridLayout(appAssembly);
             TestInteractiveSegmentAnswer(appAssembly);
             TestBasicControls(appAssembly);
@@ -252,6 +253,35 @@ namespace WAHU.ChildUiRuntimeSmoke
                     var mission = GetField<Button>(form, "_missionButton");
                     A(!string.IsNullOrWhiteSpace(mission.AccessibleName), "math_hub_mission_button_accessible_name");
                     A(mission.TabStop, "math_hub_mission_button_keyboard_focusable");
+                    var continueButton = GetField<Button>(form, "_continueLessonButton");
+                    A(!continueButton.Enabled, "math_hub_continue_disabled_without_progress");
+
+                    var secondLesson = catalog.FindLesson("m2_ls_num_full_hundreds_recognize");
+                    var progressSkills = new Dictionary<string, SkillSnapshot>(StringComparer.Ordinal)
+                    {
+                        {
+                            secondLesson.SkillId,
+                            new SkillSnapshot
+                            {
+                                SkillId = secondLesson.SkillId,
+                                AttemptsCount = 3,
+                                MasteryScore = 0.55,
+                                LearningState = "LEARNING",
+                                LastSeenAtUtc = DateTime.UtcNow
+                            }
+                        }
+                    };
+                    SetField(form, "_skills", progressSkills);
+                    Invoke(form, "PopulateChapters");
+                    Invoke(form, "RefreshContinueLessonState");
+                    A(Get<string>(form, "ContinueLessonId") == secondLesson.Id, "math_hub_continue_selects_recent_active_lesson");
+                    A(continueButton.Enabled, "math_hub_continue_enabled_with_progress");
+                    A(continueButton.AccessibleDescription.IndexOf(secondLesson.TitleVi, StringComparison.OrdinalIgnoreCase) >= 0,
+                        "math_hub_continue_names_target_lesson");
+                    A(chapterFlow.Controls[0].Text.IndexOf("1 đã học", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "math_hub_chapter_shows_real_studied_count");
+                    Invoke(form, "ContinueCurrentLesson");
+                    A(Get<string>(form, "SelectedLessonId") == secondLesson.Id, "math_hub_continue_opens_target_lesson");
 
                     RenderFormAndAssert(form, 1180, 760, "math_hub_default_window");
                     RenderFormAndAssert(form, 900, 640, "math_hub_min_window");
@@ -282,6 +312,44 @@ namespace WAHU.ChildUiRuntimeSmoke
             }
         }
 
+        private static void TestResumePresentation(Assembly appAssembly)
+        {
+            var sessionPath = Path.Combine(Path.GetDirectoryName(appAssembly.Location), "WAHU.Session.dll");
+            var sessionAssembly = Assembly.LoadFrom(sessionPath);
+            var startType = sessionAssembly.GetType("WAHU.Session.MathSessionStartResult", true);
+            var method = typeof(WAHUKidsLearn.MathLessonForm).GetMethod(
+                "BuildSessionStartNotice", BindingFlags.Static | BindingFlags.NonPublic);
+            A(method != null, "math_resume_notice_helper_available");
+
+            var restored = Activator.CreateInstance(startType);
+            Set(restored, "ResumedExistingSession", true);
+            Set(restored, "RestoredOpenQuestion", true);
+            Set(restored, "CompletedQuestionCount", 2);
+            var restoredText = (string)method.Invoke(null, new[] { restored });
+            A(restoredText.IndexOf("đúng câu", StringComparison.OrdinalIgnoreCase) >= 0,
+                "math_resume_notice_exact_open_question");
+
+            var corrupt = Activator.CreateInstance(startType);
+            Set(corrupt, "ResumedExistingSession", true);
+            Set(corrupt, "DiscardedCorruptOpenQuestion", true);
+            Set(corrupt, "CompletedQuestionCount", 1);
+            var corruptText = (string)method.Invoke(null, new[] { corrupt });
+            A(corruptText.IndexOf("vẫn an toàn", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                corruptText.IndexOf("câu mới", StringComparison.OrdinalIgnoreCase) >= 0,
+                "math_resume_notice_corrupt_cache_safe");
+
+            var resumed = Activator.CreateInstance(startType);
+            Set(resumed, "ResumedExistingSession", true);
+            Set(resumed, "CompletedQuestionCount", 3);
+            var resumedText = (string)method.Invoke(null, new[] { resumed });
+            A(resumedText.IndexOf("tiếp tục", StringComparison.OrdinalIgnoreCase) >= 0,
+                "math_resume_notice_completed_progress");
+
+            var fresh = Activator.CreateInstance(startType);
+            var freshText = (string)method.Invoke(null, new[] { fresh });
+            A(freshText == null, "math_fresh_session_has_no_resume_notice");
+        }
+
         private static void TestAnswerGridLayout(Assembly appAssembly)
         {
             var tempRoot = Path.Combine(Path.GetTempPath(), "wahu-child-ui-layout-" + Guid.NewGuid().ToString("N"));
@@ -292,6 +360,9 @@ namespace WAHU.ChildUiRuntimeSmoke
                 var database = new LearningDatabase(Path.Combine(tempRoot, "learning.db"), schema);
                 using (var form = new WAHUKidsLearn.MathLessonForm(database, new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW }))
                 {
+                    var stopButton = GetField<Button>(form, "_stopButton");
+                    A(stopButton.Text.IndexOf("học tiếp", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "math_stop_button_promises_resume_semantics");
                     Invoke(form, "ConfigureAnswerLayout", 2);
                     var grid = GetField<TableLayoutPanel>(form, "_answerGrid");
                     var buttons = GetField<Array>(form, "_answerButtons");
@@ -325,20 +396,22 @@ namespace WAHU.ChildUiRuntimeSmoke
 
         private static void TestInteractiveSegmentAnswer(Assembly appAssembly)
         {
-            var question = new MathQuestion
+            var generator = new MathQuestionGenerator(314159);
+            var question = generator.Generate(new MathSelectionDecision
             {
-                TemplateId = "draw_segment_given_length",
-                SkillId = "DRAW_SEGMENT_GIVEN_LENGTH",
-                PromptVi = "Vẽ đoạn thẳng AB dài 7 cm bằng cách chọn hai đầu mút trên thước.",
-                CorrectAnswer = 7,
-                CorrectAnswerText = "7",
-                AnswerKind = "interaction_integer",
-                Choices = new int[0],
-                ChoiceTexts = new string[0],
-                IllustrationData = "segmentdraw|7|15",
-                HintLevel1 = "Đếm số khoảng 1 cm giữa hai đầu mút.",
-                HintLevel2 = "Độ dài bằng hiệu tuyệt đối giữa hai vị trí."
-            };
+                Template = new MathTemplateRef
+                {
+                    TemplateId = "draw_segment_given_length",
+                    SkillId = "DRAW_SEGMENT_GIVEN_LENGTH"
+                },
+                DifficultyFit = 0.5
+            });
+            A(string.Equals(question.AnswerKind, "interaction_integer", StringComparison.Ordinal),
+                "segment_generated_question_preserves_interaction_kind");
+            A(question.DisplayChoices.Count == 0, "segment_generated_question_has_no_fake_choices");
+            A(!string.IsNullOrWhiteSpace(question.IllustrationData) &&
+                question.IllustrationData.StartsWith("segmentdraw|", StringComparison.Ordinal),
+                "segment_generated_question_has_interaction_geometry");
 
             using (var control = CreateInternalControl(appAssembly, "WAHUKidsLearn.SegmentDrawingAnswerControl"))
             {
@@ -346,11 +419,12 @@ namespace WAHU.ChildUiRuntimeSmoke
                 A(!Get<bool>(control, "HasAnswer"), "segment_interaction_starts_without_answer");
                 Invoke(control, "MoveCursor", 2);
                 Invoke(control, "SelectCursor");
-                Invoke(control, "MoveCursor", 7);
+                Invoke(control, "MoveCursor", question.CorrectAnswer);
                 Invoke(control, "SelectCursor");
                 A(Get<bool>(control, "HasAnswer"), "segment_interaction_two_endpoints_complete_answer");
-                A(Get<int>(control, "SelectedLength") == 7, "segment_interaction_computes_absolute_length");
-                A(Get<string>(control, "SelectedAnswer") == "7", "segment_interaction_serializes_integer_answer");
+                A(Get<int>(control, "SelectedLength") == question.CorrectAnswer, "segment_interaction_computes_absolute_length");
+                A(Get<string>(control, "SelectedAnswer") == question.CorrectAnswerDisplay,
+                    "segment_interaction_serializes_integer_answer");
                 Invoke(control, "SetHintLevel", 2);
                 RenderAndAssert(control, 620, 154, "segment_interaction_hint2");
                 Invoke(control, "ShowResult", true);
@@ -375,7 +449,7 @@ namespace WAHU.ChildUiRuntimeSmoke
                     var interactive = GetField<Control>(form, "_interactiveAnswer");
                     Invoke(interactive, "MoveCursor", 1);
                     Invoke(interactive, "SelectCursor");
-                    Invoke(interactive, "MoveCursor", 7);
+                    Invoke(interactive, "MoveCursor", question.CorrectAnswer);
                     Invoke(interactive, "SelectCursor");
                     A(submit.Enabled, "segment_submit_enabled_after_valid_segment");
                 }
@@ -446,6 +520,13 @@ namespace WAHU.ChildUiRuntimeSmoke
             var info = target.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             if (info == null) throw new MissingFieldException(target.GetType().FullName, fieldName);
             return (T)info.GetValue(target);
+        }
+
+        private static void SetField(object target, string fieldName, object value)
+        {
+            var info = target.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            if (info == null) throw new MissingFieldException(target.GetType().FullName, fieldName);
+            info.SetValue(target, value);
         }
 
         private static bool ContainsControlText(Control root, string needle)

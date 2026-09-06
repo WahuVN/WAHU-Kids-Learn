@@ -5,70 +5,97 @@ Definition: % dưới đây đo theo Definition of Done strict của Math, khôn
 
 ## Overall
 
-- **Content: 94%** — AI1 đã có 7 chương, 17 chủ đề, 67 lesson, 201 câu, prerequisite graph và semantic validator; 12/12 MathContentDataSmoke PASS. Phần còn lại chủ yếu là runtime consumption/contract với engine, không phải thiếu hàng loạt content.
-- **Engine: 73%** — validator nhiều answer kind, mastery/review/reward, append-only attempts và semantic idempotency schema V3 đã có; exact resume, targeted lesson/prerequisite unlock và interaction finalizer vẫn chưa xong.
-- **UI: 84%** — Math Hub + chapter/topic/lesson, lesson objective/concept/example/practice/prerequisite presentation, mastery thật theo skill, adaptive exercise, hint/feedback/completion và interactive segment control đã có. Còn result mastery/score/next lesson, locked/unlocked first-class và resume UX.
-- **Test: 71%** — Child UI 650 assertions PASS, Math engine 47 assertions PASS, Math content 12/12 PASS; full solution build vẫn bị Data/SQLite compile-reference chặn nên chưa thể coi clean gate đạt.
-- **E2E: 46%** — Home → Math Hub → lesson content và adaptive mission baseline chạy; Flow resume, prerequisite unlock, lesson-targeted practice và generated interaction chưa đạt full gate.
-- **Tổng Math: ~70%** theo strict production Definition of Done hiện tại.
+- **Content: 95%** — 7 chương, 17 chủ đề, 67 lesson, 201 câu, prerequisite graph và semantic validator đã có; MathContentDataSmoke hiện **13/13 PASS**. Phần còn lại chủ yếu là product/runtime consumption chứ không phải thiếu content hàng loạt.
+- **Engine: 85%** — answer validation, mastery/review/reward, schema V3 idempotency, exact suspend/resume, deterministic open-question restore và `interaction_integer` finalization đều PASS. Chưa có lesson-targeted session/unlock, lesson score/XP first-class, retry/skip contract hoàn chỉnh.
+- **UI: 90%** — Math Hub, chapter/topic/lesson, lesson content, mastery thật, chapter progress, “Tiếp tục bài đang học”, adaptive exercise, hint/feedback/completion, exact resume UX và generated interactive segment đều có. Còn locked/unlocked first-class và result score/mastery delta/next lesson.
+- **Test: 82%** — Child UI **665 assertions PASS**, Math session persistence/resume **48 assertions PASS**, Math engine baseline PASS, Math content **13/13 PASS**. Full old-style solution build vẫn bị Data/SQLite compile-reference chặn.
+- **E2E: 67%** — Home → Math Hub → lesson → adaptive exercise → result baseline chạy; Flow 2 exact resume PASS; generated interaction PASS; Flow 5 prerequisite unlock và lesson-targeted practice chưa có product contract.
+- **Tổng Math: ~82%** theo strict production Definition of Done hiện tại.
 
 ## P0
 
-- Không phát hiện P0 UI/integration mới trong wave AI3-002.
+- Không phát hiện P0 UI/integration mới trong wave AI3-003.
 
 ## P1
 
-1. `MathQuestionGenerator.FinalizeAnswerOptions()` vẫn làm mất `interaction_integer` và biến bài vẽ đoạn thành numeric choice — owner AI2, Request 004.
-2. Exact resume active Math session chưa có API/runtime state hoàn chỉnh — owner AI2.
-3. Chưa có targeted lesson/skill session + prerequisite unlock contract first-class; AI3 không fake “Luyện bài này” hoặc lock state ở frontend — owner AI2 contract, AI3 consume sau.
-4. Full clean solution build vẫn FAIL tại `src/Data` vì `System.Data.SQLite` không được resolve thành compile reference dù package assets tồn tại — owner AI2/core build integration.
+1. **Lesson-targeted session + prerequisite unlock:** catalog có prerequisite graph nhưng engine chưa publish first-class API/state để mở đúng lesson và quyết định locked/unlocked. AI3 không fake “Luyện bài này” hoặc lock frontend.
+2. **Clean production build graph:** `WAHU.Data.csproj` old-style net48 vẫn không resolve `System.Data.SQLite` compile reference bằng `dotnet msbuild`; SDK x86/net48 smoke harness dùng cùng production source + SQLite thật vẫn PASS.
+3. **Result contract:** chưa có first-class lesson score / mastery delta summary / numeric XP / next-lesson contract để UI trình bày mà không tự tính.
 
-## P2 / missing product flow
+## Closed blockers in current wave
 
-- Result screen chưa có numeric score/mastery delta/next lesson vì engine chưa publish contract lesson-result tương ứng.
-- Loading state catalog hiện là synchronous safe state; chưa có async loading experience riêng.
-- Static question bank đã tồn tại nhưng adaptive runtime hiện vẫn chạy generator/template path; AI3 không tự thay engine source.
+- **Exact resume:** CLOSED upstream bởi `a1d5146` + `beb0c0e` + regression `a36c4cb`; AI3 đã consume `Suspend/Resume` đúng semantics.
+- **Generated interaction finalizer:** CLOSED upstream bởi `9e275de`; `interaction_integer` được giữ nguyên và không sinh fake choices.
+- **UI stop/close semantics:** CLOSED AI3 wave 003 — “Dừng và học tiếp sau” và close lesson dùng `Suspend`, runtime fatal error vẫn dùng `Abort`.
 
 ## Current tests
 
-- `src/Content/WAHU.Content.csproj` Release x86: **PASS**.
-- `src/App/WAHUKidsLearn.csproj` Release x86 (`BuildProjectReferences=false`): **PASS**.
+- `src/Learning/WAHU.Learning.csproj` Release x86: **PASS**.
+- `src/App/WAHUKidsLearn.csproj` Release x86 (`BuildProjectReferences=false`, với fresh Data/Session test artifacts): **PASS**.
 - `tests/ChildUiRuntimeSmoke` Release x86 (`BuildProjectReferences=false`): **PASS**.
-- ChildUiRuntimeSmoke: **PASS — 650 assertions**.
-- MathEngineRuntimeSmoke: **PASS — 47 assertions**.
-- MathContentDataSmoke: **PASS — 12/12 tests**.
-- `WAHUKidsLearn.sln` Release x86 clean dependent build: **FAIL at `src/Data` / `System.Data.SQLite` reference resolution**; App/Content/Learning projects build trước điểm fail đều PASS.
+- ChildUiRuntimeSmoke: **PASS — 665 assertions**.
+- MathSessionPersistenceRuntimeSmoke: **PASS — 48 assertions**.
+- MathEngineRuntimeSmoke baseline: **PASS — 47 assertions** ở gate trước; generated interaction hiện được khóa thêm trong Child UI smoke bằng generator thật.
+- MathContentDataSmoke: **PASS — 13/13 tests**.
+- `WAHUKidsLearn.sln` old-style Release x86 clean build: **vẫn FAIL tại `src/Data` / `System.Data.SQLite` reference resolution** trên toolchain `dotnet msbuild` hiện có.
 
 ## Integration wave status
 
 ### AI3-001 — interactive segment answer
 
 - Commit: `c63e110` — `Toán UI: hỗ trợ vẽ đoạn thẳng tương tác`.
-- UI control, keyboard, accessibility, hint/result state: PASS.
-- Runtime-generated E2E: BLOCKED by AI2 Request 004.
+- Mouse + keyboard + accessibility + hint/result state: PASS.
+- Sau upstream `9e275de`, Child UI smoke dùng **MathQuestionGenerator thật** và xác nhận:
+  - `AnswerKind == interaction_integer`;
+  - `DisplayChoices.Count == 0`;
+  - có `segmentdraw|...` payload;
+  - UI chọn hai đầu mút, tính đúng độ dài và serialize đúng answer.
+- Generated interaction E2E: **PASS**.
 
 ### AI3-002 — Math Hub + lesson content integration
 
+- Commit: `11d7914` — `Toán UI: hoàn thiện hub và nội dung bài học`.
+- Consume `lesson_catalog_v1.json` thật.
+- Flow: Home → Toán lớp 2 → chương → chủ đề/bài → objective → concept → worked example → practice metadata → prerequisite presentation.
+- Progress/mastery đọc từ `LearnerSessionService.LoadSkillSnapshots()`, không fake frontend.
+- Missing/corrupt catalog: child-safe state, không white-screen.
+- Responsive 1180×760 + 900×640: PASS.
+
+### AI3-003 — continue progress + exact resume integration
+
 - Source: READY, đang chốt commit hiện tại.
-- Consume trực tiếp `content_packs/math_grade2_v1/lesson_catalog_v1.json` qua `MathLessonCatalogSource`.
-- Flow: Home → Toán lớp 2 → chương → chủ đề/bài → mục tiêu → kiến thức → concept → ví dụ có lời giải → practice metadata → prerequisite presentation.
-- Progress/mastery: đọc thật từ `LearnerSessionService.LoadSkillSnapshots()`, không fake progress frontend.
-- State: `Chưa học`, `Đang học`, `Cần ôn`, `Đã vững` dựa trên `LearningState` + `MasteryScore` engine đã persist.
-- Missing/corrupt catalog: child-safe empty state; adaptive mission vẫn còn khả dụng.
-- Responsive gate: 1180×760 + minimum 900×640 layout tree PASS.
-- Accessibility: chapter/lesson/mission controls có name/description + keyboard focus.
-- Lesson-targeted practice cố ý chưa mở vì coordinator chưa có targeted-session contract.
+- Math Hub:
+  - chapter hiện số bài đã học + số bài `STABLE` từ state engine thật;
+  - CTA “Tiếp tục bài đang học” chọn lesson active/review gần nhất theo `LastSeenAtUtc`;
+  - không có progress thì CTA disabled;
+  - sau adaptive mission, chapter progress + continue target refresh lại.
+- Math Lesson:
+  - consume `TargetQuestionCount` + `CompletedQuestionCount` khi resume;
+  - resume đúng open question hiện thông báo child-safe “tiếp tục đúng câu đang làm dở”;
+  - corrupt open cache thông báo phần đã làm vẫn an toàn và chuyển câu mới;
+  - nút stop đổi thành “Dừng và học tiếp sau”;
+  - user stop / window close gọi `Suspend`, không `Abort`;
+  - fatal runtime path vẫn `Abort` fail-closed.
+- Flow 2 engine regression:
+  - same session id;
+  - exact open question id/content;
+  - persisted target count;
+  - committed counters;
+  - no stale replay / no duplicate attempt;
+  - corrupt cache keeps committed progress;
+  - deterministic generation across restart;
+  - suspend grants no reward.
 
 ## Latest owner commits observed
 
-- AI1 functional content: `ad5db15` — `Toán: chốt status content và test biểu thức fail-closed`.
-- AI2: `a9dfcdf` — `feat(toán): khóa idempotency và nâng persistence lên schema v3`.
-- AI3 functional: `c63e110` — interactive segment; AI3-002 là wave đang được commit từ trạng thái này.
+- Upstream prerequisite/content guard: `2ac3027` — `Toán: siết hard guard thời gian và thứ tự prerequisite`.
+- AI2 resume: `a1d5146`, `beb0c0e`, regression `a36c4cb`.
+- AI2 interaction finalizer: `9e275de` — `fix(toán): giữ dạng trả lời tương tác khi hoàn thiện câu`.
+- AI3 latest committed: `11d7914`; wave AI3-003 đang được chốt từ trạng thái hiện tại.
 
 ## Next integration gates
 
-1. AI2 preserve `interaction_integer` → generated segment E2E.
-2. AI2 exact `Suspend/Resume` → Flow 2 close/restart/resume + Flow 3 restart progress.
-3. AI2 targeted lesson/prerequisite contract → lesson-specific practice + locked/unlocked Flow 5.
-4. Result contract → score/mastery/reward/next lesson presentation.
-5. Data/SQLite build blocker closed → full clean build + LearningSession/MathDataEngine smoke + full E2E regression.
+1. Publish lesson-target/prerequisite unlock contract → AI3 thêm “Luyện bài này”, locked/unlocked state và Flow 5.
+2. Publish result-level score/mastery/XP/next-lesson contract → hoàn thiện result screen.
+3. Fix production SQLite reference/toolchain → full clean solution build + complete regression gate.
+4. Sau targeted lesson contract, chạy E2E toàn bộ lesson/prerequisite path thay vì chỉ adaptive mission toàn Math.

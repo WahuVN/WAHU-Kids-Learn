@@ -33,6 +33,8 @@ namespace WAHUKidsLearn
         private ChildActionButton _nextButton;
         private ChildActionButton _stopButton;
         private int _hintLevel;
+        private int _targetQuestionCount = MathSessionCoordinator.DefaultTargetQuestionCount;
+        private string _sessionNotice;
         private bool _finished;
         private bool _submitting;
         private bool _completeOnNext;
@@ -80,7 +82,7 @@ namespace WAHUKidsLearn
             {
                 Dock = DockStyle.Fill,
                 Margin = new Padding(0, 4, 18, 4),
-                Text = "Dừng ở đây",
+                Text = "Dừng và học tiếp sau",
                 FillColor = Color.FromArgb(232, 230, 220),
                 HoverColor = Color.FromArgb(220, 217, 207),
                 PressedColor = Color.FromArgb(207, 204, 193),
@@ -313,8 +315,10 @@ namespace WAHUKidsLearn
                 var seed = unchecked(Environment.TickCount ^ DateTime.UtcNow.Millisecond ^ GetHashCode());
                 _coordinator = new MathSessionCoordinator(_database, templatePath, profile, seed);
                 var started = _coordinator.Start("Bé học");
-                if (started.RecoveredDanglingSessions > 0)
-                    _support.Text = "Buổi trước đã được lưu an toàn. Mình bắt đầu nhiệm vụ mới nhé.";
+                _targetQuestionCount = Math.Max(1, started.TargetQuestionCount);
+                _progressBar.Maximum = _targetQuestionCount;
+                _progressBar.Value = Math.Min(_targetQuestionCount, Math.Max(0, started.CompletedQuestionCount));
+                _sessionNotice = BuildSessionStartNotice(started);
                 ShowNextQuestion();
             }
             catch
@@ -349,14 +353,41 @@ namespace WAHUKidsLearn
                 _completeOnNext = false;
                 var summary = _coordinator.Summary;
                 var questionNumber = summary.Attempts + 1;
-                _progressText.Text = "Câu " + questionNumber + " / " + MathSessionCoordinator.DefaultTargetQuestionCount;
-                _progressBar.Value = summary.Attempts;
+                _progressText.Text = "Câu " + questionNumber + " / " + _targetQuestionCount;
+                _progressBar.Maximum = _targetQuestionCount;
+                _progressBar.Value = Math.Min(_targetQuestionCount, Math.Max(0, summary.Attempts));
                 ConfigureAnswerInput(_question);
+                if (!string.IsNullOrWhiteSpace(_sessionNotice))
+                {
+                    var inputSupport = _support.Text;
+                    _support.Text = UsesInteractiveAnswer(_question)
+                        ? _sessionNotice + " " + inputSupport
+                        : _sessionNotice;
+                    _sessionNotice = null;
+                }
             }
             catch
             {
                 FailCurrentSession("Không thể mở câu tiếp theo. Những câu con đã làm vẫn được giữ lại.");
             }
+        }
+
+        private static string BuildSessionStartNotice(MathSessionStartResult started)
+        {
+            if (started == null) return null;
+            if (started.ResumedExistingSession)
+            {
+                if (started.RestoredOpenQuestion)
+                    return "Mình tiếp tục đúng câu con đang làm dở nhé.";
+                if (started.DiscardedCorruptOpenQuestion)
+                    return "Phần con đã làm vẫn an toàn. Câu đang mở bị lỗi nên mình tiếp tục bằng câu mới nhé.";
+                return started.CompletedQuestionCount > 0
+                    ? "Mình tiếp tục buổi Toán đang học dở nhé."
+                    : "Buổi Toán trước vẫn còn. Mình tiếp tục từ đây nhé.";
+            }
+            if (started.RecoveredDanglingSessions > 0)
+                return "Buổi trước đã được lưu an toàn. Mình bắt đầu nhiệm vụ mới nhé.";
+            return null;
         }
 
         private static bool UsesInteractiveAnswer(MathQuestion question)
@@ -629,7 +660,7 @@ namespace WAHUKidsLearn
                 "Dừng buổi học ở đây?\r\n\r\nNhững câu đã làm vẫn được lưu để lần sau học tiếp.",
                 "Dừng buổi học", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
             if (answer != DialogResult.Yes) return;
-            try { if (_coordinator != null && _coordinator.IsActive) _coordinator.Abort("child_requested_stop"); }
+            try { if (_coordinator != null && _coordinator.IsActive) _coordinator.Suspend("child_requested_stop"); }
             catch { }
             _finished = true;
             Close();
@@ -710,7 +741,7 @@ namespace WAHUKidsLearn
                     "Dừng buổi học", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
                 if (answer != DialogResult.Yes) { e.Cancel = true; return; }
             }
-            try { if (_coordinator != null && _coordinator.IsActive) _coordinator.Abort("lesson_window_closed"); }
+            try { if (_coordinator != null && _coordinator.IsActive) _coordinator.Suspend("lesson_window_closed"); }
             catch { }
             _finished = true;
         }
