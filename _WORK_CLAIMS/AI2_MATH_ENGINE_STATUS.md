@@ -19,7 +19,7 @@ Branch: `main`
 ## Tests
 
 - `tests/MathEngineRuntimeSmoke`: PASS — **47 assertions**.
-- `tests/MathDataEngineRuntimeSmoke`: PASS — **55 assertions** (idempotency + terminal-session guard + exact replay after terminal state + optimistic skill-state guard).
+- `tests/MathDataEngineRuntimeSmoke`: PASS — **63 assertions** (idempotency + terminal-session guard + optimistic skill-state guard + true cross-process contention smoke).
 - `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **158 assertions** (authored bank + targeted lesson + prerequisite unlock + exact resume + mastery delta + next lesson + corrupt authored cursor recovery + retry/resume/anti-double-submit + stale coordinator/skill guards).
 - `tests/SQLiteRuntimeSmoke`: PASS — **166 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
 - `tests/LearningSessionRuntimeSmoke`: PASS — **794 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
@@ -71,6 +71,7 @@ Branch: `main`
 - stale mastery risk do concurrent submit cùng coordinator: mitigated bằng submit gate + semantic key; regression replay PASS.
 - stale coordinator/process sau terminal session: PASS — persistence atomic guard chặn attempt mới sau complete/abort, không ghi semantic key/mastery phụ.
 - stale mastery snapshot giữa coordinator/process: PASS — expected skill state chống lost-update; snapshot cũ không được overwrite `child_skill`, exact replay vẫn idempotent.
+- true cross-process contention: PASS lặp 3 vòng — hai worker/process độc lập cùng race từ một expected snapshot, đúng một write commit và durable mastery chain không mất update.
 - lesson completion/progress: PASS first-class persistence — `started_count`, `completed_count`, last/best score.
 - lesson score: PASS first-class cho targeted session; score = correct / authored target count × 100, persisted cùng transaction session completion.
 - lesson prerequisite unlock: PASS first-class — prerequisite được thỏa bởi completed targeted lesson; legacy `STABLE` skill được công nhận để không khóa ngược dữ liệu cũ.
@@ -82,7 +83,7 @@ Branch: `main`
 
 PASS: `0`, số âm, số rất lớn, decimal, fraction, malformed, empty, divide-by-zero, unit, expression safety, duplicate event, same-payload replay, conflict payload, app close giữa lesson, exact resume, stale cached open question, corrupted cached question, V1/V2/V3/V4 migration, locked lesson direct-start, targeted suspend/resume, prerequisite completion → unlock, retry suspend/resume, retry-correct/retry-wrong, duplicate initial retry intent, exact replay sau terminal state, stale coordinator submit sau complete/abort, stale child-skill snapshot / lost-update guard.
 
-Còn phải làm: skip policy nếu product cho phép, numeric XP/daily streak nếu product cần, true cross-process lock/busy stress regression và network/write-failure behavior ở integration boundary. Lesson-target/completion/score/prerequisite unlock + mastery-delta/next-lesson + retry/first-try/hint scoring + terminal-session + stale-skill write guards đã đóng.
+Còn phải làm: skip policy nếu product cho phép, numeric XP/daily streak nếu product cần, network/write-failure behavior ở integration boundary. Lesson-target/completion/score/prerequisite unlock + mastery-delta/next-lesson + retry/first-try/hint scoring + terminal-session + stale-skill + true cross-process contention guards đã đóng.
 
 ## Commits
 
@@ -96,7 +97,8 @@ Còn phải làm: skip policy nếu product cho phép, numeric XP/daily streak n
 - `7f79367` — `fix(toán): khôi phục đúng câu authored khi cache hỏng` — pushed.
 - `7c9a9ea` — `feat(toán): thêm retry an toàn và chấm first-try` — pushed.
 - `081f004` — `fix(toán): chặn ghi câu mới sau khi phiên đã kết thúc` — pushed.
-- optimistic child-skill stale-state guard — đang chốt selective commit hiện tại.
+- `c26e4e5` — `fix(toán): chặn ghi đè mastery từ snapshot cũ` — pushed.
+- true cross-process contention regression — đang chốt selective commit hiện tại.
 
 ## Blocker / coordination
 

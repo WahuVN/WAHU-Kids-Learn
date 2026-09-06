@@ -176,6 +176,7 @@ Mastery-bearing Math write phải chống lost-update khi một coordinator/proc
 - Nếu row chưa tồn tại thì chỉ hợp lệ khi expected attempts = 0; nếu state đã đổi, toàn bộ write bị reject trước attempt/key/mastery/review nên không thể ghi đè state mới bằng kết quả tính từ snapshot cũ.
 - Exact semantic replay vẫn được resolve trước optimistic guard; do đó retry của một write đã durable không fail chỉ vì `child_skill` hiện đã tiến lên.
 - Regression khóa cả service-level stale distinct attempt và coordinator-level stale skill snapshot sau khi câu đã mở.
+- Cross-process smoke dùng hai executable worker độc lập, hai SQLite connection/write gate độc lập và cùng expected snapshot; invariant là đúng một distinct write commit, một write bị reject/busy và durable attempt/key/mastery/review chỉ có một chuỗi.
 
 ## Contract còn chưa chốt
 

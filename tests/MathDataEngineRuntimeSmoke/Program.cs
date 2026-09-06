@@ -1,7 +1,10 @@
 using System;
 using System.Data.SQLite;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
+using System.Threading;
 using WAHU.Data;
 
 namespace WAHU.MathDataEngineRuntimeSmoke
@@ -12,6 +15,9 @@ namespace WAHU.MathDataEngineRuntimeSmoke
 
         private static int Main(string[] args)
         {
+            if (args != null && args.Length > 0 && string.Equals(args[0], "--commit-worker", StringComparison.Ordinal))
+                return RunCommitWorker(args);
+
             var root = Path.Combine(Path.GetTempPath(), "wahu-math-data-smoke-" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(root);
             try
@@ -21,6 +27,7 @@ namespace WAHU.MathDataEngineRuntimeSmoke
                 TestFreshV3AndIdempotentCommit(root, sourceSchema);
                 TestTerminalSessionRejectsNewAttemptsButAllowsExactReplay(root, sourceSchema);
                 TestOptimisticSkillStateGuard(root, sourceSchema);
+                TestCrossProcessConcurrentSkillWrites(root, sourceSchema);
                 TestExistingV1UpgradesToV3WithBackup(root, sourceSchema);
                 TestV3BackfillPreservesLegacyDuplicates(root, sourceSchema);
                 Console.WriteLine("MATH_DATA_ENGINE_RUNTIME_SMOKE_PASS assertions=" + _assertions);
@@ -221,6 +228,116 @@ namespace WAHU.MathDataEngineRuntimeSmoke
             var replayResult = service.Commit(replay);
             A(replayResult.AlreadyCommitted && replayResult.AttemptId == "optimistic-attempt-2",
                 "optimistic_guard_exact_replay_precedes_stale_state_check");
+        }
+
+        private static void TestCrossProcessConcurrentSkillWrites(string root, string sourceSchema)
+        {
+            var schemaDir = Path.Combine(root, "schema-cross-process");
+            CopySchemas(sourceSchema, schemaDir);
+            var schemaPath = Path.Combine(schemaDir, "001_initial.sql");
+            var dbPath = Path.Combine(root, "cross-process.db");
+            var database = new LearningDatabase(dbPath, schemaPath);
+            database.Initialize("DELETE");
+            var sessions = new LearnerSessionService(database);
+            var profile = sessions.EnsurePrimaryChild("Bé cross process");
+            var session = sessions.BeginSession(profile.ChildId, "math", "LOW");
+            var gatePath = Path.Combine(root, "cross-process-go.flag");
+            var exePath = Assembly.GetExecutingAssembly().Location;
+
+            using (var first = StartCommitWorker(exePath, dbPath, schemaPath, profile.ChildId, session.SessionId,
+                "cross-attempt-a", "cross-question-a", gatePath))
+            using (var second = StartCommitWorker(exePath, dbPath, schemaPath, profile.ChildId, session.SessionId,
+                "cross-attempt-b", "cross-question-b", gatePath))
+            {
+                File.WriteAllText(gatePath, "go");
+                var firstExited = first.WaitForExit(20000);
+                var secondExited = second.WaitForExit(20000);
+                if (!firstExited) { try { first.Kill(); } catch { } }
+                if (!secondExited) { try { second.Kill(); } catch { } }
+                var firstOutput = first.StandardOutput.ReadToEnd() + first.StandardError.ReadToEnd();
+                var secondOutput = second.StandardOutput.ReadToEnd() + second.StandardError.ReadToEnd();
+                A(firstExited && secondExited,
+                    "cross_process_workers_exit_without_hanging_on_sqlite_lock");
+                var oneCommitted = (first.ExitCode == 0 && second.ExitCode == 2) ||
+                                   (first.ExitCode == 2 && second.ExitCode == 0);
+                A(oneCommitted,
+                    "cross_process_exactly_one_distinct_stale_skill_write_commits outputs=" + firstOutput.Trim() + " | " + secondOutput.Trim());
+            }
+
+            using (var c = database.OpenConnection())
+            {
+                A(Count(c, "SELECT count(*) FROM attempt WHERE session_id='" + session.SessionId + "';") == 1,
+                    "cross_process_race_keeps_one_attempt");
+                A(Count(c, "SELECT count(*) FROM attempt_commit_key WHERE session_id='" + session.SessionId + "';") == 1,
+                    "cross_process_race_keeps_one_semantic_key");
+                A(Count(c, "SELECT count(*) FROM mastery_event WHERE child_id='" + profile.ChildId + "' AND skill_id='TEST_MATH_SKILL';") == 1,
+                    "cross_process_race_keeps_one_mastery_event");
+                A(Convert.ToInt32(Scalar(c, "SELECT attempts_count FROM child_skill WHERE child_id='" + profile.ChildId + "' AND skill_id='TEST_MATH_SKILL';"), CultureInfo.InvariantCulture) == 1,
+                    "cross_process_race_prevents_lost_update_attempt_counter");
+                A(Math.Abs(Convert.ToDouble(Scalar(c, "SELECT mastery_score FROM child_skill WHERE child_id='" + profile.ChildId + "' AND skill_id='TEST_MATH_SKILL';"), CultureInfo.InvariantCulture) - 0.35) < 0.0000001,
+                    "cross_process_race_preserves_single_mastery_transition");
+                A(Count(c, "SELECT count(*) FROM review_schedule WHERE child_id='" + profile.ChildId + "' AND skill_id='TEST_MATH_SKILL';") == 1,
+                    "cross_process_race_keeps_one_review_state");
+            }
+        }
+
+        private static Process StartCommitWorker(string exePath, string dbPath, string schemaPath, string childId,
+            string sessionId, string attemptId, string questionId, string gatePath)
+        {
+            var info = new ProcessStartInfo
+            {
+                FileName = exePath,
+                Arguments = QuoteArg("--commit-worker") + " " + QuoteArg(dbPath) + " " + QuoteArg(schemaPath) + " " +
+                    QuoteArg(childId) + " " + QuoteArg(sessionId) + " " + QuoteArg(attemptId) + " " +
+                    QuoteArg(questionId) + " " + QuoteArg(gatePath),
+                WorkingDirectory = Path.GetDirectoryName(exePath),
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            };
+            var process = Process.Start(info);
+            if (process == null) throw new InvalidOperationException("Could not start MathData cross-process worker.");
+            return process;
+        }
+
+        private static int RunCommitWorker(string[] args)
+        {
+            if (args == null || args.Length != 8) return 90;
+            var deadline = DateTime.UtcNow.AddSeconds(15);
+            while (!File.Exists(args[7]) && DateTime.UtcNow < deadline) Thread.Sleep(10);
+            if (!File.Exists(args[7])) return 91;
+
+            try
+            {
+                var database = new LearningDatabase(args[1], args[2]);
+                var request = BuildRequest(args[3], args[4], args[5], args[6], "12", true, DateTime.UtcNow);
+                request.ExpectedSkillMasteryScore = 0.25;
+                request.ExpectedSkillAttemptsCount = 0;
+                new AnswerCommitService(database).Commit(request);
+                Console.WriteLine("CROSS_PROCESS_WORKER_COMMITTED " + args[5]);
+                return 0;
+            }
+            catch (InvalidOperationException ex)
+            {
+                Console.WriteLine("CROSS_PROCESS_WORKER_REJECTED " + ex.Message);
+                return 2;
+            }
+            catch (SQLiteException ex)
+            {
+                Console.WriteLine("CROSS_PROCESS_WORKER_REJECTED_SQLITE " + ex.ErrorCode);
+                return 2;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("CROSS_PROCESS_WORKER_FAIL " + ex);
+                return 3;
+            }
+        }
+
+        private static string QuoteArg(string value)
+        {
+            return "\"" + (value ?? string.Empty).Replace("\"", "\\\"") + "\"";
         }
 
         private static void TestExistingV1UpgradesToV3WithBackup(string root, string sourceSchema)
