@@ -39,18 +39,32 @@ namespace WAHU.LearningSessionRuntimeSmoke
         private static IList<MathTemplateRef> TestVerifiedContentAndCore(string templatePath)
         {
             var descriptors = new MathVerifiedTemplateSource().Load(templatePath);
-            A(descriptors.Count >= 15, "verified_template_source_loads_full_pack");
+            A(descriptors.Count == 18, "verified_template_source_flattens_all_verified_variants");
             A(descriptors.All(x => x.Status == "VERIFIED_A_TEMPLATE"), "template_source_filters_verified_a_only");
-            var refs = descriptors.Select(x => new MathTemplateRef { TemplateId = x.Id, SkillId = x.SkillId })
-                .Where(AdaptiveMathSelector.IsSupported).ToList();
-            A(refs.Count == 15, "generator_supports_fifteen_verified_templates");
+            var refs = descriptors.Select(x => new MathTemplateRef
+            {
+                TemplateId = x.Id,
+                SkillId = x.SkillId,
+                SourceTemplateId = x.SourceTemplateId,
+                FixedContextVi = x.FixedContextVi,
+                StatementVi = x.StatementVi,
+                AnswerText = x.AnswerText
+            }).Where(AdaptiveMathSelector.IsSupported).ToList();
+            A(refs.Count == 18, "generator_supports_all_eighteen_verified_runtime_candidates");
+            var chanceRefs = refs.Where(x => x.TemplateId.StartsWith("possible_certain_impossible_die__", StringComparison.Ordinal)).ToList();
+            A(chanceRefs.Count == 3, "compound_probability_template_flattens_three_variants");
+            A(chanceRefs.All(x => x.SourceTemplateId == "possible_certain_impossible_die" &&
+                                  !string.IsNullOrWhiteSpace(x.FixedContextVi) && !string.IsNullOrWhiteSpace(x.StatementVi) && !string.IsNullOrWhiteSpace(x.AnswerText)),
+                "compound_probability_variant_metadata_preserved");
+            A(new HashSet<string>(chanceRefs.Select(x => x.AnswerText), StringComparer.Ordinal).SetEquals(new[] { "có thể", "chắc chắn", "không thể" }),
+                "compound_probability_verified_answers_preserved");
 
             var selector = new AdaptiveMathSelector();
             var empty = new Dictionary<string, SkillSnapshot>(StringComparer.Ordinal);
             var first = selector.Select(refs, empty, new DateTime(2026, 9, 6, 10, 0, 0, DateTimeKind.Utc), new string[0], new string[0]);
             A(first != null && first.Template != null, "selector_returns_candidate");
             A(first.DifficultyFit >= 0 && first.DifficultyFit <= 1, "selector_difficulty_fit_bounded");
-            A(first.CandidateSummary.Count == 15, "selector_audits_all_candidates");
+            A(first.CandidateSummary.Count == 18, "selector_audits_all_candidates");
 
             var dueSkills = new Dictionary<string, SkillSnapshot>(StringComparer.Ordinal);
             foreach (var r in refs) dueSkills[r.SkillId] = new SkillSnapshot { SkillId = r.SkillId, MasteryScore = 0.20, Confidence = 0.20, AttemptsCount = 1, LearningState = "LEARNING" };
@@ -80,6 +94,10 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 if (r.TemplateId == "divide_table_2_exact" || r.TemplateId == "divide_table_5_exact")
                     A(!q.UsesTextChoices && q.CorrectAnswer >= 1 && q.CorrectAnswer <= 10, "division_exact_answer_range_" + r.TemplateId);
                 if (r.TemplateId == "polyline_length") A(!q.UsesTextChoices && q.CorrectAnswer >= 3 && q.CorrectAnswer <= 60, "polyline_sum_range");
+                if (r.TemplateId.StartsWith("possible_certain_impossible_die__", StringComparison.Ordinal))
+                    A(q.UsesTextChoices && q.DisplayChoices.Count == 3 &&
+                      new HashSet<string>(q.DisplayChoices, StringComparer.Ordinal).SetEquals(new[] { "có thể", "chắc chắn", "không thể" }),
+                      "probability_variant_uses_three_verified_classification_choices_" + r.SkillId);
             }
 
             var mastery = new MasteryEngineV1();
@@ -126,6 +144,9 @@ namespace WAHU.LearningSessionRuntimeSmoke
             A(classifier.Classify(divideQuestion, "6").ErrorType == "FACT_ERROR", "division_fact_error_classified");
             var polylineQuestion = new MathQuestion { TemplateId = "polyline_length", CorrectAnswer = 25, AnswerKind = "integer", CorrectAnswerText = "25" };
             A(classifier.Classify(polylineQuestion, "24").ErrorType == "MEASUREMENT_SUM_ERROR", "polyline_sum_error_classified");
+            var eventQuestion = TextQuestion("possible_certain_impossible_die__event_possible", "có thể", new[] { "có thể", "chắc chắn", "không thể" });
+            A(classifier.Classify(eventQuestion, "không thể").ErrorType == "EVENT_CLASSIFICATION_ERROR", "event_classification_error_classified");
+            A(classifier.Classify(eventQuestion, "có thể") == null, "correct_event_classification_has_no_error");
 
             TestGeneratorFuzz(refs);
             return refs;
@@ -380,6 +401,12 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 if (values.Length < 3 || values[0] + values[1] + values[2] != q.CorrectAnswer)
                     throw new Exception("FUZZ_FAIL polyline sum");
             }
+            if (q.TemplateId.StartsWith("possible_certain_impossible_die__", StringComparison.Ordinal))
+            {
+                if (!q.UsesTextChoices || q.DisplayChoices.Count != 3 ||
+                    !new HashSet<string>(q.DisplayChoices, StringComparer.Ordinal).SetEquals(new[] { "có thể", "chắc chắn", "không thể" }))
+                    throw new Exception("FUZZ_FAIL probability choice contract");
+            }
         }
 
         private static MathQuestion TextQuestion(string templateId, string correct, IList<string> choices)
@@ -419,6 +446,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
 
         private static string ExpectedRepresentation(string templateId)
         {
+            if (!string.IsNullOrWhiteSpace(templateId) && templateId.StartsWith("possible_certain_impossible_die__", StringComparison.Ordinal)) return "die_outcomes";
             if (templateId == "place_value_decompose_3digit" || templateId == "expanded_form_3digit") return "place_value_blocks";
             if (templateId == "predecessor_successor" || templateId == "compare_two_numbers_1000") return "number_line_1000";
             if (templateId == "mental_add_within_20" || templateId == "mental_sub_within_20") return "number_ray";
@@ -432,10 +460,10 @@ namespace WAHU.LearningSessionRuntimeSmoke
         private static bool RoadmapScoresBounded(MathRoadmapSnapshot roadmap)
         {
             if (roadmap == null || roadmap.NumberSense == null || roadmap.Mental20 == null || roadmap.Written1000 == null ||
-                roadmap.Tables25 == null || roadmap.Measurement == null) return false;
+                roadmap.Tables25 == null || roadmap.Measurement == null || roadmap.Chance == null) return false;
             return Bounded(roadmap.NumberSense.MasteryAverage) && Bounded(roadmap.Mental20.MasteryAverage) &&
                    Bounded(roadmap.Written1000.MasteryAverage) && Bounded(roadmap.Tables25.MasteryAverage) &&
-                   Bounded(roadmap.Measurement.MasteryAverage);
+                   Bounded(roadmap.Measurement.MasteryAverage) && Bounded(roadmap.Chance.MasteryAverage);
         }
 
         private static bool Bounded(double value) { return value >= 0 && value <= 1; }

@@ -145,6 +145,8 @@ namespace WAHU.Learning
 
             if (question.UsesTextChoices)
             {
+                if (question.TemplateId != null && question.TemplateId.StartsWith("possible_certain_impossible_die__", StringComparison.Ordinal))
+                    return New("EVENT_CLASSIFICATION_ERROR", 0.64, "wrong_possible_certain_impossible_choice");
                 if (question.TemplateId == "place_value_decompose_3digit" || question.TemplateId == "expanded_form_3digit")
                     return New("PLACE_VALUE_ERROR", 0.66, "wrong_place_value_choice");
                 if (question.TemplateId == "compare_two_numbers_1000")

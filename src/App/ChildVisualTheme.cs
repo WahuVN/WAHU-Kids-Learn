@@ -248,7 +248,9 @@ namespace WAHUKidsLearn
             if (_question == null || Width < 80 || Height < 40) return;
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             var values = ExtractNumbers(_question.PromptVi);
-            if (_question.TemplateId == "place_value_decompose_3digit" || _question.TemplateId == "expanded_form_3digit")
+            if (_question.TemplateId != null && _question.TemplateId.StartsWith("possible_certain_impossible_die__", StringComparison.Ordinal))
+                DrawDieOutcomes(e.Graphics);
+            else if (_question.TemplateId == "place_value_decompose_3digit" || _question.TemplateId == "expanded_form_3digit")
                 DrawPlaceValueConcept(e.Graphics, values);
             else if (_question.TemplateId == "predecessor_successor" || _question.TemplateId == "compare_two_numbers_1000")
                 DrawNumberOrder(e.Graphics, values);
@@ -263,6 +265,63 @@ namespace WAHUKidsLearn
                 DrawPlaceValue(e.Graphics, values);
             else if (_question.TemplateId == "polyline_length")
                 DrawPolyline(e.Graphics, values);
+        }
+
+        private void DrawDieOutcomes(Graphics g)
+        {
+            var gap = Math.Max(6, Math.Min(12, Width / 70));
+            var available = Math.Max(120, Width - 34 - gap * 5);
+            var dieSize = Math.Min(58, Math.Max(34, available / 6));
+            var total = dieSize * 6 + gap * 5;
+            var left = Math.Max(8, (Width - total) / 2);
+            var top = Math.Max(5, (Height - dieSize) / 2 - (_hintLevel >= 1 ? 8 : 0));
+            for (var value = 1; value <= 6; value++)
+            {
+                var rect = new Rectangle(left + (value - 1) * (dieSize + gap), top, dieSize, dieSize);
+                using (var path = ChildVisualTheme.RoundedRect(rect, Math.Max(7, dieSize / 7)))
+                using (var fill = new SolidBrush(Color.FromArgb(252, 251, 244)))
+                using (var border = new Pen(Color.FromArgb(185, 191, 183), 1.5f))
+                {
+                    g.FillPath(fill, path);
+                    g.DrawPath(border, path);
+                }
+                DrawDiePips(g, rect, value);
+            }
+
+            if (_hintLevel >= 1)
+            {
+                TextRenderer.DrawText(g, "Các kết quả có thể: 1, 2, 3, 4, 5, 6", ChildVisualTheme.Font(8.5f, FontStyle.Bold),
+                    new Rectangle(0, Math.Max(0, Height - 22), Width, 20), ChildVisualTheme.MutedInk,
+                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+            }
+        }
+
+        private static void DrawDiePips(Graphics g, Rectangle rect, int value)
+        {
+            var cx = rect.Left + rect.Width / 2;
+            var cy = rect.Top + rect.Height / 2;
+            var dx = Math.Max(8, rect.Width / 4);
+            var dy = Math.Max(8, rect.Height / 4);
+            var r = Math.Max(2, rect.Width / 13);
+            var positions = new System.Collections.Generic.List<Point>();
+            if (value == 1 || value == 3 || value == 5) positions.Add(new Point(cx, cy));
+            if (value >= 2)
+            {
+                positions.Add(new Point(cx - dx, cy - dy));
+                positions.Add(new Point(cx + dx, cy + dy));
+            }
+            if (value >= 4)
+            {
+                positions.Add(new Point(cx + dx, cy - dy));
+                positions.Add(new Point(cx - dx, cy + dy));
+            }
+            if (value == 6)
+            {
+                positions.Add(new Point(cx - dx, cy));
+                positions.Add(new Point(cx + dx, cy));
+            }
+            using (var pip = new SolidBrush(ChildVisualTheme.Ink))
+                foreach (var p in positions) g.FillEllipse(pip, p.X - r, p.Y - r, r * 2 + 1, r * 2 + 1);
         }
 
         private void DrawPlaceValueConcept(Graphics g, int[] values)
@@ -889,9 +948,10 @@ namespace WAHUKidsLearn
                 new RoadmapRow("Nhẩm 0–20", _snapshot == null ? null : _snapshot.Mental20, ChildVisualTheme.PeachStrong),
                 new RoadmapRow("Cộng / Trừ đến 1000", _snapshot == null ? null : _snapshot.Written1000, ChildVisualTheme.MintStrong),
                 new RoadmapRow("Nhân / Chia 2 · 5", _snapshot == null ? null : _snapshot.Tables25, ChildVisualTheme.SkyStrong),
-                new RoadmapRow("Đo lường", _snapshot == null ? null : _snapshot.Measurement, Color.FromArgb(147, 126, 181))
+                new RoadmapRow("Đo lường", _snapshot == null ? null : _snapshot.Measurement, Color.FromArgb(147, 126, 181)),
+                new RoadmapRow("Khả năng xảy ra", _snapshot == null ? null : _snapshot.Chance, Color.FromArgb(185, 126, 157))
             };
-            var rowH = Math.Max(20, Height / 5);
+            var rowH = Math.Max(20, Height / 6);
             for (var i = 0; i < rows.Length; i++) DrawRow(e.Graphics, rows[i], new Rectangle(0, i * rowH, Width, rowH));
         }
 
@@ -934,7 +994,8 @@ namespace WAHUKidsLearn
                    DescribeGroup("Nhẩm 0 đến 20", snapshot.Mental20) + "; " +
                    DescribeGroup("Cộng trừ đến 1000", snapshot.Written1000) + "; " +
                    DescribeGroup("Nhân chia bảng 2 và 5", snapshot.Tables25) + "; " +
-                   DescribeGroup("Đo lường", snapshot.Measurement) + ".";
+                   DescribeGroup("Đo lường", snapshot.Measurement) + "; " +
+                   DescribeGroup("Khả năng xảy ra", snapshot.Chance) + ".";
         }
 
         private static string DescribeGroup(string name, MathRoadmapGroupProgress progress)

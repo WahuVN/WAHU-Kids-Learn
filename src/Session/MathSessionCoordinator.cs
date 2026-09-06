@@ -76,8 +76,15 @@ namespace WAHU.Session
         {
             if (_active || _session != null) throw new InvalidOperationException("Math session already started.");
             var descriptors = new MathVerifiedTemplateSource().Load(_templatePath);
-            _templates = descriptors.Select(x => new MathTemplateRef { TemplateId = x.Id, SkillId = x.SkillId })
-                .Where(AdaptiveMathSelector.IsSupported).ToList();
+            _templates = descriptors.Select(x => new MathTemplateRef
+            {
+                TemplateId = x.Id,
+                SkillId = x.SkillId,
+                SourceTemplateId = x.SourceTemplateId,
+                FixedContextVi = x.FixedContextVi,
+                StatementVi = x.StatementVi,
+                AnswerText = x.AnswerText
+            }).Where(AdaptiveMathSelector.IsSupported).ToList();
             if (_templates.Count == 0) throw new InvalidOperationException("Không có template Toán VERIFIED được runtime hỗ trợ.");
 
             _profile = _sessionService.EnsurePrimaryChild(displayName);
@@ -468,6 +475,7 @@ namespace WAHU.Session
             if (error != null && error.ErrorType == "COMPARISON_ERROR") return "Chưa đúng. Mình so sánh từ hàng lớn nhất trước nhé.";
             if (error != null && error.ErrorType == "SEQUENCE_NEIGHBOR_ERROR") return "Chưa đúng. Số liền trước kém 1 và số liền sau hơn 1 nhé.";
             if (error != null && error.ErrorType == "MEASUREMENT_SUM_ERROR") return "Chưa đúng. Độ dài đường gấp khúc là tổng các đoạn của nó.";
+            if (error != null && error.ErrorType == "EVENT_CLASSIFICATION_ERROR") return "Chưa đúng. Con đối chiếu câu này với tất cả kết quả có thể của xúc xắc nhé.";
             return "Chưa đúng. Mình xem gợi ý rồi thử câu tiếp theo nhé.";
         }
 

@@ -10,6 +10,10 @@ namespace WAHU.Content
         public string Id { get; set; }
         public string SkillId { get; set; }
         public string Status { get; set; }
+        public string SourceTemplateId { get; set; }
+        public string FixedContextVi { get; set; }
+        public string StatementVi { get; set; }
+        public string AnswerText { get; set; }
     }
 
     public sealed class MathVerifiedTemplateSource
@@ -46,15 +50,66 @@ namespace WAHU.Content
                 var item = raw as Dictionary<string, object>;
                 if (item == null) continue;
                 var id = OptionalString(item, "id");
-                var skill = OptionalString(item, "skill");
                 var status = OptionalString(item, "status");
-                if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(skill)) continue;
+                if (string.IsNullOrWhiteSpace(id)) continue;
                 if (!string.Equals(status, "VERIFIED_A_TEMPLATE", StringComparison.Ordinal)) continue;
-                if (!ids.Add(id)) throw new InvalidDataException("Duplicate VERIFIED math template id: " + id);
-                result.Add(new MathVerifiedTemplateDescriptor { Id = id, SkillId = skill, Status = status });
+
+                var skill = OptionalString(item, "skill");
+                if (!string.IsNullOrWhiteSpace(skill))
+                {
+                    Add(result, ids, new MathVerifiedTemplateDescriptor
+                    {
+                        Id = id,
+                        SourceTemplateId = id,
+                        SkillId = skill,
+                        Status = status
+                    });
+                    continue;
+                }
+
+                object rawVariants;
+                if (!item.TryGetValue("variants", out rawVariants))
+                    throw new InvalidDataException("VERIFIED math template has neither skill nor variants: " + id);
+                var variants = rawVariants as object[];
+                if (variants == null || variants.Length == 0)
+                    throw new InvalidDataException("VERIFIED math template variants must be a non-empty array: " + id);
+
+                var fixedContext = OptionalString(item, "fixed_context");
+                if (string.IsNullOrWhiteSpace(fixedContext))
+                    throw new InvalidDataException("VERIFIED variant template missing fixed_context: " + id);
+
+                foreach (var rawVariant in variants)
+                {
+                    var variant = rawVariant as Dictionary<string, object>;
+                    if (variant == null) throw new InvalidDataException("VERIFIED math variant must be object: " + id);
+                    var variantSkill = OptionalString(variant, "skill");
+                    var statement = OptionalString(variant, "statement");
+                    var answer = OptionalString(variant, "answer");
+                    if (string.IsNullOrWhiteSpace(variantSkill) || string.IsNullOrWhiteSpace(statement) || string.IsNullOrWhiteSpace(answer))
+                        throw new InvalidDataException("VERIFIED math variant missing skill/statement/answer: " + id);
+
+                    Add(result, ids, new MathVerifiedTemplateDescriptor
+                    {
+                        Id = id + "__" + variantSkill.ToLowerInvariant(),
+                        SourceTemplateId = id,
+                        SkillId = variantSkill,
+                        Status = status,
+                        FixedContextVi = fixedContext,
+                        StatementVi = statement,
+                        AnswerText = answer
+                    });
+                }
             }
             if (result.Count == 0) throw new InvalidDataException("Math template source contains no child-ready VERIFIED_A_TEMPLATE items.");
             return result;
+        }
+
+        private static void Add(ICollection<MathVerifiedTemplateDescriptor> result, ISet<string> ids, MathVerifiedTemplateDescriptor descriptor)
+        {
+            if (descriptor == null || string.IsNullOrWhiteSpace(descriptor.Id))
+                throw new InvalidDataException("Invalid VERIFIED math descriptor.");
+            if (!ids.Add(descriptor.Id)) throw new InvalidDataException("Duplicate VERIFIED math template id: " + descriptor.Id);
+            result.Add(descriptor);
         }
 
         private static string ReadString(Dictionary<string, object> root, string key)

@@ -22,6 +22,10 @@ namespace WAHU.Learning
     {
         public string TemplateId { get; set; }
         public string SkillId { get; set; }
+        public string SourceTemplateId { get; set; }
+        public string FixedContextVi { get; set; }
+        public string StatementVi { get; set; }
+        public string AnswerText { get; set; }
     }
 
     public sealed class MathQuestion

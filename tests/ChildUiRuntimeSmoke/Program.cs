@@ -37,6 +37,9 @@ namespace WAHU.ChildUiRuntimeSmoke
         {
             var cases = new[]
             {
+                QT("possible_certain_impossible_die__event_possible", "Gieo một con xúc xắc chuẩn có các mặt 1,2,3,4,5,6. Xuất hiện số 3. Điều này là gì?", "có thể"),
+                QT("possible_certain_impossible_die__event_certain", "Gieo một con xúc xắc chuẩn có các mặt 1,2,3,4,5,6. Xuất hiện một số từ 1 đến 6. Điều này là gì?", "chắc chắn"),
+                QT("possible_certain_impossible_die__event_impossible", "Gieo một con xúc xắc chuẩn có các mặt 1,2,3,4,5,6. Xuất hiện số 8. Điều này là gì?", "không thể"),
                 Q("place_value_decompose_3digit", "Số 472 gồm bao nhiêu trăm, chục và đơn vị?", 0),
                 Q("expanded_form_3digit", "Viết 604 thành tổng của trăm, chục và đơn vị.", 0),
                 Q("predecessor_successor", "Số liền trước và số liền sau của 472 là gì?", 0),
@@ -109,14 +112,15 @@ namespace WAHU.ChildUiRuntimeSmoke
                 Mental20 = new MathRoadmapGroupProgress { GroupId = "mental_20", SkillRows = 1, Attempts = 8, MasteryAverage = 0.72 },
                 Written1000 = new MathRoadmapGroupProgress { GroupId = "written_1000", SkillRows = 3, Attempts = 11, MasteryAverage = 0.54 },
                 Tables25 = new MathRoadmapGroupProgress { GroupId = "tables_2_5", SkillRows = 2, Attempts = 7, MasteryAverage = 0.66 },
-                Measurement = new MathRoadmapGroupProgress { GroupId = "measurement_geometry", SkillRows = 1, Attempts = 3, MasteryAverage = 0.47 }
+                Measurement = new MathRoadmapGroupProgress { GroupId = "measurement_geometry", SkillRows = 1, Attempts = 3, MasteryAverage = 0.47 },
+                Chance = new MathRoadmapGroupProgress { GroupId = "chance_events", SkillRows = 2, Attempts = 5, MasteryAverage = 0.58 }
             };
             foreach (var scale in new[] { 1.00f, 1.25f })
             {
                 using (var roadmap = CreateInternalControl(appAssembly, "WAHUKidsLearn.MathRoadmapControl"))
                 {
                     Invoke(roadmap, "SetSnapshot", snapshot);
-                    RenderAndAssert(roadmap, (int)(560 * scale), (int)(96 * scale), "math_roadmap_scale_" + scale);
+                    RenderAndAssert(roadmap, (int)(560 * scale), (int)(132 * scale), "math_roadmap_scale_" + scale);
                 }
             }
         }
@@ -239,6 +243,22 @@ namespace WAHU.ChildUiRuntimeSmoke
                 }
                 host.Controls.Remove(child);
             }
+        }
+
+        private static MathQuestion QT(string template, string prompt, string answer)
+        {
+            return new MathQuestion
+            {
+                TemplateId = template,
+                SkillId = template,
+                PromptVi = prompt,
+                AnswerKind = "text",
+                CorrectAnswerText = answer,
+                ChoiceTexts = new[] { "có thể", "chắc chắn", "không thể" },
+                Representation = "die_outcomes",
+                HintLevel1 = "hint 1",
+                HintLevel2 = "hint 2"
+            };
         }
 
         private static MathQuestion Q(string template, string prompt, int answer)

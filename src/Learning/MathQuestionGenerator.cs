@@ -18,24 +18,31 @@ namespace WAHU.Learning
         {
             if (decision == null || decision.Template == null) throw new ArgumentNullException("decision");
             MathQuestion question;
-            switch (decision.Template.TemplateId)
+            if (decision.Template.TemplateId.StartsWith("possible_certain_impossible_die__", StringComparison.Ordinal))
             {
-                case "place_value_decompose_3digit": question = PlaceValueDecompose(decision.Template); break;
-                case "expanded_form_3digit": question = ExpandedForm(decision.Template); break;
-                case "predecessor_successor": question = PredecessorSuccessor(decision.Template); break;
-                case "compare_two_numbers_1000": question = CompareTwoNumbers(decision.Template); break;
-                case "mental_add_within_20": question = MentalAdd(decision.Template); break;
-                case "mental_sub_within_20": question = MentalSub(decision.Template); break;
-                case "times_table_2": question = Times(decision.Template, 2); break;
-                case "times_table_5": question = Times(decision.Template, 5); break;
-                case "divide_table_2_exact": question = Divide(decision.Template, 2); break;
-                case "divide_table_5_exact": question = Divide(decision.Template, 5); break;
-                case "add_within_1000_no_carry": question = AddNoCarry(decision.Template); break;
-                case "add_within_1000_one_carry": question = AddOneCarry(decision.Template); break;
-                case "subtract_within_1000_no_borrow": question = SubNoBorrow(decision.Template); break;
-                case "subtract_within_1000_one_borrow": question = SubOneBorrow(decision.Template); break;
-                case "polyline_length": question = PolylineLength(decision.Template); break;
-                default: throw new InvalidOperationException("Unsupported VERIFIED math template: " + decision.Template.TemplateId);
+                question = ProbabilityEvent(decision.Template);
+            }
+            else
+            {
+                switch (decision.Template.TemplateId)
+                {
+                    case "place_value_decompose_3digit": question = PlaceValueDecompose(decision.Template); break;
+                    case "expanded_form_3digit": question = ExpandedForm(decision.Template); break;
+                    case "predecessor_successor": question = PredecessorSuccessor(decision.Template); break;
+                    case "compare_two_numbers_1000": question = CompareTwoNumbers(decision.Template); break;
+                    case "mental_add_within_20": question = MentalAdd(decision.Template); break;
+                    case "mental_sub_within_20": question = MentalSub(decision.Template); break;
+                    case "times_table_2": question = Times(decision.Template, 2); break;
+                    case "times_table_5": question = Times(decision.Template, 5); break;
+                    case "divide_table_2_exact": question = Divide(decision.Template, 2); break;
+                    case "divide_table_5_exact": question = Divide(decision.Template, 5); break;
+                    case "add_within_1000_no_carry": question = AddNoCarry(decision.Template); break;
+                    case "add_within_1000_one_carry": question = AddOneCarry(decision.Template); break;
+                    case "subtract_within_1000_no_borrow": question = SubNoBorrow(decision.Template); break;
+                    case "subtract_within_1000_one_borrow": question = SubOneBorrow(decision.Template); break;
+                    case "polyline_length": question = PolylineLength(decision.Template); break;
+                    default: throw new InvalidOperationException("Unsupported VERIFIED math template: " + decision.Template.TemplateId);
+                }
             }
 
             question.QuestionId = decision.Template.TemplateId + "-" + Guid.NewGuid().ToString("N");
@@ -114,6 +121,19 @@ namespace WAHU.Learning
                 correct, Shuffle(new List<string> { ">", "<" }),
                 "So sánh từ hàng lớn nhất: trăm, rồi chục, rồi đơn vị.",
                 "Số nào lớn hơn thì phía mở rộng của dấu so sánh quay về phía số đó.");
+        }
+
+        private MathQuestion ProbabilityEvent(MathTemplateRef template)
+        {
+            if (template == null || string.IsNullOrWhiteSpace(template.FixedContextVi) ||
+                string.IsNullOrWhiteSpace(template.StatementVi) || string.IsNullOrWhiteSpace(template.AnswerText))
+                throw new InvalidOperationException("VERIFIED probability variant metadata is incomplete.");
+            var choices = Shuffle(new List<string> { "có thể", "chắc chắn", "không thể" });
+            return NewTextQuestion(template,
+                template.FixedContextVi + " " + template.StatementVi + " Điều này là gì?",
+                template.AnswerText, choices,
+                "Hãy nhìn tất cả sáu kết quả có thể xuất hiện trên xúc xắc: 1, 2, 3, 4, 5, 6.",
+                "So sánh câu đã cho với toàn bộ sáu mặt của xúc xắc rồi chọn: có thể, chắc chắn hoặc không thể.");
         }
 
         private MathQuestion MentalAdd(MathTemplateRef template)
@@ -234,6 +254,8 @@ namespace WAHU.Learning
 
         private static string RepresentationFor(string templateId)
         {
+            if (!string.IsNullOrWhiteSpace(templateId) && templateId.StartsWith("possible_certain_impossible_die__", StringComparison.Ordinal))
+                return "die_outcomes";
             switch (templateId)
             {
                 case "place_value_decompose_3digit":

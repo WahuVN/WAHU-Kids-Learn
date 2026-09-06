@@ -100,6 +100,10 @@ namespace WAHU.Learning
         public static bool IsSupported(MathTemplateRef template)
         {
             if (template == null || string.IsNullOrWhiteSpace(template.TemplateId) || string.IsNullOrWhiteSpace(template.SkillId)) return false;
+            if (template.TemplateId.StartsWith("possible_certain_impossible_die__", StringComparison.Ordinal))
+                return !string.IsNullOrWhiteSpace(template.FixedContextVi) &&
+                       !string.IsNullOrWhiteSpace(template.StatementVi) &&
+                       !string.IsNullOrWhiteSpace(template.AnswerText);
             switch (template.TemplateId)
             {
                 case "place_value_decompose_3digit":

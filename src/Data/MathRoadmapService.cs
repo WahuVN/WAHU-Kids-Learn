@@ -19,11 +19,12 @@ namespace WAHU.Data
         public MathRoadmapGroupProgress Written1000 { get; set; }
         public MathRoadmapGroupProgress Tables25 { get; set; }
         public MathRoadmapGroupProgress Measurement { get; set; }
+        public MathRoadmapGroupProgress Chance { get; set; }
         public int TotalTrackedAttempts
         {
             get
             {
-                return Attempts(NumberSense) + Attempts(Mental20) + Attempts(Written1000) + Attempts(Tables25) + Attempts(Measurement);
+                return Attempts(NumberSense) + Attempts(Mental20) + Attempts(Written1000) + Attempts(Tables25) + Attempts(Measurement) + Attempts(Chance);
             }
         }
 
@@ -47,11 +48,13 @@ namespace WAHU.Data
             var written = NewGroup("written_1000");
             var tables = NewGroup("tables_2_5");
             var measurement = NewGroup("measurement_geometry");
+            var chance = NewGroup("chance_events");
             var numberSenseScore = 0.0;
             var mentalScore = 0.0;
             var writtenScore = 0.0;
             var tableScore = 0.0;
             var measurementScore = 0.0;
+            var chanceScore = 0.0;
 
             using (var connection = _database.OpenConnection())
             using (var command = connection.CreateCommand())
@@ -76,6 +79,8 @@ FROM child_skill WHERE child_id=@child AND subject='math';";
                             Add(tables, ref tableScore, mastery, attempts);
                         else if (skill == "POLYLINE_LENGTH_SUM_SEGMENTS")
                             Add(measurement, ref measurementScore, mastery, attempts);
+                        else if (skill == "EVENT_POSSIBLE" || skill == "EVENT_CERTAIN" || skill == "EVENT_IMPOSSIBLE")
+                            Add(chance, ref chanceScore, mastery, attempts);
                         else if (!string.IsNullOrWhiteSpace(skill) &&
                                  (skill.StartsWith("ADD_WITHIN_1000", StringComparison.Ordinal) ||
                                   skill.StartsWith("SUB_WITHIN_1000", StringComparison.Ordinal)))
@@ -89,13 +94,15 @@ FROM child_skill WHERE child_id=@child AND subject='math';";
             FinalizeAverage(written, writtenScore);
             FinalizeAverage(tables, tableScore);
             FinalizeAverage(measurement, measurementScore);
+            FinalizeAverage(chance, chanceScore);
             return new MathRoadmapSnapshot
             {
                 NumberSense = numberSense,
                 Mental20 = mental,
                 Written1000 = written,
                 Tables25 = tables,
-                Measurement = measurement
+                Measurement = measurement,
+                Chance = chance
             };
         }
 

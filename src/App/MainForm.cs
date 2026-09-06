@@ -126,7 +126,7 @@ namespace WAHUKidsLearn
             var gardenLayout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 4 };
             gardenLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 48));
             gardenLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            gardenLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 132));
+            gardenLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 180));
             gardenLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 44));
             gardenLayout.Controls.Add(new Label
             {
