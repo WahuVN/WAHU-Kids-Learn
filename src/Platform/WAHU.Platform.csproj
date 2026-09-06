@@ -1,0 +1,36 @@
+﻿<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProjectGuid>{2759F943-D509-4130-9E79-B3E28C1CDC88}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>WAHU.Platform</RootNamespace>
+    <AssemblyName>WAHU.Platform</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols><DebugType>full</DebugType><Optimize>false</Optimize><OutputPath>bin\Debug\</OutputPath><DefineConstants>DEBUG;TRACE</DefineConstants><PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <DebugType>pdbonly</DebugType><Optimize>true</Optimize><OutputPath>bin\Release\</OutputPath><DefineConstants>TRACE</DefineConstants><PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" /><Reference Include="System.Core" /><Reference Include="System.Drawing" /><Reference Include="System.Management" /><Reference Include="System.Runtime.Serialization" /><Reference Include="System.Security" /><Reference Include="System.Windows.Forms" /><Reference Include="System.Xml" /><Reference Include="System.Web.Extensions" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CompatibilityClassifier.cs" />
+    <Compile Include="Hashing.cs" />
+    <Compile Include="JsonReportWriter.cs" />
+    <Compile Include="NativeMethods.cs" />
+    <Compile Include="PreflightProbe.cs" />
+    <Compile Include="PreflightReport.cs" />
+    <Compile Include="SignatureVerifier.cs" />
+    <Compile Include="SingleInstanceGuard.cs" />
+    <Compile Include="RuntimeSessionMarker.cs" />
+    <Compile Include="RuntimeConfigBundle.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
