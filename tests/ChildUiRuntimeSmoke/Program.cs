@@ -28,6 +28,7 @@ namespace WAHU.ChildUiRuntimeSmoke
             TestCompanionAndCompletion(appAssembly);
             TestRoadmap(appAssembly);
             TestAnswerGridLayout(appAssembly);
+            TestInteractiveSegmentAnswer(appAssembly);
             TestBasicControls(appAssembly);
 
             Console.WriteLine("CHILD_UI_RUNTIME_SMOKE_PASS assertions=" + _assertions);
@@ -217,6 +218,69 @@ namespace WAHU.ChildUiRuntimeSmoke
             }
         }
 
+        private static void TestInteractiveSegmentAnswer(Assembly appAssembly)
+        {
+            var question = new MathQuestion
+            {
+                TemplateId = "draw_segment_given_length",
+                SkillId = "DRAW_SEGMENT_GIVEN_LENGTH",
+                PromptVi = "Vẽ đoạn thẳng AB dài 7 cm bằng cách chọn hai đầu mút trên thước.",
+                CorrectAnswer = 7,
+                CorrectAnswerText = "7",
+                AnswerKind = "interaction_integer",
+                Choices = new int[0],
+                ChoiceTexts = new string[0],
+                IllustrationData = "segmentdraw|7|15",
+                HintLevel1 = "Đếm số khoảng 1 cm giữa hai đầu mút.",
+                HintLevel2 = "Độ dài bằng hiệu tuyệt đối giữa hai vị trí."
+            };
+
+            using (var control = CreateInternalControl(appAssembly, "WAHUKidsLearn.SegmentDrawingAnswerControl"))
+            {
+                Invoke(control, "SetQuestion", question);
+                A(!Get<bool>(control, "HasAnswer"), "segment_interaction_starts_without_answer");
+                Invoke(control, "MoveCursor", 2);
+                Invoke(control, "SelectCursor");
+                Invoke(control, "MoveCursor", 7);
+                Invoke(control, "SelectCursor");
+                A(Get<bool>(control, "HasAnswer"), "segment_interaction_two_endpoints_complete_answer");
+                A(Get<int>(control, "SelectedLength") == 7, "segment_interaction_computes_absolute_length");
+                A(Get<string>(control, "SelectedAnswer") == "7", "segment_interaction_serializes_integer_answer");
+                Invoke(control, "SetHintLevel", 2);
+                RenderAndAssert(control, 620, 154, "segment_interaction_hint2");
+                Invoke(control, "ShowResult", true);
+                RenderAndAssert(control, 620, 154, "segment_interaction_correct_locked");
+            }
+
+            var tempRoot = Path.Combine(Path.GetTempPath(), "wahu-child-ui-interactive-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempRoot);
+            try
+            {
+                var schema = Path.Combine(Directory.GetCurrentDirectory(), "data", "schema", "001_initial.sql");
+                var database = new LearningDatabase(Path.Combine(tempRoot, "learning.db"), schema);
+                using (var form = new WAHUKidsLearn.MathLessonForm(database, new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW }))
+                {
+                    Invoke(form, "ConfigureAnswerInput", question);
+                    var support = GetField<Label>(form, "_support");
+                    var submit = GetField<Button>(form, "_interactiveSubmitButton");
+                    A(support.Text.IndexOf("điểm A", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "segment_form_switches_to_interactive_guidance");
+                    A(!submit.Enabled, "segment_submit_disabled_until_two_endpoints");
+
+                    var interactive = GetField<Control>(form, "_interactiveAnswer");
+                    Invoke(interactive, "MoveCursor", 1);
+                    Invoke(interactive, "SelectCursor");
+                    Invoke(interactive, "MoveCursor", 7);
+                    Invoke(interactive, "SelectCursor");
+                    A(submit.Enabled, "segment_submit_enabled_after_valid_segment");
+                }
+            }
+            finally
+            {
+                try { Directory.Delete(tempRoot, true); } catch { }
+            }
+        }
+
         private static void TestBasicControls(Assembly appAssembly)
         {
             using (var button = CreateInternalControl(appAssembly, "WAHUKidsLearn.AnswerChoiceButton"))
@@ -263,6 +327,13 @@ namespace WAHU.ChildUiRuntimeSmoke
             var info = target.GetType().GetProperty(property, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             if (info == null) throw new MissingMemberException(target.GetType().FullName, property);
             info.SetValue(target, value, null);
+        }
+
+        private static T Get<T>(object target, string property)
+        {
+            var info = target.GetType().GetProperty(property, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            if (info == null) throw new MissingMemberException(target.GetType().FullName, property);
+            return (T)info.GetValue(target, null);
         }
 
         private static T GetField<T>(object target, string fieldName)
