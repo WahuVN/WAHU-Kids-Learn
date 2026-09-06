@@ -1383,6 +1383,15 @@ namespace WAHU.Learning
 
         private void FinalizeAnswerOptions(MathQuestion question)
         {
+            if (string.Equals(question.AnswerKind, "interaction_integer", StringComparison.Ordinal))
+            {
+                if (string.IsNullOrWhiteSpace(question.CorrectAnswerText))
+                    question.CorrectAnswerText = question.CorrectAnswer.ToString(CultureInfo.InvariantCulture);
+                question.Choices = new int[0];
+                question.ChoiceTexts = new string[0];
+                return;
+            }
+
             if (question.UsesTextChoices)
             {
                 if (question.ChoiceTexts == null || question.ChoiceTexts.Count < 2)

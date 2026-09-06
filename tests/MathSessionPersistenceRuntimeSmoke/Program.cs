@@ -29,6 +29,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestCommittedStaleQuestionIsNotReplayed(root, schemaPath, templatePath);
                 TestCorruptOpenQuestionRecoversWithoutProgressReset(root, schemaPath, templatePath);
                 TestDeterministicSecondQuestionAcrossResume(root, schemaPath, templatePath);
+                TestInteractiveIntegerFinalization();
                 Console.WriteLine("MATH_SESSION_PERSISTENCE_RUNTIME_SMOKE_PASS assertions=" + _assertions);
                 return 0;
             }
@@ -185,6 +186,30 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 A(replacement != null, "corrupt_cache_can_continue_with_new_question");
                 resumed.Abort("cleanup");
             }
+        }
+
+        private static void TestInteractiveIntegerFinalization()
+        {
+            var generator = new MathQuestionGenerator(20260907);
+            var question = new MathQuestion
+            {
+                AnswerKind = "interaction_integer",
+                CorrectAnswer = 7,
+                CorrectAnswerText = "7",
+                Choices = new[] { 6, 7, 8 },
+                ChoiceTexts = new[] { "6", "7", "8" }
+            };
+            var finalize = typeof(MathQuestionGenerator).GetMethod(
+                "FinalizeAnswerOptions",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            A(finalize != null, "interactive_finalizer_method_found");
+            finalize.Invoke(generator, new object[] { question });
+            A(string.Equals(question.AnswerKind, "interaction_integer", StringComparison.Ordinal),
+                "interactive_answer_kind_preserved");
+            A(question.DisplayChoices != null && question.DisplayChoices.Count == 0,
+                "interactive_answer_exposes_no_fake_choices");
+            A(question.IsCorrectAnswer("7"), "interactive_numeric_answer_still_validates");
+            A(!question.IsCorrectAnswer("8"), "interactive_wrong_numeric_answer_rejected");
         }
 
         private static void TestDeterministicSecondQuestionAcrossResume(string root, string schemaPath, string templatePath)
