@@ -2,6 +2,19 @@
 
 Updated: 2026-09-07
 
+## ACTIVE PHASE — PLAYABLE EVENT / GAME V1
+
+Mục tiêu mới: **đưa 5 bài đầu thành trải nghiệm chơi học được ngay**, không chỉ lesson/session kỹ thuật. Contract chung đã khóa tại `_WORK_CLAIMS/MATH_PLAYABLE_EVENT_GAME_V1.md`.
+
+Cả 3 AI phải chạy song song theo contract đó:
+- AI1: event/scenario content + psychology-safe copy + validator.
+- AI2: event runtime + BehaviorDecision mapping + resume/reward semantics.
+- AI3: Home/Hub entry + playable event UI + E2E/release.
+
+Không AI nào chờ AI khác: AI2/AI3 dùng synthetic fixture theo schema frozen cho tới khi AI1 publish JSON; AI3 dùng internal event view fixture cho tới khi AI2 public adapter land.
+
+P0 chỉ DONE khi Home → event → 3 câu → retry/repair → suspend/resume → completion → Garden update chạy được trên current HEAD.
+
 ## USER PRIORITY OVERRIDE — FIRST LESSONS FIRST
 
 Hiệu lực từ 2026-09-07: **ưu tiên hoàn thiện thật kỹ các bài Toán đầu trước; bài sau để cập nhật/hardening sau**.
@@ -24,15 +37,15 @@ File này dành cho người điều phối. Không cần kể lại lịch sử
 
 ## AI1
 
-`BẠN LÀ AI1. Đọc USER PRIORITY OVERRIDE trong _WORK_CLAIMS/MATH_3AI_MASTER_EXECUTION.md, rồi đọc toàn bộ _WORK_CLAIMS/AI1_PARALLEL_NOW.md và tự kiểm current HEAD và làm liên tục đúng master plan. Không hỏi lại nếu repo/test tự giải được. Gặp lock thì chuyển FALLBACK, không chờ AI khác. Commit/push từng wave nhỏ.`
+`BẠN LÀ AI1. Đọc toàn bộ _WORK_CLAIMS/MATH_PLAYABLE_EVENT_GAME_V1.md trước, sau đó đọc _WORK_CLAIMS/AI1_PARALLEL_NOW.md và current HEAD. Hoàn tất WIP AI1 hiện có rồi chuyển ngay sang PLAYABLE EVENT V1: làm event/scenario content cho 5 bài đầu, psychology-safe copy, validator/tests, không sửa engine/UI. Không chờ AI khác; dùng FALLBACK nếu shared file bận. Commit/push từng wave nhỏ cho tới khi lane playable P0 xanh.`
 
 ## AI2
 
-`BẠN LÀ AI2. Đọc USER PRIORITY OVERRIDE trong _WORK_CLAIMS/MATH_3AI_MASTER_EXECUTION.md, rồi đọc toàn bộ _WORK_CLAIMS/AI2_PARALLEL_NOW.md và tự kiểm current HEAD và làm liên tục đúng master plan. Không hỏi lại nếu repo/test tự giải được. Gặp lock thì chuyển FALLBACK, không chờ AI khác. Commit/push từng wave nhỏ.`
+`BẠN LÀ AI2. Đọc toàn bộ _WORK_CLAIMS/MATH_PLAYABLE_EVENT_GAME_V1.md trước, sau đó đọc _WORK_CLAIMS/AI2_PARALLEL_NOW.md và current HEAD. Chuyển sang PLAYABLE EVENT V1: triển khai event runtime quanh targeted MathSession hiện có, BehaviorDecision→event action, resume/suspend/reward idempotent và fault/corruption tests. Dùng synthetic fixture theo schema frozen, không chờ AI1; không sửa authored content/UI. Commit/push từng wave nhỏ cho tới khi engine playable P0 xanh.`
 
 ## AI3
 
-`BẠN LÀ AI3. Đọc USER PRIORITY OVERRIDE trong _WORK_CLAIMS/MATH_3AI_MASTER_EXECUTION.md, rồi đọc toàn bộ _WORK_CLAIMS/AI3_PARALLEL_NOW.md và tự kiểm current HEAD và làm liên tục đúng master plan. Không hỏi lại nếu repo/test tự giải được. Gặp lock thì chuyển FALLBACK, không chờ AI khác. Commit/push từng wave nhỏ.`
+`BẠN LÀ AI3. Đọc toàn bộ _WORK_CLAIMS/MATH_PLAYABLE_EVENT_GAME_V1.md trước, sau đó đọc _WORK_CLAIMS/AI3_PARALLEL_NOW.md và current HEAD. Chuyển sang PLAYABLE EVENT V1: thêm entry Toán nhanh — Nhiệm vụ cứu hộ, intro/checkpoint/behavior-aware repair-break/completion Garden UI, resume E2E và release payload. Dùng fixture UI trước khi AI1/AI2 land, không chờ; không đổi engine semantics/content. Commit/push từng wave nhỏ cho tới khi UI playable P0 xanh.`
 
 ---
 

@@ -4,11 +4,16 @@ LANE=AI1
 ROLE=MATH_CONTENT_DATA_OWNER
 LANE_DONE=YES
 EXECUTION_MODE=VERIFY_THEN_IMPROVE_NO_WAIT
-PRIORITY_POLICY=FIRST_LESSONS_FIRST
-ACTIVE_FOCUS=CH01_LESSONS_01_10
-LATER_LESSON_POLISH=DEFERRED_UNTIL_FIRST_BLOCK_LOCKED
+PRIORITY_POLICY=PLAYABLE_FIRST_FIVE_FIRST
+ACTIVE_PHASE=PLAYABLE_EVENT_GAME_V1
+ACTIVE_FOCUS=CH01_LESSONS_01_05_PLUS_GAME_EVENT_CONTENT
+LATER_LESSON_POLISH=DEFERRED_UNTIL_PLAYABLE_P0_GREEN
 
 > Khi được người dùng bảo “đọc file và làm”: đọc **toàn bộ file này**, tự inspect repo/current HEAD, rồi làm từ START PROCEDURE xuống BACKLOG. Không dừng chỉ vì `LANE_DONE=YES`; dòng đó chỉ nói strict Math DoD trước đây đã đạt.
+
+## PLAYABLE EVENT V1 OVERRIDE
+
+Đọc và tuân thủ `_WORK_CLAIMS/MATH_PLAYABLE_EVENT_GAME_V1.md` trước mọi P1 polish khác. Hoàn tất/commit WIP first-five hiện có rồi chuyển ngay sang event catalog V1 cho 5 bài đầu. AI1 sở hữu scenario text, child-safe psychology copy, event JSON/authoring/validator/tests. Không sửa Session/App. Nếu manifest bận, làm source + fixture + validator trước, không chờ.
 
 ## 0. Mission
 

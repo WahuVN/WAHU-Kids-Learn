@@ -4,8 +4,14 @@ LANE=AI2
 ROLE=MATH_ENGINE_SESSION_PERSISTENCE_OWNER
 LANE_DONE=YES
 EXECUTION_MODE=VERIFY_THEN_HARDEN_NO_WAIT
+ACTIVE_PHASE=PLAYABLE_EVENT_GAME_V1
+ACTIVE_FOCUS=FIRST_FIVE_EVENT_RUNTIME_BEHAVIOR_RESUME_REWARD
 
 > Khi người dùng bảo “đọc file và làm”: đọc toàn bộ file này, inspect current HEAD, verify stable contracts rồi tiếp tục fuzz/stress/hardening. Không dừng chỉ vì `LANE_DONE=YES`.
+
+## PLAYABLE EVENT V1 OVERRIDE
+
+Đọc và tuân thủ `_WORK_CLAIMS/MATH_PLAYABLE_EVENT_GAME_V1.md` trước backlog fuzz chung. P0 mới là event wrapper quanh targeted MathSession 3 câu, BehaviorDecision→event action, safe suspend/resume, no reward on incomplete, existing Garden reward exactly once on completion, fail-safe về ordinary Math khi event metadata hỏng. Dùng synthetic event fixture ngay, không chờ AI1. Không sửa authored event copy/UI.
 
 ## 0. Mission
 

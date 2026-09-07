@@ -3,7 +3,9 @@
 LANE=AI3
 ROLE=MATH_UI_QA_RELEASE_INTEGRATION_OWNER
 LANE_DONE=NO
-EXECUTION_MODE=EARLY_LESSON_DEEP_HARDEN_NO_WAIT
+EXECUTION_MODE=PLAYABLE_EVENT_UI_NO_WAIT
+ACTIVE_PHASE=PLAYABLE_EVENT_GAME_V1
+ACTIVE_FOCUS=FIRST_FIVE_QUICK_RESCUE_UI_E2E_RELEASE
 LAST_FULLY_VERIFIED_HEAD=`3a53af7`
 LAST_VERIFIED_CHILD_UI=3267_ASSERTIONS_PASS
 LAST_VERIFIED_PERSISTENCE=7159_ASSERTIONS_PASS
@@ -16,6 +18,10 @@ EARLY_LESSON_DEEP_CONTENT=62_OF_62_PASS
 EARLY_LESSON_DEEP_VALIDATOR=402_OF_402_VALID
 
 > Khi người dùng bảo “đọc file và làm”: đọc toàn bộ file này, inspect current HEAD, verify UI/release trên contract hiện hành rồi tiếp tục QA/hardening. Không dừng chỉ vì `LANE_DONE=YES`.
+
+## PLAYABLE EVENT V1 OVERRIDE
+
+Đọc và tuân thủ `_WORK_CLAIMS/MATH_PLAYABLE_EVENT_GAME_V1.md`. P0 mới là đưa first-five thành flow chơi được: Home/Hub entry → intro → 3 checkpoints dùng lại MathLessonForm → behavior-aware repair/break → completion restoration/Garden → resume E2E. Dùng internal fixture/view-model trước khi AI1/AI2 land; final adapter mỏng sau. Không chờ và không đổi engine/content semantics.
 
 ## PRIORITY OVERRIDE — làm kỹ bài đầu trước
 
