@@ -2,12 +2,20 @@
 
 LANE=AI2
 ROLE=MATH_ENGINE_SESSION_PERSISTENCE_OWNER
-LANE_DONE=YES
+LANE_DONE=NO
 EXECUTION_MODE=VERIFY_THEN_HARDEN_NO_WAIT
 ACTIVE_PHASE=PLAYABLE_EVENT_GAME_V1
 ACTIVE_FOCUS=FIRST_FIVE_EVENT_RUNTIME_BEHAVIOR_RESUME_REWARD
 
 > Khi người dùng bảo “đọc file và làm”: đọc toàn bộ file này, inspect current HEAD, verify stable contracts rồi tiếp tục fuzz/stress/hardening. Không dừng chỉ vì `LANE_DONE=YES`.
+
+## PLAYABLE EVENT V1 ENGINE STATUS
+
+- Public runtime landed: `492a942` — `MathGameEventCatalogSource`, DTO/state/action mapper, `MathGameEventCoordinator`.
+- Synthetic P0: **PASS** — exact targeted 3-question session, checkpoint progress, retry+suspend/resume, behavior action mapping, early-complete guard, Garden reward once, corrupt/missing metadata fallback, answer-transaction fault recovery, concurrent coordinator idempotency.
+- Persistence current: **7636 PASS**.
+- Event identity requires no migration: V1 enforces one event/lesson; resume can derive event deterministically from `target_lesson_id` when catalog is healthy.
+- Production `game_events_v1.json` is currently AI1 WIP/untracked; do not stage it. Continue synthetic fault/hardening until AI1 publishes, then run real 5-event integration immediately.
 
 ## PLAYABLE EVENT V1 OVERRIDE
 
@@ -64,7 +72,7 @@ Milestone: `3cf7fc6`.
 - MathDataEngineRuntimeSmoke: 104 PASS.
 - LearningSessionRuntimeSmoke: 800 PASS.
 - SQLiteRuntimeSmoke production: 179 PASS.
-- MathSessionPersistenceRuntimeSmoke current: **7592 PASS**; gồm real 402-bank breadth stress + write-failure/corruption repair + deterministic authored runtime IDs + concurrent pending-retry semantics + generated/open-ordinal self-heal + late-review transaction rollback + operational DB failure fail-safe.
+- MathSessionPersistenceRuntimeSmoke current: **7636 PASS**; gồm real 402-bank breadth stress + write-failure/corruption repair + deterministic authored runtime IDs + concurrent pending-retry semantics + generated/open-ordinal self-heal + late-review transaction rollback + operational DB failure fail-safe.
 - Real 402-bank integration đã PASS; selector breadth hiện verify đủ **67/67 lesson**, mỗi basic/medium/application bucket đều deterministic, in-range và xoay đủ 2 variant qua 16 seed.
 
 Không hard-code assertion count; regression mới chỉ được tăng hoặc nếu giảm phải có lý do rõ.

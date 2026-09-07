@@ -74,6 +74,8 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestInteractiveIntegerFinalization();
                 TestGameEventBehaviorMapping();
                 TestGameEventRuntimeResumeRewardAndFallback(root, schemaPath, templatePath, lessonCatalogPath);
+                TestGameEventCommitFaultPreservesCheckpoint(root, schemaPath, templatePath, lessonCatalogPath);
+                TestGameEventConcurrentCoordinatorsStayIdempotent(root, schemaPath, templatePath, lessonCatalogPath);
                 Console.WriteLine("MATH_SESSION_PERSISTENCE_RUNTIME_SMOKE_PASS assertions=" + _assertions);
                 return 0;
             }
@@ -185,14 +187,14 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                     "game_event_suspend_preserves_active_session_and_grants_no_reward");
             }
 
-            using (var resumed = new MathGameEventCoordinator(database, templatePath, eventPath, "NORMAL", 999999, eventId, lesson.Id))
+            using (var resumed = new MathGameEventCoordinator(database, templatePath, eventPath, "NORMAL", 999999, null, lesson.Id))
             {
                 var start = resumed.Start("Bé event cứu hộ");
                 A(start.Session.ResumedExistingSession && start.Session.SessionId == sessionId &&
                   start.Session.SelectedContentQuestionIds.SequenceEqual(selected) && start.Session.RetryPending &&
                   start.EventState.EventId == eventId && start.EventState.CompletedCheckpointCount == 1 &&
                   start.EventState.CurrentCheckpointNumber == 2 && start.EventState.RetryPending,
-                    "game_event_resume_restores_exact_event_session_selected_set_checkpoint_retry");
+                    "game_event_resume_derives_event_from_unique_target_lesson_and_restores_checkpoint_retry");
                 var q2 = resumed.NextQuestion();
                 A(q2.QuestionId == q2Id && q2.ContentQuestionId == selected[1],
                     "game_event_resume_restores_exact_open_question");
@@ -253,6 +255,114 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                   Count(fallbackDb, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + fallbackSessionId + "';") == 1 &&
                   Count(fallbackDb, "SELECT count(*) FROM reward_event WHERE child_id='" + fallbackChildId + "';") == 0,
                     "game_event_corrupt_metadata_fallback_loses_no_learning_and_grants_no_fake_reward");
+            }
+        }
+
+        private static void TestGameEventCommitFaultPreservesCheckpoint(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.Lessons[0];
+            var eventId = "m2_evt_fault_rescue_01";
+            var eventPath = Path.Combine(root, "synthetic-game-event-fault.json");
+            WriteSyntheticGameEventCatalog(eventPath, eventId, lesson.Id, lesson.SkillId);
+            var database = NewDatabase(Path.Combine(root, "game-event-commit-fault.db"), schemaPath);
+
+            using (var game = new MathGameEventCoordinator(database, templatePath, eventPath, "LOW", 14101, eventId, lesson.Id))
+            {
+                var start = game.Start("Bé event fault");
+                var q1 = game.NextQuestion();
+                Exec(database, @"CREATE TRIGGER fail_game_event_mastery BEFORE INSERT ON mastery_event
+BEGIN SELECT RAISE(ABORT,'game event injected mastery failure'); END;");
+                var failed = false;
+                try { game.SubmitAnswerAt(q1.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700); }
+                catch (Exception) { failed = true; }
+                var afterFault = game.CurrentState;
+                A(failed && afterFault.CompletedCheckpointCount == 0 && afterFault.CurrentCheckpointNumber == 1 &&
+                  !afterFault.IsComplete && game.NextQuestion().QuestionId == q1.QuestionId,
+                    "game_event_answer_fault_preserves_open_question_and_checkpoint");
+                A(Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + start.Session.SessionId + "';") == 0 &&
+                  Count(database, "SELECT count(*) FROM mastery_event;") == 0 &&
+                  Count(database, "SELECT count(*) FROM reward_event;") == 0,
+                    "game_event_answer_fault_rolls_back_learning_chain_and_reward");
+
+                Exec(database, "DROP TRIGGER fail_game_event_mastery;");
+                var q1Retry = game.SubmitAnswerAt(q1.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 720);
+                A(q1Retry.Learning.IsCorrect && q1Retry.EventState.CompletedCheckpointCount == 1 &&
+                  Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + start.Session.SessionId + "';") == 1,
+                    "game_event_retry_after_fault_commits_checkpoint_exactly_once");
+                for (var ordinal = 1; ordinal < 3; ordinal++)
+                {
+                    var question = game.NextQuestion();
+                    game.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 800 + ordinal * 100);
+                }
+                var completion = game.Complete();
+                A(completion.LearningSummary.LessonCompleted && completion.EventState.IsComplete &&
+                  Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + start.Session.SessionId + "';") == 3 &&
+                  Count(database, "SELECT count(*) FROM mastery_event;") == 3,
+                    "game_event_fault_recovery_completes_with_exact_three_learning_events");
+                A(Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + start.Session.SessionId + "';") == 1,
+                    "game_event_fault_recovery_grants_one_completion_reward");
+            }
+        }
+
+        private static void TestGameEventConcurrentCoordinatorsStayIdempotent(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.Lessons[0];
+            var eventId = "m2_evt_concurrent_rescue_01";
+            var eventPath = Path.Combine(root, "synthetic-game-event-concurrent.json");
+            WriteSyntheticGameEventCatalog(eventPath, eventId, lesson.Id, lesson.SkillId);
+            var database = NewDatabase(Path.Combine(root, "game-event-concurrent.db"), schemaPath);
+
+            using (var first = new MathGameEventCoordinator(database, templatePath, eventPath, "LOW", 14201, eventId, lesson.Id))
+            {
+                var firstStart = first.Start("Bé event concurrent");
+                using (var second = new MathGameEventCoordinator(database, templatePath, eventPath, "NORMAL", 999999, eventId, lesson.Id))
+                {
+                    var secondStart = second.Start("Bé event concurrent");
+                    A(secondStart.Session.ResumedExistingSession && secondStart.Session.SessionId == firstStart.Session.SessionId &&
+                      secondStart.EventState.EventId == eventId &&
+                      secondStart.Session.SelectedContentQuestionIds.SequenceEqual(firstStart.Session.SelectedContentQuestionIds),
+                        "game_event_concurrent_second_wrapper_binds_durable_winner_event_session");
+
+                    for (var ordinal = 0; ordinal < 3; ordinal++)
+                    {
+                        var firstQuestion = first.NextQuestion();
+                        var secondQuestion = second.NextQuestion();
+                        A(firstQuestion.QuestionId == secondQuestion.QuestionId &&
+                          firstQuestion.ContentQuestionId == secondQuestion.ContentQuestionId,
+                            "game_event_concurrent_same_checkpoint_same_question_" + ordinal);
+                        var committed = first.SubmitAnswerAt(firstQuestion.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700 + ordinal * 100);
+                        var replay = second.SubmitAnswerAt(secondQuestion.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 720 + ordinal * 100);
+                        A(committed.Learning.QuestionCompleted && replay.Learning.QuestionCompleted &&
+                          first.CurrentState.CompletedCheckpointCount == ordinal + 1 &&
+                          second.CurrentState.CompletedCheckpointCount == ordinal + 1,
+                            "game_event_concurrent_replay_keeps_checkpoint_in_sync_" + ordinal);
+                    }
+
+                    var completed = first.Complete();
+                    A(completed.LearningSummary.LessonCompleted && completed.EventState.IsComplete &&
+                      Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + firstStart.Session.SessionId + "';") == 3 &&
+                      Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + firstStart.Session.SessionId + "';") == 3,
+                        "game_event_concurrent_three_checkpoints_write_no_duplicate_learning_events");
+                    A(Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + firstStart.Session.SessionId + "';") == 1,
+                        "game_event_concurrent_winner_completion_grants_one_reward");
+
+                    var staleCompletionRejected = false;
+                    try { second.Complete(); }
+                    catch (Exception) { staleCompletionRejected = true; }
+                    A(staleCompletionRejected &&
+                      Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + firstStart.Session.SessionId + "';") == 1,
+                        "game_event_concurrent_stale_completion_cannot_duplicate_reward");
+                }
             }
         }
 
