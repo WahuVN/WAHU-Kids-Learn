@@ -1715,6 +1715,21 @@ namespace WAHU.ChildUiRuntimeSmoke
                         "quick_rescue_intro_cards_fit_900x640");
                 }
 
+                using (var scaledRescue = (Form)rescueCtor.Invoke(new object[] { database, settings }))
+                {
+                    Invoke(scaledRescue, "LoadEvents");
+                    Invoke(scaledRescue, "SelectEvent", presentation);
+                    scaledRescue.Scale(new SizeF(1.25f, 1.25f));
+                    RenderFormAndAssert(scaledRescue, 1125, 800, "quick_rescue_intro_125pct");
+                    var scaledButtons = GetField<System.Collections.IDictionary>(scaledRescue, "_eventButtons");
+                    var scaledCheckpoints = GetField<FlowLayoutPanel>(scaledRescue, "_checkpoints");
+                    A(scaledButtons.Count == 5 && scaledCheckpoints.Controls.Count == 3 &&
+                      GetField<Button>(scaledRescue, "_startButton").Height >= 60,
+                        "quick_rescue_intro_125pct_keeps_missions_checkpoints_and_primary_cta");
+                    A(ContainsControlText(scaledRescue, "KHÔNG ĐẾM NGƯỢC"),
+                        "quick_rescue_intro_125pct_keeps_no_countdown_banner");
+                }
+
                 using (var failureShell = (Form)rescueCtor.Invoke(new object[] { database, settings }))
                 {
                     Invoke(failureShell, "LoadEvents");
