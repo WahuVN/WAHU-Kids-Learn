@@ -495,7 +495,7 @@ namespace WAHUKidsLearn
                 var practiceCount = lesson.PracticeSets == null ? 0 : lesson.PracticeSets.TotalCount;
                 AddBody(practiceCount + " câu trong ngân hàng bài học: cơ bản, vừa sức và vận dụng.");
                 var access = LessonAccess(lesson.Id);
-                _detailFlow.Controls.Add(CreateLessonPracticeButton(lesson, access, practiceCount));
+                _detailFlow.Controls.Add(CreateLessonPracticeButton(lesson, access));
                 if (access != null && access.IsCompleted && access.LastScorePercent.HasValue)
                 {
                     var scoreText = "Lần gần nhất: " + Math.Round(access.LastScorePercent.Value) + "%";
@@ -531,7 +531,7 @@ namespace WAHUKidsLearn
             }
         }
 
-        private ChildActionButton CreateLessonPracticeButton(MathLessonDescriptor lesson, MathLessonAccessSnapshot access, int practiceCount)
+        private ChildActionButton CreateLessonPracticeButton(MathLessonDescriptor lesson, MathLessonAccessSnapshot access)
         {
             var button = new ChildActionButton
             {
@@ -570,8 +570,8 @@ namespace WAHUKidsLearn
                 return button;
             }
 
-            button.Text = (access.IsCompleted ? "Luyện lại " : "Luyện ") + Math.Max(1, practiceCount) + " câu bài này";
-            button.BadgeText = Math.Max(1, practiceCount).ToString();
+            button.Text = access.IsCompleted ? "Luyện lại bài này" : "Luyện bài này";
+            button.BadgeText = string.Empty;
             button.AccessibleDescription = access.IsCompleted
                 ? "Mở lại bài luyện tập " + lesson.TitleVi + "."
                 : "Bắt đầu bài luyện tập " + lesson.TitleVi + ".";

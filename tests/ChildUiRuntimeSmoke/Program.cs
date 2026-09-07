@@ -204,7 +204,7 @@ namespace WAHU.ChildUiRuntimeSmoke
             A(firstLesson.ObjectivesVi.Count >= 2, "math_catalog_lesson_has_objectives");
             A(firstLesson.Concepts.Count > 0, "math_catalog_lesson_has_concept");
             A(firstLesson.WorkedExamples.Count > 0, "math_catalog_lesson_has_worked_example");
-            A(firstLesson.PracticeSets.TotalCount == 3, "math_catalog_lesson_has_three_practice_questions");
+            A(firstLesson.PracticeSets.TotalCount >= 3, "math_catalog_lesson_has_at_least_three_practice_questions");
             A(catalog.FindLessonBySkill(firstLesson.SkillId).Id == firstLesson.Id, "math_catalog_skill_maps_to_lesson");
 
             var tempRoot = Path.Combine(Path.GetTempPath(), "wahu-child-ui-math-hub-" + Guid.NewGuid().ToString("N"));
@@ -252,12 +252,33 @@ namespace WAHU.ChildUiRuntimeSmoke
                     A(ContainsControlText(detailFlow, "Kiến thức cần nhớ"), "math_hub_detail_shows_concept_section");
                     A(ContainsControlText(detailFlow, "Ví dụ có lời giải"), "math_hub_detail_shows_example_section");
                     A(ContainsControlText(detailFlow, "Luyện tập"), "math_hub_detail_shows_practice_section");
-                    A(ContainsControlText(detailFlow, "3 câu trong ngân hàng bài học"), "math_hub_detail_shows_practice_count");
-                    var firstPractice = FindButtonContaining(detailFlow, "Luyện 3 câu bài này");
+                    A(ContainsControlText(detailFlow, firstLesson.PracticeSets.TotalCount + " câu trong ngân hàng bài học"), "math_hub_detail_shows_practice_count");
+                    var firstPractice = FindButtonContaining(detailFlow, "Luyện bài này");
                     A(firstPractice != null && firstPractice.Enabled,
                         "math_hub_first_lesson_targeted_practice_unlocked");
+                    A(string.IsNullOrWhiteSpace(Get<string>(firstPractice, "BadgeText")),
+                        "math_hub_targeted_practice_does_not_present_pool_as_session_count");
                     A(firstPractice.AccessibleDescription.IndexOf(firstLesson.TitleVi, StringComparison.OrdinalIgnoreCase) >= 0,
                         "math_hub_targeted_practice_names_lesson");
+
+                    var originalBasic = firstLesson.PracticeSets.Basic;
+                    var originalMedium = firstLesson.PracticeSets.Medium;
+                    var originalApplication = firstLesson.PracticeSets.Application;
+                    firstLesson.PracticeSets.Basic = new List<string> { "pool_basic_1", "pool_basic_2" };
+                    firstLesson.PracticeSets.Medium = new List<string> { "pool_medium_1", "pool_medium_2" };
+                    firstLesson.PracticeSets.Application = new List<string> { "pool_application_1", "pool_application_2" };
+                    Invoke(form, "SelectLessonInCatalog", firstLesson);
+                    A(ContainsControlText(detailFlow, "6 câu trong ngân hàng bài học"),
+                        "math_hub_expanded_pool_keeps_bank_count_visible");
+                    var expandedPoolPractice = FindButtonContaining(detailFlow, "Luyện bài này");
+                    A(expandedPoolPractice != null && expandedPoolPractice.Enabled &&
+                        string.Equals(expandedPoolPractice.Text, "Luyện bài này", StringComparison.Ordinal) &&
+                        string.IsNullOrWhiteSpace(Get<string>(expandedPoolPractice, "BadgeText")),
+                        "math_hub_expanded_pool_does_not_claim_six_question_session");
+                    firstLesson.PracticeSets.Basic = originalBasic;
+                    firstLesson.PracticeSets.Medium = originalMedium;
+                    firstLesson.PracticeSets.Application = originalApplication;
+                    Invoke(form, "SelectLessonInCatalog", firstLesson);
 
                     var lockedLesson = catalog.Lessons.FirstOrDefault(x => x.PrerequisiteSkills != null && x.PrerequisiteSkills.Count > 0);
                     A(lockedLesson != null, "math_hub_catalog_has_prerequisite_lesson_for_lock_test");
@@ -918,7 +939,7 @@ namespace WAHU.ChildUiRuntimeSmoke
                     A(ContainsControlText(detail, "Đã hoàn thành") && ContainsControlText(detail, "Tốt nhất: 100%"),
                         "targeted_ui_flow_hub_shows_completed_score");
                     Invoke(hub, "SelectLessonInCatalog", dependent);
-                    var unlockedPractice = FindButtonContaining(detail, "Luyện 3 câu bài này");
+                    var unlockedPractice = FindButtonContaining(detail, "Luyện bài này");
                     A(unlockedPractice != null && unlockedPractice.Enabled,
                         "targeted_ui_flow_completing_prerequisite_unlocks_next_lesson");
                 }

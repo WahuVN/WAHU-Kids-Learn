@@ -236,14 +236,25 @@ Test-only wave mở rộng E2E của AI3-010 sang hai answer surfaces còn lại
 
 Clean detached `847be1b`: production solution Rebuild Release/x86 **PASS**, Child UI **1593 assertions PASS**, persistence **183 assertions PASS**, content **36/36 PASS**, release-required runtime smokes **11/11 PASS**.
 
-## 14. Verification gates
+## 14. AI3-012 — decouple lesson bank size from practice CTA
 
-Current clean release evidence tại `847be1b`:
+UI-side Request 009 coupling được đóng mà không hard-code `3`:
+
+- lesson detail vẫn dùng `PracticeSets.TotalCount` để trình bày kích thước **ngân hàng** câu hỏi;
+- CTA unlocked/completed đổi thành `Luyện bài này` / `Luyện lại bài này`, bỏ numeric badge và không còn nhận `practiceCount` làm tham số;
+- regression mô phỏng in-memory pool 6 câu (2 basic + 2 medium + 2 application): detail hiện `6 câu trong ngân hàng bài học`, CTA vẫn trung tính và badge rỗng;
+- Flow 5/prerequisite unlock vẫn tìm và mở đúng targeted lesson practice.
+
+Clean detached `31e1991`: production solution Rebuild Release/x86 **PASS**, Child UI **1596 assertions PASS**, persistence **194 assertions PASS**, content **36/36 PASS**, release-required smokes **11/11 PASS**.
+
+## 15. Verification gates
+
+Current clean release evidence tại `31e1991`:
 
 - Production `WAHUKidsLearn.sln` Rebuild Release/x86 bằng Visual Studio 2022 Community MSBuild: **PASS**.
-- ChildUiRuntimeSmoke: **PASS — 1593 assertions**.
-- MathSessionPersistenceRuntimeSmoke: **PASS — 183 assertions**.
-- Release-required runtime smokes: **11/11 PASS** — SetupPreflight 42, Behavior 15, LearningSession 794, Motion 25, Child UI 1593, Content 21, Security 19, Audio 14, Performance 13, Update 33, SQLite 166.
+- ChildUiRuntimeSmoke: **PASS — 1596 assertions**.
+- MathSessionPersistenceRuntimeSmoke: **PASS — 194 assertions**.
+- Release-required runtime smokes: **11/11 PASS** — SetupPreflight 42, Behavior 15, LearningSession 794, Motion 25, Child UI 1596, Content 21, Security 19, Audio 14, Performance 13, Update 33, SQLite 166.
 - MathContentDataSmoke: **PASS — 36/36**.
 - `git diff --check`: **PASS**.
 - 67/67 lesson-detail/access sweep: **PASS**.
@@ -252,12 +263,12 @@ Current clean release evidence tại `847be1b`:
 - Exact retry-resume UI E2E: **PASS**.
 - Recoverable SQLite write-failure E2E trên choice/typed/interaction: **PASS**.
 - Request 007 corrupt-medium ordinal recovery có regression chính thức tại `7f79367`.
-- Retry/first-try engine contract `7c9a9ea` và write-failure reconcile `400fd0c` đã được AI3 UI consume; clean persistence suite hiện **183 assertions**.
+- Retry/first-try engine contract `7c9a9ea` và write-failure reconcile `400fd0c` đã được AI3 UI consume; clean persistence suite hiện **194 assertions**.
 - Generated `draw_segment_given_length` vẫn chỉ ở WIP AI2; chưa coi adaptive-generator blocker CLOSED trước upstream commit.
 
-## 15. Production release build audit
+## 16. Production release build audit
 
-Clean detached `847be1b` dùng đúng Visual Studio 2022 Community MSBuild production toolchain:
+Clean detached `31e1991` dùng đúng Visual Studio 2022 Community MSBuild production toolchain:
 
 `C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe WAHUKidsLearn.sln /restore /m /t:Rebuild /p:Configuration=Release /p:Platform=x86`
 
@@ -265,13 +276,13 @@ Kết quả: **PASS — exit 0**. `WAHU.Data`, `WAHU.Session`, App và toàn sol
 
 Release-required smoke executables trên cùng clean tree: **11/11 PASS**.
 
-- SetupPreflight **42**; Behavior **15**; LearningSession **794**; Motion **25**; Child UI **1593**; Content **21**; Security **19**; Audio **14**; Performance **13**; Update **33**; SQLite **166**.
+- SetupPreflight **42**; Behavior **15**; LearningSession **794**; Motion **25**; Child UI **1596**; Content **21**; Security **19**; Audio **14**; Performance **13**; Update **33**; SQLite **166**.
 - `0437122` đóng runtime-config schema mismatch bằng cách đồng bộ `RuntimeConfigBundle` với database runtime schema 4.
 - `847be1b` đóng `bundled_english_verified`: `.gitattributes` giữ exact LF bytes của `verified_core_v1.json` trên Windows `core.autocrlf=true`, nên manifest SHA-256 ổn định trên clean checkout.
 
 Vì vậy release runtime smoke chain đã **CLOSED**; strict distribution DoD hiện còn packaging/installer payload Request 008 và Math pool/session contract Request 009.
 
-## 16. Remaining blockers
+## 17. Remaining blockers
 
 ### P1-01 — adaptive interaction generator ownership
 
@@ -290,13 +301,14 @@ UI audit hiện tại:
 
 - lesson detail **đúng**: dùng `PracticeSets.TotalCount` để hiển thị `N câu trong ngân hàng bài học`;
 - lesson form/progress/result **đúng**: dùng `StartResult.TargetQuestionCount` / outcome `TargetQuestionCount` thật;
-- Hub CTA **còn coupling**: `CreateLessonPracticeButton()` lấy `PracticeSets.TotalCount` cho text/badge session, nên pool 6 sẽ thành `Luyện 6 câu bài này`.
+- Hub CTA **đã decouple AI3-012**: `CreateLessonPracticeButton()` không còn nhận pool count; unlocked/completed dùng `Luyện bài này` / `Luyện lại bài này` và badge rỗng.
+- Synthetic pool 6 đã khóa regression: detail hiện bank size 6 nhưng CTA không claim session 6 câu.
 
-AI3 chưa hard-code `3` vì `MathLessonAccessSnapshot` chưa publish target/session preview count. Chờ AI2 first-class contract cho selected 3-question session set/target, sau đó khóa regression pool >=6 nhưng CTA/progress/result vẫn 3.
+Phần còn mở của Request 009 là engine first-class selected 3-question session set/target từ pool mở rộng; sau khi AI2 publish contract, AI3 sẽ khóa E2E pool >=6 nhưng session/progress/result vẫn 3.
 
-## 17. Next AI3 actions
+## 18. Next AI3 actions
 
 1. Theo dõi release lane đóng Request 008; không sửa `tools/build/*` khi đang có owner/WIP khác.
-2. Theo dõi AI2 Request 009; khi có first-class target/selected-set contract, sửa Hub CTA khỏi pool count và thêm >=6-pool → 3-question E2E.
+2. Theo dõi AI2 Request 009; khi có first-class target/selected-set contract, thêm >=6-pool → 3-question E2E cho session/progress/result.
 3. Khi AI2 commit generator `draw_segment_given_length`, chạy adaptive interaction regression rồi cập nhật status.
 4. Khi các gate trên đóng, chạy full portable/installer/reinstall Math release regression và chốt strict DoD.
