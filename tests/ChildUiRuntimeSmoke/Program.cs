@@ -925,6 +925,8 @@ namespace WAHU.ChildUiRuntimeSmoke
                     var typedCount = 0;
                     var choiceCount = 0;
                     var interactionCount = 0;
+                    var answerUnitCount = 0;
+                    var answerUnits = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                     foreach (var raw in questions)
                     {
                         var question = raw as MathQuestion;
@@ -936,6 +938,24 @@ namespace WAHU.ChildUiRuntimeSmoke
                         catch (TargetInvocationException ex)
                         {
                             throw new Exception("Authored UI cannot render " + question.ContentQuestionId + " (" + question.QuestionType + "/" + question.AnswerKind + ")", ex.InnerException ?? ex);
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(question.AnswerUnit))
+                        {
+                            answerUnitCount++;
+                            answerUnits.Add(question.AnswerUnit);
+                            A(string.Equals(question.AnswerKind, "integer", StringComparison.Ordinal),
+                                "authored_ui_answer_unit_stays_integer_" + question.ContentQuestionId);
+                            A(question.IsCorrectAnswer(question.CorrectAnswerDisplay) &&
+                                !question.IsCorrectAnswer(question.CorrectAnswerFeedbackDisplay),
+                                "authored_ui_answer_unit_grading_stays_raw_" + question.ContentQuestionId);
+                            A(question.CorrectAnswerFeedbackDisplay == question.CorrectAnswerDisplay + " " + question.AnswerUnit,
+                                "authored_ui_answer_unit_feedback_appends_unit_" + question.ContentQuestionId);
+                            var typedSupport = GetField<Label>(form, "_support").Text;
+                            var typedDescription = GetField<TextBox>(form, "_typedAnswerBox").AccessibleDescription;
+                            A(typedSupport.IndexOf("kèm đơn vị", StringComparison.OrdinalIgnoreCase) < 0 &&
+                                typedDescription.IndexOf("kèm đơn vị", StringComparison.OrdinalIgnoreCase) < 0,
+                                "authored_ui_answer_unit_input_does_not_require_unit_" + question.ContentQuestionId);
                         }
 
                         if (string.Equals(question.AnswerKind, "interaction_integer", StringComparison.Ordinal))
@@ -963,6 +983,9 @@ namespace WAHU.ChildUiRuntimeSmoke
                     A(interactionCount == 2, "authored_ui_sweep_two_interaction_questions");
                     A(typedCount + choiceCount + interactionCount == count,
                         "authored_ui_sweep_answer_surfaces_partition_full_bank");
+                    A(answerUnitCount == 48, "authored_ui_sweep_all_answer_unit_questions");
+                    A(answerUnits.SetEquals(new[] { "cm", "dm", "m", "kg", "l", "ngày", "giờ", "phút" }),
+                        "authored_ui_sweep_answer_unit_matrix_complete");
                 }
             }
             finally
