@@ -178,6 +178,32 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
                     if choice_numbers[:2] != [groups, each]:
                         return f"Có {groups} nhóm, mỗi nhóm {each} chấm nên phải giữ đúng hai số {groups} và {each}; “{choice_text}” đổi số nhóm."
 
+    if skill in {"EVENT_POSSIBLE", "EVENT_CERTAIN", "EVENT_IMPOSSIBLE"}:
+        label = choice_text.strip().casefold()
+        if skill == "EVENT_POSSIBLE":
+            if label == "chắc chắn":
+                return "Sự kiện chỉ có thể xảy ra chứ không xảy ra ở mọi kết quả, nên chưa thể gọi là chắc chắn."
+            if label == "không thể":
+                return "Sự kiện có ít nhất một kết quả làm nó xảy ra, nên không thể xếp vào loại không thể."
+            if label in {"bằng nhau", "luôn sai", "không có kết quả"}:
+                return f"“{choice_text}” không phải cách phân loại mức độ có thể xảy ra của sự kiện trong tình huống này."
+        if skill == "EVENT_CERTAIN":
+            if label in {"có thể nhưng không chắc", "chỉ có thể"}:
+                return "Mọi kết quả hợp lệ đều thỏa điều kiện, nên sự kiện không chỉ dừng ở mức có thể mà là chắc chắn."
+            if label == "không thể":
+                return "Sự kiện xảy ra với mọi kết quả hợp lệ, nên không thể gọi là không thể."
+            if label in {"sai", "không có màu", "không xác định"}:
+                return f"“{choice_text}” không phản ánh việc mọi kết quả hợp lệ đều làm sự kiện xảy ra."
+        if skill == "EVENT_IMPOSSIBLE":
+            if label == "có thể":
+                return "Không có kết quả hợp lệ nào làm sự kiện xảy ra, nên không thể gọi là có thể."
+            if label == "chắc chắn":
+                return "Không có kết quả hợp lệ nào làm sự kiện xảy ra, trái hẳn với điều kiện của sự kiện chắc chắn."
+            if label in {"luôn đúng", "luôn xảy ra"}:
+                return f"“{choice_text}” nói sự kiện luôn xảy ra, nhưng thực tế không có kết quả hợp lệ nào làm nó xảy ra."
+            if label == "bằng nhau":
+                return "“bằng nhau” không phải cách phân loại mức độ có thể xảy ra của sự kiện."
+
     return None
 
 

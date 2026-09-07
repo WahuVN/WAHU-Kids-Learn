@@ -7828,17 +7828,17 @@
         {
           "id": "a",
           "text": "chắc chắn",
-          "rationale_vi": "“chắc chắn” chưa đúng. Số 4 là một mặt có thể xuất hiện nhưng không phải lần nào cũng ra 4."
+          "rationale_vi": "“chắc chắn” chưa đúng. Sự kiện chỉ có thể xảy ra chứ không xảy ra ở mọi kết quả, nên chưa thể gọi là chắc chắn. Số 4 là một mặt có thể xuất hiện nhưng không phải lần nào cũng ra 4."
         },
         {
           "id": "b",
           "text": "không thể",
-          "rationale_vi": "“không thể” chưa đúng. Số 4 là một mặt có thể xuất hiện nhưng không phải lần nào cũng ra 4."
+          "rationale_vi": "“không thể” chưa đúng. Sự kiện có ít nhất một kết quả làm nó xảy ra, nên không thể xếp vào loại không thể. Số 4 là một mặt có thể xuất hiện nhưng không phải lần nào cũng ra 4."
         },
         {
           "id": "c",
           "text": "bằng nhau",
-          "rationale_vi": "“bằng nhau” chưa đúng. Số 4 là một mặt có thể xuất hiện nhưng không phải lần nào cũng ra 4."
+          "rationale_vi": "“bằng nhau” chưa đúng. “bằng nhau” không phải cách phân loại mức độ có thể xảy ra của sự kiện trong tình huống này. Số 4 là một mặt có thể xuất hiện nhưng không phải lần nào cũng ra 4."
         },
         {
           "id": "d",
@@ -7886,17 +7886,17 @@
         {
           "id": "b",
           "text": "chắc chắn",
-          "rationale_vi": "“chắc chắn” chưa đúng. Có bóng đỏ trong túi nên có thể lấy được, nhưng còn bóng xanh nên không chắc chắn."
+          "rationale_vi": "“chắc chắn” chưa đúng. Sự kiện chỉ có thể xảy ra chứ không xảy ra ở mọi kết quả, nên chưa thể gọi là chắc chắn. Có bóng đỏ trong túi nên có thể lấy được, nhưng còn bóng xanh nên không chắc chắn."
         },
         {
           "id": "c",
           "text": "không thể",
-          "rationale_vi": "“không thể” chưa đúng. Có bóng đỏ trong túi nên có thể lấy được, nhưng còn bóng xanh nên không chắc chắn."
+          "rationale_vi": "“không thể” chưa đúng. Sự kiện có ít nhất một kết quả làm nó xảy ra, nên không thể xếp vào loại không thể. Có bóng đỏ trong túi nên có thể lấy được, nhưng còn bóng xanh nên không chắc chắn."
         },
         {
           "id": "d",
           "text": "luôn sai",
-          "rationale_vi": "“luôn sai” chưa đúng. Có bóng đỏ trong túi nên có thể lấy được, nhưng còn bóng xanh nên không chắc chắn."
+          "rationale_vi": "“luôn sai” chưa đúng. “luôn sai” không phải cách phân loại mức độ có thể xảy ra của sự kiện trong tình huống này. Có bóng đỏ trong túi nên có thể lấy được, nhưng còn bóng xanh nên không chắc chắn."
         }
       ],
       "correct_choice_id": "a"
@@ -7934,7 +7934,7 @@
         {
           "id": "a",
           "text": "chắc chắn",
-          "rationale_vi": "“chắc chắn” chưa đúng. Số 2 có trên vòng quay nên có thể xuất hiện, nhưng còn số 1 và 3 nên không chắc chắn."
+          "rationale_vi": "“chắc chắn” chưa đúng. Sự kiện chỉ có thể xảy ra chứ không xảy ra ở mọi kết quả, nên chưa thể gọi là chắc chắn. Số 2 có trên vòng quay nên có thể xuất hiện, nhưng còn số 1 và 3 nên không chắc chắn."
         },
         {
           "id": "b",
@@ -7944,12 +7944,12 @@
         {
           "id": "c",
           "text": "không thể",
-          "rationale_vi": "“không thể” chưa đúng. Số 2 có trên vòng quay nên có thể xuất hiện, nhưng còn số 1 và 3 nên không chắc chắn."
+          "rationale_vi": "“không thể” chưa đúng. Sự kiện có ít nhất một kết quả làm nó xảy ra, nên không thể xếp vào loại không thể. Số 2 có trên vòng quay nên có thể xuất hiện, nhưng còn số 1 và 3 nên không chắc chắn."
         },
         {
           "id": "d",
           "text": "không có kết quả",
-          "rationale_vi": "“không có kết quả” chưa đúng. Số 2 có trên vòng quay nên có thể xuất hiện, nhưng còn số 1 và 3 nên không chắc chắn."
+          "rationale_vi": "“không có kết quả” chưa đúng. “không có kết quả” không phải cách phân loại mức độ có thể xảy ra của sự kiện trong tình huống này. Số 2 có trên vòng quay nên có thể xuất hiện, nhưng còn số 1 và 3 nên không chắc chắn."
         }
       ],
       "correct_choice_id": "b"
@@ -7987,12 +7987,12 @@
         {
           "id": "a",
           "text": "có thể nhưng không chắc",
-          "rationale_vi": "“có thể nhưng không chắc” chưa đúng. Mọi mặt của xúc xắc đều là một số từ 1 đến 6. Vậy đáp án là chắc chắn."
+          "rationale_vi": "“có thể nhưng không chắc” chưa đúng. Mọi kết quả hợp lệ đều thỏa điều kiện, nên sự kiện không chỉ dừng ở mức có thể mà là chắc chắn. Mọi mặt của xúc xắc đều là một số từ 1 đến 6. Vậy đáp án là chắc chắn."
         },
         {
           "id": "b",
           "text": "không thể",
-          "rationale_vi": "“không thể” chưa đúng. Mọi mặt của xúc xắc đều là một số từ 1 đến 6. Vậy đáp án là chắc chắn."
+          "rationale_vi": "“không thể” chưa đúng. Sự kiện xảy ra với mọi kết quả hợp lệ, nên không thể gọi là không thể. Mọi mặt của xúc xắc đều là một số từ 1 đến 6. Vậy đáp án là chắc chắn."
         },
         {
           "id": "c",
@@ -8002,7 +8002,7 @@
         {
           "id": "d",
           "text": "sai",
-          "rationale_vi": "“sai” chưa đúng. Mọi mặt của xúc xắc đều là một số từ 1 đến 6. Vậy đáp án là chắc chắn."
+          "rationale_vi": "“sai” chưa đúng. “sai” không phản ánh việc mọi kết quả hợp lệ đều làm sự kiện xảy ra. Mọi mặt của xúc xắc đều là một số từ 1 đến 6. Vậy đáp án là chắc chắn."
         }
       ],
       "correct_choice_id": "c"
@@ -8040,17 +8040,17 @@
         {
           "id": "a",
           "text": "không thể",
-          "rationale_vi": "“không thể” chưa đúng. Mọi bóng trong túi đều xanh nên lấy bóng nào cũng xanh. Vậy đáp án là chắc chắn."
+          "rationale_vi": "“không thể” chưa đúng. Sự kiện xảy ra với mọi kết quả hợp lệ, nên không thể gọi là không thể. Mọi bóng trong túi đều xanh nên lấy bóng nào cũng xanh. Vậy đáp án là chắc chắn."
         },
         {
           "id": "b",
           "text": "có thể nhưng không chắc",
-          "rationale_vi": "“có thể nhưng không chắc” chưa đúng. Mọi bóng trong túi đều xanh nên lấy bóng nào cũng xanh. Vậy đáp án là chắc chắn."
+          "rationale_vi": "“có thể nhưng không chắc” chưa đúng. Mọi kết quả hợp lệ đều thỏa điều kiện, nên sự kiện không chỉ dừng ở mức có thể mà là chắc chắn. Mọi bóng trong túi đều xanh nên lấy bóng nào cũng xanh. Vậy đáp án là chắc chắn."
         },
         {
           "id": "c",
           "text": "không có màu",
-          "rationale_vi": "“không có màu” chưa đúng. Mọi bóng trong túi đều xanh nên lấy bóng nào cũng xanh. Vậy đáp án là chắc chắn."
+          "rationale_vi": "“không có màu” chưa đúng. “không có màu” không phản ánh việc mọi kết quả hợp lệ đều làm sự kiện xảy ra. Mọi bóng trong túi đều xanh nên lấy bóng nào cũng xanh. Vậy đáp án là chắc chắn."
         },
         {
           "id": "d",
@@ -8098,17 +8098,17 @@
         {
           "id": "b",
           "text": "không thể",
-          "rationale_vi": "“không thể” chưa đúng. Mọi thẻ trong hộp đều mang số 2 hoặc 5 nên khi rút một thẻ, sự kiện này chắc chắn xảy ra."
+          "rationale_vi": "“không thể” chưa đúng. Sự kiện xảy ra với mọi kết quả hợp lệ, nên không thể gọi là không thể. Mọi thẻ trong hộp đều mang số 2 hoặc 5 nên khi rút một thẻ, sự kiện này chắc chắn xảy ra."
         },
         {
           "id": "c",
           "text": "chỉ có thể",
-          "rationale_vi": "“chỉ có thể” chưa đúng. Mọi thẻ trong hộp đều mang số 2 hoặc 5 nên khi rút một thẻ, sự kiện này chắc chắn xảy ra."
+          "rationale_vi": "“chỉ có thể” chưa đúng. Mọi kết quả hợp lệ đều thỏa điều kiện, nên sự kiện không chỉ dừng ở mức có thể mà là chắc chắn. Mọi thẻ trong hộp đều mang số 2 hoặc 5 nên khi rút một thẻ, sự kiện này chắc chắn xảy ra."
         },
         {
           "id": "d",
           "text": "không xác định",
-          "rationale_vi": "“không xác định” chưa đúng. Mọi thẻ trong hộp đều mang số 2 hoặc 5 nên khi rút một thẻ, sự kiện này chắc chắn xảy ra."
+          "rationale_vi": "“không xác định” chưa đúng. “không xác định” không phản ánh việc mọi kết quả hợp lệ đều làm sự kiện xảy ra. Mọi thẻ trong hộp đều mang số 2 hoặc 5 nên khi rút một thẻ, sự kiện này chắc chắn xảy ra."
         }
       ],
       "correct_choice_id": "a"
@@ -8146,7 +8146,7 @@
         {
           "id": "a",
           "text": "có thể",
-          "rationale_vi": "“có thể” chưa đúng. Không có mặt số 8 nên sự kiện không thể xảy ra."
+          "rationale_vi": "“có thể” chưa đúng. Không có kết quả hợp lệ nào làm sự kiện xảy ra, nên không thể gọi là có thể. Không có mặt số 8 nên sự kiện không thể xảy ra."
         },
         {
           "id": "b",
@@ -8156,12 +8156,12 @@
         {
           "id": "c",
           "text": "chắc chắn",
-          "rationale_vi": "“chắc chắn” chưa đúng. Không có mặt số 8 nên sự kiện không thể xảy ra."
+          "rationale_vi": "“chắc chắn” chưa đúng. Không có kết quả hợp lệ nào làm sự kiện xảy ra, trái hẳn với điều kiện của sự kiện chắc chắn. Không có mặt số 8 nên sự kiện không thể xảy ra."
         },
         {
           "id": "d",
           "text": "luôn đúng",
-          "rationale_vi": "“luôn đúng” chưa đúng. Không có mặt số 8 nên sự kiện không thể xảy ra."
+          "rationale_vi": "“luôn đúng” chưa đúng. “luôn đúng” nói sự kiện luôn xảy ra, nhưng thực tế không có kết quả hợp lệ nào làm nó xảy ra. Không có mặt số 8 nên sự kiện không thể xảy ra."
         }
       ],
       "correct_choice_id": "b"
@@ -8199,12 +8199,12 @@
         {
           "id": "a",
           "text": "chắc chắn",
-          "rationale_vi": "“chắc chắn” chưa đúng. Không có bóng xanh trong túi nên không thể lấy bóng xanh."
+          "rationale_vi": "“chắc chắn” chưa đúng. Không có kết quả hợp lệ nào làm sự kiện xảy ra, trái hẳn với điều kiện của sự kiện chắc chắn. Không có bóng xanh trong túi nên không thể lấy bóng xanh."
         },
         {
           "id": "b",
           "text": "có thể",
-          "rationale_vi": "“có thể” chưa đúng. Không có bóng xanh trong túi nên không thể lấy bóng xanh."
+          "rationale_vi": "“có thể” chưa đúng. Không có kết quả hợp lệ nào làm sự kiện xảy ra, nên không thể gọi là có thể. Không có bóng xanh trong túi nên không thể lấy bóng xanh."
         },
         {
           "id": "c",
@@ -8214,7 +8214,7 @@
         {
           "id": "d",
           "text": "bằng nhau",
-          "rationale_vi": "“bằng nhau” chưa đúng. Không có bóng xanh trong túi nên không thể lấy bóng xanh."
+          "rationale_vi": "“bằng nhau” chưa đúng. “bằng nhau” không phải cách phân loại mức độ có thể xảy ra của sự kiện. Không có bóng xanh trong túi nên không thể lấy bóng xanh."
         }
       ],
       "correct_choice_id": "c"
@@ -8252,17 +8252,17 @@
         {
           "id": "a",
           "text": "có thể",
-          "rationale_vi": "“có thể” chưa đúng. Số 5 không xuất hiện trên vòng quay nên không có kết quả hợp lệ nào làm sự kiện xảy ra; đó là sự kiện không thể."
+          "rationale_vi": "“có thể” chưa đúng. Không có kết quả hợp lệ nào làm sự kiện xảy ra, nên không thể gọi là có thể. Số 5 không xuất hiện trên vòng quay nên không có kết quả hợp lệ nào làm sự kiện xảy ra; đó là sự kiện không thể."
         },
         {
           "id": "b",
           "text": "chắc chắn",
-          "rationale_vi": "“chắc chắn” chưa đúng. Số 5 không xuất hiện trên vòng quay nên không có kết quả hợp lệ nào làm sự kiện xảy ra; đó là sự kiện không thể."
+          "rationale_vi": "“chắc chắn” chưa đúng. Không có kết quả hợp lệ nào làm sự kiện xảy ra, trái hẳn với điều kiện của sự kiện chắc chắn. Số 5 không xuất hiện trên vòng quay nên không có kết quả hợp lệ nào làm sự kiện xảy ra; đó là sự kiện không thể."
         },
         {
           "id": "c",
           "text": "luôn xảy ra",
-          "rationale_vi": "“luôn xảy ra” chưa đúng. Số 5 không xuất hiện trên vòng quay nên không có kết quả hợp lệ nào làm sự kiện xảy ra; đó là sự kiện không thể."
+          "rationale_vi": "“luôn xảy ra” chưa đúng. “luôn xảy ra” nói sự kiện luôn xảy ra, nhưng thực tế không có kết quả hợp lệ nào làm nó xảy ra. Số 5 không xuất hiện trên vòng quay nên không có kết quả hợp lệ nào làm sự kiện xảy ra; đó là sự kiện không thể."
         },
         {
           "id": "d",
