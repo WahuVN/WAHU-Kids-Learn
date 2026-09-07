@@ -93,6 +93,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestGameEventTerminalRuntimeCleanupReconcilesOnNextStart(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventCommitFaultPreservesCheckpoint(root, schemaPath, templatePath, lessonCatalogPath);
                 TestGameEventConcurrentCoordinatorsStayIdempotent(root, schemaPath, templatePath, lessonCatalogPath);
+                TestGameEventCompleteVsSuspendRaceStaysTerminal(root, schemaPath, templatePath, lessonCatalogPath);
                 Console.WriteLine("MATH_SESSION_PERSISTENCE_RUNTIME_SMOKE_PASS assertions=" + _assertions);
                 return 0;
             }
@@ -1395,6 +1396,83 @@ BEGIN SELECT RAISE(ABORT,'game event injected mastery failure'); END;");
                       "' AND lesson_id='" + lesson.Id + "' AND completed_count=1;") == 1,
                         "game_event_concurrent_completion_terminalizes_progress_and_reward_exactly_once");
                 }
+            }
+        }
+
+        private static void TestGameEventCompleteVsSuspendRaceStaysTerminal(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.Lessons[0];
+            var eventId = "m2_evt_complete_suspend_race_01";
+            var eventPath = Path.Combine(root, "synthetic-game-event-complete-suspend-race.json");
+            WriteSyntheticGameEventCatalog(eventPath, eventId, lesson.Id, lesson.SkillId);
+            var database = NewDatabase(Path.Combine(root, "game-event-complete-suspend-race.db"), schemaPath);
+
+            using (var completing = new MathGameEventCoordinator(database, templatePath, eventPath, "LOW", 14231, eventId, lesson.Id))
+            using (var closing = new MathGameEventCoordinator(database, templatePath, eventPath, "NORMAL", 999999, eventId, lesson.Id))
+            {
+                var firstStart = completing.Start("Bé complete suspend race");
+                var secondStart = closing.Start("Bé complete suspend race");
+                A(secondStart.Session.ResumedExistingSession && secondStart.Session.SessionId == firstStart.Session.SessionId,
+                    "game_event_complete_suspend_race_wrappers_share_durable_session");
+
+                for (var ordinal = 0; ordinal < 3; ordinal++)
+                {
+                    var qA = completing.NextQuestion();
+                    var qB = closing.NextQuestion();
+                    completing.SubmitAnswerAt(qA.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700 + ordinal * 100);
+                    closing.SubmitAnswerAt(qB.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 720 + ordinal * 100);
+                }
+
+                MathGameEventCompletionResult completion = null;
+                Exception completionError = null;
+                Exception suspendError = null;
+                var gate = new ManualResetEvent(false);
+                var readyComplete = new ManualResetEvent(false);
+                var readySuspend = new ManualResetEvent(false);
+                var completeThread = new Thread(() =>
+                {
+                    readyComplete.Set();
+                    gate.WaitOne();
+                    try { completion = completing.Complete(); } catch (Exception ex) { completionError = ex; }
+                });
+                var suspendThread = new Thread(() =>
+                {
+                    readySuspend.Set();
+                    gate.WaitOne();
+                    try { closing.SuspendForBreak("close_during_completion"); } catch (Exception ex) { suspendError = ex; }
+                });
+                completeThread.Start();
+                suspendThread.Start();
+                A(readyComplete.WaitOne(5000) && readySuspend.WaitOne(5000),
+                    "game_event_complete_suspend_race_workers_ready");
+                gate.Set();
+                A(completeThread.Join(10000) && suspendThread.Join(10000),
+                    "game_event_complete_suspend_race_workers_finish");
+                gate.Dispose();
+                readyComplete.Dispose();
+                readySuspend.Dispose();
+
+                A(completionError == null && suspendError == null && completion != null &&
+                  completion.EventState.IsComplete && completion.LearningSummary.LessonCompleted,
+                    "game_event_complete_suspend_race_completion_wins_without_surface_error");
+                A(SessionState(database, firstStart.Session.SessionId) == "completed" &&
+                  Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + firstStart.Session.SessionId + "';") == 0,
+                    "game_event_complete_suspend_race_cannot_revive_terminal_runtime_checkpoint");
+                A(Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + firstStart.Session.SessionId + "';") == 3 &&
+                  Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + firstStart.Session.SessionId + "';") == 3 &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + firstStart.Session.SessionId + "';") == 1,
+                    "game_event_complete_suspend_race_keeps_exact_learning_and_reward_chain");
+
+                closing.Dispose();
+                A(SessionState(database, firstStart.Session.SessionId) == "completed" &&
+                  Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + firstStart.Session.SessionId + "';") == 0 &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + firstStart.Session.SessionId + "';") == 1,
+                    "game_event_dispose_after_completion_race_is_terminal_idempotent");
             }
         }
 
