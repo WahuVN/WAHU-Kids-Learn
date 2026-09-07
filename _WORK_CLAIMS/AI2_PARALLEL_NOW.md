@@ -13,10 +13,11 @@ ACTIVE_FOCUS=FIRST_FIVE_EVENT_RUNTIME_BEHAVIOR_RESUME_REWARD
 
 - Public runtime landed: `492a942` — `MathGameEventCatalogSource`, DTO/state/action mapper, `MathGameEventCoordinator`.
 - Synthetic P0: **PASS** — exact targeted 3-question session, checkpoint progress, retry+suspend/resume, behavior action mapping, early-complete guard, Garden reward once, corrupt/missing metadata fallback, answer-transaction fault recovery, concurrent coordinator idempotency.
-- Persistence current: **7735 PASS**.
+- Persistence current: **7745 PASS**.
 - Event identity requires no migration: V1 enforces one event/lesson; resume can derive event deterministically from `target_lesson_id` when catalog is healthy.
 - Production `game_events_v1.json` published by AI1 at `bd1809e` and integrated against runtime: 5/5 production events sequential PASS; production event-1 wrong→retry→suspend/resume PASS.
 - Durable active-event precedence: nếu UI bấm event khác trong lúc một targeted event đang dở, event wrapper resume session/lesson/event durable cũ; caller lesson thường vẫn reject mismatch.
+- Behavior-action resume: support action cuối được rebuild từ durable behavior history khi resume; không reset về `normal`. FATIGUED không bị ép bằng cách hạ threshold single-skill; CTA `Nghỉ ở đây` vẫn là explicit safe suspend path.
 
 ## PLAYABLE EVENT V1 OVERRIDE
 
@@ -73,7 +74,7 @@ Milestone: `3cf7fc6`.
 - MathDataEngineRuntimeSmoke: 104 PASS.
 - LearningSessionRuntimeSmoke: 800 PASS.
 - SQLiteRuntimeSmoke production: 179 PASS.
-- MathSessionPersistenceRuntimeSmoke current: **7735 PASS**; gồm real 402-bank breadth stress + write-failure/corruption repair + deterministic authored runtime IDs + concurrent pending-retry semantics + generated/open-ordinal self-heal + late-review transaction rollback + operational DB failure fail-safe.
+- MathSessionPersistenceRuntimeSmoke current: **7745 PASS**; gồm real 402-bank breadth stress + write-failure/corruption repair + deterministic authored runtime IDs + concurrent pending-retry semantics + generated/open-ordinal self-heal + late-review transaction rollback + operational DB failure fail-safe.
 - Real 402-bank integration đã PASS; selector breadth hiện verify đủ **67/67 lesson**, mỗi basic/medium/application bucket đều deterministic, in-range và xoay đủ 2 variant qua 16 seed.
 
 Không hard-code assertion count; regression mới chỉ được tăng hoặc nếu giảm phải có lý do rõ.

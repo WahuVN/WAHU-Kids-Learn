@@ -350,8 +350,15 @@ namespace WAHU.Session
             _session = new MathSessionCoordinator(_database, _templatePath, _performanceProfile, _seed, lessonId, true);
             _start = _session.Start(displayName);
             _started = true;
-            if (_start.ResumedExistingSession && !string.Equals(_start.TargetLessonId, lessonId, StringComparison.Ordinal))
-                ResolveEventForLessonFailSafe(_start.TargetLessonId);
+            if (_start.ResumedExistingSession)
+            {
+                _lastAction = MathGameEventBehaviorMapper.Map(new BehaviorDecision
+                {
+                    State = _session.Summary.FinalBehaviorState
+                });
+                if (!string.Equals(_start.TargetLessonId, lessonId, StringComparison.Ordinal))
+                    ResolveEventForLessonFailSafe(_start.TargetLessonId);
+            }
             try
             {
                 // A prior completed Math session may have become durable just before a transient

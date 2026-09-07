@@ -77,6 +77,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestGameEventRuntimeResumeRewardAndFallback(root, schemaPath, templatePath, lessonCatalogPath);
                 TestProductionFirstFiveGameEventsRuntime(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestProductionFirstEventResumeJourney(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
+                TestGameEventResumeRestoresBehaviorAction(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventDifferentSelectionResumesDurableActiveEvent(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventRewardFaultReconcilesOnNextStart(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventCommitFaultPreservesCheckpoint(root, schemaPath, templatePath, lessonCatalogPath);
@@ -401,6 +402,67 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 A(Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + sessionId + "';") == 1 &&
                   Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + sessionId + "';") == 3,
                     "production_first_event_resume_journey_grants_one_reward_three_mastery");
+            }
+        }
+
+        private static void TestGameEventResumeRestoresBehaviorAction(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath,
+            string gameEventPath)
+        {
+            var events = new MathGameEventCatalogSource().Load(gameEventPath, lessonCatalogPath);
+            var definition = events.Events[0];
+            var database = NewDatabase(Path.Combine(root, "game-event-behavior-resume.db"), schemaPath);
+            string sessionId;
+            string openQ3Id;
+            BehaviorState stateBeforeSuspend;
+            string actionBeforeSuspend;
+
+            using (var first = new MathGameEventCoordinator(database, templatePath, gameEventPath, "LOW", 15131,
+                definition.Id, definition.TargetLessonId))
+            {
+                var start = first.Start("Bé behavior resume");
+                sessionId = start.Session.SessionId;
+
+                for (var ordinal = 0; ordinal < 2; ordinal++)
+                {
+                    var question = first.NextQuestion();
+                    var wrong1 = first.SubmitAnswerWithRetryAt(WrongAnswer(question), 2, "smoke", DateTime.UtcNow, 5000);
+                    A(!wrong1.Learning.IsCorrect && wrong1.Learning.CanRetry && !wrong1.Learning.QuestionCompleted,
+                        "game_event_behavior_resume_wrong_pending_" + ordinal);
+                    var wrong2 = first.SubmitRetryAnswerAt(WrongAnswer(question), 2, "smoke", DateTime.UtcNow, 5000);
+                    A(!wrong2.Learning.IsCorrect && wrong2.Learning.QuestionCompleted,
+                        "game_event_behavior_resume_retry_wrong_finalizes_" + ordinal);
+                }
+
+                var q3 = first.NextQuestion();
+                openQ3Id = q3.QuestionId;
+                var q3Wrong = first.SubmitAnswerWithRetryAt(WrongAnswer(q3), 2, "smoke", DateTime.UtcNow, 5000);
+                stateBeforeSuspend = q3Wrong.EventState.Action.BehaviorState;
+                actionBeforeSuspend = q3Wrong.EventState.Action.Action;
+                A(!q3Wrong.Learning.IsCorrect && q3Wrong.Learning.CanRetry && q3Wrong.EventState.RetryPending &&
+                  q3Wrong.EventState.CompletedCheckpointCount == 2,
+                    "game_event_behavior_resume_keeps_third_checkpoint_pending");
+                A(stateBeforeSuspend != BehaviorState.READY && actionBeforeSuspend != "normal",
+                    "game_event_behavior_resume_reaches_non_normal_support_action_before_suspend");
+                first.SuspendForBreak("behavior_action_resume");
+            }
+
+            using (var resumed = new MathGameEventCoordinator(database, templatePath, gameEventPath, "NORMAL", 999999,
+                null, definition.TargetLessonId))
+            {
+                var start = resumed.Start("Bé behavior resume");
+                A(start.Session.ResumedExistingSession && start.Session.SessionId == sessionId &&
+                  start.Session.RetryPending && start.EventState.CompletedCheckpointCount == 2,
+                    "game_event_behavior_resume_restores_pending_third_checkpoint");
+                A(start.EventState.Action.BehaviorState == stateBeforeSuspend &&
+                  start.EventState.Action.Action == actionBeforeSuspend,
+                    "game_event_behavior_resume_restores_last_durable_behavior_action");
+                A(resumed.NextQuestion().QuestionId == openQ3Id,
+                    "game_event_behavior_resume_keeps_exact_open_third_question");
+                resumed.SuspendForBreak("behavior_resume_cleanup");
             }
         }
 
