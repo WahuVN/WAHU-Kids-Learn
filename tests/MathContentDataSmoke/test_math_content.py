@@ -64,6 +64,8 @@ class MathContentDataSmoke(unittest.TestCase):
                 self.assertGreaterEqual(len(lesson["objectives_vi"]), 2)
                 self.assertTrue(lesson["explanation_vi"].strip())
                 self.assertGreaterEqual(len(lesson["concepts"]), 1)
+                for concept in lesson["concepts"]:
+                    self.assertGreaterEqual(len(concept["definition_vi"].strip()), validator.MIN_CONCEPT_DEFINITION_CHARS)
                 self.assertGreaterEqual(len(lesson["worked_examples"]), 1)
                 example = lesson["worked_examples"][0]
                 self.assertTrue(example["prompt_vi"].strip())

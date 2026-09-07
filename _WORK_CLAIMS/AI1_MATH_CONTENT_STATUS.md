@@ -133,6 +133,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - child-facing lesson/question text có **0 internal-engine vocabulary**; metadata kỹ thuật như `application`, `numeric_input`, `deterministic` vẫn được phép;
 - **67/67 worked example unique**, mỗi ví dụ có ít nhất 2 bước giải, **0 exact/near overlap** với 201 câu practice và 67/67 solution chốt đáp án tường minh;
 - cả hai mục tiêu học đạt **67/67 unique** và gắn concept; objective 1 đã loại **67/67** placeholder `Nhận biết và thực hiện đúng nội dung:` và đổi động từ theo answer surface, objective 2 placeholder chung = 0;
+- 67/67 concept definition hiện dài ít nhất **40 ký tự**; 3 definition quá mỏng (`Thêm vào`, `Ngày và giờ`, `Giờ và phút`) đã được nâng thành quan hệ có ý nghĩa, vẫn giữ Grade-2 scope;
 - 201/201 `explanation_vi` unique và dài ít nhất 32 ký tự; **57 lời giải quá ngắn đã được nâng lên 0**, MCQ giữ correct-rationale đồng bộ với explanation; **201/201 lời giải có evidence của đáp án**, 44 câu thiếu kết luận tường minh đã được nâng về 0; **33 numeric feedback tail máy móc** `Kết quả này theo đúng quy tắc...` đã giảm **33 → 0** và được thay bằng check-step theo nhóm concept;
 - toàn ngân hàng đạt **0 exact duplicate + 0 cross-lesson near-duplicate ≥ 0.95**; 2 cặp near-duplicate đã được viết lại theo ngữ cảnh khác;
 - 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract;

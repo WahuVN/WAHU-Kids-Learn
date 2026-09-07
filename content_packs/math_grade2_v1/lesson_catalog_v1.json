@@ -1580,7 +1580,7 @@
         {
           "id": "m2_cp_wp_one_step_add_more_01",
           "name_vi": "Thêm vào",
-          "definition_vi": "Tổng mới = số ban đầu + số được thêm."
+          "definition_vi": "Khi có thêm một lượng mới, tổng mới bằng số ban đầu cộng số được thêm; lượng cần tìm tăng lên."
         }
       ],
       "worked_examples": [
@@ -2696,7 +2696,7 @@
         {
           "id": "m2_cp_time_day_24_hours_01",
           "name_vi": "Ngày và giờ",
-          "definition_vi": "1 ngày = 24 giờ."
+          "definition_vi": "Một ngày đầy đủ gồm 24 giờ; đủ 24 giờ liên tiếp tương ứng đúng một ngày."
         }
       ],
       "worked_examples": [
@@ -2745,7 +2745,7 @@
         {
           "id": "m2_cp_time_hour_60_minutes_01",
           "name_vi": "Giờ và phút",
-          "definition_vi": "1 giờ = 60 phút."
+          "definition_vi": "Một giờ gồm 60 phút; đủ 60 phút liên tiếp tương ứng đúng một giờ."
         }
       ],
       "worked_examples": [

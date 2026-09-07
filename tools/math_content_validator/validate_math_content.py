@@ -37,6 +37,7 @@ NUMERIC_EQUALITY_RES = (
     re.compile(r"(?<!\d)((?:\d+\s+:\s+)+\d+)\s*=\s*(-?\d+)(?!\d)"),
 )
 MIN_QUESTION_EXPLANATION_CHARS = 32
+MIN_CONCEPT_DEFINITION_CHARS = 40
 MAX_HINT_CHARS = 130
 MAX_APPLICATION_LOWER_SHAPE_SIMILARITY = 0.75
 GENERIC_SECOND_HINT = "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
@@ -569,6 +570,8 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
                 concept_ids.add(x); all_ids.append((x, cwhere))
             required_text(concept, "name_vi", cwhere, errors)
             concept_definition = required_text(concept, "definition_vi", cwhere, errors)
+            if concept_definition and len(concept_definition) < MIN_CONCEPT_DEFINITION_CHARS:
+                errors.append(f"concept_definition_too_short:{cwhere}:{len(concept_definition)}")
             validate_numeric_equalities(concept_definition, cwhere + ".definition_vi", errors)
         examples = required_list(lesson, "worked_examples", where, errors)
         for j, example in enumerate(examples):
