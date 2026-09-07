@@ -387,6 +387,7 @@ $manifest = [ordered]@{
         source_provenance = 'PASS'
         source_tree_clean = 'PASS'
         source_commit_stable = 'PASS'
+        source_provenance_after_installer = 'PENDING'
         win7_target_smoke = 'PENDING'
         production_signing = 'PENDING'
     }
@@ -453,5 +454,24 @@ if ($CompileInstaller -or $RequireInstaller) {
 } else {
     Write-Host '[15/15] Installer compile chưa được yêu cầu.'
 }
+
+Write-Host '[15b/15] Final post-installer source provenance gate'
+$gitCommitAfterInstaller = (& $git rev-parse HEAD 2>$null).Trim()
+if ($LASTEXITCODE -ne 0 -or $gitCommitAfterInstaller -ne $sourceGitCommit) {
+    throw "REFUSE_SOURCE_HEAD_CHANGED_AFTER_INSTALLER: HEAD đổi sau installer step. start=$sourceGitCommit end=$gitCommitAfterInstaller"
+}
+$sourceStatusAfterInstaller = @(Get-GitSourceStatus -GitPath $git)
+if ($sourceStatusAfterInstaller.Count -ne 0) {
+    throw ("REFUSE_SOURCE_MUTATED_AFTER_INSTALLER: source tree thay đổi sau installer step. Entries: " + (($sourceStatusAfterInstaller | ForEach-Object { [string]$_ }) -join '; '))
+}
+& $git diff --check
+if ($LASTEXITCODE -ne 0) { throw 'Git diff --check fail sau installer step.' }
+$manifest.gates.source_provenance_after_installer = 'PASS'
+$manifest | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $manifestPath -Encoding UTF8
+$manifestFinal = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
+if ($manifestFinal.gates.source_provenance_after_installer -ne 'PASS' -or $manifestFinal.git_commit -ne $sourceGitCommit) {
+    throw 'Release manifest final provenance write/round-trip failed.'
+}
+Write-Host "SOURCE_PROVENANCE_AFTER_INSTALLER_PASS git_commit=$gitCommitAfterInstaller"
 
 Write-Host "BUILD_SETUP_ARTIFACTS_PASS publish=$publish"
