@@ -78,6 +78,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestGameEventRuntimeResumeRewardAndFallback(root, schemaPath, templatePath, lessonCatalogPath);
                 TestGameEventCorruptCatalogCompletesLearningSafely(root, schemaPath, templatePath, lessonCatalogPath);
                 TestGameEventStaleIdFallsBackToLessonEvent(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
+                TestGameEventMismatchedEventLessonFailsBeforeSession(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestProductionFirstFiveGameEventsRuntime(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestProductionFirstEventResumeJourney(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventResumeAfterThirdAnswerBeforeComplete(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
@@ -408,6 +409,34 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                     "game_event_stale_requested_id_keeps_targeted_three_question_session");
                 game.SuspendForBreak("stale_event_id_cleanup");
             }
+        }
+
+        private static void TestGameEventMismatchedEventLessonFailsBeforeSession(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath,
+            string gameEventPath)
+        {
+            var events = new MathGameEventCatalogSource().Load(gameEventPath, lessonCatalogPath);
+            A(events.Events.Count >= 2, "game_event_mismatch_fixture_has_two_production_events");
+            var requested = events.Events[0];
+            var wrongLesson = events.Events[1].TargetLessonId;
+            var database = NewDatabase(Path.Combine(root, "game-event-mismatched-lesson.db"), schemaPath);
+            var rejected = false;
+            using (var game = new MathGameEventCoordinator(database, templatePath, gameEventPath, "LOW", 14961,
+                requested.Id, wrongLesson))
+            {
+                try { game.Start("Bé stale mapping"); }
+                catch (InvalidOperationException) { rejected = true; }
+            }
+            A(rejected,
+                "game_event_mismatched_event_and_fallback_lesson_is_rejected_fail_closed");
+            A(Count(database, "SELECT count(*) FROM session WHERE state='active';") == 0 &&
+              Count(database, "SELECT count(*) FROM math_session_runtime;") == 0 &&
+              Count(database, "SELECT count(*) FROM math_lesson_progress;") == 0 &&
+              Count(database, "SELECT count(*) FROM reward_event;") == 0,
+                "game_event_mismatch_fails_before_creating_session_progress_or_reward");
         }
 
         private static void TestProductionFirstFiveGameEventsRuntime(
