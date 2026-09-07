@@ -37,6 +37,7 @@ namespace WAHU.ChildUiRuntimeSmoke
             TestAllAuthoredAnswerSurfaces(appAssembly);
             TestTargetedLessonUiFlow(appAssembly);
             TestChoiceRetryUiFlow(appAssembly);
+            TestSubmitFailureRecoveryUiFlow(appAssembly);
             TestRetryResumeUiFlow(appAssembly);
             TestInteractionRetryUiFlow(appAssembly);
             TestInteractiveSegmentAnswer(appAssembly);
@@ -1017,6 +1018,164 @@ namespace WAHU.ChildUiRuntimeSmoke
             }
         }
 
+        private static void TestSubmitFailureRecoveryUiFlow(Assembly appAssembly)
+        {
+            var repo = Directory.GetCurrentDirectory();
+            var sourceContent = Path.Combine(repo, "content_packs", "math_grade2_v1");
+            var runtimeContent = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "content_packs", "math_grade2_v1");
+            Directory.CreateDirectory(runtimeContent);
+            foreach (var name in new[] { "verified_templates_v1.json", "lesson_catalog_v1.json", "question_bank_v1.json" })
+                File.Copy(Path.Combine(sourceContent, name), Path.Combine(runtimeContent, name), true);
+
+            var lesson = new MathLessonCatalogSource().Load(Path.Combine(sourceContent, "lesson_catalog_v1.json"))
+                .FindLesson("m2_ls_point_recognize");
+            A(lesson != null && (lesson.PrerequisiteSkills == null || lesson.PrerequisiteSkills.Count == 0),
+                "submit_failure_fixture_root_lesson_unlocked");
+
+            var tempRoot = Path.Combine(Path.GetTempPath(), "wahu-child-ui-submit-failure-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempRoot);
+            try
+            {
+                var schemaSource = Path.Combine(repo, "data", "schema");
+                var schemaDir = Path.Combine(tempRoot, "schema");
+                Directory.CreateDirectory(schemaDir);
+                foreach (var source in Directory.GetFiles(schemaSource, "*.sql"))
+                    File.Copy(source, Path.Combine(schemaDir, Path.GetFileName(source)), true);
+                var database = new LearningDatabase(Path.Combine(tempRoot, "learning.db"), Path.Combine(schemaDir, "001_initial.sql"));
+                var init = database.Initialize("DELETE");
+                A(init.SchemaVersion == 4 && init.Health.IsHealthy, "submit_failure_database_v4_ready");
+                new LearnerSessionService(database).EnsurePrimaryChild("Bé UI write recovery");
+
+                var ctor = typeof(WAHUKidsLearn.MathLessonForm).GetConstructor(
+                    BindingFlags.Instance | BindingFlags.NonPublic,
+                    null,
+                    new[] { typeof(LearningDatabase), typeof(RuntimePerformanceSettings), typeof(string) },
+                    null);
+                A(ctor != null, "submit_failure_lesson_constructor_available");
+                using (var form = (WAHUKidsLearn.MathLessonForm)ctor.Invoke(new object[]
+                {
+                    database,
+                    new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW },
+                    lesson.Id
+                }))
+                {
+                    Invoke(form, "StartSession");
+                    var question = GetField<MathQuestion>(form, "_question");
+                    A(question != null && question.DisplayChoices != null && question.DisplayChoices.Count >= 2,
+                        "submit_failure_first_question_is_choice");
+                    var contentQuestionId = question.ContentQuestionId;
+                    var correctIndex = -1;
+                    for (var i = 0; i < question.DisplayChoices.Count; i++)
+                        if (string.Equals(question.DisplayChoices[i], question.CorrectAnswerDisplay, StringComparison.Ordinal)) correctIndex = i;
+                    A(correctIndex >= 0, "submit_failure_correct_index_resolves");
+
+                    ExecuteDatabaseSql(database, @"CREATE TRIGGER ui_fail_math_mastery
+BEFORE INSERT ON mastery_event
+BEGIN
+    SELECT RAISE(ABORT, 'ui_injected_math_commit_failure');
+END;");
+                    Invoke(form, "SubmitChoice", correctIndex, "ui_write_failure");
+
+                    var coordinator = GetField<object>(form, "_coordinator");
+                    var failedSummary = Get<object>(coordinator, "Summary");
+                    A(!GetField<bool>(form, "_finished") && !GetField<bool>(form, "_submitting") &&
+                        Get<bool>(coordinator, "IsActive") && Get<bool>(coordinator, "HasOpenQuestion"),
+                        "submit_failure_ui_keeps_recoverable_session_active");
+                    A(Get<int>(failedSummary, "Attempts") == 0 && Get<int>(failedSummary, "AnswerAttempts") == 0,
+                        "submit_failure_ui_does_not_advance_counters");
+                    var restored = GetField<MathQuestion>(form, "_question");
+                    A(restored != null && string.Equals(restored.ContentQuestionId, contentQuestionId, StringComparison.Ordinal),
+                        "submit_failure_ui_keeps_same_authored_question");
+                    A(GetField<Label>(form, "_feedback").Text.IndexOf("Chưa lưu", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                        GetField<Label>(form, "_support").Text.IndexOf("an toàn", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "submit_failure_ui_explains_safe_retry");
+                    var buttons = GetField<Array>(form, "_answerButtons");
+                    for (var i = 0; i < question.DisplayChoices.Count; i++)
+                    {
+                        var button = (Control)buttons.GetValue(i);
+                        A(button.Enabled && Get<object>(button, "VisualState").ToString() == "Idle",
+                            "submit_failure_ui_choice_reenabled_" + i);
+                    }
+                    A(!GetField<bool>(form, "_completeOnNext"), "submit_failure_ui_does_not_route_to_next_question");
+
+                    ExecuteDatabaseSql(database, "DROP TRIGGER ui_fail_math_mastery;");
+                    Invoke(form, "SubmitChoice", correctIndex, "ui_write_recovery_retry");
+                    var recoveredSummary = Get<object>(coordinator, "Summary");
+                    A(Get<int>(recoveredSummary, "Attempts") == 1 && Get<int>(recoveredSummary, "AnswerAttempts") == 1 &&
+                        Get<int>(recoveredSummary, "IndependentCorrect") == 1 && Get<int>(recoveredSummary, "RetriedQuestions") == 0,
+                        "submit_failure_retry_commits_once_as_true_first_durable_try");
+                    var correctButton = (Control)buttons.GetValue(correctIndex);
+                    A(!correctButton.Enabled && Get<object>(correctButton, "VisualState").ToString() == "Correct",
+                        "submit_failure_retry_finalizes_normal_answer_ui");
+
+                    Invoke(coordinator, "Abort", "submit_failure_cleanup");
+                    SetField(form, "_finished", true);
+                }
+
+                var retryDatabase = new LearningDatabase(Path.Combine(tempRoot, "learning-retry.db"), Path.Combine(schemaDir, "001_initial.sql"));
+                var retryInit = retryDatabase.Initialize("DELETE");
+                A(retryInit.SchemaVersion == 4 && retryInit.Health.IsHealthy, "submit_retry_failure_database_v4_ready");
+                new LearnerSessionService(retryDatabase).EnsurePrimaryChild("Bé UI retry write recovery");
+                using (var retryForm = (WAHUKidsLearn.MathLessonForm)ctor.Invoke(new object[]
+                {
+                    retryDatabase,
+                    new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW },
+                    lesson.Id
+                }))
+                {
+                    Invoke(retryForm, "StartSession");
+                    var retryQuestion = GetField<MathQuestion>(retryForm, "_question");
+                    var retryCorrectIndex = -1;
+                    for (var i = 0; i < retryQuestion.DisplayChoices.Count; i++)
+                        if (string.Equals(retryQuestion.DisplayChoices[i], retryQuestion.CorrectAnswerDisplay, StringComparison.Ordinal)) retryCorrectIndex = i;
+                    A(retryCorrectIndex >= 0, "submit_retry_failure_correct_index_resolves");
+                    var retryWrongIndex = (retryCorrectIndex + 1) % retryQuestion.DisplayChoices.Count;
+                    Invoke(retryForm, "SubmitChoice", retryWrongIndex, "ui_retry_write_fixture_wrong");
+                    var retryCoordinator = GetField<object>(retryForm, "_coordinator");
+                    var beforeFailure = Get<object>(retryCoordinator, "Summary");
+                    A(GetField<bool>(retryForm, "_retryPending") && Get<int>(beforeFailure, "Attempts") == 0 &&
+                        Get<int>(beforeFailure, "AnswerAttempts") == 1,
+                        "submit_retry_failure_fixture_is_attempt_two");
+
+                    ExecuteDatabaseSql(retryDatabase, @"CREATE TRIGGER ui_fail_math_retry_mastery
+BEFORE INSERT ON mastery_event
+BEGIN
+    SELECT RAISE(ABORT, 'ui_injected_math_retry_commit_failure');
+END;");
+                    Invoke(retryForm, "SubmitChoice", retryCorrectIndex, "ui_retry_write_failure");
+                    var failedRetrySummary = Get<object>(retryCoordinator, "Summary");
+                    A(!GetField<bool>(retryForm, "_finished") && GetField<bool>(retryForm, "_retryPending") &&
+                        Get<bool>(retryCoordinator, "IsActive") && Get<bool>(retryCoordinator, "HasOpenQuestion"),
+                        "submit_retry_failure_ui_preserves_retry_pending_session");
+                    A(Get<int>(failedRetrySummary, "Attempts") == 0 && Get<int>(failedRetrySummary, "AnswerAttempts") == 1 &&
+                        Get<int>(failedRetrySummary, "RetriedCorrect") == 0,
+                        "submit_retry_failure_does_not_add_ghost_retry_attempt");
+                    A(GetField<Label>(retryForm, "_progressText").Text.IndexOf("thử lại", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                        GetField<Label>(retryForm, "_support").Text.IndexOf("Lần thử lại", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "submit_retry_failure_ui_keeps_attempt_two_presentation");
+                    var retryButtons = GetField<Array>(retryForm, "_answerButtons");
+                    var retryCorrectButton = (Control)retryButtons.GetValue(retryCorrectIndex);
+                    A(retryCorrectButton.Enabled && Get<object>(retryCorrectButton, "VisualState").ToString() == "Idle",
+                        "submit_retry_failure_choices_reenabled_without_reveal");
+
+                    ExecuteDatabaseSql(retryDatabase, "DROP TRIGGER ui_fail_math_retry_mastery;");
+                    Invoke(retryForm, "SubmitChoice", retryCorrectIndex, "ui_retry_write_recovered");
+                    var retryRecovered = Get<object>(retryCoordinator, "Summary");
+                    A(!GetField<bool>(retryForm, "_retryPending") && Get<int>(retryRecovered, "Attempts") == 1 &&
+                        Get<int>(retryRecovered, "AnswerAttempts") == 2 && Get<int>(retryRecovered, "RetriedQuestions") == 1 &&
+                        Get<int>(retryRecovered, "RetriedCorrect") == 1 && Get<int>(retryRecovered, "IndependentCorrect") == 0,
+                        "submit_retry_failure_recovery_preserves_assisted_semantics");
+
+                    Invoke(retryCoordinator, "Abort", "submit_retry_failure_cleanup");
+                    SetField(retryForm, "_finished", true);
+                }
+            }
+            finally
+            {
+                try { Directory.Delete(tempRoot, true); } catch { }
+            }
+        }
+
         private static void TestRetryResumeUiFlow(Assembly appAssembly)
         {
             var repo = Directory.GetCurrentDirectory();
@@ -1414,6 +1573,39 @@ namespace WAHU.ChildUiRuntimeSmoke
             var info = target.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             if (info == null) throw new MissingFieldException(target.GetType().FullName, fieldName);
             info.SetValue(target, value);
+        }
+
+        private static void ExecuteDatabaseSql(LearningDatabase database, string sql)
+        {
+            var open = typeof(LearningDatabase).GetMethod("OpenConnection", BindingFlags.Instance | BindingFlags.Public);
+            if (open == null) throw new MissingMethodException(typeof(LearningDatabase).FullName, "OpenConnection");
+            var connection = open.Invoke(database, null) as IDisposable;
+            if (connection == null) throw new InvalidOperationException("LearningDatabase.OpenConnection did not return IDisposable connection.");
+            try
+            {
+                var createCommand = connection.GetType().GetMethod("CreateCommand", Type.EmptyTypes);
+                if (createCommand == null) throw new MissingMethodException(connection.GetType().FullName, "CreateCommand");
+                var commandObject = createCommand.Invoke(connection, null);
+                var command = commandObject as IDisposable;
+                if (command == null) throw new InvalidOperationException("SQLite command is not disposable.");
+                try
+                {
+                    var commandText = commandObject.GetType().GetProperty("CommandText", BindingFlags.Instance | BindingFlags.Public);
+                    if (commandText == null) throw new MissingMemberException(commandObject.GetType().FullName, "CommandText");
+                    commandText.SetValue(commandObject, sql, null);
+                    var execute = commandObject.GetType().GetMethod("ExecuteNonQuery", Type.EmptyTypes);
+                    if (execute == null) throw new MissingMethodException(commandObject.GetType().FullName, "ExecuteNonQuery");
+                    execute.Invoke(commandObject, null);
+                }
+                finally
+                {
+                    command.Dispose();
+                }
+            }
+            finally
+            {
+                connection.Dispose();
+            }
         }
 
         private static bool ContainsControlText(Control root, string needle)

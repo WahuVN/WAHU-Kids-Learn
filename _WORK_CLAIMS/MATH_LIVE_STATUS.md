@@ -5,16 +5,16 @@ Definition: % dưới đây đo theo Definition of Done strict của Math, khôn
 
 ## Overall
 
-- **Content: 98%** — 7 chương, 17 chủ đề, 67 lesson, 201 câu authored, prerequisite graph, difficulty progression, distractor rationale, worked-example separation, lesson-specific objectives và semantic validator đều có. `MathContentDataSmoke`: **30/30 PASS** tại clean HEAD `c08c7cf`.
-- **Engine: 97%** — answer validation/equivalence, mastery/review/reward, idempotency, exact suspend/resume, authored bank, schema V4 lesson progress, lesson-targeted session, prerequisite unlock, targeted score/best score, mastery delta, next lesson, corrupt authored cursor recovery, retry/first-try scoring, write-failure recovery và concurrent mastery race regression đều có contract/gate first-class. Clean persistence gate tại `c08c7cf`: **171 assertions PASS**. Generator segment vẫn chờ commit ổn định riêng.
-- **UI: 99%** — Math Hub, toàn bộ 67 lesson detail, theory/example, adaptive mission, lesson-targeted practice, locked/unlocked, exact resume, choice/typed/interaction answers, retry cùng câu cho cả 3 answer surfaces, exact retry-resume UI và result first-try/retry counters + lesson score/best score + mastery delta + next lesson đều consume contract thật.
-- **Test: 98%** — Child UI **1534 assertions PASS**; 67/67 lesson-detail/access sweep PASS; 201/201 authored answer-surface sweep PASS; targeted Flow 5 + retry typed/choice/interaction + exact retry-resume + advanced-result UI E2E PASS; persistence **171 assertions PASS**; content **30/30 PASS**. Full old-style solution build vẫn còn blocker Data/SQLite.
-- **E2E: 94%** — Home → Math Hub → lesson → targeted authored practice → retry cùng câu → suspend/relaunch → exact attempt-2 resume → result → mastery/next-lesson presentation → persisted lesson progress → Hub refresh → prerequisite unlock PASS; adaptive mission baseline PASS. Chưa có release-clean full solution/packaging gate.
+- **Content: 98%** — 7 chương, 17 chủ đề, 67 lesson, 201 câu authored, prerequisite graph, difficulty progression, distractor rationale, worked-example separation, lesson-specific objectives và semantic validator đều có. `MathContentDataSmoke`: **34/34 PASS** tại clean HEAD `2da39b5`.
+- **Engine: 97%** — answer validation/equivalence, mastery/review/reward, idempotency, exact suspend/resume, authored bank, schema V4 lesson progress, lesson-targeted session, prerequisite unlock, targeted score/best score, mastery delta, next lesson, corrupt authored cursor recovery, retry/first-try scoring, write-failure reconciliation và concurrent session/mastery guards đều có contract/gate first-class. Clean persistence gate tại `2da39b5`: **171 assertions PASS**. Generator segment vẫn chờ commit ổn định riêng.
+- **UI: 99%** — Math Hub, toàn bộ 67 lesson detail, theory/example, adaptive mission, lesson-targeted practice, locked/unlocked, exact resume, choice/typed/interaction answers, retry cùng câu cho cả 3 answer surfaces, exact retry-resume, child-safe write-failure recovery và result first-try/retry counters + lesson score/best score + mastery delta + next lesson đều consume contract thật.
+- **Test: 98%** — Child UI **1558 assertions PASS**; 67/67 lesson-detail/access sweep PASS; 201/201 authored answer-surface sweep PASS; targeted Flow 5 + retry typed/choice/interaction + exact retry-resume + injected SQLite write-failure recovery + advanced-result UI E2E PASS; persistence **171 assertions PASS**; content **34/34 PASS**. Full old-style solution build vẫn còn blocker Data/SQLite.
+- **E2E: 95%** — Home → Math Hub → lesson → targeted authored practice → retry cùng câu → suspend/relaunch → exact attempt-2 resume → recoverable DB-write failure → retry same question → result → mastery/next-lesson presentation → persisted lesson progress → Hub refresh → prerequisite unlock PASS; adaptive mission baseline PASS. Chưa có release-clean full solution/packaging gate.
 - **Tổng Math: ~95%** theo strict production Definition of Done hiện tại.
 
 ## P0
 
-- Không phát hiện P0 Math UI/integration mới trong wave AI3-009.
+- Không phát hiện P0 Math UI/integration mới trong wave AI3-010.
 
 ## P1 còn mở
 
@@ -34,22 +34,25 @@ Definition: % dưới đây đo theo Definition of Done strict của Math, khôn
 - **Result route mismatch:** CLOSED AI3-004 — `Về thư viện Toán` đúng route thực tế.
 - **Corrupt authored resume ordinal:** CLOSED upstream `7f79367` — cache câu medium hỏng được rollback cursor về committed ordinal, phát lại medium rồi application; đủ 3 attempts mới complete lesson.
 - **Retry/first-try UI:** CLOSED AI3-008 — typed, choice và interaction giữ nguyên câu sau first-try sai; progress không tăng trước khi question finalize; resume retry giữ attempt 2; result dùng `IndependentCorrect`, `RetriedQuestions`, `RetriedCorrect` first-class thay vì suy luận.
+- **Recoverable answer-write failure UI:** CLOSED AI3-010 — khi engine rollback transaction và giữ đúng open question, UI không abort session; answer surface được mở lại child-safe, không ghost attempt, và retry lưu lại giữ đúng independent/retried semantics. Nếu coordinator không xác nhận được cùng open question thì UI vẫn fail-closed/abort như trước.
 
 ## Current verified gates
 
-- Current workspace: ChildUiRuntimeSmoke **1534 assertions PASS**.
+- Current workspace: ChildUiRuntimeSmoke **1558 assertions PASS**.
 - 67/67 lesson-detail/access sweep: **PASS** — mỗi lesson select được, title/objective/example/practice render, CTA accessibility tồn tại và `Enabled` khớp `MathLessonAccessSnapshot.IsUnlocked`.
 - All-201 authored answer-surface sweep: **PASS — 201/201**.
 - Targeted lesson Flow 5 + advanced result presentation: **PASS**.
 - Retry UI E2E: **PASS** — typed, choice, authored interaction; first-try sai không tăng completed count, retry đúng finalize đúng một lần, result giữ first-try semantics.
 - Retry-resume UI E2E: **PASS** — suspend ở attempt 2 → mở lại đúng authored `ContentQuestionId`, `_retryPending=true`, progress/support đúng retry state, choices editable và retry-correct finalize assisted.
-- Clean detached worktree tại `c08c7cf` + đúng 1 file AI3-009:
-  - source App/Data/Session/Learning/Content không đổi từ AI3-008 clean artifacts.
-  - ChildUiRuntimeSmoke: **PASS — 1534 assertions**.
+- Submit-write recovery E2E: **PASS** — injected SQLite trigger làm fail transaction ở first attempt và retry attempt 2; UI giữ cùng open question/session, counters không tăng, không reveal answer, bỏ trigger rồi submit lại commit đúng một durable attempt.
+- Clean detached worktree tại `2da39b5` + đúng 2 file AI3-010:
+  - Data/Session SDK x86/net48 source-equivalent build trực tiếp từ runtime HEAD `2da39b5`: **PASS — 0 warning / 0 error**.
+  - App Release x86 targeted build: **PASS**.
+  - ChildUiRuntimeSmoke: **PASS — 1558 assertions**.
   - MathSessionPersistenceRuntimeSmoke: **PASS — 171 assertions**.
-  - MathContentDataSmoke: **PASS — 30/30**.
+  - MathContentDataSmoke: **PASS — 34/34**.
   - `git diff --check`: **PASS**.
-- Request 007 đã có regression chính thức trong `7f79367`; retry/first-try engine contract ở `7c9a9ea` đã được AI3-008/009 consume. Generated segment vẫn chỉ ở WIP AI2 nên chưa tính CLOSED.
+- Request 007 đã có regression chính thức trong `7f79367`; retry/first-try engine contract ở `7c9a9ea` và write-failure reconcile ở `400fd0c` đã được AI3 UI consume. Generated segment vẫn chỉ ở WIP AI2 nên chưa tính CLOSED.
 - `WAHUKidsLearn.sln` old-style Release x86 clean build: **chưa đạt gate** vì production Data/SQLite reference/toolchain.
 
 ## Integration waves
@@ -108,13 +111,25 @@ Commit `a06d1a3` — `Toán UI: thêm retry an toàn cho mọi dạng đáp án`
 - Clean detached `40dc075`: Child UI **1522 assertions PASS**, persistence **158 assertions PASS**, content **29/29 PASS**.
 
 ### AI3-009 — exact retry-resume UI regression
-Test-only wave đã qua clean gate tại `c08c7cf`, đang chốt commit.
+Commit `c5cb9da` — `Toán QA: khóa retry resume đúng câu`.
 
 - Cố ý trả lời sai first attempt của authored choice rồi `Suspend` khi `RetryPending=true`.
 - Mở lại cùng lesson bằng form mới phải restore đúng `ContentQuestionId`, attempt 2 và progress label `thử lại`.
 - Support text giải thích đang tiếp tục lần thử lại của cùng câu; choices vẫn editable/idle, không reveal correct answer.
 - Retry đúng sau resume phải cho `Attempts=1`, `AnswerAttempts=2`, `RetriedQuestions=1`, `RetriedCorrect=1`, `IndependentCorrect=0`.
 - Clean detached `c08c7cf`: Child UI **1534 assertions PASS**, persistence **171 assertions PASS**, content **30/30 PASS**.
+
+### AI3-010 — phục hồi UI sau lỗi ghi đáp án
+Source/test đã qua clean gate tại `2da39b5`; wave chỉ gồm App source + Child UI smoke + 2 file audit/status AI3.
+
+- Nếu submit ném lỗi nhưng coordinator vẫn `IsActive`, `HasOpenQuestion` và `NextQuestion()` trả đúng `QuestionId` hiện tại, UI coi đây là recoverable write failure thay vì abort session.
+- Typed/choice/interaction answer surface được mở lại, progress không tăng, nút Next vẫn ẩn và child-facing feedback nói rõ dữ liệu trước đó vẫn an toàn.
+- Choice recovery reset visual về idle, không reveal đáp án đúng sau transaction fail.
+- Inject SQLite trigger thật để làm fail durable mastery write ở cả first attempt và retry attempt 2.
+- First-attempt failure → bỏ trigger → submit lại vẫn `IndependentCorrect=1`, không ghost retry.
+- Retry-attempt failure → bỏ trigger → submit lại vẫn `RetriedQuestions=1`, `RetriedCorrect=1`, `IndependentCorrect=0`.
+- Nếu engine không xác nhận được cùng open question thì UI vẫn dùng fail-closed `Abort` cũ.
+- Clean detached `2da39b5`: Child UI **1558 assertions PASS**, persistence **171 assertions PASS**, content **34/34 PASS**; Data/Session clean source-equivalent build **0 warning / 0 error**.
 
 ## Next integration gates
 

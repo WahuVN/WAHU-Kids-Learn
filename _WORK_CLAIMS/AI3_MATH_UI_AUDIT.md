@@ -199,6 +199,8 @@ Upstream retry contract: `7c9a9ea`.
 
 ## 11. AI3-009 — exact retry-resume UI regression
 
+Commit `c5cb9da` — `Toán QA: khóa retry resume đúng câu`.
+
 Test-only wave khóa presentation/lifecycle khi đóng app đúng lúc đang ở attempt 2:
 
 - first form trả lời sai authored choice ở attempt 1 rồi `Suspend` với retry pending;
@@ -210,24 +212,41 @@ Test-only wave khóa presentation/lifecycle khi đóng app đúng lúc đang ở
 
 Clean detached `c08c7cf`: Child UI **1534 assertions PASS**, persistence **171 assertions PASS**, content **30/30 PASS**.
 
-## 12. Verification gates
+## 12. AI3-010 — recoverable answer-write failure UI
 
-Current clean HEAD `c08c7cf` + đúng 1 file AI3-009:
+Upstream durable reconcile contract: `400fd0c`; concurrent active-session guard hiện đã có trong `b8fd18b`.
 
-- App/Data/Session/Learning/Content source không đổi từ AI3-008 clean artifacts; `c08c7cf` chỉ đổi content data/validator.
-- ChildUiRuntimeSmoke: **PASS — 1534 assertions**.
+- Submit exception không còn mặc định phá hủy buổi học nếu engine đã rollback sạch và giữ đúng open question.
+- UI chỉ phục hồi khi đồng thời có `IsActive`, `HasOpenQuestion` và `NextQuestion().QuestionId == _question.QuestionId`; guard fail thì vẫn `FailCurrentSession()`/`Abort` như trước.
+- Recovery reset `_submitting=false`, giữ `_retryPending` hiện tại, không tăng progress và không hiện nút Next.
+- Typed input được enable/select-all; interaction submit được enable lại nếu control còn answer; choice buttons về idle/enabled và không reveal correct answer.
+- Child-facing feedback nói rõ câu chưa lưu, dữ liệu đã lưu trước đó vẫn an toàn và có thể thử lại chính câu này.
+- SQLite trigger E2E làm fail `mastery_event` write ở first attempt: counters vẫn 0/0, cùng authored question còn mở; bỏ trigger rồi submit lại commit một lần với `IndependentCorrect=1`.
+- SQLite trigger E2E làm fail đúng retry attempt 2: `AnswerAttempts` vẫn 1, `_retryPending=true`, không ghost retry; bỏ trigger rồi submit lại cho `RetriedQuestions=1`, `RetriedCorrect=1`, `IndependentCorrect=0`.
+
+Clean detached `2da39b5`: Child UI **1558 assertions PASS**, persistence **171 assertions PASS**, content **34/34 PASS**. Data/Session SDK x86/net48 được clean-build trực tiếp từ cùng runtime HEAD với **0 warning / 0 error**.
+
+## 13. Verification gates
+
+Current clean HEAD `2da39b5` + đúng 2 file AI3-010:
+
+- Data SDK x86/net48 source-equivalent build: **PASS — 0 warning / 0 error**.
+- Session SDK x86/net48 source-equivalent build: **PASS — 0 warning / 0 error**.
+- App Release x86 targeted build: **PASS**.
+- ChildUiRuntimeSmoke: **PASS — 1558 assertions**.
 - MathSessionPersistenceRuntimeSmoke: **PASS — 171 assertions**.
-- MathContentDataSmoke: **PASS — 30/30**.
+- MathContentDataSmoke: **PASS — 34/34**.
 - `git diff --check`: **PASS**.
 - 67/67 lesson-detail/access sweep: **PASS**.
 - 201/201 authored answer-surface sweep: **PASS**.
 - Retry typed/choice/authored-interaction E2E: **PASS**.
 - Exact retry-resume UI E2E: **PASS**.
+- Recoverable first-attempt/retry-attempt SQLite write-failure E2E: **PASS**.
 - Request 007 corrupt-medium ordinal recovery có regression chính thức tại `7f79367`.
-- Retry/first-try engine contract `7c9a9ea` đã được AI3-008/009 consume; clean persistence suite hiện 171 assertions.
+- Retry/first-try engine contract `7c9a9ea` và write-failure reconcile `400fd0c` đã được AI3 UI consume; clean persistence suite hiện 171 assertions.
 - Generated `draw_segment_given_length` vẫn chỉ ở WIP AI2; chưa coi P1-02 CLOSED trước upstream commit.
 
-## 13. Remaining blockers
+## 14. Remaining blockers
 
 ### P1-01 — production Data/SQLite clean build
 
@@ -247,7 +266,7 @@ Static audit tại HEAD:
 - Artifact mới nhất hiện có `0.1.41-dev` là build từ `e299c41`, database schema 2. Publish tree + portable ZIP có verified templates nhưng thiếu lesson catalog, question bank và schema V4; artifact này là **STALE**, không phải release evidence cho Math hiện tại.
 - Request 008 đã mở cho release lane: hard-guard đủ ba Math runtime JSON và rebuild artifact schema V4; sau đó chạy portable/installer upgrade E2E giữ learner DB/lesson progress.
 
-## 14. Next AI3 actions
+## 15. Next AI3 actions
 
 1. Theo dõi release lane đóng Request 008 và production SQLite build blocker; không sửa `tools/build/*` khi đang có owner/WIP khác.
 2. Khi có artifact schema V4 mới, chạy portable/installer Math payload + relaunch/reinstall regression.

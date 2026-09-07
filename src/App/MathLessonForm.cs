@@ -615,6 +615,71 @@ namespace WAHUKidsLearn
             return true;
         }
 
+        private bool TryRecoverAfterSubmitFailure()
+        {
+            try
+            {
+                if (_coordinator == null || !_coordinator.IsActive || !_coordinator.HasOpenQuestion || _question == null)
+                    return false;
+                var restored = _coordinator.NextQuestion();
+                if (restored == null || !string.Equals(restored.QuestionId, _question.QuestionId, StringComparison.Ordinal))
+                    return false;
+
+                _question = restored;
+                _submitting = false;
+                _completeOnNext = false;
+                var summary = _coordinator.Summary;
+                _progressText.Text = "Câu " + (Math.Max(0, summary.Attempts) + 1) + " / " + _targetQuestionCount +
+                    (_retryPending ? " · thử lại" : string.Empty);
+                _progressBar.Value = Math.Min(_progressBar.Maximum, Math.Max(0, summary.Attempts));
+                _companion.State = CompanionReactionState.TryAgain;
+                _feedback.Text = "Chưa lưu được câu này. Mình thử lại chính câu này nhé.";
+                _feedbackCard.CardColor = Color.FromArgb(245, 239, 224);
+                _feedbackCard.BorderColor = Color.FromArgb(225, 210, 171);
+                _feedbackCard.Visible = true;
+                _support.Text = _retryPending
+                    ? "Phần đã làm trước đó vẫn an toàn. Lần thử lại này chưa được tính; con thử lưu lại nhé."
+                    : "Phần đã làm trước đó vẫn an toàn. Câu này chưa được tính; con thử lại nhé.";
+                _hintButton.Visible = true;
+                _hintButton.Enabled = _hintLevel < 2;
+                _nextButton.Visible = false;
+
+                if (UsesTypedAnswer(_question))
+                {
+                    _typedAnswerBox.Enabled = true;
+                    _typedSubmitButton.Enabled = !string.IsNullOrWhiteSpace(_typedAnswerBox.Text);
+                    _typedAnswerBox.AccessibleDescription = "Câu chưa lưu được. Sửa nếu cần rồi nhấn Enter hoặc nút Kiểm tra đáp án để thử lại.";
+                    _typedAnswerBox.SelectAll();
+                    _typedAnswerBox.Focus();
+                    return true;
+                }
+
+                if (UsesInteractiveAnswer(_question))
+                {
+                    _interactiveSubmitButton.Enabled = _interactiveAnswer.HasAnswer;
+                    _interactiveAnswer.Focus();
+                    return true;
+                }
+
+                var choices = _question.DisplayChoices;
+                if (choices == null || choices.Count < 2 || choices.Count > _answerButtons.Length) return false;
+                for (var i = 0; i < _answerButtons.Length; i++)
+                {
+                    var active = i < choices.Count;
+                    _answerButtons[i].Enabled = active;
+                    if (!active) continue;
+                    _answerButtons[i].VisualState = AnswerChoiceButton.ChoiceVisualState.Idle;
+                    _answerButtons[i].BadgeText = (i + 1).ToString();
+                }
+                _answerButtons[0].Focus();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         private void SubmitTypedAnswer(string inputMode)
         {
             if (_question == null || !UsesTypedAnswer(_question) || _submitting || string.IsNullOrWhiteSpace(_typedAnswerBox.Text)) return;
@@ -657,7 +722,8 @@ namespace WAHUKidsLearn
             }
             catch
             {
-                FailCurrentSession("Không thể lưu câu vừa làm. Buổi học sẽ dừng để bảo vệ dữ liệu.");
+                if (!TryRecoverAfterSubmitFailure())
+                    FailCurrentSession("Không thể lưu câu vừa làm. Buổi học sẽ dừng để bảo vệ dữ liệu.");
             }
         }
         private void SubmitInteractiveAnswer(string inputMode)
@@ -699,7 +765,8 @@ namespace WAHUKidsLearn
             }
             catch
             {
-                FailCurrentSession("Không thể lưu câu vừa làm. Buổi học sẽ dừng để bảo vệ dữ liệu.");
+                if (!TryRecoverAfterSubmitFailure())
+                    FailCurrentSession("Không thể lưu câu vừa làm. Buổi học sẽ dừng để bảo vệ dữ liệu.");
             }
         }
 
@@ -770,7 +837,8 @@ namespace WAHUKidsLearn
             }
             catch
             {
-                FailCurrentSession("Không thể lưu câu vừa làm. Buổi học sẽ dừng để bảo vệ dữ liệu.");
+                if (!TryRecoverAfterSubmitFailure())
+                    FailCurrentSession("Không thể lưu câu vừa làm. Buổi học sẽ dừng để bảo vệ dữ liệu.");
             }
         }
 
