@@ -1,14 +1,15 @@
 # AI2 — PARALLEL NOW — ENGINE/SESSION
 
 LANE: AI2
-LANE_DONE=NO
+LANE_DONE=YES
 BASELINE=3d8674d
 MANIFEST_LOCK=FREE
 BUILD_SETUP_LOCK=AI3
 REQUEST_009_READY=05cdb2a
 REQUEST_010_READY=7afbb7b
 REQUEST_006_READY=3cf7fc6
-ADAPTIVE_SEGMENT_READY=THIS_COMMIT
+FINAL_ENGINE_STRESS_READY=373d9d1
+ADAPTIVE_SEGMENT_READY=d21a665
 
 
 ## NO-WAIT rule
@@ -19,7 +20,7 @@ AI2 **không chờ AI1/AI3**. Request 009 dùng synthetic pool >=6 ngay trong en
 - DONE/commit-now: adaptive `draw_segment_given_length` — LearningSession 800 PASS.
 - DONE: Request 009 at `05cdb2a` — synthetic pool >=6 selects/persists exactly 3; persistence 264 PASS.
 - DONE: Request 006 at `3cf7fc6` — `answer_unit` display-only survives loader/runtime/resume; raw integer grading unchanged; persistence 277 PASS.
-- NOW: validator/generator fuzz, retry/idempotency/corrupt-cache/persistence stress, selector determinism, V5 pack-identity regression.
+- DONE: final stress — selected-set metadata self-heal `3b8a10b`; expanded-bank persistence regression `373d9d1`; MathEngine 47 + MathData 104 + LearningSession 800 + Persistence 289 PASS; current AI1 pool-402 WIP cũng Persistence 289 PASS.
 
 ## Mission now
 
