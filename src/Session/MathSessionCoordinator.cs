@@ -129,7 +129,6 @@ namespace WAHU.Session
             else
             {
                 recovered = _sessionService.RecoverDanglingSessions();
-                var createdHere = false;
                 try
                 {
                     _seed = _requestedSeed;
@@ -144,7 +143,8 @@ namespace WAHU.Session
                     }
 
                     _session = _runtime.TryCreateSession(
-                        _profile.ChildId, _performanceProfile, _seed, _targetQuestionCount, _sessionMode, _targetLessonId);
+                        _profile.ChildId, _performanceProfile, _seed, _targetQuestionCount, _sessionMode, _targetLessonId,
+                        _targetLesson == null ? null : _targetLesson.SkillId);
                     if (_session == null)
                     {
                         var raced = _runtime.LoadLatestResumable(_profile.ChildId);
@@ -159,26 +159,14 @@ namespace WAHU.Session
                     }
                     else
                     {
-                        createdHere = true;
                         _skills = _sessionService.LoadSkillSnapshots(_profile.ChildId, "math");
-                        if (string.Equals(_sessionMode, "lesson", StringComparison.Ordinal))
-                            _lessonProgressStore.MarkStarted(_profile.ChildId, _targetLesson.Id, _targetLesson.SkillId, _session.StartedAtUtc);
                         _active = true;
                     }
                 }
                 catch
                 {
-                    if (createdHere && _session != null)
-                    {
-                        try { _runtime.Delete(_session.SessionId); } catch { }
-                        try
-                        {
-                            _sessionService.CompleteSession(_session.SessionId, true,
-                                _json.Serialize(new Dictionary<string, object> { { "reason", "session_start_failed" }, { "attempts", 0 } }),
-                                _json.Serialize(new Dictionary<string, object> { { "final_state", BehaviorState.READY.ToString() } }));
-                        }
-                        catch { }
-                    }
+                    // Once session + runtime (+ lesson-start progress) are durable, a local read/restore
+                    // failure must leave that session resumable instead of aborting shared durable state.
                     _session = null;
                     _skills = null;
                     _active = false;

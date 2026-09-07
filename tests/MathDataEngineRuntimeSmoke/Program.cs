@@ -34,6 +34,7 @@ namespace WAHU.MathDataEngineRuntimeSmoke
                 TestCrossProcessConcurrentSkillWrites(root, sourceSchema);
                 TestCrossProcessSingleActiveSessionGuard(root, sourceSchema);
                 TestCrossProcessAtomicMathRuntimeStart(root, sourceSchema);
+                TestTargetedAtomicStartRollsBackOnProgressFailure(root, sourceSchema);
                 TestExistingV1UpgradesToV3WithBackup(root, sourceSchema);
                 TestV3BackfillPreservesLegacyDuplicates(root, sourceSchema);
                 Console.WriteLine("MATH_DATA_ENGINE_RUNTIME_SMOKE_PASS assertions=" + _assertions);
@@ -575,6 +576,67 @@ namespace WAHU.MathDataEngineRuntimeSmoke
                 Console.Error.WriteLine("ATOMIC_RUNTIME_WORKER_FAIL " + ex);
                 return 3;
             }
+        }
+
+        private static void TestTargetedAtomicStartRollsBackOnProgressFailure(string root, string sourceSchema)
+        {
+            var schemaDir = Path.Combine(root, "schema-targeted-start-failure");
+            CopySchemas(sourceSchema, schemaDir);
+            var schemaPath = Path.Combine(schemaDir, "001_initial.sql");
+            var dbPath = Path.Combine(root, "targeted-start-failure.db");
+            var database = new LearningDatabase(dbPath, schemaPath);
+            database.Initialize("DELETE");
+            var sessions = new LearnerSessionService(database);
+            var profile = sessions.EnsurePrimaryChild("Bé targeted atomic");
+            var runtime = new MathSessionRuntimeService(database);
+
+            using (var c = database.OpenConnection())
+            {
+                Exec(c, @"CREATE TRIGGER smoke_fail_math_lesson_start
+BEFORE INSERT ON math_lesson_progress
+BEGIN
+    SELECT RAISE(ABORT, 'injected_math_lesson_start_failure');
+END;");
+            }
+
+            var failed = false;
+            try
+            {
+                runtime.TryCreateSession(profile.ChildId, "LOW", 9901, 9, "lesson", "M2-L1", "TEST_MATH_SKILL");
+            }
+            catch (SQLiteException)
+            {
+                failed = true;
+            }
+            A(failed, "targeted_atomic_start_injected_progress_failure_surfaces_error");
+            using (var c = database.OpenConnection())
+            {
+                A(Count(c, "SELECT count(*) FROM session WHERE child_id='" + profile.ChildId + "' AND planned_subject='math';") == 0,
+                    "targeted_atomic_start_failure_rolls_back_session");
+                A(Count(c, "SELECT count(*) FROM math_session_runtime;") == 0,
+                    "targeted_atomic_start_failure_rolls_back_runtime");
+                A(Count(c, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + profile.ChildId + "' AND lesson_id='M2-L1';") == 0,
+                    "targeted_atomic_start_failure_rolls_back_lesson_progress");
+                Exec(c, "DROP TRIGGER smoke_fail_math_lesson_start;");
+            }
+
+            var started = runtime.TryCreateSession(
+                profile.ChildId, "LOW", 9902, 9, "lesson", "M2-L1", "TEST_MATH_SKILL");
+            A(started != null && !string.IsNullOrWhiteSpace(started.SessionId),
+                "targeted_atomic_start_retry_creates_session");
+            using (var c = database.OpenConnection())
+            {
+                A(Count(c, "SELECT count(*) FROM session WHERE id='" + started.SessionId + "' AND state='active';") == 1,
+                    "targeted_atomic_start_retry_has_active_session");
+                A(Count(c, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + started.SessionId + "' AND session_mode='lesson' AND target_lesson_id='M2-L1';") == 1,
+                    "targeted_atomic_start_retry_has_runtime");
+                A(Count(c, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + profile.ChildId + "' AND lesson_id='M2-L1' AND skill_id='TEST_MATH_SKILL' AND started_count=1 AND completed_count=0;") == 1,
+                    "targeted_atomic_start_retry_writes_lesson_progress_once");
+            }
+            A(sessions.RecoverDanglingSessions() == 0,
+                "targeted_atomic_start_retry_is_immediately_resumable_not_dangling");
+            sessions.CompleteSession(started.SessionId, true, "{}", "{}");
+            runtime.Delete(started.SessionId);
         }
 
         private static void TestExistingV1UpgradesToV3WithBackup(string root, string sourceSchema)

@@ -204,12 +204,13 @@ Một child không được có hơn một session active cho cùng subject, k�
 
 Math cold-start không được lộ một `session` active chưa có `math_session_runtime`, vì recovery process khác có thể hiểu nhầm đó là session crash cũ:
 
-- Math startup dùng `MathSessionRuntimeService.TryCreateSession(...)` để insert `session` và `math_session_runtime` trong cùng một SQLite write transaction.
+- Math startup dùng `MathSessionRuntimeService.TryCreateSession(...)` để insert `session` + `math_session_runtime` và, với targeted lesson, tăng `math_lesson_progress.started_count` trong cùng một SQLite write transaction.
 - Nếu active Math session đã tồn tại, method trả `null`; không tạo session/runtime thứ hai và không tạo durable partial state.
 - `MathSessionCoordinator.Start()` khi thua cold-start race phải load `LoadLatestResumable(...)` và restore session winner nếu request tương thích, thay vì abort/recover session của process khác.
-- Cleanup sau start failure chỉ được abort/delete session do chính coordinator đó vừa tạo (`createdHere`); session winner của process khác không được đụng tới.
+- Sau khi atomic startup đã commit, lỗi local ở bước read/restore không được abort/delete durable session; coordinator chỉ clear local state và rethrow để lần Start sau resume lại session đã commit.
 - `RecoverDanglingSessions()` chỉ còn nhìn thấy session Math active thiếu runtime khi đó thực sự là legacy/partial crash state, không phải khe hở giữa hai transaction startup bình thường.
 - True cross-process regression xác nhận đúng 1 active session + đúng 1 runtime, không có active session thiếu runtime, winner không bị recovery nhầm và lập tức resumable; terminal state vẫn giải phóng slot cho session sau.
+- Targeted fault-injection dùng trigger `RAISE(ABORT)` ở `math_lesson_progress`: failure phải rollback cả `session` + `math_session_runtime` + lesson progress; bỏ trigger rồi retry chỉ tạo một startup chain và `started_count=1`.
 
 ## Contract còn chưa chốt
 

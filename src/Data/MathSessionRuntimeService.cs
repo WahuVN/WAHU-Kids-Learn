@@ -54,13 +54,22 @@ namespace WAHU.Data
             int seed,
             int targetQuestionCount,
             string sessionMode,
-            string targetLessonId)
+            string targetLessonId,
+            string targetSkillId = null)
         {
             Require(childId, "childId");
             if (targetQuestionCount < 1 || targetQuestionCount > 40) throw new ArgumentOutOfRangeException("targetQuestionCount");
             if (sessionMode != "adaptive" && sessionMode != "lesson") throw new ArgumentException("Invalid Math session mode.");
-            if (sessionMode == "lesson") Require(targetLessonId, "targetLessonId");
-            else targetLessonId = null;
+            if (sessionMode == "lesson")
+            {
+                Require(targetLessonId, "targetLessonId");
+                Require(targetSkillId, "targetSkillId");
+            }
+            else
+            {
+                targetLessonId = null;
+                targetSkillId = null;
+            }
             if (performanceProfile != "LOW" && performanceProfile != "NORMAL") performanceProfile = "LOW";
 
             var sessionId = "session-" + Guid.NewGuid().ToString("N");
@@ -97,6 +106,27 @@ VALUES(@session,@seed,@target,0,@mode,@lesson,@utc);";
                     runtime.Parameters.AddWithValue("@lesson", string.IsNullOrWhiteSpace(targetLessonId) ? (object)DBNull.Value : targetLessonId);
                     runtime.Parameters.AddWithValue("@utc", Utc(startedAtUtc));
                     runtime.ExecuteNonQuery();
+                }
+
+                if (sessionMode == "lesson")
+                {
+                    using (var progress = connection.CreateCommand())
+                    {
+                        progress.Transaction = transaction;
+                        progress.CommandText = @"INSERT INTO math_lesson_progress(
+child_id,lesson_id,skill_id,started_count,completed_count,last_started_at_utc,updated_at_utc)
+VALUES(@child,@lesson,@skill,1,0,@utc,@utc)
+ON CONFLICT(child_id,lesson_id) DO UPDATE SET
+skill_id=excluded.skill_id,
+started_count=math_lesson_progress.started_count+1,
+last_started_at_utc=excluded.last_started_at_utc,
+updated_at_utc=excluded.updated_at_utc;";
+                        progress.Parameters.AddWithValue("@child", childId);
+                        progress.Parameters.AddWithValue("@lesson", targetLessonId);
+                        progress.Parameters.AddWithValue("@skill", targetSkillId);
+                        progress.Parameters.AddWithValue("@utc", Utc(startedAtUtc));
+                        progress.ExecuteNonQuery();
+                    }
                 }
 
                 return new LearnerSessionHandle
