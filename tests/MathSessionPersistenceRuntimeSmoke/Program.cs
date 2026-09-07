@@ -41,6 +41,8 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestRealPoolSelectionBreadth(lessonCatalogPath);
                 TestAnswerUnitFeedbackSurvivesCoordinatorResume(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedLessonUnlockAndResume(root, schemaPath, templatePath, lessonCatalogPath);
+                TestFirstFiveLessonsGoldenPath(root, schemaPath, templatePath, lessonCatalogPath);
+                TestFirstLessonAllSixVariantsWithRetryResume(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedCompletionSurvivesNextLessonReadFailure(root, schemaPath, templatePath, lessonCatalogPath);
                 TestCorruptRuntimeMetadataIsQuarantined(root, schemaPath, templatePath);
                 TestOperationalDatabaseFailureDoesNotQuarantineRuntime(root, schemaPath, templatePath);
@@ -416,6 +418,264 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 A(question.LessonId == dependent.Id, "newly_unlocked_session_targets_exact_lesson");
                 next.Abort("targeted_cleanup");
             }
+        }
+
+        private static void TestFirstFiveLessonsGoldenPath(string root, string schemaPath, string templatePath, string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var firstFive = catalog.Lessons.Take(5).ToList();
+            var expectedIds = new[]
+            {
+                "m2_ls_num_count_read_write_0_1000",
+                "m2_ls_num_full_hundreds_recognize",
+                "m2_ls_num_predecessor_successor",
+                "m2_ls_place_value_hundreds_tens_ones",
+                "m2_ls_num_expanded_form_hto"
+            };
+            A(firstFive.Count == 5 && firstFive.Select(x => x.Id).SequenceEqual(expectedIds),
+                "first_five_golden_slice_is_exact_curriculum_front");
+
+            var database = NewDatabase(Path.Combine(root, "first-five-lessons-golden.db"), schemaPath);
+            var profile = new LearnerSessionService(database).EnsurePrimaryChild("Bé 5 bài đầu");
+            var accessService = new MathLessonProgressService(database, lessonCatalogPath);
+            var progressStore = new MathLessonProgressStore(database);
+
+            A(accessService.GetAccess(profile.ChildId, firstFive[0].Id).IsUnlocked,
+                "first_five_lesson1_is_initially_unlocked");
+            A(!accessService.GetAccess(profile.ChildId, firstFive[1].Id).IsUnlocked &&
+              !accessService.GetAccess(profile.ChildId, firstFive[2].Id).IsUnlocked &&
+              !accessService.GetAccess(profile.ChildId, firstFive[3].Id).IsUnlocked &&
+              !accessService.GetAccess(profile.ChildId, firstFive[4].Id).IsUnlocked,
+                "first_five_dependents_are_initially_locked");
+
+            for (var lessonIndex = 0; lessonIndex < firstFive.Count; lessonIndex++)
+            {
+                var lesson = firstFive[lessonIndex];
+                var access = accessService.GetAccess(profile.ChildId, lesson.Id);
+                A(access.IsUnlocked && access.UnsatisfiedPrerequisiteLessonIds.Count == 0,
+                    "first_five_reached_lesson_is_unlocked_" + (lessonIndex + 1));
+
+                using (var coordinator = new MathSessionCoordinator(database, templatePath, "LOW", 9300 + lessonIndex, lesson.Id))
+                {
+                    var start = coordinator.Start("Bé 5 bài đầu");
+                    var selected = start.SelectedContentQuestionIds.ToList();
+                    A(start.SessionMode == "lesson" && start.TargetLessonId == lesson.Id &&
+                      start.TargetQuestionCount == 3 && selected.Count == 3,
+                        "first_five_start_targets_exact_three_" + (lessonIndex + 1));
+                    A(lesson.PracticeSets.Basic.Contains(selected[0]) &&
+                      lesson.PracticeSets.Medium.Contains(selected[1]) &&
+                      lesson.PracticeSets.Application.Contains(selected[2]),
+                        "first_five_selected_set_is_basic_medium_application_" + (lessonIndex + 1));
+
+                    var q1 = coordinator.NextQuestion();
+                    A(q1 != null && q1.LessonId == lesson.Id && q1.SkillId == lesson.SkillId &&
+                      q1.ContentQuestionId == selected[0] && lesson.PracticeSets.Basic.Contains(q1.ContentQuestionId),
+                        "first_five_q1_is_selected_basic_" + (lessonIndex + 1));
+                    var q1Again = coordinator.NextQuestion();
+                    A(q1Again != null && q1Again.QuestionId == q1.QuestionId,
+                        "first_five_q1_next_is_idempotent_" + (lessonIndex + 1));
+                    var r1 = coordinator.SubmitAnswerAt(q1.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700);
+                    A(r1.IsCorrect && r1.QuestionCompleted && coordinator.Summary.Attempts == 1,
+                        "first_five_q1_commits_correctly_" + (lessonIndex + 1));
+
+                    var q2 = coordinator.NextQuestion();
+                    A(q2 != null && q2.LessonId == lesson.Id && q2.SkillId == lesson.SkillId &&
+                      q2.ContentQuestionId == selected[1] && lesson.PracticeSets.Medium.Contains(q2.ContentQuestionId),
+                        "first_five_q2_is_selected_medium_" + (lessonIndex + 1));
+                    var r2 = coordinator.SubmitAnswerAt(q2.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 800);
+                    A(r2.IsCorrect && r2.QuestionCompleted && coordinator.Summary.Attempts == 2,
+                        "first_five_q2_commits_correctly_" + (lessonIndex + 1));
+
+                    var q3 = coordinator.NextQuestion();
+                    A(q3 != null && q3.LessonId == lesson.Id && q3.SkillId == lesson.SkillId &&
+                      q3.ContentQuestionId == selected[2] && lesson.PracticeSets.Application.Contains(q3.ContentQuestionId),
+                        "first_five_q3_is_selected_application_" + (lessonIndex + 1));
+                    var r3 = coordinator.SubmitAnswerAt(q3.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 900);
+                    A(r3.IsCorrect && r3.QuestionCompleted && coordinator.Summary.Attempts == 3 && coordinator.NextQuestion() == null,
+                        "first_five_q3_completes_three_question_target_" + (lessonIndex + 1));
+
+                    var summary = coordinator.Complete();
+                    A(summary.LessonCompleted && summary.TargetLessonId == lesson.Id && summary.Attempts == 3 && summary.Correct == 3,
+                        "first_five_lesson_completes_" + (lessonIndex + 1));
+                    A(summary.LessonScorePercent.HasValue && summary.LessonBestScorePercent.HasValue &&
+                      Math.Abs(summary.LessonScorePercent.Value - 100.0) < 0.0001 &&
+                      Math.Abs(summary.LessonBestScorePercent.Value - 100.0) < 0.0001,
+                        "first_five_lesson_scores_are_100_" + (lessonIndex + 1));
+                    if (lessonIndex < firstFive.Count - 1)
+                        A(summary.NextLessonId == firstFive[lessonIndex + 1].Id,
+                            "first_five_completion_points_to_immediate_next_" + (lessonIndex + 1));
+                }
+
+                var stored = progressStore.LoadOne(profile.ChildId, lesson.Id);
+                A(stored != null && stored.StartedCount == 1 && stored.CompletedCount == 1 &&
+                  stored.LastScorePercent.HasValue && stored.BestScorePercent.HasValue &&
+                  Math.Abs(stored.LastScorePercent.Value - 100.0) < 0.0001 &&
+                  Math.Abs(stored.BestScorePercent.Value - 100.0) < 0.0001,
+                    "first_five_progress_persists_completion_" + (lessonIndex + 1));
+
+                if (lessonIndex == 0)
+                {
+                    A(accessService.GetAccess(profile.ChildId, firstFive[1].Id).IsUnlocked &&
+                      accessService.GetAccess(profile.ChildId, firstFive[2].Id).IsUnlocked &&
+                      accessService.GetAccess(profile.ChildId, firstFive[3].Id).IsUnlocked,
+                        "first_five_lesson1_unlocks_lessons2_3_4");
+                    A(!accessService.GetAccess(profile.ChildId, firstFive[4].Id).IsUnlocked,
+                        "first_five_lesson5_stays_locked_until_place_value_completed");
+                }
+                if (lessonIndex == 3)
+                    A(accessService.GetAccess(profile.ChildId, firstFive[4].Id).IsUnlocked,
+                        "first_five_lesson4_unlocks_lesson5");
+            }
+
+            A(Count(database, "SELECT count(*) FROM session WHERE state='completed';") == 5,
+                "first_five_exactly_five_sessions_completed");
+            A(Count(database, "SELECT count(*) FROM attempt;") == 15 &&
+              Count(database, "SELECT count(*) FROM mastery_event;") == 15,
+                "first_five_exactly_fifteen_attempts_and_mastery_events");
+            A(Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + profile.ChildId + "' AND completed_count=1;") == 5,
+                "first_five_exactly_five_completed_progress_rows");
+            A(Count(database, "SELECT count(*) FROM session WHERE state='active';") == 0,
+                "first_five_leave_no_active_session");
+        }
+
+        private static void TestFirstLessonAllSixVariantsWithRetryResume(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.Lessons.First();
+            A(lesson.Id == "m2_ls_num_count_read_write_0_1000" &&
+              lesson.PracticeSets.Basic.Count == 2 && lesson.PracticeSets.Medium.Count == 2 &&
+              lesson.PracticeSets.Application.Count == 2,
+                "first_lesson_deep_slice_is_expected_six_question_pool");
+
+            var deterministicIndex = typeof(MathSessionCoordinator).GetMethod(
+                "DeterministicBucketIndex",
+                System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
+            A(deterministicIndex != null, "first_lesson_deep_slice_finds_bucket_selector");
+
+            var buckets = new[]
+            {
+                lesson.PracticeSets.Basic,
+                lesson.PracticeSets.Medium,
+                lesson.PracticeSets.Application
+            };
+            var bucketNames = new[] { "basic", "medium", "application" };
+            var allIds = new HashSet<string>(buckets.SelectMany(x => x), StringComparer.Ordinal);
+            var plannedSeen = new HashSet<string>(StringComparer.Ordinal);
+            var seedsToRun = new List<int>();
+            for (var seed = 0; seed < 16 && plannedSeen.Count < allIds.Count; seed++)
+            {
+                var selectedForSeed = new List<string>();
+                for (var bucketIndex = 0; bucketIndex < buckets.Length; bucketIndex++)
+                {
+                    var index = (int)deterministicIndex.Invoke(null,
+                        new object[] { seed, lesson.Id, bucketNames[bucketIndex], buckets[bucketIndex].Count });
+                    selectedForSeed.Add(buckets[bucketIndex][index]);
+                }
+                if (seed == 0 || selectedForSeed.Any(x => !plannedSeen.Contains(x)))
+                {
+                    seedsToRun.Add(seed);
+                    foreach (var id in selectedForSeed) plannedSeen.Add(id);
+                }
+            }
+            A(plannedSeen.SetEquals(allIds) && seedsToRun.Count >= 2 && seedsToRun.Count <= 4,
+                "first_lesson_deep_slice_plans_small_seed_set_covering_all_six_questions");
+
+            var database = NewDatabase(Path.Combine(root, "first-lesson-all-six.db"), schemaPath);
+            var profile = new LearnerSessionService(database).EnsurePrimaryChild("Bé bài đầu kỹ");
+            var seenDurable = new HashSet<string>(StringComparer.Ordinal);
+            var completedSessions = 0;
+
+            for (var runIndex = 0; runIndex < seedsToRun.Count; runIndex++)
+            {
+                var seed = seedsToRun[runIndex];
+                if (runIndex == 0)
+                {
+                    string sessionId;
+                    string mediumQuestionId;
+                    IList<string> selected;
+                    using (var first = new MathSessionCoordinator(database, templatePath, "LOW", seed, lesson.Id))
+                    {
+                        var start = first.Start("Bé bài đầu kỹ");
+                        sessionId = start.SessionId;
+                        selected = start.SelectedContentQuestionIds.ToList();
+                        foreach (var id in selected) seenDurable.Add(id);
+                        A(start.TargetLessonId == lesson.Id && start.TargetQuestionCount == 3,
+                            "first_lesson_retry_session_targets_exact_lesson");
+
+                        var q1 = first.NextQuestion();
+                        first.SubmitAnswerAt(q1.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700);
+                        var q2 = first.NextQuestion();
+                        mediumQuestionId = q2.QuestionId;
+                        var wrong = first.SubmitAnswerWithRetryAt(WrongAnswer(q2), 0, "smoke", DateTime.UtcNow, 800);
+                        A(!wrong.IsCorrect && !wrong.QuestionCompleted && wrong.CanRetry && wrong.AttemptIndex == 1 &&
+                          first.Summary.Attempts == 1 && first.Summary.AnswerAttempts == 2,
+                            "first_lesson_medium_wrong_enters_retry_without_completing_question");
+                        first.Suspend("first_lesson_retry_resume");
+                    }
+
+                    using (var resumed = new MathSessionCoordinator(database, templatePath, "NORMAL", 999999, lesson.Id))
+                    {
+                        var start = resumed.Start("Bé bài đầu kỹ");
+                        A(start.ResumedExistingSession && start.SessionId == sessionId && start.RetryPending &&
+                          start.CurrentAttemptIndex == 2 && start.SelectedContentQuestionIds.SequenceEqual(selected),
+                            "first_lesson_retry_resume_restores_same_selected_set_and_attempt_two");
+                        var q2 = resumed.NextQuestion();
+                        A(q2.QuestionId == mediumQuestionId && q2.ContentQuestionId == selected[1],
+                            "first_lesson_retry_resume_keeps_exact_medium_question");
+                        var retry = resumed.SubmitRetryAnswerAt(q2.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 850);
+                        A(retry.IsCorrect && retry.QuestionCompleted && retry.IsRetry && !retry.IndependentSuccess &&
+                          resumed.Summary.RetriedQuestions == 1 && resumed.Summary.RetriedCorrect == 1,
+                            "first_lesson_retry_correct_is_assisted_and_finalizes_once");
+                        var q3 = resumed.NextQuestion();
+                        resumed.SubmitAnswerAt(q3.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 900);
+                        var summary = resumed.Complete();
+                        A(summary.LessonCompleted && summary.Attempts == 3 && summary.Correct == 3 &&
+                          summary.AnswerAttempts == 4 && summary.IndependentCorrect == 2,
+                            "first_lesson_retry_session_completes_three_questions_from_four_answers");
+                    }
+                }
+                else
+                {
+                    using (var coordinator = new MathSessionCoordinator(database, templatePath, "LOW", seed, lesson.Id))
+                    {
+                        var start = coordinator.Start("Bé bài đầu kỹ");
+                        var selected = start.SelectedContentQuestionIds.ToList();
+                        foreach (var id in selected) seenDurable.Add(id);
+                        A(start.TargetLessonId == lesson.Id && selected.Count == 3,
+                            "first_lesson_variant_session_starts_" + runIndex);
+                        for (var ordinal = 0; ordinal < 3; ordinal++)
+                        {
+                            var question = coordinator.NextQuestion();
+                            A(question.ContentQuestionId == selected[ordinal],
+                                "first_lesson_variant_session_serves_selected_" + runIndex + "_" + ordinal);
+                            coordinator.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700 + ordinal * 100);
+                        }
+                        var summary = coordinator.Complete();
+                        A(summary.LessonCompleted && summary.Attempts == 3 && summary.Correct == 3,
+                            "first_lesson_variant_session_completes_" + runIndex);
+                    }
+                }
+                completedSessions++;
+            }
+
+            A(seenDurable.SetEquals(allIds),
+                "first_lesson_deep_slice_exercises_all_six_authored_ids_through_real_sessions");
+            foreach (var id in allIds)
+                A(Count(database, "SELECT count(*) FROM attempt WHERE question_id LIKE '" + id + "-%';") >= 1,
+                    "first_lesson_deep_slice_has_durable_attempt_for_" + id);
+
+            var progress = new MathLessonProgressStore(database).LoadOne(profile.ChildId, lesson.Id);
+            A(progress != null && progress.StartedCount == completedSessions && progress.CompletedCount == completedSessions &&
+              progress.BestScorePercent.HasValue && Math.Abs(progress.BestScorePercent.Value - 100.0) < 0.0001,
+                "first_lesson_deep_slice_tracks_all_replays_and_best_score");
+            A(Count(database, "SELECT count(*) FROM session WHERE child_id='" + profile.ChildId + "' AND state='completed';") == completedSessions,
+                "first_lesson_deep_slice_completes_every_planned_session");
+            A(Count(database, "SELECT count(*) FROM session WHERE child_id='" + profile.ChildId + "' AND state='active';") == 0,
+                "first_lesson_deep_slice_leaves_no_active_session");
         }
 
         private static void TestTargetedCompletionSurvivesNextLessonReadFailure(string root, string schemaPath, string templatePath, string lessonCatalogPath)

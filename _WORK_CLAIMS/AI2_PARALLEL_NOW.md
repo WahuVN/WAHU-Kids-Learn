@@ -58,10 +58,26 @@ Milestone: `3cf7fc6`.
 - MathDataEngineRuntimeSmoke: 104 PASS.
 - LearningSessionRuntimeSmoke: 800 PASS.
 - SQLiteRuntimeSmoke production: 179 PASS.
-- MathSessionPersistenceRuntimeSmoke current: **7206 PASS**; gồm real 402-bank breadth stress + write-failure/corruption repair + deterministic authored runtime IDs + concurrent pending-retry semantics + generated/open-ordinal self-heal + late-review transaction rollback + operational DB failure fail-safe.
+- MathSessionPersistenceRuntimeSmoke current: **7311 PASS**; gồm real 402-bank breadth stress + write-failure/corruption repair + deterministic authored runtime IDs + concurrent pending-retry semantics + generated/open-ordinal self-heal + late-review transaction rollback + operational DB failure fail-safe.
 - Real 402-bank integration đã PASS; selector breadth hiện verify đủ **67/67 lesson**, mỗi basic/medium/application bucket đều deterministic, in-range và xoay đủ 2 variant qua 16 seed.
 
 Không hard-code assertion count; regression mới chỉ được tăng hoặc nếu giảm phải có lý do rõ.
+
+## 1A. USER PRIORITY OVERRIDE — FIRST LESSONS FIRST
+
+Ưu tiên hiện hành từ user: **làm thật kỹ các bài đầu trước; bài sau có thể cập nhật/hardening sau**.
+
+AI2 phải ưu tiên theo thứ tự:
+1. 5 bài đầu curriculum (`m2_ls_num_count_read_write_0_1000` → `m2_ls_num_expanded_form_hto`) là **golden slice P0/P1**.
+2. Bài 1 phải được xem như **golden lesson**: cả 6 authored variants, retry/resume/idempotency/progress/unlock đều phải xanh.
+3. Sau khi 5 bài đầu ổn mới mở rộng 6–10; chưa ưu tiên hardening bài xa nếu không phải regression chung ảnh hưởng bài đầu.
+4. Bug engine chung phát hiện khi test bài đầu vẫn sửa ở root cause + regression toàn engine; không patch riêng content/UI để che lỗi.
+5. Mỗi lần được gọi lại, trước backlog chung hãy verify golden slice đầu tiên còn xanh trên current HEAD/bank.
+
+Current evidence:
+- 5 bài đầu chạy sequential targeted completion trên bank thật: PASS.
+- Bài 1 chạy đủ 6/6 authored IDs qua real sessions, gồm wrong→retry→suspend→resume: PASS.
+- Persistence sau golden-slice hardening: **7311 PASS**.
 
 ## 2. Ownership
 
