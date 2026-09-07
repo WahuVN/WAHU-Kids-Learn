@@ -1181,6 +1181,7 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             errors.append(f"child_facing_number_above_baseline:{name}:{path}:{number}:{max_number}")
 
     baseline_skills = []
+    skill_domain: dict[str, str] = {}
     domains = baseline.get("domains")
     if not isinstance(domains, dict):
         errors.append("baseline_domains_missing")
@@ -1190,6 +1191,9 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             errors.append(f"baseline_domain_not_list:{domain}")
             continue
         baseline_skills.extend(skills)
+        for skill_id in skills:
+            if isinstance(skill_id, str):
+                skill_domain[skill_id] = domain
     baseline_skill_set = set(baseline_skills)
     if len(baseline_skills) != len(baseline_skill_set):
         errors.append("baseline_duplicate_skill")
@@ -1540,10 +1544,15 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
         if question_type not in QUESTION_TYPES:
             errors.append(f"unsupported_question_type:{where}:{question_type!r}")
         tags = required_list(q, "tags", where, errors, 5)
-        if skill and skill.lower() not in tags:
-            errors.append(f"missing_skill_tag:{where}:{skill.lower()}")
-        if question_type and question_type not in tags:
-            errors.append(f"missing_question_type_tag:{where}:{question_type}")
+        if len(tags) != len(set(tags)):
+            errors.append(f"duplicate_question_tag:{where}")
+        expected_tags = {skill.lower(), skill_domain.get(skill, ""), difficulty, question_type, q.get("answer_kind")}
+        expected_tags.discard("")
+        actual_tags = set(tags)
+        if actual_tags != expected_tags or len(tags) != len(expected_tags):
+            missing_tags = sorted(expected_tags - actual_tags)
+            extra_tags = sorted(actual_tags - expected_tags)
+            errors.append(f"question_tag_contract_mismatch:{where}:missing={missing_tags}:extra={extra_tags}")
         if q.get("status") != "CHILD_READY":
             errors.append(f"question_not_child_ready:{where}")
 

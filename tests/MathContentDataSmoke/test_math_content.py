@@ -196,6 +196,21 @@ class MathContentDataSmoke(unittest.TestCase):
         self.assertEqual(self.catalog, catalog)
         self.assertEqual(self.bank, bank)
 
+    def test_question_tags_match_skill_domain_difficulty_surface_and_answer_kind(self):
+        skill_domain = {skill: domain for domain, skills in self.baseline["domains"].items() for skill in skills}
+        for item in self.questions:
+            expected = {
+                item["skill_id"].lower(),
+                skill_domain[item["skill_id"]],
+                item["difficulty"],
+                item["question_type"],
+                item["answer_kind"],
+            }
+            with self.subTest(item=item["id"]):
+                self.assertEqual(5, len(item["tags"]))
+                self.assertEqual(5, len(set(item["tags"])))
+                self.assertEqual(expected, set(item["tags"]))
+
     def test_required_answer_kinds_only(self):
         kinds = Counter(q["answer_kind"] for q in self.questions)
         grade2_kinds = {"integer", "interaction_integer", "text", "unit", "expression"}

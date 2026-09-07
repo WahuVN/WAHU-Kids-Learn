@@ -72,6 +72,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - baseline traceability root: `curriculum_id = vn_moet_math_grade2_tt32_2018`, Grade 2 Math, status `VERIFIED_A_BASELINE`, source bắt buộc `MOET_TT32_2018` + `TT32_FULL_ANNEX_MIRROR`, source không trùng; catalog/bank phải bind đúng curriculum này;
 - baseline hard guards bị đổi/mất: `max_number=1000`, carry/borrow rounds `1`, bảng nhân `[2,5]`, bảng chia `[2,5]`, mental add/sub max `20`, vị trí kim phút baseline `[3,6]`; validator fail nếu bất kỳ giá trị nào lệch; riêng max-number còn được enforce trên **2.870 numeric literals child-facing**, hiện max=1000 / over1000=0; **3/3 `MENTAL_ADD_SUB_WITHIN_20` validation range đã thu hẹp từ 0..1000 về 0..20** và bị khóa theo hard guard;
 - duplicate ID toàn catalog/bank;
+- question tag contract lệch/stale/duplicate: 201/201 câu phải có đúng 5 tag `{skill.lower, domain, difficulty, question_type, answer_kind}`; không cho tag dư hoặc thiếu sau khi đổi surface/difficulty;
 - missing lesson/question/reference;
 - orphan question;
 - bad prerequisite + prerequisite cycle + prerequisite trỏ về bài ở phía sau lộ trình; direct prerequisite dư thừa do đã được một prerequisite khác bao hàm cũng bị chặn;
@@ -143,7 +144,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract;
 - **166 phương trình số instructional** đang được kiểm bằng arithmetic parser, hiện **0 sai**; detector có regression cho cả phép cộng chuỗi và phép chia dùng dấu `:`.
 
-Latest result: **43 tests PASS**.
+Latest result: **44 tests PASS**.
 
 ## Commits / waves
 
