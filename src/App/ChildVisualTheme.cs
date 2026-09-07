@@ -53,6 +53,18 @@ namespace WAHUKidsLearn
         {
             return new Font("Segoe UI", size, style, GraphicsUnit.Point);
         }
+
+        // Fonts created only for a paint pass are caller-owned GDI objects. Keep the familiar
+        // TextRenderer signature but dispose the temporary font deterministically after drawing.
+        public static void DrawTextWithOwnedFont(Graphics graphics, string text, Font font, Rectangle bounds, Color color)
+        {
+            using (font) TextRenderer.DrawText(graphics, text, font, bounds, color);
+        }
+
+        public static void DrawTextWithOwnedFont(Graphics graphics, string text, Font font, Rectangle bounds, Color color, TextFormatFlags flags)
+        {
+            using (font) TextRenderer.DrawText(graphics, text, font, bounds, color, flags);
+        }
     }
 
     internal sealed class ChildSceneLayout : TableLayoutPanel
@@ -212,7 +224,7 @@ namespace WAHUKidsLearn
                 using (var b = new SolidBrush(Color.FromArgb(42, 255, 255, 255)))
                 using (var path = ChildVisualTheme.RoundedRect(badge, 12))
                     pevent.Graphics.FillPath(b, path);
-                TextRenderer.DrawText(pevent.Graphics, BadgeText, ChildVisualTheme.Font(9.5f, FontStyle.Bold), badge,
+                ChildVisualTheme.DrawTextWithOwnedFont(pevent.Graphics, BadgeText, ChildVisualTheme.Font(9.5f, FontStyle.Bold), badge,
                     Enabled ? TextColor : DisabledTextColor,
                     TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
             }
@@ -1177,7 +1189,7 @@ namespace WAHUKidsLearn
 
         private static void DrawCentered(Graphics g, string text, Rectangle rect, Color color, float size)
         {
-            TextRenderer.DrawText(g, text ?? string.Empty, ChildVisualTheme.Font(size, FontStyle.Bold), rect, color,
+            ChildVisualTheme.DrawTextWithOwnedFont(g, text ?? string.Empty, ChildVisualTheme.Font(size, FontStyle.Bold), rect, color,
                 TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
         }
 
@@ -1201,7 +1213,7 @@ namespace WAHUKidsLearn
                 var angle = (n * 30 - 90) * Math.PI / 180.0;
                 var tx = cx + (int)Math.Round(Math.Cos(angle) * (radius - 13));
                 var ty = cy + (int)Math.Round(Math.Sin(angle) * (radius - 13));
-                TextRenderer.DrawText(g, n.ToString(), ChildVisualTheme.Font(7.2f, FontStyle.Bold),
+                ChildVisualTheme.DrawTextWithOwnedFont(g, n.ToString(), ChildVisualTheme.Font(7.2f, FontStyle.Bold),
                     new Rectangle(tx - 10, ty - 9, 20, 18), ChildVisualTheme.MutedInk,
                     TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
             }
@@ -1224,7 +1236,7 @@ namespace WAHUKidsLearn
 
             if (_hintLevel >= 1)
             {
-                TextRenderer.DrawText(g, "Kim phút: số 3 = 15 phút · số 6 = 30 phút", ChildVisualTheme.Font(8.2f, FontStyle.Bold),
+                ChildVisualTheme.DrawTextWithOwnedFont(g, "Kim phút: số 3 = 15 phút · số 6 = 30 phút", ChildVisualTheme.Font(8.2f, FontStyle.Bold),
                     new Rectangle(0, Math.Max(0, Height - 21), Width, 19), ChildVisualTheme.MutedInk,
                     TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
             }
@@ -1256,13 +1268,13 @@ namespace WAHUKidsLearn
                         using (var focusPath = ChildVisualTheme.RoundedRect(focus, 18))
                         { g.FillPath(focusFill, focusPath); g.DrawPath(focusBorder, focusPath); }
                         g.FillEllipse(dot, cx - 8, cy - 8, 16, 16);
-                        TextRenderer.DrawText(g, "A", ChildVisualTheme.Font(10f, FontStyle.Bold), new Rectangle(cx + 12, cy - 14, 32, 26), ChildVisualTheme.Ink);
+                        ChildVisualTheme.DrawTextWithOwnedFont(g, "A", ChildVisualTheme.Font(10f, FontStyle.Bold), new Rectangle(cx + 12, cy - 14, 32, 26), ChildVisualTheme.Ink);
                         break;
                     case "LINE_SEGMENT_RECOGNIZE":
                         g.DrawLine(pen, cx - 100, cy, cx + 100, cy);
                         g.FillEllipse(dot, cx - 105, cy - 5, 10, 10); g.FillEllipse(dot, cx + 95, cy - 5, 10, 10);
-                        TextRenderer.DrawText(g, "A", ChildVisualTheme.Font(8f, FontStyle.Bold), new Rectangle(cx - 118, cy + 8, 24, 20), ChildVisualTheme.Ink);
-                        TextRenderer.DrawText(g, "B", ChildVisualTheme.Font(8f, FontStyle.Bold), new Rectangle(cx + 94, cy + 8, 24, 20), ChildVisualTheme.Ink);
+                        ChildVisualTheme.DrawTextWithOwnedFont(g, "A", ChildVisualTheme.Font(8f, FontStyle.Bold), new Rectangle(cx - 118, cy + 8, 24, 20), ChildVisualTheme.Ink);
+                        ChildVisualTheme.DrawTextWithOwnedFont(g, "B", ChildVisualTheme.Font(8f, FontStyle.Bold), new Rectangle(cx + 94, cy + 8, 24, 20), ChildVisualTheme.Ink);
                         break;
                     case "CURVE_RECOGNIZE":
                         g.DrawBezier(pen, cx - 130, cy + 28, cx - 45, cy - 70, cx + 50, cy + 70, cx + 130, cy - 24);
@@ -1300,7 +1312,7 @@ namespace WAHUKidsLearn
                 }
             }
             if (_hintLevel >= 1)
-                TextRenderer.DrawText(g, "Quan sát đặc điểm của hình", ChildVisualTheme.Font(8.3f, FontStyle.Bold),
+                ChildVisualTheme.DrawTextWithOwnedFont(g, "Quan sát đặc điểm của hình", ChildVisualTheme.Font(8.3f, FontStyle.Bold),
                     new Rectangle(0, Math.Max(0, Height - 21), Width, 19), ChildVisualTheme.MutedInk,
                     TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
         }
@@ -1318,13 +1330,13 @@ namespace WAHUKidsLearn
             for (var row = 0; row < 3; row++)
             {
                 var y = startY + row * rowH;
-                TextRenderer.DrawText(g, labels[row], ChildVisualTheme.Font(8.7f, FontStyle.Bold),
+                ChildVisualTheme.DrawTextWithOwnedFont(g, labels[row], ChildVisualTheme.Font(8.7f, FontStyle.Bold),
                     new Rectangle(8, y, labelW, rowH), ChildVisualTheme.Ink,
                     TextFormatFlags.Right | TextFormatFlags.VerticalCenter);
                 for (var i = 0; i < counts[row]; i++)
                     DrawAnimalMark(g, new Rectangle(iconsLeft + i * gap, y + (rowH - iconSize) / 2, iconSize, iconSize), row);
             }
-            TextRenderer.DrawText(g, "1 hình = 1 con", ChildVisualTheme.Font(8f, FontStyle.Bold),
+            ChildVisualTheme.DrawTextWithOwnedFont(g, "1 hình = 1 con", ChildVisualTheme.Font(8f, FontStyle.Bold),
                 new Rectangle(0, Math.Max(0, Height - 20), Width, 18), ChildVisualTheme.MutedInk,
                 TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
         }
@@ -1373,7 +1385,7 @@ namespace WAHUKidsLearn
 
             if (_hintLevel >= 1)
             {
-                TextRenderer.DrawText(g, "Các kết quả có thể: 1, 2, 3, 4, 5, 6", ChildVisualTheme.Font(8.5f, FontStyle.Bold),
+                ChildVisualTheme.DrawTextWithOwnedFont(g, "Các kết quả có thể: 1, 2, 3, 4, 5, 6", ChildVisualTheme.Font(8.5f, FontStyle.Bold),
                     new Rectangle(0, Math.Max(0, Height - 22), Width, 20), ChildVisualTheme.MutedInk,
                     TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
             }
@@ -1426,17 +1438,17 @@ namespace WAHUKidsLearn
                     g.FillRectangle(fill, rect);
                     g.DrawRectangle(pen, rect);
                 }
-                TextRenderer.DrawText(g, headers[i], ChildVisualTheme.Font(8.8f, FontStyle.Bold),
+                ChildVisualTheme.DrawTextWithOwnedFont(g, headers[i], ChildVisualTheme.Font(8.8f, FontStyle.Bold),
                     new Rectangle(x, 14, cellW, 20), ChildVisualTheme.MutedInk,
                     TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
                 var valueText = _hintLevel >= 1 ? digits[i].ToString() : "?";
-                TextRenderer.DrawText(g, valueText, ChildVisualTheme.Font(18f, FontStyle.Bold),
+                ChildVisualTheme.DrawTextWithOwnedFont(g, valueText, ChildVisualTheme.Font(18f, FontStyle.Bold),
                     new Rectangle(x, 35, cellW, 34), ChildVisualTheme.Ink,
                     TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
                 if (_hintLevel >= 2)
                 {
                     var unit = i == 0 ? digits[i] * 100 : (i == 1 ? digits[i] * 10 : digits[i]);
-                    TextRenderer.DrawText(g, "= " + unit, ChildVisualTheme.Font(8.5f),
+                    ChildVisualTheme.DrawTextWithOwnedFont(g, "= " + unit, ChildVisualTheme.Font(8.5f),
                         new Rectangle(x, 67, cellW, 19), ChildVisualTheme.PeachStrong,
                         TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
                 }
@@ -1460,17 +1472,17 @@ namespace WAHUKidsLearn
                     using (var brush = new SolidBrush(k == 0 ? Color.FromArgb(238, 245, 221) : Color.FromArgb(224, 239, 249)))
                     using (var pen = new Pen(Color.FromArgb(205, 209, 195)))
                     { g.FillRectangle(brush, box); g.DrawRectangle(pen, box); }
-                    TextRenderer.DrawText(g, numbers[k].ToString(), ChildVisualTheme.Font(18f, FontStyle.Bold), box,
+                    ChildVisualTheme.DrawTextWithOwnedFont(g, numbers[k].ToString(), ChildVisualTheme.Font(18f, FontStyle.Bold), box,
                         ChildVisualTheme.Ink, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
                     if (_hintLevel >= 1)
                     {
                         var h = (numbers[k] / 100) % 10; var t = (numbers[k] / 10) % 10; var o = numbers[k] % 10;
-                        TextRenderer.DrawText(g, "T " + h + " · C " + t + " · ĐV " + o, ChildVisualTheme.Font(8.2f),
+                        ChildVisualTheme.DrawTextWithOwnedFont(g, "T " + h + " · C " + t + " · ĐV " + o, ChildVisualTheme.Font(8.2f),
                             new Rectangle(box.Left, box.Bottom - 20, box.Width, 18), ChildVisualTheme.MutedInk,
                             TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
                     }
                 }
-                TextRenderer.DrawText(g, "?", ChildVisualTheme.Font(20f, FontStyle.Bold),
+                ChildVisualTheme.DrawTextWithOwnedFont(g, "?", ChildVisualTheme.Font(20f, FontStyle.Bold),
                     new Rectangle(left + boxW, 30, gap, 36), ChildVisualTheme.PeachStrong,
                     TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
                 return;
@@ -1498,19 +1510,19 @@ namespace WAHUKidsLearn
             {
                 using (var pen = new Pen(Color.FromArgb(128, 139, 137), 2f)) g.DrawLine(pen, x, y - 10, x, y + 10);
             }
-            TextRenderer.DrawText(g, n.ToString(), ChildVisualTheme.Font(15f, FontStyle.Bold),
+            ChildVisualTheme.DrawTextWithOwnedFont(g, n.ToString(), ChildVisualTheme.Font(15f, FontStyle.Bold),
                 new Rectangle(centerX - 45, y - 45, 90, 30), ChildVisualTheme.Ink,
                 TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
-            TextRenderer.DrawText(g, "−1", ChildVisualTheme.Font(9f, FontStyle.Bold),
+            ChildVisualTheme.DrawTextWithOwnedFont(g, "−1", ChildVisualTheme.Font(9f, FontStyle.Bold),
                 new Rectangle(centerX - 150, y - 40, 90, 22), ChildVisualTheme.MintStrong,
                 TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
-            TextRenderer.DrawText(g, "+1", ChildVisualTheme.Font(9f, FontStyle.Bold),
+            ChildVisualTheme.DrawTextWithOwnedFont(g, "+1", ChildVisualTheme.Font(9f, FontStyle.Bold),
                 new Rectangle(centerX + 60, y - 40, 90, 22), ChildVisualTheme.MintStrong,
                 TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
-            TextRenderer.DrawText(g, "?", ChildVisualTheme.Font(13f, FontStyle.Bold),
+            ChildVisualTheme.DrawTextWithOwnedFont(g, "?", ChildVisualTheme.Font(13f, FontStyle.Bold),
                 new Rectangle(centerX - 135, y + 12, 60, 24), ChildVisualTheme.PeachStrong,
                 TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
-            TextRenderer.DrawText(g, "?", ChildVisualTheme.Font(13f, FontStyle.Bold),
+            ChildVisualTheme.DrawTextWithOwnedFont(g, "?", ChildVisualTheme.Font(13f, FontStyle.Bold),
                 new Rectangle(centerX + 75, y + 12, 60, 24), ChildVisualTheme.PeachStrong,
                 TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
         }
@@ -1554,7 +1566,7 @@ namespace WAHUKidsLearn
                     }
                 }
             }
-            TextRenderer.DrawText(g, "mỗi nhóm " + divisor, ChildVisualTheme.Font(8.8f, FontStyle.Bold),
+            ChildVisualTheme.DrawTextWithOwnedFont(g, "mỗi nhóm " + divisor, ChildVisualTheme.Font(8.8f, FontStyle.Bold),
                 new Rectangle(0, Math.Max(0, Height - 24), Width, 22), ChildVisualTheme.MutedInk,
                 TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
         }
@@ -1578,12 +1590,12 @@ namespace WAHUKidsLearn
             {
                 var mx = (points[i].X + points[i + 1].X) / 2;
                 var my = (points[i].Y + points[i + 1].Y) / 2;
-                TextRenderer.DrawText(g, values[i] + " cm", ChildVisualTheme.Font(9f, FontStyle.Bold),
+                ChildVisualTheme.DrawTextWithOwnedFont(g, values[i] + " cm", ChildVisualTheme.Font(9f, FontStyle.Bold),
                     new Rectangle(mx - 34, my - 24, 68, 21), ChildVisualTheme.PeachStrong,
                     TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
             }
             if (_hintLevel >= 1)
-                TextRenderer.DrawText(g, "cộng 3 đoạn", ChildVisualTheme.Font(9f, FontStyle.Bold),
+                ChildVisualTheme.DrawTextWithOwnedFont(g, "cộng 3 đoạn", ChildVisualTheme.Font(9f, FontStyle.Bold),
                     new Rectangle(0, Math.Max(0, Height - 22), Width, 20), ChildVisualTheme.MintStrong,
                     TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
         }
@@ -1610,7 +1622,7 @@ namespace WAHUKidsLearn
                     if (n % 5 == 0)
                     {
                         var r = new Rectangle(x - 18, y + 10, 36, 19);
-                        TextRenderer.DrawText(g, n.ToString(), ChildVisualTheme.Font(8.5f), r,
+                        ChildVisualTheme.DrawTextWithOwnedFont(g, n.ToString(), ChildVisualTheme.Font(8.5f), r,
                             ChildVisualTheme.MutedInk, TextFormatFlags.HorizontalCenter | TextFormatFlags.Top);
                     }
                 }
@@ -1621,7 +1633,7 @@ namespace WAHUKidsLearn
             using (var startBrush = new SolidBrush(ChildVisualTheme.PeachStrong))
                 g.FillEllipse(startBrush, sx - 6, y - 6, 12, 12);
             var startLabel = new Rectangle(sx - 32, 2, 64, 22);
-            TextRenderer.DrawText(g, "bắt đầu " + start, ChildVisualTheme.Font(8.5f, FontStyle.Bold), startLabel,
+            ChildVisualTheme.DrawTextWithOwnedFont(g, "bắt đầu " + start, ChildVisualTheme.Font(8.5f, FontStyle.Bold), startLabel,
                 ChildVisualTheme.PeachStrong, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
 
             var arrowY = y - 25;
@@ -1634,7 +1646,7 @@ namespace WAHUKidsLearn
             var label = (subtract ? "lùi " : "tiến ") + amount + " bước";
             var mid = (sx + ex) / 2;
             var labelRect = new Rectangle(mid - 55, arrowY - 25, 110, 20);
-            TextRenderer.DrawText(g, label, ChildVisualTheme.Font(9f, FontStyle.Bold), labelRect,
+            ChildVisualTheme.DrawTextWithOwnedFont(g, label, ChildVisualTheme.Font(9f, FontStyle.Bold), labelRect,
                 ChildVisualTheme.MintStrong, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
 
             if (_hintLevel >= 2)
@@ -1672,7 +1684,7 @@ namespace WAHUKidsLearn
                 }
             }
             var labelRect = new Rectangle(0, Math.Max(0, Height - 22), Width, 20);
-            TextRenderer.DrawText(g, groups + " nhóm · mỗi nhóm " + perGroup, ChildVisualTheme.Font(8.5f), labelRect,
+            ChildVisualTheme.DrawTextWithOwnedFont(g, groups + " nhóm · mỗi nhóm " + perGroup, ChildVisualTheme.Font(8.5f), labelRect,
                 ChildVisualTheme.MutedInk, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
         }
 
@@ -1701,20 +1713,20 @@ namespace WAHUKidsLearn
                     using (var hi = new SolidBrush(Color.FromArgb(65, ChildVisualTheme.Sun)))
                         g.FillRectangle(hi, x + 3, 0, cellW - 6, Math.Min(Height - 2, 88));
                 }
-                TextRenderer.DrawText(g, headers[c], ChildVisualTheme.Font(8.5f, FontStyle.Bold),
+                ChildVisualTheme.DrawTextWithOwnedFont(g, headers[c], ChildVisualTheme.Font(8.5f, FontStyle.Bold),
                     new Rectangle(x, headerY, cellW, 20), ChildVisualTheme.MutedInk,
                     TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
-                TextRenderer.DrawText(g, digitsA[c].ToString(), ChildVisualTheme.Font(15f, FontStyle.Bold),
+                ChildVisualTheme.DrawTextWithOwnedFont(g, digitsA[c].ToString(), ChildVisualTheme.Font(15f, FontStyle.Bold),
                     new Rectangle(x, rowA, cellW, 27), ChildVisualTheme.Ink,
                     TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
-                TextRenderer.DrawText(g, digitsB[c].ToString(), ChildVisualTheme.Font(15f, FontStyle.Bold),
+                ChildVisualTheme.DrawTextWithOwnedFont(g, digitsB[c].ToString(), ChildVisualTheme.Font(15f, FontStyle.Bold),
                     new Rectangle(x, rowB, cellW, 27), ChildVisualTheme.Ink,
                     TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
                 using (var divider = new Pen(Color.FromArgb(224, 222, 210), 1f))
                     if (c > 0) g.DrawLine(divider, x, 3, x, Math.Min(Height - 3, 88));
             }
             var signRect = new Rectangle(Math.Max(0, left - 37), rowB, 34, 27);
-            TextRenderer.DrawText(g, add ? "+" : "−", ChildVisualTheme.Font(15f, FontStyle.Bold), signRect,
+            ChildVisualTheme.DrawTextWithOwnedFont(g, add ? "+" : "−", ChildVisualTheme.Font(15f, FontStyle.Bold), signRect,
                 ChildVisualTheme.PeachStrong, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
             using (var pen = new Pen(ChildVisualTheme.Ink, 2f))
                 g.DrawLine(pen, left + 5, Math.Min(Height - 8, 88), left + totalW - 5, Math.Min(Height - 8, 88));
@@ -1723,7 +1735,7 @@ namespace WAHUKidsLearn
             {
                 var cue = add ? "nhớ 1 sang trái" : "mượn 1 từ trái";
                 var cueX = left + cueColumn * cellW;
-                TextRenderer.DrawText(g, cue, ChildVisualTheme.Font(8.5f, FontStyle.Bold),
+                ChildVisualTheme.DrawTextWithOwnedFont(g, cue, ChildVisualTheme.Font(8.5f, FontStyle.Bold),
                     new Rectangle(cueX - 25, Math.Min(Height - 25, 92), cellW + 50, 22),
                     ChildVisualTheme.PeachStrong, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
             }
@@ -1931,13 +1943,13 @@ namespace WAHUKidsLearn
             var title = string.IsNullOrWhiteSpace(_unlockedItemId)
                 ? "Khu vườn lớn thêm 1 bước"
                 : "Mở khóa: " + ItemName(_unlockedItemId);
-            TextRenderer.DrawText(g, title, ChildVisualTheme.Font(11f, FontStyle.Bold), titleRect,
+            ChildVisualTheme.DrawTextWithOwnedFont(g, title, ChildVisualTheme.Font(11f, FontStyle.Bold), titleRect,
                 ChildVisualTheme.Ink, TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
 
             var next = _sessionsUntilNext > 0 && !string.IsNullOrWhiteSpace(_nextItemId)
                 ? "Còn " + _sessionsUntilNext + " nhiệm vụ hoàn thành để tới " + ItemName(_nextItemId) + "."
                 : "Các mốc khu vườn hiện tại đã được mở đủ.";
-            TextRenderer.DrawText(g, "Vườn: " + _growthSteps + " bước · " + next,
+            ChildVisualTheme.DrawTextWithOwnedFont(g, "Vườn: " + _growthSteps + " bước · " + next,
                 ChildVisualTheme.Font(9.5f), detailRect, ChildVisualTheme.MutedInk,
                 TextFormatFlags.Left | TextFormatFlags.Top | TextFormatFlags.WordBreak | TextFormatFlags.EndEllipsis);
         }
@@ -2042,7 +2054,7 @@ namespace WAHUKidsLearn
         {
             var titleWidth = Math.Min(176, Math.Max(112, bounds.Width / 3));
             var titleRect = new Rectangle(bounds.Left + 4, bounds.Top + 2, titleWidth - 8, bounds.Height - 4);
-            TextRenderer.DrawText(g, row.Title, ChildVisualTheme.Font(9.3f, FontStyle.Bold), titleRect,
+            ChildVisualTheme.DrawTextWithOwnedFont(g, row.Title, ChildVisualTheme.Font(9.3f, FontStyle.Bold), titleRect,
                 ChildVisualTheme.Ink, TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
 
             var statusWidth = Math.Min(96, Math.Max(72, bounds.Width / 5));
@@ -2065,7 +2077,7 @@ namespace WAHUKidsLearn
             var status = !hasEvidence ? "Chưa bắt đầu" :
                 (score >= 0.80 ? "Vững" : (score >= 0.55 ? "Vững dần" : "Đang học"));
             var statusRect = new Rectangle(barRight + 5, bounds.Top + 2, statusWidth, bounds.Height - 4);
-            TextRenderer.DrawText(g, status, ChildVisualTheme.Font(8.7f, hasEvidence ? FontStyle.Bold : FontStyle.Regular),
+            ChildVisualTheme.DrawTextWithOwnedFont(g, status, ChildVisualTheme.Font(8.7f, hasEvidence ? FontStyle.Bold : FontStyle.Regular),
                 statusRect, hasEvidence ? row.Accent : ChildVisualTheme.MutedInk,
                 TextFormatFlags.Right | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
         }

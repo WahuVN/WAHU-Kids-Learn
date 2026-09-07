@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using WAHU.Content;
 using WAHU.Data;
@@ -23,6 +24,7 @@ namespace WAHU.ChildUiRuntimeSmoke
             Application.SetCompatibleTextRenderingDefault(false);
             var appAssembly = typeof(WAHUKidsLearn.MainForm).Assembly;
 
+            TestPaintFontOwnershipSourceGuard();
             TestInstructionVisuals(appAssembly, 1.00f);
             TestInstructionVisuals(appAssembly, 1.25f);
             TestGarden(appAssembly, 1.00f);
@@ -55,6 +57,32 @@ namespace WAHU.ChildUiRuntimeSmoke
             TestBasicControls(appAssembly);
 
             Console.WriteLine("CHILD_UI_RUNTIME_SMOKE_PASS assertions=" + _assertions);
+        }
+
+        private static void TestPaintFontOwnershipSourceGuard()
+        {
+            var appDir = Path.Combine(Directory.GetCurrentDirectory(), "src", "App");
+            var hotPaintFiles = new[]
+            {
+                "GameArtControls.cs",
+                "MathInteractiveControls.cs",
+                "MathQuickRescueForm.cs",
+                "ChildVisualTheme.cs"
+            };
+            var directTemporaryFont = new Regex(
+                @"TextRenderer\.DrawText\((?:(?!;).)*?ChildVisualTheme\.Font\(",
+                RegexOptions.Singleline | RegexOptions.CultureInvariant);
+
+            foreach (var fileName in hotPaintFiles)
+            {
+                var source = File.ReadAllText(Path.Combine(appDir, fileName));
+                A(!directTemporaryFont.IsMatch(source),
+                    "paint_font_ownership_no_inline_temporary_font_" + Path.GetFileNameWithoutExtension(fileName));
+            }
+
+            var themeSource = File.ReadAllText(Path.Combine(appDir, "ChildVisualTheme.cs"));
+            A(themeSource.IndexOf("using (font) TextRenderer.DrawText", StringComparison.Ordinal) >= 0,
+                "paint_font_ownership_helper_disposes_temporary_font");
         }
 
         private static void TestInstructionVisuals(Assembly appAssembly, float scale)
