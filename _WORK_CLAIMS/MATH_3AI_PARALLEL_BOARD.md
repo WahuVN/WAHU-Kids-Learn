@@ -1,8 +1,19 @@
 # MATH — 3 AI PARALLEL BOARD (READ-ONLY)
 
-Baseline after coordination: `d1665dc` (`Toán: siết phạm vi số theo kỹ năng`).
+Baseline after coordination: `3d8674d` (`Toán: chia 3 lane AI chạy song song không xung đột`).
 
 Purpose: keep AI1/AI2/AI3 productive in parallel on the same working tree without overwriting, staging or committing another lane's work. This file is coordinator-owned and **READ-ONLY for AI1/AI2/AI3**. Each AI updates only its own `AI*_PARALLEL_NOW.md` status file.
+
+
+## 0. NO-WAIT policy — 3 AI chạy cùng lúc liên tục
+
+**Không AI nào được đứng chờ dependency của AI khác.** Mọi dependency chỉ chặn bước *publish/merge vào runtime*, không chặn công việc. Nếu gặp lock/handoff chưa mở, AI phải lập tức chuyển sang task độc lập kế tiếp trong backlog của chính lane.
+
+- AI1 không chờ Request 009: làm **shadow pool-6 hoàn chỉnh** trong draft-only path, validator/test riêng, preview catalog/bank riêng. Chỉ bước copy/merge vào runtime `question_bank_v1.json` + `lesson_catalog_v1.json` mới phụ thuộc AI2.
+- AI2 không chờ AI1 pool thật: Request 009 được phát triển/test bằng **synthetic >=6 pool fixture** trong engine tests. Request 010, adaptive generator và Request 006 đều độc lập với AI1 publish.
+- AI3 không chờ AI2: UI target hard-code, Request 008 portable/installer lists, V5 status cleanup, accessibility/Child UI regression, synthetic pool-6 UI E2E đều làm ngay. Chỉ bước sửa `Build-SetupArtifacts.ps1` và real-bank pool6 E2E phụ thuộc handoff; khi chưa mở thì chuyển task khác.
+
+Mỗi lane dùng queue `NOW -> NEXT -> FALLBACK`. Khi task NOW bị khóa bởi file-owner khác, **không đợi**: chạy NEXT/FALLBACK.
 
 ## 1. Non-negotiable shared-tree rules
 
@@ -67,7 +78,7 @@ AI3 must not edit `src/Learning/**`, `src/Session/**`, Math runtime content JSON
 
 ## 3. Parallel execution graph
 
-### Phase P0 — run immediately in parallel
+### Phase P0 — chạy NGAY đồng thời, không dependency
 
 **AI1:** prepare authored breadth expansion without changing runtime bank yet. Curate one additional `basic`, `medium`, `application` question per skill (201 new draft questions total) in new draft-only source under `tools/math_content_authoring/drafts/`; add draft-only validation/tests. IDs must be future runtime IDs `_04`, `_05`, `_06`. Do not import the draft into `generate_grade2_content.py` yet. Continue independent content audits only in AI1-owned files.
 
@@ -75,7 +86,7 @@ AI3 must not edit `src/Learning/**`, `src/Session/**`, Math runtime content JSON
 
 **AI3:** fix adaptive mission UI hard-code (`Luyện 8 câu hôm nay`, badge/accessibility wording) to derive from `MathSessionCoordinator.DefaultTargetQuestionCount`; add Child UI regression. In parallel, update portable/installer required payload lists for Request 008 to require `verified_templates_v1.json`, `lesson_catalog_v1.json`, `question_bank_v1.json`. Do not touch `Build-SetupArtifacts.ps1` yet.
 
-### Phase P1 — still parallel after first commits
+### Phase P1 — tiếp tục đồng thời; dependency chỉ quyết định publish, không quyết định có việc làm hay không
 
 **AI1:** finish draft pool quality gates: every skill exactly 3 draft questions (1 per difficulty), no prompt near-duplicate against runtime 01..03 or other draft questions, Grade-2 operation/range/unit guards, deterministic `_04..06` IDs. Publish only draft artifacts/tests.
 
@@ -83,13 +94,21 @@ AI3 must not edit `src/Learning/**`, `src/Session/**`, Math runtime content JSON
 
 **AI3:** after AI2 hands off `Build-SetupArtifacts.ps1`, finish Request 008 preflight/staging hard guards for all three Math runtime JSON and run portable/installer payload tests. Also keep UI tests parameterized from engine constants; no numeric target hard-code.
 
-### Sync S1 — Request 009 handoff
+### Sync S1 — Request 009 chỉ là publish gate, KHÔNG phải wait gate
 
 AI2 writes `REQUEST_009_READY=<commit>` in `AI2_PARALLEL_NOW.md` only after its synthetic pool >=6 persistence/regression suite passes.
 
-Then, and only then:
+Khi marker xuất hiện, AI1 chuyển từ shadow/draft sang publish runtime:
 - AI1 merges the draft 201 questions into the runtime authoring pipeline, yielding 402 authored questions / 6 per lesson / 2 per difficulty, updates catalog practice sets, validator/tests and final manifest hash after manifest lock is free.
 - AI3 runs real-bank E2E: pool=6 but targeted session/progress/result remains 3; fresh selection identities can produce different valid sets; resume/retry preserves set.
+
+### Permanent fallback backlog — dùng ngay nếu task chính chạm lock
+
+**AI1 fallback:** audit/curate shadow pool quality, distractor/hint/explanation uniqueness, difficulty progression, prerequisite/source/ID/Unicode/readability guards, draft deterministic regeneration, content preview statistics. Không chạm engine/UI.
+
+**AI2 fallback:** fuzz MathAnswerValidator, generated-template coverage, selector determinism, retry/idempotency/corrupt-cache/persistence stress, schema-V5 pack identity, synthetic selected-set permutations. Không chạm UI/content runtime bank.
+
+**AI3 fallback:** accessibility strings, no-hard-code reflection tests, 67-lesson render sweep, stale-state/error-state UI, portable/installer required-file tests, status-doc cleanup, synthetic fixtures for pool 6 / display unit. Không chạm engine/content runtime bank.
 
 ### Phase P2 — final closure
 

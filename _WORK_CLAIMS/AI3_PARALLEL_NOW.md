@@ -2,9 +2,21 @@
 
 LANE: AI3
 LANE_DONE=NO
-BASELINE=d1665dc
-BUILD_SETUP_LOCK=WAIT_AI2
-REQUEST_009_READY=WAIT
+BASELINE=3d8674d
+BUILD_SETUP_LOCK=LOCKED_BUT_NO_WAIT
+REQUEST_009_READY=NOT_REQUIRED_FOR_SYNTHETIC_UI_WORK
+
+
+## NO-WAIT rule
+AI3 **không chờ AI2/AI1**. Mọi UI coupling được test bằng engine constant hoặc synthetic fixtures ngay. `Build-SetupArtifacts.ps1` lock chỉ chặn đúng file đó; trong lúc lock, AI3 tiếp tục UI + portable/installer + ChildUI + status/QA.
+
+### Queue luôn có việc
+- NOW: bỏ hard-code adaptive `8/tám`, derive từ `DefaultTargetQuestionCount`, thêm ChildUI regression.
+- NOW song song: Request 008 required-file lists trong Portable/Installer E2E (2 file đang clean).
+- NEXT: synthetic pool-6 UI E2E (bank count 6, neutral CTA, không invent session target).
+- NEXT: V5 stable status cleanup (`ece2a0c`), accessibility/no-stale-state/error-state sweeps.
+- FALLBACK: 67-lesson render/access sweep, retry/resume/write-failure UI regression, reflection guard chống numeric hard-code.
+- Khi `Build-SetupArtifacts.ps1` lock mở: chèn staging hard guard ngay, nhưng không có thời gian idle trước đó.
 
 ## Mission now
 
@@ -26,13 +38,13 @@ In `Test-PortableE2E.ps1` and `Test-InstallerE2E.ps1`, require all three Math ru
 - `content_packs\math_grade2_v1\question_bank_v1.json`
 Keep schema expectation at V5. Commit these two files independently if tests pass.
 
-Do not touch `Build-SetupArtifacts.ps1` while `BUILD_SETUP_LOCK=WAIT_AI2`.
+Do not touch `Build-SetupArtifacts.ps1` while `BUILD_SETUP_LOCK=LOCKED_BUT_NO_WAIT`.
 
 ### C. Request 008 staging after handoff
-When `AI2_PARALLEL_NOW.md` says `BUILD_SETUP_LOCK=AI3`, add preflight/staged publish `Require-File` guards for the same three JSON in `Build-SetupArtifacts.ps1`. Then run staged payload + portable + installer E2E.
+Publish/file handoff only — khi `AI2_PARALLEL_NOW.md` nói `BUILD_SETUP_LOCK=AI3`, add preflight/staged publish `Require-File` guards for the same three JSON in `Build-SetupArtifacts.ps1`. Then run staged payload + portable + installer E2E.
 
 ### D. After Request 009
-When `AI2_PARALLEL_NOW.md` publishes `REQUEST_009_READY=<sha>` and AI1 merges real pool=6:
+Real-bank publish gate only — khi AI2 publish `REQUEST_009_READY=<sha>` và AI1 merge pool=6:
 - add real-bank E2E: Hub detail says 6-bank count, session target/progress/result remain 3;
 - different fresh selection identities may produce different selected sets;
 - exact resume/retry keeps the same selected set.
