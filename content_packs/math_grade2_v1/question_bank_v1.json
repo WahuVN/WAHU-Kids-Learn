@@ -101,17 +101,17 @@
         {
           "id": "b",
           "text": "bốn trăm hai",
-          "rationale_vi": "“bốn trăm hai” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Đọc và viết số” rồi thử lại."
+          "rationale_vi": "“bốn trăm hai” chưa đúng. 420 có 4 trăm, 2 chục và 0 đơn vị nên đọc là bốn trăm hai mươi."
         },
         {
           "id": "c",
           "text": "bốn mươi hai",
-          "rationale_vi": "Nếu chọn “bốn mươi hai”, có ít nhất một bước của “Đọc và viết số” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“bốn mươi hai” chưa đúng. 420 có 4 trăm, 2 chục và 0 đơn vị nên đọc là bốn trăm hai mươi."
         },
         {
           "id": "d",
           "text": "hai trăm bốn mươi",
-          "rationale_vi": "“hai trăm bốn mươi” là phương án nhiễu gần đúng. Tự làm theo “Đọc và viết số” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“hai trăm bốn mươi” chưa đúng. 420 có 4 trăm, 2 chục và 0 đơn vị nên đọc là bốn trăm hai mươi."
         }
       ],
       "correct_choice_id": "a"
@@ -180,7 +180,7 @@
         {
           "id": "a",
           "text": "610",
-          "rationale_vi": "“610” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Số tròn trăm” rồi thử lại."
+          "rationale_vi": "“610” chưa đúng. 600 có hàng chục và hàng đơn vị đều bằng 0."
         },
         {
           "id": "b",
@@ -190,12 +190,12 @@
         {
           "id": "c",
           "text": "606",
-          "rationale_vi": "Nếu chọn “606”, có ít nhất một bước của “Số tròn trăm” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“606” chưa đúng. 600 có hàng chục và hàng đơn vị đều bằng 0."
         },
         {
           "id": "d",
           "text": "660",
-          "rationale_vi": "“660” là phương án nhiễu gần đúng. Tự làm theo “Số tròn trăm” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“660” chưa đúng. 600 có hàng chục và hàng đơn vị đều bằng 0."
         }
       ],
       "correct_choice_id": "b"
@@ -238,7 +238,7 @@
         {
           "id": "b",
           "text": "Sai",
-          "rationale_vi": "“Sai” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Số tròn trăm” rồi thử lại."
+          "rationale_vi": "“Sai” chưa đúng. 700 có hàng chục và hàng đơn vị đều bằng 0 nên đây là số tròn trăm. Vậy đáp án là Đúng."
         }
       ],
       "correct_choice_id": "a"
@@ -276,12 +276,12 @@
         {
           "id": "a",
           "text": "750",
-          "rationale_vi": "“750” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Số tròn trăm” rồi thử lại."
+          "rationale_vi": "“750” chưa đúng. 700 có đúng 7 trăm và không có thêm chục hay đơn vị."
         },
         {
           "id": "b",
           "text": "705",
-          "rationale_vi": "Nếu chọn “705”, có ít nhất một bước của “Số tròn trăm” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“705” chưa đúng. 700 có đúng 7 trăm và không có thêm chục hay đơn vị."
         },
         {
           "id": "c",
@@ -291,7 +291,7 @@
         {
           "id": "d",
           "text": "570",
-          "rationale_vi": "“570” là phương án nhiễu gần đúng. Tự làm theo “Số tròn trăm” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“570” chưa đúng. 700 có đúng 7 trăm và không có thêm chục hay đơn vị."
         }
       ],
       "correct_choice_id": "c"
@@ -515,17 +515,17 @@
         {
           "id": "a",
           "text": "300 + 5 + 2",
-          "rationale_vi": "“300 + 5 + 2” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Dạng khai triển” rồi thử lại."
+          "rationale_vi": "“300 + 5 + 2” chưa đúng. 352 có 3 trăm, 5 chục và 2 đơn vị nên bằng 300 + 50 + 2."
         },
         {
           "id": "b",
           "text": "30 + 50 + 2",
-          "rationale_vi": "Nếu chọn “30 + 50 + 2”, có ít nhất một bước của “Dạng khai triển” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“30 + 50 + 2” chưa đúng. 352 có 3 trăm, 5 chục và 2 đơn vị nên bằng 300 + 50 + 2."
         },
         {
           "id": "c",
           "text": "300 + 50 + 20",
-          "rationale_vi": "“300 + 50 + 20” là phương án nhiễu gần đúng. Tự làm theo “Dạng khai triển” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“300 + 50 + 20” chưa đúng. 352 có 3 trăm, 5 chục và 2 đơn vị nên bằng 300 + 50 + 2."
         },
         {
           "id": "d",
@@ -604,17 +604,17 @@
         {
           "id": "b",
           "text": "908 = 90 + 8",
-          "rationale_vi": "“908 = 90 + 8” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Dạng khai triển” rồi thử lại."
+          "rationale_vi": "“908 = 90 + 8” chưa đúng. 908 có 9 trăm, 0 chục và 8 đơn vị; hàng chục bằng 0 nên dạng đúng là 900 + 8. Vậy đáp án là 908 = 900 + 8."
         },
         {
           "id": "c",
           "text": "908 = 900 + 80 + 8",
-          "rationale_vi": "Nếu chọn “908 = 900 + 80 + 8”, có ít nhất một bước của “Dạng khai triển” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“908 = 900 + 80 + 8” chưa đúng. 908 có 9 trăm, 0 chục và 8 đơn vị; hàng chục bằng 0 nên dạng đúng là 900 + 8. Vậy đáp án là 908 = 900 + 8."
         },
         {
           "id": "d",
           "text": "908 = 900 + 0 + 80",
-          "rationale_vi": "“908 = 900 + 0 + 80” là phương án nhiễu gần đúng. Tự làm theo “Dạng khai triển” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“908 = 900 + 0 + 80” chưa đúng. 908 có 9 trăm, 0 chục và 8 đơn vị; hàng chục bằng 0 nên dạng đúng là 900 + 8. Vậy đáp án là 908 = 900 + 8."
         }
       ],
       "correct_choice_id": "a"
@@ -745,7 +745,7 @@
         {
           "id": "a",
           "text": ">",
-          "rationale_vi": "“>” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “So sánh số” rồi thử lại."
+          "rationale_vi": "“>” chưa đúng. Cùng 6 trăm nhưng 0 chục nhỏ hơn 8 chục nên 608 < 680. Vậy đáp án là <."
         },
         {
           "id": "b",
@@ -755,12 +755,12 @@
         {
           "id": "c",
           "text": "=",
-          "rationale_vi": "Nếu chọn “=”, có ít nhất một bước của “So sánh số” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“=” chưa đúng. Cùng 6 trăm nhưng 0 chục nhỏ hơn 8 chục nên 608 < 680. Vậy đáp án là <."
         },
         {
           "id": "d",
           "text": "+",
-          "rationale_vi": "“+” là phương án nhiễu gần đúng. Tự làm theo “So sánh số” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“+” chưa đúng. Cùng 6 trăm nhưng 0 chục nhỏ hơn 8 chục nên 608 < 680. Vậy đáp án là <."
         }
       ],
       "correct_choice_id": "b"
@@ -798,12 +798,12 @@
         {
           "id": "a",
           "text": "<",
-          "rationale_vi": "“<” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “So sánh số” rồi thử lại."
+          "rationale_vi": "“<” chưa đúng. Cùng 9 trăm; 4 chục lớn hơn 2 chục nên 945 > 925. Vậy đáp án là >."
         },
         {
           "id": "b",
           "text": "=",
-          "rationale_vi": "Nếu chọn “=”, có ít nhất một bước của “So sánh số” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“=” chưa đúng. Cùng 9 trăm; 4 chục lớn hơn 2 chục nên 945 > 925. Vậy đáp án là >."
         },
         {
           "id": "c",
@@ -813,7 +813,7 @@
         {
           "id": "d",
           "text": "-",
-          "rationale_vi": "“-” là phương án nhiễu gần đúng. Tự làm theo “So sánh số” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“-” chưa đúng. Cùng 9 trăm; 4 chục lớn hơn 2 chục nên 945 > 925. Vậy đáp án là >."
         }
       ],
       "correct_choice_id": "c"
@@ -851,17 +851,17 @@
         {
           "id": "a",
           "text": "399 > 403",
-          "rationale_vi": "“399 > 403” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “So sánh số” rồi thử lại."
+          "rationale_vi": "“399 > 403” chưa đúng. 399 còn dưới 400, trong khi 403 lớn hơn 400 nên 399 < 403."
         },
         {
           "id": "b",
           "text": "399 = 403",
-          "rationale_vi": "Nếu chọn “399 = 403”, có ít nhất một bước của “So sánh số” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“399 = 403” chưa đúng. 399 còn dưới 400, trong khi 403 lớn hơn 400 nên 399 < 403."
         },
         {
           "id": "c",
           "text": "399 + 403",
-          "rationale_vi": "“399 + 403” là phương án nhiễu gần đúng. Tự làm theo “So sánh số” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“399 + 403” chưa đúng. 399 còn dưới 400, trong khi 403 lớn hơn 400 nên 399 < 403."
         },
         {
           "id": "d",
@@ -1002,17 +1002,17 @@
         {
           "id": "b",
           "text": "320, 302, 230, 203",
-          "rationale_vi": "“320, 302, 230, 203” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Thứ tự tăng giảm” rồi thử lại."
+          "rationale_vi": "“320, 302, 230, 203” chưa đúng. Tăng dần là từ bé đến lớn: 203 < 230 < 302 < 320."
         },
         {
           "id": "c",
           "text": "203, 302, 230, 320",
-          "rationale_vi": "Nếu chọn “203, 302, 230, 320”, có ít nhất một bước của “Thứ tự tăng giảm” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“203, 302, 230, 320” chưa đúng. Tăng dần là từ bé đến lớn: 203 < 230 < 302 < 320."
         },
         {
           "id": "d",
           "text": "230, 203, 320, 302",
-          "rationale_vi": "“230, 203, 320, 302” là phương án nhiễu gần đúng. Tự làm theo “Thứ tự tăng giảm” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“230, 203, 320, 302” chưa đúng. Tăng dần là từ bé đến lớn: 203 < 230 < 302 < 320."
         }
       ],
       "correct_choice_id": "a"
@@ -1050,7 +1050,7 @@
         {
           "id": "a",
           "text": "405, 450, 504, 540",
-          "rationale_vi": "“405, 450, 504, 540” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Thứ tự tăng giảm” rồi thử lại."
+          "rationale_vi": "“405, 450, 504, 540” chưa đúng. Giảm dần là từ lớn đến bé: 540 > 504 > 450 > 405."
         },
         {
           "id": "b",
@@ -1060,12 +1060,12 @@
         {
           "id": "c",
           "text": "540, 450, 504, 405",
-          "rationale_vi": "Nếu chọn “540, 450, 504, 405”, có ít nhất một bước của “Thứ tự tăng giảm” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“540, 450, 504, 405” chưa đúng. Giảm dần là từ lớn đến bé: 540 > 504 > 450 > 405."
         },
         {
           "id": "d",
           "text": "504, 540, 405, 450",
-          "rationale_vi": "“504, 540, 405, 450” là phương án nhiễu gần đúng. Tự làm theo “Thứ tự tăng giảm” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“504, 540, 405, 450” chưa đúng. Giảm dần là từ lớn đến bé: 540 > 504 > 450 > 405."
         }
       ],
       "correct_choice_id": "b"
@@ -1103,12 +1103,12 @@
         {
           "id": "a",
           "text": "111, 110, 101, 100",
-          "rationale_vi": "“111, 110, 101, 100” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Thứ tự tăng giảm” rồi thử lại."
+          "rationale_vi": "“111, 110, 101, 100” chưa đúng. So sánh hàng chục rồi hàng đơn vị để có 100 < 101 < 110 < 111."
         },
         {
           "id": "b",
           "text": "100, 110, 101, 111",
-          "rationale_vi": "Nếu chọn “100, 110, 101, 111”, có ít nhất một bước của “Thứ tự tăng giảm” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“100, 110, 101, 111” chưa đúng. So sánh hàng chục rồi hàng đơn vị để có 100 < 101 < 110 < 111."
         },
         {
           "id": "c",
@@ -1118,7 +1118,7 @@
         {
           "id": "d",
           "text": "101, 100, 111, 110",
-          "rationale_vi": "“101, 100, 111, 110” là phương án nhiễu gần đúng. Tự làm theo “Thứ tự tăng giảm” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“101, 100, 111, 110” chưa đúng. So sánh hàng chục rồi hàng đơn vị để có 100 < 101 < 110 < 111."
         }
       ],
       "correct_choice_id": "c"
@@ -1218,17 +1218,17 @@
         {
           "id": "a",
           "text": "khoảng 7",
-          "rationale_vi": "“khoảng 7” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Ước lượng theo chục” rồi thử lại."
+          "rationale_vi": "“khoảng 7” chưa đúng. 73 gần 70 hơn 80 khi ước lượng theo chục gần nhất. Vậy đáp án là khoảng 70."
         },
         {
           "id": "b",
           "text": "khoảng 700",
-          "rationale_vi": "Nếu chọn “khoảng 700”, có ít nhất một bước của “Ước lượng theo chục” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“khoảng 700” chưa đúng. 73 gần 70 hơn 80 khi ước lượng theo chục gần nhất. Vậy đáp án là khoảng 70."
         },
         {
           "id": "c",
           "text": "khoảng 20",
-          "rationale_vi": "“khoảng 20” là phương án nhiễu gần đúng. Tự làm theo “Ước lượng theo chục” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“khoảng 20” chưa đúng. 73 gần 70 hơn 80 khi ước lượng theo chục gần nhất. Vậy đáp án là khoảng 70."
         },
         {
           "id": "d",
@@ -1276,17 +1276,17 @@
         {
           "id": "b",
           "text": "tổng",
-          "rationale_vi": "“tổng” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Số hạng và tổng” rồi thử lại."
+          "rationale_vi": "“tổng” chưa đúng. 23 là một trong hai số được cộng nên là số hạng."
         },
         {
           "id": "c",
           "text": "hiệu",
-          "rationale_vi": "Nếu chọn “hiệu”, có ít nhất một bước của “Số hạng và tổng” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“hiệu” chưa đúng. 23 là một trong hai số được cộng nên là số hạng."
         },
         {
           "id": "d",
           "text": "số bị trừ",
-          "rationale_vi": "“số bị trừ” là phương án nhiễu gần đúng. Tự làm theo “Số hạng và tổng” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“số bị trừ” chưa đúng. 23 là một trong hai số được cộng nên là số hạng."
         }
       ],
       "correct_choice_id": "a"
@@ -1324,7 +1324,7 @@
         {
           "id": "a",
           "text": "số hạng",
-          "rationale_vi": "“số hạng” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Số hạng và tổng” rồi thử lại."
+          "rationale_vi": "“số hạng” chưa đúng. Kết quả của phép cộng gọi là tổng."
         },
         {
           "id": "b",
@@ -1334,12 +1334,12 @@
         {
           "id": "c",
           "text": "số trừ",
-          "rationale_vi": "Nếu chọn “số trừ”, có ít nhất một bước của “Số hạng và tổng” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“số trừ” chưa đúng. Kết quả của phép cộng gọi là tổng."
         },
         {
           "id": "d",
           "text": "thương",
-          "rationale_vi": "“thương” là phương án nhiễu gần đúng. Tự làm theo “Số hạng và tổng” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“thương” chưa đúng. Kết quả của phép cộng gọi là tổng."
         }
       ],
       "correct_choice_id": "b"
@@ -1377,12 +1377,12 @@
         {
           "id": "a",
           "text": "230 và 350",
-          "rationale_vi": "“230 và 350” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Số hạng và tổng” rồi thử lại."
+          "rationale_vi": "“230 và 350” chưa đúng. Hai số đứng trước dấu bằng và được nối bằng dấu + là hai số hạng. Vậy đáp án là 120 và 230."
         },
         {
           "id": "b",
           "text": "120 và 350",
-          "rationale_vi": "Nếu chọn “120 và 350”, có ít nhất một bước của “Số hạng và tổng” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“120 và 350” chưa đúng. Hai số đứng trước dấu bằng và được nối bằng dấu + là hai số hạng. Vậy đáp án là 120 và 230."
         },
         {
           "id": "c",
@@ -1392,7 +1392,7 @@
         {
           "id": "d",
           "text": "350 và 350",
-          "rationale_vi": "“350 và 350” là phương án nhiễu gần đúng. Tự làm theo “Số hạng và tổng” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“350 và 350” chưa đúng. Hai số đứng trước dấu bằng và được nối bằng dấu + là hai số hạng. Vậy đáp án là 120 và 230."
         }
       ],
       "correct_choice_id": "c"
@@ -1430,17 +1430,17 @@
         {
           "id": "a",
           "text": "số trừ",
-          "rationale_vi": "“số trừ” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Số bị trừ, số trừ, hiệu” rồi thử lại."
+          "rationale_vi": "“số trừ” chưa đúng. 50 là số đứng trước dấu trừ nên là số bị trừ."
         },
         {
           "id": "b",
           "text": "hiệu",
-          "rationale_vi": "Nếu chọn “hiệu”, có ít nhất một bước của “Số bị trừ, số trừ, hiệu” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“hiệu” chưa đúng. 50 là số đứng trước dấu trừ nên là số bị trừ."
         },
         {
           "id": "c",
           "text": "tổng",
-          "rationale_vi": "“tổng” là phương án nhiễu gần đúng. Tự làm theo “Số bị trừ, số trừ, hiệu” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“tổng” chưa đúng. 50 là số đứng trước dấu trừ nên là số bị trừ."
         },
         {
           "id": "d",
@@ -1488,17 +1488,17 @@
         {
           "id": "b",
           "text": "số bị trừ",
-          "rationale_vi": "“số bị trừ” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Số bị trừ, số trừ, hiệu” rồi thử lại."
+          "rationale_vi": "“số bị trừ” chưa đúng. 20 là lượng được bớt khỏi số bị trừ nên là số trừ."
         },
         {
           "id": "c",
           "text": "hiệu",
-          "rationale_vi": "Nếu chọn “hiệu”, có ít nhất một bước của “Số bị trừ, số trừ, hiệu” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“hiệu” chưa đúng. 20 là lượng được bớt khỏi số bị trừ nên là số trừ."
         },
         {
           "id": "d",
           "text": "số hạng",
-          "rationale_vi": "“số hạng” là phương án nhiễu gần đúng. Tự làm theo “Số bị trừ, số trừ, hiệu” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“số hạng” chưa đúng. 20 là lượng được bớt khỏi số bị trừ nên là số trừ."
         }
       ],
       "correct_choice_id": "a"
@@ -1536,7 +1536,7 @@
         {
           "id": "a",
           "text": "số trừ và hiệu",
-          "rationale_vi": "“số trừ và hiệu” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Số bị trừ, số trừ, hiệu” rồi thử lại."
+          "rationale_vi": "“số trừ và hiệu” chưa đúng. Trong phép trừ, 90 là số bị trừ còn kết quả 55 là hiệu. Vậy đáp án là số bị trừ và hiệu."
         },
         {
           "id": "b",
@@ -1546,12 +1546,12 @@
         {
           "id": "c",
           "text": "hiệu và số bị trừ",
-          "rationale_vi": "Nếu chọn “hiệu và số bị trừ”, có ít nhất một bước của “Số bị trừ, số trừ, hiệu” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“hiệu và số bị trừ” chưa đúng. Trong phép trừ, 90 là số bị trừ còn kết quả 55 là hiệu. Vậy đáp án là số bị trừ và hiệu."
         },
         {
           "id": "d",
           "text": "số bị trừ và số trừ",
-          "rationale_vi": "“số bị trừ và số trừ” là phương án nhiễu gần đúng. Tự làm theo “Số bị trừ, số trừ, hiệu” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“số bị trừ và số trừ” chưa đúng. Trong phép trừ, 90 là số bị trừ còn kết quả 55 là hiệu. Vậy đáp án là số bị trừ và hiệu."
         }
       ],
       "correct_choice_id": "b"
@@ -2249,12 +2249,12 @@
         {
           "id": "a",
           "text": "2 + 2 + 2 + 2",
-          "rationale_vi": "“2 + 2 + 2 + 2” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Nhóm bằng nhau” rồi thử lại."
+          "rationale_vi": "“2 + 2 + 2 + 2” chưa đúng. Ba nhóm, mỗi nhóm 2 tương ứng cộng số 2 ba lần. Vậy đáp án là 2 + 2 + 2."
         },
         {
           "id": "b",
           "text": "2 + 3",
-          "rationale_vi": "Nếu chọn “2 + 3”, có ít nhất một bước của “Nhóm bằng nhau” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“2 + 3” chưa đúng. Ba nhóm, mỗi nhóm 2 tương ứng cộng số 2 ba lần. Vậy đáp án là 2 + 2 + 2."
         },
         {
           "id": "c",
@@ -2264,7 +2264,7 @@
         {
           "id": "d",
           "text": "3 + 2 + 2",
-          "rationale_vi": "“3 + 2 + 2” là phương án nhiễu gần đúng. Tự làm theo “Nhóm bằng nhau” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“3 + 2 + 2” chưa đúng. Ba nhóm, mỗi nhóm 2 tương ứng cộng số 2 ba lần. Vậy đáp án là 2 + 2 + 2."
         }
       ],
       "correct_choice_id": "c"
@@ -2457,17 +2457,17 @@
         {
           "id": "a",
           "text": "tích",
-          "rationale_vi": "“tích” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Thừa số và tích” rồi thử lại."
+          "rationale_vi": "“tích” chưa đúng. 2 là một số được nhân nên là thừa số."
         },
         {
           "id": "b",
           "text": "thương",
-          "rationale_vi": "Nếu chọn “thương”, có ít nhất một bước của “Thừa số và tích” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“thương” chưa đúng. 2 là một số được nhân nên là thừa số."
         },
         {
           "id": "c",
           "text": "số bị chia",
-          "rationale_vi": "“số bị chia” là phương án nhiễu gần đúng. Tự làm theo “Thừa số và tích” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“số bị chia” chưa đúng. 2 là một số được nhân nên là thừa số."
         },
         {
           "id": "d",
@@ -2515,17 +2515,17 @@
         {
           "id": "b",
           "text": "thừa số",
-          "rationale_vi": "“thừa số” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Thừa số và tích” rồi thử lại."
+          "rationale_vi": "“thừa số” chưa đúng. Kết quả của phép nhân gọi là tích."
         },
         {
           "id": "c",
           "text": "hiệu",
-          "rationale_vi": "Nếu chọn “hiệu”, có ít nhất một bước của “Thừa số và tích” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“hiệu” chưa đúng. Kết quả của phép nhân gọi là tích."
         },
         {
           "id": "d",
           "text": "số chia",
-          "rationale_vi": "“số chia” là phương án nhiễu gần đúng. Tự làm theo “Thừa số và tích” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“số chia” chưa đúng. Kết quả của phép nhân gọi là tích."
         }
       ],
       "correct_choice_id": "a"
@@ -2563,7 +2563,7 @@
         {
           "id": "a",
           "text": "8 và 16",
-          "rationale_vi": "“8 và 16” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Thừa số và tích” rồi thử lại."
+          "rationale_vi": "“8 và 16” chưa đúng. Hai số đứng hai bên dấu nhân là hai thừa số. Vậy đáp án là 2 và 8."
         },
         {
           "id": "b",
@@ -2573,12 +2573,12 @@
         {
           "id": "c",
           "text": "2 và 16",
-          "rationale_vi": "Nếu chọn “2 và 16”, có ít nhất một bước của “Thừa số và tích” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“2 và 16” chưa đúng. Hai số đứng hai bên dấu nhân là hai thừa số. Vậy đáp án là 2 và 8."
         },
         {
           "id": "d",
           "text": "16 và 16",
-          "rationale_vi": "“16 và 16” là phương án nhiễu gần đúng. Tự làm theo “Thừa số và tích” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“16 và 16” chưa đúng. Hai số đứng hai bên dấu nhân là hai thừa số. Vậy đáp án là 2 và 8."
         }
       ],
       "correct_choice_id": "b"
@@ -2616,12 +2616,12 @@
         {
           "id": "a",
           "text": "số chia",
-          "rationale_vi": "“số chia” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Số bị chia, số chia, thương” rồi thử lại."
+          "rationale_vi": "“số chia” chưa đúng. 10 là lượng được đem chia nên là số bị chia."
         },
         {
           "id": "b",
           "text": "thương",
-          "rationale_vi": "Nếu chọn “thương”, có ít nhất một bước của “Số bị chia, số chia, thương” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“thương” chưa đúng. 10 là lượng được đem chia nên là số bị chia."
         },
         {
           "id": "c",
@@ -2631,7 +2631,7 @@
         {
           "id": "d",
           "text": "tích",
-          "rationale_vi": "“tích” là phương án nhiễu gần đúng. Tự làm theo “Số bị chia, số chia, thương” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“tích” chưa đúng. 10 là lượng được đem chia nên là số bị chia."
         }
       ],
       "correct_choice_id": "c"
@@ -2669,17 +2669,17 @@
         {
           "id": "a",
           "text": "số bị chia",
-          "rationale_vi": "“số bị chia” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Số bị chia, số chia, thương” rồi thử lại."
+          "rationale_vi": "“số bị chia” chưa đúng. 5 là số dùng để chia nên là số chia."
         },
         {
           "id": "b",
           "text": "thương",
-          "rationale_vi": "Nếu chọn “thương”, có ít nhất một bước của “Số bị chia, số chia, thương” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“thương” chưa đúng. 5 là số dùng để chia nên là số chia."
         },
         {
           "id": "c",
           "text": "số hạng",
-          "rationale_vi": "“số hạng” là phương án nhiễu gần đúng. Tự làm theo “Số bị chia, số chia, thương” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“số hạng” chưa đúng. 5 là số dùng để chia nên là số chia."
         },
         {
           "id": "d",
@@ -2727,17 +2727,17 @@
         {
           "id": "b",
           "text": "số chia và thương",
-          "rationale_vi": "“số chia và thương” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Số bị chia, số chia, thương” rồi thử lại."
+          "rationale_vi": "“số chia và thương” chưa đúng. Trong phép chia, 18 là số bị chia còn kết quả 9 là thương. Vậy đáp án là số bị chia và thương."
         },
         {
           "id": "c",
           "text": "thương và số bị chia",
-          "rationale_vi": "Nếu chọn “thương và số bị chia”, có ít nhất một bước của “Số bị chia, số chia, thương” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“thương và số bị chia” chưa đúng. Trong phép chia, 18 là số bị chia còn kết quả 9 là thương. Vậy đáp án là số bị chia và thương."
         },
         {
           "id": "d",
           "text": "số bị chia và số chia",
-          "rationale_vi": "“số bị chia và số chia” là phương án nhiễu gần đúng. Tự làm theo “Số bị chia, số chia, thương” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“số bị chia và số chia” chưa đúng. Trong phép chia, 18 là số bị chia còn kết quả 9 là thương. Vậy đáp án là số bị chia và thương."
         }
       ],
       "correct_choice_id": "a"
@@ -3147,7 +3147,7 @@
         {
           "id": "a",
           "text": "4 - 4",
-          "rationale_vi": "“4 - 4” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Quan hệ của phép tính” rồi thử lại."
+          "rationale_vi": "“4 - 4” chưa đúng. Gộp hai lượng lại là quan hệ cộng; hai nhóm 4 là 4 + 4."
         },
         {
           "id": "b",
@@ -3157,12 +3157,12 @@
         {
           "id": "c",
           "text": "4 : 2",
-          "rationale_vi": "Nếu chọn “4 : 2”, có ít nhất một bước của “Quan hệ của phép tính” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“4 : 2” chưa đúng. Gộp hai lượng lại là quan hệ cộng; hai nhóm 4 là 4 + 4."
         },
         {
           "id": "d",
           "text": "4 + 2",
-          "rationale_vi": "“4 + 2” là phương án nhiễu gần đúng. Tự làm theo “Quan hệ của phép tính” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“4 + 2” chưa đúng. Gộp hai lượng lại là quan hệ cộng; hai nhóm 4 là 4 + 4."
         }
       ],
       "correct_choice_id": "b"
@@ -3200,12 +3200,12 @@
         {
           "id": "a",
           "text": "10 + 3",
-          "rationale_vi": "“10 + 3” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Quan hệ của phép tính” rồi thử lại."
+          "rationale_vi": "“10 + 3” chưa đúng. Bỏ bớt một phần khỏi lượng ban đầu là phép trừ. Vậy đáp án là 10 - 3."
         },
         {
           "id": "b",
           "text": "10 : 2",
-          "rationale_vi": "Nếu chọn “10 : 2”, có ít nhất một bước của “Quan hệ của phép tính” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“10 : 2” chưa đúng. Bỏ bớt một phần khỏi lượng ban đầu là phép trừ. Vậy đáp án là 10 - 3."
         },
         {
           "id": "c",
@@ -3215,7 +3215,7 @@
         {
           "id": "d",
           "text": "3 - 10",
-          "rationale_vi": "“3 - 10” là phương án nhiễu gần đúng. Tự làm theo “Quan hệ của phép tính” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“3 - 10” chưa đúng. Bỏ bớt một phần khỏi lượng ban đầu là phép trừ. Vậy đáp án là 10 - 3."
         }
       ],
       "correct_choice_id": "c"
@@ -3253,17 +3253,17 @@
         {
           "id": "a",
           "text": "5 + 2",
-          "rationale_vi": "“5 + 2” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Quan hệ của phép tính” rồi thử lại."
+          "rationale_vi": "“5 + 2” chưa đúng. Nhiều nhóm bằng nhau được mô tả bằng phép nhân. Vậy đáp án là 5 × 2."
         },
         {
           "id": "b",
           "text": "5 - 2",
-          "rationale_vi": "Nếu chọn “5 - 2”, có ít nhất một bước của “Quan hệ của phép tính” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“5 - 2” chưa đúng. Nhiều nhóm bằng nhau được mô tả bằng phép nhân. Vậy đáp án là 5 × 2."
         },
         {
           "id": "c",
-          "text": "10 : 5",
-          "rationale_vi": "“10 : 5” là phương án nhiễu gần đúng. Tự làm theo “Quan hệ của phép tính” rồi so kết quả với lựa chọn này."
+          "text": "2 × 2",
+          "rationale_vi": "“2 × 2” chưa đúng. Nhiều nhóm bằng nhau được mô tả bằng phép nhân. Vậy đáp án là 5 × 2."
         },
         {
           "id": "d",
@@ -3871,17 +3871,17 @@
         {
           "id": "b",
           "text": "10 + 2",
-          "rationale_vi": "“10 + 2” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Chọn phép tính” rồi thử lại."
+          "rationale_vi": "“10 + 2” chưa đúng. Tình huống lấy bớt và hỏi còn lại nên dùng phép trừ. Vậy đáp án là 10 - 2."
         },
         {
           "id": "c",
           "text": "10 × 2",
-          "rationale_vi": "Nếu chọn “10 × 2”, có ít nhất một bước của “Chọn phép tính” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“10 × 2” chưa đúng. Tình huống lấy bớt và hỏi còn lại nên dùng phép trừ. Vậy đáp án là 10 - 2."
         },
         {
           "id": "d",
           "text": "10 : 2",
-          "rationale_vi": "“10 : 2” là phương án nhiễu gần đúng. Tự làm theo “Chọn phép tính” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“10 : 2” chưa đúng. Tình huống lấy bớt và hỏi còn lại nên dùng phép trừ. Vậy đáp án là 10 - 2."
         }
       ],
       "correct_choice_id": "a"
@@ -3919,7 +3919,7 @@
         {
           "id": "a",
           "text": "5 + 2",
-          "rationale_vi": "“5 + 2” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Chọn phép tính” rồi thử lại."
+          "rationale_vi": "“5 + 2” chưa đúng. Nhiều nhóm bằng nhau và hỏi tổng nên dùng phép nhân. Vậy đáp án là 5 × 2."
         },
         {
           "id": "b",
@@ -3929,12 +3929,12 @@
         {
           "id": "c",
           "text": "5 - 2",
-          "rationale_vi": "Nếu chọn “5 - 2”, có ít nhất một bước của “Chọn phép tính” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“5 - 2” chưa đúng. Nhiều nhóm bằng nhau và hỏi tổng nên dùng phép nhân. Vậy đáp án là 5 × 2."
         },
         {
           "id": "d",
           "text": "10 : 5",
-          "rationale_vi": "“10 : 5” là phương án nhiễu gần đúng. Tự làm theo “Chọn phép tính” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“10 : 5” chưa đúng. Nhiều nhóm bằng nhau và hỏi tổng nên dùng phép nhân. Vậy đáp án là 5 × 2."
         }
       ],
       "correct_choice_id": "b"
@@ -3972,12 +3972,12 @@
         {
           "id": "a",
           "text": "30 + 5",
-          "rationale_vi": "“30 + 5” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Chọn phép tính” rồi thử lại."
+          "rationale_vi": "“30 + 5” chưa đúng. Chia đều tổng số bút thành 5 phần nên dùng phép chia. Vậy đáp án là 30 : 5."
         },
         {
           "id": "b",
           "text": "30 - 5",
-          "rationale_vi": "Nếu chọn “30 - 5”, có ít nhất một bước của “Chọn phép tính” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“30 - 5” chưa đúng. Chia đều tổng số bút thành 5 phần nên dùng phép chia. Vậy đáp án là 30 : 5."
         },
         {
           "id": "c",
@@ -3987,7 +3987,7 @@
         {
           "id": "d",
           "text": "5 + 5",
-          "rationale_vi": "“5 + 5” là phương án nhiễu gần đúng. Tự làm theo “Chọn phép tính” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“5 + 5” chưa đúng. Chia đều tổng số bút thành 5 phần nên dùng phép chia. Vậy đáp án là 30 : 5."
         }
       ],
       "correct_choice_id": "c"
@@ -4025,17 +4025,17 @@
         {
           "id": "a",
           "text": "5 cm",
-          "rationale_vi": "“5 cm” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Điểm” rồi thử lại."
+          "rationale_vi": "“5 cm” chưa đúng. Điểm thường được đặt tên bằng chữ cái in hoa như A."
         },
         {
           "id": "b",
           "text": "2 kg",
-          "rationale_vi": "Nếu chọn “2 kg”, có ít nhất một bước của “Điểm” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“2 kg” chưa đúng. Điểm thường được đặt tên bằng chữ cái in hoa như A."
         },
         {
           "id": "c",
           "text": "10 l",
-          "rationale_vi": "“10 l” là phương án nhiễu gần đúng. Tự làm theo “Điểm” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“10 l” chưa đúng. Điểm thường được đặt tên bằng chữ cái in hoa như A."
         },
         {
           "id": "d",
@@ -4083,17 +4083,17 @@
         {
           "id": "b",
           "text": "Điểm có độ dài 5 cm",
-          "rationale_vi": "“Điểm có độ dài 5 cm” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Điểm” rồi thử lại."
+          "rationale_vi": "“Điểm có độ dài 5 cm” chưa đúng. Điểm dùng để chỉ vị trí và không có độ dài. Vậy đáp án là Điểm biểu diễn một vị trí."
         },
         {
           "id": "c",
           "text": "Điểm luôn là một hình tròn lớn",
-          "rationale_vi": "Nếu chọn “Điểm luôn là một hình tròn lớn”, có ít nhất một bước của “Điểm” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“Điểm luôn là một hình tròn lớn” chưa đúng. Điểm dùng để chỉ vị trí và không có độ dài. Vậy đáp án là Điểm biểu diễn một vị trí."
         },
         {
           "id": "d",
           "text": "Điểm có hai đầu mút",
-          "rationale_vi": "“Điểm có hai đầu mút” là phương án nhiễu gần đúng. Tự làm theo “Điểm” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“Điểm có hai đầu mút” chưa đúng. Điểm dùng để chỉ vị trí và không có độ dài. Vậy đáp án là Điểm biểu diễn một vị trí."
         }
       ],
       "correct_choice_id": "a"
@@ -4131,7 +4131,7 @@
         {
           "id": "a",
           "text": "1",
-          "rationale_vi": "“1” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Điểm” rồi thử lại."
+          "rationale_vi": "“1” chưa đúng. Mỗi tên A, B, C chỉ một điểm, nên có 3 điểm."
         },
         {
           "id": "b",
@@ -4141,12 +4141,12 @@
         {
           "id": "c",
           "text": "2",
-          "rationale_vi": "Nếu chọn “2”, có ít nhất một bước của “Điểm” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“2” chưa đúng. Mỗi tên A, B, C chỉ một điểm, nên có 3 điểm."
         },
         {
           "id": "d",
           "text": "4",
-          "rationale_vi": "“4” là phương án nhiễu gần đúng. Tự làm theo “Điểm” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“4” chưa đúng. Mỗi tên A, B, C chỉ một điểm, nên có 3 điểm."
         }
       ],
       "correct_choice_id": "b"
@@ -4184,12 +4184,12 @@
         {
           "id": "a",
           "text": "0",
-          "rationale_vi": "“0” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Đoạn thẳng” rồi thử lại."
+          "rationale_vi": "“0” chưa đúng. Đoạn thẳng AB có hai đầu mút A và B. Vậy đáp án là 2."
         },
         {
           "id": "b",
           "text": "1",
-          "rationale_vi": "Nếu chọn “1”, có ít nhất một bước của “Đoạn thẳng” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“1” chưa đúng. Đoạn thẳng AB có hai đầu mút A và B. Vậy đáp án là 2."
         },
         {
           "id": "c",
@@ -4199,7 +4199,7 @@
         {
           "id": "d",
           "text": "3",
-          "rationale_vi": "“3” là phương án nhiễu gần đúng. Tự làm theo “Đoạn thẳng” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“3” chưa đúng. Đoạn thẳng AB có hai đầu mút A và B. Vậy đáp án là 2."
         }
       ],
       "correct_choice_id": "c"
@@ -4237,17 +4237,17 @@
         {
           "id": "a",
           "text": "Đường uốn cong không có đầu",
-          "rationale_vi": "“Đường uốn cong không có đầu” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Đoạn thẳng” rồi thử lại."
+          "rationale_vi": "“Đường uốn cong không có đầu” chưa đúng. Đoạn thẳng là phần thẳng nối hai điểm đầu mút. Vậy đáp án là Phần thẳng nối hai đầu mút."
         },
         {
           "id": "b",
           "text": "Khối tròn",
-          "rationale_vi": "Nếu chọn “Khối tròn”, có ít nhất một bước của “Đoạn thẳng” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“Khối tròn” chưa đúng. Đoạn thẳng là phần thẳng nối hai điểm đầu mút. Vậy đáp án là Phần thẳng nối hai đầu mút."
         },
         {
           "id": "c",
           "text": "Một điểm duy nhất",
-          "rationale_vi": "“Một điểm duy nhất” là phương án nhiễu gần đúng. Tự làm theo “Đoạn thẳng” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“Một điểm duy nhất” chưa đúng. Đoạn thẳng là phần thẳng nối hai điểm đầu mút. Vậy đáp án là Phần thẳng nối hai đầu mút."
         },
         {
           "id": "d",
@@ -4295,17 +4295,17 @@
         {
           "id": "b",
           "text": "khối cầu",
-          "rationale_vi": "“khối cầu” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Đoạn thẳng” rồi thử lại."
+          "rationale_vi": "“khối cầu” chưa đúng. Phần thẳng nối hai điểm M và N là đoạn thẳng MN."
         },
         {
           "id": "c",
           "text": "đường cong",
-          "rationale_vi": "Nếu chọn “đường cong”, có ít nhất một bước của “Đoạn thẳng” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“đường cong” chưa đúng. Phần thẳng nối hai điểm M và N là đoạn thẳng MN."
         },
         {
           "id": "d",
           "text": "điểm MN",
-          "rationale_vi": "“điểm MN” là phương án nhiễu gần đúng. Tự làm theo “Đoạn thẳng” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“điểm MN” chưa đúng. Phần thẳng nối hai điểm M và N là đoạn thẳng MN."
         }
       ],
       "correct_choice_id": "a"
@@ -4343,7 +4343,7 @@
         {
           "id": "a",
           "text": "Đường đi thẳng không đổi hướng",
-          "rationale_vi": "“Đường đi thẳng không đổi hướng” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Đường cong” rồi thử lại."
+          "rationale_vi": "“Đường đi thẳng không đổi hướng” chưa đúng. Đường cong có hình dạng uốn lượn, không giữ hướng thẳng trên toàn bộ đường. Vậy đáp án là Đường uốn lượn."
         },
         {
           "id": "b",
@@ -4353,12 +4353,12 @@
         {
           "id": "c",
           "text": "Một điểm",
-          "rationale_vi": "Nếu chọn “Một điểm”, có ít nhất một bước của “Đường cong” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“Một điểm” chưa đúng. Đường cong có hình dạng uốn lượn, không giữ hướng thẳng trên toàn bộ đường. Vậy đáp án là Đường uốn lượn."
         },
         {
           "id": "d",
           "text": "Một đoạn chỉ có hai đầu mút nhưng luôn thẳng",
-          "rationale_vi": "“Một đoạn chỉ có hai đầu mút nhưng luôn thẳng” là phương án nhiễu gần đúng. Tự làm theo “Đường cong” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“Một đoạn chỉ có hai đầu mút nhưng luôn thẳng” chưa đúng. Đường cong có hình dạng uốn lượn, không giữ hướng thẳng trên toàn bộ đường. Vậy đáp án là Đường uốn lượn."
         }
       ],
       "correct_choice_id": "b"
@@ -4396,12 +4396,12 @@
         {
           "id": "a",
           "text": "đường thẳng",
-          "rationale_vi": "“đường thẳng” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Đường cong” rồi thử lại."
+          "rationale_vi": "“đường thẳng” chưa đúng. Vòng cung là một đường cong. Lựa chọn này khớp với đường cong; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng."
         },
         {
           "id": "b",
           "text": "đoạn thẳng",
-          "rationale_vi": "Nếu chọn “đoạn thẳng”, có ít nhất một bước của “Đường cong” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“đoạn thẳng” chưa đúng. Vòng cung là một đường cong. Lựa chọn này khớp với đường cong; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng."
         },
         {
           "id": "c",
@@ -4411,7 +4411,7 @@
         {
           "id": "d",
           "text": "điểm",
-          "rationale_vi": "“điểm” là phương án nhiễu gần đúng. Tự làm theo “Đường cong” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“điểm” chưa đúng. Vòng cung là một đường cong. Lựa chọn này khớp với đường cong; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng."
         }
       ],
       "correct_choice_id": "c"
@@ -4449,17 +4449,17 @@
         {
           "id": "a",
           "text": "Đường cong luôn có bốn cạnh",
-          "rationale_vi": "“Đường cong luôn có bốn cạnh” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Đường cong” rồi thử lại."
+          "rationale_vi": "“Đường cong luôn có bốn cạnh” chưa đúng. Đặc điểm nhận biết là đường bị uốn và thay đổi hướng. Vậy đáp án là Đường cong có thể đổi hướng mềm mại."
         },
         {
           "id": "b",
           "text": "Đường cong là khối cầu",
-          "rationale_vi": "Nếu chọn “Đường cong là khối cầu”, có ít nhất một bước của “Đường cong” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“Đường cong là khối cầu” chưa đúng. Đặc điểm nhận biết là đường bị uốn và thay đổi hướng. Vậy đáp án là Đường cong có thể đổi hướng mềm mại."
         },
         {
           "id": "c",
           "text": "Đường cong luôn kéo thẳng về hai phía",
-          "rationale_vi": "“Đường cong luôn kéo thẳng về hai phía” là phương án nhiễu gần đúng. Tự làm theo “Đường cong” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“Đường cong luôn kéo thẳng về hai phía” chưa đúng. Đặc điểm nhận biết là đường bị uốn và thay đổi hướng. Vậy đáp án là Đường cong có thể đổi hướng mềm mại."
         },
         {
           "id": "d",
@@ -4507,17 +4507,17 @@
         {
           "id": "b",
           "text": "Luôn cong",
-          "rationale_vi": "“Luôn cong” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Đường thẳng” rồi thử lại."
+          "rationale_vi": "“Luôn cong” chưa đúng. Đường thẳng không bị giới hạn bởi hai đầu mút như đoạn thẳng. Vậy đáp án là Có thể kéo dài về hai phía."
         },
         {
           "id": "c",
           "text": "Có đúng bốn cạnh",
-          "rationale_vi": "Nếu chọn “Có đúng bốn cạnh”, có ít nhất một bước của “Đường thẳng” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“Có đúng bốn cạnh” chưa đúng. Đường thẳng không bị giới hạn bởi hai đầu mút như đoạn thẳng. Vậy đáp án là Có thể kéo dài về hai phía."
         },
         {
           "id": "d",
           "text": "Là một khối",
-          "rationale_vi": "“Là một khối” là phương án nhiễu gần đúng. Tự làm theo “Đường thẳng” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“Là một khối” chưa đúng. Đường thẳng không bị giới hạn bởi hai đầu mút như đoạn thẳng. Vậy đáp án là Có thể kéo dài về hai phía."
         }
       ],
       "correct_choice_id": "a"
@@ -4555,7 +4555,7 @@
         {
           "id": "a",
           "text": "đường cong",
-          "rationale_vi": "“đường cong” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Đường thẳng” rồi thử lại."
+          "rationale_vi": "“đường cong” chưa đúng. Đó là mô tả của đường thẳng. Lựa chọn này khớp với đường thẳng; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng."
         },
         {
           "id": "b",
@@ -4565,12 +4565,12 @@
         {
           "id": "c",
           "text": "khối trụ",
-          "rationale_vi": "Nếu chọn “khối trụ”, có ít nhất một bước của “Đường thẳng” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“khối trụ” chưa đúng. Đó là mô tả của đường thẳng. Lựa chọn này khớp với đường thẳng; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng."
         },
         {
           "id": "d",
           "text": "điểm",
-          "rationale_vi": "“điểm” là phương án nhiễu gần đúng. Tự làm theo “Đường thẳng” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“điểm” chưa đúng. Đó là mô tả của đường thẳng. Lựa chọn này khớp với đường thẳng; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng."
         }
       ],
       "correct_choice_id": "b"
@@ -4608,12 +4608,12 @@
         {
           "id": "a",
           "text": "d là khối cầu",
-          "rationale_vi": "“d là khối cầu” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Đường thẳng” rồi thử lại."
+          "rationale_vi": "“d là khối cầu” chưa đúng. Dữ kiện đã cho xác định cả hai điểm cùng thuộc đường thẳng d. Vậy đáp án là A và B nằm trên d."
         },
         {
           "id": "b",
           "text": "A là một đoạn thẳng",
-          "rationale_vi": "Nếu chọn “A là một đoạn thẳng”, có ít nhất một bước của “Đường thẳng” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“A là một đoạn thẳng” chưa đúng. Dữ kiện đã cho xác định cả hai điểm cùng thuộc đường thẳng d. Vậy đáp án là A và B nằm trên d."
         },
         {
           "id": "c",
@@ -4623,7 +4623,7 @@
         {
           "id": "d",
           "text": "B có độ dài",
-          "rationale_vi": "“B có độ dài” là phương án nhiễu gần đúng. Tự làm theo “Đường thẳng” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“B có độ dài” chưa đúng. Dữ kiện đã cho xác định cả hai điểm cùng thuộc đường thẳng d. Vậy đáp án là A và B nằm trên d."
         }
       ],
       "correct_choice_id": "c"
@@ -4661,17 +4661,17 @@
         {
           "id": "a",
           "text": "Chỉ một điểm",
-          "rationale_vi": "“Chỉ một điểm” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Đường gấp khúc” rồi thử lại."
+          "rationale_vi": "“Chỉ một điểm” chưa đúng. Đường gấp khúc là chuỗi các đoạn thẳng nối nhau. Vậy đáp án là Nhiều đoạn thẳng nối tiếp."
         },
         {
           "id": "b",
           "text": "Chỉ một đường cong",
-          "rationale_vi": "Nếu chọn “Chỉ một đường cong”, có ít nhất một bước của “Đường gấp khúc” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“Chỉ một đường cong” chưa đúng. Đường gấp khúc là chuỗi các đoạn thẳng nối nhau. Vậy đáp án là Nhiều đoạn thẳng nối tiếp."
         },
         {
           "id": "c",
           "text": "Một khối cầu",
-          "rationale_vi": "“Một khối cầu” là phương án nhiễu gần đúng. Tự làm theo “Đường gấp khúc” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“Một khối cầu” chưa đúng. Đường gấp khúc là chuỗi các đoạn thẳng nối nhau. Vậy đáp án là Nhiều đoạn thẳng nối tiếp."
         },
         {
           "id": "d",
@@ -4719,17 +4719,17 @@
         {
           "id": "b",
           "text": "khối trụ",
-          "rationale_vi": "“khối trụ” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Đường gấp khúc” rồi thử lại."
+          "rationale_vi": "“khối trụ” chưa đúng. Ba đoạn thẳng nối tiếp tại B và C tạo một đường gấp khúc. Vậy đáp án là đường gấp khúc ABCD."
         },
         {
           "id": "c",
           "text": "đường cong tròn",
-          "rationale_vi": "Nếu chọn “đường cong tròn”, có ít nhất một bước của “Đường gấp khúc” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“đường cong tròn” chưa đúng. Ba đoạn thẳng nối tiếp tại B và C tạo một đường gấp khúc. Vậy đáp án là đường gấp khúc ABCD."
         },
         {
           "id": "d",
           "text": "một điểm",
-          "rationale_vi": "“một điểm” là phương án nhiễu gần đúng. Tự làm theo “Đường gấp khúc” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“một điểm” chưa đúng. Ba đoạn thẳng nối tiếp tại B và C tạo một đường gấp khúc. Vậy đáp án là đường gấp khúc ABCD."
         }
       ],
       "correct_choice_id": "a"
@@ -4767,7 +4767,7 @@
         {
           "id": "a",
           "text": "2",
-          "rationale_vi": "“2” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Đường gấp khúc” rồi thử lại."
+          "rationale_vi": "“2” chưa đúng. Một chuỗi mở 4 đoạn cần 5 điểm liên tiếp để tạo 4 đoạn."
         },
         {
           "id": "b",
@@ -4777,12 +4777,12 @@
         {
           "id": "c",
           "text": "3",
-          "rationale_vi": "Nếu chọn “3”, có ít nhất một bước của “Đường gấp khúc” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“3” chưa đúng. Một chuỗi mở 4 đoạn cần 5 điểm liên tiếp để tạo 4 đoạn."
         },
         {
           "id": "d",
           "text": "4",
-          "rationale_vi": "“4” là phương án nhiễu gần đúng. Tự làm theo “Đường gấp khúc” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“4” chưa đúng. Một chuỗi mở 4 đoạn cần 5 điểm liên tiếp để tạo 4 đoạn."
         }
       ],
       "correct_choice_id": "b"
@@ -4820,12 +4820,12 @@
         {
           "id": "a",
           "text": "vuông góc",
-          "rationale_vi": "“vuông góc” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Thẳng hàng” rồi thử lại."
+          "rationale_vi": "“vuông góc” chưa đúng. Ba điểm cùng nằm trên một đường thẳng là ba điểm thẳng hàng."
         },
         {
           "id": "b",
           "text": "cong",
-          "rationale_vi": "Nếu chọn “cong”, có ít nhất một bước của “Thẳng hàng” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“cong” chưa đúng. Ba điểm cùng nằm trên một đường thẳng là ba điểm thẳng hàng."
         },
         {
           "id": "c",
@@ -4835,7 +4835,7 @@
         {
           "id": "d",
           "text": "tạo khối cầu",
-          "rationale_vi": "“tạo khối cầu” là phương án nhiễu gần đúng. Tự làm theo “Thẳng hàng” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“tạo khối cầu” chưa đúng. Ba điểm cùng nằm trên một đường thẳng là ba điểm thẳng hàng."
         }
       ],
       "correct_choice_id": "c"
@@ -4873,17 +4873,17 @@
         {
           "id": "a",
           "text": "có",
-          "rationale_vi": "“có” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Thẳng hàng” rồi thử lại."
+          "rationale_vi": "“có” chưa đúng. C không nằm trên đường qua A và B nên ba điểm không thẳng hàng."
         },
         {
           "id": "b",
           "text": "luôn luôn",
-          "rationale_vi": "Nếu chọn “luôn luôn”, có ít nhất một bước của “Thẳng hàng” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“luôn luôn” chưa đúng. C không nằm trên đường qua A và B nên ba điểm không thẳng hàng."
         },
         {
           "id": "c",
           "text": "không đủ vì điểm không có tên",
-          "rationale_vi": "“không đủ vì điểm không có tên” là phương án nhiễu gần đúng. Tự làm theo “Thẳng hàng” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“không đủ vì điểm không có tên” chưa đúng. C không nằm trên đường qua A và B nên ba điểm không thẳng hàng."
         },
         {
           "id": "d",
@@ -4931,17 +4931,17 @@
         {
           "id": "b",
           "text": "Cả ba có cùng tên",
-          "rationale_vi": "“Cả ba có cùng tên” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Thẳng hàng” rồi thử lại."
+          "rationale_vi": "“Cả ba có cùng tên” chưa đúng. Điều kiện trực quan là ba điểm cùng thuộc một đường thẳng. Vậy đáp án là Cả ba có cùng nằm trên một đường thẳng."
         },
         {
           "id": "c",
           "text": "Có hai điểm trùng nhau",
-          "rationale_vi": "Nếu chọn “Có hai điểm trùng nhau”, có ít nhất một bước của “Thẳng hàng” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“Có hai điểm trùng nhau” chưa đúng. Điều kiện trực quan là ba điểm cùng thuộc một đường thẳng. Vậy đáp án là Cả ba có cùng nằm trên một đường thẳng."
         },
         {
           "id": "d",
           "text": "Có một hình tròn bên cạnh",
-          "rationale_vi": "“Có một hình tròn bên cạnh” là phương án nhiễu gần đúng. Tự làm theo “Thẳng hàng” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“Có một hình tròn bên cạnh” chưa đúng. Điều kiện trực quan là ba điểm cùng thuộc một đường thẳng. Vậy đáp án là Cả ba có cùng nằm trên một đường thẳng."
         }
       ],
       "correct_choice_id": "a"
@@ -5010,7 +5010,7 @@
         {
           "id": "a",
           "text": "hình tam giác",
-          "rationale_vi": "“hình tam giác” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Tứ giác” rồi thử lại."
+          "rationale_vi": "“hình tam giác” chưa đúng. Hình chữ nhật có bốn cạnh và bốn đỉnh nên là tứ giác."
         },
         {
           "id": "b",
@@ -5020,12 +5020,12 @@
         {
           "id": "c",
           "text": "khối cầu",
-          "rationale_vi": "Nếu chọn “khối cầu”, có ít nhất một bước của “Tứ giác” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“khối cầu” chưa đúng. Hình chữ nhật có bốn cạnh và bốn đỉnh nên là tứ giác."
         },
         {
           "id": "d",
           "text": "đường cong",
-          "rationale_vi": "“đường cong” là phương án nhiễu gần đúng. Tự làm theo “Tứ giác” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“đường cong” chưa đúng. Hình chữ nhật có bốn cạnh và bốn đỉnh nên là tứ giác."
         }
       ],
       "correct_choice_id": "b"
@@ -5063,12 +5063,12 @@
         {
           "id": "a",
           "text": "hình tam giác",
-          "rationale_vi": "“hình tam giác” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Tứ giác” rồi thử lại."
+          "rationale_vi": "“hình tam giác” chưa đúng. Hình kín có bốn cạnh là tứ giác. Vậy đáp án là hình tứ giác."
         },
         {
           "id": "b",
           "text": "đường gấp khúc mở",
-          "rationale_vi": "Nếu chọn “đường gấp khúc mở”, có ít nhất một bước của “Tứ giác” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“đường gấp khúc mở” chưa đúng. Hình kín có bốn cạnh là tứ giác. Vậy đáp án là hình tứ giác."
         },
         {
           "id": "c",
@@ -5078,7 +5078,7 @@
         {
           "id": "d",
           "text": "khối trụ",
-          "rationale_vi": "“khối trụ” là phương án nhiễu gần đúng. Tự làm theo “Tứ giác” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“khối trụ” chưa đúng. Hình kín có bốn cạnh là tứ giác. Vậy đáp án là hình tứ giác."
         }
       ],
       "correct_choice_id": "c"
@@ -5116,17 +5116,17 @@
         {
           "id": "a",
           "text": "quả bóng",
-          "rationale_vi": "“quả bóng” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Khối trụ” rồi thử lại."
+          "rationale_vi": "“quả bóng” chưa đúng. Lon nước có hai đáy tròn và mặt cong xung quanh, gần dạng khối trụ."
         },
         {
           "id": "b",
           "text": "tờ giấy phẳng",
-          "rationale_vi": "Nếu chọn “tờ giấy phẳng”, có ít nhất một bước của “Khối trụ” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“tờ giấy phẳng” chưa đúng. Lon nước có hai đáy tròn và mặt cong xung quanh, gần dạng khối trụ."
         },
         {
           "id": "c",
           "text": "điểm A",
-          "rationale_vi": "“điểm A” là phương án nhiễu gần đúng. Tự làm theo “Khối trụ” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“điểm A” chưa đúng. Lon nước có hai đáy tròn và mặt cong xung quanh, gần dạng khối trụ."
         },
         {
           "id": "d",
@@ -5174,17 +5174,17 @@
         {
           "id": "b",
           "text": "Không có mặt nào",
-          "rationale_vi": "“Không có mặt nào” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Khối trụ” rồi thử lại."
+          "rationale_vi": "“Không có mặt nào” chưa đúng. Đặc trưng trực quan của khối trụ là hai đáy tròn cùng mặt cong bao quanh. Vậy đáp án là Hai đáy tròn và một mặt cong xung quanh."
         },
         {
           "id": "c",
           "text": "Chỉ có một điểm",
-          "rationale_vi": "Nếu chọn “Chỉ có một điểm”, có ít nhất một bước của “Khối trụ” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“Chỉ có một điểm” chưa đúng. Đặc trưng trực quan của khối trụ là hai đáy tròn cùng mặt cong bao quanh. Vậy đáp án là Hai đáy tròn và một mặt cong xung quanh."
         },
         {
           "id": "d",
           "text": "Bốn cạnh phẳng",
-          "rationale_vi": "“Bốn cạnh phẳng” là phương án nhiễu gần đúng. Tự làm theo “Khối trụ” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“Bốn cạnh phẳng” chưa đúng. Đặc trưng trực quan của khối trụ là hai đáy tròn cùng mặt cong bao quanh. Vậy đáp án là Hai đáy tròn và một mặt cong xung quanh."
         }
       ],
       "correct_choice_id": "a"
@@ -5222,7 +5222,7 @@
         {
           "id": "a",
           "text": "tam giác",
-          "rationale_vi": "“tam giác” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Khối trụ” rồi thử lại."
+          "rationale_vi": "“tam giác” chưa đúng. Hai đáy của khối trụ là các hình tròn."
         },
         {
           "id": "b",
@@ -5232,12 +5232,12 @@
         {
           "id": "c",
           "text": "đường thẳng",
-          "rationale_vi": "Nếu chọn “đường thẳng”, có ít nhất một bước của “Khối trụ” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“đường thẳng” chưa đúng. Hai đáy của khối trụ là các hình tròn."
         },
         {
           "id": "d",
           "text": "điểm",
-          "rationale_vi": "“điểm” là phương án nhiễu gần đúng. Tự làm theo “Khối trụ” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“điểm” chưa đúng. Hai đáy của khối trụ là các hình tròn."
         }
       ],
       "correct_choice_id": "b"
@@ -5275,12 +5275,12 @@
         {
           "id": "a",
           "text": "lon nước",
-          "rationale_vi": "“lon nước” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Khối cầu” rồi thử lại."
+          "rationale_vi": "“lon nước” chưa đúng. Quả bóng tròn đều theo mọi hướng, gần dạng khối cầu."
         },
         {
           "id": "b",
           "text": "hộp chữ nhật",
-          "rationale_vi": "Nếu chọn “hộp chữ nhật”, có ít nhất một bước của “Khối cầu” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“hộp chữ nhật” chưa đúng. Quả bóng tròn đều theo mọi hướng, gần dạng khối cầu."
         },
         {
           "id": "c",
@@ -5290,7 +5290,7 @@
         {
           "id": "d",
           "text": "thước thẳng",
-          "rationale_vi": "“thước thẳng” là phương án nhiễu gần đúng. Tự làm theo “Khối cầu” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“thước thẳng” chưa đúng. Quả bóng tròn đều theo mọi hướng, gần dạng khối cầu."
         }
       ],
       "correct_choice_id": "c"
@@ -5328,17 +5328,17 @@
         {
           "id": "a",
           "text": "có 1 cạnh",
-          "rationale_vi": "“có 1 cạnh” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Khối cầu” rồi thử lại."
+          "rationale_vi": "“có 1 cạnh” chưa đúng. Khối cầu không có cạnh và không có đỉnh."
         },
         {
           "id": "b",
           "text": "có 2 đỉnh",
-          "rationale_vi": "Nếu chọn “có 2 đỉnh”, có ít nhất một bước của “Khối cầu” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“có 2 đỉnh” chưa đúng. Khối cầu không có cạnh và không có đỉnh."
         },
         {
           "id": "c",
           "text": "có 4 cạnh",
-          "rationale_vi": "“có 4 cạnh” là phương án nhiễu gần đúng. Tự làm theo “Khối cầu” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“có 4 cạnh” chưa đúng. Khối cầu không có cạnh và không có đỉnh."
         },
         {
           "id": "d",
@@ -5386,17 +5386,17 @@
         {
           "id": "b",
           "text": "Có hai đáy tròn",
-          "rationale_vi": "“Có hai đáy tròn” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Khối cầu” rồi thử lại."
+          "rationale_vi": "“Có hai đáy tròn” chưa đúng. Khối cầu tròn đều theo mọi hướng và không có mặt đáy phẳng. Vậy đáp án là Tròn đều và không có đáy phẳng."
         },
         {
           "id": "c",
           "text": "Có bốn cạnh",
-          "rationale_vi": "Nếu chọn “Có bốn cạnh”, có ít nhất một bước của “Khối cầu” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“Có bốn cạnh” chưa đúng. Khối cầu tròn đều theo mọi hướng và không có mặt đáy phẳng. Vậy đáp án là Tròn đều và không có đáy phẳng."
         },
         {
           "id": "d",
           "text": "Là một đoạn thẳng",
-          "rationale_vi": "“Là một đoạn thẳng” là phương án nhiễu gần đúng. Tự làm theo “Khối cầu” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“Là một đoạn thẳng” chưa đúng. Khối cầu tròn đều theo mọi hướng và không có mặt đáy phẳng. Vậy đáp án là Tròn đều và không có đáy phẳng."
         }
       ],
       "correct_choice_id": "a"
@@ -5527,7 +5527,7 @@
         {
           "id": "a",
           "text": "một điểm",
-          "rationale_vi": "“một điểm” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Ghép và tạo hình” rồi thử lại."
+          "rationale_vi": "“một điểm” chưa đúng. Hai mảnh tam giác có thể ghép cạnh với cạnh để tạo một hình kín bốn cạnh trong cách ghép phù hợp. Vậy đáp án là một tứ giác."
         },
         {
           "id": "b",
@@ -5537,12 +5537,12 @@
         {
           "id": "c",
           "text": "một khối cầu",
-          "rationale_vi": "Nếu chọn “một khối cầu”, có ít nhất một bước của “Ghép và tạo hình” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“một khối cầu” chưa đúng. Hai mảnh tam giác có thể ghép cạnh với cạnh để tạo một hình kín bốn cạnh trong cách ghép phù hợp. Vậy đáp án là một tứ giác."
         },
         {
           "id": "d",
           "text": "một đường thẳng vô hạn",
-          "rationale_vi": "“một đường thẳng vô hạn” là phương án nhiễu gần đúng. Tự làm theo “Ghép và tạo hình” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“một đường thẳng vô hạn” chưa đúng. Hai mảnh tam giác có thể ghép cạnh với cạnh để tạo một hình kín bốn cạnh trong cách ghép phù hợp. Vậy đáp án là một tứ giác."
         }
       ],
       "correct_choice_id": "b"
@@ -5580,12 +5580,12 @@
         {
           "id": "a",
           "text": "1",
-          "rationale_vi": "“1” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Ghép và tạo hình” rồi thử lại."
+          "rationale_vi": "“1” chưa đúng. Một đường cắt chéo xuyên hết hình vuông chia tờ giấy thành hai mảnh. Vậy đáp án là 2."
         },
         {
           "id": "b",
           "text": "3",
-          "rationale_vi": "Nếu chọn “3”, có ít nhất một bước của “Ghép và tạo hình” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“3” chưa đúng. Một đường cắt chéo xuyên hết hình vuông chia tờ giấy thành hai mảnh. Vậy đáp án là 2."
         },
         {
           "id": "c",
@@ -5595,7 +5595,7 @@
         {
           "id": "d",
           "text": "4",
-          "rationale_vi": "“4” là phương án nhiễu gần đúng. Tự làm theo “Ghép và tạo hình” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“4” chưa đúng. Một đường cắt chéo xuyên hết hình vuông chia tờ giấy thành hai mảnh. Vậy đáp án là 2."
         }
       ],
       "correct_choice_id": "c"
@@ -5633,17 +5633,17 @@
         {
           "id": "a",
           "text": "Chỉ đặt hai đỉnh chạm nhau rồi để hở cạnh",
-          "rationale_vi": "“Chỉ đặt hai đỉnh chạm nhau rồi để hở cạnh” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Ghép và tạo hình” rồi thử lại."
+          "rationale_vi": "“Chỉ đặt hai đỉnh chạm nhau rồi để hở cạnh” chưa đúng. Muốn tạo một hình kín mới, cần ghép các cạnh phù hợp sát nhau mà không chồng hai mảnh lên nhau. Vậy đáp án là Đặt hai cạnh phù hợp sát nhau để hai mảnh không chồng lên nhau."
         },
         {
           "id": "b",
           "text": "Chồng khít hai tam giác lên cùng một vị trí",
-          "rationale_vi": "Nếu chọn “Chồng khít hai tam giác lên cùng một vị trí”, có ít nhất một bước của “Ghép và tạo hình” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“Chồng khít hai tam giác lên cùng một vị trí” chưa đúng. Muốn tạo một hình kín mới, cần ghép các cạnh phù hợp sát nhau mà không chồng hai mảnh lên nhau. Vậy đáp án là Đặt hai cạnh phù hợp sát nhau để hai mảnh không chồng lên nhau."
         },
         {
           "id": "c",
           "text": "Để hai tam giác cách xa nhau",
-          "rationale_vi": "“Để hai tam giác cách xa nhau” là phương án nhiễu gần đúng. Tự làm theo “Ghép và tạo hình” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“Để hai tam giác cách xa nhau” chưa đúng. Muốn tạo một hình kín mới, cần ghép các cạnh phù hợp sát nhau mà không chồng hai mảnh lên nhau. Vậy đáp án là Đặt hai cạnh phù hợp sát nhau để hai mảnh không chồng lên nhau."
         },
         {
           "id": "d",
@@ -5691,17 +5691,17 @@
         {
           "id": "b",
           "text": "nhẹ hơn",
-          "rationale_vi": "“nhẹ hơn” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “So sánh khối lượng” rồi thử lại."
+          "rationale_vi": "“nhẹ hơn” chưa đúng. Với cân hoạt động đúng, phía hạ thấp hơn là phía nặng hơn."
         },
         {
           "id": "c",
           "text": "bằng 0 kg",
-          "rationale_vi": "Nếu chọn “bằng 0 kg”, có ít nhất một bước của “So sánh khối lượng” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“bằng 0 kg” chưa đúng. Với cân hoạt động đúng, phía hạ thấp hơn là phía nặng hơn."
         },
         {
           "id": "d",
           "text": "không có khối lượng",
-          "rationale_vi": "“không có khối lượng” là phương án nhiễu gần đúng. Tự làm theo “So sánh khối lượng” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“không có khối lượng” chưa đúng. Với cân hoạt động đúng, phía hạ thấp hơn là phía nặng hơn."
         }
       ],
       "correct_choice_id": "a"
@@ -5739,7 +5739,7 @@
         {
           "id": "a",
           "text": "nặng hơn",
-          "rationale_vi": "“nặng hơn” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “So sánh khối lượng” rồi thử lại."
+          "rationale_vi": "“nặng hơn” chưa đúng. Quan hệ nặng hơn - nhẹ hơn là hai chiều đối lập."
         },
         {
           "id": "b",
@@ -5749,12 +5749,12 @@
         {
           "id": "c",
           "text": "bằng nhau chắc chắn",
-          "rationale_vi": "Nếu chọn “bằng nhau chắc chắn”, có ít nhất một bước của “So sánh khối lượng” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“bằng nhau chắc chắn” chưa đúng. Quan hệ nặng hơn - nhẹ hơn là hai chiều đối lập."
         },
         {
           "id": "d",
           "text": "không đo được",
-          "rationale_vi": "“không đo được” là phương án nhiễu gần đúng. Tự làm theo “So sánh khối lượng” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“không đo được” chưa đúng. Quan hệ nặng hơn - nhẹ hơn là hai chiều đối lập."
         }
       ],
       "correct_choice_id": "b"
@@ -5792,12 +5792,12 @@
         {
           "id": "a",
           "text": "Bên trái nặng hơn",
-          "rationale_vi": "“Bên trái nặng hơn” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “So sánh khối lượng” rồi thử lại."
+          "rationale_vi": "“Bên trái nặng hơn” chưa đúng. Hai đĩa cân bằng cho thấy khối lượng hai bên bằng nhau trong điều kiện cân. Vậy đáp án là Hai bên có khối lượng bằng nhau trong phép cân đó."
         },
         {
           "id": "b",
           "text": "Bên phải nặng hơn",
-          "rationale_vi": "Nếu chọn “Bên phải nặng hơn”, có ít nhất một bước của “So sánh khối lượng” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“Bên phải nặng hơn” chưa đúng. Hai đĩa cân bằng cho thấy khối lượng hai bên bằng nhau trong điều kiện cân. Vậy đáp án là Hai bên có khối lượng bằng nhau trong phép cân đó."
         },
         {
           "id": "c",
@@ -5807,7 +5807,7 @@
         {
           "id": "d",
           "text": "Không bên nào có khối lượng",
-          "rationale_vi": "“Không bên nào có khối lượng” là phương án nhiễu gần đúng. Tự làm theo “So sánh khối lượng” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“Không bên nào có khối lượng” chưa đúng. Hai đĩa cân bằng cho thấy khối lượng hai bên bằng nhau trong điều kiện cân. Vậy đáp án là Hai bên có khối lượng bằng nhau trong phép cân đó."
         }
       ],
       "correct_choice_id": "c"
@@ -5877,17 +5877,17 @@
         {
           "id": "a",
           "text": "km",
-          "rationale_vi": "“km” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Kilôgam” rồi thử lại."
+          "rationale_vi": "“km” chưa đúng. Kilôgam được kí hiệu là kg. Lựa chọn này khớp với kilôgam; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng."
         },
         {
           "id": "b",
           "text": "l",
-          "rationale_vi": "Nếu chọn “l”, có ít nhất một bước của “Kilôgam” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“l” chưa đúng. Kilôgam được kí hiệu là kg. Lựa chọn này khớp với kilôgam; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng."
         },
         {
           "id": "c",
           "text": "cm",
-          "rationale_vi": "“cm” là phương án nhiễu gần đúng. Tự làm theo “Kilôgam” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“cm” chưa đúng. Kilôgam được kí hiệu là kg. Lựa chọn này khớp với kilôgam; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng."
         },
         {
           "id": "d",
@@ -6003,17 +6003,17 @@
         {
           "id": "b",
           "text": "kg",
-          "rationale_vi": "“kg” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Lít” rồi thử lại."
+          "rationale_vi": "“kg” chưa đúng. Lít được kí hiệu là l. Lựa chọn này khớp với lít; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng."
         },
         {
           "id": "c",
           "text": "km",
-          "rationale_vi": "Nếu chọn “km”, có ít nhất một bước của “Lít” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“km” chưa đúng. Lít được kí hiệu là l. Lựa chọn này khớp với lít; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng."
         },
         {
           "id": "d",
           "text": "dm",
-          "rationale_vi": "“dm” là phương án nhiễu gần đúng. Tự làm theo “Lít” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“dm” chưa đúng. Lít được kí hiệu là l. Lựa chọn này khớp với lít; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng."
         }
       ],
       "correct_choice_id": "a"
@@ -6147,7 +6147,7 @@
         {
           "id": "a",
           "text": "dm",
-          "rationale_vi": "“dm” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Quan hệ đơn vị độ dài” rồi thử lại."
+          "rationale_vi": "“dm” chưa đúng. Quãng đường dài thường được đo bằng ki-lô-mét. Vậy đáp án là km."
         },
         {
           "id": "b",
@@ -6157,12 +6157,12 @@
         {
           "id": "c",
           "text": "cm",
-          "rationale_vi": "Nếu chọn “cm”, có ít nhất một bước của “Quan hệ đơn vị độ dài” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“cm” chưa đúng. Quãng đường dài thường được đo bằng ki-lô-mét. Vậy đáp án là km."
         },
         {
           "id": "d",
           "text": "kg",
-          "rationale_vi": "“kg” là phương án nhiễu gần đúng. Tự làm theo “Quan hệ đơn vị độ dài” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“kg” chưa đúng. Quãng đường dài thường được đo bằng ki-lô-mét. Vậy đáp án là km."
         }
       ],
       "correct_choice_id": "b"
@@ -6232,12 +6232,12 @@
         {
           "id": "a",
           "text": "2 ngày",
-          "rationale_vi": "“2 ngày” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Ngày và giờ” rồi thử lại."
+          "rationale_vi": "“2 ngày” chưa đúng. Theo quan hệ đã học, 24 giờ liên tiếp bằng 1 ngày đầy đủ."
         },
         {
           "id": "b",
           "text": "10 ngày",
-          "rationale_vi": "Nếu chọn “10 ngày”, có ít nhất một bước của “Ngày và giờ” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“10 ngày” chưa đúng. Theo quan hệ đã học, 24 giờ liên tiếp bằng 1 ngày đầy đủ."
         },
         {
           "id": "c",
@@ -6247,7 +6247,7 @@
         {
           "id": "d",
           "text": "không thể biết",
-          "rationale_vi": "“không thể biết” là phương án nhiễu gần đúng. Tự làm theo “Ngày và giờ” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“không thể biết” chưa đúng. Theo quan hệ đã học, 24 giờ liên tiếp bằng 1 ngày đầy đủ."
         }
       ],
       "correct_choice_id": "c"
@@ -6285,7 +6285,7 @@
         {
           "id": "a",
           "text": "Đúng",
-          "rationale_vi": "“Đúng” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Ngày và giờ” rồi thử lại."
+          "rationale_vi": "“Đúng” chưa đúng. Một ngày đầy đủ có đúng 24 giờ nên phát biểu 'ít hơn 24 giờ' là sai."
         },
         {
           "id": "b",
@@ -6360,17 +6360,17 @@
         {
           "id": "a",
           "text": "dài hơn",
-          "rationale_vi": "“dài hơn” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Giờ và phút” rồi thử lại."
+          "rationale_vi": "“dài hơn” chưa đúng. 1 giờ = 60 phút; 45 phút ít hơn 60 phút nên ngắn hơn 1 giờ."
         },
         {
           "id": "b",
           "text": "bằng nhau",
-          "rationale_vi": "Nếu chọn “bằng nhau”, có ít nhất một bước của “Giờ và phút” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“bằng nhau” chưa đúng. 1 giờ = 60 phút; 45 phút ít hơn 60 phút nên ngắn hơn 1 giờ."
         },
         {
           "id": "c",
           "text": "không so sánh được",
-          "rationale_vi": "“không so sánh được” là phương án nhiễu gần đúng. Tự làm theo “Giờ và phút” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“không so sánh được” chưa đúng. 1 giờ = 60 phút; 45 phút ít hơn 60 phút nên ngắn hơn 1 giờ."
         },
         {
           "id": "d",
@@ -6418,17 +6418,17 @@
         {
           "id": "b",
           "text": "1 ngày",
-          "rationale_vi": "“1 ngày” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Giờ và phút” rồi thử lại."
+          "rationale_vi": "“1 ngày” chưa đúng. Theo quan hệ đã học, 60 phút bằng 1 giờ."
         },
         {
           "id": "c",
           "text": "30 phút",
-          "rationale_vi": "Nếu chọn “30 phút”, có ít nhất một bước của “Giờ và phút” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“30 phút” chưa đúng. Theo quan hệ đã học, 60 phút bằng 1 giờ."
         },
         {
           "id": "d",
           "text": "không thể biết",
-          "rationale_vi": "“không thể biết” là phương án nhiễu gần đúng. Tự làm theo “Giờ và phút” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“không thể biết” chưa đúng. Theo quan hệ đã học, 60 phút bằng 1 giờ."
         }
       ],
       "correct_choice_id": "a"
@@ -6530,7 +6530,7 @@
         {
           "id": "a",
           "text": "13 tháng 9",
-          "rationale_vi": "“13 tháng 9” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Đọc lịch” rồi thử lại."
+          "rationale_vi": "“13 tháng 9” chưa đúng. Ngày kế tiếp tăng số ngày thêm 1 trong cùng tháng, nên là 15 tháng 9."
         },
         {
           "id": "b",
@@ -6540,12 +6540,12 @@
         {
           "id": "c",
           "text": "14 tháng 10",
-          "rationale_vi": "Nếu chọn “14 tháng 10”, có ít nhất một bước của “Đọc lịch” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“14 tháng 10” chưa đúng. Ngày kế tiếp tăng số ngày thêm 1 trong cùng tháng, nên là 15 tháng 9."
         },
         {
           "id": "d",
           "text": "16 tháng 9",
-          "rationale_vi": "“16 tháng 9” là phương án nhiễu gần đúng. Tự làm theo “Đọc lịch” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“16 tháng 9” chưa đúng. Ngày kế tiếp tăng số ngày thêm 1 trong cùng tháng, nên là 15 tháng 9."
         }
       ],
       "correct_choice_id": "b"
@@ -6583,12 +6583,12 @@
         {
           "id": "a",
           "text": "Màu yêu thích của người xem",
-          "rationale_vi": "“Màu yêu thích của người xem” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Giá trị tờ tiền” rồi thử lại."
+          "rationale_vi": "“Màu yêu thích của người xem” chưa đúng. Để nhận biết giá trị, cần đọc con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền. Vậy đáp án là Con số mệnh giá và chữ đồng trên tờ."
         },
         {
           "id": "b",
           "text": "Số trang của sách bên cạnh",
-          "rationale_vi": "Nếu chọn “Số trang của sách bên cạnh”, có ít nhất một bước của “Giá trị tờ tiền” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“Số trang của sách bên cạnh” chưa đúng. Để nhận biết giá trị, cần đọc con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền. Vậy đáp án là Con số mệnh giá và chữ đồng trên tờ."
         },
         {
           "id": "c",
@@ -6598,7 +6598,7 @@
         {
           "id": "d",
           "text": "Chiều dài của bàn học",
-          "rationale_vi": "“Chiều dài của bàn học” là phương án nhiễu gần đúng. Tự làm theo “Giá trị tờ tiền” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“Chiều dài của bàn học” chưa đúng. Để nhận biết giá trị, cần đọc con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền. Vậy đáp án là Con số mệnh giá và chữ đồng trên tờ."
         }
       ],
       "correct_choice_id": "c"
@@ -6641,7 +6641,7 @@
         {
           "id": "b",
           "text": "Đúng",
-          "rationale_vi": "“Đúng” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Giá trị tờ tiền” rồi thử lại."
+          "rationale_vi": "“Đúng” chưa đúng. Màu sắc có thể hỗ trợ quan sát nhưng cần đọc con số mệnh giá và đơn vị đồng để nhận biết giá trị. Vậy đáp án là Sai."
         }
       ],
       "correct_choice_id": "a"
@@ -6679,17 +6679,17 @@
         {
           "id": "a",
           "text": "Chọn tờ có màu mình thích hơn",
-          "rationale_vi": "“Chọn tờ có màu mình thích hơn” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Giá trị tờ tiền” rồi thử lại."
+          "rationale_vi": "“Chọn tờ có màu mình thích hơn” chưa đúng. Đọc đúng con số mệnh giá trên từng tờ rồi so sánh hai giá trị; không đoán chỉ từ màu sắc hoặc vị trí. Vậy đáp án là Đọc và so sánh con số mệnh giá trên hai tờ."
         },
         {
           "id": "b",
           "text": "Chọn tờ nằm bên trái",
-          "rationale_vi": "Nếu chọn “Chọn tờ nằm bên trái”, có ít nhất một bước của “Giá trị tờ tiền” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“Chọn tờ nằm bên trái” chưa đúng. Đọc đúng con số mệnh giá trên từng tờ rồi so sánh hai giá trị; không đoán chỉ từ màu sắc hoặc vị trí. Vậy đáp án là Đọc và so sánh con số mệnh giá trên hai tờ."
         },
         {
           "id": "c",
           "text": "Đếm số chữ xuất hiện trên mỗi tờ",
-          "rationale_vi": "“Đếm số chữ xuất hiện trên mỗi tờ” là phương án nhiễu gần đúng. Tự làm theo “Giá trị tờ tiền” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“Đếm số chữ xuất hiện trên mỗi tờ” chưa đúng. Đọc đúng con số mệnh giá trên từng tờ rồi so sánh hai giá trị; không đoán chỉ từ màu sắc hoặc vị trí. Vậy đáp án là Đọc và so sánh con số mệnh giá trên hai tờ."
         },
         {
           "id": "d",
@@ -6926,17 +6926,17 @@
         {
           "id": "b",
           "text": "4 giờ 30 phút",
-          "rationale_vi": "“4 giờ 30 phút” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “15 phút và 30 phút trên đồng hồ” rồi thử lại."
+          "rationale_vi": "“4 giờ 30 phút” chưa đúng. Kim phút ở số 3 tương ứng 15 phút; kim giờ ở khoảng sau 4 nên là 4 giờ 15 phút."
         },
         {
           "id": "c",
           "text": "3 giờ 4 phút",
-          "rationale_vi": "Nếu chọn “3 giờ 4 phút”, có ít nhất một bước của “15 phút và 30 phút trên đồng hồ” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“3 giờ 4 phút” chưa đúng. Kim phút ở số 3 tương ứng 15 phút; kim giờ ở khoảng sau 4 nên là 4 giờ 15 phút."
         },
         {
           "id": "d",
           "text": "4 giờ 3 phút",
-          "rationale_vi": "“4 giờ 3 phút” là phương án nhiễu gần đúng. Tự làm theo “15 phút và 30 phút trên đồng hồ” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“4 giờ 3 phút” chưa đúng. Kim phút ở số 3 tương ứng 15 phút; kim giờ ở khoảng sau 4 nên là 4 giờ 15 phút."
         }
       ],
       "correct_choice_id": "a"
@@ -6974,7 +6974,7 @@
         {
           "id": "a",
           "text": "7 giờ 15 phút",
-          "rationale_vi": "“7 giờ 15 phút” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “15 phút và 30 phút trên đồng hồ” rồi thử lại."
+          "rationale_vi": "“7 giờ 15 phút” chưa đúng. Kim phút ở số 6 là 30 phút; kim giờ giữa 7 và 8 là 7 giờ 30 phút."
         },
         {
           "id": "b",
@@ -6984,12 +6984,12 @@
         {
           "id": "c",
           "text": "6 giờ 7 phút",
-          "rationale_vi": "Nếu chọn “6 giờ 7 phút”, có ít nhất một bước của “15 phút và 30 phút trên đồng hồ” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“6 giờ 7 phút” chưa đúng. Kim phút ở số 6 là 30 phút; kim giờ giữa 7 và 8 là 7 giờ 30 phút."
         },
         {
           "id": "d",
           "text": "8 giờ 30 phút",
-          "rationale_vi": "“8 giờ 30 phút” là phương án nhiễu gần đúng. Tự làm theo “15 phút và 30 phút trên đồng hồ” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“8 giờ 30 phút” chưa đúng. Kim phút ở số 6 là 30 phút; kim giờ giữa 7 và 8 là 7 giờ 30 phút."
         }
       ],
       "correct_choice_id": "b"
@@ -7027,12 +7027,12 @@
         {
           "id": "a",
           "text": "5 giờ 15 phút",
-          "rationale_vi": "“5 giờ 15 phút” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “15 phút và 30 phút trên đồng hồ” rồi thử lại."
+          "rationale_vi": "“5 giờ 15 phút” chưa đúng. Kim phút từ số 3 đến số 6 chuyển từ 15 phút sang 30 phút; kim giờ vẫn trong khoảng sau 5 nên là 5 giờ 30 phút."
         },
         {
           "id": "b",
           "text": "6 giờ 30 phút",
-          "rationale_vi": "Nếu chọn “6 giờ 30 phút”, có ít nhất một bước của “15 phút và 30 phút trên đồng hồ” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“6 giờ 30 phút” chưa đúng. Kim phút từ số 3 đến số 6 chuyển từ 15 phút sang 30 phút; kim giờ vẫn trong khoảng sau 5 nên là 5 giờ 30 phút."
         },
         {
           "id": "c",
@@ -7042,7 +7042,7 @@
         {
           "id": "d",
           "text": "5 giờ 45 phút",
-          "rationale_vi": "“5 giờ 45 phút” là phương án nhiễu gần đúng. Tự làm theo “15 phút và 30 phút trên đồng hồ” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“5 giờ 45 phút” chưa đúng. Kim phút từ số 3 đến số 6 chuyển từ 15 phút sang 30 phút; kim giờ vẫn trong khoảng sau 5 nên là 5 giờ 30 phút."
         }
       ],
       "correct_choice_id": "c"
@@ -7176,17 +7176,17 @@
         {
           "id": "a",
           "text": "15 km",
-          "rationale_vi": "“15 km” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Ước lượng số đo” rồi thử lại."
+          "rationale_vi": "“15 km” chưa đúng. Bút chì là vật nhỏ, đơn vị cm và độ dài khoảng vài chục cm là hợp lý. Vậy đáp án là 15 cm."
         },
         {
           "id": "b",
           "text": "15 m",
-          "rationale_vi": "Nếu chọn “15 m”, có ít nhất một bước của “Ước lượng số đo” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“15 m” chưa đúng. Bút chì là vật nhỏ, đơn vị cm và độ dài khoảng vài chục cm là hợp lý. Vậy đáp án là 15 cm."
         },
         {
           "id": "c",
           "text": "150 m",
-          "rationale_vi": "“150 m” là phương án nhiễu gần đúng. Tự làm theo “Ước lượng số đo” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“150 m” chưa đúng. Bút chì là vật nhỏ, đơn vị cm và độ dài khoảng vài chục cm là hợp lý. Vậy đáp án là 15 cm."
         },
         {
           "id": "d",
@@ -7234,17 +7234,17 @@
         {
           "id": "b",
           "text": "2 cm",
-          "rationale_vi": "“2 cm” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Ước lượng số đo” rồi thử lại."
+          "rationale_vi": "“2 cm” chưa đúng. Cửa cao khoảng vài mét, nên 2 m là hợp lý."
         },
         {
           "id": "c",
           "text": "2 km",
-          "rationale_vi": "Nếu chọn “2 km”, có ít nhất một bước của “Ước lượng số đo” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“2 km” chưa đúng. Cửa cao khoảng vài mét, nên 2 m là hợp lý."
         },
         {
           "id": "d",
           "text": "20 km",
-          "rationale_vi": "“20 km” là phương án nhiễu gần đúng. Tự làm theo “Ước lượng số đo” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“20 km” chưa đúng. Cửa cao khoảng vài mét, nên 2 m là hợp lý."
         }
       ],
       "correct_choice_id": "a"
@@ -7282,7 +7282,7 @@
         {
           "id": "a",
           "text": "5 cm",
-          "rationale_vi": "“5 cm” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Ước lượng số đo” rồi thử lại."
+          "rationale_vi": "“5 cm” chưa đúng. Gấp đôi mốc 10 cm là khoảng 20 cm."
         },
         {
           "id": "b",
@@ -7292,12 +7292,12 @@
         {
           "id": "c",
           "text": "100 cm",
-          "rationale_vi": "Nếu chọn “100 cm”, có ít nhất một bước của “Ước lượng số đo” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“100 cm” chưa đúng. Gấp đôi mốc 10 cm là khoảng 20 cm."
         },
         {
           "id": "d",
           "text": "2 km",
-          "rationale_vi": "“2 km” là phương án nhiễu gần đúng. Tự làm theo “Ước lượng số đo” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“2 km” chưa đúng. Gấp đôi mốc 10 cm là khoảng 20 cm."
         }
       ],
       "correct_choice_id": "b"
@@ -7744,12 +7744,12 @@
         {
           "id": "a",
           "text": "Cam",
-          "rationale_vi": "“Cam” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Suy luận từ dữ liệu” rồi thử lại."
+          "rationale_vi": "“Cam” chưa đúng. 7 biểu tượng lớn hơn 5 và 3 nên Táo nhiều nhất."
         },
         {
           "id": "b",
           "text": "Chuối",
-          "rationale_vi": "Nếu chọn “Chuối”, có ít nhất một bước của “Suy luận từ dữ liệu” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“Chuối” chưa đúng. 7 biểu tượng lớn hơn 5 và 3 nên Táo nhiều nhất."
         },
         {
           "id": "c",
@@ -7759,7 +7759,7 @@
         {
           "id": "d",
           "text": "Cả ba bằng nhau",
-          "rationale_vi": "“Cả ba bằng nhau” là phương án nhiễu gần đúng. Tự làm theo “Suy luận từ dữ liệu” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“Cả ba bằng nhau” chưa đúng. 7 biểu tượng lớn hơn 5 và 3 nên Táo nhiều nhất."
         }
       ],
       "correct_choice_id": "c"
@@ -7828,17 +7828,17 @@
         {
           "id": "a",
           "text": "chắc chắn",
-          "rationale_vi": "“chắc chắn” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Có thể” rồi thử lại."
+          "rationale_vi": "“chắc chắn” chưa đúng. Số 4 là một mặt có thể xuất hiện nhưng không phải lần nào cũng ra 4."
         },
         {
           "id": "b",
           "text": "không thể",
-          "rationale_vi": "Nếu chọn “không thể”, có ít nhất một bước của “Có thể” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“không thể” chưa đúng. Số 4 là một mặt có thể xuất hiện nhưng không phải lần nào cũng ra 4."
         },
         {
           "id": "c",
           "text": "bằng nhau",
-          "rationale_vi": "“bằng nhau” là phương án nhiễu gần đúng. Tự làm theo “Có thể” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“bằng nhau” chưa đúng. Số 4 là một mặt có thể xuất hiện nhưng không phải lần nào cũng ra 4."
         },
         {
           "id": "d",
@@ -7886,17 +7886,17 @@
         {
           "id": "b",
           "text": "chắc chắn",
-          "rationale_vi": "“chắc chắn” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Có thể” rồi thử lại."
+          "rationale_vi": "“chắc chắn” chưa đúng. Có bóng đỏ trong túi nên có thể lấy được, nhưng còn bóng xanh nên không chắc chắn."
         },
         {
           "id": "c",
           "text": "không thể",
-          "rationale_vi": "Nếu chọn “không thể”, có ít nhất một bước của “Có thể” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“không thể” chưa đúng. Có bóng đỏ trong túi nên có thể lấy được, nhưng còn bóng xanh nên không chắc chắn."
         },
         {
           "id": "d",
           "text": "luôn sai",
-          "rationale_vi": "“luôn sai” là phương án nhiễu gần đúng. Tự làm theo “Có thể” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“luôn sai” chưa đúng. Có bóng đỏ trong túi nên có thể lấy được, nhưng còn bóng xanh nên không chắc chắn."
         }
       ],
       "correct_choice_id": "a"
@@ -7934,7 +7934,7 @@
         {
           "id": "a",
           "text": "chắc chắn",
-          "rationale_vi": "“chắc chắn” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Có thể” rồi thử lại."
+          "rationale_vi": "“chắc chắn” chưa đúng. Số 2 có trên vòng quay nên có thể xảy ra, nhưng không phải kết quả duy nhất."
         },
         {
           "id": "b",
@@ -7944,12 +7944,12 @@
         {
           "id": "c",
           "text": "không thể",
-          "rationale_vi": "Nếu chọn “không thể”, có ít nhất một bước của “Có thể” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“không thể” chưa đúng. Số 2 có trên vòng quay nên có thể xảy ra, nhưng không phải kết quả duy nhất."
         },
         {
           "id": "d",
           "text": "không có kết quả",
-          "rationale_vi": "“không có kết quả” là phương án nhiễu gần đúng. Tự làm theo “Có thể” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“không có kết quả” chưa đúng. Số 2 có trên vòng quay nên có thể xảy ra, nhưng không phải kết quả duy nhất."
         }
       ],
       "correct_choice_id": "b"
@@ -7987,12 +7987,12 @@
         {
           "id": "a",
           "text": "có thể nhưng không chắc",
-          "rationale_vi": "“có thể nhưng không chắc” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Chắc chắn” rồi thử lại."
+          "rationale_vi": "“có thể nhưng không chắc” chưa đúng. Mọi mặt của xúc xắc đều là một số từ 1 đến 6. Vậy đáp án là chắc chắn."
         },
         {
           "id": "b",
           "text": "không thể",
-          "rationale_vi": "Nếu chọn “không thể”, có ít nhất một bước của “Chắc chắn” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“không thể” chưa đúng. Mọi mặt của xúc xắc đều là một số từ 1 đến 6. Vậy đáp án là chắc chắn."
         },
         {
           "id": "c",
@@ -8002,7 +8002,7 @@
         {
           "id": "d",
           "text": "sai",
-          "rationale_vi": "“sai” là phương án nhiễu gần đúng. Tự làm theo “Chắc chắn” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“sai” chưa đúng. Mọi mặt của xúc xắc đều là một số từ 1 đến 6. Vậy đáp án là chắc chắn."
         }
       ],
       "correct_choice_id": "c"
@@ -8040,17 +8040,17 @@
         {
           "id": "a",
           "text": "không thể",
-          "rationale_vi": "“không thể” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Chắc chắn” rồi thử lại."
+          "rationale_vi": "“không thể” chưa đúng. Mọi bóng trong túi đều xanh nên lấy bóng nào cũng xanh. Vậy đáp án là chắc chắn."
         },
         {
           "id": "b",
           "text": "có thể nhưng không chắc",
-          "rationale_vi": "Nếu chọn “có thể nhưng không chắc”, có ít nhất một bước của “Chắc chắn” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“có thể nhưng không chắc” chưa đúng. Mọi bóng trong túi đều xanh nên lấy bóng nào cũng xanh. Vậy đáp án là chắc chắn."
         },
         {
           "id": "c",
           "text": "không có màu",
-          "rationale_vi": "“không có màu” là phương án nhiễu gần đúng. Tự làm theo “Chắc chắn” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“không có màu” chưa đúng. Mọi bóng trong túi đều xanh nên lấy bóng nào cũng xanh. Vậy đáp án là chắc chắn."
         },
         {
           "id": "d",
@@ -8098,17 +8098,17 @@
         {
           "id": "b",
           "text": "không thể",
-          "rationale_vi": "“không thể” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Chắc chắn” rồi thử lại."
+          "rationale_vi": "“không thể” chưa đúng. Tất cả thẻ đều là 2 hoặc 5 nên sự kiện luôn xảy ra. Vậy đáp án là chắc chắn."
         },
         {
           "id": "c",
           "text": "chỉ có thể",
-          "rationale_vi": "Nếu chọn “chỉ có thể”, có ít nhất một bước của “Chắc chắn” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“chỉ có thể” chưa đúng. Tất cả thẻ đều là 2 hoặc 5 nên sự kiện luôn xảy ra. Vậy đáp án là chắc chắn."
         },
         {
           "id": "d",
           "text": "không xác định",
-          "rationale_vi": "“không xác định” là phương án nhiễu gần đúng. Tự làm theo “Chắc chắn” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“không xác định” chưa đúng. Tất cả thẻ đều là 2 hoặc 5 nên sự kiện luôn xảy ra. Vậy đáp án là chắc chắn."
         }
       ],
       "correct_choice_id": "a"
@@ -8146,7 +8146,7 @@
         {
           "id": "a",
           "text": "có thể",
-          "rationale_vi": "“có thể” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Không thể” rồi thử lại."
+          "rationale_vi": "“có thể” chưa đúng. Không có mặt số 8 nên sự kiện không thể xảy ra."
         },
         {
           "id": "b",
@@ -8156,12 +8156,12 @@
         {
           "id": "c",
           "text": "chắc chắn",
-          "rationale_vi": "Nếu chọn “chắc chắn”, có ít nhất một bước của “Không thể” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“chắc chắn” chưa đúng. Không có mặt số 8 nên sự kiện không thể xảy ra."
         },
         {
           "id": "d",
           "text": "luôn đúng",
-          "rationale_vi": "“luôn đúng” là phương án nhiễu gần đúng. Tự làm theo “Không thể” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“luôn đúng” chưa đúng. Không có mặt số 8 nên sự kiện không thể xảy ra."
         }
       ],
       "correct_choice_id": "b"
@@ -8199,12 +8199,12 @@
         {
           "id": "a",
           "text": "chắc chắn",
-          "rationale_vi": "“chắc chắn” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Không thể” rồi thử lại."
+          "rationale_vi": "“chắc chắn” chưa đúng. Không có bóng xanh trong túi nên không thể lấy bóng xanh."
         },
         {
           "id": "b",
           "text": "có thể",
-          "rationale_vi": "Nếu chọn “có thể”, có ít nhất một bước của “Không thể” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“có thể” chưa đúng. Không có bóng xanh trong túi nên không thể lấy bóng xanh."
         },
         {
           "id": "c",
@@ -8214,7 +8214,7 @@
         {
           "id": "d",
           "text": "bằng nhau",
-          "rationale_vi": "“bằng nhau” là phương án nhiễu gần đúng. Tự làm theo “Không thể” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“bằng nhau” chưa đúng. Không có bóng xanh trong túi nên không thể lấy bóng xanh."
         }
       ],
       "correct_choice_id": "c"
@@ -8252,17 +8252,17 @@
         {
           "id": "a",
           "text": "có thể",
-          "rationale_vi": "“có thể” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “Không thể” rồi thử lại."
+          "rationale_vi": "“có thể” chưa đúng. Số 5 không có trên vòng quay nên sự kiện không thể xảy ra."
         },
         {
           "id": "b",
           "text": "chắc chắn",
-          "rationale_vi": "Nếu chọn “chắc chắn”, có ít nhất một bước của “Không thể” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên."
+          "rationale_vi": "“chắc chắn” chưa đúng. Số 5 không có trên vòng quay nên sự kiện không thể xảy ra."
         },
         {
           "id": "c",
           "text": "luôn xảy ra",
-          "rationale_vi": "“luôn xảy ra” là phương án nhiễu gần đúng. Tự làm theo “Không thể” rồi so kết quả với lựa chọn này."
+          "rationale_vi": "“luôn xảy ra” chưa đúng. Số 5 không có trên vòng quay nên sự kiện không thể xảy ra."
         },
         {
           "id": "d",

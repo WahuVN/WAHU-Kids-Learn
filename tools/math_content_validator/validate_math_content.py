@@ -42,6 +42,11 @@ GENERIC_SECOND_HINT = "Thực hiện từng bước và kiểm tra lại với d
 GENERIC_FIRST_OBJECTIVE_PREFIX = "Nhận biết và thực hiện đúng nội dung:"
 GENERIC_SECOND_OBJECTIVE = "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
 GENERIC_DISTRACTOR_RATIONALE = "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+SHALLOW_DISTRACTOR_RATIONALE_MARKERS = (
+    "chưa thỏa đủ dữ kiện",
+    "có ít nhất một bước của",
+    "phương án nhiễu gần đúng",
+)
 CHILD_FACING_KEYS = {
     "title_vi", "objectives_vi", "explanation_vi", "name_vi", "definition_vi",
     "prompt_vi", "solution_steps_vi", "hints_vi", "rationale_vi", "text",
@@ -905,6 +910,11 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
                 distractor_rationale_counts[normalized_rationale] += 1
                 if normalized_rationale == GENERIC_DISTRACTOR_RATIONALE:
                     errors.append(f"generic_distractor_rationale:{where}:{cid}")
+                if any(marker in normalized_rationale.casefold() for marker in SHALLOW_DISTRACTOR_RATIONALE_MARKERS):
+                    errors.append(f"shallow_distractor_rationale:{where}:{cid}")
+                normalized_explanation = " ".join(explanation.split())
+                if normalized_explanation and normalized_explanation not in normalized_rationale:
+                    errors.append(f"distractor_rationale_missing_question_reason:{where}:{cid}")
             if correct_text not in accepted:
                 errors.append(f"correct_choice_text_not_accepted:{where}:{correct_text}")
             normalized_correct_text = normalize_choice_text(correct_text) if isinstance(correct_text, str) else ""

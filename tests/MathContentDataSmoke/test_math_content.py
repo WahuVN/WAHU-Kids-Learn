@@ -427,9 +427,13 @@ class MathContentDataSmoke(unittest.TestCase):
             choices = item.get("choices", [])
             if not choices:
                 continue
+            reason = " ".join(item["explanation_vi"].split())
             for choice in choices:
                 if choice["id"] != item["correct_choice_id"]:
-                    rationales.append(choice["rationale_vi"])
+                    rationale = " ".join(choice["rationale_vi"].split())
+                    rationales.append(rationale)
+                    self.assertIn(reason, rationale)
+                    self.assertTrue(all(marker not in rationale.casefold() for marker in validator.SHALLOW_DISTRACTOR_RATIONALE_MARKERS))
         self.assertEqual(267, len(rationales))
         self.assertNotIn(validator.GENERIC_DISTRACTOR_RATIONALE, rationales)
         counts = Counter(rationales)
@@ -463,6 +467,13 @@ class MathContentDataSmoke(unittest.TestCase):
                 self.assertTrue(all(value > 0 for value in counts))
                 self.assertLessEqual(max(counts) - min(counts), 1)
         self.assertEqual([22, 22, 22, 22], [Counter(x["correct_choice_id"] for x in by_count[4])[key] for key in "abcd"])
+
+    def test_equal_group_operation_choice_is_unambiguous(self):
+        item = self.question_by_id["m2_q_operation_meaning_from_visual_03"]
+        texts = {choice["text"] for choice in item["choices"]}
+        self.assertEqual("5 × 2", item["correct_answer"])
+        self.assertNotIn("10 : 5", texts)
+        self.assertIn("2 × 2", texts)
 
     def test_multiple_choice_options_are_semantically_distinct(self):
         self.assertEqual("có thể", validator.normalize_choice_text("  CÓ   THỂ "))

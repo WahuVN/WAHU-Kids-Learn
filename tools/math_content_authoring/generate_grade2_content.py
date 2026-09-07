@@ -191,15 +191,10 @@ def second_hint(question_type: str, difficulty: str, concept_name: str) -> str:
     return by_type.get(difficulty, by_type["medium"])
 
 
-def distractor_rationale(choice_text: str, concept_name: str, position: int) -> str:
-    """Explain why a distractor needs re-checking without leaking the correct choice."""
-    concept = concept_name.strip()
-    templates = [
-        f"“{choice_text}” chưa thỏa đủ dữ kiện. Đối chiếu lại từng chi tiết với kiến thức “{concept}” rồi thử lại.",
-        f"Nếu chọn “{choice_text}”, có ít nhất một bước của “{concept}” bị lệch. Hãy kiểm tra lại từ dữ kiện đầu tiên.",
-        f"“{choice_text}” là phương án nhiễu gần đúng. Tự làm theo “{concept}” rồi so kết quả với lựa chọn này.",
-    ]
-    return templates[position % len(templates)]
+def distractor_rationale(choice_text: str, explanation: str) -> str:
+    """After a wrong choice, reuse the question-specific worked reason instead of a generic template."""
+    reason = " ".join(explanation.strip().split())
+    return f"“{choice_text}” chưa đúng. {reason}"
 
 
 def nq(prompt: str, answer: int, explanation: str, *, unit: str | None = None,
@@ -757,7 +752,7 @@ Q = {
     "OPERATION_MEANING_FROM_VISUAL": [
         mc("Hai nhóm 4 chấm được gộp lại. Phép tính nào mô tả việc gộp?", "4 + 4", ["4 - 4", "4 : 2", "4 + 2"], "Gộp hai lượng lại là quan hệ cộng; hai nhóm 4 là 4 + 4."),
         mc("Có 10 chấm, gạch bỏ 3 chấm. Phép tính nào mô tả tình huống?", "10 - 3", ["10 + 3", "10 : 2", "3 - 10"], "Bỏ bớt một phần khỏi lượng ban đầu là phép trừ."),
-        mc("Có 5 nhóm bằng nhau, mỗi nhóm 2 chấm. Phép tính nào phù hợp nhất?", "5 × 2", ["5 + 2", "5 - 2", "10 : 5"], "Nhiều nhóm bằng nhau được mô tả bằng phép nhân."),
+        mc("Có 5 nhóm bằng nhau, mỗi nhóm 2 chấm. Phép tính nào phù hợp nhất?", "5 × 2", ["5 + 2", "5 - 2", "2 × 2"], "Nhiều nhóm bằng nhau được mô tả bằng phép nhân."),
     ],
     "WP_ONE_STEP_ADD_MORE": [
         nq("Lan có 24 bút chì, được cho thêm 13 bút. Lan có tất cả bao nhiêu bút?", 37, "24 + 13 = 37 vì số bút được thêm vào lượng ban đầu."),
@@ -1046,12 +1041,10 @@ def build() -> tuple[dict, dict]:
                     target = choice_position_counts.get(count, 0) % count
                     choice_position_counts[count] = choice_position_counts.get(count, 0) + 1
                     ordered = distractors[:target] + [correct] + distractors[target:]
-                    distractor_index = 0
                     for index, choice in enumerate(ordered):
                         choice["id"] = chr(ord("a") + index)
                         if choice is not correct:
-                            choice["rationale_vi"] = distractor_rationale(choice["text"], concept_name, distractor_index)
-                            distractor_index += 1
+                            choice["rationale_vi"] = distractor_rationale(choice["text"], q["explanation_vi"])
                     q["choices"] = ordered
                     q["correct_choice_id"] = ordered[target]["id"]
                 questions.append(q)

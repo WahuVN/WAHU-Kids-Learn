@@ -28,7 +28,7 @@ Owner: AI1 — Math Content & Data
   - interactive measurement
   - word problem
 - Semantic validator errors: **0**
-- Math content unittest: **30 / 30 PASS**
+- Math content unittest: **31 / 31 PASS**
 - Pack manifest/hash/listing check on current working tree: **PASS** (`version=1.9.0`, 3 listed files)
 - Persistence runtime smoke: **171 assertions PASS**
 - Child UI targeted build (`BuildProjectReferences=false`) + runtime smoke: **1534 assertions PASS**
@@ -81,7 +81,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - invalid unit metadata;
 - `answer_unit` display-only metadata sai kind/type hoặc rỗng;
 - invalid MC correct choice / duplicate choices / rationale missing;
-- distractor rationale placeholder/generic hoặc bị tái dùng quá mức;
+- distractor rationale placeholder/generic, dùng 3 mẫu shallow cũ hoặc không chứa lý do riêng của chính câu;
 - hint cấp 2 placeholder/generic hoặc bị tái dùng quá mức;
 - hint cấp 1/2 tiết lộ canonical answer chưa xuất hiện trong đề; true/false được loại khỏi detector để “Đúng/Sai” vẫn dùng được như ngôn ngữ hướng dẫn; mỗi hint child-facing tối đa 130 ký tự;
 - vocabulary kỹ thuật nội bộ lọt vào field child-facing (`baseline`, `runtime`, `template`, `validator`, ...);
@@ -122,9 +122,9 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - nội dung tiền Việt Nam không hard-code mệnh giá khi chưa có source/book mapping;
 - skill quan hệ thời gian không mở rộng thành phép nhân/chia ngoài yêu cầu cần đạt;
 - mọi phép nhân/chia literal child-facing nằm trong bảng 2 hoặc 5, kể cả distractor;
-- mọi MCQ có choice khác nhau sau normalize text và không có hai biểu thức choice cùng giá trị số;
+- mọi MCQ có choice khác nhau sau normalize text và không có hai biểu thức choice cùng giá trị số; câu equal-group `5 × 2` đã loại distractor `10 : 5` có thể mô tả cùng cấu trúc nhóm và khóa regression ambiguity;
 - 201/201 hint cấp 2 hiện actionable, **201 unique / max repeat 1**; toàn bộ 402 hint slots đạt **0 unseen-answer leak** và **0 hint >130 ký tự**; readability hiện hint1 p90/max = **109/114**, hint2 = **108/119** (trước wave max 168/167);
-- 267 distractor có **256 rationale khác nhau**, max lặp 3 và placeholder chung = 0;
+- 267/267 distractor có **rationale unique / max repeat 1**, mỗi rationale sai chứa lời giải riêng của chính câu; 3 họ mẫu shallow cũ đã giảm **267 → 0**;
 - vị trí đáp án đúng được cân bằng deterministic: 88 câu 4-choice = 22/22/22/22 cho A/B/C/D; 3 true/false = 2/1;
 - 23 câu integer có `answer_unit` giữ đúng contract display-only, không đổi sang unit-input;
 - **17 application regression quan trọng** được khóa riêng: 4 câu kết hợp dữ kiện/khái niệm trước đó + 13 câu transfer/error-analysis mới (dạng khai triển, ý nghĩa chia, tia số, đo thước, đổi+tính số đo, đường gấp khúc, biểu đồ tranh và các bài toán một bước);
@@ -136,7 +136,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract;
 - **166 phương trình số instructional** đang được kiểm bằng arithmetic parser, hiện **0 sai**; detector có regression cho cả phép cộng chuỗi và phép chia dùng dấu `:`.
 
-Latest result: **30 tests PASS**.
+Latest result: **31 tests PASS**.
 
 ## Commits / waves
 
@@ -167,6 +167,7 @@ Latest result: **30 tests PASS**.
 - `0b71681` — `Toán: chặn gợi ý tiết lộ đáp án`
 - `40dc075` — `Toán: gọn gợi ý và tinh giản prerequisite`
 - `c08c7cf` — `Toán: khóa tính đúng của phép tính trong lời giải`
+- `a0fa436` — `Toán: đặc thù hóa mục tiêu đầu tiên của bài học`
 
 ## Current blockers outside AI1 content ownership
 
