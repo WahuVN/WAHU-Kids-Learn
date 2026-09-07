@@ -127,6 +127,57 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
             if violates:
                 sign = "<" if left < right else ">"
                 return f"Trong “{choice_text}”, {left} đứng trước {right} dù {left} {sign} {right}, nên thứ tự chưa {direction}."
+
+    if skill == "NUM_FULL_HUNDREDS_RECOGNIZE":
+        if re.fullmatch(r"\d+", choice_text.strip()):
+            value = int(choice_text.strip())
+            tens = (value // 10) % 10
+            ones = value % 10
+            if tens != 0 or ones != 0:
+                return (f"Số {value} còn hàng chục hoặc hàng đơn vị khác 0 "
+                        f"({tens} chục, {ones} đơn vị), nên chưa phải một số trăm đầy đủ.")
+
+    if skill == "MULTIPLICATION_MEANING" and "+" in choice_text:
+        match = re.search(r"Có\s+(\d+)\s+nhóm, mỗi nhóm\s+(\d+)", prompt, re.IGNORECASE)
+        terms = [int(x) for x in re.findall(r"\d+", choice_text)]
+        if match and terms:
+            groups, each = int(match.group(1)), int(match.group(2))
+            if len(terms) != groups or any(term != each for term in terms):
+                return (f"Phải cộng số {each} đúng {groups} lần; lựa chọn “{choice_text}” "
+                        f"không giữ đúng số nhóm và số phần tử mỗi nhóm.")
+
+    if skill in {"OPERATION_MEANING_FROM_VISUAL", "WP_SELECT_OPERATION_ONE_STEP"}:
+        normalized_prompt = prompt.casefold()
+        expected_op = None
+        context_reason = None
+        if "gộp" in normalized_prompt:
+            expected_op, context_reason = "+", "gộp các nhóm nên cần phép cộng"
+        elif "gạch bỏ" in normalized_prompt or ("ăn" in normalized_prompt and "còn lại" in normalized_prompt):
+            expected_op, context_reason = "-", "bớt đi rồi hỏi phần còn lại nên cần phép trừ"
+        elif "nhóm bằng nhau" in normalized_prompt or ("mỗi giỏ" in normalized_prompt and "tất cả" in normalized_prompt):
+            expected_op, context_reason = "×", "nhiều nhóm bằng nhau và hỏi tất cả nên cần phép nhân"
+        elif "chia đều" in normalized_prompt:
+            expected_op, context_reason = ":", "chia đều thành các phần bằng nhau nên cần phép chia"
+        if expected_op:
+            shown_op = next((op for op in ("×", ":", "+", "-") if op in choice_text), None)
+            if shown_op and shown_op != expected_op:
+                return f"Tình huống này {context_reason}; “{choice_text}” dùng phép tính khác quan hệ đề bài."
+            prompt_numbers = [int(x) for x in re.findall(r"\d+", prompt)]
+            choice_numbers = [int(x) for x in re.findall(r"\d+", choice_text)]
+            if shown_op == expected_op and len(prompt_numbers) >= 2 and len(choice_numbers) >= 2:
+                if "gộp" in normalized_prompt and "hai nhóm" in normalized_prompt:
+                    each = prompt_numbers[0]
+                    if choice_numbers[:2] != [each, each]:
+                        return f"Có hai nhóm cùng {each} chấm nên phép cộng phải dùng {each} và {each}, không phải “{choice_text}”."
+                if "gạch bỏ" in normalized_prompt:
+                    start, removed = prompt_numbers[0], prompt_numbers[1]
+                    if choice_numbers[:2] != [start, removed]:
+                        return f"Phải bắt đầu từ {start} rồi bớt {removed}; “{choice_text}” đặt sai số ban đầu hoặc số bị bớt."
+                if "nhóm bằng nhau" in normalized_prompt:
+                    groups, each = prompt_numbers[0], prompt_numbers[1]
+                    if choice_numbers[:2] != [groups, each]:
+                        return f"Có {groups} nhóm, mỗi nhóm {each} chấm nên phải giữ đúng hai số {groups} và {each}; “{choice_text}” đổi số nhóm."
+
     return None
 
 

@@ -180,7 +180,7 @@
         {
           "id": "a",
           "text": "610",
-          "rationale_vi": "“610” chưa đúng. 600 có hàng chục và hàng đơn vị đều bằng 0."
+          "rationale_vi": "“610” chưa đúng. Số 610 còn hàng chục hoặc hàng đơn vị khác 0 (1 chục, 0 đơn vị), nên chưa phải một số trăm đầy đủ. 600 có hàng chục và hàng đơn vị đều bằng 0."
         },
         {
           "id": "b",
@@ -190,12 +190,12 @@
         {
           "id": "c",
           "text": "606",
-          "rationale_vi": "“606” chưa đúng. 600 có hàng chục và hàng đơn vị đều bằng 0."
+          "rationale_vi": "“606” chưa đúng. Số 606 còn hàng chục hoặc hàng đơn vị khác 0 (0 chục, 6 đơn vị), nên chưa phải một số trăm đầy đủ. 600 có hàng chục và hàng đơn vị đều bằng 0."
         },
         {
           "id": "d",
           "text": "660",
-          "rationale_vi": "“660” chưa đúng. 600 có hàng chục và hàng đơn vị đều bằng 0."
+          "rationale_vi": "“660” chưa đúng. Số 660 còn hàng chục hoặc hàng đơn vị khác 0 (6 chục, 0 đơn vị), nên chưa phải một số trăm đầy đủ. 600 có hàng chục và hàng đơn vị đều bằng 0."
         }
       ],
       "correct_choice_id": "b"
@@ -276,12 +276,12 @@
         {
           "id": "a",
           "text": "750",
-          "rationale_vi": "“750” chưa đúng. 700 có đúng 7 trăm và không có thêm chục hay đơn vị."
+          "rationale_vi": "“750” chưa đúng. Số 750 còn hàng chục hoặc hàng đơn vị khác 0 (5 chục, 0 đơn vị), nên chưa phải một số trăm đầy đủ. 700 có đúng 7 trăm và không có thêm chục hay đơn vị."
         },
         {
           "id": "b",
           "text": "705",
-          "rationale_vi": "“705” chưa đúng. 700 có đúng 7 trăm và không có thêm chục hay đơn vị."
+          "rationale_vi": "“705” chưa đúng. Số 705 còn hàng chục hoặc hàng đơn vị khác 0 (0 chục, 5 đơn vị), nên chưa phải một số trăm đầy đủ. 700 có đúng 7 trăm và không có thêm chục hay đơn vị."
         },
         {
           "id": "c",
@@ -291,7 +291,7 @@
         {
           "id": "d",
           "text": "570",
-          "rationale_vi": "“570” chưa đúng. 700 có đúng 7 trăm và không có thêm chục hay đơn vị."
+          "rationale_vi": "“570” chưa đúng. Số 570 còn hàng chục hoặc hàng đơn vị khác 0 (7 chục, 0 đơn vị), nên chưa phải một số trăm đầy đủ. 700 có đúng 7 trăm và không có thêm chục hay đơn vị."
         }
       ],
       "correct_choice_id": "c"
@@ -2249,12 +2249,12 @@
         {
           "id": "a",
           "text": "2 + 2 + 2 + 2",
-          "rationale_vi": "“2 + 2 + 2 + 2” chưa đúng. Ba nhóm, mỗi nhóm 2 tương ứng cộng số 2 ba lần. Vậy đáp án là 2 + 2 + 2."
+          "rationale_vi": "“2 + 2 + 2 + 2” chưa đúng. Phải cộng số 2 đúng 3 lần; lựa chọn “2 + 2 + 2 + 2” không giữ đúng số nhóm và số phần tử mỗi nhóm. Ba nhóm, mỗi nhóm 2 tương ứng cộng số 2 ba lần. Vậy đáp án là 2 + 2 + 2."
         },
         {
           "id": "b",
           "text": "2 + 3",
-          "rationale_vi": "“2 + 3” chưa đúng. Ba nhóm, mỗi nhóm 2 tương ứng cộng số 2 ba lần. Vậy đáp án là 2 + 2 + 2."
+          "rationale_vi": "“2 + 3” chưa đúng. Phải cộng số 2 đúng 3 lần; lựa chọn “2 + 3” không giữ đúng số nhóm và số phần tử mỗi nhóm. Ba nhóm, mỗi nhóm 2 tương ứng cộng số 2 ba lần. Vậy đáp án là 2 + 2 + 2."
         },
         {
           "id": "c",
@@ -2264,7 +2264,7 @@
         {
           "id": "d",
           "text": "3 + 2 + 2",
-          "rationale_vi": "“3 + 2 + 2” chưa đúng. Ba nhóm, mỗi nhóm 2 tương ứng cộng số 2 ba lần. Vậy đáp án là 2 + 2 + 2."
+          "rationale_vi": "“3 + 2 + 2” chưa đúng. Phải cộng số 2 đúng 3 lần; lựa chọn “3 + 2 + 2” không giữ đúng số nhóm và số phần tử mỗi nhóm. Ba nhóm, mỗi nhóm 2 tương ứng cộng số 2 ba lần. Vậy đáp án là 2 + 2 + 2."
         }
       ],
       "correct_choice_id": "c"
@@ -3147,7 +3147,7 @@
         {
           "id": "a",
           "text": "4 - 4",
-          "rationale_vi": "“4 - 4” chưa đúng. Gộp hai lượng lại là quan hệ cộng; hai nhóm 4 là 4 + 4."
+          "rationale_vi": "“4 - 4” chưa đúng. Tình huống này gộp các nhóm nên cần phép cộng; “4 - 4” dùng phép tính khác quan hệ đề bài. Gộp hai lượng lại là quan hệ cộng; hai nhóm 4 là 4 + 4."
         },
         {
           "id": "b",
@@ -3157,7 +3157,7 @@
         {
           "id": "c",
           "text": "4 : 2",
-          "rationale_vi": "“4 : 2” chưa đúng. Gộp hai lượng lại là quan hệ cộng; hai nhóm 4 là 4 + 4."
+          "rationale_vi": "“4 : 2” chưa đúng. Tình huống này gộp các nhóm nên cần phép cộng; “4 : 2” dùng phép tính khác quan hệ đề bài. Gộp hai lượng lại là quan hệ cộng; hai nhóm 4 là 4 + 4."
         },
         {
           "id": "d",
@@ -3200,12 +3200,12 @@
         {
           "id": "a",
           "text": "10 + 3",
-          "rationale_vi": "“10 + 3” chưa đúng. Bỏ bớt một phần khỏi lượng ban đầu là phép trừ. Vậy đáp án là 10 - 3."
+          "rationale_vi": "“10 + 3” chưa đúng. Tình huống này bớt đi rồi hỏi phần còn lại nên cần phép trừ; “10 + 3” dùng phép tính khác quan hệ đề bài. Bỏ bớt một phần khỏi lượng ban đầu là phép trừ. Vậy đáp án là 10 - 3."
         },
         {
           "id": "b",
           "text": "10 : 2",
-          "rationale_vi": "“10 : 2” chưa đúng. Bỏ bớt một phần khỏi lượng ban đầu là phép trừ. Vậy đáp án là 10 - 3."
+          "rationale_vi": "“10 : 2” chưa đúng. Tình huống này bớt đi rồi hỏi phần còn lại nên cần phép trừ; “10 : 2” dùng phép tính khác quan hệ đề bài. Bỏ bớt một phần khỏi lượng ban đầu là phép trừ. Vậy đáp án là 10 - 3."
         },
         {
           "id": "c",
@@ -3215,7 +3215,7 @@
         {
           "id": "d",
           "text": "3 - 10",
-          "rationale_vi": "“3 - 10” chưa đúng. Bỏ bớt một phần khỏi lượng ban đầu là phép trừ. Vậy đáp án là 10 - 3."
+          "rationale_vi": "“3 - 10” chưa đúng. Phải bắt đầu từ 10 rồi bớt 3; “3 - 10” đặt sai số ban đầu hoặc số bị bớt. Bỏ bớt một phần khỏi lượng ban đầu là phép trừ. Vậy đáp án là 10 - 3."
         }
       ],
       "correct_choice_id": "c"
@@ -3253,17 +3253,17 @@
         {
           "id": "a",
           "text": "5 + 2",
-          "rationale_vi": "“5 + 2” chưa đúng. Năm nhóm bằng nhau, mỗi nhóm có 2 chấm nên phép nhân 5 × 2 mới biểu diễn đủ các nhóm."
+          "rationale_vi": "“5 + 2” chưa đúng. Tình huống này nhiều nhóm bằng nhau và hỏi tất cả nên cần phép nhân; “5 + 2” dùng phép tính khác quan hệ đề bài. Năm nhóm bằng nhau, mỗi nhóm có 2 chấm nên phép nhân 5 × 2 mới biểu diễn đủ các nhóm."
         },
         {
           "id": "b",
           "text": "5 - 2",
-          "rationale_vi": "“5 - 2” chưa đúng. Năm nhóm bằng nhau, mỗi nhóm có 2 chấm nên phép nhân 5 × 2 mới biểu diễn đủ các nhóm."
+          "rationale_vi": "“5 - 2” chưa đúng. Tình huống này nhiều nhóm bằng nhau và hỏi tất cả nên cần phép nhân; “5 - 2” dùng phép tính khác quan hệ đề bài. Năm nhóm bằng nhau, mỗi nhóm có 2 chấm nên phép nhân 5 × 2 mới biểu diễn đủ các nhóm."
         },
         {
           "id": "c",
           "text": "2 × 2",
-          "rationale_vi": "“2 × 2” chưa đúng. Năm nhóm bằng nhau, mỗi nhóm có 2 chấm nên phép nhân 5 × 2 mới biểu diễn đủ các nhóm."
+          "rationale_vi": "“2 × 2” chưa đúng. Có 5 nhóm, mỗi nhóm 2 chấm nên phải giữ đúng hai số 5 và 2; “2 × 2” đổi số nhóm. Năm nhóm bằng nhau, mỗi nhóm có 2 chấm nên phép nhân 5 × 2 mới biểu diễn đủ các nhóm."
         },
         {
           "id": "d",
@@ -3871,17 +3871,17 @@
         {
           "id": "b",
           "text": "10 + 2",
-          "rationale_vi": "“10 + 2” chưa đúng. Tình huống lấy bớt và hỏi còn lại nên dùng phép trừ. Vậy đáp án là 10 - 2."
+          "rationale_vi": "“10 + 2” chưa đúng. Tình huống này bớt đi rồi hỏi phần còn lại nên cần phép trừ; “10 + 2” dùng phép tính khác quan hệ đề bài. Tình huống lấy bớt và hỏi còn lại nên dùng phép trừ. Vậy đáp án là 10 - 2."
         },
         {
           "id": "c",
           "text": "10 × 2",
-          "rationale_vi": "“10 × 2” chưa đúng. Tình huống lấy bớt và hỏi còn lại nên dùng phép trừ. Vậy đáp án là 10 - 2."
+          "rationale_vi": "“10 × 2” chưa đúng. Tình huống này bớt đi rồi hỏi phần còn lại nên cần phép trừ; “10 × 2” dùng phép tính khác quan hệ đề bài. Tình huống lấy bớt và hỏi còn lại nên dùng phép trừ. Vậy đáp án là 10 - 2."
         },
         {
           "id": "d",
           "text": "10 : 2",
-          "rationale_vi": "“10 : 2” chưa đúng. Tình huống lấy bớt và hỏi còn lại nên dùng phép trừ. Vậy đáp án là 10 - 2."
+          "rationale_vi": "“10 : 2” chưa đúng. Tình huống này bớt đi rồi hỏi phần còn lại nên cần phép trừ; “10 : 2” dùng phép tính khác quan hệ đề bài. Tình huống lấy bớt và hỏi còn lại nên dùng phép trừ. Vậy đáp án là 10 - 2."
         }
       ],
       "correct_choice_id": "a"
@@ -3919,7 +3919,7 @@
         {
           "id": "a",
           "text": "5 + 2",
-          "rationale_vi": "“5 + 2” chưa đúng. Nhiều nhóm bằng nhau và hỏi tổng nên dùng phép nhân. Vậy đáp án là 5 × 2."
+          "rationale_vi": "“5 + 2” chưa đúng. Tình huống này nhiều nhóm bằng nhau và hỏi tất cả nên cần phép nhân; “5 + 2” dùng phép tính khác quan hệ đề bài. Nhiều nhóm bằng nhau và hỏi tổng nên dùng phép nhân. Vậy đáp án là 5 × 2."
         },
         {
           "id": "b",
@@ -3929,12 +3929,12 @@
         {
           "id": "c",
           "text": "5 - 2",
-          "rationale_vi": "“5 - 2” chưa đúng. Nhiều nhóm bằng nhau và hỏi tổng nên dùng phép nhân. Vậy đáp án là 5 × 2."
+          "rationale_vi": "“5 - 2” chưa đúng. Tình huống này nhiều nhóm bằng nhau và hỏi tất cả nên cần phép nhân; “5 - 2” dùng phép tính khác quan hệ đề bài. Nhiều nhóm bằng nhau và hỏi tổng nên dùng phép nhân. Vậy đáp án là 5 × 2."
         },
         {
           "id": "d",
           "text": "10 : 5",
-          "rationale_vi": "“10 : 5” chưa đúng. Nhiều nhóm bằng nhau và hỏi tổng nên dùng phép nhân. Vậy đáp án là 5 × 2."
+          "rationale_vi": "“10 : 5” chưa đúng. Tình huống này nhiều nhóm bằng nhau và hỏi tất cả nên cần phép nhân; “10 : 5” dùng phép tính khác quan hệ đề bài. Nhiều nhóm bằng nhau và hỏi tổng nên dùng phép nhân. Vậy đáp án là 5 × 2."
         }
       ],
       "correct_choice_id": "b"
@@ -3972,12 +3972,12 @@
         {
           "id": "a",
           "text": "30 + 5",
-          "rationale_vi": "“30 + 5” chưa đúng. Cần chia đều 30 bút thành 5 phần bằng nhau nên phép tính đúng là 30 : 5."
+          "rationale_vi": "“30 + 5” chưa đúng. Tình huống này chia đều thành các phần bằng nhau nên cần phép chia; “30 + 5” dùng phép tính khác quan hệ đề bài. Cần chia đều 30 bút thành 5 phần bằng nhau nên phép tính đúng là 30 : 5."
         },
         {
           "id": "b",
           "text": "30 - 5",
-          "rationale_vi": "“30 - 5” chưa đúng. Cần chia đều 30 bút thành 5 phần bằng nhau nên phép tính đúng là 30 : 5."
+          "rationale_vi": "“30 - 5” chưa đúng. Tình huống này chia đều thành các phần bằng nhau nên cần phép chia; “30 - 5” dùng phép tính khác quan hệ đề bài. Cần chia đều 30 bút thành 5 phần bằng nhau nên phép tính đúng là 30 : 5."
         },
         {
           "id": "c",
@@ -3987,7 +3987,7 @@
         {
           "id": "d",
           "text": "5 + 5",
-          "rationale_vi": "“5 + 5” chưa đúng. Cần chia đều 30 bút thành 5 phần bằng nhau nên phép tính đúng là 30 : 5."
+          "rationale_vi": "“5 + 5” chưa đúng. Tình huống này chia đều thành các phần bằng nhau nên cần phép chia; “5 + 5” dùng phép tính khác quan hệ đề bài. Cần chia đều 30 bút thành 5 phần bằng nhau nên phép tính đúng là 30 : 5."
         }
       ],
       "correct_choice_id": "c"
