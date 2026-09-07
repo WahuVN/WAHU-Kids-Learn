@@ -95,6 +95,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestGardenProgressIgnoresZeroAttemptCompletedSessions(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGardenRewardUsesDurableEligibilityInsteadOfCallerOrForeignAttempts(root, schemaPath);
                 TestGardenRewardRepairsCanonicalKeyCollisionAndIgnoresOrphanGrowth(root, schemaPath);
+                TestGardenMilestonesOneThreeSixTenAreExactAndReplaySafe(root, schemaPath);
                 TestDirectTargetedLessonRejectsEarlyComplete(root, schemaPath, templatePath, lessonCatalogPath);
                 TestGameEventTerminalRuntimeCleanupReconcilesOnNextStart(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventCommitFaultPreservesCheckpoint(root, schemaPath, templatePath, lessonCatalogPath);
@@ -1575,6 +1576,85 @@ VALUES(@id,@child,'garden_growth','growth_step','session_completed','missing-ses
                 "garden_orphan_reward_event_does_not_inflate_growth_progress");
         }
 
+        private static void TestGardenMilestonesOneThreeSixTenAreExactAndReplaySafe(
+            string root,
+            string schemaPath)
+        {
+            var database = NewDatabase(Path.Combine(root, "garden-milestones-1-3-6-10.db"), schemaPath);
+            var sessions = new LearnerSessionService(database);
+            var owner = sessions.EnsurePrimaryChild("Bé garden milestones");
+            var rewards = new GameWorldRewardService(database);
+            var milestoneItems = new Dictionary<int, string>
+            {
+                { 1, "garden_seedling" },
+                { 3, "garden_flower_patch" },
+                { 6, "garden_lantern" },
+                { 10, "garden_bench" }
+            };
+
+            for (var completed = 1; completed <= 10; completed++)
+            {
+                var session = sessions.BeginSession(owner.ChildId, "math", "LOW");
+                Exec(database, @"INSERT INTO attempt(
+id,session_id,child_id,pack_id,pack_version,question_id,skill_id,subject,started_at_utc,answered_at_utc,answer_json,is_correct,response_ms,hint_level,representation,input_method,attempt_index,listen_count)
+VALUES(@id,@session,@child,'math-grade2-verified-core','1.0',@question,@skill,'math',@started,@answered,'{}',1,700,0,'symbolic','smoke',1,0);",
+                    "@id", "attempt-garden-milestone-" + completed + "-" + Guid.NewGuid().ToString("N"),
+                    "@session", session.SessionId,
+                    "@child", owner.ChildId,
+                    "@question", "garden-milestone-question-" + completed,
+                    "@skill", "M2_GARDEN_MILESTONE_" + completed,
+                    "@started", DateTime.UtcNow.AddSeconds(-1).ToString("o", CultureInfo.InvariantCulture),
+                    "@answered", DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture));
+                sessions.CompleteSession(session.SessionId, false, "{\"fixture\":\"garden_milestone\"}", "{}");
+
+                var granted = rewards.GrantCompletedMathSession(owner.ChildId, session.SessionId, completed % 2 == 0 ? 0 : 999);
+                string expectedUnlock;
+                milestoneItems.TryGetValue(completed, out expectedUnlock);
+                A(granted.RewardCreated && granted.GrowthSteps == completed && granted.CompletedMathSessions == completed &&
+                  (expectedUnlock == null
+                      ? granted.NewlyUnlockedItems.Count == 0
+                      : granted.NewlyUnlockedItems.SequenceEqual(new[] { expectedUnlock })),
+                    "garden_milestone_exact_reward_and_unlock_at_session_" + completed);
+
+                var replay = rewards.GrantCompletedMathSession(owner.ChildId, session.SessionId, 0);
+                A(!replay.RewardCreated && replay.GrowthSteps == completed && replay.CompletedMathSessions == completed &&
+                  replay.NewlyUnlockedItems.Count == 0 &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + session.SessionId + "';") == 1,
+                    "garden_milestone_replay_is_idempotent_at_session_" + completed);
+
+                var progress = rewards.ReadProgress(owner.ChildId);
+                var expectedInventory = milestoneItems.Keys.Count(x => x <= completed);
+                A(progress.GrowthSteps == completed && progress.CompletedMathSessions == completed &&
+                  progress.UnlockedItems.Count == expectedInventory &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE child_id='" + owner.ChildId + "';") == completed &&
+                  Count(database, "SELECT count(*) FROM inventory WHERE child_id='" + owner.ChildId + "';") == expectedInventory,
+                    "garden_milestone_progress_and_inventory_exact_after_session_" + completed);
+
+                if (completed < 3)
+                    A(progress.NextMilestoneSessionCount == 3 && progress.NextMilestoneItemId == "garden_flower_patch" &&
+                      progress.SessionsUntilNextMilestone == 3 - completed,
+                        "garden_milestone_points_to_flower_patch_after_session_" + completed);
+                else if (completed < 6)
+                    A(progress.NextMilestoneSessionCount == 6 && progress.NextMilestoneItemId == "garden_lantern" &&
+                      progress.SessionsUntilNextMilestone == 6 - completed,
+                        "garden_milestone_points_to_lantern_after_session_" + completed);
+                else if (completed < 10)
+                    A(progress.NextMilestoneSessionCount == 10 && progress.NextMilestoneItemId == "garden_bench" &&
+                      progress.SessionsUntilNextMilestone == 10 - completed,
+                        "garden_milestone_points_to_bench_after_session_" + completed);
+                else
+                    A(progress.NextMilestoneSessionCount == 0 && progress.NextMilestoneItemId == null &&
+                      progress.SessionsUntilNextMilestone == 0,
+                        "garden_milestone_ten_finishes_current_table");
+            }
+
+            var final = rewards.ReadProgress(owner.ChildId);
+            A(final.UnlockedItems.Count == 4 &&
+              new[] { "garden_seedling", "garden_flower_patch", "garden_lantern", "garden_bench" }.All(final.UnlockedItems.Contains),
+                "garden_milestones_one_three_six_ten_all_unlock_exactly_once");
+            A(rewards.ReconcileMissingCompletedMathSessionRewards(owner.ChildId) == 0,
+                "garden_milestones_complete_table_needs_no_reconcile_after_exact_rewards");
+        }
         private static void TestDirectTargetedLessonRejectsEarlyComplete(
             string root,
             string schemaPath,
