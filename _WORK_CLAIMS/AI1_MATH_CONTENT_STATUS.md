@@ -69,6 +69,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 
 `tools/math_content_validator/validate_math_content.py` hiện chặn:
 
+- baseline traceability root: `curriculum_id = vn_moet_math_grade2_tt32_2018`, Grade 2 Math, status `VERIFIED_A_BASELINE`, source bắt buộc `MOET_TT32_2018` + `TT32_FULL_ANNEX_MIRROR`, source không trùng; catalog/bank phải bind đúng curriculum này;
 - duplicate ID toàn catalog/bank;
 - missing lesson/question/reference;
 - orphan question;
@@ -141,7 +142,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract;
 - **166 phương trình số instructional** đang được kiểm bằng arithmetic parser, hiện **0 sai**; detector có regression cho cả phép cộng chuỗi và phép chia dùng dấu `:`.
 
-Latest result: **38 tests PASS**.
+Latest result: **39 tests PASS**.
 
 ## Commits / waves
 

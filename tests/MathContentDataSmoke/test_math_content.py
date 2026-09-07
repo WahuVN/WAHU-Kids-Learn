@@ -51,6 +51,16 @@ class MathContentDataSmoke(unittest.TestCase):
         self.assertEqual(201, metrics["questions"])
         self.assertEqual(201, metrics["valid_questions"])
 
+    def test_baseline_source_traceability_is_locked(self):
+        self.assertEqual([], validator.baseline_traceability_violations(self.baseline))
+        broken = dict(self.baseline)
+        broken["source_ids"] = ["MOET_TT32_2018"]
+        self.assertIn("baseline_required_sources_missing:TT32_FULL_ANNEX_MIRROR",
+                      validator.baseline_traceability_violations(broken))
+        broken = dict(self.baseline)
+        broken["curriculum_id"] = "other_curriculum"
+        self.assertIn("baseline_curriculum_id_mismatch", validator.baseline_traceability_violations(broken))
+
     def test_every_baseline_skill_has_exactly_one_loadable_lesson(self):
         self.assertEqual(67, len(self.skills))
         self.assertEqual(67, len(self.lessons))

@@ -20,6 +20,9 @@ DEFAULT_LESSONS = ROOT / "content_packs" / "math_grade2_v1" / "lesson_catalog_v1
 DEFAULT_QUESTIONS = ROOT / "content_packs" / "math_grade2_v1" / "question_bank_v1.json"
 
 ID_RE = re.compile(r"^[a-z0-9][a-z0-9_]{2,127}$")
+EXPECTED_CURRICULUM_ID = "vn_moet_math_grade2_tt32_2018"
+EXPECTED_BASELINE_STATUS = "VERIFIED_A_BASELINE"
+REQUIRED_BASELINE_SOURCE_IDS = {"MOET_TT32_2018", "TT32_FULL_ANNEX_MIRROR"}
 DIFFICULTIES = {"basic", "medium", "application"}
 ENGINE_ANSWER_KINDS = {"integer", "interaction_integer", "number", "decimal", "fraction", "text", "unit", "expression"}
 GRADE2_USED_ANSWER_KINDS = {"integer", "interaction_integer", "text", "unit", "expression"}
@@ -1032,6 +1035,33 @@ def find_cycle(graph: dict[str, list[str]]) -> list[str] | None:
     return None
 
 
+def baseline_traceability_violations(baseline: object) -> list[str]:
+    if not isinstance(baseline, dict):
+        return ["baseline_not_object"]
+    violations: list[str] = []
+    if baseline.get("schema_version") != 1:
+        violations.append("baseline_bad_schema_version")
+    if baseline.get("curriculum_id") != EXPECTED_CURRICULUM_ID:
+        violations.append("baseline_curriculum_id_mismatch")
+    if baseline.get("grade") != 2:
+        violations.append("baseline_grade_mismatch")
+    if baseline.get("subject") != "math":
+        violations.append("baseline_subject_mismatch")
+    if baseline.get("status") != EXPECTED_BASELINE_STATUS:
+        violations.append("baseline_status_mismatch")
+    source_ids = baseline.get("source_ids")
+    if not isinstance(source_ids, list) or any(not isinstance(x, str) or not x.strip() for x in source_ids):
+        violations.append("baseline_source_ids_invalid")
+    else:
+        normalized = [x.strip() for x in source_ids]
+        if len(normalized) != len(set(normalized)):
+            violations.append("baseline_source_ids_duplicate")
+        missing = sorted(REQUIRED_BASELINE_SOURCE_IDS - set(normalized))
+        if missing:
+            violations.append("baseline_required_sources_missing:" + ",".join(missing))
+    return violations
+
+
 def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tuple[list[str], dict]:
     errors: list[str] = []
     baseline = load_json(baseline_path, errors)
@@ -1039,6 +1069,8 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
     bank = load_json(question_path, errors)
     if errors:
         return errors, {}
+
+    errors.extend(baseline_traceability_violations(baseline))
 
     for root, name in ((catalog, "lesson_catalog"), (bank, "question_bank")):
         if root.get("schema_version") != 1:
