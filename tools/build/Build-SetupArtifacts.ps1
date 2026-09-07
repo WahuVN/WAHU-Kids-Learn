@@ -47,6 +47,24 @@ function Invoke-SmokeWithAssertions {
     return [int]$matches[0].Groups[1].Value
 }
 
+function Get-GitSourceStatus {
+    param([string]$GitPath)
+    return @(& $GitPath status --porcelain=v1 --untracked-files=all 2>$null)
+}
+
+$git = (Get-Command git -ErrorAction SilentlyContinue).Source
+if (-not $git) { throw 'Không tìm thấy Git để khóa provenance của artifact.' }
+Write-Host '[0/15] Source provenance / clean-tree gate'
+$sourceGitCommit = (& $git rev-parse HEAD 2>$null).Trim()
+if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($sourceGitCommit)) { throw 'Không đọc được Git HEAD cho release artifact.' }
+$sourceStatusBefore = @(Get-GitSourceStatus -GitPath $git)
+if ($sourceStatusBefore.Count -ne 0) {
+    throw ("REFUSE_DIRTY_SOURCE: release artifact chỉ được build từ Git tree sạch. Dirty entries: " + (($sourceStatusBefore | ForEach-Object { [string]$_ }) -join '; '))
+}
+& $git diff --check
+if ($LASTEXITCODE -ne 0) { throw 'Git diff --check fail trước release build.' }
+Write-Host "SOURCE_PROVENANCE_START_PASS git_commit=$sourceGitCommit"
+
 $msbuild = Find-FirstExisting @(
     'C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe',
     'C:\Program Files\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\MSBuild.exe',
@@ -116,7 +134,7 @@ $contentAssertions = Invoke-SmokeWithAssertions -Name 'Content runtime smoke' -P
 Write-Host '[6b/15] Production Math content + game-event validator'
 $python = (Get-Command python -ErrorAction SilentlyContinue).Source
 if (-not $python) { throw 'Không tìm thấy Python để chạy Math content validator.' }
-$validatorOutput = @(& $python 'tools\math_content_validator\validate_math_content.py' --json 2>&1)
+$validatorOutput = @(& $python -B 'tools\math_content_validator\validate_math_content.py' --json 2>&1)
 $validatorExit = $LASTEXITCODE
 foreach ($line in $validatorOutput) { Write-Host ([string]$line) }
 if ($validatorExit -ne 0) { throw "Math content validator fail: $validatorExit" }
@@ -139,7 +157,7 @@ Write-Host '[6c/15] Full Math content/event/pool Python smoke'
 $mathContentStdoutPath = [IO.Path]::GetTempFileName()
 $mathContentStderrPath = [IO.Path]::GetTempFileName()
 try {
-    $mathContentProcess = Start-Process -FilePath $python -ArgumentList @('-m','unittest','discover','tests/MathContentDataSmoke','-p','test*.py','-q') -RedirectStandardOutput $mathContentStdoutPath -RedirectStandardError $mathContentStderrPath -Wait -PassThru -NoNewWindow
+    $mathContentProcess = Start-Process -FilePath $python -ArgumentList @('-B','-m','unittest','discover','tests/MathContentDataSmoke','-p','test*.py','-q') -RedirectStandardOutput $mathContentStdoutPath -RedirectStandardError $mathContentStderrPath -Wait -PassThru -NoNewWindow
     $mathContentTestExit = $mathContentProcess.ExitCode
     $mathContentStdout = if (Test-Path -LiteralPath $mathContentStdoutPath) { Get-Content -Raw -LiteralPath $mathContentStdoutPath } else { '' }
     $mathContentStderr = if (Test-Path -LiteralPath $mathContentStderrPath) { Get-Content -Raw -LiteralPath $mathContentStderrPath } else { '' }
@@ -295,8 +313,19 @@ if ([int]$portableE2EReport.first_bootstrap_exit -ne 0 -or [int]$portableE2ERepo
 if ($portableE2EReport.zip_sha256 -ne $portableZipHash) { throw 'Portable E2E tested ZIP hash does not match the just-built artifact.' }
 Write-Host "PORTABLE_E2E_GATE_PASS report=$portableE2EReportPath"
 
-$gitCommit = $null
-try { $gitCommit = (& git rev-parse HEAD 2>$null).Trim() } catch { }
+Write-Host '[13c/15] Final source provenance gate'
+$gitCommit = (& $git rev-parse HEAD 2>$null).Trim()
+if ($LASTEXITCODE -ne 0 -or $gitCommit -ne $sourceGitCommit) {
+    throw "REFUSE_SOURCE_HEAD_CHANGED: HEAD đổi trong lúc build. start=$sourceGitCommit end=$gitCommit"
+}
+$sourceStatusAfter = @(Get-GitSourceStatus -GitPath $git)
+if ($sourceStatusAfter.Count -ne 0) {
+    throw ("REFUSE_SOURCE_MUTATED: source tree thay đổi trong lúc build. Entries: " + (($sourceStatusAfter | ForEach-Object { [string]$_ }) -join '; '))
+}
+& $git diff --check
+if ($LASTEXITCODE -ne 0) { throw 'Git diff --check fail sau release build.' }
+Write-Host "SOURCE_PROVENANCE_FINAL_PASS git_commit=$gitCommit"
+
 $providerPath = Join-Path $publish 'System.Data.SQLite.dll'
 $nativePath = Join-Path $publish 'e_sqlite3.dll'
 $manifest = [ordered]@{
@@ -355,6 +384,9 @@ $manifest = [ordered]@{
         math_session_persistence_runtime_smoke_assertions = $mathPersistenceAssertions
         backup_restore_smoke = 'PASS'
         staged_payload_guard = 'PASS'
+        source_provenance = 'PASS'
+        source_tree_clean = 'PASS'
+        source_commit_stable = 'PASS'
         win7_target_smoke = 'PENDING'
         production_signing = 'PENDING'
     }
