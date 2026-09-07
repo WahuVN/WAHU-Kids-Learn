@@ -42,6 +42,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestAnswerUnitFeedbackSurvivesCoordinatorResume(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedLessonUnlockAndResume(root, schemaPath, templatePath, lessonCatalogPath);
                 TestFirstFiveLessonsGoldenPath(root, schemaPath, templatePath, lessonCatalogPath);
+                TestFirstFiveAllAuthoredVariantsEndToEnd(root, schemaPath, templatePath, lessonCatalogPath);
                 TestFirstLessonAllSixVariantsWithRetryResume(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedCompletionSurvivesNextLessonReadFailure(root, schemaPath, templatePath, lessonCatalogPath);
                 TestCorruptRuntimeMetadataIsQuarantined(root, schemaPath, templatePath);
@@ -536,6 +537,125 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 "first_five_exactly_five_completed_progress_rows");
             A(Count(database, "SELECT count(*) FROM session WHERE state='active';") == 0,
                 "first_five_leave_no_active_session");
+        }
+
+        private static void TestFirstFiveAllAuthoredVariantsEndToEnd(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var firstFive = catalog.Lessons.Take(5).ToList();
+            var database = NewDatabase(Path.Combine(root, "first-five-all-variants.db"), schemaPath);
+            var profile = new LearnerSessionService(database).EnsurePrimaryChild("Bé 30 câu đầu");
+            var accessService = new MathLessonProgressService(database, lessonCatalogPath);
+            var progressStore = new MathLessonProgressStore(database);
+            var deterministicIndex = typeof(MathSessionCoordinator).GetMethod(
+                "DeterministicBucketIndex",
+                System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
+            A(deterministicIndex != null, "first_five_all_variants_finds_bucket_selector");
+
+            var allDurableIds = new HashSet<string>(StringComparer.Ordinal);
+            var totalCompletedSessions = 0;
+            for (var lessonIndex = 0; lessonIndex < firstFive.Count; lessonIndex++)
+            {
+                var lesson = firstFive[lessonIndex];
+                var access = accessService.GetAccess(profile.ChildId, lesson.Id);
+                A(access.IsUnlocked && access.UnsatisfiedPrerequisiteLessonIds.Count == 0,
+                    "first_five_all_variants_lesson_unlocked_" + (lessonIndex + 1));
+
+                var buckets = new[]
+                {
+                    lesson.PracticeSets.Basic,
+                    lesson.PracticeSets.Medium,
+                    lesson.PracticeSets.Application
+                };
+                var bucketNames = new[] { "basic", "medium", "application" };
+                A(buckets.All(x => x != null && x.Count == 2),
+                    "first_five_all_variants_two_per_bucket_" + (lessonIndex + 1));
+                var allIds = new HashSet<string>(buckets.SelectMany(x => x), StringComparer.Ordinal);
+                A(allIds.Count == 6,
+                    "first_five_all_variants_six_unique_ids_" + (lessonIndex + 1));
+
+                var plannedSeen = new HashSet<string>(StringComparer.Ordinal);
+                var seedsToRun = new List<int>();
+                for (var seed = 0; seed < 16 && plannedSeen.Count < allIds.Count; seed++)
+                {
+                    var selectedForSeed = new List<string>();
+                    for (var bucketIndex = 0; bucketIndex < buckets.Length; bucketIndex++)
+                    {
+                        var bucketChoice = (int)deterministicIndex.Invoke(null,
+                            new object[] { seed, lesson.Id, bucketNames[bucketIndex], buckets[bucketIndex].Count });
+                        selectedForSeed.Add(buckets[bucketIndex][bucketChoice]);
+                    }
+                    if (seed == 0 || selectedForSeed.Any(x => !plannedSeen.Contains(x)))
+                    {
+                        seedsToRun.Add(seed);
+                        foreach (var id in selectedForSeed) plannedSeen.Add(id);
+                    }
+                }
+                A(plannedSeen.SetEquals(allIds) && seedsToRun.Count >= 2 && seedsToRun.Count <= 4,
+                    "first_five_all_variants_small_seed_plan_covers_six_" + (lessonIndex + 1));
+
+                var seenInSessions = new HashSet<string>(StringComparer.Ordinal);
+                foreach (var seed in seedsToRun)
+                {
+                    using (var coordinator = new MathSessionCoordinator(database, templatePath, "LOW",
+                        10000 + lessonIndex * 100 + seed, lesson.Id))
+                    {
+                        var start = coordinator.Start("Bé 30 câu đầu");
+                        var selected = start.SelectedContentQuestionIds.ToList();
+                        A(start.TargetLessonId == lesson.Id && start.TargetQuestionCount == 3 && selected.Count == 3,
+                            "first_five_all_variants_session_targets_three_" + lessonIndex + "_" + seed);
+                        A(buckets[0].Contains(selected[0]) && buckets[1].Contains(selected[1]) && buckets[2].Contains(selected[2]),
+                            "first_five_all_variants_session_bucket_order_" + lessonIndex + "_" + seed);
+                        foreach (var id in selected)
+                        {
+                            seenInSessions.Add(id);
+                            allDurableIds.Add(id);
+                        }
+
+                        for (var ordinal = 0; ordinal < 3; ordinal++)
+                        {
+                            var question = coordinator.NextQuestion();
+                            A(question != null && question.LessonId == lesson.Id && question.SkillId == lesson.SkillId &&
+                              question.ContentQuestionId == selected[ordinal] && buckets[ordinal].Contains(question.ContentQuestionId),
+                                "first_five_all_variants_serves_exact_selected_" + lessonIndex + "_" + seed + "_" + ordinal);
+                            var outcome = coordinator.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow,
+                                700 + ordinal * 100);
+                            A(outcome.IsCorrect && outcome.QuestionCompleted,
+                                "first_five_all_variants_answer_commits_" + lessonIndex + "_" + seed + "_" + ordinal);
+                        }
+                        var summary = coordinator.Complete();
+                        A(summary.LessonCompleted && summary.Attempts == 3 && summary.Correct == 3 &&
+                          summary.TargetLessonId == lesson.Id,
+                            "first_five_all_variants_session_completes_" + lessonIndex + "_" + seed);
+                    }
+                    totalCompletedSessions++;
+                }
+
+                A(seenInSessions.SetEquals(allIds),
+                    "first_five_all_variants_real_sessions_cover_all_six_" + (lessonIndex + 1));
+                foreach (var id in allIds)
+                    A(Count(database, "SELECT count(*) FROM attempt WHERE question_id LIKE '" + id + "-%';") >= 1,
+                        "first_five_all_variants_durable_attempt_" + id);
+
+                var progress = progressStore.LoadOne(profile.ChildId, lesson.Id);
+                A(progress != null && progress.StartedCount == seedsToRun.Count && progress.CompletedCount == seedsToRun.Count &&
+                  progress.BestScorePercent.HasValue && Math.Abs(progress.BestScorePercent.Value - 100.0) < 0.0001,
+                    "first_five_all_variants_progress_counts_replays_" + (lessonIndex + 1));
+            }
+
+            A(allDurableIds.Count == 30,
+                "first_five_all_variants_cover_exactly_thirty_authored_questions");
+            A(Count(database, "SELECT count(*) FROM attempt;") == totalCompletedSessions * 3 &&
+              Count(database, "SELECT count(*) FROM mastery_event;") == totalCompletedSessions * 3,
+                "first_five_all_variants_all_questions_commit_one_mastery_each");
+            A(Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + profile.ChildId + "' AND completed_count>0;") == 5,
+                "first_five_all_variants_leave_five_completed_progress_rows");
+            A(Count(database, "SELECT count(*) FROM session WHERE child_id='" + profile.ChildId + "' AND state='active';") == 0,
+                "first_five_all_variants_leave_no_active_session");
         }
 
         private static void TestFirstLessonAllSixVariantsWithRetryResume(
