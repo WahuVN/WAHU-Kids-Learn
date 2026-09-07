@@ -38,7 +38,11 @@ namespace WAHU.ContentRuntimeSmoke
             var english = validator.ValidateDirectory(Path.Combine(projectRoot, "content_packs", "english_grade2_v1"), true);
             Assert(math.IsValid && math.ChildRuntimeAllowed, "bundled_math_verified");
             Assert(english.IsValid && english.ChildRuntimeAllowed, "bundled_english_verified");
-            Assert(math.Manifest.version == "1.8.0" && english.Manifest.version == "1.0.0", "bundled_versions_explicit");
+            var coordinatorSource = File.ReadAllText(Path.Combine(projectRoot, "src", "Session", "MathSessionCoordinator.cs"));
+            var runtimeVersion = Regex.Match(coordinatorSource,
+                "public\\s+const\\s+string\\s+PackVersion\\s*=\\s*\\\"([^\\\"]+)\\\"");
+            Assert(runtimeVersion.Success && math.Manifest.version == runtimeVersion.Groups[1].Value &&
+                english.Manifest.version == "1.0.0", "bundled_versions_match_runtime_contract");
         }
 
         private static void TestMathCurriculumBaselineSync()
