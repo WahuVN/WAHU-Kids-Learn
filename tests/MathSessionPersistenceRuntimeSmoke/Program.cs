@@ -53,6 +53,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestCorruptOpenQuestionTimestampSelfHealsExactOrdinal(root, schemaPath, templatePath, lessonCatalogPath);
                 TestAdaptiveCorruptOpenQuestionTimestampSelfHealsExactOrdinal(root, schemaPath, templatePath);
                 TestCorruptSessionStartedTimestampIsQuarantined(root, schemaPath, templatePath);
+                TestFutureSessionStartedTimestampIsQuarantined(root, schemaPath, templatePath);
                 TestOperationalDatabaseFailureDoesNotQuarantineRuntime(root, schemaPath, templatePath);
                 TestRuntimePackIdentityResumePolicy(root, schemaPath, templatePath);
                 TestTargetedCorruptOpenQuestionReplaysAuthoredOrdinal(root, schemaPath, templatePath, lessonCatalogPath);
@@ -3241,6 +3242,40 @@ BEGIN SELECT RAISE(ABORT,'game event injected mastery failure'); END;");
                   Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + oldSessionId + "';") == 0,
                     "corrupt_session_started_timestamp_removes_only_old_runtime_checkpoint");
                 replacement.Abort("corrupt_session_start_timestamp_cleanup");
+            }
+        }
+
+        private static void TestFutureSessionStartedTimestampIsQuarantined(
+            string root,
+            string schemaPath,
+            string templatePath)
+        {
+            var database = NewDatabase(Path.Combine(root, "future-session-started-timestamp.db"), schemaPath);
+            string oldSessionId;
+            string childId;
+            using (var first = new MathSessionCoordinator(database, templatePath, "LOW", 8078, 2))
+            {
+                var started = first.Start("Bé future session start timestamp");
+                oldSessionId = started.SessionId;
+                childId = started.ChildId;
+                first.NextQuestion();
+                first.Suspend("future_session_start_timestamp_fixture");
+            }
+
+            Exec(database,
+                "UPDATE session SET started_at_utc='2999-01-01T00:00:00.0000000Z' WHERE id=@session;",
+                "@session", oldSessionId);
+            using (var replacement = new MathSessionCoordinator(database, templatePath, "NORMAL", 8079, 2))
+            {
+                var started = replacement.Start("Bé future session start timestamp");
+                A(!started.ResumedExistingSession && started.SessionId != oldSessionId && started.ChildId == childId &&
+                  started.RecoveredDanglingSessions == 1,
+                    "future_session_started_timestamp_is_quarantined_as_core_runtime_corruption");
+                A(Count(database, "SELECT count(*) FROM session WHERE id='" + oldSessionId +
+                  "' AND state='recovered' AND ended_at_utc IS NOT NULL;") == 1 &&
+                  Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + oldSessionId + "';") == 0,
+                    "future_session_started_timestamp_does_not_self_heal_as_open_question_only");
+                replacement.Abort("future_session_start_timestamp_cleanup");
             }
         }
 

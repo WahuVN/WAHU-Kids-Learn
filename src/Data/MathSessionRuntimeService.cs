@@ -615,6 +615,8 @@ WHERE session_id=@session;";
                 throw new InvalidOperationException("Math runtime target_question_count is outside the supported range.");
             if (snapshot.GeneratedQuestionCount < 0 || snapshot.GeneratedQuestionCount > snapshot.TargetQuestionCount)
                 throw new InvalidOperationException("Math runtime generated_question_count is inconsistent with target_question_count.");
+            if (snapshot.StartedAtUtc > snapshot.UpdatedAtUtc)
+                throw new InvalidOperationException("Math runtime session started_at_utc cannot be later than runtime updated_at_utc.");
             if (!string.Equals(snapshot.SessionMode, "adaptive", StringComparison.Ordinal) &&
                 !string.Equals(snapshot.SessionMode, "lesson", StringComparison.Ordinal))
                 throw new InvalidOperationException("Math runtime session_mode is invalid.");
