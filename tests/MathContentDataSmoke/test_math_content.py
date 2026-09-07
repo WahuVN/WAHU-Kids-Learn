@@ -312,6 +312,15 @@ class MathContentDataSmoke(unittest.TestCase):
     def test_child_facing_text_avoids_internal_engine_vocabulary(self):
         self.assertEqual([], validator.child_facing_internal_vocabulary(self.catalog))
         self.assertEqual([], validator.child_facing_internal_vocabulary(self.bank))
+
+    def test_child_facing_text_is_unicode_and_whitespace_clean(self):
+        self.assertEqual([], validator.child_facing_text_hygiene(self.catalog))
+        self.assertEqual([], validator.child_facing_text_hygiene(self.bank))
+        self.assertNotEqual([], validator.child_facing_text_hygiene({"prompt_vi": "  Dữ kiện bẩn"}))
+        self.assertNotEqual([], validator.child_facing_text_hygiene({"prompt_vi": "Hai  khoảng trắng"}))
+        self.assertNotEqual([], validator.child_facing_text_hygiene({"prompt_vi": "Sai , dấu câu"}))
+        self.assertNotEqual([], validator.child_facing_text_hygiene({"prompt_vi": "ẩn\u200bký tự"}))
+        self.assertEqual([], validator.child_facing_text_hygiene({"prompt_vi": "Tính 18 : 2."}))
         metadata_only = {
             "difficulty_span": ["application"],
             "id_policy": "deterministic_ascii_lower_snake",

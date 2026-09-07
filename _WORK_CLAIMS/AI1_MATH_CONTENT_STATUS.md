@@ -85,6 +85,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - hint cấp 2 placeholder/generic hoặc bị tái dùng quá mức;
 - hint cấp 1/2 tiết lộ canonical answer chưa xuất hiện trong đề; true/false được loại khỏi detector để “Đúng/Sai” vẫn dùng được như ngôn ngữ hướng dẫn; mỗi hint child-facing tối đa 130 ký tự;
 - vocabulary kỹ thuật nội bộ lọt vào field child-facing (`baseline`, `runtime`, `template`, `validator`, ...);
+- child-facing text không NFC, có control/format character (kể cả zero-width), leading/trailing/repeated space hoặc spacing dấu câu bẩn; phép chia chuẩn `a : b` được miễn đúng mục đích toán học; audit hiện **6426 strings sạch**;
 - mục tiêu học đầu tiên dùng placeholder `Nhận biết và thực hiện đúng nội dung:` hoặc bị tái dùng quá mức;
 - mục tiêu học thứ hai generic/placeholder hoặc bị tái dùng quá mức;
 - explanation câu hỏi quá ngắn, không đủ bước giải thích/kiểm tra cho feedback học tập;
@@ -130,7 +131,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - vị trí đáp án đúng được cân bằng deterministic: 88 câu 4-choice = 22/22/22/22 cho A/B/C/D; 3 true/false = 2/1;
 - 23 câu integer có `answer_unit` giữ đúng contract display-only, không đổi sang unit-input;
 - **39 application regression quan trọng** được khóa riêng: 38 regression trước đó + câu đọc/viết số đã đổi từ ghép hàng trực tiếp sang sửa lỗi bỏ quên hàng chục;
-- child-facing lesson/question text có **0 internal-engine vocabulary**; metadata kỹ thuật như `application`, `numeric_input`, `deterministic` vẫn được phép;
+- child-facing lesson/question text có **0 internal-engine vocabulary** và **0 Unicode/whitespace/control-character hygiene violation**; metadata kỹ thuật như `application`, `numeric_input`, `deterministic` vẫn được phép;
 - **67/67 worked example unique**, mỗi ví dụ có ít nhất 2 bước giải, **0 exact/near overlap** với 201 câu practice và 67/67 solution chốt đáp án tường minh;
 - cả hai mục tiêu học đạt **67/67 unique** và gắn concept; objective 1 đã loại **67/67** placeholder `Nhận biết và thực hiện đúng nội dung:` và đổi động từ theo answer surface, objective 2 placeholder chung = 0;
 - 67/67 concept definition hiện dài ít nhất **40 ký tự**; 3 definition quá mỏng (`Thêm vào`, `Ngày và giờ`, `Giờ và phút`) đã được nâng thành quan hệ có ý nghĩa, vẫn giữ Grade-2 scope;
@@ -139,7 +140,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract;
 - **166 phương trình số instructional** đang được kiểm bằng arithmetic parser, hiện **0 sai**; detector có regression cho cả phép cộng chuỗi và phép chia dùng dấu `:`.
 
-Latest result: **36 tests PASS**.
+Latest result: **37 tests PASS**.
 
 ## Commits / waves
 

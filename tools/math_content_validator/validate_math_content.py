@@ -677,6 +677,37 @@ def child_facing_internal_vocabulary(value: object) -> list[tuple[str, str, str]
     return violations
 
 
+def child_facing_text_hygiene(value: object) -> list[tuple[str, str, str]]:
+    violations: list[tuple[str, str, str]] = []
+
+    def scan(node: object, path: str, child_facing: bool = False) -> None:
+        if isinstance(node, dict):
+            for key, item in node.items():
+                scan(item, f"{path}.{key}" if path else key, key in CHILD_FACING_KEYS)
+            return
+        if isinstance(node, list):
+            for index, item in enumerate(node):
+                scan(item, f"{path}[{index}]", child_facing)
+            return
+        if not child_facing or not isinstance(node, str):
+            return
+        if unicodedata.normalize("NFC", node) != node:
+            violations.append((path, "non_nfc", node))
+        if any(unicodedata.category(ch) in {"Cc", "Cf"} for ch in node):
+            violations.append((path, "control_or_format_character", node))
+        if node != node.strip():
+            violations.append((path, "outer_whitespace", node))
+        if "  " in node:
+            violations.append((path, "repeated_space", node))
+        if re.search(r"\s+[,.!?;](?:\s|$)", node):
+            violations.append((path, "space_before_punctuation", node))
+        if re.search(r"[,.!?;](?=[A-Za-zÀ-ỹĐđ])", node):
+            violations.append((path, "missing_space_after_punctuation", node))
+
+    scan(value, "")
+    return violations
+
+
 def check_id(value: object, where: str, errors: list[str]) -> str:
     if not isinstance(value, str) or not ID_RE.fullmatch(value):
         errors.append(f"invalid_id:{where}:{value!r}")
@@ -1009,6 +1040,8 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             errors.append(f"curriculum_mismatch:{name}")
         for path, term, _text in child_facing_internal_vocabulary(root):
             errors.append(f"internal_vocabulary_child_facing:{name}:{path}:{term}")
+        for path, issue, _text in child_facing_text_hygiene(root):
+            errors.append(f"child_facing_text_hygiene:{name}:{path}:{issue}")
 
     baseline_skills = []
     domains = baseline.get("domains")
