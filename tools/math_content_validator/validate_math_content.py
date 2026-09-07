@@ -43,6 +43,7 @@ GENERIC_SECOND_HINT = "Thực hiện từng bước và kiểm tra lại với d
 GENERIC_FIRST_OBJECTIVE_PREFIX = "Nhận biết và thực hiện đúng nội dung:"
 GENERIC_SECOND_OBJECTIVE = "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
 GENERIC_DISTRACTOR_RATIONALE = "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
+SHALLOW_NUMERIC_EXPLANATION_MARKER = "kết quả này theo đúng quy tắc"
 SHALLOW_DISTRACTOR_RATIONALE_MARKERS = (
     "chưa thỏa đủ dữ kiện",
     "có ít nhất một bước của",
@@ -696,6 +697,8 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             all_question_prompts.append((lid, qid, prompt))
         explanation = required_text(q, "explanation_vi", where, errors)
         validate_numeric_equalities(explanation, where + ".explanation_vi", errors)
+        if SHALLOW_NUMERIC_EXPLANATION_MARKER in explanation.casefold():
+            errors.append(f"shallow_numeric_explanation:{where}")
         if explanation and len(explanation) < MIN_QUESTION_EXPLANATION_CHARS:
             errors.append(f"question_explanation_too_short:{where}:{len(explanation)}")
         if explanation and not explanation_states_answer(q, explanation):

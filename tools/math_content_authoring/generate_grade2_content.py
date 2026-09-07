@@ -64,6 +64,27 @@ def second_objective(question_types: list[str], concept_name: str) -> str:
     return f"Vận dụng {concept} với dữ kiện mới, nêu cách tìm kết quả và tự kiểm tra bằng quy tắc đã học."
 
 
+def numeric_feedback_check(concept_name: str) -> str:
+    concept = concept_name.strip().lower()
+    if any(token in concept for token in ("nhân", "chia")):
+        return " Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học."
+    if any(token in concept for token in ("cộng", "trừ", "tính từ trái sang phải", "nhẩm")):
+        return " Tính lại từng bước theo đúng thứ tự để kiểm tra kết quả."
+    if any(token in concept for token in ("đo bằng thước", "vạch chia", "độ dài đường gấp khúc", "vẽ đoạn thẳng")):
+        return " Kiểm tra lại các vạch hoặc từng đoạn đã dùng trước khi chốt số đo."
+    if "tính với số đo" in concept or "giải toán đo lường" in concept:
+        return " Kiểm tra các số đo đã cùng đơn vị rồi làm lại phép tính một lần nữa."
+    if "biểu đồ" in concept or "dữ liệu" in concept:
+        return " Đếm lại biểu tượng hoặc dữ liệu cần dùng rồi kiểm tra phép tính."
+    if "đọc lịch" in concept:
+        return " Kiểm tra lại đúng ngày và tháng trên lịch trước khi chốt kết quả."
+    if "ước lượng" in concept:
+        return " So lại kết quả với mốc chục gần nhất để xem ước lượng có hợp lý không."
+    if concept in {"kilôgam", "lít"}:
+        return " Kiểm tra lại số đứng cùng đơn vị được hỏi trong đề."
+    return f" Làm lại bước chính của {concept} để kiểm tra kết quả vừa tìm được."
+
+
 def deepen_explanation(explanation: str, question_type: str, concept_name: str) -> str:
     """Keep concise authored math, but add the missing why/check step when feedback is too terse."""
     text = explanation.strip()
@@ -72,7 +93,7 @@ def deepen_explanation(explanation: str, question_type: str, concept_name: str) 
     concept = concept_name.strip().lower()
     suffixes = {
         "word_problem": f" Đây là cách dùng {concept} để trả lời đúng đại lượng mà đề đang hỏi.",
-        "numeric_input": f" Kết quả này theo đúng quy tắc {concept}; hãy đối chiếu lại với các số đã cho.",
+        "numeric_input": numeric_feedback_check(concept_name),
         "expression_input": f" Thứ tự các bước phải đúng với {concept}; tính lại từng bước sẽ kiểm tra được kết quả.",
         "multiple_choice": f" Lựa chọn này khớp với {concept}; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng.",
         "true_false": f" Mệnh đề được kiểm tra trực tiếp bằng {concept}, không dựa vào phỏng đoán.",

@@ -1166,7 +1166,7 @@
       "accepted_answers": [
         "80"
       ],
-      "explanation_vi": "8 chục nghĩa là khoảng 80. Kết quả này theo đúng quy tắc ước lượng theo chục; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "8 chục nghĩa là khoảng 80. So lại kết quả với mốc chục gần nhất để xem ước lượng có hợp lý không.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng các nhóm 10 làm mốc để chọn số chục gần và hợp lý với số lượng quan sát.",
         "Tách dữ kiện theo “Ước lượng theo chục”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
@@ -1754,7 +1754,7 @@
       "accepted_answers": [
         "552"
       ],
-      "explanation_vi": "6-4=2, 8-3=5, 7-2=5; được 552. Kết quả này theo đúng quy tắc trừ không mượn; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "6-4=2, 8-3=5, 7-2=5; được 552. Tính lại từng bước theo đúng thứ tự để kiểm tra kết quả.",
       "hints_vi": [
         "Nhớ kiến thức: Trừ từng hàng trực tiếp khi mỗi chữ số của số bị trừ đủ lớn ở cột tương ứng.",
         "Khoanh các số cần dùng, áp dụng “Trừ không mượn”, rồi viết phần số của kết quả."
@@ -1940,7 +1940,7 @@
       "accepted_answers": [
         "60"
       ],
-      "explanation_vi": "50 + 20 = 70, rồi 70 - 10 = 60. Kết quả này theo đúng quy tắc tính từ trái sang phải; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "50 + 20 = 70, rồi 70 - 10 = 60. Tính lại từng bước theo đúng thứ tự để kiểm tra kết quả.",
       "hints_vi": [
         "Nhớ kiến thức: Biểu thức chỉ gồm + và - được tính lần lượt từ trái qua phải.",
         "Khoanh các số cần dùng, áp dụng “Tính từ trái sang phải”, rồi viết phần số của kết quả."
@@ -2197,7 +2197,7 @@
       "accepted_answers": [
         "700"
       ],
-      "explanation_vi": "3 trăm + 4 trăm = 7 trăm = 700. Kết quả này theo đúng quy tắc nhẩm số tròn; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "3 trăm + 4 trăm = 7 trăm = 700. Tính lại từng bước theo đúng thứ tự để kiểm tra kết quả.",
       "hints_vi": [
         "Nhớ kiến thức: Xem 30 là 3 chục và 400 là 4 trăm để cộng trừ theo đơn vị chục hoặc trăm.",
         "Viết một phép tính hoặc quan hệ ngắn cho “Nhẩm số tròn”, tính xong đối chiếu lại điều đề đang hỏi."
@@ -2374,7 +2374,7 @@
       "accepted_answers": [
         "3"
       ],
-      "explanation_vi": "15 : 5 = 3 nhóm. Kết quả này theo đúng quy tắc chia đều; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "15 : 5 = 3 nhóm. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
       "hints_vi": [
         "Nhớ kiến thức: Chia đều nghĩa là mỗi nhóm nhận cùng số lượng và không bỏ sót đối tượng trong bài chia hết.",
         "Tách dữ kiện theo “Chia đều”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
@@ -2754,7 +2754,7 @@
       "accepted_answers": [
         "12"
       ],
-      "explanation_vi": "Bảng nhân 2: 2 × 6 = 12. Kết quả này theo đúng quy tắc nhân 2; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "Bảng nhân 2: 2 × 6 = 12. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
       "hints_vi": [
         "Nhớ kiến thức: Nhân một số với 2 là lấy hai lần số đó hoặc tạo các cặp bằng nhau.",
         "Khoanh các số cần dùng, áp dụng “Nhân 2”, rồi viết phần số của kết quả."
@@ -2785,7 +2785,7 @@
       "accepted_answers": [
         "18"
       ],
-      "explanation_vi": "Bảng nhân 2: 2 × 9 = 18. Kết quả này theo đúng quy tắc nhân 2; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "Bảng nhân 2: 2 × 9 = 18. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
       "hints_vi": [
         "Nhớ kiến thức: Nhân một số với 2 là lấy hai lần số đó hoặc tạo các cặp bằng nhau.",
         "Tách dữ kiện theo “Nhân 2”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
@@ -2816,7 +2816,7 @@
       "accepted_answers": [
         "14"
       ],
-      "explanation_vi": "7 nhóm 2 chiếc: 7 × 2 = 14. Kết quả này theo đúng quy tắc nhân 2; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "7 nhóm 2 chiếc: 7 × 2 = 14. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
       "hints_vi": [
         "Nhớ kiến thức: Nhân một số với 2 là lấy hai lần số đó hoặc tạo các cặp bằng nhau.",
         "Viết một phép tính hoặc quan hệ ngắn cho “Nhân 2”, tính xong đối chiếu lại điều đề đang hỏi."
@@ -2847,7 +2847,7 @@
       "accepted_answers": [
         "20"
       ],
-      "explanation_vi": "Bảng nhân 5: 5 × 4 = 20. Kết quả này theo đúng quy tắc nhân 5; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "Bảng nhân 5: 5 × 4 = 20. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
       "hints_vi": [
         "Nhớ kiến thức: Nhân một số với 5 là cộng các nhóm 5 bằng nhau.",
         "Khoanh các số cần dùng, áp dụng “Nhân 5”, rồi viết phần số của kết quả."
@@ -2878,7 +2878,7 @@
       "accepted_answers": [
         "40"
       ],
-      "explanation_vi": "Bảng nhân 5: 5 × 8 = 40. Kết quả này theo đúng quy tắc nhân 5; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "Bảng nhân 5: 5 × 8 = 40. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
       "hints_vi": [
         "Nhớ kiến thức: Nhân một số với 5 là cộng các nhóm 5 bằng nhau.",
         "Tách dữ kiện theo “Nhân 5”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
@@ -2909,7 +2909,7 @@
       "accepted_answers": [
         "30"
       ],
-      "explanation_vi": "6 nhóm 5 bút: 6 × 5 = 30. Kết quả này theo đúng quy tắc nhân 5; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "6 nhóm 5 bút: 6 × 5 = 30. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
       "hints_vi": [
         "Nhớ kiến thức: Nhân một số với 5 là cộng các nhóm 5 bằng nhau.",
         "Viết một phép tính hoặc quan hệ ngắn cho “Nhân 5”, tính xong đối chiếu lại điều đề đang hỏi."
@@ -2940,7 +2940,7 @@
       "accepted_answers": [
         "8"
       ],
-      "explanation_vi": "Vì 2 × 8 = 16 nên 16 : 2 = 8. Kết quả này theo đúng quy tắc chia 2; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "Vì 2 × 8 = 16 nên 16 : 2 = 8. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng quan hệ nhân - chia để tìm thương khi số chia là 2.",
         "Khoanh các số cần dùng, áp dụng “Chia 2”, rồi viết phần số của kết quả."
@@ -2971,7 +2971,7 @@
       "accepted_answers": [
         "10"
       ],
-      "explanation_vi": "Vì 2 × 10 = 20 nên 20 : 2 = 10. Kết quả này theo đúng quy tắc chia 2; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "Vì 2 × 10 = 20 nên 20 : 2 = 10. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng quan hệ nhân - chia để tìm thương khi số chia là 2.",
         "Tách dữ kiện theo “Chia 2”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
@@ -3002,7 +3002,7 @@
       "accepted_answers": [
         "9"
       ],
-      "explanation_vi": "18 : 2 = 9. Kết quả này theo đúng quy tắc chia 2; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "18 : 2 = 9. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng quan hệ nhân - chia để tìm thương khi số chia là 2.",
         "Viết một phép tính hoặc quan hệ ngắn cho “Chia 2”, tính xong đối chiếu lại điều đề đang hỏi."
@@ -3033,7 +3033,7 @@
       "accepted_answers": [
         "5"
       ],
-      "explanation_vi": "Vì 5 × 5 = 25 nên 25 : 5 = 5. Kết quả này theo đúng quy tắc chia 5; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "Vì 5 × 5 = 25 nên 25 : 5 = 5. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng quan hệ nhân - chia để tìm thương khi số chia là 5.",
         "Khoanh các số cần dùng, áp dụng “Chia 5”, rồi viết phần số của kết quả."
@@ -3064,7 +3064,7 @@
       "accepted_answers": [
         "8"
       ],
-      "explanation_vi": "Vì 5 × 8 = 40 nên 40 : 5 = 8. Kết quả này theo đúng quy tắc chia 5; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "Vì 5 × 8 = 40 nên 40 : 5 = 8. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng quan hệ nhân - chia để tìm thương khi số chia là 5.",
         "Tách dữ kiện theo “Chia 5”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
@@ -3095,7 +3095,7 @@
       "accepted_answers": [
         "10"
       ],
-      "explanation_vi": "50 : 5 = 10 túi. Kết quả này theo đúng quy tắc chia 5; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "50 : 5 = 10 túi. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng quan hệ nhân - chia để tìm thương khi số chia là 5.",
         "Viết một phép tính hoặc quan hệ ngắn cho “Chia 5”, tính xong đối chiếu lại điều đề đang hỏi."
@@ -5413,7 +5413,7 @@
       "accepted_answers": [
         "7"
       ],
-      "explanation_vi": "Vị trí B = 2 + 5 = 7 cm. Kết quả này theo đúng quy tắc vẽ đoạn thẳng theo độ dài; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "Vị trí B = 2 + 5 = 7 cm. Kiểm tra lại các vạch hoặc từng đoạn đã dùng trước khi chốt số đo.",
       "hints_vi": [
         "Nhớ kiến thức: Độ dài đoạn thẳng bằng hiệu vị trí hai đầu mút trên cùng một thước chia đều.",
         "Khoanh các số cần dùng, áp dụng “Vẽ đoạn thẳng theo độ dài”, rồi viết phần số của kết quả."
@@ -5475,7 +5475,7 @@
       "accepted_answers": [
         "9"
       ],
-      "explanation_vi": "3 + 6 = 9 cm. Kết quả này theo đúng quy tắc vẽ đoạn thẳng theo độ dài; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "3 + 6 = 9 cm. Kiểm tra lại các vạch hoặc từng đoạn đã dùng trước khi chốt số đo.",
       "hints_vi": [
         "Nhớ kiến thức: Độ dài đoạn thẳng bằng hiệu vị trí hai đầu mút trên cùng một thước chia đều.",
         "Viết một phép tính hoặc quan hệ ngắn cho “Vẽ đoạn thẳng theo độ dài”, tính xong đối chiếu lại điều đề đang hỏi."
@@ -5824,7 +5824,7 @@
       "accepted_answers": [
         "5"
       ],
-      "explanation_vi": "Con số đi trước đơn vị kg là 5. Kết quả này theo đúng quy tắc kilôgam; hãy đối chiếu lại với các số đã cho. Vậy đáp án là 5 kg.",
+      "explanation_vi": "Con số đi trước đơn vị kg là 5. Kiểm tra lại số đứng cùng đơn vị được hỏi trong đề. Vậy đáp án là 5 kg.",
       "hints_vi": [
         "Nhớ kiến thức: kg là kí hiệu của kilôgam, một đơn vị đo khối lượng thông dụng.",
         "Khoanh các số cần dùng, áp dụng “Kilôgam”, rồi viết phần số của kết quả."
@@ -5945,7 +5945,7 @@
       "accepted_answers": [
         "4"
       ],
-      "explanation_vi": "Con số đi trước kí hiệu l là 4. Kết quả này theo đúng quy tắc lít; hãy đối chiếu lại với các số đã cho. Vậy đáp án là 4 l.",
+      "explanation_vi": "Con số đi trước kí hiệu l là 4. Kiểm tra lại số đứng cùng đơn vị được hỏi trong đề. Vậy đáp án là 4 l.",
       "hints_vi": [
         "Nhớ kiến thức: l là kí hiệu của lít, đơn vị đo dung tích.",
         "Khoanh các số cần dùng, áp dụng “Lít”, rồi viết phần số của kết quả."
@@ -6445,7 +6445,7 @@
       "accepted_answers": [
         "30"
       ],
-      "explanation_vi": "Tháng 4 có 30 ngày. Kết quả này theo đúng quy tắc đọc lịch; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "Tháng 4 có 30 ngày. Kiểm tra lại đúng ngày và tháng trên lịch trước khi chốt kết quả.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng số ngày và vị trí ngày trên lịch để xác định ngày trước, ngày sau và số ngày trong tháng.",
         "Khoanh các số cần dùng, áp dụng “Đọc lịch”, rồi viết phần số của kết quả."
@@ -6477,7 +6477,7 @@
       "accepted_answers": [
         "31"
       ],
-      "explanation_vi": "Tháng 5 có 31 ngày. Kết quả này theo đúng quy tắc đọc lịch; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "Tháng 5 có 31 ngày. Kiểm tra lại đúng ngày và tháng trên lịch trước khi chốt kết quả.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng số ngày và vị trí ngày trên lịch để xác định ngày trước, ngày sau và số ngày trong tháng.",
         "Tách dữ kiện theo “Đọc lịch”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
@@ -6711,7 +6711,7 @@
       "accepted_answers": [
         "8"
       ],
-      "explanation_vi": "8 - 0 = 8 cm. Kết quả này theo đúng quy tắc đo bằng thước cm; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "8 - 0 = 8 cm. Kiểm tra lại các vạch hoặc từng đoạn đã dùng trước khi chốt số đo.",
       "hints_vi": [
         "Nhớ kiến thức: Độ dài bằng hiệu số giữa hai vị trí đầu mút trên thước chia cm.",
         "Khoanh các số cần dùng, áp dụng “Đo bằng thước cm”, rồi viết phần số của kết quả."
@@ -6743,7 +6743,7 @@
       "accepted_answers": [
         "7"
       ],
-      "explanation_vi": "10 - 3 = 7 cm. Kết quả này theo đúng quy tắc đo bằng thước cm; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "10 - 3 = 7 cm. Kiểm tra lại các vạch hoặc từng đoạn đã dùng trước khi chốt số đo.",
       "hints_vi": [
         "Nhớ kiến thức: Độ dài bằng hiệu số giữa hai vị trí đầu mút trên thước chia cm.",
         "Tách dữ kiện theo “Đo bằng thước cm”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
@@ -6869,7 +6869,7 @@
       "accepted_answers": [
         "15"
       ],
-      "explanation_vi": "Các vạch lần lượt 0, 5, 10, 15. Kết quả này theo đúng quy tắc vạch chia; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "Các vạch lần lượt 0, 5, 10, 15. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
       "hints_vi": [
         "Nhớ kiến thức: Mỗi vạch trên cùng một thang đều cách nhau một giá trị cố định nếu thang chia đều.",
         "Viết một phép tính hoặc quan hệ ngắn cho “Vạch chia”, tính xong đối chiếu lại điều đề đang hỏi."
@@ -7059,7 +7059,7 @@
       "accepted_answers": [
         "30"
       ],
-      "explanation_vi": "1 m = 10 dm nên 3 m = 30 dm. Kết quả này theo đúng quy tắc tính với số đo; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "1 m = 10 dm nên 3 m = 30 dm. Kiểm tra các số đo đã cùng đơn vị rồi làm lại phép tính một lần nữa.",
       "hints_vi": [
         "Nhớ kiến thức: Đưa các số đo về cùng đơn vị trước khi cộng, trừ hoặc so sánh.",
         "Khoanh các số cần dùng, áp dụng “Tính với số đo”, rồi viết phần số của kết quả."
@@ -7314,7 +7314,7 @@
       "accepted_answers": [
         "10"
       ],
-      "explanation_vi": "4 + 6 = 10 cm. Kết quả này theo đúng quy tắc độ dài đường gấp khúc; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "4 + 6 = 10 cm. Kiểm tra lại các vạch hoặc từng đoạn đã dùng trước khi chốt số đo.",
       "hints_vi": [
         "Nhớ kiến thức: Cộng độ dài từng đoạn thành phần để có tổng độ dài đường gấp khúc.",
         "Khoanh các số cần dùng, áp dụng “Độ dài đường gấp khúc”, rồi viết phần số của kết quả."
@@ -7346,7 +7346,7 @@
       "accepted_answers": [
         "10"
       ],
-      "explanation_vi": "3 + 5 + 2 = 10 cm. Kết quả này theo đúng quy tắc độ dài đường gấp khúc; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "3 + 5 + 2 = 10 cm. Kiểm tra lại các vạch hoặc từng đoạn đã dùng trước khi chốt số đo.",
       "hints_vi": [
         "Nhớ kiến thức: Cộng độ dài từng đoạn thành phần để có tổng độ dài đường gấp khúc.",
         "Tách dữ kiện theo “Độ dài đường gấp khúc”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
@@ -7410,7 +7410,7 @@
       "accepted_answers": [
         "5"
       ],
-      "explanation_vi": "2 m + 3 m = 5 m. Kết quả này theo đúng quy tắc giải toán đo lường; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "2 m + 3 m = 5 m. Kiểm tra các số đo đã cùng đơn vị rồi làm lại phép tính một lần nữa.",
       "hints_vi": [
         "Nhớ kiến thức: Một bài đo lường một bước kết hợp số đo cùng đơn vị với cộng hoặc trừ phù hợp tình huống.",
         "Khoanh các số cần dùng, áp dụng “Giải toán đo lường”, rồi viết phần số của kết quả."
@@ -7442,7 +7442,7 @@
       "accepted_answers": [
         "5"
       ],
-      "explanation_vi": "8 l - 3 l = 5 l. Kết quả này theo đúng quy tắc giải toán đo lường; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "8 l - 3 l = 5 l. Kiểm tra các số đo đã cùng đơn vị rồi làm lại phép tính một lần nữa.",
       "hints_vi": [
         "Nhớ kiến thức: Một bài đo lường một bước kết hợp số đo cùng đơn vị với cộng hoặc trừ phù hợp tình huống.",
         "Tách dữ kiện theo “Giải toán đo lường”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
@@ -7630,7 +7630,7 @@
       "accepted_answers": [
         "6"
       ],
-      "explanation_vi": "3 biểu tượng × 2 quả = 6 quả. Kết quả này theo đúng quy tắc biểu đồ tranh; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "3 biểu tượng × 2 quả = 6 quả. Đếm lại biểu tượng hoặc dữ liệu cần dùng rồi kiểm tra phép tính.",
       "hints_vi": [
         "Nhớ kiến thức: Số lượng = số biểu tượng × giá trị mỗi biểu tượng theo chú giải.",
         "Tách dữ kiện theo “Biểu đồ tranh”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
@@ -7692,7 +7692,7 @@
       "accepted_answers": [
         "2"
       ],
-      "explanation_vi": "6 - 4 = 2 bạn. Kết quả này theo đúng quy tắc suy luận từ dữ liệu; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "6 - 4 = 2 bạn. Đếm lại biểu tượng hoặc dữ liệu cần dùng rồi kiểm tra phép tính.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng các số đã đọc từ biểu đồ để so sánh và nêu nhận xét có căn cứ.",
         "Khoanh các số cần dùng, áp dụng “Suy luận từ dữ liệu”, rồi viết phần số của kết quả."

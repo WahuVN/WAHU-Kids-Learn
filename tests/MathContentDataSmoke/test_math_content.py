@@ -332,6 +332,7 @@ class MathContentDataSmoke(unittest.TestCase):
             with self.subTest(item=item["id"]):
                 explanation = item["explanation_vi"].strip()
                 self.assertGreaterEqual(len(explanation), validator.MIN_QUESTION_EXPLANATION_CHARS)
+                self.assertNotIn(validator.SHALLOW_NUMERIC_EXPLANATION_MARKER, explanation.casefold())
                 self.assertTrue(validator.explanation_states_answer(item, explanation))
                 choices = item.get("choices", [])
                 if choices:
