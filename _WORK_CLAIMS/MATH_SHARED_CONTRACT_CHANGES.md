@@ -200,6 +200,17 @@ Một child không được có hơn một session active cho cùng subject, k�
 - True cross-process regression dùng hai executable worker độc lập cùng cold-start; invariant là đúng một session active tồn tại. Stress lặp 3 vòng bổ sung PASS.
 - Guard này ngăn duplicate runtime/progress-start chain từ race cold-start; loser hiện nhận conflict/failure và caller có thể reload/resume durable session thay vì tạo bản sao.
 
+## 2026-09-07 — Atomic Math session + runtime startup (AI2)
+
+Math cold-start không được lộ một `session` active chưa có `math_session_runtime`, vì recovery process khác có thể hiểu nhầm đó là session crash cũ:
+
+- Math startup dùng `MathSessionRuntimeService.TryCreateSession(...)` để insert `session` và `math_session_runtime` trong cùng một SQLite write transaction.
+- Nếu active Math session đã tồn tại, method trả `null`; không tạo session/runtime thứ hai và không tạo durable partial state.
+- `MathSessionCoordinator.Start()` khi thua cold-start race phải load `LoadLatestResumable(...)` và restore session winner nếu request tương thích, thay vì abort/recover session của process khác.
+- Cleanup sau start failure chỉ được abort/delete session do chính coordinator đó vừa tạo (`createdHere`); session winner của process khác không được đụng tới.
+- `RecoverDanglingSessions()` chỉ còn nhìn thấy session Math active thiếu runtime khi đó thực sự là legacy/partial crash state, không phải khe hở giữa hai transaction startup bình thường.
+- True cross-process regression xác nhận đúng 1 active session + đúng 1 runtime, không có active session thiếu runtime, winner không bị recovery nhầm và lập tức resumable; terminal state vẫn giải phóng slot cho session sau.
+
 ## Contract còn chưa chốt
 
 Các mục sau chưa được UI/content tự invent cho tới khi AI2 publish contract:

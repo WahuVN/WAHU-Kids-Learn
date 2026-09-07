@@ -48,6 +48,68 @@ namespace WAHU.Data
             _database = database ?? throw new ArgumentNullException("database");
         }
 
+        public LearnerSessionHandle TryCreateSession(
+            string childId,
+            string performanceProfile,
+            int seed,
+            int targetQuestionCount,
+            string sessionMode,
+            string targetLessonId)
+        {
+            Require(childId, "childId");
+            if (targetQuestionCount < 1 || targetQuestionCount > 40) throw new ArgumentOutOfRangeException("targetQuestionCount");
+            if (sessionMode != "adaptive" && sessionMode != "lesson") throw new ArgumentException("Invalid Math session mode.");
+            if (sessionMode == "lesson") Require(targetLessonId, "targetLessonId");
+            else targetLessonId = null;
+            if (performanceProfile != "LOW" && performanceProfile != "NORMAL") performanceProfile = "LOW";
+
+            var sessionId = "session-" + Guid.NewGuid().ToString("N");
+            var startedAtUtc = DateTime.UtcNow;
+            return _database.Writes.Execute((connection, transaction) =>
+            {
+                using (var session = connection.CreateCommand())
+                {
+                    session.Transaction = transaction;
+                    session.CommandText = @"INSERT INTO session(id,child_id,started_at_utc,state,planned_subject,performance_profile)
+SELECT @id,@child,@started,'active','math',@profile
+WHERE NOT EXISTS (
+    SELECT 1 FROM session
+    WHERE child_id=@child AND planned_subject='math'
+      AND state IN ('started','active') AND ended_at_utc IS NULL
+);";
+                    session.Parameters.AddWithValue("@id", sessionId);
+                    session.Parameters.AddWithValue("@child", childId);
+                    session.Parameters.AddWithValue("@started", Utc(startedAtUtc));
+                    session.Parameters.AddWithValue("@profile", performanceProfile);
+                    if (session.ExecuteNonQuery() != 1) return null;
+                }
+
+                using (var runtime = connection.CreateCommand())
+                {
+                    runtime.Transaction = transaction;
+                    runtime.CommandText = @"INSERT INTO math_session_runtime(
+session_id,seed,target_question_count,generated_question_count,session_mode,target_lesson_id,updated_at_utc)
+VALUES(@session,@seed,@target,0,@mode,@lesson,@utc);";
+                    runtime.Parameters.AddWithValue("@session", sessionId);
+                    runtime.Parameters.AddWithValue("@seed", seed);
+                    runtime.Parameters.AddWithValue("@target", targetQuestionCount);
+                    runtime.Parameters.AddWithValue("@mode", sessionMode);
+                    runtime.Parameters.AddWithValue("@lesson", string.IsNullOrWhiteSpace(targetLessonId) ? (object)DBNull.Value : targetLessonId);
+                    runtime.Parameters.AddWithValue("@utc", Utc(startedAtUtc));
+                    runtime.ExecuteNonQuery();
+                }
+
+                return new LearnerSessionHandle
+                {
+                    SessionId = sessionId,
+                    ChildId = childId,
+                    StartedAtUtc = startedAtUtc,
+                    Subject = "math",
+                    PerformanceProfile = performanceProfile
+                };
+            });
+        }
+
         public void Create(string sessionId, int seed, int targetQuestionCount)
         {
             Create(sessionId, seed, targetQuestionCount, "adaptive", null);

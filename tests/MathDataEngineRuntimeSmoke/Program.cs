@@ -19,6 +19,8 @@ namespace WAHU.MathDataEngineRuntimeSmoke
                 return RunCommitWorker(args);
             if (args != null && args.Length > 0 && string.Equals(args[0], "--session-worker", StringComparison.Ordinal))
                 return RunSessionWorker(args);
+            if (args != null && args.Length > 0 && string.Equals(args[0], "--runtime-session-worker", StringComparison.Ordinal))
+                return RunRuntimeSessionWorker(args);
 
             var root = Path.Combine(Path.GetTempPath(), "wahu-math-data-smoke-" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(root);
@@ -31,6 +33,7 @@ namespace WAHU.MathDataEngineRuntimeSmoke
                 TestOptimisticSkillStateGuard(root, sourceSchema);
                 TestCrossProcessConcurrentSkillWrites(root, sourceSchema);
                 TestCrossProcessSingleActiveSessionGuard(root, sourceSchema);
+                TestCrossProcessAtomicMathRuntimeStart(root, sourceSchema);
                 TestExistingV1UpgradesToV3WithBackup(root, sourceSchema);
                 TestV3BackfillPreservesLegacyDuplicates(root, sourceSchema);
                 Console.WriteLine("MATH_DATA_ENGINE_RUNTIME_SMOKE_PASS assertions=" + _assertions);
@@ -449,6 +452,127 @@ namespace WAHU.MathDataEngineRuntimeSmoke
             catch (Exception ex)
             {
                 Console.Error.WriteLine("CROSS_SESSION_WORKER_FAIL " + ex);
+                return 3;
+            }
+        }
+
+        private static void TestCrossProcessAtomicMathRuntimeStart(string root, string sourceSchema)
+        {
+            var schemaDir = Path.Combine(root, "schema-atomic-runtime-start");
+            CopySchemas(sourceSchema, schemaDir);
+            var schemaPath = Path.Combine(schemaDir, "001_initial.sql");
+            var dbPath = Path.Combine(root, "atomic-runtime-start.db");
+            var database = new LearningDatabase(dbPath, schemaPath);
+            database.Initialize("DELETE");
+            var sessions = new LearnerSessionService(database);
+            var profile = sessions.EnsurePrimaryChild("Bé atomic runtime");
+            var gatePath = Path.Combine(root, "atomic-runtime-go.flag");
+            var exePath = Assembly.GetExecutingAssembly().Location;
+
+            using (var first = StartRuntimeSessionWorker(exePath, dbPath, schemaPath, profile.ChildId, gatePath))
+            using (var second = StartRuntimeSessionWorker(exePath, dbPath, schemaPath, profile.ChildId, gatePath))
+            {
+                File.WriteAllText(gatePath, "go");
+                var firstExited = first.WaitForExit(20000);
+                var secondExited = second.WaitForExit(20000);
+                if (!firstExited) { try { first.Kill(); } catch { } }
+                if (!secondExited) { try { second.Kill(); } catch { } }
+                var firstOutput = first.StandardOutput.ReadToEnd() + first.StandardError.ReadToEnd();
+                var secondOutput = second.StandardOutput.ReadToEnd() + second.StandardError.ReadToEnd();
+                A(firstExited && secondExited,
+                    "atomic_runtime_workers_exit_without_hanging");
+                var oneCreated = (first.ExitCode == 0 && second.ExitCode == 2) ||
+                                 (first.ExitCode == 2 && second.ExitCode == 0);
+                A(oneCreated,
+                    "atomic_runtime_exactly_one_cross_process_start_wins outputs=" + firstOutput.Trim() + " | " + secondOutput.Trim());
+            }
+
+            string activeSessionId;
+            using (var c = database.OpenConnection())
+            {
+                A(Count(c, "SELECT count(*) FROM session WHERE child_id='" + profile.ChildId + "' AND planned_subject='math' AND state IN ('started','active') AND ended_at_utc IS NULL;") == 1,
+                    "atomic_runtime_has_one_active_math_session");
+                A(Count(c, "SELECT count(*) FROM math_session_runtime r JOIN session s ON s.id=r.session_id WHERE s.child_id='" + profile.ChildId + "' AND s.state IN ('started','active') AND s.ended_at_utc IS NULL;") == 1,
+                    "atomic_runtime_active_session_has_exactly_one_runtime");
+                A(Count(c, "SELECT count(*) FROM session s LEFT JOIN math_session_runtime r ON r.session_id=s.id WHERE s.child_id='" + profile.ChildId + "' AND s.planned_subject='math' AND s.state IN ('started','active') AND s.ended_at_utc IS NULL AND r.session_id IS NULL;") == 0,
+                    "atomic_runtime_never_exposes_active_math_session_without_runtime");
+                activeSessionId = Convert.ToString(Scalar(c,
+                    "SELECT s.id FROM session s JOIN math_session_runtime r ON r.session_id=s.id WHERE s.child_id='" + profile.ChildId + "' AND s.state IN ('started','active') AND s.ended_at_utc IS NULL LIMIT 1;"),
+                    CultureInfo.InvariantCulture);
+            }
+
+            A(sessions.RecoverDanglingSessions() == 0,
+                "atomic_runtime_winner_is_not_misclassified_as_dangling");
+            var resumable = new MathSessionRuntimeService(database).LoadLatestResumable(profile.ChildId);
+            A(resumable != null && resumable.SessionId == activeSessionId,
+                "atomic_runtime_winner_is_immediately_resumable");
+
+            sessions.CompleteSession(activeSessionId, true, "{}", "{}");
+            new MathSessionRuntimeService(database).Delete(activeSessionId);
+            var next = new MathSessionRuntimeService(database).TryCreateSession(
+                profile.ChildId, "LOW", 7788, 8, "adaptive", null);
+            A(next != null && next.SessionId != activeSessionId,
+                "atomic_runtime_terminal_state_releases_slot_for_next_runtime_session");
+            using (var c = database.OpenConnection())
+            {
+                A(Count(c, "SELECT count(*) FROM session s JOIN math_session_runtime r ON r.session_id=s.id WHERE s.id='" + next.SessionId + "' AND s.state='active';") == 1,
+                    "atomic_runtime_next_session_and_runtime_commit_together");
+            }
+            sessions.CompleteSession(next.SessionId, true, "{}", "{}");
+            new MathSessionRuntimeService(database).Delete(next.SessionId);
+        }
+
+        private static Process StartRuntimeSessionWorker(string exePath, string dbPath, string schemaPath, string childId, string gatePath)
+        {
+            var info = new ProcessStartInfo
+            {
+                FileName = exePath,
+                Arguments = QuoteArg("--runtime-session-worker") + " " + QuoteArg(dbPath) + " " + QuoteArg(schemaPath) + " " +
+                    QuoteArg(childId) + " " + QuoteArg(gatePath),
+                WorkingDirectory = Path.GetDirectoryName(exePath),
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            };
+            var process = Process.Start(info);
+            if (process == null) throw new InvalidOperationException("Could not start atomic Math runtime worker.");
+            return process;
+        }
+
+        private static int RunRuntimeSessionWorker(string[] args)
+        {
+            if (args == null || args.Length != 5) return 94;
+            var deadline = DateTime.UtcNow.AddSeconds(15);
+            while (!File.Exists(args[4]) && DateTime.UtcNow < deadline) Thread.Sleep(10);
+            if (!File.Exists(args[4])) return 95;
+
+            try
+            {
+                var database = new LearningDatabase(args[1], args[2]);
+                var session = new MathSessionRuntimeService(database).TryCreateSession(
+                    args[3], "LOW", 6677, 8, "adaptive", null);
+                if (session == null)
+                {
+                    Console.WriteLine("ATOMIC_RUNTIME_WORKER_REJECTED active_session_exists");
+                    return 2;
+                }
+                Console.WriteLine("ATOMIC_RUNTIME_WORKER_CREATED " + session.SessionId);
+                return 0;
+            }
+            catch (InvalidOperationException ex)
+            {
+                Console.WriteLine("ATOMIC_RUNTIME_WORKER_REJECTED " + ex.Message);
+                return 2;
+            }
+            catch (SQLiteException ex)
+            {
+                Console.WriteLine("ATOMIC_RUNTIME_WORKER_REJECTED_SQLITE " + ex.ErrorCode);
+                return 2;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("ATOMIC_RUNTIME_WORKER_FAIL " + ex);
                 return 3;
             }
         }

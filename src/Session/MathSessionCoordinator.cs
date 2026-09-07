@@ -129,6 +129,7 @@ namespace WAHU.Session
             else
             {
                 recovered = _sessionService.RecoverDanglingSessions();
+                var createdHere = false;
                 try
                 {
                     _seed = _requestedSeed;
@@ -141,16 +142,33 @@ namespace WAHU.Session
                         PrepareTargetLessonForStart();
                         _targetQuestionCount = _targetQuestions.Count;
                     }
-                    _session = _sessionService.BeginSession(_profile.ChildId, "math", _performanceProfile);
-                    _runtime.Create(_session.SessionId, _seed, _targetQuestionCount, _sessionMode, _targetLessonId);
-                    _skills = _sessionService.LoadSkillSnapshots(_profile.ChildId, "math");
-                    if (string.Equals(_sessionMode, "lesson", StringComparison.Ordinal))
-                        _lessonProgressStore.MarkStarted(_profile.ChildId, _targetLesson.Id, _targetLesson.SkillId, _session.StartedAtUtc);
-                    _active = true;
+
+                    _session = _runtime.TryCreateSession(
+                        _profile.ChildId, _performanceProfile, _seed, _targetQuestionCount, _sessionMode, _targetLessonId);
+                    if (_session == null)
+                    {
+                        var raced = _runtime.LoadLatestResumable(_profile.ChildId);
+                        if (raced == null)
+                            throw new InvalidOperationException("Một phiên Toán khác vừa được mở. Hãy thử tiếp tục lại phiên đang học.");
+                        if (!string.IsNullOrWhiteSpace(_requestedLessonId) &&
+                            (!string.Equals(raced.SessionMode, "lesson", StringComparison.Ordinal) ||
+                             !string.Equals(raced.TargetLessonId, _requestedLessonId, StringComparison.Ordinal)))
+                            throw new InvalidOperationException("Một phiên Toán khác đang học dở. Hãy tiếp tục hoặc kết thúc phiên đó trước khi mở bài này.");
+                        RestoreSession(raced, out restoredOpenQuestion, out discardedCorruptOpenQuestion);
+                        resumed = true;
+                    }
+                    else
+                    {
+                        createdHere = true;
+                        _skills = _sessionService.LoadSkillSnapshots(_profile.ChildId, "math");
+                        if (string.Equals(_sessionMode, "lesson", StringComparison.Ordinal))
+                            _lessonProgressStore.MarkStarted(_profile.ChildId, _targetLesson.Id, _targetLesson.SkillId, _session.StartedAtUtc);
+                        _active = true;
+                    }
                 }
                 catch
                 {
-                    if (_session != null)
+                    if (createdHere && _session != null)
                     {
                         try { _runtime.Delete(_session.SessionId); } catch { }
                         try
