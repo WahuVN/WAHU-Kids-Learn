@@ -14,6 +14,7 @@ namespace WAHU.MathEngineRuntimeSmoke
             TestDecimalAndFractionEquivalence();
             TestTextMultipleAnswersAndUnits();
             TestExpressionSafety();
+            TestAdversarialAnswerInputs();
             TestClassifierUsesValidator();
             TestMasteryScoringSemantics();
             Console.WriteLine("MATH_ENGINE_RUNTIME_SMOKE_PASS assertions=" + _assertions);
@@ -102,6 +103,58 @@ namespace WAHU.MathEngineRuntimeSmoke
             var unknown = NumberQuestion("future_unknown_kind", "2+2", 0);
             A(!unknown.IsCorrectAnswer("4"), "unknown_kind_does_not_widen_parser");
             A(unknown.IsCorrectAnswer("2+2"), "unknown_kind_exact_text_still_supported");
+        }
+
+        private static void TestAdversarialAnswerInputs()
+        {
+            var integer = NumberQuestion("integer", "2147483647", int.MaxValue);
+            A(integer.IsCorrectAnswer("2147483647"), "integer_int_max_valid");
+            A(!integer.IsCorrectAnswer("2147483648"), "integer_int_max_plus_one_not_equivalent");
+            int parsed;
+            A(MathAnswerValidator.TryParseInteger("2147483647", out parsed) && parsed == int.MaxValue,
+                "try_parse_integer_accepts_int_max");
+            A(!MathAnswerValidator.TryParseInteger("2147483648", out parsed),
+                "try_parse_integer_rejects_int_overflow");
+            A(!MathAnswerValidator.TryParseInteger("-2147483649", out parsed),
+                "try_parse_integer_rejects_negative_int_overflow");
+            A(!integer.IsCorrectAnswer(new string('2', 257)), "answer_length_limit_rejects_257_chars");
+
+            var text = new MathQuestion { AnswerKind = "text", CorrectAnswerText = "có thể" };
+            A(text.IsCorrectAnswer("co\u0301 the\u0302̉"), "text_nfd_normalizes_to_nfc");
+            A(text.IsCorrectAnswer("\t CÓ\nTHỂ  "), "text_unicode_whitespace_collapses");
+
+            var unit = new MathQuestion
+            {
+                AnswerKind = "unit",
+                CorrectAnswerText = "12 cm",
+                ExpectedUnit = "cm",
+                AcceptedUnits = new[] { "xăng-ti-mét" }
+            };
+            A(unit.IsCorrectAnswer("12\tCM..."), "unit_trailing_periods_and_whitespace_normalized");
+            A(unit.IsCorrectAnswer("12 xăng-ti-me\u0301t"), "unit_nfd_alias_normalized");
+            A(!unit.IsCorrectAnswer("12 cm extra"), "unit_rejects_trailing_extra_text");
+
+            var expression = NumberQuestion("expression", "14", 14);
+            A(expression.IsCorrectAnswer("2\u00D7(3+4)"), "expression_unicode_multiply_supported");
+            A(expression.IsCorrectAnswer("28\u00F72"), "expression_unicode_divide_supported");
+            A(expression.IsCorrectAnswer("20\u22126"), "expression_unicode_minus_supported");
+            A(expression.IsCorrectAnswer("20\u20136"), "expression_en_dash_minus_supported");
+            A(expression.IsCorrectAnswer("28/-2*-1"), "expression_unary_negative_after_division_supported");
+            A(!expression.IsCorrectAnswer("14+"), "expression_rejects_trailing_operator");
+            A(!expression.IsCorrectAnswer("(14"), "expression_rejects_unclosed_parenthesis");
+            A(!expression.IsCorrectAnswer("14)"), "expression_rejects_unopened_parenthesis");
+            A(!expression.IsCorrectAnswer(new string('(', 17) + "14" + new string(')', 17)),
+                "expression_rejects_depth_over_16");
+            A(!expression.IsCorrectAnswer(string.Join("+", new string[97]).Replace("+", "1+" ) + "1"),
+                "expression_rejects_token_bomb_over_limit");
+
+            var restricted = NumberQuestion("expression", "75", 75);
+            restricted.AllowedExpressionOperators = new[] { "+", "-", "(", ")" };
+            A(restricted.IsCorrectAnswer("75"), "restricted_expression_plain_numeric_result_allowed");
+            A(restricted.IsCorrectAnswer("100\u221230+5"), "restricted_expression_unicode_minus_maps_to_allowed_operator");
+            A(!restricted.IsCorrectAnswer("15\u00D75"), "restricted_expression_unicode_multiply_rejected");
+            restricted.AllowedExpressionOperators = new[] { "+", "BAD" };
+            A(!restricted.IsCorrectAnswer("70+5"), "invalid_expression_whitelist_fails_closed");
         }
 
         private static void TestClassifierUsesValidator()

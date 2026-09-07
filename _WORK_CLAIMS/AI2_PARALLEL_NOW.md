@@ -54,7 +54,7 @@ Milestone: `3cf7fc6`.
 - durable attempt/mastery history không bị xóa khi quarantine runtime checkpoint.
 
 ### Current historical gates
-- MathEngineRuntimeSmoke: 47 PASS.
+- MathEngineRuntimeSmoke: **72 PASS** — thêm adversarial validator fuzz (Unicode/NFD, overflow, length, unit alias, expression depth/token-bomb, Unicode operators, invalid whitelist fail-closed).
 - MathDataEngineRuntimeSmoke: 104 PASS.
 - LearningSessionRuntimeSmoke: 800 PASS.
 - SQLiteRuntimeSmoke production: 179 PASS.

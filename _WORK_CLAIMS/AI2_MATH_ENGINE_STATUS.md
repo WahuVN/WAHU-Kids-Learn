@@ -18,7 +18,7 @@ Branch: `main`
 
 ## Tests
 
-- `tests/MathEngineRuntimeSmoke`: PASS — **47 assertions**.
+- `tests/MathEngineRuntimeSmoke`: PASS — **72 assertions** (baseline equivalence + adversarial Unicode/NFD, int overflow, answer-length, unit alias, expression depth/token-bomb, Unicode operators và invalid per-question whitelist fail-closed).
 - `tests/MathDataEngineRuntimeSmoke`: PASS — **104 assertions** (idempotency + terminal-session guard + optimistic skill-state guard + true cross-process mastery/session contention + atomic startup + subject/child-scoped dangling recovery).
 - `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **7119 assertions** (toàn bộ gate cũ + real 402-bank selector breadth + targeted selected-set write-failure rollback + selected-set semantic-corruption repair matrix).
 - `tests/SQLiteRuntimeSmoke`: PASS — **179 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
