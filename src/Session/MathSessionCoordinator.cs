@@ -1017,6 +1017,24 @@ namespace WAHU.Session
                 return;
             }
 
+            // An open-question clock is part of response/behavior evidence. Missing, malformed
+            // (parsed as null), pre-session, or future-vs-checkpoint timestamps must never be
+            // silently replaced with DateTime.UtcNow because that fabricates response_ms and can
+            // turn a normal wrong answer into a false rapid-wrong signal. Drop only the derived
+            // open-question cache, rewind to durable completed-question progress, and regenerate
+            // the same deterministic ordinal on NextQuestion().
+            if (!runtime.QuestionStartedAtUtc.HasValue ||
+                runtime.QuestionStartedAtUtc.Value < runtime.StartedAtUtc ||
+                runtime.QuestionStartedAtUtc.Value > runtime.UpdatedAtUtc)
+            {
+                _currentQuestion = null;
+                _currentSelection = null;
+                discardedCorruptOpenQuestion = true;
+                ReconcileTargetedGeneratedOrdinalAfterDiscard();
+                try { _runtime.SaveCheckpoint(_session.SessionId, _generatedQuestionCount, _forcedRepairTemplateId, RuntimeCheckpointSelectionJson()); } catch { }
+                return;
+            }
+
             try
             {
                 var question = _json.Deserialize<MathQuestion>(runtime.CurrentQuestionJson);

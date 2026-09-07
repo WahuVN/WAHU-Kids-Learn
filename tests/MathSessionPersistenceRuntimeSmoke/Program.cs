@@ -50,6 +50,9 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestFirstLessonAllSixVariantsWithRetryResume(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedCompletionSurvivesNextLessonReadFailure(root, schemaPath, templatePath, lessonCatalogPath);
                 TestCorruptRuntimeMetadataIsQuarantined(root, schemaPath, templatePath);
+                TestCorruptOpenQuestionTimestampSelfHealsExactOrdinal(root, schemaPath, templatePath, lessonCatalogPath);
+                TestAdaptiveCorruptOpenQuestionTimestampSelfHealsExactOrdinal(root, schemaPath, templatePath);
+                TestCorruptSessionStartedTimestampIsQuarantined(root, schemaPath, templatePath);
                 TestOperationalDatabaseFailureDoesNotQuarantineRuntime(root, schemaPath, templatePath);
                 TestRuntimePackIdentityResumePolicy(root, schemaPath, templatePath);
                 TestTargetedCorruptOpenQuestionReplaysAuthoredOrdinal(root, schemaPath, templatePath, lessonCatalogPath);
@@ -3096,6 +3099,148 @@ BEGIN SELECT RAISE(ABORT,'game event injected mastery failure'); END;");
                 A(Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + started.SessionId + "';") == 1,
                     "corrupt_runtime_quarantine_replacement_session_is_durably_resumable");
                 replacement.Abort("corrupt_runtime_metadata_cleanup");
+            }
+        }
+
+        private static void TestCorruptOpenQuestionTimestampSelfHealsExactOrdinal(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.Lessons.First(x => x.PrerequisiteSkills == null || x.PrerequisiteSkills.Count == 0);
+            var database = NewDatabase(Path.Combine(root, "corrupt-open-question-timestamp.db"), schemaPath);
+            string sessionId;
+            string childId;
+            string q2Id;
+            string q2ContentId;
+
+            using (var first = new MathSessionCoordinator(database, templatePath, "LOW", 8073, lesson.Id))
+            {
+                var started = first.Start("Bé corrupt open timestamp");
+                sessionId = started.SessionId;
+                childId = started.ChildId;
+                var q1 = first.NextQuestion();
+                first.SubmitAnswerAt(q1.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700);
+                var q2 = first.NextQuestion();
+                q2Id = q2.QuestionId;
+                q2ContentId = q2.ContentQuestionId;
+                A(first.HasOpenQuestion && first.Summary.Attempts == 1,
+                    "corrupt_open_timestamp_fixture_keeps_q2_open_after_one_durable_question");
+                first.Suspend("corrupt_open_timestamp_fixture");
+            }
+
+            Exec(database,
+                "UPDATE math_session_runtime SET question_started_at_utc='definitely-not-a-date' WHERE session_id=@session;",
+                "@session", sessionId);
+            A(Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + sessionId +
+                "' AND current_question_json IS NOT NULL AND question_started_at_utc='definitely-not-a-date';") == 1,
+                "corrupt_open_timestamp_fixture_persists_invalid_question_start_time");
+
+            using (var resumed = new MathSessionCoordinator(database, templatePath, "NORMAL", 999999, lesson.Id))
+            {
+                var start = resumed.Start("Bé corrupt open timestamp");
+                A(start.ResumedExistingSession && start.SessionId == sessionId && start.ChildId == childId &&
+                  !start.RestoredOpenQuestion && start.DiscardedCorruptOpenQuestion && start.CompletedQuestionCount == 1,
+                    "corrupt_open_timestamp_self_heals_without_quarantining_session");
+                var q2 = resumed.NextQuestion();
+                A(q2.QuestionId == q2Id && q2.ContentQuestionId == q2ContentId,
+                    "corrupt_open_timestamp_regenerates_exact_q2_ordinal");
+                A(Count(database, "SELECT count(*) FROM session WHERE id='" + sessionId +
+                  "' AND state='active' AND ended_at_utc IS NULL;") == 1 &&
+                  Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + childId +
+                  "' AND lesson_id='" + lesson.Id + "' AND started_count=1 AND completed_count=0;") == 1,
+                    "corrupt_open_timestamp_keeps_session_and_lesson_start_exactly_once");
+                resumed.Suspend("corrupt_open_timestamp_future_fixture");
+            }
+
+            Exec(database,
+                "UPDATE math_session_runtime SET question_started_at_utc='2999-01-01T00:00:00.0000000Z' WHERE session_id=@session;",
+                "@session", sessionId);
+            using (var resumedFuture = new MathSessionCoordinator(database, templatePath, "LOW", 1, lesson.Id))
+            {
+                var start = resumedFuture.Start("Bé corrupt open timestamp");
+                A(start.ResumedExistingSession && start.SessionId == sessionId &&
+                  !start.RestoredOpenQuestion && start.DiscardedCorruptOpenQuestion && start.CompletedQuestionCount == 1,
+                    "future_open_timestamp_self_heals_instead_of_restoring_fake_zero_response_clock");
+                var q2 = resumedFuture.NextQuestion();
+                A(q2.QuestionId == q2Id && q2.ContentQuestionId == q2ContentId,
+                    "future_open_timestamp_regenerates_exact_q2_ordinal");
+                resumedFuture.Suspend("corrupt_open_timestamp_cleanup");
+            }
+        }
+
+        private static void TestAdaptiveCorruptOpenQuestionTimestampSelfHealsExactOrdinal(
+            string root,
+            string schemaPath,
+            string templatePath)
+        {
+            var database = NewDatabase(Path.Combine(root, "adaptive-corrupt-open-question-timestamp.db"), schemaPath);
+            string sessionId;
+            string questionId;
+            string fingerprint;
+
+            using (var first = new MathSessionCoordinator(database, templatePath, "LOW", 8074, 2))
+            {
+                var started = first.Start("Bé adaptive corrupt open timestamp");
+                sessionId = started.SessionId;
+                var question = first.NextQuestion();
+                questionId = question.QuestionId;
+                fingerprint = question.TemplateId + "|" + question.PromptVi + "|" + question.CorrectAnswerDisplay + "|" + string.Join("~", question.DisplayChoices);
+                A(first.HasOpenQuestion && first.Summary.Attempts == 0,
+                    "adaptive_corrupt_open_timestamp_fixture_keeps_q1_open_without_attempt");
+                first.Suspend("adaptive_corrupt_open_timestamp_fixture");
+            }
+
+            Exec(database,
+                "UPDATE math_session_runtime SET question_started_at_utc='not-a-real-adaptive-time' WHERE session_id=@session;",
+                "@session", sessionId);
+            using (var resumed = new MathSessionCoordinator(database, templatePath, "NORMAL", 999999, 9))
+            {
+                var start = resumed.Start("Bé adaptive corrupt open timestamp");
+                A(start.ResumedExistingSession && start.SessionId == sessionId && start.CompletedQuestionCount == 0 &&
+                  !start.RestoredOpenQuestion && start.DiscardedCorruptOpenQuestion,
+                    "adaptive_corrupt_open_timestamp_self_heals_same_session");
+                var regenerated = resumed.NextQuestion();
+                var regeneratedFingerprint = regenerated.TemplateId + "|" + regenerated.PromptVi + "|" + regenerated.CorrectAnswerDisplay + "|" + string.Join("~", regenerated.DisplayChoices);
+                A(regenerated.QuestionId == questionId && regeneratedFingerprint == fingerprint,
+                    "adaptive_corrupt_open_timestamp_regenerates_exact_q1_semantic_identity");
+                A(Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + sessionId + "';") == 0,
+                    "adaptive_corrupt_open_timestamp_writes_no_fake_attempt");
+                resumed.Suspend("adaptive_corrupt_open_timestamp_cleanup");
+            }
+        }
+
+        private static void TestCorruptSessionStartedTimestampIsQuarantined(
+            string root,
+            string schemaPath,
+            string templatePath)
+        {
+            var database = NewDatabase(Path.Combine(root, "corrupt-session-started-timestamp.db"), schemaPath);
+            string oldSessionId;
+            string childId;
+            using (var first = new MathSessionCoordinator(database, templatePath, "LOW", 8076, 2))
+            {
+                var started = first.Start("Bé corrupt session start timestamp");
+                oldSessionId = started.SessionId;
+                childId = started.ChildId;
+                first.NextQuestion();
+                first.Suspend("corrupt_session_start_timestamp_fixture");
+            }
+
+            Exec(database, "UPDATE session SET started_at_utc='not-a-date' WHERE id=@session;", "@session", oldSessionId);
+            using (var replacement = new MathSessionCoordinator(database, templatePath, "NORMAL", 8077, 2))
+            {
+                var started = replacement.Start("Bé corrupt session start timestamp");
+                A(!started.ResumedExistingSession && started.SessionId != oldSessionId && started.ChildId == childId &&
+                  started.RecoveredDanglingSessions == 1,
+                    "corrupt_session_started_timestamp_is_quarantined_not_self_healed");
+                A(Count(database, "SELECT count(*) FROM session WHERE id='" + oldSessionId +
+                  "' AND state='recovered' AND ended_at_utc IS NOT NULL;") == 1 &&
+                  Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + oldSessionId + "';") == 0,
+                    "corrupt_session_started_timestamp_removes_only_old_runtime_checkpoint");
+                replacement.Abort("corrupt_session_start_timestamp_cleanup");
             }
         }
 
