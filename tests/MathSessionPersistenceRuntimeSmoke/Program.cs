@@ -674,6 +674,16 @@ VALUES(@id,@session,@child,' ','','blank-pack-question','LEGACY_PACK_SKILL','mat
                 first.Abort("pool6_seed_a_cleanup");
             }
 
+            var seedARepeatDatabase = NewDatabase(Path.Combine(root, "pool6-seed-a-repeat.db"), schemaPath);
+            using (var repeated = new MathSessionCoordinator(seedARepeatDatabase, pack.TemplatePath, "LOW", 9101, pack.LessonId))
+            {
+                var start = repeated.Start("Bé pool sáu A lặp");
+                AssertValidSelectedSet(start, pack, "pool6_seed_a_repeat");
+                A(start.SelectedContentQuestionIds.SequenceEqual(seedASelection),
+                    "pool6_same_seed_and_lesson_selects_same_ordered_set");
+                repeated.Abort("pool6_seed_a_repeat_cleanup");
+            }
+
             var seedBDatabase = NewDatabase(Path.Combine(root, "pool6-seed-b.db"), schemaPath);
             using (var second = new MathSessionCoordinator(seedBDatabase, pack.TemplatePath, "LOW", 9102, pack.LessonId))
             {
@@ -767,6 +777,42 @@ VALUES(@id,@session,@child,' ','','blank-pack-question','LEGACY_PACK_SKILL','mat
                 A(resumed.Summary.Attempts == 3 && resumed.NextQuestion() == null,
                     "pool6_corrupt_recovery_completes_selected_three_only");
                 resumed.Abort("pool6_corrupt_cleanup");
+            }
+
+            var selectionRepairDatabase = NewDatabase(Path.Combine(root, "pool6-corrupt-selection.db"), schemaPath);
+            IList<string> selectionBeforeCorruption;
+            string selectionRepairSessionId;
+            using (var first = new MathSessionCoordinator(selectionRepairDatabase, pack.TemplatePath, "LOW", 9401, pack.LessonId))
+            {
+                var start = first.Start("Bé pool sáu selection corrupt");
+                selectionRepairSessionId = start.SessionId;
+                selectionBeforeCorruption = start.SelectedContentQuestionIds.ToList();
+                var basic = first.NextQuestion();
+                A(basic.ContentQuestionId == selectionBeforeCorruption[0],
+                    "pool6_selection_corrupt_fixture_serves_selected_basic");
+                first.SubmitAnswerAt(basic.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700);
+                Exec(selectionRepairDatabase,
+                    "UPDATE math_session_runtime SET current_selection_json=@selection WHERE session_id=@session;",
+                    "@selection", "not-json-at-all", "@session", selectionRepairSessionId);
+                first.Suspend("pool6_selection_corrupt_suspend");
+            }
+
+            using (var resumed = new MathSessionCoordinator(selectionRepairDatabase, pack.TemplatePath, "NORMAL", 987654, pack.LessonId))
+            {
+                var start = resumed.Start("Bé pool sáu selection corrupt");
+                A(start.ResumedExistingSession && start.CompletedQuestionCount == 1 && !start.RestoredOpenQuestion,
+                    "pool6_corrupt_selection_metadata_resumes_committed_progress");
+                A(start.SelectedContentQuestionIds.SequenceEqual(selectionBeforeCorruption),
+                    "pool6_corrupt_selection_metadata_rebuilds_same_deterministic_set");
+                var repairedJson = ScalarText(selectionRepairDatabase,
+                    "SELECT current_selection_json FROM math_session_runtime WHERE session_id='" + selectionRepairSessionId + "';");
+                A(!string.IsNullOrWhiteSpace(repairedJson) && repairedJson.Contains("selected_content_question_ids") &&
+                  repairedJson.Contains(selectionBeforeCorruption[1]),
+                    "pool6_corrupt_selection_metadata_is_repaired_in_checkpoint");
+                var medium = resumed.NextQuestion();
+                A(medium.ContentQuestionId == selectionBeforeCorruption[1],
+                    "pool6_corrupt_selection_metadata_continues_selected_medium_ordinal");
+                resumed.Abort("pool6_selection_corrupt_cleanup");
             }
         }
 

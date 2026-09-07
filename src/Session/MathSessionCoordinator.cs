@@ -809,14 +809,20 @@ namespace WAHU.Session
         private void SelectTargetLessonQuestionsForFreshSession()
         {
             if (_targetLesson == null || _targetQuestionPool == null) EnsureTargetLessonLoaded();
+            _selectedContentQuestionIds = BuildDeterministicTargetLessonSelection();
+            ApplySelectedTargetQuestions();
+        }
+
+        private IList<string> BuildDeterministicTargetLessonSelection()
+        {
+            if (_targetLesson == null) throw new InvalidOperationException("Targeted Math lesson is not loaded.");
             var practice = _targetLesson.PracticeSets;
-            _selectedContentQuestionIds = new List<string>
+            return new List<string>
             {
                 SelectTargetBucketQuestion(practice.Basic, "basic"),
                 SelectTargetBucketQuestion(practice.Medium, "medium"),
                 SelectTargetBucketQuestion(practice.Application, "application")
             };
-            ApplySelectedTargetQuestions();
         }
 
         private string SelectTargetBucketQuestion(IList<string> ids, string bucketName)
@@ -916,11 +922,12 @@ namespace WAHU.Session
             _forcedRepairTemplateId = string.Equals(_sessionMode, "adaptive", StringComparison.Ordinal)
                 ? runtime.ForcedRepairTemplateId : null;
             var hadPersistedLessonSelection = false;
+            var lessonSelectionMetadataNeedsRepair = false;
             if (string.Equals(_sessionMode, "lesson", StringComparison.Ordinal))
             {
-                _selectedContentQuestionIds = DeserializeLessonSelectedContentQuestionIds(runtime.CurrentSelectionJson);
-                hadPersistedLessonSelection = _selectedContentQuestionIds.Count > 0;
                 EnsureTargetLessonLoaded();
+                hadPersistedLessonSelection = TryRestorePersistedTargetSelection(
+                    runtime.CurrentSelectionJson, out lessonSelectionMetadataNeedsRepair);
                 if (!hadPersistedLessonSelection) SelectTargetLessonQuestionsForFreshSession();
                 if (_targetQuestions == null || _targetQuestions.Count != TargetedLessonQuestionCount ||
                     _targetQuestionCount != TargetedLessonQuestionCount)
@@ -942,7 +949,8 @@ namespace WAHU.Session
                     discardedCorruptOpenQuestion = true;
                     ReconcileTargetedGeneratedOrdinalAfterDiscard();
                 }
-                if (string.Equals(_sessionMode, "lesson", StringComparison.Ordinal) && !hadPersistedLessonSelection)
+                if (string.Equals(_sessionMode, "lesson", StringComparison.Ordinal) &&
+                    (!hadPersistedLessonSelection || lessonSelectionMetadataNeedsRepair))
                 {
                     try { _runtime.SaveCheckpoint(_session.SessionId, _generatedQuestionCount, _forcedRepairTemplateId, RuntimeCheckpointSelectionJson()); } catch { }
                 }
@@ -974,6 +982,15 @@ namespace WAHU.Session
                 _currentSelection = DeserializeSelection(runtime.CurrentSelectionJson, question);
                 _currentAttemptIndex = nextAttemptIndex;
                 _questionStartedAtUtc = runtime.QuestionStartedAtUtc ?? DateTime.UtcNow;
+                if (string.Equals(_sessionMode, "lesson", StringComparison.Ordinal) && lessonSelectionMetadataNeedsRepair)
+                {
+                    try
+                    {
+                        _runtime.SaveOpenQuestion(_session.SessionId, _generatedQuestionCount, _json.Serialize(question),
+                            SerializeSelection(_currentSelection), _questionStartedAtUtc, _forcedRepairTemplateId);
+                    }
+                    catch { }
+                }
                 restoredOpenQuestion = true;
             }
             catch
@@ -1199,6 +1216,39 @@ namespace WAHU.Session
                 _selectedContentQuestionIds.Distinct(StringComparer.Ordinal).Count() != TargetedLessonQuestionCount)
                 throw new InvalidOperationException("Targeted Math selected question set is not initialized.");
             data["selected_content_question_ids"] = _selectedContentQuestionIds.ToArray();
+        }
+
+        private bool TryRestorePersistedTargetSelection(string json, out bool metadataNeedsRepair)
+        {
+            metadataNeedsRepair = false;
+            if (string.IsNullOrWhiteSpace(json)) return false;
+            try
+            {
+                var persisted = DeserializeLessonSelectedContentQuestionIds(json);
+                if (persisted.Count == 0)
+                {
+                    metadataNeedsRepair = true;
+                    return false;
+                }
+                _selectedContentQuestionIds = persisted;
+                ApplySelectedTargetQuestions();
+                return true;
+            }
+            catch (ArgumentException)
+            {
+                metadataNeedsRepair = true;
+            }
+            catch (InvalidDataException)
+            {
+                metadataNeedsRepair = true;
+            }
+            catch (InvalidOperationException)
+            {
+                metadataNeedsRepair = true;
+            }
+            _selectedContentQuestionIds = new List<string>();
+            _targetQuestions = new List<MathQuestion>();
+            return false;
         }
 
         private IList<string> DeserializeLessonSelectedContentQuestionIds(string json)
