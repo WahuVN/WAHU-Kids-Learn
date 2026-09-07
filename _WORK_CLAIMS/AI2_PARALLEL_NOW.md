@@ -14,7 +14,7 @@ ACTIVE_FOCUS=FIRST_FIVE_EVENT_RUNTIME_BEHAVIOR_RESUME_REWARD
 
 - Public runtime landed: `492a942` — `MathGameEventCatalogSource`, DTO/state/action mapper, `MathGameEventCoordinator`.
 - Synthetic P0: **PASS** — exact targeted 3-question session, checkpoint progress, retry+suspend/resume, behavior action mapping, early-complete guard, Garden reward once, corrupt/missing metadata fallback, answer-transaction fault recovery, concurrent coordinator idempotency.
-- Persistence current: **7803 PASS**.
+- Persistence current: **7807 PASS**.
 - Event identity requires no migration: V1 enforces one event/lesson; resume can derive event deterministically from `target_lesson_id` when catalog is healthy.
 - Production `game_events_v1.json` published by AI1 at `bd1809e` and integrated against runtime: 5/5 production events sequential PASS; production event-1 wrong→retry→suspend/resume PASS.
 - Durable active-event precedence: nếu UI bấm event khác trong lúc một targeted event đang dở, event wrapper resume session/lesson/event durable cũ; caller lesson thường vẫn reject mismatch.
@@ -29,6 +29,7 @@ ACTIVE_FOCUS=FIRST_FIVE_EVENT_RUNTIME_BEHAVIOR_RESUME_REWARD
 - Concurrent fresh replay: hai cửa sổ cùng chơi lại sau terminal event bind cùng replay session mới; `started_count` không double, Garden reward cũ không nhân và terminal session cũ không bị resume.
 - Corrupt-catalog pending retry: event catalog hỏng giữa q2 retry vẫn fallback lesson presentation, giữ `RetryPending` + exact q2; retry-correct vẫn assisted, learning giữ nguyên và không fake reward.
 - Metadata recovery: sau fallback do catalog hỏng, khi catalog khỏe lại lần mở sau rebind game presentation vào đúng active session/checkpoint tiếp theo; selected set giữ nguyên và reward vẫn 0 cho session chưa complete.
+- No-autoplay: production event completion chỉ publish next lesson recommendation; event kế tiếp không tự tạo session/progress, chỉ Start khi bé chủ động bấm.
 
 ## PLAYABLE EVENT V1 OVERRIDE
 
@@ -85,7 +86,7 @@ Milestone: `3cf7fc6`.
 - MathDataEngineRuntimeSmoke: 104 PASS.
 - LearningSessionRuntimeSmoke: 800 PASS.
 - SQLiteRuntimeSmoke production: 179 PASS.
-- MathSessionPersistenceRuntimeSmoke current: **7803 PASS**; gồm real 402-bank breadth stress + write-failure/corruption repair + deterministic authored runtime IDs + concurrent pending-retry semantics + generated/open-ordinal self-heal + late-review transaction rollback + operational DB failure fail-safe.
+- MathSessionPersistenceRuntimeSmoke current: **7807 PASS**; gồm real 402-bank breadth stress + write-failure/corruption repair + deterministic authored runtime IDs + concurrent pending-retry semantics + generated/open-ordinal self-heal + late-review transaction rollback + operational DB failure fail-safe.
 - Real 402-bank integration đã PASS; selector breadth hiện verify đủ **67/67 lesson**, mỗi basic/medium/application bucket đều deterministic, in-range và xoay đủ 2 variant qua 16 seed.
 
 Không hard-code assertion count; regression mới chỉ được tăng hoặc nếu giảm phải có lý do rõ.

@@ -392,6 +392,15 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                     A(completion.LearningSummary.GardenGrowthSteps == eventIndex + 1 &&
                       Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + start.Session.SessionId + "';") == 1,
                         "production_game_event_grants_one_predictable_garden_reward_" + (eventIndex + 1));
+                    if (eventIndex + 1 < events.Events.Count)
+                    {
+                        var nextDefinition = events.Events[eventIndex + 1];
+                        A(completion.LearningSummary.NextLessonId == nextDefinition.TargetLessonId &&
+                          Count(database, "SELECT count(*) FROM session WHERE child_id='" + childId + "' AND state='active';") == 0 &&
+                          Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + childId +
+                          "' AND lesson_id='" + nextDefinition.TargetLessonId + "';") == 0,
+                            "production_game_event_completion_recommends_but_does_not_autoplay_next_event_" + (eventIndex + 1));
+                    }
                 }
             }
 
