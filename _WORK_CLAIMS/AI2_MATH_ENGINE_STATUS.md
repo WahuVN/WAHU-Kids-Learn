@@ -20,11 +20,12 @@ Branch: `main`
 
 - `tests/MathEngineRuntimeSmoke`: PASS — **47 assertions**.
 - `tests/MathDataEngineRuntimeSmoke`: PASS — **104 assertions** (idempotency + terminal-session guard + optimistic skill-state guard + true cross-process mastery/session contention + atomic startup + subject/child-scoped dangling recovery).
-- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **264 assertions** (authored bank + targeted lesson + prerequisite unlock + exact resume + mastery delta + next lesson + corrupt authored cursor/core-runtime recovery + retry/resume/anti-double-submit + stale coordinator/skill guards + injected write-failure rollback/retry + post-completion enrichment failure safety).
+- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **277 assertions** (authored bank + targeted lesson + prerequisite unlock + exact resume + mastery delta + next lesson + corrupt authored cursor/core-runtime recovery + retry/resume/anti-double-submit + stale coordinator/skill guards + injected write-failure rollback/retry + post-completion enrichment failure safety).
 - `tests/SQLiteRuntimeSmoke`: PASS — **179 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
 - `tests/LearningSessionRuntimeSmoke`: PASS — **800 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
 - Request 009: CLOSED tại `05cdb2a` — authored pool >=6 dùng selected set đúng 3 câu (1 basic + 1 medium + 1 application), deterministic theo seed/lesson, persisted qua checkpoint JSON; retry/resume/corrupt-open recovery giữ nguyên selected set và complete sau 3 câu. Synthetic pool-6 regression + legacy path đạt **264 assertions PASS**.
 - Request 010: CLOSED tại `7afbb7b` — authored expression preserve `allowed_operators`; `75`, `100 - 30 + 5`, `70 + 5` PASS; `15*5`, `150/2` FAIL; JSON roundtrip giữ whitelist; expression legacy không whitelist vẫn backward-compatible.
+- Request 006: CLOSED tại `3cf7fc6` — integer `answer_unit` được preserve qua authored loader -> runtime instance -> current-question JSON -> coordinator resume; raw grading vẫn chỉ nhận số, còn feedback outcome xuất `N đơn vị` cho UI. Persistence **277 assertions PASS**.
 - PowerShell release/build scripts: schema V5 payload/bootstrap expectations đã cập nhật; staged `Build-SetupArtifacts.ps1` PASS qua Release x86 + runtime smokes + staged payload/preflight + portable packaging.
 - `git diff --check` + staged `git diff --cached --check`: PASS cho wave V5.
 

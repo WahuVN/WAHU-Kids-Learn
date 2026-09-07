@@ -7,6 +7,7 @@ MANIFEST_LOCK=FREE
 BUILD_SETUP_LOCK=AI3
 REQUEST_009_READY=05cdb2a
 REQUEST_010_READY=7afbb7b
+REQUEST_006_READY=3cf7fc6
 ADAPTIVE_SEGMENT_READY=THIS_COMMIT
 
 
@@ -17,8 +18,8 @@ AI2 **không chờ AI1/AI3**. Request 009 dùng synthetic pool >=6 ngay trong en
 - DONE: Request 010 isolated at `7afbb7b` — expression whitelist + current-question JSON regression, persistence 220 PASS.
 - DONE/commit-now: adaptive `draw_segment_given_length` — LearningSession 800 PASS.
 - DONE: Request 009 at `05cdb2a` — synthetic pool >=6 selects/persists exactly 3; persistence 264 PASS.
-- NOW: Request 006 `answer_unit` model/loader/runtime/resume.
-- FALLBACK: validator/generator fuzz, retry/idempotency/corrupt-cache/persistence stress, selector determinism, V5 pack-identity regression.
+- DONE: Request 006 at `3cf7fc6` — `answer_unit` display-only survives loader/runtime/resume; raw integer grading unchanged; persistence 277 PASS.
+- NOW: validator/generator fuzz, retry/idempotency/corrupt-cache/persistence stress, selector determinism, V5 pack-identity regression.
 
 ## Mission now
 
