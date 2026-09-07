@@ -185,6 +185,8 @@ Latest runtime result: **49/49 PASS**; pool-6 regression **8/8 PASS**; full `Mat
 - `602bec7` — `Toán: nâng chất lượng đáp án nhiễu nhận dạng`
 - `def7313` — `Toán: nâng thêm câu vận dụng theo hướng chuyển giao`
 - `c7c2905` — `Toán: tăng chiều sâu câu vận dụng còn yếu`
+- `49329b3` — `feat(toán): dựng shadow pool 402 câu cho 67 bài`
+- `68145ea` — `feat(toán): publish ngân hàng 402 câu cho 67 bài`
 
 ## Pool-6 runtime publish — COMPLETE
 
