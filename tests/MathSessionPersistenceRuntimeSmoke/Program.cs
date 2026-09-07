@@ -4,6 +4,7 @@ using System.Data.SQLite;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Web.Script.Serialization;
 using WAHU.Content;
 using WAHU.Data;
@@ -83,6 +84,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestGameEventResumeRestoresExplicitRepairBeforeStateTransition(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventDifferentSelectionResumesDurableActiveEvent(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventRewardFaultReconcilesOnNextStart(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
+                TestGameEventConcurrentRewardReconcileIsIdempotent(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventTerminalRuntimeCleanupReconcilesOnNextStart(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventCommitFaultPreservesCheckpoint(root, schemaPath, templatePath, lessonCatalogPath);
                 TestGameEventConcurrentCoordinatorsStayIdempotent(root, schemaPath, templatePath, lessonCatalogPath);
@@ -763,6 +765,97 @@ BEGIN SELECT RAISE(ABORT,'game event injected reward failure'); END;");
             A(SessionState(database, secondSessionId) == "active" &&
               Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + secondSessionId + "';") == 0,
                 "game_event_reward_reconcile_never_rewards_active_session");
+        }
+
+        private static void TestGameEventConcurrentRewardReconcileIsIdempotent(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath,
+            string gameEventPath)
+        {
+            var events = new MathGameEventCatalogSource().Load(gameEventPath, lessonCatalogPath);
+            var firstEvent = events.Events[0];
+            var secondEvent = events.Events[1];
+            var database = NewDatabase(Path.Combine(root, "game-event-reward-concurrent-reconcile.db"), schemaPath);
+            string sessionId;
+            string childId;
+
+            Exec(database, @"CREATE TRIGGER fail_concurrent_reward_seed BEFORE INSERT ON reward_event
+BEGIN SELECT RAISE(ABORT,'game event injected concurrent reward seed failure'); END;");
+            using (var game = new MathGameEventCoordinator(database, templatePath, gameEventPath, "LOW", 15221,
+                firstEvent.Id, firstEvent.TargetLessonId))
+            {
+                var start = game.Start("Bé concurrent reward reconcile");
+                sessionId = start.Session.SessionId;
+                childId = start.Session.ChildId;
+                for (var ordinal = 0; ordinal < 3; ordinal++)
+                {
+                    var question = game.NextQuestion();
+                    game.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700 + ordinal * 100);
+                }
+                var completion = game.Complete();
+                A(completion.LearningSummary.LessonCompleted && completion.LearningSummary.GardenGrowthSteps == 0 &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + sessionId + "';") == 0,
+                    "game_event_concurrent_reward_fixture_has_completed_learning_and_missing_reward");
+            }
+            Exec(database, "DROP TRIGGER fail_concurrent_reward_seed;");
+
+            var workerA = new LearningDatabase(database.DatabasePath, schemaPath);
+            var workerB = new LearningDatabase(database.DatabasePath, schemaPath);
+            var gate = new ManualResetEvent(false);
+            var readyA = new ManualResetEvent(false);
+            var readyB = new ManualResetEvent(false);
+            Exception errorA = null;
+            Exception errorB = null;
+            var repairedA = -1;
+            var repairedB = -1;
+            var threadA = new Thread(() =>
+            {
+                readyA.Set();
+                gate.WaitOne();
+                try { repairedA = new GameWorldRewardService(workerA).ReconcileMissingCompletedMathSessionRewards(childId); }
+                catch (Exception ex) { errorA = ex; }
+            });
+            var threadB = new Thread(() =>
+            {
+                readyB.Set();
+                gate.WaitOne();
+                try { repairedB = new GameWorldRewardService(workerB).ReconcileMissingCompletedMathSessionRewards(childId); }
+                catch (Exception ex) { errorB = ex; }
+            });
+            threadA.Start();
+            threadB.Start();
+            A(readyA.WaitOne(5000) && readyB.WaitOne(5000),
+                "game_event_concurrent_reward_reconcile_workers_ready");
+            gate.Set();
+            A(threadA.Join(10000) && threadB.Join(10000),
+                "game_event_concurrent_reward_reconcile_workers_finish");
+            gate.Dispose();
+            readyA.Dispose();
+            readyB.Dispose();
+
+            A(errorA == null && errorB == null && repairedA + repairedB == 1,
+                "game_event_concurrent_reward_reconcile_creates_exactly_one_reward_without_worker_error");
+            A(Count(database, "SELECT count(*) FROM reward_event WHERE child_id='" + childId +
+              "' AND reward_type='garden_growth' AND source_ref='" + sessionId + "';") == 1 &&
+              Count(database, "SELECT count(*) FROM inventory WHERE child_id='" + childId +
+              "' AND item_id='garden_seedling';") == 1,
+                "game_event_concurrent_reward_reconcile_keeps_reward_and_first_milestone_unique");
+            var progress = new GameWorldRewardService(database).ReadProgress(childId);
+            A(progress.GrowthSteps == 1 && progress.CompletedMathSessions == 1 &&
+              progress.UnlockedItems.Count(x => x == "garden_seedling") == 1,
+                "game_event_concurrent_reward_reconcile_progress_is_consistent");
+
+            using (var next = new MathGameEventCoordinator(database, templatePath, gameEventPath, "LOW", 15222,
+                secondEvent.Id, secondEvent.TargetLessonId))
+            {
+                var start = next.Start("Bé concurrent reward reconcile");
+                A(!start.Session.ResumedExistingSession && start.Session.TargetLessonId == secondEvent.TargetLessonId &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + sessionId + "';") == 1,
+                    "game_event_concurrent_reward_reconcile_next_event_starts_without_duplicate_repair");
+                next.SuspendForBreak("concurrent_reward_reconcile_cleanup");
+            }
         }
 
         private static void TestGameEventTerminalRuntimeCleanupReconcilesOnNextStart(
