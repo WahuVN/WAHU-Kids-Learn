@@ -23,6 +23,14 @@ ID_RE = re.compile(r"^[a-z0-9][a-z0-9_]{2,127}$")
 EXPECTED_CURRICULUM_ID = "vn_moet_math_grade2_tt32_2018"
 EXPECTED_BASELINE_STATUS = "VERIFIED_A_BASELINE"
 REQUIRED_BASELINE_SOURCE_IDS = {"MOET_TT32_2018", "TT32_FULL_ANNEX_MIRROR"}
+EXPECTED_BASELINE_HARD_GUARDS = {
+    "max_number_baseline": 1000,
+    "max_carry_or_borrow_rounds": 1,
+    "official_multiplication_tables": [2, 5],
+    "official_division_tables": [2, 5],
+    "mental_add_sub_max": 20,
+    "clock_minute_hand_allowed_numbers_for_baseline_tasks": [3, 6],
+}
 DIFFICULTIES = {"basic", "medium", "application"}
 ENGINE_ANSWER_KINDS = {"integer", "interaction_integer", "number", "decimal", "fraction", "text", "unit", "expression"}
 GRADE2_USED_ANSWER_KINDS = {"integer", "interaction_integer", "text", "unit", "expression"}
@@ -1062,6 +1070,20 @@ def baseline_traceability_violations(baseline: object) -> list[str]:
     return violations
 
 
+def baseline_hard_guard_violations(baseline: object) -> list[str]:
+    if not isinstance(baseline, dict):
+        return ["baseline_not_object"]
+    hard_guards = baseline.get("hard_guards")
+    if not isinstance(hard_guards, dict):
+        return ["baseline_hard_guards_missing"]
+    violations: list[str] = []
+    for key, expected in EXPECTED_BASELINE_HARD_GUARDS.items():
+        actual = hard_guards.get(key)
+        if actual != expected:
+            violations.append(f"baseline_hard_guard_mismatch:{key}:{actual!r}")
+    return violations
+
+
 def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tuple[list[str], dict]:
     errors: list[str] = []
     baseline = load_json(baseline_path, errors)
@@ -1071,6 +1093,7 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
         return errors, {}
 
     errors.extend(baseline_traceability_violations(baseline))
+    errors.extend(baseline_hard_guard_violations(baseline))
 
     for root, name in ((catalog, "lesson_catalog"), (bank, "question_bank")):
         if root.get("schema_version") != 1:

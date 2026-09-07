@@ -291,6 +291,18 @@ class MathContentDataSmoke(unittest.TestCase):
                 serialized = json.dumps(item, ensure_ascii=False)
                 self.assertEqual([], validator.grade2_operation_scope_violations(serialized))
 
+    def test_baseline_hard_guards_are_locked(self):
+        self.assertEqual([], validator.baseline_hard_guard_violations(self.baseline))
+        broken = dict(self.baseline)
+        broken_guards = dict(self.baseline["hard_guards"])
+        broken_guards["official_multiplication_tables"] = [2, 3, 5]
+        broken["hard_guards"] = broken_guards
+        violations = validator.baseline_hard_guard_violations(broken)
+        self.assertTrue(any(x.startswith("baseline_hard_guard_mismatch:official_multiplication_tables:") for x in violations))
+        broken = dict(self.baseline)
+        broken["hard_guards"] = None
+        self.assertEqual(["baseline_hard_guards_missing"], validator.baseline_hard_guard_violations(broken))
+
     def test_child_facing_core_surfaces_have_readability_bounds(self):
         for lesson in self.lessons:
             self.assertLessEqual(len(lesson["title_vi"]), validator.MAX_LESSON_TITLE_CHARS)
