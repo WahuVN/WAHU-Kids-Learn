@@ -1,2 +1,6 @@
 # Manifest-hashed content must keep exact repository bytes on every checkout.
 content_packs/english_grade2_v1/verified_core_v1.json -text
+content_packs/math_grade2_v1/verified_templates_v1.json text eol=crlf
+content_packs/math_grade2_v1/lesson_catalog_v1.json text eol=crlf
+content_packs/math_grade2_v1/question_bank_v1.json text eol=crlf
+content_packs/math_grade2_v1/game_events_v1.json text eol=lf

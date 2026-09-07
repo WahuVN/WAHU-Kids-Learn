@@ -77,6 +77,7 @@ try {
         'content_packs\math_grade2_v1\verified_templates_v1.json',
         'content_packs\math_grade2_v1\lesson_catalog_v1.json',
         'content_packs\math_grade2_v1\question_bank_v1.json',
+        'content_packs\math_grade2_v1\game_events_v1.json',
         'content_packs\english_grade2_v1\manifest.json',
         'WAHU.SetupPreflight.exe'
     )

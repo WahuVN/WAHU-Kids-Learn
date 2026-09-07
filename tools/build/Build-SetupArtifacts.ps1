@@ -77,6 +77,7 @@ $schemaSource = Join-Path $root 'data\schema\001_initial.sql'
 $mathTemplateSource = Join-Path $root 'content_packs\math_grade2_v1\verified_templates_v1.json'
 $mathLessonCatalogSource = Join-Path $root 'content_packs\math_grade2_v1\lesson_catalog_v1.json'
 $mathQuestionBankSource = Join-Path $root 'content_packs\math_grade2_v1\question_bank_v1.json'
+$mathGameEventSource = Join-Path $root 'content_packs\math_grade2_v1\game_events_v1.json'
 Require-File $preflightSmoke
 Require-File $behaviorSmoke
 Require-File $learningSessionSmoke
@@ -92,6 +93,7 @@ Require-File $schemaSource
 Require-File $mathTemplateSource
 Require-File $mathLessonCatalogSource
 Require-File $mathQuestionBankSource
+Require-File $mathGameEventSource
 
 Write-Host '[2/15] Setup preflight smoke'
 $preflightAssertions = Invoke-SmokeWithAssertions -Name 'SetupPreflight smoke' -Path $preflightSmoke -PassPrefix 'SETUP_PREFLIGHT_SMOKE_PASS'
@@ -178,7 +180,7 @@ Copy-Item 'assets\verified_vectors' (Join-Path $publish 'assets') -Recurse -Forc
 Copy-Item 'data\schema\*.sql' (Join-Path $publish 'data\schema') -Force
 
 # Hard deployment guards: these must be in the actual staged installer payload.
-foreach ($name in @('WAHU.Learning.dll','WAHU.Motion.dll','WAHU.Content.dll','WAHU.Audio.dll','WAHU.Security.dll','WAHU.Performance.dll','WAHU.Session.dll','WAHU.Data.dll','WAHU.Updater.exe','System.Data.SQLite.dll','e_sqlite3.dll','data\schema\001_initial.sql','data\schema\002_attempt_immutability.sql','data\schema\003_math_attempt_idempotency_runtime.sql','data\schema\004_math_lesson_progress.sql','data\schema\005_math_runtime_pack_identity.sql','content_packs\math_grade2_v1\verified_templates_v1.json','content_packs\math_grade2_v1\lesson_catalog_v1.json','content_packs\math_grade2_v1\question_bank_v1.json')) {
+foreach ($name in @('WAHU.Learning.dll','WAHU.Motion.dll','WAHU.Content.dll','WAHU.Audio.dll','WAHU.Security.dll','WAHU.Performance.dll','WAHU.Session.dll','WAHU.Data.dll','WAHU.Updater.exe','System.Data.SQLite.dll','e_sqlite3.dll','data\schema\001_initial.sql','data\schema\002_attempt_immutability.sql','data\schema\003_math_attempt_idempotency_runtime.sql','data\schema\004_math_lesson_progress.sql','data\schema\005_math_runtime_pack_identity.sql','content_packs\math_grade2_v1\verified_templates_v1.json','content_packs\math_grade2_v1\lesson_catalog_v1.json','content_packs\math_grade2_v1\question_bank_v1.json','content_packs\math_grade2_v1\game_events_v1.json')) {
     Require-File (Join-Path $publish $name)
 }
 
