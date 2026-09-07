@@ -1354,20 +1354,46 @@ BEGIN SELECT RAISE(ABORT,'game event injected mastery failure'); END;");
                             "game_event_concurrent_replay_keeps_checkpoint_in_sync_" + ordinal);
                     }
 
-                    var completed = first.Complete();
-                    A(completed.LearningSummary.LessonCompleted && completed.EventState.IsComplete &&
+                    MathGameEventCompletionResult completionA = null;
+                    MathGameEventCompletionResult completionB = null;
+                    Exception completionErrorA = null;
+                    Exception completionErrorB = null;
+                    var completionGate = new ManualResetEvent(false);
+                    var completionReadyA = new ManualResetEvent(false);
+                    var completionReadyB = new ManualResetEvent(false);
+                    var completionThreadA = new Thread(() =>
+                    {
+                        completionReadyA.Set();
+                        completionGate.WaitOne();
+                        try { completionA = first.Complete(); } catch (Exception ex) { completionErrorA = ex; }
+                    });
+                    var completionThreadB = new Thread(() =>
+                    {
+                        completionReadyB.Set();
+                        completionGate.WaitOne();
+                        try { completionB = second.Complete(); } catch (Exception ex) { completionErrorB = ex; }
+                    });
+                    completionThreadA.Start();
+                    completionThreadB.Start();
+                    A(completionReadyA.WaitOne(5000) && completionReadyB.WaitOne(5000),
+                        "game_event_concurrent_completion_workers_ready");
+                    completionGate.Set();
+                    A(completionThreadA.Join(10000) && completionThreadB.Join(10000),
+                        "game_event_concurrent_completion_workers_finish");
+                    completionGate.Dispose();
+                    completionReadyA.Dispose();
+                    completionReadyB.Dispose();
+
+                    A((completionA != null || completionB != null) &&
+                      (completionErrorA == null || completionErrorB == null) &&
                       Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + firstStart.Session.SessionId + "';") == 3 &&
                       Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + firstStart.Session.SessionId + "';") == 3,
-                        "game_event_concurrent_three_checkpoints_write_no_duplicate_learning_events");
-                    A(Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + firstStart.Session.SessionId + "';") == 1,
-                        "game_event_concurrent_winner_completion_grants_one_reward");
-
-                    var staleCompletionRejected = false;
-                    try { second.Complete(); }
-                    catch (Exception) { staleCompletionRejected = true; }
-                    A(staleCompletionRejected &&
-                      Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + firstStart.Session.SessionId + "';") == 1,
-                        "game_event_concurrent_stale_completion_cannot_duplicate_reward");
+                        "game_event_concurrent_completion_preserves_exact_learning_chain");
+                    A(SessionState(database, firstStart.Session.SessionId) == "completed" &&
+                      Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + firstStart.Session.SessionId + "';") == 1 &&
+                      Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + firstStart.Session.ChildId +
+                      "' AND lesson_id='" + lesson.Id + "' AND completed_count=1;") == 1,
+                        "game_event_concurrent_completion_terminalizes_progress_and_reward_exactly_once");
                 }
             }
         }
