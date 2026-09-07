@@ -656,7 +656,7 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
             "đường thẳng": "Vòng cung có sự uốn cong nên không thể là đường thẳng.",
             "đoạn thẳng": "Vòng cung không phải phần thẳng giữa hai đầu mút nên không phải đoạn thẳng.",
             "điểm": "Vòng cung là một nét có chiều dài và đổi hướng, không phải một điểm đơn lẻ.",
-            "nét đó vẫn là đường thẳng vì có đoạn đi thẳng": "Chỉ cần nét đã uốn và đổi hướng thì nó có phần đường cong; một đoạn đi thẳng không làm toàn nét trở thành đường thẳng.",
+            "nét đó vẫn là đường thẳng vì có đoạn đi thẳng": "Nét đã uốn thì có phần đường cong; một đoạn đi thẳng không làm cả nét trở thành đường thẳng.",
             "nét đó phải khép kín mới là đường cong": "Đường cong không bắt buộc khép kín; một nét uốn mở vẫn là đường cong.",
             "nét đó là một điểm vì không có cạnh": "Điểm chỉ là một vị trí; nét đã kéo dài và uốn sang bên nên không thể là một điểm.",
         }
@@ -758,8 +758,8 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
             "một điểm": "Ghép hai tam giác theo cạnh tạo một hình có diện tích, không thể thu lại thành một điểm đơn lẻ.",
             "một khối cầu": "Hai tam giác phẳng ghép theo cạnh vẫn tạo hình phẳng, không tự biến thành một khối cầu ba chiều.",
             "một đường thẳng vô hạn": "Hai tam giác là các hình hữu hạn; ghép chúng không thể tạo một đường thẳng kéo dài vô hạn.",
-            "chỉ đặt hai đỉnh chạm nhau rồi để hở cạnh": "Chỉ chạm tại một đỉnh vẫn để biên hình hở; muốn tạo tứ giác kín cần ghép các cạnh phù hợp sát nhau.",
-            "chồng khít hai tam giác lên cùng một vị trí": "Chồng hai mảnh lên nhau không ghép diện tích thành một tứ giác mới; cần đặt hai mảnh kề nhau theo cạnh.",
+            "chỉ đặt hai đỉnh chạm nhau rồi để hở cạnh": "Chỉ chạm một đỉnh vẫn để hình hở; muốn kín phải ghép hai cạnh sát nhau.",
+            "chồng khít hai tam giác lên cùng một vị trí": "Chồng hai mảnh không tạo tứ giác mới; cần đặt kề nhau theo cạnh.",
             "để hai tam giác cách xa nhau": "Hai mảnh cách xa nhau không tạo thành một hình kín chung.",
         }
         if label in reasons: return reasons[label]

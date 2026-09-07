@@ -4449,7 +4449,7 @@
         {
           "id": "a",
           "text": "Nét đó vẫn là đường thẳng vì có đoạn đi thẳng",
-          "rationale_vi": "“Nét đó vẫn là đường thẳng vì có đoạn đi thẳng” chưa đúng. Chỉ cần nét đã uốn và đổi hướng thì nó có phần đường cong; một đoạn đi thẳng không làm toàn nét trở thành đường thẳng. Nét đã uốn và đổi hướng nên có phần đường cong; đường cong không bắt buộc phải khép kín. Vậy đáp án là Nét đó có phần đường cong vì đã đổi hướng."
+          "rationale_vi": "“Nét đó vẫn là đường thẳng vì có đoạn đi thẳng” chưa đúng. Nét đã uốn thì có phần đường cong; một đoạn đi thẳng không làm cả nét trở thành đường thẳng. Nét đã uốn và đổi hướng nên có phần đường cong; đường cong không bắt buộc phải khép kín. Vậy đáp án là Nét đó có phần đường cong vì đã đổi hướng."
         },
         {
           "id": "b",
@@ -5633,12 +5633,12 @@
         {
           "id": "a",
           "text": "Chỉ đặt hai đỉnh chạm nhau rồi để hở cạnh",
-          "rationale_vi": "“Chỉ đặt hai đỉnh chạm nhau rồi để hở cạnh” chưa đúng. Chỉ chạm tại một đỉnh vẫn để biên hình hở; muốn tạo tứ giác kín cần ghép các cạnh phù hợp sát nhau. Muốn tạo một hình kín mới, cần ghép các cạnh phù hợp sát nhau mà không chồng hai mảnh lên nhau. Vậy đáp án là Đặt hai cạnh phù hợp sát nhau để hai mảnh không chồng lên nhau."
+          "rationale_vi": "“Chỉ đặt hai đỉnh chạm nhau rồi để hở cạnh” chưa đúng. Chỉ chạm một đỉnh vẫn để hình hở; muốn kín phải ghép hai cạnh sát nhau. Muốn tạo một hình kín mới, cần ghép các cạnh phù hợp sát nhau mà không chồng hai mảnh lên nhau. Vậy đáp án là Đặt hai cạnh phù hợp sát nhau để hai mảnh không chồng lên nhau."
         },
         {
           "id": "b",
           "text": "Chồng khít hai tam giác lên cùng một vị trí",
-          "rationale_vi": "“Chồng khít hai tam giác lên cùng một vị trí” chưa đúng. Chồng hai mảnh lên nhau không ghép diện tích thành một tứ giác mới; cần đặt hai mảnh kề nhau theo cạnh. Muốn tạo một hình kín mới, cần ghép các cạnh phù hợp sát nhau mà không chồng hai mảnh lên nhau. Vậy đáp án là Đặt hai cạnh phù hợp sát nhau để hai mảnh không chồng lên nhau."
+          "rationale_vi": "“Chồng khít hai tam giác lên cùng một vị trí” chưa đúng. Chồng hai mảnh không tạo tứ giác mới; cần đặt kề nhau theo cạnh. Muốn tạo một hình kín mới, cần ghép các cạnh phù hợp sát nhau mà không chồng hai mảnh lên nhau. Vậy đáp án là Đặt hai cạnh phù hợp sát nhau để hai mảnh không chồng lên nhau."
         },
         {
           "id": "c",

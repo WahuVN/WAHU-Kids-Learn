@@ -40,6 +40,7 @@ NUMERIC_EQUALITY_RES = (
 MIN_QUESTION_EXPLANATION_CHARS = 32
 MIN_CONCEPT_DEFINITION_CHARS = 40
 MAX_HINT_CHARS = 130
+MAX_DISTRACTOR_RATIONALE_CHARS = 300
 MAX_APPLICATION_LOWER_SHAPE_SIMILARITY = 0.75
 GENERIC_SECOND_HINT = "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
 SHALLOW_FIRST_HINT_MARKER = "nhớ kiến thức:"
@@ -429,7 +430,7 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
             "đường thẳng": "Vòng cung có sự uốn cong nên không thể là đường thẳng.",
             "đoạn thẳng": "Vòng cung không phải phần thẳng giữa hai đầu mút nên không phải đoạn thẳng.",
             "điểm": "Vòng cung là một nét có chiều dài và đổi hướng, không phải một điểm đơn lẻ.",
-            "nét đó vẫn là đường thẳng vì có đoạn đi thẳng": "Chỉ cần nét đã uốn và đổi hướng thì nó có phần đường cong; một đoạn đi thẳng không làm toàn nét trở thành đường thẳng.",
+            "nét đó vẫn là đường thẳng vì có đoạn đi thẳng": "Nét đã uốn thì có phần đường cong; một đoạn đi thẳng không làm cả nét trở thành đường thẳng.",
             "nét đó phải khép kín mới là đường cong": "Đường cong không bắt buộc khép kín; một nét uốn mở vẫn là đường cong.",
             "nét đó là một điểm vì không có cạnh": "Điểm chỉ là một vị trí; nét đã kéo dài và uốn sang bên nên không thể là một điểm.",
         }
@@ -531,8 +532,8 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
             "một điểm": "Ghép hai tam giác theo cạnh tạo một hình có diện tích, không thể thu lại thành một điểm đơn lẻ.",
             "một khối cầu": "Hai tam giác phẳng ghép theo cạnh vẫn tạo hình phẳng, không tự biến thành một khối cầu ba chiều.",
             "một đường thẳng vô hạn": "Hai tam giác là các hình hữu hạn; ghép chúng không thể tạo một đường thẳng kéo dài vô hạn.",
-            "chỉ đặt hai đỉnh chạm nhau rồi để hở cạnh": "Chỉ chạm tại một đỉnh vẫn để biên hình hở; muốn tạo tứ giác kín cần ghép các cạnh phù hợp sát nhau.",
-            "chồng khít hai tam giác lên cùng một vị trí": "Chồng hai mảnh lên nhau không ghép diện tích thành một tứ giác mới; cần đặt hai mảnh kề nhau theo cạnh.",
+            "chỉ đặt hai đỉnh chạm nhau rồi để hở cạnh": "Chỉ chạm một đỉnh vẫn để hình hở; muốn kín phải ghép hai cạnh sát nhau.",
+            "chồng khít hai tam giác lên cùng một vị trí": "Chồng hai mảnh không tạo tứ giác mới; cần đặt kề nhau theo cạnh.",
             "để hai tam giác cách xa nhau": "Hai mảnh cách xa nhau không tạo thành một hình kín chung.",
         }
         if label in reasons: return reasons[label]
@@ -1530,6 +1531,8 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
                 if not structured_reason and not component_marker:
                     errors.append(f"missing_choice_specific_diagnosis:{where}:{cid}:{text}")
                 distractor_rationale_counts[normalized_rationale] += 1
+                if len(normalized_rationale) > MAX_DISTRACTOR_RATIONALE_CHARS:
+                    errors.append(f"distractor_rationale_too_long:{where}:{cid}:{len(normalized_rationale)}")
                 if normalized_rationale == GENERIC_DISTRACTOR_RATIONALE:
                     errors.append(f"generic_distractor_rationale:{where}:{cid}")
                 if any(marker in normalized_rationale.casefold() for marker in SHALLOW_DISTRACTOR_RATIONALE_MARKERS):

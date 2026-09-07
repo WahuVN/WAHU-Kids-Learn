@@ -525,6 +525,7 @@ class MathContentDataSmoke(unittest.TestCase):
                 if choice["id"] != item["correct_choice_id"]:
                     rationale = " ".join(choice["rationale_vi"].split())
                     rationales.append(rationale)
+                    self.assertLessEqual(len(rationale), validator.MAX_DISTRACTOR_RATIONALE_CHARS)
                     self.assertIn(reason, rationale)
                     self.assertTrue(all(marker not in rationale.casefold() for marker in validator.SHALLOW_DISTRACTOR_RATIONALE_MARKERS))
                     structured_reason = validator.structured_choice_reason(
