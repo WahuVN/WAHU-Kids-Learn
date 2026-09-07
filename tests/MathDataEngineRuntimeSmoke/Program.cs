@@ -21,6 +21,10 @@ namespace WAHU.MathDataEngineRuntimeSmoke
                 return RunSessionWorker(args);
             if (args != null && args.Length > 0 && string.Equals(args[0], "--runtime-session-worker", StringComparison.Ordinal))
                 return RunRuntimeSessionWorker(args);
+            if (args != null && args.Length > 0 && string.Equals(args[0], "--recovery-worker", StringComparison.Ordinal))
+                return RunRecoveryWorker(args);
+            if (args != null && args.Length > 0 && string.Equals(args[0], "--terminal-cleanup-worker", StringComparison.Ordinal))
+                return RunTerminalCleanupWorker(args);
 
             var root = Path.Combine(Path.GetTempPath(), "wahu-math-data-smoke-" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(root);
@@ -34,6 +38,9 @@ namespace WAHU.MathDataEngineRuntimeSmoke
                 TestCrossProcessConcurrentSkillWrites(root, sourceSchema);
                 TestCrossProcessSingleActiveSessionGuard(root, sourceSchema);
                 TestCrossProcessAtomicMathRuntimeStart(root, sourceSchema);
+                TestCrossProcessRecoveryDoesNotReclaimLiveRuntime(root, sourceSchema);
+                TestCrossProcessRecoveryCannotSplitAtomicStart(root, sourceSchema);
+                TestCrossProcessTerminalCleanupPreservesFreshRuntime(root, sourceSchema);
                 TestRuntimePackIdentityArgumentValidation(root, sourceSchema);
                 TestTargetedAtomicStartRollsBackOnProgressFailure(root, sourceSchema);
                 TestDanglingRecoveryIsScopedToMath(root, sourceSchema);
@@ -630,6 +637,203 @@ namespace WAHU.MathDataEngineRuntimeSmoke
                 Console.Error.WriteLine("ATOMIC_RUNTIME_WORKER_FAIL " + ex);
                 return 3;
             }
+        }
+
+        private static Process StartMaintenanceWorker(string mode, string exePath, string dbPath, string schemaPath, string childId, string gatePath)
+        {
+            var info = new ProcessStartInfo
+            {
+                FileName = exePath,
+                Arguments = QuoteArg(mode) + " " + QuoteArg(dbPath) + " " + QuoteArg(schemaPath) + " " +
+                    QuoteArg(childId) + " " + QuoteArg(gatePath),
+                WorkingDirectory = Path.GetDirectoryName(exePath),
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            };
+            var process = Process.Start(info);
+            if (process == null) throw new InvalidOperationException("Could not start MathData maintenance worker.");
+            return process;
+        }
+
+        private static int RunRecoveryWorker(string[] args)
+        {
+            if (args == null || args.Length != 5) return 96;
+            var deadline = DateTime.UtcNow.AddSeconds(15);
+            while (!File.Exists(args[4]) && DateTime.UtcNow < deadline) Thread.Sleep(10);
+            if (!File.Exists(args[4])) return 97;
+            try
+            {
+                var database = new LearningDatabase(args[1], args[2]);
+                var recovered = new LearnerSessionService(database).RecoverDanglingSessions(args[3]);
+                Console.WriteLine("RECOVERY_WORKER_RECOVERED " + recovered.ToString(CultureInfo.InvariantCulture));
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("RECOVERY_WORKER_FAIL " + ex);
+                return 3;
+            }
+        }
+
+        private static int RunTerminalCleanupWorker(string[] args)
+        {
+            if (args == null || args.Length != 5) return 98;
+            var deadline = DateTime.UtcNow.AddSeconds(15);
+            while (!File.Exists(args[4]) && DateTime.UtcNow < deadline) Thread.Sleep(10);
+            if (!File.Exists(args[4])) return 99;
+            try
+            {
+                var database = new LearningDatabase(args[1], args[2]);
+                var deleted = new MathSessionRuntimeService(database).DeleteTerminalCheckpoints(args[3]);
+                Console.WriteLine("TERMINAL_CLEANUP_WORKER_DELETED " + deleted.ToString(CultureInfo.InvariantCulture));
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("TERMINAL_CLEANUP_WORKER_FAIL " + ex);
+                return 3;
+            }
+        }
+
+        private static void TestCrossProcessRecoveryDoesNotReclaimLiveRuntime(string root, string sourceSchema)
+        {
+            var schemaDir = Path.Combine(root, "schema-recovery-vs-live-commit");
+            CopySchemas(sourceSchema, schemaDir);
+            var schemaPath = Path.Combine(schemaDir, "001_initial.sql");
+            var dbPath = Path.Combine(root, "recovery-vs-live-commit.db");
+            var database = new LearningDatabase(dbPath, schemaPath);
+            database.Initialize("DELETE");
+            var sessions = new LearnerSessionService(database);
+            var profile = sessions.EnsurePrimaryChild("Bé recovery live runtime");
+            var runtime = new MathSessionRuntimeService(database);
+            var active = runtime.TryCreateSession(profile.ChildId, "LOW", 8801, 8, "adaptive", null);
+            A(active != null, "recovery_live_runtime_fixture_starts_atomic_session");
+
+            var gatePath = Path.Combine(root, "recovery-live-go.flag");
+            var exePath = Assembly.GetExecutingAssembly().Location;
+            using (var commit = StartCommitWorker(exePath, dbPath, schemaPath, profile.ChildId, active.SessionId,
+                "recovery-live-attempt", "recovery-live-question", gatePath))
+            using (var recovery = StartMaintenanceWorker("--recovery-worker", exePath, dbPath, schemaPath, profile.ChildId, gatePath))
+            {
+                File.WriteAllText(gatePath, "go");
+                var commitExited = commit.WaitForExit(20000);
+                var recoveryExited = recovery.WaitForExit(20000);
+                if (!commitExited) { try { commit.Kill(); } catch { } }
+                if (!recoveryExited) { try { recovery.Kill(); } catch { } }
+                var commitOutput = commit.StandardOutput.ReadToEnd() + commit.StandardError.ReadToEnd();
+                var recoveryOutput = recovery.StandardOutput.ReadToEnd() + recovery.StandardError.ReadToEnd();
+                A(commitExited && recoveryExited && commit.ExitCode == 0 && recovery.ExitCode == 0,
+                    "recovery_live_runtime_workers_finish_without_lock_failure outputs=" + commitOutput.Trim() + " | " + recoveryOutput.Trim());
+                A(recoveryOutput.Contains("RECOVERY_WORKER_RECOVERED 0"),
+                    "recovery_live_runtime_never_reclaims_session_with_runtime_marker");
+            }
+
+            using (var c = database.OpenConnection())
+            {
+                A(Count(c, "SELECT count(*) FROM session WHERE id='" + active.SessionId + "' AND state='active' AND ended_at_utc IS NULL;") == 1 &&
+                  Count(c, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + active.SessionId + "';") == 1,
+                    "recovery_live_runtime_keeps_owner_session_active_and_resumable");
+                A(Count(c, "SELECT count(*) FROM attempt WHERE session_id='" + active.SessionId + "';") == 1 &&
+                  Count(c, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + active.SessionId + "';") == 1,
+                    "recovery_live_runtime_allows_concurrent_answer_learning_commit");
+            }
+            sessions.CompleteSession(active.SessionId, true, "{}", "{}");
+            runtime.Delete(active.SessionId);
+        }
+
+        private static void TestCrossProcessRecoveryCannotSplitAtomicStart(string root, string sourceSchema)
+        {
+            var schemaDir = Path.Combine(root, "schema-recovery-vs-atomic-start");
+            CopySchemas(sourceSchema, schemaDir);
+            var schemaPath = Path.Combine(schemaDir, "001_initial.sql");
+            var dbPath = Path.Combine(root, "recovery-vs-atomic-start.db");
+            var database = new LearningDatabase(dbPath, schemaPath);
+            database.Initialize("DELETE");
+            var sessions = new LearnerSessionService(database);
+            var profile = sessions.EnsurePrimaryChild("Bé recovery atomic start");
+            var gatePath = Path.Combine(root, "recovery-start-go.flag");
+            var exePath = Assembly.GetExecutingAssembly().Location;
+
+            using (var starter = StartRuntimeSessionWorker(exePath, dbPath, schemaPath, profile.ChildId, gatePath))
+            using (var recovery = StartMaintenanceWorker("--recovery-worker", exePath, dbPath, schemaPath, profile.ChildId, gatePath))
+            {
+                File.WriteAllText(gatePath, "go");
+                var startExited = starter.WaitForExit(20000);
+                var recoveryExited = recovery.WaitForExit(20000);
+                if (!startExited) { try { starter.Kill(); } catch { } }
+                if (!recoveryExited) { try { recovery.Kill(); } catch { } }
+                var startOutput = starter.StandardOutput.ReadToEnd() + starter.StandardError.ReadToEnd();
+                var recoveryOutput = recovery.StandardOutput.ReadToEnd() + recovery.StandardError.ReadToEnd();
+                A(startExited && recoveryExited && starter.ExitCode == 0 && recovery.ExitCode == 0,
+                    "recovery_atomic_start_workers_finish_without_lock_failure outputs=" + startOutput.Trim() + " | " + recoveryOutput.Trim());
+                A(recoveryOutput.Contains("RECOVERY_WORKER_RECOVERED 0"),
+                    "recovery_atomic_start_never_observes_half_created_session");
+            }
+
+            string activeSessionId;
+            using (var c = database.OpenConnection())
+            {
+                A(Count(c, "SELECT count(*) FROM session s JOIN math_session_runtime r ON r.session_id=s.id WHERE s.child_id='" + profile.ChildId + "' AND s.state='active' AND s.ended_at_utc IS NULL;") == 1 &&
+                  Count(c, "SELECT count(*) FROM session s LEFT JOIN math_session_runtime r ON r.session_id=s.id WHERE s.child_id='" + profile.ChildId + "' AND s.state='active' AND s.ended_at_utc IS NULL AND r.session_id IS NULL;") == 0,
+                    "recovery_atomic_start_commits_session_and_runtime_as_one_visible_unit");
+                activeSessionId = Convert.ToString(Scalar(c,
+                    "SELECT s.id FROM session s JOIN math_session_runtime r ON r.session_id=s.id WHERE s.child_id='" + profile.ChildId + "' AND s.state='active' LIMIT 1;"), CultureInfo.InvariantCulture);
+            }
+            sessions.CompleteSession(activeSessionId, true, "{}", "{}");
+            new MathSessionRuntimeService(database).Delete(activeSessionId);
+        }
+
+        private static void TestCrossProcessTerminalCleanupPreservesFreshRuntime(string root, string sourceSchema)
+        {
+            var schemaDir = Path.Combine(root, "schema-cleanup-vs-fresh-start");
+            CopySchemas(sourceSchema, schemaDir);
+            var schemaPath = Path.Combine(schemaDir, "001_initial.sql");
+            var dbPath = Path.Combine(root, "cleanup-vs-fresh-start.db");
+            var database = new LearningDatabase(dbPath, schemaPath);
+            database.Initialize("DELETE");
+            var sessions = new LearnerSessionService(database);
+            var profile = sessions.EnsurePrimaryChild("Bé cleanup fresh runtime");
+            var runtime = new MathSessionRuntimeService(database);
+            var terminal = runtime.TryCreateSession(profile.ChildId, "LOW", 8802, 8, "adaptive", null);
+            A(terminal != null, "cleanup_fresh_start_fixture_creates_old_runtime");
+            sessions.CompleteSession(terminal.SessionId, false, "{}", "{}");
+            using (var c = database.OpenConnection())
+                A(Count(c, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + terminal.SessionId + "';") == 1,
+                    "cleanup_fresh_start_fixture_leaves_terminal_runtime_stale");
+
+            var gatePath = Path.Combine(root, "cleanup-fresh-start-go.flag");
+            var exePath = Assembly.GetExecutingAssembly().Location;
+            using (var starter = StartRuntimeSessionWorker(exePath, dbPath, schemaPath, profile.ChildId, gatePath))
+            using (var cleanup = StartMaintenanceWorker("--terminal-cleanup-worker", exePath, dbPath, schemaPath, profile.ChildId, gatePath))
+            {
+                File.WriteAllText(gatePath, "go");
+                var startExited = starter.WaitForExit(20000);
+                var cleanupExited = cleanup.WaitForExit(20000);
+                if (!startExited) { try { starter.Kill(); } catch { } }
+                if (!cleanupExited) { try { cleanup.Kill(); } catch { } }
+                var startOutput = starter.StandardOutput.ReadToEnd() + starter.StandardError.ReadToEnd();
+                var cleanupOutput = cleanup.StandardOutput.ReadToEnd() + cleanup.StandardError.ReadToEnd();
+                A(startExited && cleanupExited && starter.ExitCode == 0 && cleanup.ExitCode == 0,
+                    "cleanup_fresh_start_workers_finish_without_lock_failure outputs=" + startOutput.Trim() + " | " + cleanupOutput.Trim());
+                A(cleanupOutput.Contains("TERMINAL_CLEANUP_WORKER_DELETED 1"),
+                    "cleanup_fresh_start_deletes_exactly_old_terminal_checkpoint");
+            }
+
+            string freshSessionId;
+            using (var c = database.OpenConnection())
+            {
+                A(Count(c, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + terminal.SessionId + "';") == 0,
+                    "cleanup_fresh_start_removes_old_terminal_runtime");
+                A(Count(c, "SELECT count(*) FROM session s JOIN math_session_runtime r ON r.session_id=s.id WHERE s.child_id='" + profile.ChildId + "' AND s.state='active' AND s.ended_at_utc IS NULL;") == 1 &&
+                  Count(c, "SELECT count(*) FROM math_session_runtime;") == 1,
+                    "cleanup_fresh_start_preserves_only_new_active_runtime");
+                freshSessionId = Convert.ToString(Scalar(c,
+                    "SELECT s.id FROM session s JOIN math_session_runtime r ON r.session_id=s.id WHERE s.child_id='" + profile.ChildId + "' AND s.state='active' LIMIT 1;"), CultureInfo.InvariantCulture);
+            }
+            sessions.CompleteSession(freshSessionId, true, "{}", "{}");
+            runtime.Delete(freshSessionId);
         }
 
         private static void TestTargetedAtomicStartRollsBackOnProgressFailure(string root, string sourceSchema)
