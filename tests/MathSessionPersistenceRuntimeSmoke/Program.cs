@@ -290,6 +290,24 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                   Count(fallbackDb, "SELECT count(*) FROM reward_event WHERE child_id='" + fallbackChildId + "';") == 0,
                     "game_event_corrupt_metadata_fallback_loses_no_learning_and_grants_no_fake_reward");
             }
+
+            WriteSyntheticGameEventCatalog(eventPath, eventId, lesson.Id, lesson.SkillId);
+            using (var restoredEvent = new MathGameEventCoordinator(fallbackDb, templatePath, eventPath, "NORMAL", 999999, null, lesson.Id))
+            {
+                var start = restoredEvent.Start("Bé event fallback");
+                A(start.Session.ResumedExistingSession && start.Session.SessionId == fallbackSessionId &&
+                  start.Session.CompletedQuestionCount == 2 && start.Session.SelectedContentQuestionIds.SequenceEqual(fallbackSelected),
+                    "game_event_metadata_recovery_resumes_same_learning_session_after_fallback");
+                A(start.Event != null && start.Event.Id == eventId && start.EventState.EventPresentationAvailable &&
+                  !start.EventState.FallbackToLessonPresentation && start.EventState.CompletedCheckpointCount == 2 &&
+                  start.EventState.CurrentCheckpointNumber == 3,
+                    "game_event_metadata_recovery_restores_event_presentation_at_exact_checkpoint");
+                var q3 = restoredEvent.NextQuestion();
+                A(q3.ContentQuestionId == fallbackSelected[2] &&
+                  Count(fallbackDb, "SELECT count(*) FROM reward_event WHERE child_id='" + fallbackChildId + "';") == 0,
+                    "game_event_metadata_recovery_keeps_selected_q3_and_no_fake_reward");
+                restoredEvent.SuspendForBreak("metadata_recovery_cleanup");
+            }
         }
 
         private static void TestGameEventStaleIdFallsBackToLessonEvent(
