@@ -2,15 +2,35 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
+using WAHU.Performance;
 
 namespace WAHUKidsLearn
 {
+    internal static class GameArtMotionPolicy
+    {
+        public static bool AllowsDecorativeMotion(RuntimePerformanceSettings performance, bool learningFocus)
+        {
+            if (performance == null || performance.Profile == PerformanceProfileKind.LOW || learningFocus) return false;
+            return performance.DecorativeMotionAllowedOutsideLearningFocus;
+        }
+
+        public static int IntervalFor(RuntimePerformanceSettings performance, int fallbackIntervalMs)
+        {
+            if (performance == null || performance.MotionFpsCap <= 0) return fallbackIntervalMs;
+            var capInterval = (int)Math.Ceiling(1000d / performance.MotionFpsCap);
+            return Math.Max(fallbackIntervalMs, capInterval);
+        }
+    }
+
     internal sealed class RescueHeroArtControl : Control
     {
         private readonly Timer _timer;
+        private readonly bool _motionAllowed;
         private int _frame;
 
-        public RescueHeroArtControl()
+        public RescueHeroArtControl() : this(null) { }
+
+        public RescueHeroArtControl(RuntimePerformanceSettings performance)
         {
             SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint |
                      ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw |
@@ -18,9 +38,21 @@ namespace WAHUKidsLearn
             BackColor = Color.Transparent;
             AccessibleName = "Minh họa hành trình cứu hộ";
             AccessibleDescription = "Thỏ và rô-bốt cùng đi qua ba chặng Toán để tới rương sao.";
-            _timer = new Timer { Interval = 90 };
-            _timer.Tick += delegate { _frame = (_frame + 1) % 80; if (Visible) Invalidate(); };
-            _timer.Start();
+            _motionAllowed = GameArtMotionPolicy.AllowsDecorativeMotion(performance, false);
+            _timer = new Timer { Interval = GameArtMotionPolicy.IntervalFor(performance, 90) };
+            _timer.Tick += delegate { _frame = (_frame + 1) % 80; Invalidate(); };
+        }
+
+        internal bool MotionAllowed { get { return _motionAllowed; } }
+        internal bool AnimationRunning { get { return _timer.Enabled; } }
+
+        protected override void OnHandleCreated(EventArgs e) { base.OnHandleCreated(e); UpdateAnimationState(); }
+        protected override void OnHandleDestroyed(EventArgs e) { _timer.Stop(); base.OnHandleDestroyed(e); }
+        protected override void OnVisibleChanged(EventArgs e) { base.OnVisibleChanged(e); UpdateAnimationState(); }
+
+        private void UpdateAnimationState()
+        {
+            _timer.Enabled = _motionAllowed && IsHandleCreated && Visible && !IsDisposed && !Disposing;
         }
 
         protected override void Dispose(bool disposing)
@@ -185,18 +217,33 @@ namespace WAHUKidsLearn
     {
         public enum Mood { Neutral, Correct, Retry, Hint }
         private readonly Timer _timer;
+        private readonly bool _motionAllowed;
         private int _frame;
         private Mood _mood;
 
         public Mood VisualMood { get { return _mood; } set { _mood = value; AccessibleDescription = MoodDescription(value); Invalidate(); } }
 
-        public GameFeedbackFxControl()
+        public GameFeedbackFxControl() : this(null, true) { }
+
+        public GameFeedbackFxControl(RuntimePerformanceSettings performance, bool learningFocus)
         {
             SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw, true);
             AccessibleName = "Hiệu ứng phản hồi học tập";
-            _timer = new Timer { Interval = 85 };
-            _timer.Tick += delegate { _frame = (_frame + 1) % 72; if (Visible) Invalidate(); };
-            _timer.Start();
+            _motionAllowed = GameArtMotionPolicy.AllowsDecorativeMotion(performance, learningFocus);
+            _timer = new Timer { Interval = GameArtMotionPolicy.IntervalFor(performance, 85) };
+            _timer.Tick += delegate { _frame = (_frame + 1) % 72; Invalidate(); };
+        }
+
+        internal bool MotionAllowed { get { return _motionAllowed; } }
+        internal bool AnimationRunning { get { return _timer.Enabled; } }
+
+        protected override void OnHandleCreated(EventArgs e) { base.OnHandleCreated(e); UpdateAnimationState(); }
+        protected override void OnHandleDestroyed(EventArgs e) { _timer.Stop(); base.OnHandleDestroyed(e); }
+        protected override void OnVisibleChanged(EventArgs e) { base.OnVisibleChanged(e); UpdateAnimationState(); }
+
+        private void UpdateAnimationState()
+        {
+            _timer.Enabled = _motionAllowed && IsHandleCreated && Visible && !IsDisposed && !Disposing;
         }
 
         protected override void Dispose(bool disposing) { if (disposing) _timer.Dispose(); base.Dispose(disposing); }
@@ -247,16 +294,31 @@ namespace WAHUKidsLearn
     internal sealed class GardenRewardArtControl : Control
     {
         private readonly Timer _timer;
+        private readonly bool _motionAllowed;
         private int _frame;
 
-        public GardenRewardArtControl()
+        public GardenRewardArtControl() : this(null) { }
+
+        public GardenRewardArtControl(RuntimePerformanceSettings performance)
         {
             SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw, true);
             AccessibleName = "Minh họa vườn phần thưởng";
             AccessibleDescription = "Mầm cây lớn lên cùng sao và hoa khi hoàn thành nhiệm vụ.";
-            _timer = new Timer { Interval = 100 };
-            _timer.Tick += delegate { _frame = (_frame + 1) % 80; if (Visible) Invalidate(); };
-            _timer.Start();
+            _motionAllowed = GameArtMotionPolicy.AllowsDecorativeMotion(performance, false);
+            _timer = new Timer { Interval = GameArtMotionPolicy.IntervalFor(performance, 100) };
+            _timer.Tick += delegate { _frame = (_frame + 1) % 80; Invalidate(); };
+        }
+
+        internal bool MotionAllowed { get { return _motionAllowed; } }
+        internal bool AnimationRunning { get { return _timer.Enabled; } }
+
+        protected override void OnHandleCreated(EventArgs e) { base.OnHandleCreated(e); UpdateAnimationState(); }
+        protected override void OnHandleDestroyed(EventArgs e) { _timer.Stop(); base.OnHandleDestroyed(e); }
+        protected override void OnVisibleChanged(EventArgs e) { base.OnVisibleChanged(e); UpdateAnimationState(); }
+
+        private void UpdateAnimationState()
+        {
+            _timer.Enabled = _motionAllowed && IsHandleCreated && Visible && !IsDisposed && !Disposing;
         }
 
         protected override void Dispose(bool disposing) { if (disposing) _timer.Dispose(); base.Dispose(disposing); }

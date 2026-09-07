@@ -265,7 +265,7 @@ namespace WAHUKidsLearn
             missionStory.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 55));
             missionStory.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 45));
             missionStory.Controls.Add(_missionSummary, 0, 0);
-            missionStory.Controls.Add(new RescueHeroArtControl
+            missionStory.Controls.Add(new RescueHeroArtControl(_performance)
             {
                 Dock = DockStyle.Fill,
                 Margin = new Padding(8, 4, 0, 6)

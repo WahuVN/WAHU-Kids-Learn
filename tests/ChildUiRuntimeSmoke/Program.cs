@@ -51,6 +51,7 @@ namespace WAHU.ChildUiRuntimeSmoke
             TestRetryResumeUiFlow(appAssembly);
             TestInteractionRetryUiFlow(appAssembly);
             TestInteractiveSegmentAnswer(appAssembly);
+            TestGameArtMotionPolicy(appAssembly);
             TestBasicControls(appAssembly);
 
             Console.WriteLine("CHILD_UI_RUNTIME_SMOKE_PASS assertions=" + _assertions);
@@ -3528,6 +3529,90 @@ END;");
             }
         }
 
+        private static void TestGameArtMotionPolicy(Assembly appAssembly)
+        {
+            var low = new RuntimePerformanceSettings
+            {
+                Profile = PerformanceProfileKind.LOW,
+                MotionFpsCap = 18,
+                DecorativeMotionAllowedOutsideLearningFocus = false
+            };
+            var normal = new RuntimePerformanceSettings
+            {
+                Profile = PerformanceProfileKind.NORMAL,
+                MotionFpsCap = 30,
+                DecorativeMotionAllowedOutsideLearningFocus = true
+            };
+
+            var heroType = appAssembly.GetType("WAHUKidsLearn.RescueHeroArtControl", true);
+            var heroCtor = heroType.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                null, new[] { typeof(RuntimePerformanceSettings) }, null);
+            A(heroCtor != null, "game_art_hero_accepts_runtime_performance_settings");
+
+            using (var lowHero = (Control)heroCtor.Invoke(new object[] { low }))
+            {
+                lowHero.Size = new Size(240, 140);
+                lowHero.CreateControl();
+                Invoke(lowHero, "UpdateAnimationState");
+                A(!Get<bool>(lowHero, "MotionAllowed") && !Get<bool>(lowHero, "AnimationRunning"),
+                    "game_art_low_profile_keeps_decorative_hero_static");
+            }
+
+            using (var normalHero = (Control)heroCtor.Invoke(new object[] { normal }))
+            {
+                normalHero.Size = new Size(240, 140);
+                normalHero.CreateControl();
+                Invoke(normalHero, "UpdateAnimationState");
+                A(Get<bool>(normalHero, "MotionAllowed") && Get<bool>(normalHero, "AnimationRunning"),
+                    "game_art_normal_profile_allows_visible_outside_focus_animation");
+                normalHero.Visible = false;
+                A(!Get<bool>(normalHero, "AnimationRunning"),
+                    "game_art_hidden_control_stops_animation_timer");
+                normalHero.Visible = true;
+                Invoke(normalHero, "UpdateAnimationState");
+                A(Get<bool>(normalHero, "AnimationRunning"),
+                    "game_art_visible_control_resumes_animation_timer");
+            }
+
+            var feedbackType = appAssembly.GetType("WAHUKidsLearn.GameFeedbackFxControl", true);
+            var feedbackCtor = feedbackType.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                null, new[] { typeof(RuntimePerformanceSettings), typeof(bool) }, null);
+            A(feedbackCtor != null, "game_art_feedback_accepts_learning_focus_policy");
+            using (var feedback = (Control)feedbackCtor.Invoke(new object[] { normal, true }))
+            {
+                feedback.Size = new Size(86, 70);
+                feedback.CreateControl();
+                Invoke(feedback, "UpdateAnimationState");
+                A(!Get<bool>(feedback, "MotionAllowed") && !Get<bool>(feedback, "AnimationRunning"),
+                    "game_art_learning_focus_feedback_stays_static_on_normal_profile");
+            }
+
+            var gardenType = appAssembly.GetType("WAHUKidsLearn.GardenRewardArtControl", true);
+            var gardenCtor = gardenType.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                null, new[] { typeof(RuntimePerformanceSettings) }, null);
+            A(gardenCtor != null, "game_art_garden_accepts_runtime_performance_settings");
+            using (var garden = (Control)gardenCtor.Invoke(new object[] { normal }))
+            {
+                garden.Size = new Size(240, 120);
+                garden.CreateControl();
+                Invoke(garden, "UpdateAnimationState");
+                A(Get<bool>(garden, "MotionAllowed") && Get<bool>(garden, "AnimationRunning"),
+                    "game_art_completion_can_animate_outside_learning_focus");
+                garden.Visible = false;
+                A(!Get<bool>(garden, "AnimationRunning"),
+                    "game_art_hidden_garden_stops_animation_timer");
+            }
+
+            var repo = Directory.GetCurrentDirectory();
+            var homeSource = File.ReadAllText(Path.Combine(repo, "src", "App", "MainForm.cs"));
+            var rescueSource = File.ReadAllText(Path.Combine(repo, "src", "App", "MathQuickRescueForm.cs"));
+            var lessonSource = File.ReadAllText(Path.Combine(repo, "src", "App", "MathLessonForm.cs"));
+            A(homeSource.IndexOf("new RescueHeroArtControl(_performance)", StringComparison.Ordinal) >= 0 &&
+              rescueSource.IndexOf("new RescueHeroArtControl(_performance)", StringComparison.Ordinal) >= 0 &&
+              lessonSource.IndexOf("new GameFeedbackFxControl(_performance, true)", StringComparison.Ordinal) >= 0 &&
+              lessonSource.IndexOf("new GardenRewardArtControl(_performance)", StringComparison.Ordinal) >= 0,
+                "game_art_forms_wire_runtime_performance_settings");
+        }
         private static void TestBasicControls(Assembly appAssembly)
         {
             using (var button = CreateInternalControl(appAssembly, "WAHUKidsLearn.AnswerChoiceButton"))

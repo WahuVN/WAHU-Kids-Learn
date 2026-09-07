@@ -502,7 +502,7 @@ namespace WAHUKidsLearn
                 AccessibleName = "Câu chuyện nhiệm vụ cứu hộ"
             };
             introLayout.Controls.Add(_intro, 0, 1);
-            var heroArt = new RescueHeroArtControl
+            var heroArt = new RescueHeroArtControl(_performance)
             {
                 Dock = DockStyle.Fill,
                 Margin = new Padding(12, 0, 0, 8)

@@ -409,8 +409,8 @@ namespace WAHUKidsLearn
             feedbackLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
             _companion = new CompanionReactionControl { Dock = DockStyle.Fill, Margin = new Padding(0) };
             var feedbackFxHost = new Panel { Dock = DockStyle.Fill, BackColor = Color.Transparent, Margin = new Padding(2, 0, 8, 0) };
-            _feedbackFx = new GameFeedbackFxControl { Dock = DockStyle.Fill, VisualMood = GameFeedbackFxControl.Mood.Neutral };
-            _gardenRewardFx = new GardenRewardArtControl { Dock = DockStyle.Fill, Visible = false };
+            _feedbackFx = new GameFeedbackFxControl(_performance, true) { Dock = DockStyle.Fill, VisualMood = GameFeedbackFxControl.Mood.Neutral };
+            _gardenRewardFx = new GardenRewardArtControl(_performance) { Dock = DockStyle.Fill, Visible = false };
             feedbackFxHost.Controls.Add(_gardenRewardFx);
             feedbackFxHost.Controls.Add(_feedbackFx);
             _feedback = new Label
