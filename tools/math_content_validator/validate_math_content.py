@@ -32,6 +32,7 @@ TIME_OUT_OF_SCOPE_ARITH_RE = re.compile(r"\b\d+\s*(?:×|\*|÷|/|:)\s*\d+\b")
 GRADE2_MUL_LITERAL_RE = re.compile(r"(?<!\d)(\d+)\s*(?:×|\*)\s*(\d+)(?!\d)")
 GRADE2_DIV_LITERAL_RE = re.compile(r"(?<!\d)(\d+)(?:\s*÷\s*|\s+:\s+)(\d+)(?!\d)")
 NUMERIC_CHOICE_EXPR_RE = re.compile(r"^[\d\s+\-−–*/×÷:().,]+$")
+NUMERIC_RELATION_RE = re.compile(r"(?=(?<!\d)([+-]?\d+)\s*(<=|>=|≤|≥|<|>)\s*([+-]?\d+)(?!\d))")
 NUMERIC_EQUALITY_RES = (
     re.compile(r"(?<!\d)((?:\d+\s*(?:[+\-×*÷])\s*)+\d+)\s*=\s*(-?\d+)(?!\d)"),
     re.compile(r"(?<!\d)((?:\d+\s+:\s+)+\d+)\s*=\s*(-?\d+)(?!\d)"),
@@ -884,6 +885,39 @@ def validate_numeric_equalities(text: str, where: str, errors: list[str]) -> Non
         errors.append(f"invalid_instructional_numeric_equality:{where}:{expression}={expected}:actual={actual}")
 
 
+def invalid_numeric_relations(text: str) -> list[tuple[int, str, int]]:
+    if not isinstance(text, str) or not text:
+        return []
+    violations: list[tuple[int, str, int]] = []
+    for match in NUMERIC_RELATION_RE.finditer(text):
+        left = int(match.group(1))
+        operator = match.group(2)
+        right = int(match.group(3))
+        valid = {
+            "<": left < right,
+            ">": left > right,
+            "<=": left <= right,
+            "≤": left <= right,
+            ">=": left >= right,
+            "≥": left >= right,
+        }[operator]
+        if not valid:
+            violations.append((left, operator, right))
+    return violations
+
+
+def validate_numeric_relations(text: str, where: str, errors: list[str]) -> None:
+    for left, operator, right in invalid_numeric_relations(text):
+        errors.append(f"invalid_instructional_numeric_relation:{where}:{left}{operator}{right}")
+
+
+def rationale_instructional_body(choice_text: str, rationale: str) -> str:
+    if not isinstance(rationale, str):
+        return ""
+    prefix = f"“{choice_text}” chưa đúng. "
+    return rationale[len(prefix):] if rationale.startswith(prefix) else rationale
+
+
 def normalize_choice_text(text: str) -> str:
     if not isinstance(text, str):
         return ""
@@ -1080,6 +1114,7 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
         required_text(lesson, "title_vi", where, errors)
         lesson_explanation = required_text(lesson, "explanation_vi", where, errors)
         validate_numeric_equalities(lesson_explanation, where + ".explanation_vi", errors)
+        validate_numeric_relations(lesson_explanation, where + ".explanation_vi", errors)
         serialized_lesson = json.dumps(lesson, ensure_ascii=False)
         for violation in grade2_operation_scope_violations(serialized_lesson):
             errors.append(f"out_of_scope_grade2_operation:{where}:{violation}")
@@ -1114,6 +1149,7 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             if concept_definition and len(concept_definition) < MIN_CONCEPT_DEFINITION_CHARS:
                 errors.append(f"concept_definition_too_short:{cwhere}:{len(concept_definition)}")
             validate_numeric_equalities(concept_definition, cwhere + ".definition_vi", errors)
+            validate_numeric_relations(concept_definition, cwhere + ".definition_vi", errors)
         examples = required_list(lesson, "worked_examples", where, errors)
         for j, example in enumerate(examples):
             ewhere = f"{where}.example[{j}]"
@@ -1125,11 +1161,13 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             required_text(example, "prompt_vi", ewhere, errors)
             answer = required_text(example, "answer", ewhere, errors)
             validate_numeric_equalities(answer, ewhere + ".answer", errors)
+            validate_numeric_relations(answer, ewhere + ".answer", errors)
             solution_steps = required_list(example, "solution_steps_vi", ewhere, errors)
             if solution_steps:
                 for step_index, step in enumerate(solution_steps):
                     if isinstance(step, str):
                         validate_numeric_equalities(step, f"{ewhere}.solution_steps_vi[{step_index}]", errors)
+                        validate_numeric_relations(step, f"{ewhere}.solution_steps_vi[{step_index}]", errors)
             if answer and solution_steps and all(isinstance(step, str) for step in solution_steps):
                 answer_evidence = normalize_prompt_identity(answer)
                 solution_evidence = normalize_prompt_identity(" ".join(solution_steps))
@@ -1244,12 +1282,17 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             all_question_prompts.append((lid, qid, prompt))
         explanation = required_text(q, "explanation_vi", where, errors)
         validate_numeric_equalities(explanation, where + ".explanation_vi", errors)
+        validate_numeric_relations(explanation, where + ".explanation_vi", errors)
         if SHALLOW_NUMERIC_EXPLANATION_MARKER in explanation.casefold():
             errors.append(f"shallow_numeric_explanation:{where}")
         if explanation and len(explanation) < MIN_QUESTION_EXPLANATION_CHARS:
             errors.append(f"question_explanation_too_short:{where}:{len(explanation)}")
         if explanation and not explanation_states_answer(q, explanation):
             errors.append(f"question_explanation_missing_answer_evidence:{where}:{question_answer_display(q)[:80]}")
+        correct_answer_text = q.get("correct_answer")
+        if isinstance(correct_answer_text, str):
+            validate_numeric_equalities(correct_answer_text, where + ".correct_answer", errors)
+            validate_numeric_relations(correct_answer_text, where + ".correct_answer", errors)
         serialized_question = json.dumps(q, ensure_ascii=False)
         for violation in grade2_operation_scope_violations(serialized_question):
             errors.append(f"out_of_scope_grade2_operation:{where}:{violation}")
@@ -1282,6 +1325,7 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
         else:
             for hint_index, hint_text in enumerate(hints):
                 validate_numeric_equalities(hint_text, f"{where}.hints_vi[{hint_index}]", errors)
+                validate_numeric_relations(hint_text, f"{where}.hints_vi[{hint_index}]", errors)
                 if len(hint_text.strip()) > MAX_HINT_CHARS:
                     errors.append(f"hint_too_long:{where}:{hint_index + 1}:{len(hint_text.strip())}")
                 if hint_reveals_unseen_answer(q, hint_text):
@@ -1472,6 +1516,8 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
                 if correct_text != choice_texts[correct_index]:
                     errors.append(f"correct_choice_text_mismatch:{where}:{correct_id}:{correct_text!r}")
             for cid, text, rationale in zip(choice_ids, choice_texts, choice_rationales):
+                relation_body = rationale if cid == correct_id else rationale_instructional_body(text, rationale)
+                validate_numeric_relations(relation_body, where + f".choice[{cid}].rationale_vi", errors)
                 if cid == correct_id:
                     continue
                 normalized_rationale = " ".join(rationale.split())

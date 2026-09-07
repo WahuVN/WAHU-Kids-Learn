@@ -206,21 +206,36 @@ class MathContentDataSmoke(unittest.TestCase):
         self.assertEqual([], validator.invalid_numeric_equalities("20 : 5 = 4."))
         self.assertNotEqual([], validator.invalid_numeric_equalities("500 + 0 + 7 = 508."))
         self.assertNotEqual([], validator.invalid_numeric_equalities("20 : 5 = 5."))
+        self.assertEqual([], validator.invalid_numeric_relations("203 < 230 < 302 < 320."))
+        self.assertEqual([], validator.invalid_numeric_relations("540 > 504 > 450 > 405."))
+        self.assertNotEqual([], validator.invalid_numeric_relations("540 < 504."))
+        self.assertNotEqual([], validator.invalid_numeric_relations("203 >= 230."))
 
         for lesson in self.lessons:
             self.assertEqual([], validator.invalid_numeric_equalities(lesson["explanation_vi"]))
+            self.assertEqual([], validator.invalid_numeric_relations(lesson["explanation_vi"]))
             for concept in lesson["concepts"]:
                 self.assertEqual([], validator.invalid_numeric_equalities(concept["definition_vi"]))
+                self.assertEqual([], validator.invalid_numeric_relations(concept["definition_vi"]))
             for example in lesson["worked_examples"]:
                 self.assertEqual([], validator.invalid_numeric_equalities(example["answer"]))
+                self.assertEqual([], validator.invalid_numeric_relations(example["answer"]))
                 for step in example["solution_steps_vi"]:
                     self.assertEqual([], validator.invalid_numeric_equalities(step))
+                    self.assertEqual([], validator.invalid_numeric_relations(step))
         for item in self.questions:
             self.assertEqual([], validator.invalid_numeric_equalities(item["explanation_vi"]))
+            self.assertEqual([], validator.invalid_numeric_relations(item["explanation_vi"]))
+            if isinstance(item.get("correct_answer"), str):
+                self.assertEqual([], validator.invalid_numeric_relations(item["correct_answer"]))
             for hint in item["hints_vi"]:
                 self.assertEqual([], validator.invalid_numeric_equalities(hint))
+                self.assertEqual([], validator.invalid_numeric_relations(hint))
             for choice in item.get("choices", []):
                 self.assertEqual([], validator.invalid_numeric_equalities(choice["rationale_vi"]))
+                relation_body = (choice["rationale_vi"] if choice["id"] == item.get("correct_choice_id")
+                                 else validator.rationale_instructional_body(choice["text"], choice["rationale_vi"]))
+                self.assertEqual([], validator.invalid_numeric_relations(relation_body))
 
     def test_expression_validator_fails_closed(self):
         self.assertEqual(validator.Fraction(75, 1), validator.eval_restricted_expression("100 - 30 + 5"))

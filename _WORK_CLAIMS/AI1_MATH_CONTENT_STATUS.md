@@ -88,7 +88,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - mục tiêu học đầu tiên dùng placeholder `Nhận biết và thực hiện đúng nội dung:` hoặc bị tái dùng quá mức;
 - mục tiêu học thứ hai generic/placeholder hoặc bị tái dùng quá mức;
 - explanation câu hỏi quá ngắn, không đủ bước giải thích/kiểm tra cho feedback học tập;
-- phương trình số trong lesson explanation / concept definition / worked answer+solution / question explanation / **mọi hint / mọi choice rationale** bị sai giá trị; regression test quét toàn bộ các field này;
+- phương trình số **và quan hệ so sánh số** (`<`, `>`, `<=`, `>=`, `≤`, `≥`) trong lesson explanation / concept definition / worked answer+solution / question explanation / correct answer / **mọi hint / phần instructional của mọi choice rationale** bị sai giá trị; distractor sai cố ý ở đầu rationale được strip trước khi kiểm quan hệ; corpus hiện có **73 quan hệ instructional, 0 vi phạm**;
 - prompt trùng/gần trùng giữa hai lesson khác nhau, tránh lãng phí ngân hàng câu hỏi;
 - application có cùng khung câu với basic/medium chỉ bằng cách đổi số (`shape similarity >= 0.75`); gate so toàn bộ application bucket với toàn bộ lower-difficulty bucket nên tương thích Request 009 nhiều câu/bucket;
 - MCQ trùng nghĩa sau normalize Unicode/case/whitespace hoặc hai biểu thức choice cho cùng giá trị số;
