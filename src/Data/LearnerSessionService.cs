@@ -155,6 +155,24 @@ WHERE id=@id AND state IN ('started','active');";
             });
         }
 
+        public bool IsCompletedMathSession(string childId, string sessionId)
+        {
+            Require(childId, "childId");
+            Require(sessionId, "sessionId");
+            using (var connection = _database.OpenConnection())
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = @"SELECT 1 FROM session
+WHERE id=@session AND child_id=@child AND planned_subject='math'
+  AND state='completed' AND ended_at_utc IS NOT NULL
+LIMIT 1;";
+                command.Parameters.AddWithValue("@session", sessionId);
+                command.Parameters.AddWithValue("@child", childId);
+                var value = command.ExecuteScalar();
+                return value != null && value != DBNull.Value;
+            }
+        }
+
         public IDictionary<string, SkillSnapshot> LoadSkillSnapshots(string childId, string subject)
         {
             Require(childId, "childId");

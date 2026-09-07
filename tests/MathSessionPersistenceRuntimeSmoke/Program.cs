@@ -61,6 +61,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestTargetedConcurrentCoordinatorsCannotDuplicateOrdinal(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedConcurrentPendingRetryKeepsFirstTrySemantics(root, schemaPath, templatePath, lessonCatalogPath);
                 TestAdaptiveConcurrentCoordinatorsShareSemanticOrdinalId(root, schemaPath, templatePath);
+                TestAdaptiveDuplicateCompletionConvergesWithoutFalseError(root, schemaPath, templatePath);
                 TestTargetedResumeDiscardsStaleConcurrentOrdinalCache(root, schemaPath, templatePath, lessonCatalogPath);
                 TestRetryAwareAnswerFlow(root, schemaPath, templatePath);
                 TestRetryWrongFinalizesOnce(root, schemaPath, templatePath);
@@ -101,6 +102,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestGameEventTerminalRuntimeCleanupReconcilesOnNextStart(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventCommitFaultPreservesCheckpoint(root, schemaPath, templatePath, lessonCatalogPath);
                 TestGameEventConcurrentCoordinatorsStayIdempotent(root, schemaPath, templatePath, lessonCatalogPath);
+                TestGameEventConcurrentCompletionRejectsAbortedTerminal(root, schemaPath, templatePath, lessonCatalogPath);
                 TestGameEventCompleteVsSuspendRaceStaysTerminal(root, schemaPath, templatePath, lessonCatalogPath);
                 Console.WriteLine("MATH_SESSION_PERSISTENCE_RUNTIME_SMOKE_PASS assertions=" + _assertions);
                 return 0;
@@ -1958,17 +1960,65 @@ BEGIN SELECT RAISE(ABORT,'game event injected mastery failure'); END;");
                     completionReadyA.Dispose();
                     completionReadyB.Dispose();
 
-                    A((completionA != null || completionB != null) &&
-                      (completionErrorA == null || completionErrorB == null) &&
+                    A(completionA != null && completionB != null &&
+                      completionErrorA == null && completionErrorB == null &&
+                      completionA.EventState.IsComplete && completionB.EventState.IsComplete &&
+                      completionA.LearningSummary.LessonCompleted && completionB.LearningSummary.LessonCompleted &&
                       Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + firstStart.Session.SessionId + "';") == 3 &&
                       Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + firstStart.Session.SessionId + "';") == 3,
-                        "game_event_concurrent_completion_preserves_exact_learning_chain");
+                        "game_event_concurrent_completion_converges_both_wrappers_without_false_error");
                     A(SessionState(database, firstStart.Session.SessionId) == "completed" &&
                       Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + firstStart.Session.SessionId + "';") == 1 &&
                       Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + firstStart.Session.ChildId +
                       "' AND lesson_id='" + lesson.Id + "' AND completed_count=1;") == 1,
                         "game_event_concurrent_completion_terminalizes_progress_and_reward_exactly_once");
                 }
+            }
+        }
+
+        private static void TestGameEventConcurrentCompletionRejectsAbortedTerminal(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.Lessons[0];
+            var eventId = "m2_evt_concurrent_abort_guard_01";
+            var eventPath = Path.Combine(root, "synthetic-game-event-concurrent-abort-guard.json");
+            WriteSyntheticGameEventCatalog(eventPath, eventId, lesson.Id, lesson.SkillId);
+            var database = NewDatabase(Path.Combine(root, "game-event-concurrent-abort-guard.db"), schemaPath);
+
+            using (var aborting = new MathGameEventCoordinator(database, templatePath, eventPath, "LOW", 14221, eventId, lesson.Id))
+            using (var completing = new MathGameEventCoordinator(database, templatePath, eventPath, "NORMAL", 999999, eventId, lesson.Id))
+            {
+                var firstStart = aborting.Start("Bé concurrent abort guard");
+                var secondStart = completing.Start("Bé concurrent abort guard");
+                A(secondStart.Session.ResumedExistingSession && secondStart.Session.SessionId == firstStart.Session.SessionId,
+                    "game_event_concurrent_abort_guard_wrappers_share_session");
+
+                for (var ordinal = 0; ordinal < 3; ordinal++)
+                {
+                    var qA = aborting.NextQuestion();
+                    var qB = completing.NextQuestion();
+                    aborting.SubmitAnswerAt(qA.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700 + ordinal * 100);
+                    completing.SubmitAnswerAt(qB.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 720 + ordinal * 100);
+                }
+                A(aborting.CurrentState.CompletedCheckpointCount == 3 && completing.CurrentState.CompletedCheckpointCount == 3,
+                    "game_event_concurrent_abort_guard_both_wrappers_reach_three_checkpoints");
+
+                var aborted = aborting.LearningSession.Abort("concurrent_abort_guard");
+                A(aborted.Attempts == 3 && SessionState(database, firstStart.Session.SessionId) == "aborted",
+                    "game_event_concurrent_abort_guard_terminalizes_as_aborted");
+
+                var rejected = false;
+                try { completing.Complete(); }
+                catch (InvalidOperationException) { rejected = true; }
+                A(rejected && SessionState(database, firstStart.Session.SessionId) == "aborted" &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + firstStart.Session.SessionId + "';") == 0 &&
+                  Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + firstStart.Session.ChildId +
+                  "' AND lesson_id='" + lesson.Id + "' AND started_count=1 AND completed_count=0;") == 1,
+                    "game_event_concurrent_completion_never_accepts_aborted_terminal_as_success");
             }
         }
 
@@ -3992,6 +4042,40 @@ END;");
                         "adaptive_concurrent_q2_replay_writes_no_duplicate_attempt_or_mastery");
                     second.Abort("adaptive_concurrent_cleanup");
                 }
+            }
+        }
+
+        private static void TestAdaptiveDuplicateCompletionConvergesWithoutFalseError(
+            string root,
+            string schemaPath,
+            string templatePath)
+        {
+            var database = NewDatabase(Path.Combine(root, "adaptive-duplicate-completion.db"), schemaPath);
+            using (var first = new MathSessionCoordinator(database, templatePath, "LOW", 8702, 1))
+            using (var second = new MathSessionCoordinator(database, templatePath, "NORMAL", 999999, 9))
+            {
+                var firstStart = first.Start("Bé adaptive duplicate completion");
+                var q1A = first.NextQuestion();
+                var secondStart = second.Start("Bé adaptive duplicate completion");
+                var q1B = second.NextQuestion();
+                A(secondStart.ResumedExistingSession && secondStart.SessionId == firstStart.SessionId && q1B.QuestionId == q1A.QuestionId,
+                    "adaptive_duplicate_completion_wrappers_share_same_question");
+
+                first.SubmitAnswerAt(q1A.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700);
+                second.SubmitAnswerAt(q1B.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 720);
+                A(first.Summary.Attempts == 1 && second.Summary.Attempts == 1 &&
+                  Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + firstStart.SessionId + "';") == 1,
+                    "adaptive_duplicate_completion_answer_replay_stays_single_attempt");
+
+                var completedA = first.Complete();
+                var completedB = second.Complete();
+                A(!first.IsActive && !second.IsActive && completedA.Attempts == 1 && completedB.Attempts == 1 &&
+                  SessionState(database, firstStart.SessionId) == "completed",
+                    "adaptive_duplicate_completion_both_wrappers_converge_terminal_success");
+                A(completedA.GardenGrowthSteps == 1 && completedB.GardenGrowthSteps == 1 &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + firstStart.SessionId + "';") == 1 &&
+                  Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + firstStart.SessionId + "';") == 1,
+                    "adaptive_duplicate_completion_keeps_reward_and_mastery_exactly_once");
             }
         }
 

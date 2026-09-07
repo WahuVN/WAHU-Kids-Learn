@@ -685,14 +685,36 @@ namespace WAHU.Session
                 summaryData["lesson_completed"] = true;
                 summaryData["lesson_score_percent"] = score;
                 summaryData["lesson_best_score_percent"] = best;
-                _lessonProgressStore.CompleteActiveSession(
-                    _session.SessionId, _profile.ChildId, _targetLesson.Id, _targetLesson.SkillId,
-                    _correct, _targetQuestionCount, _json.Serialize(summaryData), behaviorJson, ended);
+                try
+                {
+                    _lessonProgressStore.CompleteActiveSession(
+                        _session.SessionId, _profile.ChildId, _targetLesson.Id, _targetLesson.SkillId,
+                        _correct, _targetQuestionCount, _json.Serialize(summaryData), behaviorJson, ended);
+                }
+                catch (InvalidOperationException)
+                {
+                    // Another coordinator may have terminalized this exact durable session first.
+                    // Accept only that proven completed state; aborted/recovered/missing or DB failures still surface.
+                    if (!_sessionService.IsCompletedMathSession(_profile.ChildId, _session.SessionId)) throw;
+                    var durableProgress = _lessonProgressStore.LoadOne(_profile.ChildId, _targetLesson.Id);
+                    if (durableProgress == null || durableProgress.CompletedCount <= 0 ||
+                        !durableProgress.LastCompletedAtUtc.HasValue ||
+                        durableProgress.LastCompletedAtUtc.Value < _session.StartedAtUtc) throw;
+                    if (durableProgress.BestScorePercent.HasValue)
+                        summary.LessonBestScorePercent = durableProgress.BestScorePercent;
+                }
             }
             else
             {
                 summaryData["lesson_completed"] = false;
-                _sessionService.CompleteSession(_session.SessionId, false, _json.Serialize(summaryData), behaviorJson);
+                try
+                {
+                    _sessionService.CompleteSession(_session.SessionId, false, _json.Serialize(summaryData), behaviorJson);
+                }
+                catch (InvalidOperationException)
+                {
+                    if (!_sessionService.IsCompletedMathSession(_profile.ChildId, _session.SessionId)) throw;
+                }
             }
 
             // From this point the terminal learning transaction is durable. Any downstream enrichment or
