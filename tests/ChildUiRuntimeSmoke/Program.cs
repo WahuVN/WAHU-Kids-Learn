@@ -40,6 +40,7 @@ namespace WAHU.ChildUiRuntimeSmoke
             TestAllAuthoredAnswerSurfaces(appAssembly);
             TestTargetedLessonUiFlow(appAssembly);
             TestFirstFiveLessonsDeepUiFlow(appAssembly);
+            TestQuickRescuePlayableUiFlow(appAssembly);
             TestExpandedPoolTargetedUiFlow(appAssembly);
             TestTargetedCursorSelfHealUiFlow(appAssembly);
             TestIntegerAnswerUnitUiFlow(appAssembly);
@@ -1562,6 +1563,379 @@ namespace WAHU.ChildUiRuntimeSmoke
             }
         }
 
+        private static void TestQuickRescuePlayableUiFlow(Assembly appAssembly)
+        {
+            var repo = Directory.GetCurrentDirectory();
+            var sourceContent = Path.Combine(repo, "content_packs", "math_grade2_v1");
+            var runtimeContent = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "content_packs", "math_grade2_v1");
+            Directory.CreateDirectory(runtimeContent);
+            var runtimeFiles = new Dictionary<string, byte[]>(StringComparer.OrdinalIgnoreCase);
+            foreach (var name in new[] { "verified_templates_v1.json", "lesson_catalog_v1.json", "question_bank_v1.json", "game_events_v1.json" })
+            {
+                var runtimePath = Path.Combine(runtimeContent, name);
+                runtimeFiles[runtimePath] = File.Exists(runtimePath) ? File.ReadAllBytes(runtimePath) : null;
+                File.Copy(Path.Combine(sourceContent, name), runtimePath, true);
+            }
+
+            var tempRoot = Path.Combine(Path.GetTempPath(), "wahu-child-ui-quick-rescue-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempRoot);
+            try
+            {
+                var schemaSource = Path.Combine(repo, "data", "schema");
+                var schemaDir = Path.Combine(tempRoot, "schema");
+                Directory.CreateDirectory(schemaDir);
+                foreach (var source in Directory.GetFiles(schemaSource, "*.sql"))
+                    File.Copy(source, Path.Combine(schemaDir, Path.GetFileName(source)), true);
+                var database = new LearningDatabase(Path.Combine(tempRoot, "learning.db"), Path.Combine(schemaDir, "001_initial.sql"));
+                var init = database.Initialize("DELETE");
+                A(init.SchemaVersion == 5 && init.Health.IsHealthy, "quick_rescue_database_v5_ready");
+                var learner = new LearnerSessionService(database).EnsurePrimaryChild("Bé UI cứu hộ");
+                var settings = new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW };
+
+                var platformAssembly = Assembly.LoadFrom(Path.Combine(Path.GetDirectoryName(appAssembly.Location), "WAHU.Platform.dll"));
+                var configType = platformAssembly.GetType("WAHU.Platform.RuntimeConfigBundle", true);
+                var configLoad = configType.GetMethod("Load", BindingFlags.Static | BindingFlags.Public, null,
+                    new[] { typeof(string), typeof(string), typeof(bool) }, null);
+                A(configLoad != null, "quick_rescue_home_runtime_config_loader_available");
+                var portableBase = Path.Combine(tempRoot, "home-portable");
+                Directory.CreateDirectory(portableBase);
+                var config = configLoad.Invoke(null, new object[] { Path.Combine(repo, "setup", "config"), portableBase, true });
+                var homeCtor = typeof(WAHUKidsLearn.MainForm).GetConstructors(BindingFlags.Instance | BindingFlags.Public)
+                    .FirstOrDefault(x => x.GetParameters().Length == 7);
+                A(homeCtor != null, "quick_rescue_home_constructor_available");
+                using (var home = (Form)homeCtor.Invoke(new object[] { config, database, null, init, null, false, settings }))
+                {
+                    var quickButton = GetField<Button>(home, "_quickRescueButton");
+                    A(quickButton != null && quickButton.Enabled &&
+                      quickButton.Text.IndexOf("Toán nhanh", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                      quickButton.Text.IndexOf("Nhiệm vụ cứu hộ", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "quick_rescue_home_entry_visible_and_enabled");
+                    A(quickButton.AccessibleDescription.IndexOf("ba chặng", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                      quickButton.AccessibleDescription.IndexOf("đồng hồ", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "quick_rescue_home_entry_accessibility_is_pressure_free");
+                }
+
+                var catalogPath = Path.Combine(sourceContent, "lesson_catalog_v1.json");
+                var hubCtor = typeof(WAHUKidsLearn.MathHubForm).GetConstructor(
+                    BindingFlags.Instance | BindingFlags.NonPublic, null,
+                    new[] { typeof(LearningDatabase), typeof(RuntimePerformanceSettings), typeof(string) }, null);
+                A(hubCtor != null, "quick_rescue_hub_constructor_available");
+                using (var hub = (WAHUKidsLearn.MathHubForm)hubCtor.Invoke(new object[] { database, settings, catalogPath }))
+                {
+                    Invoke(hub, "LoadCatalogAndProgress");
+                    var rescueButton = GetField<Button>(hub, "_rescueButton");
+                    A(rescueButton != null && rescueButton.Enabled &&
+                      rescueButton.Text.IndexOf("Cứu hộ", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "quick_rescue_math_hub_entry_visible_and_enabled");
+                    A(rescueButton.AccessibleDescription.IndexOf("năm bài Toán đầu", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                      rescueButton.AccessibleDescription.IndexOf("đồng hồ", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "quick_rescue_math_hub_entry_describes_v1_scope_and_no_timer");
+                }
+
+                var rescueType = appAssembly.GetType("WAHUKidsLearn.MathQuickRescueForm", true);
+                var presentationType = appAssembly.GetType("WAHUKidsLearn.MathQuickRescueEventPresentation", true);
+                var rescueCtor = rescueType.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                    null, new[] { typeof(LearningDatabase), typeof(RuntimePerformanceSettings) }, null);
+                A(rescueCtor != null && presentationType != null, "quick_rescue_intro_types_available");
+
+                object presentation;
+                string eventId;
+                string lessonId;
+                string eventTitle;
+                string completionCopy;
+                string repairCopy;
+                string breakCopy;
+                List<string> checkpointNames;
+                using (var rescue = (Form)rescueCtor.Invoke(new object[] { database, settings }))
+                {
+                    Invoke(rescue, "LoadEvents");
+                    A(Get<int>(rescue, "EventCount") == 5, "quick_rescue_intro_loads_five_production_events");
+                    presentation = GetField<object>(rescue, "_selectedEvent");
+                    A(presentation != null, "quick_rescue_intro_selects_available_event");
+                    eventId = Get<string>(presentation, "Id");
+                    lessonId = Get<string>(presentation, "TargetLessonId");
+                    eventTitle = Get<string>(presentation, "TitleVi");
+                    completionCopy = Get<string>(presentation, "CompletionVi");
+                    repairCopy = Get<string>(presentation, "RepairCopyVi");
+                    breakCopy = Get<string>(presentation, "BreakCopyVi");
+                    checkpointNames = ((System.Collections.IEnumerable)Get<object>(presentation, "CheckpointNounsVi"))
+                        .Cast<object>().Select(Convert.ToString).ToList();
+                    A(eventId == "m2_evt_number_sign_rescue_01" &&
+                      lessonId == "m2_ls_num_count_read_write_0_1000",
+                        "quick_rescue_intro_recommends_first_unlocked_production_event");
+                    A(checkpointNames.Count == 3 && checkpointNames.All(x => !string.IsNullOrWhiteSpace(x)),
+                        "quick_rescue_intro_has_three_named_checkpoints");
+                    A(GetField<Label>(rescue, "_eventTitle").Text == eventTitle &&
+                      GetField<Label>(rescue, "_intro").Text.IndexOf("ba", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "quick_rescue_intro_renders_production_title_and_story");
+                    var startButton = GetField<Button>(rescue, "_startButton");
+                    A(startButton.Enabled && startButton.Text.IndexOf("3 chặng", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "quick_rescue_intro_primary_cta_is_three_checkpoints");
+                    A(startButton.AccessibleDescription.IndexOf("Không có giới hạn thời gian", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "quick_rescue_intro_primary_cta_has_no_time_pressure");
+                    var buttons = GetField<System.Collections.IDictionary>(rescue, "_eventButtons");
+                    A(buttons != null && buttons.Count == 5 && ((Button)buttons[eventId]).Enabled,
+                        "quick_rescue_intro_lists_all_five_and_first_is_playable");
+                    A(GetField<FlowLayoutPanel>(rescue, "_checkpoints").Controls.Count == 3,
+                        "quick_rescue_intro_renders_three_checkpoint_rows");
+                    RenderFormAndAssert(rescue, 900, 640, "quick_rescue_intro_900x640");
+                }
+
+                var eventLessonCtor = typeof(WAHUKidsLearn.MathLessonForm).GetConstructor(
+                    BindingFlags.Instance | BindingFlags.NonPublic, null,
+                    new[] { typeof(LearningDatabase), typeof(RuntimePerformanceSettings), typeof(string), presentationType }, null);
+                A(eventLessonCtor != null, "quick_rescue_event_lesson_constructor_available");
+
+                var garden = new GameWorldRewardService(database);
+                var beforeGarden = garden.ReadProgress(learner.ChildId);
+                A(beforeGarden.GrowthSteps == 0 && beforeGarden.CompletedMathSessions == 0,
+                    "quick_rescue_journey_starts_without_reward");
+
+                string sessionId;
+                string openQuestionId;
+                string openContentQuestionId;
+                using (var first = (WAHUKidsLearn.MathLessonForm)eventLessonCtor.Invoke(new object[]
+                {
+                    database, settings, lessonId, presentation
+                }))
+                {
+                    RenderFormAndAssert(first, 900, 640, "quick_rescue_event_900x640");
+                    Invoke(first, "StartSession");
+                    var state = GetField<object>(first, "_eventState");
+                    sessionId = Get<string>(state, "SessionId");
+                    A(Get<string>(state, "EventId") == eventId &&
+                      Get<int>(state, "CompletedCheckpointCount") == 0 &&
+                      Get<int>(state, "CurrentCheckpointNumber") == 1 &&
+                      Get<int>(state, "TotalCheckpointCount") == 3,
+                        "quick_rescue_journey_starts_exact_event_three_checkpoints");
+                    A(GetField<Label>(first, "_progressText").Text.IndexOf("Chặng 1", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                      GetField<Label>(first, "_progressText").Text.IndexOf(checkpointNames[0], StringComparison.OrdinalIgnoreCase) >= 0,
+                        "quick_rescue_journey_checkpoint_one_visible");
+                    A(GetField<Button>(first, "_stopButton").Text == "Nghỉ ở đây",
+                        "quick_rescue_journey_break_cta_visible");
+
+                    var question = GetField<MathQuestion>(first, "_question");
+                    A(question != null && question.LessonId == lessonId, "quick_rescue_journey_first_question_targets_event_lesson");
+                    openQuestionId = question.QuestionId;
+                    openContentQuestionId = question.ContentQuestionId;
+                    SubmitCurrentMathQuestionWrongForRetry(first, "quick_rescue_wrong");
+                    state = GetField<object>(first, "_eventState");
+                    A(GetField<bool>(first, "_retryPending") && Get<bool>(state, "RetryPending") &&
+                      Get<int>(state, "CompletedCheckpointCount") == 0 && Get<int>(state, "CurrentCheckpointNumber") == 1,
+                        "quick_rescue_wrong_preserves_checkpoint_and_opens_retry");
+                    A(GetField<Label>(first, "_support").Text.IndexOf(repairCopy, StringComparison.OrdinalIgnoreCase) >= 0,
+                        "quick_rescue_wrong_uses_production_repair_copy");
+                    A(GetField<Label>(first, "_progressText").Text.IndexOf("thử lại", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "quick_rescue_wrong_progress_names_retry_without_advancing");
+
+                    Invoke(first, "ShowHint");
+                    var hintedSupport = GetField<Label>(first, "_support").Text;
+                    A(hintedSupport.IndexOf(checkpointNames[0], StringComparison.OrdinalIgnoreCase) >= 0 &&
+                      hintedSupport.IndexOf(question.HintLevel1, StringComparison.OrdinalIgnoreCase) >= 0,
+                        "quick_rescue_retry_hint_keeps_checkpoint_context");
+
+                    var gameCoordinator = GetField<object>(first, "_gameEventCoordinator");
+                    Invoke(gameCoordinator, "SuspendForBreak", "ui_quick_rescue_retry_break");
+                    SetField(first, "_finished", true);
+                }
+
+                var suspendedGarden = garden.ReadProgress(learner.ChildId);
+                A(suspendedGarden.GrowthSteps == 0 && suspendedGarden.CompletedMathSessions == 0,
+                    "quick_rescue_suspend_does_not_grant_fake_reward");
+
+                using (var resumed = (WAHUKidsLearn.MathLessonForm)eventLessonCtor.Invoke(new object[]
+                {
+                    database, settings, lessonId, presentation
+                }))
+                {
+                    Invoke(resumed, "StartSession");
+                    var state = GetField<object>(resumed, "_eventState");
+                    var question = GetField<MathQuestion>(resumed, "_question");
+                    A(Get<string>(state, "SessionId") == sessionId && Get<string>(state, "EventId") == eventId,
+                        "quick_rescue_resume_restores_exact_event_and_session");
+                    A(Get<bool>(state, "RetryPending") && Get<int>(state, "CompletedCheckpointCount") == 0 &&
+                      Get<int>(state, "CurrentCheckpointNumber") == 1 && GetField<bool>(resumed, "_retryPending"),
+                        "quick_rescue_resume_restores_pending_retry_checkpoint");
+                    A(question != null && question.QuestionId == openQuestionId &&
+                      question.ContentQuestionId == openContentQuestionId,
+                        "quick_rescue_resume_restores_exact_open_question");
+                    var resumeSupport = GetField<Label>(resumed, "_support").Text;
+                    A(resumeSupport.IndexOf(checkpointNames[0], StringComparison.OrdinalIgnoreCase) >= 0 &&
+                      resumeSupport.IndexOf("thử lại", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                      resumeSupport.IndexOf("gợi ý", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "quick_rescue_resume_copy_names_same_checkpoint_retry");
+                    A(GetField<Label>(resumed, "_progressText").Text.IndexOf("thử lại", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "quick_rescue_resume_progress_keeps_retry_state");
+
+                    SubmitCurrentMathQuestionCorrectly(resumed, "quick_rescue_retry_correct");
+                    state = GetField<object>(resumed, "_eventState");
+                    A(Get<int>(state, "CompletedCheckpointCount") == 1 && !Get<bool>(state, "RetryPending"),
+                        "quick_rescue_retry_correct_advances_exactly_one_checkpoint");
+                    Invoke(resumed, "HandleNextButton");
+                    A(GetField<Label>(resumed, "_progressText").Text.IndexOf("Chặng 2", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                      GetField<Label>(resumed, "_progressText").Text.IndexOf(checkpointNames[1], StringComparison.OrdinalIgnoreCase) >= 0,
+                        "quick_rescue_checkpoint_two_visible_after_retry_repair");
+
+                    SubmitCurrentMathQuestionCorrectly(resumed, "quick_rescue_checkpoint_two_correct");
+                    state = GetField<object>(resumed, "_eventState");
+                    A(Get<int>(state, "CompletedCheckpointCount") == 2,
+                        "quick_rescue_checkpoint_two_advances_once");
+                    Invoke(resumed, "HandleNextButton");
+                    A(GetField<Label>(resumed, "_progressText").Text.IndexOf("Chặng 3", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                      GetField<Label>(resumed, "_progressText").Text.IndexOf(checkpointNames[2], StringComparison.OrdinalIgnoreCase) >= 0,
+                        "quick_rescue_checkpoint_three_visible");
+
+                    SubmitCurrentMathQuestionCorrectly(resumed, "quick_rescue_checkpoint_three_correct");
+                    A(GetField<bool>(resumed, "_completeOnNext"),
+                        "quick_rescue_third_checkpoint_routes_to_completion");
+                    Invoke(resumed, "HandleNextButton");
+                    state = GetField<object>(resumed, "_eventState");
+                    A(GetField<bool>(resumed, "_finished") && Get<bool>(state, "IsComplete") &&
+                      Get<int>(state, "CompletedCheckpointCount") == 3,
+                        "quick_rescue_completion_marks_all_three_checkpoints");
+                    A(GetField<Label>(resumed, "_prompt").Text == "Nhiệm vụ cứu hộ hoàn thành",
+                        "quick_rescue_completion_uses_restoration_title");
+                    var completionSupport = GetField<Label>(resumed, "_support").Text;
+                    A(completionSupport.IndexOf(completionCopy, StringComparison.OrdinalIgnoreCase) >= 0 &&
+                      completionSupport.IndexOf("Khu vườn", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "quick_rescue_completion_shows_production_restoration_and_garden");
+                    var resultButton = GetField<Button>(resumed, "_nextButton");
+                    A(resultButton.Text == "Về nhiệm vụ cứu hộ" &&
+                      resultButton.AccessibleDescription.IndexOf("danh sách nhiệm vụ cứu hộ", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "quick_rescue_completion_returns_to_rescue_list_without_autoplay");
+                    Invoke(resumed, "HandleNextButton");
+                }
+
+                var completedGarden = garden.ReadProgress(learner.ChildId);
+                A(completedGarden.GrowthSteps == 1 && completedGarden.CompletedMathSessions == 1,
+                    "quick_rescue_completion_grows_garden_exactly_once");
+
+                using (var afterCompletion = (Form)rescueCtor.Invoke(new object[] { database, settings }))
+                {
+                    Invoke(afterCompletion, "LoadEvents");
+                    var buttons = GetField<System.Collections.IDictionary>(afterCompletion, "_eventButtons");
+                    var replay = buttons == null ? null : buttons[eventId] as Button;
+                    A(replay != null && replay.Enabled && replay.Text.IndexOf("Đã hoàn thành", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                      replay.Text.IndexOf("chơi lại", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "quick_rescue_list_marks_completed_event_replayable");
+                    A(garden.ReadProgress(learner.ChildId).GrowthSteps == 1,
+                        "quick_rescue_reopening_list_does_not_duplicate_reward");
+                }
+
+                var sessionAssembly = Assembly.LoadFrom(Path.Combine(Path.GetDirectoryName(appAssembly.Location), "WAHU.Session.dll"));
+                var eventStateType = sessionAssembly.GetType("WAHU.Session.MathGameEventState", true);
+                var eventActionType = sessionAssembly.GetType("WAHU.Session.MathGameEventAction", true);
+                var outcomeType = sessionAssembly.GetType("WAHU.Session.MathAnswerOutcome", true);
+                var buildSupport = typeof(WAHUKidsLearn.MathLessonForm).GetMethod("BuildOutcomeSupport",
+                    BindingFlags.Instance | BindingFlags.NonPublic);
+                A(eventStateType != null && eventActionType != null && outcomeType != null && buildSupport != null,
+                    "quick_rescue_behavior_presentation_contract_available");
+                using (var synthetic = (WAHUKidsLearn.MathLessonForm)eventLessonCtor.Invoke(new object[]
+                {
+                    database, settings, lessonId, presentation
+                }))
+                {
+                    var outcome = Activator.CreateInstance(outcomeType);
+                    Set(outcome, "CompletedQuestionCount", 1);
+                    Set(outcome, "IsCorrect", false);
+
+                    var state = Activator.CreateInstance(eventStateType);
+                    var strained = Activator.CreateInstance(eventActionType);
+                    Set(strained, "UseSmallCue", true);
+                    Set(state, "Action", strained);
+                    SetField(synthetic, "_eventState", state);
+                    var strainedText = (string)buildSupport.Invoke(synthetic, new[] { outcome, "fallback" });
+                    A(strainedText.IndexOf("Mình làm từng bước nhé", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                      strainedText.IndexOf(repairCopy, StringComparison.OrdinalIgnoreCase) >= 0,
+                        "quick_rescue_strained_uses_small_cue_and_repair_support");
+
+                    var frustrated = Activator.CreateInstance(eventActionType);
+                    Set(frustrated, "UseRepair", true);
+                    Set(state, "Action", frustrated);
+                    var frustratedText = (string)buildSupport.Invoke(synthetic, new[] { outcome, "fallback" });
+                    A(frustratedText.IndexOf(repairCopy, StringComparison.OrdinalIgnoreCase) >= 0,
+                        "quick_rescue_frustrated_uses_neutral_repair_copy");
+
+                    var fatigued = Activator.CreateInstance(eventActionType);
+                    Set(fatigued, "OfferBreak", true);
+                    Set(fatigued, "SuggestPositiveClose", true);
+                    Set(state, "Action", fatigued);
+                    var fatiguedText = (string)buildSupport.Invoke(synthetic, new[] { outcome, "fallback" });
+                    A(fatiguedText == breakCopy,
+                        "quick_rescue_fatigued_uses_safe_break_copy");
+
+                    Set(outcome, "IsCorrect", true);
+                    var flow = Activator.CreateInstance(eventActionType);
+                    Set(flow, "MinimizeInterruptions", true);
+                    Set(state, "Action", flow);
+                    var flowText = (string)buildSupport.Invoke(synthetic, new[] { outcome, "fallback" });
+                    A(flowText == "Đã xong " + checkpointNames[0] + ".",
+                        "quick_rescue_flow_minimizes_interruption_copy");
+                    SetField(synthetic, "_finished", true);
+                }
+
+                var runtimeEventPath = Path.Combine(runtimeContent, "game_events_v1.json");
+                File.Delete(runtimeEventPath);
+                using (var missingShell = (Form)rescueCtor.Invoke(new object[] { database, settings }))
+                {
+                    Invoke(missingShell, "LoadEvents");
+                    A(!GetField<Button>(missingShell, "_startButton").Enabled &&
+                      GetField<Label>(missingShell, "_eventTitle").Text.IndexOf("đang chuẩn bị", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                      GetField<Label>(missingShell, "_intro").Text.IndexOf("vẫn có thể học Toán", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "quick_rescue_missing_catalog_shell_fails_safe_to_math");
+                }
+
+                using (var fallbackLesson = (WAHUKidsLearn.MathLessonForm)eventLessonCtor.Invoke(new object[]
+                {
+                    database, settings, lessonId, presentation
+                }))
+                {
+                    Invoke(fallbackLesson, "StartSession");
+                    A(GetField<object>(fallbackLesson, "_eventPresentation") == null,
+                        "quick_rescue_missing_catalog_runtime_switches_to_lesson_presentation");
+                    A(GetField<Label>(fallbackLesson, "_sessionTitle").Text == "Nhiệm vụ Toán" &&
+                      GetField<Button>(fallbackLesson, "_stopButton").Text == "Dừng và học tiếp sau" &&
+                      GetField<Label>(fallbackLesson, "_progressText").Text.StartsWith("Câu ", StringComparison.Ordinal),
+                        "quick_rescue_missing_catalog_runtime_uses_ordinary_lesson_chrome");
+                    var lessonTitle = new MathLessonCatalogSource().Load(catalogPath).FindLesson(lessonId).TitleVi;
+                    A(fallbackLesson.Text.IndexOf(lessonTitle, StringComparison.OrdinalIgnoreCase) >= 0 &&
+                      fallbackLesson.Text.IndexOf(eventTitle, StringComparison.OrdinalIgnoreCase) < 0,
+                        "quick_rescue_missing_catalog_runtime_names_lesson_not_event");
+                    Invoke(GetField<object>(fallbackLesson, "_coordinator"), "Abort", "ui_quick_rescue_missing_catalog_cleanup");
+                    SetField(fallbackLesson, "_finished", true);
+                }
+
+                File.WriteAllText(runtimeEventPath, "{ not-valid-json", System.Text.Encoding.UTF8);
+                using (var corruptShell = (Form)rescueCtor.Invoke(new object[] { database, settings }))
+                {
+                    Invoke(corruptShell, "LoadEvents");
+                    A(!GetField<Button>(corruptShell, "_startButton").Enabled &&
+                      GetField<Label>(corruptShell, "_eventTitle").Text.IndexOf("đang chuẩn bị", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "quick_rescue_corrupt_catalog_shell_fails_safe");
+                }
+            }
+            finally
+            {
+                foreach (var pair in runtimeFiles)
+                {
+                    try
+                    {
+                        if (pair.Value == null)
+                        {
+                            if (File.Exists(pair.Key)) File.Delete(pair.Key);
+                        }
+                        else
+                        {
+                            Directory.CreateDirectory(Path.GetDirectoryName(pair.Key));
+                            File.WriteAllBytes(pair.Key, pair.Value);
+                        }
+                    }
+                    catch { }
+                }
+                try { Directory.Delete(tempRoot, true); } catch { }
+            }
+        }
+
         private static void TestExpandedPoolTargetedUiFlow(Assembly appAssembly)
         {
             var repo = Directory.GetCurrentDirectory();
@@ -2062,6 +2436,36 @@ namespace WAHU.ChildUiRuntimeSmoke
             {
                 try { Directory.Delete(tempRoot, true); } catch { }
             }
+        }
+
+        private static void SubmitCurrentMathQuestionWrongForRetry(WAHUKidsLearn.MathLessonForm form, string assertionPrefix)
+        {
+            var question = GetField<MathQuestion>(form, "_question");
+            A(question != null, assertionPrefix + "_question_available");
+            if (string.Equals(question.AnswerKind, "interaction_integer", StringComparison.Ordinal))
+            {
+                var interactive = GetField<Control>(form, "_interactiveAnswer");
+                var wrongLength = question.CorrectAnswer == 1 ? 2 : 1;
+                Invoke(interactive, "SelectCursor");
+                Invoke(interactive, "MoveCursor", wrongLength);
+                Invoke(interactive, "SelectCursor");
+                Invoke(form, "SubmitInteractiveAnswer", assertionPrefix);
+                return;
+            }
+            if (question.DisplayChoices == null || question.DisplayChoices.Count == 0)
+            {
+                var input = GetField<TextBox>(form, "_typedAnswerBox");
+                input.Text = "__sai__";
+                A(GetField<Button>(form, "_typedSubmitButton").Enabled, assertionPrefix + "_typed_submit_ready");
+                Invoke(form, "SubmitTypedAnswer", assertionPrefix);
+                return;
+            }
+
+            var correctIndex = -1;
+            for (var i = 0; i < question.DisplayChoices.Count; i++)
+                if (string.Equals(question.DisplayChoices[i], question.CorrectAnswerDisplay, StringComparison.Ordinal)) correctIndex = i;
+            A(correctIndex >= 0 && question.DisplayChoices.Count >= 2, assertionPrefix + "_choice_wrong_index_available");
+            Invoke(form, "SubmitChoice", (correctIndex + 1) % question.DisplayChoices.Count, assertionPrefix);
         }
 
         private static void SubmitCurrentMathQuestionCorrectly(WAHUKidsLearn.MathLessonForm form, string assertionPrefix)

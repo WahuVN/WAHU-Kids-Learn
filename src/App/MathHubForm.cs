@@ -31,6 +31,7 @@ namespace WAHUKidsLearn
         private Label _summary;
         private Label _detailEmpty;
         private ChildActionButton _continueLessonButton;
+        private ChildActionButton _rescueButton;
         private ChildActionButton _missionButton;
         private MathLessonDescriptor _continueLesson;
         private bool _continueResumesSession;
@@ -241,31 +242,32 @@ namespace WAHUKidsLearn
 
         private Control BuildFooter()
         {
-            var footer = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, RowCount = 1, Padding = new Padding(4, 8, 2, 2) };
-            footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40));
-            footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 28));
-            footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 32));
+            var footer = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 4, RowCount = 1, Padding = new Padding(4, 8, 2, 2) };
+            footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
+            footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 22));
+            footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 27));
+            footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 26));
             footer.Controls.Add(new Label
             {
                 Dock = DockStyle.Fill,
-                Text = "Con có thể xem bài trước. Nhiệm vụ hôm nay sẽ tự chọn câu phù hợp với phần con đang cần luyện.",
+                Text = "Con có thể học theo bài, chơi một nhiệm vụ cứu hộ ngắn hoặc làm nhiệm vụ thích ứng.",
                 TextAlign = ContentAlignment.MiddleLeft,
                 ForeColor = ChildVisualTheme.MutedInk,
-                Font = ChildVisualTheme.Font(9.8f),
-                Padding = new Padding(8, 0, 12, 0),
-                AccessibleName = "Cách luyện Toán hôm nay"
+                Font = ChildVisualTheme.Font(9.2f),
+                Padding = new Padding(8, 0, 8, 0),
+                AccessibleName = "Các cách luyện Toán"
             }, 0, 0);
 
             _continueLessonButton = new ChildActionButton
             {
                 Dock = DockStyle.Fill,
-                Margin = new Padding(8, 2, 8, 2),
+                Margin = new Padding(5, 2, 5, 2),
                 Text = "Chưa có bài đang học",
                 FillColor = Color.FromArgb(226, 239, 247),
                 HoverColor = Color.FromArgb(210, 230, 241),
                 PressedColor = Color.FromArgb(194, 219, 233),
                 TextColor = ChildVisualTheme.SkyStrong,
-                Font = ChildVisualTheme.Font(10.2f, FontStyle.Bold),
+                Font = ChildVisualTheme.Font(9.5f, FontStyle.Bold),
                 Radius = 18,
                 AccessibleName = "Tiếp tục bài Toán đang học",
                 AccessibleDescription = "Chưa có bài học đang học dở để tiếp tục.",
@@ -274,24 +276,42 @@ namespace WAHUKidsLearn
             _continueLessonButton.Click += delegate { ContinueCurrentLesson(); };
             footer.Controls.Add(_continueLessonButton, 1, 0);
 
+            _rescueButton = new ChildActionButton
+            {
+                Dock = DockStyle.Fill,
+                Margin = new Padding(5, 2, 5, 2),
+                Text = "Toán nhanh — Cứu hộ",
+                BadgeText = "3",
+                FillColor = Color.FromArgb(238, 209, 154),
+                HoverColor = Color.FromArgb(231, 194, 129),
+                PressedColor = Color.FromArgb(219, 178, 111),
+                TextColor = Color.FromArgb(104, 73, 34),
+                Font = ChildVisualTheme.Font(10.2f, FontStyle.Bold),
+                Radius = 18,
+                AccessibleName = "Mở Toán nhanh — Nhiệm vụ cứu hộ",
+                AccessibleDescription = "Mở nhiệm vụ ba chặng cho năm bài Toán đầu. Không có đồng hồ đếm ngược."
+            };
+            _rescueButton.Click += delegate { OpenQuickRescue(); };
+            footer.Controls.Add(_rescueButton, 2, 0);
+
             var adaptiveQuestionCount = MathSessionCoordinator.DefaultTargetQuestionCount;
             var adaptiveQuestionCountText = adaptiveQuestionCount.ToString();
             _missionButton = new ChildActionButton
             {
                 Dock = DockStyle.Fill,
-                Margin = new Padding(8, 2, 0, 2),
+                Margin = new Padding(5, 2, 0, 2),
                 Text = "Luyện " + adaptiveQuestionCountText + " câu hôm nay",
                 BadgeText = adaptiveQuestionCountText,
                 FillColor = ChildVisualTheme.MintStrong,
                 HoverColor = Color.FromArgb(90, 156, 103),
                 PressedColor = Color.FromArgb(75, 139, 88),
-                Font = ChildVisualTheme.Font(12f, FontStyle.Bold),
+                Font = ChildVisualTheme.Font(10.2f, FontStyle.Bold),
                 Radius = 18,
                 AccessibleName = "Bắt đầu nhiệm vụ Toán hôm nay",
                 AccessibleDescription = "Mở nhiệm vụ Toán thích ứng gồm khoảng " + adaptiveQuestionCountText + " câu."
             };
             _missionButton.Click += delegate { OpenAdaptiveMission(); };
-            footer.Controls.Add(_missionButton, 2, 0);
+            footer.Controls.Add(_missionButton, 3, 0);
             return footer;
         }
 
@@ -937,6 +957,38 @@ namespace WAHUKidsLearn
                 MessageBox.Show(this,
                     "Chưa thể mở phần luyện tập của bài này lúc này. Con vẫn có thể xem lại kiến thức và ví dụ.",
                     "WAHU Kids Learn", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private void OpenQuickRescue()
+        {
+            try
+            {
+                _rescueButton.Enabled = false;
+                var preferredLessonId = _selectedLesson != null && MathQuickRescueFixtureCatalog.ContainsLesson(_selectedLesson.Id)
+                    ? _selectedLesson.Id : null;
+                using (var rescue = new MathQuickRescueForm(_database, _performance, _catalogPath,
+                    preferredLessonId, new List<MathQuickRescueEventPresentation>()))
+                    rescue.ShowDialog(this);
+                RefreshSkillProgress();
+                RefreshLessonAccess();
+                PopulateChapters();
+                RefreshContinueLessonState();
+                if (_catalog != null && !string.IsNullOrWhiteSpace(preferredLessonId))
+                {
+                    var refreshedLesson = _catalog.FindLesson(preferredLessonId);
+                    if (refreshedLesson != null) SelectLessonInCatalog(refreshedLesson);
+                }
+            }
+            catch
+            {
+                MessageBox.Show(this,
+                    "Chưa thể mở nhiệm vụ cứu hộ lúc này. Con vẫn có thể luyện theo bài hoặc làm nhiệm vụ Toán hôm nay.",
+                    "WAHU Kids Learn", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            finally
+            {
+                _rescueButton.Enabled = true;
             }
         }
 

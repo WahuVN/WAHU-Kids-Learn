@@ -14,6 +14,10 @@ namespace WAHUKidsLearn
         private readonly LearningDatabase _database;
         private readonly RuntimePerformanceSettings _performance;
         private readonly string _targetLessonId;
+        private MathQuickRescueEventPresentation _eventPresentation;
+        private MathGameEventCoordinator _gameEventCoordinator;
+        private MathGameEventState _eventState;
+        private DateTime _questionShownAtUtc;
         private MathSessionCoordinator _coordinator;
         private MathQuestion _question;
         private readonly AnswerChoiceButton[] _answerButtons = new AnswerChoiceButton[4];
@@ -24,8 +28,10 @@ namespace WAHUKidsLearn
         private TableLayoutPanel _interactiveAnswerLayout;
         private SegmentDrawingAnswerControl _interactiveAnswer;
         private ChildActionButton _interactiveSubmitButton;
+        private Label _sessionTitle;
         private Label _progressText;
         private ProgressStrip _progressBar;
+        private QuickRescueCheckpointStrip _eventCheckpointStrip;
         private Label _prompt;
         private MathInstructionVisual _instructionVisual;
         private LessonCompletionVisual _completionVisual;
@@ -45,16 +51,23 @@ namespace WAHUKidsLearn
         private bool _completeOnNext;
 
         public MathLessonForm(LearningDatabase database, RuntimePerformanceSettings performance)
-            : this(database, performance, null)
+            : this(database, performance, null, null)
         {
         }
 
         internal MathLessonForm(LearningDatabase database, RuntimePerformanceSettings performance, string targetLessonId)
+            : this(database, performance, targetLessonId, null)
+        {
+        }
+
+        internal MathLessonForm(LearningDatabase database, RuntimePerformanceSettings performance, string targetLessonId,
+            MathQuickRescueEventPresentation eventPresentation)
         {
             _database = database ?? throw new ArgumentNullException("database");
             _performance = performance;
             _targetLessonId = string.IsNullOrWhiteSpace(targetLessonId) ? null : targetLessonId.Trim();
-            Text = "WAHU Kids Learn — Toán lớp 2";
+            _eventPresentation = eventPresentation;
+            Text = _eventPresentation == null ? "WAHU Kids Learn — Toán lớp 2" : "WAHU Kids Learn — " + _eventPresentation.TitleVi;
             StartPosition = FormStartPosition.CenterParent;
             MinimumSize = new Size(900, 640);
             ClientSize = new Size(1080, 720);
@@ -97,7 +110,7 @@ namespace WAHUKidsLearn
             {
                 Dock = DockStyle.Fill,
                 Margin = new Padding(0, 4, 18, 4),
-                Text = "Dừng và học tiếp sau",
+                Text = _eventPresentation == null ? "Dừng và học tiếp sau" : "Nghỉ ở đây",
                 FillColor = Color.FromArgb(232, 230, 220),
                 HoverColor = Color.FromArgb(220, 217, 207),
                 PressedColor = Color.FromArgb(207, 204, 193),
@@ -108,15 +121,16 @@ namespace WAHUKidsLearn
             };
             _stopButton.Click += delegate { RequestStop(); };
             header.Controls.Add(_stopButton, 0, 0);
-            header.Controls.Add(new Label
+            _sessionTitle = new Label
             {
                 Dock = DockStyle.Fill,
-                Text = "Nhiệm vụ Toán",
+                Text = _eventPresentation == null ? "Nhiệm vụ Toán" : "Nhiệm vụ cứu hộ",
                 TextAlign = ContentAlignment.MiddleCenter,
                 ForeColor = ChildVisualTheme.Ink,
                 Font = ChildVisualTheme.Font(17f, FontStyle.Bold),
-                AccessibleName = "Nhiệm vụ Toán"
-            }, 1, 0);
+                AccessibleName = _eventPresentation == null ? "Nhiệm vụ Toán" : "Nhiệm vụ cứu hộ"
+            };
+            header.Controls.Add(_sessionTitle, 1, 0);
             _progressText = new Label
             {
                 Dock = DockStyle.Fill,
@@ -128,13 +142,26 @@ namespace WAHUKidsLearn
             header.Controls.Add(_progressText, 2, 0);
             root.Controls.Add(header, 0, 0);
 
+            var progressHost = new Panel { Dock = DockStyle.Fill, BackColor = Color.Transparent };
             _progressBar = new ProgressStrip
             {
                 Dock = DockStyle.Fill,
                 Margin = new Padding(158, 2, 170, 7),
-                Maximum = MathSessionCoordinator.DefaultTargetQuestionCount
+                Maximum = MathSessionCoordinator.DefaultTargetQuestionCount,
+                Visible = _eventPresentation == null
             };
-            root.Controls.Add(_progressBar, 0, 1);
+            progressHost.Controls.Add(_progressBar);
+            _eventCheckpointStrip = new QuickRescueCheckpointStrip
+            {
+                Dock = DockStyle.Fill,
+                Margin = new Padding(158, 0, 170, 2),
+                Visible = _eventPresentation != null
+            };
+            if (_eventPresentation != null)
+                _eventCheckpointStrip.SetState(0, 0, _eventPresentation.CheckpointNounsVi);
+            progressHost.Controls.Add(_eventCheckpointStrip);
+            _eventCheckpointStrip.BringToFront();
+            root.Controls.Add(progressHost, 0, 1);
 
             var questionCard = new ChildCard
             {
@@ -374,23 +401,65 @@ namespace WAHUKidsLearn
                     "content_packs", "math_grade2_v1", "verified_templates_v1.json");
                 var profile = _performance == null ? "LOW" : _performance.Profile.ToString();
                 var seed = unchecked(Environment.TickCount ^ DateTime.UtcNow.Millisecond ^ GetHashCode());
-                _coordinator = string.IsNullOrWhiteSpace(_targetLessonId)
-                    ? new MathSessionCoordinator(_database, templatePath, profile, seed)
-                    : new MathSessionCoordinator(_database, templatePath, profile, seed, _targetLessonId);
-                var started = _coordinator.Start("Bé học");
-                if (string.Equals(started.SessionMode, "lesson", StringComparison.Ordinal) && !string.IsNullOrWhiteSpace(started.TargetLessonTitleVi))
+                MathSessionStartResult started;
+                if (_eventPresentation != null)
+                {
+                    var eventPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
+                        "content_packs", "math_grade2_v1", "game_events_v1.json");
+                    _gameEventCoordinator = new MathGameEventCoordinator(_database, templatePath, eventPath, profile, seed,
+                        _eventPresentation.Id, _targetLessonId);
+                    var eventStarted = _gameEventCoordinator.Start("Bé học");
+                    _coordinator = _gameEventCoordinator.LearningSession;
+                    _eventState = eventStarted.EventState;
+                    started = eventStarted.Session;
+                    if (eventStarted.Event == null || _eventState == null || _eventState.FallbackToLessonPresentation)
+                    {
+                        _eventPresentation = null;
+                        ApplyLessonFallbackPresentation(started);
+                    }
+                    else
+                    {
+                        _eventPresentation = MathQuickRescueEventPresentation.FromDefinition(eventStarted.Event);
+                    }
+                }
+                else
+                {
+                    _coordinator = string.IsNullOrWhiteSpace(_targetLessonId)
+                        ? new MathSessionCoordinator(_database, templatePath, profile, seed)
+                        : new MathSessionCoordinator(_database, templatePath, profile, seed, _targetLessonId);
+                    started = _coordinator.Start("Bé học");
+                }
+                if (_eventPresentation != null)
+                    Text = "WAHU Kids Learn — " + _eventPresentation.TitleVi;
+                else if (string.Equals(started.SessionMode, "lesson", StringComparison.Ordinal) && !string.IsNullOrWhiteSpace(started.TargetLessonTitleVi))
                     Text = "WAHU Kids Learn — " + started.TargetLessonTitleVi;
                 _targetQuestionCount = Math.Max(1, started.TargetQuestionCount);
                 _progressBar.Maximum = _targetQuestionCount;
                 _progressBar.Value = Math.Min(_targetQuestionCount, Math.Max(0, started.CompletedQuestionCount));
                 _retryPending = started.RetryPending;
-                _sessionNotice = BuildSessionStartNotice(started);
+                _sessionNotice = _eventPresentation == null
+                    ? BuildSessionStartNotice(started)
+                    : BuildEventSessionStartNotice(started, _eventState);
                 ShowNextQuestion();
             }
             catch
             {
                 ShowFatalChildMessage("Chưa thể bắt đầu buổi Toán lúc này. Nhờ người lớn mở mục Phụ huynh để kiểm tra nhé.");
             }
+        }
+
+        private void ApplyLessonFallbackPresentation(MathSessionStartResult started)
+        {
+            _sessionTitle.Text = "Nhiệm vụ Toán";
+            _sessionTitle.AccessibleName = "Nhiệm vụ Toán";
+            _stopButton.Text = "Dừng và học tiếp sau";
+            _progressBar.Visible = true;
+            _eventCheckpointStrip.Visible = false;
+            if (started != null && string.Equals(started.SessionMode, "lesson", StringComparison.Ordinal) &&
+                !string.IsNullOrWhiteSpace(started.TargetLessonTitleVi))
+                Text = "WAHU Kids Learn — " + started.TargetLessonTitleVi;
+            else
+                Text = "WAHU Kids Learn — Toán lớp 2";
         }
 
         private void ApplyPromptTypography(string promptVi)
@@ -433,6 +502,8 @@ namespace WAHUKidsLearn
             {
                 _question = _coordinator.NextQuestion();
                 if (_question == null) { CompleteSession(); return; }
+                _questionShownAtUtc = DateTime.UtcNow;
+                if (_gameEventCoordinator != null) _eventState = _gameEventCoordinator.CurrentState;
                 _hintLevel = 0;
                 _submitting = false;
                 ApplyPromptTypography(_question.PromptVi);
@@ -450,10 +521,9 @@ namespace WAHUKidsLearn
                 _completeOnNext = false;
                 var summary = _coordinator.Summary;
                 var questionNumber = summary.Attempts + 1;
-                _progressText.Text = "Câu " + questionNumber + " / " + _targetQuestionCount + (_retryPending ? " · thử lại" : string.Empty);
-                _progressBar.Maximum = _targetQuestionCount;
-                _progressBar.Value = Math.Min(_targetQuestionCount, Math.Max(0, summary.Attempts));
+                UpdateProgressPresentation(summary.Attempts, questionNumber, _targetQuestionCount, _retryPending, false);
                 ConfigureAnswerInput(_question);
+                _support.Text = BuildEventQuestionSupport(_support.Text, questionNumber);
                 if (!string.IsNullOrWhiteSpace(_sessionNotice))
                 {
                     var inputSupport = _support.Text;
@@ -467,6 +537,84 @@ namespace WAHUKidsLearn
             {
                 FailCurrentSession("Không thể mở câu tiếp theo. Những câu con đã làm vẫn được giữ lại.");
             }
+        }
+
+        private void UpdateProgressPresentation(int completed, int questionNumber, int targetCount, bool retry, bool afterAnswer)
+        {
+            var target = Math.Max(1, targetCount);
+            var safeCompleted = Math.Max(0, Math.Min(target, completed));
+            _progressBar.Maximum = target;
+            _progressBar.Value = safeCompleted;
+            if (_eventPresentation == null)
+            {
+                _progressText.Text = afterAnswer
+                    ? "Đã làm " + safeCompleted + " / " + target
+                    : "Câu " + Math.Max(1, questionNumber) + " / " + target + (retry ? " · thử lại" : string.Empty);
+                return;
+            }
+
+            var activeIndex = safeCompleted >= target ? target - 1 : Math.Max(0, Math.Min(target - 1, questionNumber - 1));
+            _eventCheckpointStrip.SetState(safeCompleted, activeIndex, _eventPresentation.CheckpointNounsVi);
+            var nounIndex = afterAnswer ? Math.Max(0, safeCompleted - 1) : activeIndex;
+            var noun = _eventPresentation.CheckpointName(nounIndex);
+            _progressText.Text = safeCompleted >= target
+                ? target + " / " + target + " chặng đã xong"
+                : (afterAnswer
+                    ? "Đã xong " + safeCompleted + " / " + target + " · " + noun
+                    : "Chặng " + (activeIndex + 1) + " / " + target + " · " + noun + (retry ? " · thử lại" : string.Empty));
+        }
+
+        private string BuildEventQuestionSupport(string normalSupport, int questionNumber)
+        {
+            if (_eventPresentation == null) return normalSupport;
+            return "Chặng " + Math.Max(1, questionNumber) + " — " +
+                _eventPresentation.CheckpointName(Math.Max(0, questionNumber - 1)) + ". " + normalSupport;
+        }
+
+        private string BuildOutcomeSupport(MathAnswerOutcome outcome, string fallback)
+        {
+            if (_eventPresentation == null || outcome == null) return fallback;
+            var checkpoint = _eventPresentation.CheckpointName(Math.Max(0, outcome.CompletedQuestionCount - 1));
+            var action = _eventState == null || _eventState.Action == null
+                ? MathGameEventBehaviorMapper.Map(outcome.Behavior)
+                : _eventState.Action;
+            if (outcome.SuggestPositiveEnd || action.SuggestPositiveClose)
+                return _eventPresentation.BreakCopyVi;
+            if (action.MinimizeInterruptions && outcome.IsCorrect)
+                return "Đã xong " + checkpoint + ".";
+            if (action.UseSmallCue)
+                return "Mình làm từng bước nhé. " + (outcome.IsCorrect ? "Đã xong " + checkpoint + "." : _eventPresentation.RepairCopyVi);
+            if (action.UseRepair)
+                return _eventPresentation.RepairCopyVi + (outcome.IsCorrect ? " " + checkpoint + " đã ổn rồi." : string.Empty);
+            if (action.OfferBreak || outcome.OfferBreak)
+                return (outcome.IsCorrect ? "Đã xong " + checkpoint + ". " : string.Empty) +
+                    "Nếu muốn, con có thể chọn Nghỉ ở đây. Phần đã làm được lưu rồi.";
+            return outcome.IsCorrect
+                ? "Đã sửa xong " + checkpoint + ". Phần này đã được lưu."
+                : _eventPresentation.RepairCopyVi + " " + fallback;
+        }
+
+        private string BuildEventSessionStartNotice(MathSessionStartResult started, MathGameEventState state)
+        {
+            if (started == null || _eventPresentation == null) return null;
+            var checkpoint = state == null || string.IsNullOrWhiteSpace(state.CurrentCheckpointNounVi)
+                ? _eventPresentation.CheckpointName(Math.Max(0, started.CompletedQuestionCount))
+                : state.CurrentCheckpointNounVi;
+            if (started.ResumedExistingSession)
+            {
+                if (started.RetryPending && started.RestoredOpenQuestion)
+                    return "Mình quay lại đúng " + checkpoint + " đang thử lại nhé. Phần trước đã lưu; con có thể xem gợi ý rồi sửa tiếp.";
+                if (started.RestoredOpenQuestion)
+                    return "Mình quay lại đúng " + checkpoint + " con đang làm dở nhé. Phần trước đã được lưu.";
+                if (started.DiscardedCorruptOpenQuestion)
+                    return "Phần đã làm vẫn an toàn. Chặng đang mở cần làm mới nên mình tiếp tục từ " + checkpoint + " nhé.";
+                return started.CompletedQuestionCount > 0
+                    ? "Mình tiếp tục nhiệm vụ cứu hộ từ " + checkpoint + " nhé. Phần trước đã được lưu."
+                    : "Nhiệm vụ trước vẫn còn. Mình tiếp tục từ chặng đầu nhé.";
+            }
+            if (started.RecoveredDanglingSessions > 0)
+                return "Phần đã lưu vẫn an toàn. Mình bắt đầu lại ba chặng cứu hộ từ đầu nhé.";
+            return "Nhiệm vụ này có ba chặng nhỏ. Không có giới hạn thời gian; mình làm lần lượt nhé.";
         }
 
         private static string BuildSessionStartNotice(MathSessionStartResult started)
@@ -615,14 +763,16 @@ namespace WAHUKidsLearn
                 _hintLevel = 1;
                 _instructionVisual.SetQuestion(_question, _hintLevel);
                 if (UsesInteractiveAnswer(_question)) _interactiveAnswer.SetHintLevel(_hintLevel);
-                _support.Text = _question.HintLevel1;
+                _support.Text = BuildEventQuestionSupport(_question.HintLevel1,
+                    _coordinator == null ? 1 : Math.Max(1, _coordinator.Summary.Attempts + 1));
                 _hintButton.Text = "Gợi ý thêm";
                 return;
             }
             _hintLevel = 2;
             _instructionVisual.SetQuestion(_question, _hintLevel);
             if (UsesInteractiveAnswer(_question)) _interactiveAnswer.SetHintLevel(_hintLevel);
-            _support.Text = _question.HintLevel2;
+            _support.Text = BuildEventQuestionSupport(_question.HintLevel2,
+                _coordinator == null ? 1 : Math.Max(1, _coordinator.Summary.Attempts + 1));
             _hintButton.Enabled = false;
             _hintButton.Text = "Đã xem đủ gợi ý";
         }
@@ -630,9 +780,19 @@ namespace WAHUKidsLearn
         private MathAnswerOutcome SubmitCurrentAnswer(string answer, string inputMode)
         {
             if (_coordinator == null) throw new InvalidOperationException("Math session is not ready.");
-            return _retryPending
-                ? _coordinator.SubmitRetryAnswer(answer, _hintLevel, inputMode)
-                : _coordinator.SubmitAnswerWithRetry(answer, _hintLevel, inputMode);
+            if (_gameEventCoordinator == null)
+                return _retryPending
+                    ? _coordinator.SubmitRetryAnswer(answer, _hintLevel, inputMode)
+                    : _coordinator.SubmitAnswerWithRetry(answer, _hintLevel, inputMode);
+
+            var answeredAtUtc = DateTime.UtcNow;
+            var responseMs = (int)Math.Min(int.MaxValue, Math.Max(0,
+                (answeredAtUtc - (_questionShownAtUtc == default(DateTime) ? answeredAtUtc : _questionShownAtUtc)).TotalMilliseconds));
+            var eventResult = _retryPending
+                ? _gameEventCoordinator.SubmitRetryAnswerAt(answer, _hintLevel, inputMode, answeredAtUtc, responseMs)
+                : _gameEventCoordinator.SubmitAnswerWithRetryAt(answer, _hintLevel, inputMode, answeredAtUtc, responseMs);
+            _eventState = eventResult.EventState;
+            return eventResult.Learning;
         }
 
         private bool PrepareRetry(MathAnswerOutcome outcome)
@@ -645,9 +805,11 @@ namespace WAHUKidsLearn
             _feedbackCard.CardColor = Color.FromArgb(251, 232, 222);
             _feedbackCard.BorderColor = Color.FromArgb(236, 202, 187);
             _feedbackCard.Visible = true;
-            _support.Text = "Con còn một lần thử ở chính câu này. Có thể xem gợi ý rồi sửa đáp án nhé.";
-            _progressText.Text = "Câu " + (outcome.CompletedQuestionCount + 1) + " / " + outcome.TargetQuestionCount + " · thử lại";
-            _progressBar.Value = Math.Min(_progressBar.Maximum, Math.Max(0, outcome.CompletedQuestionCount));
+            _support.Text = _eventPresentation == null
+                ? "Con còn một lần thử ở chính câu này. Có thể xem gợi ý rồi sửa đáp án nhé."
+                : _eventPresentation.RepairCopyVi + " Con còn một lần thử ở chính chặng này; có thể xem gợi ý rồi sửa tiếp nhé.";
+            UpdateProgressPresentation(outcome.CompletedQuestionCount, outcome.CompletedQuestionCount + 1,
+                outcome.TargetQuestionCount, true, false);
             _hintButton.Visible = true;
             _hintButton.Enabled = _hintLevel < 2;
             _nextButton.Visible = false;
@@ -669,17 +831,18 @@ namespace WAHUKidsLearn
                 _submitting = false;
                 _completeOnNext = false;
                 var summary = _coordinator.Summary;
-                _progressText.Text = "Câu " + (Math.Max(0, summary.Attempts) + 1) + " / " + _targetQuestionCount +
-                    (_retryPending ? " · thử lại" : string.Empty);
-                _progressBar.Value = Math.Min(_progressBar.Maximum, Math.Max(0, summary.Attempts));
+                UpdateProgressPresentation(Math.Max(0, summary.Attempts), Math.Max(0, summary.Attempts) + 1,
+                    _targetQuestionCount, _retryPending, false);
                 _companion.State = CompanionReactionState.TryAgain;
                 _feedback.Text = "Chưa lưu được câu này. Mình thử lại chính câu này nhé.";
                 _feedbackCard.CardColor = Color.FromArgb(245, 239, 224);
                 _feedbackCard.BorderColor = Color.FromArgb(225, 210, 171);
                 _feedbackCard.Visible = true;
-                _support.Text = _retryPending
-                    ? "Phần đã làm trước đó vẫn an toàn. Lần thử lại này chưa được tính; con thử lưu lại nhé."
-                    : "Phần đã làm trước đó vẫn an toàn. Câu này chưa được tính; con thử lại nhé.";
+                _support.Text = _eventPresentation == null
+                    ? (_retryPending
+                        ? "Phần đã làm trước đó vẫn an toàn. Lần thử lại này chưa được tính; con thử lưu lại nhé."
+                        : "Phần đã làm trước đó vẫn an toàn. Câu này chưa được tính; con thử lại nhé.")
+                    : _eventPresentation.RepairCopyVi + " Phần đã làm trước đó vẫn an toàn; chặng này chưa được tính.";
                 _hintButton.Visible = true;
                 _hintButton.Enabled = _hintLevel < 2;
                 _nextButton.Visible = false;
@@ -746,18 +909,21 @@ namespace WAHUKidsLearn
                 _feedbackCard.CardColor = outcome.IsCorrect ? Color.FromArgb(226, 242, 224) : Color.FromArgb(251, 232, 222);
                 _feedbackCard.BorderColor = outcome.IsCorrect ? Color.FromArgb(190, 221, 188) : Color.FromArgb(236, 202, 187);
                 _feedbackCard.Visible = true;
-                _support.Text = outcome.IsCorrect
+                var typedSupport = outcome.IsCorrect
                     ? "Tốt rồi. Câu trả lời này đã được lưu để lần sau ôn đúng lúc."
                     : "Đáp án đúng: " + outcome.CorrectAnswerDisplay + ". Câu sau sẽ giúp con luyện tiếp phần này.";
-                _progressText.Text = "Đã làm " + outcome.CompletedQuestionCount + " / " + outcome.TargetQuestionCount;
-                _progressBar.Value = outcome.CompletedQuestionCount;
+                _support.Text = BuildOutcomeSupport(outcome, typedSupport);
+                UpdateProgressPresentation(outcome.CompletedQuestionCount, outcome.CompletedQuestionCount,
+                    outcome.TargetQuestionCount, false, true);
                 _hintButton.Visible = false;
                 _nextButton.Visible = true;
                 _completeOnNext = outcome.SuggestPositiveEnd || outcome.CompletedQuestionCount >= outcome.TargetQuestionCount;
                 _nextButton.Text = outcome.SuggestPositiveEnd ? "Nghỉ ở đây" :
                     (outcome.CompletedQuestionCount >= outcome.TargetQuestionCount ? "Xem kết quả" : "Câu tiếp theo");
                 if (outcome.SuggestPositiveEnd)
-                    _support.Text = "Con đã cố gắng đủ cho lúc này. Có thể nghỉ ở đây và học tiếp lần sau.";
+                    _support.Text = _eventPresentation == null
+                        ? "Con đã cố gắng đủ cho lúc này. Có thể nghỉ ở đây và học tiếp lần sau."
+                        : _eventPresentation.BreakCopyVi;
                 _nextButton.Focus();
             }
             catch
@@ -789,18 +955,21 @@ namespace WAHUKidsLearn
                 _feedbackCard.CardColor = outcome.IsCorrect ? Color.FromArgb(226, 242, 224) : Color.FromArgb(251, 232, 222);
                 _feedbackCard.BorderColor = outcome.IsCorrect ? Color.FromArgb(190, 221, 188) : Color.FromArgb(236, 202, 187);
                 _feedbackCard.Visible = true;
-                _support.Text = outcome.IsCorrect
+                var interactiveSupport = outcome.IsCorrect
                     ? "Tốt rồi. Đoạn thẳng này đã được lưu để lần sau ôn đúng lúc."
                     : "Đoạn đúng cần dài " + outcome.CorrectAnswerDisplay + " cm. Câu sau sẽ giúp con luyện tiếp phần này.";
-                _progressText.Text = "Đã làm " + outcome.CompletedQuestionCount + " / " + outcome.TargetQuestionCount;
-                _progressBar.Value = outcome.CompletedQuestionCount;
+                _support.Text = BuildOutcomeSupport(outcome, interactiveSupport);
+                UpdateProgressPresentation(outcome.CompletedQuestionCount, outcome.CompletedQuestionCount,
+                    outcome.TargetQuestionCount, false, true);
                 _hintButton.Visible = false;
                 _nextButton.Visible = true;
                 _completeOnNext = outcome.SuggestPositiveEnd || outcome.CompletedQuestionCount >= outcome.TargetQuestionCount;
                 _nextButton.Text = outcome.SuggestPositiveEnd ? "Nghỉ ở đây" :
                     (outcome.CompletedQuestionCount >= outcome.TargetQuestionCount ? "Xem kết quả" : "Câu tiếp theo");
                 if (outcome.SuggestPositiveEnd)
-                    _support.Text = "Con đã cố gắng đủ cho lúc này. Có thể nghỉ ở đây và học tiếp lần sau.";
+                    _support.Text = _eventPresentation == null
+                        ? "Con đã cố gắng đủ cho lúc này. Có thể nghỉ ở đây và học tiếp lần sau."
+                        : _eventPresentation.BreakCopyVi;
                 _nextButton.Focus();
             }
             catch
@@ -861,18 +1030,21 @@ namespace WAHUKidsLearn
                 _feedbackCard.CardColor = outcome.IsCorrect ? Color.FromArgb(226, 242, 224) : Color.FromArgb(251, 232, 222);
                 _feedbackCard.BorderColor = outcome.IsCorrect ? Color.FromArgb(190, 221, 188) : Color.FromArgb(236, 202, 187);
                 _feedbackCard.Visible = true;
-                _support.Text = outcome.IsCorrect
+                var choiceSupport = outcome.IsCorrect
                     ? "Tốt rồi. Câu này đã được lưu để lần sau ôn đúng lúc."
                     : "Mình đã chỉ ra đáp án đúng. Câu sau sẽ giúp con luyện tiếp phần này.";
-                _progressText.Text = "Đã làm " + outcome.CompletedQuestionCount + " / " + outcome.TargetQuestionCount;
-                _progressBar.Value = outcome.CompletedQuestionCount;
+                _support.Text = BuildOutcomeSupport(outcome, choiceSupport);
+                UpdateProgressPresentation(outcome.CompletedQuestionCount, outcome.CompletedQuestionCount,
+                    outcome.TargetQuestionCount, false, true);
                 _hintButton.Visible = false;
                 _nextButton.Visible = true;
                 _completeOnNext = outcome.SuggestPositiveEnd || outcome.CompletedQuestionCount >= outcome.TargetQuestionCount;
                 _nextButton.Text = outcome.SuggestPositiveEnd ? "Nghỉ ở đây" :
                     (outcome.CompletedQuestionCount >= outcome.TargetQuestionCount ? "Xem kết quả" : "Câu tiếp theo");
                 if (outcome.SuggestPositiveEnd)
-                    _support.Text = "Con đã cố gắng đủ cho lúc này. Có thể nghỉ ở đây và học tiếp lần sau.";
+                    _support.Text = _eventPresentation == null
+                        ? "Con đã cố gắng đủ cho lúc này. Có thể nghỉ ở đây và học tiếp lần sau."
+                        : _eventPresentation.BreakCopyVi;
                 _nextButton.Focus();
             }
             catch
@@ -909,7 +1081,17 @@ namespace WAHUKidsLearn
             if (_finished) return;
             try
             {
-                var summary = _coordinator != null && _coordinator.IsActive ? _coordinator.Complete() : null;
+                MathSessionSummary summary = null;
+                if (_gameEventCoordinator != null && _coordinator != null && _coordinator.IsActive)
+                {
+                    var completion = _gameEventCoordinator.Complete();
+                    _eventState = completion.EventState;
+                    summary = completion.LearningSummary;
+                }
+                else if (_coordinator != null && _coordinator.IsActive)
+                {
+                    summary = _coordinator.Complete();
+                }
                 _finished = true;
                 ShowCompletion(summary);
             }
@@ -989,9 +1171,14 @@ namespace WAHUKidsLearn
                 summary == null ? null : summary.NextGardenMilestoneItemId);
             _completionVisual.Visible = true;
             _companion.State = CompanionReactionState.Celebrate;
-            _prompt.Text = summary != null && string.Equals(summary.SessionMode, "lesson", StringComparison.Ordinal)
-                ? "Hoàn thành bài học" : "Hoàn thành nhiệm vụ";
-            _support.Text = BuildCompletionSupportText(summary);
+            _prompt.Text = _eventPresentation != null
+                ? "Nhiệm vụ cứu hộ hoàn thành"
+                : (summary != null && string.Equals(summary.SessionMode, "lesson", StringComparison.Ordinal)
+                    ? "Hoàn thành bài học" : "Hoàn thành nhiệm vụ");
+            var completionSupport = BuildCompletionSupportText(summary);
+            _support.Text = _eventPresentation == null
+                ? completionSupport
+                : _eventPresentation.CompletionVi + " " + completionSupport;
             _support.AccessibleName = "Tóm tắt tiến bộ: " + _support.Text;
             _feedback.Text = BuildCompletionPerformanceText(summary);
             _feedback.AccessibleName = "Kết quả nhiệm vụ: " + _feedback.Text;
@@ -1005,23 +1192,42 @@ namespace WAHUKidsLearn
             _hintButton.Visible = false;
             _stopButton.Visible = false;
             _nextButton.Visible = true;
-            _nextButton.Text = "Về thư viện Toán";
-            _nextButton.AccessibleName = "Về thư viện Toán";
-            _nextButton.AccessibleDescription = "Đóng kết quả và quay lại danh sách bài Toán.";
+            _nextButton.Text = _eventPresentation == null ? "Về thư viện Toán" : "Về nhiệm vụ cứu hộ";
+            _nextButton.AccessibleName = _eventPresentation == null ? "Về thư viện Toán" : "Về nhiệm vụ cứu hộ";
+            _nextButton.AccessibleDescription = _eventPresentation == null
+                ? "Đóng kết quả và quay lại danh sách bài Toán."
+                : "Đóng kết quả và quay lại danh sách nhiệm vụ cứu hộ.";
             _completeOnNext = false;
-            _progressText.Text = "Hoàn thành";
-            _progressBar.Value = _progressBar.Maximum;
+            if (_eventPresentation == null)
+            {
+                _progressText.Text = "Hoàn thành";
+                _progressBar.Value = _progressBar.Maximum;
+            }
+            else
+            {
+                UpdateProgressPresentation(_targetQuestionCount, _targetQuestionCount, _targetQuestionCount, false, true);
+            }
             _nextButton.Focus();
         }
 
         private void RequestStop()
         {
             if (_finished) { Close(); return; }
+            var stopMessage = _eventPresentation == null
+                ? "Dừng buổi học ở đây?\r\n\r\nNhững câu đã làm vẫn được lưu để lần sau học tiếp."
+                : _eventPresentation.BreakCopyVi + "\r\n\r\nNhững chặng đã làm vẫn được lưu để lần sau quay lại đúng chỗ.";
             var answer = MessageBox.Show(this,
-                "Dừng buổi học ở đây?\r\n\r\nNhững câu đã làm vẫn được lưu để lần sau học tiếp.",
-                "Dừng buổi học", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
+                stopMessage,
+                _eventPresentation == null ? "Dừng buổi học" : "Nghỉ ở đây",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
             if (answer != DialogResult.Yes) return;
-            try { if (_coordinator != null && _coordinator.IsActive) _coordinator.Suspend("child_requested_stop"); }
+            try
+            {
+                if (_gameEventCoordinator != null && _coordinator != null && _coordinator.IsActive)
+                    _gameEventCoordinator.SuspendForBreak("child_requested_break");
+                else if (_coordinator != null && _coordinator.IsActive)
+                    _coordinator.Suspend("child_requested_stop");
+            }
             catch { }
             _finished = true;
             Close();
@@ -1106,19 +1312,33 @@ namespace WAHUKidsLearn
             if (_finished) return;
             if (e.CloseReason == CloseReason.UserClosing)
             {
+                var closeMessage = _eventPresentation == null
+                    ? "Dừng buổi học ở đây? Những câu đã làm vẫn được lưu."
+                    : _eventPresentation.BreakCopyVi + " Những chặng đã làm vẫn được lưu để lần sau quay lại đúng chỗ.";
                 var answer = MessageBox.Show(this,
-                    "Dừng buổi học ở đây? Những câu đã làm vẫn được lưu.",
-                    "Dừng buổi học", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
+                    closeMessage,
+                    _eventPresentation == null ? "Dừng buổi học" : "Nghỉ ở đây",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
                 if (answer != DialogResult.Yes) { e.Cancel = true; return; }
             }
-            try { if (_coordinator != null && _coordinator.IsActive) _coordinator.Suspend("lesson_window_closed"); }
+            try
+            {
+                if (_gameEventCoordinator != null && _coordinator != null && _coordinator.IsActive)
+                    _gameEventCoordinator.SuspendForBreak("game_event_window_closed");
+                else if (_coordinator != null && _coordinator.IsActive)
+                    _coordinator.Suspend("lesson_window_closed");
+            }
             catch { }
             _finished = true;
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing && _coordinator != null) _coordinator.Dispose();
+            if (disposing)
+            {
+                if (_gameEventCoordinator != null) _gameEventCoordinator.Dispose();
+                else if (_coordinator != null) _coordinator.Dispose();
+            }
             base.Dispose(disposing);
         }
     }

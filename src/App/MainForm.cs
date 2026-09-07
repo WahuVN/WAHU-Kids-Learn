@@ -24,6 +24,7 @@ namespace WAHUKidsLearn
         private Label _gardenProgress;
         private Label _missionSummary;
         private ChildActionButton _mathButton;
+        private ChildActionButton _quickRescueButton;
         private Label _safeIssue;
 
         public MainForm(RuntimeConfigBundle config, LearningDatabase learningDatabase, PreflightReport report,
@@ -233,23 +234,46 @@ namespace WAHUKidsLearn
                 AccessibleName = "Mô tả nhiệm vụ"
             };
             missionLayout.Controls.Add(_missionSummary, 0, 2);
-            _mathButton = new ChildActionButton
+            var mathActions = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1 };
+            mathActions.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 58));
+            mathActions.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 42));
+            _quickRescueButton = new ChildActionButton
             {
                 Dock = DockStyle.Fill,
-                Margin = new Padding(0, 8, 0, 6),
-                Text = "Mở Toán lớp 2",
-                BadgeText = "67",
-                Font = ChildVisualTheme.Font(16f, FontStyle.Bold),
+                Margin = new Padding(0, 8, 6, 6),
+                Text = "Toán nhanh — Nhiệm vụ cứu hộ",
+                BadgeText = "3",
+                Font = ChildVisualTheme.Font(11.5f, FontStyle.Bold),
                 FillColor = ChildVisualTheme.MintStrong,
                 HoverColor = Color.FromArgb(90, 156, 103),
                 PressedColor = Color.FromArgb(75, 139, 88),
+                Radius = 20,
+                AccessibleName = "Mở Toán nhanh — Nhiệm vụ cứu hộ",
+                AccessibleDescription = "Mở một nhiệm vụ ngắn gồm ba chặng Toán. Không có đồng hồ đếm ngược và có thể nghỉ bất cứ lúc nào."
+            };
+            _quickRescueButton.Enabled = IsLearnerReady();
+            _quickRescueButton.Click += delegate { OpenQuickRescue(); };
+            mathActions.Controls.Add(_quickRescueButton, 0, 0);
+
+            _mathButton = new ChildActionButton
+            {
+                Dock = DockStyle.Fill,
+                Margin = new Padding(6, 8, 0, 6),
+                Text = "Thư viện Toán",
+                BadgeText = "67",
+                Font = ChildVisualTheme.Font(10.5f, FontStyle.Bold),
+                FillColor = Color.FromArgb(226, 239, 247),
+                HoverColor = Color.FromArgb(210, 230, 241),
+                PressedColor = Color.FromArgb(194, 219, 233),
+                TextColor = ChildVisualTheme.SkyStrong,
                 Radius = 20,
                 AccessibleName = "Mở thư viện Toán lớp 2",
                 AccessibleDescription = "Mở bảy chương và sáu mươi bảy bài học Toán lớp 2."
             };
             _mathButton.Enabled = IsLearnerReady();
             _mathButton.Click += delegate { OpenMathHub(); };
-            missionLayout.Controls.Add(_mathButton, 0, 3);
+            mathActions.Controls.Add(_mathButton, 1, 0);
+            missionLayout.Controls.Add(mathActions, 0, 3);
             missionLayout.Controls.Add(new Label
             {
                 Dock = DockStyle.Fill,
@@ -343,6 +367,23 @@ namespace WAHUKidsLearn
             {
                 MessageBox.Show(this,
                     "Chưa thể mở thư viện Toán lúc này. Nhờ người lớn mở mục Phụ huynh để kiểm tra nhé.",
+                    "WAHU Kids Learn", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private void OpenQuickRescue()
+        {
+            if (!IsLearnerReady()) return;
+            try
+            {
+                using (var rescue = new MathQuickRescueForm(_learningDatabase, _performance))
+                    rescue.ShowDialog(this);
+                RefreshHomeProgress();
+            }
+            catch
+            {
+                MessageBox.Show(this,
+                    "Chưa thể mở nhiệm vụ cứu hộ lúc này. Con vẫn có thể học trong thư viện Toán.",
                     "WAHU Kids Learn", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
