@@ -181,7 +181,7 @@ Latest result: **34 tests PASS**.
 4. UI smoke full project-reference build vẫn gặp lỗi reference `System.Data.SQLite` khi build `WAHU.Data.csproj`; App + Child UI targeted build với `BuildProjectReferences=false` PASS. Đây là build/dependency WIP ngoài AI1.
 5. Retry UI presentation trong current working tree hiện **PASS** sau rebuild App + Child UI với `BuildProjectReferences=false`; Child UI đạt **1558 assertions**. Chưa coi là commit-owned closure cho tới khi lane UI chốt các file WIP của họ.
 6. Legacy generator vẫn chỉ phủ 65/67 skill, nhưng lesson-authored path đã cho phép hai skill `FOLD_CUT_COMPOSE_SHAPES` và `MONEY_VND_NOTE_RECOGNITION` có bài luyện thật mà không cần template giả.
-7. **Breadth / replay blocker:** cả 67 lesson hiện có đúng `(1 basic, 1 medium, 1 application)` = 3 authored questions và targeted engine luôn nạp toàn bộ IDs theo đúng thứ tự, nên học lại sẽ gặp lại nguyên 3 câu. `MathSessionCoordinator` đã hỗ trợ 1–40 question/lesson, nhưng shared contract + AI2 persistence tests + AI3 CTA hiện khóa “Luyện 3 câu bài này”. Muốn đạt non-demo breadth cần contract wave AI1 mở rộng bank đồng thời AI2/AI3 cập nhật session/test/UI.
+7. **Breadth / replay blocker — Request 009 OPEN:** cả 67 lesson hiện có đúng `(1 basic, 1 medium, 1 application)` = 3 authored questions và targeted engine luôn nạp toàn bộ IDs theo đúng thứ tự, nên học lại gặp lại nguyên 3 câu. Request 009 đề xuất tách pool size khỏi session target: AI1 mở pool `>=6` câu/bài, AI2 chọn/persist đúng 3 câu cân bằng mỗi phiên, AI3 giữ CTA/progress 3 câu nhưng hiển thị pool count riêng. AI1 chưa mở rộng bank trước khi runtime contract/regression này xanh.
 
 ## Lane verdict
 

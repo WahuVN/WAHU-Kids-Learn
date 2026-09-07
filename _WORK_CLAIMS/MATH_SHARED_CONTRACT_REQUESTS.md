@@ -71,3 +71,16 @@
 - Gate mạnh hơn nên mở app từ portable/installed payload và xác nhận Math catalog load được 7 chương / 17 chủ đề / 67 bài, authored bank load đủ 201 câu; không chỉ kiểm file tồn tại.
 - Khi rebuild release artifact mới, release manifest phải có database schema version 4 và git commit chứa `1436705`/sau đó; portable + installer phải giữ learner DB/lesson progress qua relaunch/reinstall theo policy hiện tại.
 - Owner: release/build lane. AI3 chỉ audit/integration regression, không sửa `tools/build/*` khi file đang có owner/WIP khác.
+
+## Request 009 — Decouple authored lesson pool size from 3-question session target
+
+- Contract hiện tại: mỗi lesson có đúng `1 basic + 1 medium + 1 application`; `MathSessionCoordinator` nối toàn bộ `PracticeSets` theo thứ tự `basic -> medium -> application` rồi đặt `TargetQuestionCount = PracticeSets.TotalCount`. Vì vậy tăng bank lên 6/9 câu sẽ đồng thời kéo dài một phiên lên 6/9 câu; học lại lesson hiện cũng luôn gặp đúng cùng 3 `ContentQuestionId`.
+- Mục tiêu UX/content: cho phép AI1 mở rộng mỗi lesson thành **pool >= 6 câu** (tối thiểu 2 basic + 2 medium + 2 application) nhưng **mỗi lesson session mặc định vẫn 3 câu**, lấy cân bằng **1 basic + 1 medium + 1 application**. `Luyện 3 câu bài này` không được biến thành phiên dài chỉ vì pool lớn hơn.
+- Contract engine cần: tách `authored_pool_count` khỏi `TargetQuestionCount`; khi bắt đầu fresh targeted session, chọn một ordered set 3 `ContentQuestionId` từ ba difficulty buckets. Cùng seed/selection identity phải deterministic để test; các fresh session với selection identity khác phải có khả năng chọn set khác thay vì luôn lấy phần tử đầu.
+- Persistence bắt buộc: ordered selected `ContentQuestionId` của session phải survive suspend/resume. Resume, retry và corrupt-open-question recovery phải tiếp tục trên **selected session set**, không re-select từ pool và không skip ordinal. Request 007 semantics vẫn áp dụng trên selected set.
+- Progress/mastery: completion/score vẫn dựa trên `TargetQuestionCount = 3`, không dựa trên tổng số câu trong authored pool. Pool size tăng không được làm lesson khó complete hơn chỉ do có thêm nội dung.
+- UI contract: Hub có thể hiển thị `N câu trong ngân hàng bài học` theo pool size, nhưng CTA session mặc định vẫn `Luyện 3 câu bài này`; lesson form/progress dùng `TargetQuestionCount` thật từ session start. Không hard-code pool size = target size.
+- Content contract sau khi AI2/AI3 chốt: AI1 sẽ cho phép nhiều ID trong từng `practice_sets.basic/medium/application`, giữ mỗi question được reference đúng một lần, giữ difficulty metadata khớp bucket và mở rộng bank deterministic. Không tạo orphan pool field song song mà runtime không consume.
+- Regression AI2 cần: lesson fixture có >=2 câu mỗi difficulty; hai fresh session với hai selection identity cố định phải tạo set hợp lệ và ít nhất một ID khác nhau; resume cùng session phải giữ nguyên ordered selected set; retry/corrupt recovery không đổi set; completion vẫn đúng sau 3 committed attempts.
+- Regression AI3 cần: Hub phân biệt pool count với session target; CTA vẫn 3 câu; targeted lesson render đúng selected 3 câu bất kể pool có 6+; result/progress vẫn `3/3`.
+- Owner: AI2 session/persistence + AI3 UI/integration. AI1 chỉ mở rộng bank sau khi contract này có runtime regression xanh để tránh phá end-to-end hiện tại.
