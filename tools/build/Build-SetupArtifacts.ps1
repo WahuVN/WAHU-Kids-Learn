@@ -128,6 +128,17 @@ $updateAssertions = Invoke-SmokeWithAssertions -Name 'Update runtime smoke' -Pat
 Write-Host '[10/15] SQLite/Data smoke + backup/restore integration'
 $sqliteAssertions = Invoke-SmokeWithAssertions -Name 'SQLite runtime smoke' -Path $sqliteSmoke -PassPrefix 'SQLITE_RUNTIME_SMOKE_PASS' -Arguments @($schemaSource)
 
+Write-Host '[10b/15] Math session persistence / rescue lifecycle smoke'
+$dotnet = (Get-Command dotnet -ErrorAction SilentlyContinue).Source
+if (-not $dotnet) { throw 'Không tìm thấy dotnet CLI để build MathSessionPersistenceRuntimeSmoke.' }
+$mathPersistenceProject = Join-Path $root 'tests\MathSessionPersistenceRuntimeSmoke\WAHU.MathSessionPersistenceRuntimeSmoke.csproj'
+Require-File $mathPersistenceProject
+& $dotnet build $mathPersistenceProject -c $Configuration '-p:Platform=x86' --nologo
+if ($LASTEXITCODE -ne 0) { throw "Math persistence smoke build fail: $LASTEXITCODE" }
+$mathPersistenceSmoke = Join-Path $root "tests\MathSessionPersistenceRuntimeSmoke\bin\x86\$Configuration\net48\WAHU.MathSessionPersistenceRuntimeSmoke.exe"
+Require-File $mathPersistenceSmoke
+$mathPersistenceAssertions = Invoke-SmokeWithAssertions -Name 'Math session persistence runtime smoke' -Path $mathPersistenceSmoke -PassPrefix 'MATH_SESSION_PERSISTENCE_RUNTIME_SMOKE_PASS'
+
 $publish = Join-Path $root 'build\win7_x86\publish'
 if (Test-Path $publish) { Remove-Item -LiteralPath $publish -Recurse -Force }
 New-Item -ItemType Directory -Force -Path $publish | Out-Null
@@ -275,6 +286,8 @@ $manifest = [ordered]@{
         update_runtime_smoke = 'PASS'
         update_runtime_smoke_assertions = $updateAssertions
         sqlite_runtime_smoke = 'PASS'
+        math_session_persistence_runtime_smoke = 'PASS'
+        math_session_persistence_runtime_smoke_assertions = $mathPersistenceAssertions
         backup_restore_smoke = 'PASS'
         staged_payload_guard = 'PASS'
         win7_target_smoke = 'PENDING'
