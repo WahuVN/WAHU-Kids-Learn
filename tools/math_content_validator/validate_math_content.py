@@ -737,6 +737,10 @@ def child_facing_text_hygiene(value: object) -> list[tuple[str, str, str]]:
             violations.append((path, "space_before_punctuation", node))
         if re.search(r"[,.!?;](?=[A-Za-zÀ-ỹĐđ])", node):
             violations.append((path, "missing_space_after_punctuation", node))
+        for match in re.finditer(r"\d(\s*)([+×=-])(\s*)\d", node):
+            if match.group(1) != " " or match.group(3) != " ":
+                violations.append((path, "numeric_operator_spacing", node))
+                break
 
     scan(value, "")
     return violations
@@ -1562,6 +1566,10 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
         if not isinstance(validation, dict):
             errors.append(f"missing_validation:{where}")
             validation = {}
+        if skill == "MENTAL_ADD_SUB_WITHIN_20":
+            mental_max = baseline.get("hard_guards", {}).get("mental_add_sub_max", 20) if isinstance(baseline.get("hard_guards"), dict) else 20
+            if validation.get("numeric_min") != 0 or validation.get("numeric_max") != mental_max:
+                errors.append(f"mental_range_metadata_mismatch:{where}:{validation.get('numeric_min')}:{validation.get('numeric_max')}:{mental_max}")
         if "answer_unit" in q:
             answer_unit = q.get("answer_unit")
             if not isinstance(answer_unit, str) or not answer_unit.strip():

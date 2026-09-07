@@ -1342,23 +1342,23 @@ Q = {
         mc("Bạn Bình gọi 90 là số trừ và 55 là hiệu trong 90 - 35 = 55. Cặp tên nào sửa đúng lời bạn Bình?", "số bị trừ và hiệu", ["số trừ và hiệu", "hiệu và số bị trừ", "số bị trừ và số trừ"], "Trong phép trừ, 90 đứng trước dấu trừ nên là số bị trừ; kết quả 55 là hiệu."),
     ],
     "ADD_WITHIN_1000_NO_CARRY": [
-        nq("Tính 243 + 125.", 368, "Cộng từng hàng: 3+5=8, 4+2=6, 2+1=3; được 368."),
-        nq("Tính 410 + 230.", 640, "0+0=0, 1 chục + 3 chục = 4 chục, 4 trăm + 2 trăm = 6 trăm; được 640."),
+        nq("Tính 243 + 125.", 368, "Cộng từng hàng: 3 + 5 = 8, 4 + 2 = 6, 2 + 1 = 3; được 368."),
+        nq("Tính 410 + 230.", 640, "0 + 0 = 0, 1 chục + 3 chục = 4 chục, 4 trăm + 2 trăm = 6 trăm; được 640."),
         nq("Thư viện có 324 sách truyện và 253 sách khoa học. Có tất cả bao nhiêu quyển?", 577, "324 + 253 = 577; từng cột đều không cần nhớ."),
     ],
     "ADD_WITHIN_1000_ONE_CARRY_MAX": [
-        nq("Tính 246 + 137.", 383, "6+7=13, viết 3 nhớ 1; 4+3+1=8; 2+1=3, nên kết quả 383."),
-        nq("Tính 358 + 124.", 482, "8+4=12, viết 2 nhớ 1; 5+2+1=8; 3+1=4, nên 482."),
+        nq("Tính 246 + 137.", 383, "6 + 7 = 13, viết 3 nhớ 1; 4 + 3 + 1 = 8; 2 + 1 = 3, nên kết quả 383."),
+        nq("Tính 358 + 124.", 482, "8 + 4 = 12, viết 2 nhớ 1; 5 + 2 + 1 = 8; 3 + 1 = 4, nên 482."),
         nq("Kho A có 465 hộp, nhập thêm 217 hộp. Có tất cả bao nhiêu hộp?", 682, "465 + 217 = 682; chỉ hàng đơn vị tạo một lượt nhớ."),
     ],
     "SUB_WITHIN_1000_NO_BORROW": [
-        nq("Tính 786 - 234.", 552, "6-4=2, 8-3=5, 7-2=5; được 552."),
+        nq("Tính 786 - 234.", 552, "6 - 4 = 2, 8 - 3 = 5, 7 - 2 = 5; được 552."),
         nq("Tính 900 - 400.", 500, "9 trăm trừ 4 trăm còn 5 trăm, tức 500."),
         nq("Kho có 654 hộp, chuyển đi 321 hộp. Còn lại bao nhiêu hộp?", 333, "654 - 321 = 333 và không cột nào cần mượn."),
     ],
     "SUB_WITHIN_1000_ONE_BORROW_MAX": [
-        nq("Tính 352 - 138.", 214, "Mượn 1 chục: 12-8=4; còn 4 chục, 4-3=1; 3-1=2, được 214."),
-        nq("Tính 641 - 223.", 418, "Mượn 1 chục: 11-3=8; còn 3 chục, 3-2=1; 6-2=4, được 418."),
+        nq("Tính 352 - 138.", 214, "Mượn 1 chục: 12 - 8 = 4; còn 4 chục, 4 - 3 = 1; 3 - 1 = 2, được 214."),
+        nq("Tính 641 - 223.", 418, "Mượn 1 chục: 11 - 3 = 8; còn 3 chục, 3 - 2 = 1; 6 - 2 = 4, được 418."),
         nq("Một cửa hàng có 730 chai, bán 412 chai. Còn lại bao nhiêu chai?", 318, "730 - 412 = 318; mượn 1 chục ở hàng đơn vị rồi các hàng còn lại trừ trực tiếp."),
     ],
     "ADD_SUB_TWO_OPERATORS_LEFT_TO_RIGHT": [
@@ -1367,9 +1367,9 @@ Q = {
         nq("Một hộp có 200 thẻ, thêm 150 thẻ rồi lấy ra 100 thẻ. Còn bao nhiêu thẻ?", 250, "Từ trái sang phải theo tình huống: 200 + 150 = 350, 350 - 100 = 250."),
     ],
     "MENTAL_ADD_SUB_WITHIN_20": [
-        nq("Tính nhẩm 8 + 7.", 15, "Tách 7 thành 2 và 5: 8+2=10, rồi 10+5=15."),
-        nq("Tính nhẩm 17 - 9.", 8, "Có thể trừ 10 rồi thêm lại 1: 17-10=7, 7+1=8."),
-        nq("Mai có 12 nhãn dán, được cho thêm 5 nhãn. Mai có bao nhiêu nhãn?", 17, "12 + 5 = 17, vẫn trong phạm vi 20."),
+        nq("Tính nhẩm 8 + 7.", 15, "Tách 7 thành 2 và 5: 8 + 2 = 10, rồi 10 + 5 = 15.", numeric_max=20),
+        nq("Tính nhẩm 17 - 9.", 8, "Có thể trừ 10 rồi thêm lại 1: 17 - 10 = 7, 7 + 1 = 8.", numeric_max=20),
+        nq("Mai có 12 nhãn dán, được cho thêm 5 nhãn. Mai có bao nhiêu nhãn?", 17, "12 + 5 = 17, vẫn trong phạm vi 20.", numeric_max=20),
     ],
     "MENTAL_ADD_SUB_ROUND_TENS_HUNDREDS_1000": [
         nq("Tính nhẩm 30 + 40.", 70, "3 chục + 4 chục = 7 chục, tức 70."),

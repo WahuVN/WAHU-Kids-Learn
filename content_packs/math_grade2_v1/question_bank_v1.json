@@ -1568,7 +1568,7 @@
       "accepted_answers": [
         "368"
       ],
-      "explanation_vi": "Cộng từng hàng: 3+5=8, 4+2=6, 2+1=3; được 368.",
+      "explanation_vi": "Cộng từng hàng: 3 + 5 = 8, 4 + 2 = 6, 2 + 1 = 3; được 368.",
       "hints_vi": [
         "Gạch dưới số hoặc vị trí liên quan đến “Cộng không nhớ”, rồi xác định điều cần tìm trước khi tính.",
         "Khoanh các số cần dùng, áp dụng “Cộng không nhớ”, rồi viết phần số của kết quả."
@@ -1599,7 +1599,7 @@
       "accepted_answers": [
         "640"
       ],
-      "explanation_vi": "0+0=0, 1 chục + 3 chục = 4 chục, 4 trăm + 2 trăm = 6 trăm; được 640.",
+      "explanation_vi": "0 + 0 = 0, 1 chục + 3 chục = 4 chục, 4 trăm + 2 trăm = 6 trăm; được 640.",
       "hints_vi": [
         "Tách dữ kiện của “Cộng không nhớ” thành từng phần; chỉ tính sau khi biết rõ điều cần tìm.",
         "Tách dữ kiện theo “Cộng không nhớ”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
@@ -1661,7 +1661,7 @@
       "accepted_answers": [
         "383"
       ],
-      "explanation_vi": "6+7=13, viết 3 nhớ 1; 4+3+1=8; 2+1=3, nên kết quả 383.",
+      "explanation_vi": "6 + 7 = 13, viết 3 nhớ 1; 4 + 3 + 1 = 8; 2 + 1 = 3, nên kết quả 383.",
       "hints_vi": [
         "Gạch dưới số hoặc vị trí liên quan đến “Cộng có nhớ”, rồi xác định điều cần tìm trước khi tính.",
         "Khoanh các số cần dùng, áp dụng “Cộng có nhớ”, rồi viết phần số của kết quả."
@@ -1692,7 +1692,7 @@
       "accepted_answers": [
         "482"
       ],
-      "explanation_vi": "8+4=12, viết 2 nhớ 1; 5+2+1=8; 3+1=4, nên 482.",
+      "explanation_vi": "8 + 4 = 12, viết 2 nhớ 1; 5 + 2 + 1 = 8; 3 + 1 = 4, nên 482.",
       "hints_vi": [
         "Tách dữ kiện của “Cộng có nhớ” thành từng phần; chỉ tính sau khi biết rõ điều cần tìm.",
         "Tách dữ kiện theo “Cộng có nhớ”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
@@ -1754,7 +1754,7 @@
       "accepted_answers": [
         "552"
       ],
-      "explanation_vi": "6-4=2, 8-3=5, 7-2=5; được 552. Tính lại từng bước theo đúng thứ tự để kiểm tra kết quả.",
+      "explanation_vi": "6 - 4 = 2, 8 - 3 = 5, 7 - 2 = 5; được 552.",
       "hints_vi": [
         "Gạch dưới số hoặc vị trí liên quan đến “Trừ không mượn”, rồi xác định điều cần tìm trước khi tính.",
         "Khoanh các số cần dùng, áp dụng “Trừ không mượn”, rồi viết phần số của kết quả."
@@ -1847,7 +1847,7 @@
       "accepted_answers": [
         "214"
       ],
-      "explanation_vi": "Mượn 1 chục: 12-8=4; còn 4 chục, 4-3=1; 3-1=2, được 214.",
+      "explanation_vi": "Mượn 1 chục: 12 - 8 = 4; còn 4 chục, 4 - 3 = 1; 3 - 1 = 2, được 214.",
       "hints_vi": [
         "Gạch dưới số hoặc vị trí liên quan đến “Trừ có mượn”, rồi xác định điều cần tìm trước khi tính.",
         "Khoanh các số cần dùng, áp dụng “Trừ có mượn”, rồi viết phần số của kết quả."
@@ -1878,7 +1878,7 @@
       "accepted_answers": [
         "418"
       ],
-      "explanation_vi": "Mượn 1 chục: 11-3=8; còn 3 chục, 3-2=1; 6-2=4, được 418.",
+      "explanation_vi": "Mượn 1 chục: 11 - 3 = 8; còn 3 chục, 3 - 2 = 1; 6 - 2 = 4, được 418.",
       "hints_vi": [
         "Tách dữ kiện của “Trừ có mượn” thành từng phần; chỉ tính sau khi biết rõ điều cần tìm.",
         "Tách dữ kiện theo “Trừ có mượn”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
@@ -2042,7 +2042,7 @@
       "accepted_answers": [
         "15"
       ],
-      "explanation_vi": "Tách 7 thành 2 và 5: 8+2=10, rồi 10+5=15.",
+      "explanation_vi": "Tách 7 thành 2 và 5: 8 + 2 = 10, rồi 10 + 5 = 15.",
       "hints_vi": [
         "Gạch dưới số hoặc vị trí liên quan đến “Tính nhẩm đến 20”, rồi xác định điều cần tìm trước khi tính.",
         "Khoanh các số cần dùng, áp dụng “Tính nhẩm đến 20”, rồi viết phần số của kết quả."
@@ -2057,7 +2057,7 @@
       "validation": {
         "integer_required": true,
         "numeric_min": 0,
-        "numeric_max": 1000
+        "numeric_max": 20
       },
       "status": "CHILD_READY"
     },
@@ -2073,7 +2073,7 @@
       "accepted_answers": [
         "8"
       ],
-      "explanation_vi": "Có thể trừ 10 rồi thêm lại 1: 17-10=7, 7+1=8.",
+      "explanation_vi": "Có thể trừ 10 rồi thêm lại 1: 17 - 10 = 7, 7 + 1 = 8.",
       "hints_vi": [
         "Tách dữ kiện của “Tính nhẩm đến 20” thành từng phần; chỉ tính sau khi biết rõ điều cần tìm.",
         "Tách dữ kiện theo “Tính nhẩm đến 20”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
@@ -2088,7 +2088,7 @@
       "validation": {
         "integer_required": true,
         "numeric_min": 0,
-        "numeric_max": 1000
+        "numeric_max": 20
       },
       "status": "CHILD_READY"
     },
@@ -2119,7 +2119,7 @@
       "validation": {
         "integer_required": true,
         "numeric_min": 0,
-        "numeric_max": 1000
+        "numeric_max": 20
       },
       "status": "CHILD_READY"
     },

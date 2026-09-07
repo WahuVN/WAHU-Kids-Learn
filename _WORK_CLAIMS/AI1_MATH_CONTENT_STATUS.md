@@ -70,7 +70,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 `tools/math_content_validator/validate_math_content.py` hiện chặn:
 
 - baseline traceability root: `curriculum_id = vn_moet_math_grade2_tt32_2018`, Grade 2 Math, status `VERIFIED_A_BASELINE`, source bắt buộc `MOET_TT32_2018` + `TT32_FULL_ANNEX_MIRROR`, source không trùng; catalog/bank phải bind đúng curriculum này;
-- baseline hard guards bị đổi/mất: `max_number=1000`, carry/borrow rounds `1`, bảng nhân `[2,5]`, bảng chia `[2,5]`, mental add/sub max `20`, vị trí kim phút baseline `[3,6]`; validator fail nếu bất kỳ giá trị nào lệch; riêng max-number còn được enforce trên **2.870 numeric literals child-facing**, hiện max=1000 / over1000=0;
+- baseline hard guards bị đổi/mất: `max_number=1000`, carry/borrow rounds `1`, bảng nhân `[2,5]`, bảng chia `[2,5]`, mental add/sub max `20`, vị trí kim phút baseline `[3,6]`; validator fail nếu bất kỳ giá trị nào lệch; riêng max-number còn được enforce trên **2.870 numeric literals child-facing**, hiện max=1000 / over1000=0; **3/3 `MENTAL_ADD_SUB_WITHIN_20` validation range đã thu hẹp từ 0..1000 về 0..20** và bị khóa theo hard guard;
 - duplicate ID toàn catalog/bank;
 - missing lesson/question/reference;
 - orphan question;
@@ -134,7 +134,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - vị trí đáp án đúng được cân bằng deterministic: 88 câu 4-choice = 22/22/22/22 cho A/B/C/D; 3 true/false = 2/1;
 - 23 câu integer có `answer_unit` giữ đúng contract display-only, không đổi sang unit-input; **23/23 prompt tự nêu đơn vị theo alias chuẩn** (`cm/xăng-ti-mét`, `l/lít`, `m/mét`, ...), validator fail nếu metadata unit tồn tại nhưng đề không nói rõ đơn vị;
 - **39 application regression quan trọng** được khóa riêng: 38 regression trước đó + câu đọc/viết số đã đổi từ ghép hàng trực tiếp sang sửa lỗi bỏ quên hàng chục;
-- child-facing lesson/question text có **0 internal-engine vocabulary** và **0 Unicode/whitespace/control-character hygiene violation**; metadata kỹ thuật như `application`, `numeric_input`, `deterministic` vẫn được phép;
+- child-facing lesson/question text có **0 internal-engine vocabulary**, **0 Unicode/whitespace/control-character hygiene violation** và **0 phép tính dính operator** (`8+2=10` kiểu cũ đã giảm 9 → 0); metadata kỹ thuật như `application`, `numeric_input`, `deterministic` vẫn được phép;
 - **67/67 worked example unique**, mỗi ví dụ có ít nhất 2 bước giải, **0 exact/near overlap** với 201 câu practice và 67/67 solution chốt đáp án tường minh;
 - cả hai mục tiêu học đạt **67/67 unique** và gắn concept; objective 1 đã loại **67/67** placeholder `Nhận biết và thực hiện đúng nội dung:` và đổi động từ theo answer surface, objective 2 placeholder chung = 0;
 - 67/67 concept definition hiện dài ít nhất **40 ký tự**; 3 definition quá mỏng (`Thêm vào`, `Ngày và giờ`, `Giờ và phút`) đã được nâng thành quan hệ có ý nghĩa, vẫn giữ Grade-2 scope;
@@ -143,7 +143,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract;
 - **166 phương trình số instructional** đang được kiểm bằng arithmetic parser, hiện **0 sai**; detector có regression cho cả phép cộng chuỗi và phép chia dùng dấu `:`.
 
-Latest result: **42 tests PASS**.
+Latest result: **43 tests PASS**.
 
 ## Commits / waves
 

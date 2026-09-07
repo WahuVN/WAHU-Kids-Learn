@@ -362,6 +362,8 @@ class MathContentDataSmoke(unittest.TestCase):
         self.assertNotEqual([], validator.child_facing_text_hygiene({"prompt_vi": "Hai  khoảng trắng"}))
         self.assertNotEqual([], validator.child_facing_text_hygiene({"prompt_vi": "Sai , dấu câu"}))
         self.assertNotEqual([], validator.child_facing_text_hygiene({"prompt_vi": "ẩn\u200bký tự"}))
+        self.assertNotEqual([], validator.child_facing_text_hygiene({"explanation_vi": "8+2=10."}))
+        self.assertEqual([], validator.child_facing_text_hygiene({"explanation_vi": "8 + 2 = 10."}))
         self.assertEqual([], validator.child_facing_text_hygiene({"prompt_vi": "Tính 18 : 2."}))
         metadata_only = {
             "difficulty_span": ["application"],
@@ -597,6 +599,15 @@ class MathContentDataSmoke(unittest.TestCase):
         self.assertLessEqual(max(counts.values()), 3)
         self.assertGreaterEqual(len(counts), int(len(rationales) * 0.9))
         self.assertTrue(all(len(x.strip()) >= 50 for x in rationales))
+
+    def test_mental_add_sub_validation_range_matches_baseline(self):
+        items = [x for x in self.questions if x["skill_id"] == "MENTAL_ADD_SUB_WITHIN_20"]
+        self.assertEqual(3, len(items))
+        expected_max = self.baseline["hard_guards"]["mental_add_sub_max"]
+        self.assertEqual(20, expected_max)
+        for item in items:
+            self.assertEqual(0, item["validation"]["numeric_min"])
+            self.assertEqual(expected_max, item["validation"]["numeric_max"])
 
     def test_measurement_scale_feedback_is_not_misclassified_as_division(self):
         item = self.question_by_id["m2_q_measure_with_common_scale_03"]
