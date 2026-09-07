@@ -1,7 +1,7 @@
 # MATH LIVE STATUS
 
 Updated: 2026-09-07
-LAST_FULLY_VERIFIED_HEAD=`610f6ac`
+LAST_FULLY_VERIFIED_HEAD=`bf5530b`
 MATH_3AI_DONE=YES
 PLAYABLE_FIRST_FIVE_P0=GREEN
 PLAYABLE_INSTALLER_E2E=BLOCKED_SAFETY_UNOWNED_LOCAL_DATA
@@ -12,9 +12,10 @@ Definition: trạng thái dưới đây dùng strict three-lane Math Definition 
 
 - **First-five playable P0: GREEN** — Home/Hub → 5 nhiệm vụ cứu hộ production → intro → 3 checkpoint → wrong/retry/hint/repair → suspend/resume exact event/session/question → completion → Garden reward idempotent.
 - P1 hardening đã khóa keyboard/prerequisite, exact resume-shell routing, valid→corrupt→valid recovery và dynamic accessibility theo state.
-- Child UI **3660 assertions PASS**; persistence **7821 assertions PASS**; full Math content/event/pool suite **90/90 PASS**.
-- `0.1.54-dev`: Build-Setup **15/15 PASS**, Portable E2E **PASS**, installer compile **PASS**.
-- Portable SHA256 `882AD94962C36BB503023AA1A8EA741CA5162E07D5113B4B99C76352F789CCD6`; Installer SHA256 `219F48D0E1CE0C863249CA616535C2A83801B4CFA133206DF1BA29411965A2CB`.
+- Start-failure accessibility cũng fail-safe: status nhìn thấy và screen-reader cùng giữ thông điệp tiến bộ đã lưu an toàn.
+- Child UI **3661 assertions PASS**; persistence **7821 assertions PASS**; full Math content/event/pool suite **90/90 PASS**.
+- `0.1.55-dev`: Build-Setup **15/15 PASS**, Portable E2E **PASS**, installer compile **PASS**.
+- Portable SHA256 `44BE2C62B0E5C3A0100A1979DDCD9A87B27DE5B108246583545D2C65A31C76CA`; Installer SHA256 `C5B915FE364D86A4B73A53579ED3406F7759FECCF20AAF18A3670DD41BAB4DBC`.
 - Release payload hard-requires `game_events_v1.json`; fresh checkout SHA của cả 4 Math runtime JSON khớp manifest. Event SHA `F9F25EA94DA7FCD20E360509EE53E6E758039CCF788FAFEC729A35F80D39A8B1`.
 - Full Installer E2E **BLOCKED_SAFETY** vì learner DB hiện hữu không có `.wahu-e2e-owned`; Portable E2E xác nhận DB hash trước/sau không đổi.
 - Production signing và real Windows 7 validation vẫn `UNAVAILABLE/PENDING`.
@@ -23,8 +24,8 @@ Definition: trạng thái dưới đây dùng strict three-lane Math Definition 
 
 - **Content: 100% theo Math lane** — 7 chương, 17 chủ đề, 67 lesson, **402 authored questions**, đúng 6 câu/lesson = 2 basic + 2 medium + 2 application. Production semantic validator: **402/402 valid, 0 errors**; full Math content/event/pool suite **90/90 PASS**.
 - **Engine: 100% theo Math lane** — schema V5 + pack identity, targeted session 3 câu từ pool 6, durable ordered selected-set, exact resume/retry/corrupt recovery, rescue runtime/checkpoint/repair/terminal/reward idempotency. `MathSessionPersistenceRuntimeSmoke`: **7821 assertions PASS**.
-- **UI/QA: playable P0 GREEN cho 5 bài đầu** — Home/Hub rescue entry, 5 mission cards, 3 checkpoint cards, behavior-aware repair/break, exact rescue resume, fail-safe event fallback, Garden completion, accessibility/keyboard/responsive. `ChildUiRuntimeSmoke`: **3660 assertions PASS**.
-- **Distribution playable dev artifact** — Build-Setup 15/15 + Portable E2E PASS + installer compile PASS trên clean `610f6ac`, artifact `0.1.54-dev`; full Installer E2E safety-blocked trên máy hiện tại.
+- **UI/QA: playable P0 GREEN cho 5 bài đầu** — Home/Hub rescue entry, 5 mission cards, 3 checkpoint cards, behavior-aware repair/break, exact rescue resume, fail-safe event fallback, Garden completion, accessibility/keyboard/responsive. `ChildUiRuntimeSmoke`: **3661 assertions PASS**.
+- **Distribution playable dev artifact** — Build-Setup 15/15 + Portable E2E PASS + installer compile PASS trên clean `bf5530b`, artifact `0.1.55-dev`; full Installer E2E safety-blocked trên máy hiện tại.
 - **Three-AI Math DoD: DONE** — AI1, AI2 và AI3 đã hoàn tất baseline; playable first-five đang là focus hardening hiện tại.
 
 ## Contract hiện hành
