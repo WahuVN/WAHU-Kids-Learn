@@ -449,10 +449,15 @@ namespace WAHUKidsLearn
                     ? "Mình tiếp tục buổi Toán đang học dở nhé."
                     : "Buổi Toán trước vẫn còn. Mình tiếp tục từ đây nhé.";
             }
+            if (started.RecoveredDanglingSessions > 0)
+            {
+                if (string.Equals(started.SessionMode, "lesson", StringComparison.Ordinal))
+                    return "Phiên học trước cần được làm mới. Phần đã lưu vẫn được giữ; bài này có " +
+                        Math.Max(1, started.TargetQuestionCount) + " câu luyện tập, mình bắt đầu lượt mới nhé.";
+                return "Buổi trước đã được lưu an toàn. Mình bắt đầu nhiệm vụ mới nhé.";
+            }
             if (string.Equals(started.SessionMode, "lesson", StringComparison.Ordinal))
                 return "Bài này có " + Math.Max(1, started.TargetQuestionCount) + " câu luyện tập. Mình làm lần lượt nhé.";
-            if (started.RecoveredDanglingSessions > 0)
-                return "Buổi trước đã được lưu an toàn. Mình bắt đầu nhiệm vụ mới nhé.";
             return null;
         }
 
