@@ -40,6 +40,7 @@ MIN_QUESTION_EXPLANATION_CHARS = 32
 MAX_HINT_CHARS = 130
 MAX_APPLICATION_LOWER_SHAPE_SIMILARITY = 0.75
 GENERIC_SECOND_HINT = "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+SHALLOW_SECOND_HINT_MARKER = "viết một phép tính hoặc quan hệ ngắn cho"
 GENERIC_FIRST_OBJECTIVE_PREFIX = "Nhận biết và thực hiện đúng nội dung:"
 GENERIC_SECOND_OBJECTIVE = "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
 GENERIC_DISTRACTOR_RATIONALE = "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
@@ -742,6 +743,8 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             second_hint_counts[second_hint] += 1
             if second_hint == GENERIC_SECOND_HINT:
                 errors.append(f"generic_second_hint:{where}")
+            if SHALLOW_SECOND_HINT_MARKER in second_hint.casefold():
+                errors.append(f"shallow_second_hint:{where}")
         question_type = required_text(q, "question_type", where, errors)
         if question_type not in QUESTION_TYPES:
             errors.append(f"unsupported_question_type:{where}:{question_type!r}")

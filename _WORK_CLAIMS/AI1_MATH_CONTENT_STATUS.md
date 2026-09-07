@@ -125,7 +125,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - skill quan hệ thời gian không mở rộng thành phép nhân/chia ngoài yêu cầu cần đạt;
 - mọi phép nhân/chia literal child-facing nằm trong bảng 2 hoặc 5, kể cả distractor;
 - mọi MCQ có choice khác nhau sau normalize text và không có hai biểu thức choice cùng giá trị số; câu equal-group `5 × 2` đã loại distractor `10 : 5` có thể mô tả cùng cấu trúc nhóm và khóa regression ambiguity; **26 câu nhận dạng/khái niệm** đã thay distractor giveaway khác miền bằng lỗi nhầm gần kiến thức và có regression chặn các mẫu vô lý cũ;
-- 201/201 hint cấp 2 hiện actionable, **201 unique / max repeat 1**; toàn bộ 402 hint slots đạt **0 unseen-answer leak** và **0 hint >130 ký tự**; readability hiện hint1 p90/max = **109/114**, hint2 = **108/119** (trước wave max 168/167);
+- 201/201 hint cấp 2 hiện actionable, **201 unique / max repeat 1**; toàn bộ 402 hint slots đạt **0 unseen-answer leak** và **0 hint >130 ký tự**; readability hiện hint1 p90/max = **109/114**, hint2 = **108/119** (trước wave max 168/167); **28 application numeric hint2** dùng khung `Viết một phép tính hoặc quan hệ ngắn...` đã giảm **28 → 0** và chuyển sang bước gợi ý theo concept;
 - 267/267 distractor có **rationale unique / max repeat 1**, mỗi rationale sai chứa lời giải riêng của chính câu; 3 họ mẫu shallow cũ đã giảm **267 → 0**;
 - vị trí đáp án đúng được cân bằng deterministic: 88 câu 4-choice = 22/22/22/22 cho A/B/C/D; 3 true/false = 2/1;
 - 23 câu integer có `answer_unit` giữ đúng contract display-only, không đổi sang unit-input;

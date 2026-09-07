@@ -270,6 +270,7 @@ class MathContentDataSmoke(unittest.TestCase):
     def test_second_hints_are_actionable_not_placeholders(self):
         second_hints = [x["hints_vi"][1] for x in self.questions]
         self.assertNotIn(validator.GENERIC_SECOND_HINT, second_hints)
+        self.assertTrue(all(validator.SHALLOW_SECOND_HINT_MARKER not in hint.casefold() for hint in second_hints))
         counts = Counter(second_hints)
         self.assertLessEqual(max(counts.values()), 3)
         self.assertGreaterEqual(len(counts), int(len(second_hints) * 0.85))

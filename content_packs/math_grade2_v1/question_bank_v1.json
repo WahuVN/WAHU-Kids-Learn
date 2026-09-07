@@ -131,7 +131,7 @@
       "explanation_vi": "Phải giữ đủ cả ba hàng: 7 trăm là 700, 3 chục là 30 và 4 đơn vị là 4; 700 + 30 + 4 = 734.",
       "hints_vi": [
         "Nhớ kiến thức: Ghép số trăm, số chục và số đơn vị theo đúng vị trí để tạo hoặc đọc một số.",
-        "Viết một phép tính hoặc quan hệ ngắn cho “Đọc và viết số”, tính xong đối chiếu lại điều đề đang hỏi."
+        "Với “Đọc và viết số”, giữ đúng vị trí trăm, chục, đơn vị rồi kiểm tra số vừa lập."
       ],
       "tags": [
         "num_count_read_write_0_1000",
@@ -373,7 +373,7 @@
       "explanation_vi": "Số liền sau hơn số đã cho đúng 1 đơn vị; 399 + 1 = 400 nên cần thay 401 bằng 400.",
       "hints_vi": [
         "Nhớ kiến thức: Với số n, số liền trước là n - 1 và số liền sau là n + 1 khi còn trong phạm vi học.",
-        "Viết một phép tính hoặc quan hệ ngắn cho “Liền trước và liền sau”, tính xong đối chiếu lại điều đề đang hỏi."
+        "Với “Liền trước và liền sau”, chỉ thay đổi một đơn vị theo đúng hướng rồi kiểm tra hai số kề nhau."
       ],
       "tags": [
         "num_predecessor_successor",
@@ -466,7 +466,7 @@
       "explanation_vi": "Hàng trăm là 4, hàng chục phải giữ 0 và hàng đơn vị là 9: 400 + 0 + 9 = 409, không phải 490.",
       "hints_vi": [
         "Nhớ kiến thức: Trong số có ba chữ số, chữ số thứ nhất là hàng trăm, thứ hai là hàng chục, thứ ba là hàng đơn vị.",
-        "Viết một phép tính hoặc quan hệ ngắn cho “Giá trị theo hàng”, tính xong đối chiếu lại điều đề đang hỏi."
+        "Với “Giá trị theo hàng”, giữ đúng vị trí trăm, chục, đơn vị rồi kiểm tra số vừa lập."
       ],
       "tags": [
         "place_value_hundreds_tens_ones",
@@ -696,7 +696,7 @@
       "explanation_vi": "Từ 300 đi lần lượt đến 400, 500 rồi 600; ba bước sang phải đưa ta đến 600.",
       "hints_vi": [
         "Nhớ kiến thức: Khoảng cách số giữa hai vạch liên tiếp là không đổi trong cùng một bài tia số.",
-        "Viết một phép tính hoặc quan hệ ngắn cho “Bước trên tia số”, tính xong đối chiếu lại điều đề đang hỏi."
+        "Với “Bước trên tia số”, tìm độ tăng giữa hai vạch kề nhau rồi đếm đúng số bước cần đi."
       ],
       "tags": [
         "number_ray_fill",
@@ -948,7 +948,7 @@
       "explanation_vi": "Cả 999 và 990 đều có 9 trăm, nhưng 999 có 9 chục bằng 990 rồi 9 đơn vị lớn hơn 0 đơn vị, nên 999 lớn hơn 990.",
       "hints_vi": [
         "Nhớ kiến thức: Số lớn nhất không nhỏ hơn số nào trong nhóm; số bé nhất không lớn hơn số nào trong nhóm.",
-        "Viết một phép tính hoặc quan hệ ngắn cho “Lớn nhất và bé nhất”, tính xong đối chiếu lại điều đề đang hỏi."
+        "Với “Lớn nhất và bé nhất”, so từ hàng trăm đến hàng chục, đơn vị trước khi chọn kết quả."
       ],
       "tags": [
         "num_min_max_up_to_4",
@@ -1633,7 +1633,7 @@
       "explanation_vi": "324 + 253 = 577; từng cột đều không cần nhớ.",
       "hints_vi": [
         "Nhớ kiến thức: Cộng từng hàng mà không tạo thêm một chục hoặc một trăm để chuyển sang cột kế tiếp.",
-        "Viết một phép tính hoặc quan hệ ngắn cho “Cộng không nhớ”, tính xong đối chiếu lại điều đề đang hỏi."
+        "Với “Cộng không nhớ”, viết đúng phép tính rồi kiểm tra lại từng bước theo thứ tự."
       ],
       "tags": [
         "add_within_1000_no_carry",
@@ -1726,7 +1726,7 @@
       "explanation_vi": "465 + 217 = 682; chỉ hàng đơn vị tạo một lượt nhớ.",
       "hints_vi": [
         "Nhớ kiến thức: Một lượt nhớ xảy ra khi tổng của một hàng tạo thêm 1 đơn vị ở hàng kế tiếp.",
-        "Viết một phép tính hoặc quan hệ ngắn cho “Cộng có nhớ”, tính xong đối chiếu lại điều đề đang hỏi."
+        "Với “Cộng có nhớ”, viết đúng phép tính rồi kiểm tra lại từng bước theo thứ tự."
       ],
       "tags": [
         "add_within_1000_one_carry_max",
@@ -1819,7 +1819,7 @@
       "explanation_vi": "654 - 321 = 333 và không cột nào cần mượn.",
       "hints_vi": [
         "Nhớ kiến thức: Trừ từng hàng trực tiếp khi mỗi chữ số của số bị trừ đủ lớn ở cột tương ứng.",
-        "Viết một phép tính hoặc quan hệ ngắn cho “Trừ không mượn”, tính xong đối chiếu lại điều đề đang hỏi."
+        "Với “Trừ không mượn”, viết đúng phép tính rồi kiểm tra lại từng bước theo thứ tự."
       ],
       "tags": [
         "sub_within_1000_no_borrow",
@@ -1912,7 +1912,7 @@
       "explanation_vi": "730 - 412 = 318; mượn 1 chục ở hàng đơn vị rồi các hàng còn lại trừ trực tiếp.",
       "hints_vi": [
         "Nhớ kiến thức: Một lượt mượn đổi 1 đơn vị của hàng lớn hơn thành 10 đơn vị ở hàng nhỏ hơn.",
-        "Viết một phép tính hoặc quan hệ ngắn cho “Trừ có mượn”, tính xong đối chiếu lại điều đề đang hỏi."
+        "Với “Trừ có mượn”, viết đúng phép tính rồi kiểm tra lại từng bước theo thứ tự."
       ],
       "tags": [
         "sub_within_1000_one_borrow_max",
@@ -2014,7 +2014,7 @@
       "explanation_vi": "Từ trái sang phải theo tình huống: 200 + 150 = 350, 350 - 100 = 250.",
       "hints_vi": [
         "Nhớ kiến thức: Biểu thức chỉ gồm + và - được tính lần lượt từ trái qua phải.",
-        "Viết một phép tính hoặc quan hệ ngắn cho “Tính từ trái sang phải”, tính xong đối chiếu lại điều đề đang hỏi."
+        "Với “Tính từ trái sang phải”, viết đúng phép tính rồi kiểm tra lại từng bước theo thứ tự."
       ],
       "tags": [
         "add_sub_two_operators_left_to_right",
@@ -2107,7 +2107,7 @@
       "explanation_vi": "12 + 5 = 17, vẫn trong phạm vi 20.",
       "hints_vi": [
         "Nhớ kiến thức: Biến đổi số thành các phần dễ cộng hoặc trừ, đặc biệt dựa vào mốc 10.",
-        "Viết một phép tính hoặc quan hệ ngắn cho “Tính nhẩm đến 20”, tính xong đối chiếu lại điều đề đang hỏi."
+        "Với “Tính nhẩm đến 20”, viết đúng phép tính rồi kiểm tra lại từng bước theo thứ tự."
       ],
       "tags": [
         "mental_add_sub_within_20",
@@ -2200,7 +2200,7 @@
       "explanation_vi": "3 trăm + 4 trăm = 7 trăm = 700. Tính lại từng bước theo đúng thứ tự để kiểm tra kết quả.",
       "hints_vi": [
         "Nhớ kiến thức: Xem 30 là 3 chục và 400 là 4 trăm để cộng trừ theo đơn vị chục hoặc trăm.",
-        "Viết một phép tính hoặc quan hệ ngắn cho “Nhẩm số tròn”, tính xong đối chiếu lại điều đề đang hỏi."
+        "Với “Nhẩm số tròn”, viết đúng phép tính rồi kiểm tra lại từng bước theo thứ tự."
       ],
       "tags": [
         "mental_add_sub_round_tens_hundreds_1000",
@@ -2315,7 +2315,7 @@
       "explanation_vi": "Có 4 nhóm bằng nhau, mỗi nhóm 5 viên nên phải nhân: 4 × 5 = 20; phép cộng 4 + 5 không biểu diễn đủ bốn nhóm.",
       "hints_vi": [
         "Nhớ kiến thức: Phép nhân là cách viết gọn của phép cộng lặp lại các nhóm có cùng số lượng.",
-        "Viết một phép tính hoặc quan hệ ngắn cho “Nhóm bằng nhau”, tính xong đối chiếu lại điều đề đang hỏi."
+        "Với “Nhóm bằng nhau”, xác định số nhóm và số phần tử mỗi nhóm rồi viết phép nhân phù hợp."
       ],
       "tags": [
         "multiplication_meaning",
@@ -2408,7 +2408,7 @@
       "explanation_vi": "Chia đều 20 thẻ vào 5 hộp phải dùng 20 : 5 = 4; phép trừ 20 - 5 không mô tả chia đều.",
       "hints_vi": [
         "Nhớ kiến thức: Chia đều nghĩa là mỗi nhóm nhận cùng số lượng và không bỏ sót đối tượng trong bài chia hết.",
-        "Viết một phép tính hoặc quan hệ ngắn cho “Chia đều”, tính xong đối chiếu lại điều đề đang hỏi."
+        "Với “Chia đều”, xác định tổng và số phần cần chia đều rồi viết phép chia phù hợp."
       ],
       "tags": [
         "division_meaning",
@@ -2819,7 +2819,7 @@
       "explanation_vi": "7 nhóm 2 chiếc: 7 × 2 = 14. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
       "hints_vi": [
         "Nhớ kiến thức: Nhân một số với 2 là lấy hai lần số đó hoặc tạo các cặp bằng nhau.",
-        "Viết một phép tính hoặc quan hệ ngắn cho “Nhân 2”, tính xong đối chiếu lại điều đề đang hỏi."
+        "Với “Nhân 2”, xác định số nhóm và số phần tử mỗi nhóm rồi viết phép nhân phù hợp."
       ],
       "tags": [
         "times_table_2",
@@ -2912,7 +2912,7 @@
       "explanation_vi": "6 nhóm 5 bút: 6 × 5 = 30. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
       "hints_vi": [
         "Nhớ kiến thức: Nhân một số với 5 là cộng các nhóm 5 bằng nhau.",
-        "Viết một phép tính hoặc quan hệ ngắn cho “Nhân 5”, tính xong đối chiếu lại điều đề đang hỏi."
+        "Với “Nhân 5”, xác định số nhóm và số phần tử mỗi nhóm rồi viết phép nhân phù hợp."
       ],
       "tags": [
         "times_table_5",
@@ -3005,7 +3005,7 @@
       "explanation_vi": "18 : 2 = 9. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng quan hệ nhân - chia để tìm thương khi số chia là 2.",
-        "Viết một phép tính hoặc quan hệ ngắn cho “Chia 2”, tính xong đối chiếu lại điều đề đang hỏi."
+        "Với “Chia 2”, xác định tổng và số phần cần chia đều rồi viết phép chia phù hợp."
       ],
       "tags": [
         "divide_table_2",
@@ -3098,7 +3098,7 @@
       "explanation_vi": "50 : 5 = 10 túi. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng quan hệ nhân - chia để tìm thương khi số chia là 5.",
-        "Viết một phép tính hoặc quan hệ ngắn cho “Chia 5”, tính xong đối chiếu lại điều đề đang hỏi."
+        "Với “Chia 5”, xác định tổng và số phần cần chia đều rồi viết phép chia phù hợp."
       ],
       "tags": [
         "divide_table_5",
@@ -5478,7 +5478,7 @@
       "explanation_vi": "3 + 6 = 9 cm. Kiểm tra lại các vạch hoặc từng đoạn đã dùng trước khi chốt số đo.",
       "hints_vi": [
         "Nhớ kiến thức: Độ dài đoạn thẳng bằng hiệu vị trí hai đầu mút trên cùng một thước chia đều.",
-        "Viết một phép tính hoặc quan hệ ngắn cho “Vẽ đoạn thẳng theo độ dài”, tính xong đối chiếu lại điều đề đang hỏi."
+        "Với “Vẽ đoạn thẳng theo độ dài”, đánh dấu các vạch hoặc đoạn cần dùng rồi tính từ đúng đầu mút."
       ],
       "tags": [
         "draw_segment_given_length",
@@ -6033,7 +6033,7 @@
       "explanation_vi": "Đề cho rót thêm nên lượng nước tăng: 7 l + 2 l = 9 l, không phải lấy 7 - 2.",
       "hints_vi": [
         "Nhớ kiến thức: l là kí hiệu của lít, đơn vị đo dung tích.",
-        "Viết một phép tính hoặc quan hệ ngắn cho “Lít”, tính xong đối chiếu lại điều đề đang hỏi."
+        "Với “Lít”, kiểm tra đơn vị của các số đo trước khi thực hiện phép tính."
       ],
       "tags": [
         "capacity_liter_read_write",
@@ -6778,7 +6778,7 @@
       "explanation_vi": "Vật không bắt đầu ở vạch 0 nên phải lấy 11 - 2 = 9 cm; không thể chỉ đọc số ở vạch cuối.",
       "hints_vi": [
         "Nhớ kiến thức: Độ dài bằng hiệu số giữa hai vị trí đầu mút trên thước chia cm.",
-        "Viết một phép tính hoặc quan hệ ngắn cho “Đo bằng thước cm”, tính xong đối chiếu lại điều đề đang hỏi."
+        "Với “Đo bằng thước cm”, đánh dấu các vạch hoặc đoạn cần dùng rồi tính từ đúng đầu mút."
       ],
       "tags": [
         "measure_with_ruler_cm",
@@ -6872,7 +6872,7 @@
       "explanation_vi": "Các vạch lần lượt 0, 5, 10, 15. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
       "hints_vi": [
         "Nhớ kiến thức: Mỗi vạch trên cùng một thang đều cách nhau một giá trị cố định nếu thang chia đều.",
-        "Viết một phép tính hoặc quan hệ ngắn cho “Vạch chia”, tính xong đối chiếu lại điều đề đang hỏi."
+        "Với “Vạch chia”, xác định tổng và số phần cần chia đều rồi viết phép chia phù hợp."
       ],
       "tags": [
         "measure_with_common_scale",
@@ -7126,7 +7126,7 @@
       "explanation_vi": "Đổi 2 m = 20 dm, rồi cộng 20 + 3 = 23 dm.",
       "hints_vi": [
         "Nhớ kiến thức: Đưa các số đo về cùng đơn vị trước khi cộng, trừ hoặc so sánh.",
-        "Viết một phép tính hoặc quan hệ ngắn cho “Tính với số đo”, tính xong đối chiếu lại điều đề đang hỏi."
+        "Với “Tính với số đo”, kiểm tra đơn vị của các số đo trước khi thực hiện phép tính."
       ],
       "tags": [
         "measurement_convert_calculate_learned_units",
@@ -7381,7 +7381,7 @@
       "explanation_vi": "Phải cộng đủ ba đoạn AB, BC và CD: 7 + 4 + 6 = 17 cm; phép tính 13 cm đã bỏ sót đoạn BC.",
       "hints_vi": [
         "Nhớ kiến thức: Cộng độ dài từng đoạn thành phần để có tổng độ dài đường gấp khúc.",
-        "Viết một phép tính hoặc quan hệ ngắn cho “Độ dài đường gấp khúc”, tính xong đối chiếu lại điều đề đang hỏi."
+        "Với “Độ dài đường gấp khúc”, đánh dấu các vạch hoặc đoạn cần dùng rồi tính từ đúng đầu mút."
       ],
       "tags": [
         "polyline_length_sum_segments",
@@ -7477,7 +7477,7 @@
       "explanation_vi": "Hai đại lượng đều là khối lượng nên cộng 6 + 4 = 10 và giữ đơn vị kg; đơn vị m của Bình là sai. Vậy đáp án là 10 kg.",
       "hints_vi": [
         "Nhớ kiến thức: Một bài đo lường một bước kết hợp số đo cùng đơn vị với cộng hoặc trừ phù hợp tình huống.",
-        "Viết một phép tính hoặc quan hệ ngắn cho “Giải toán đo lường”, tính xong đối chiếu lại điều đề đang hỏi."
+        "Với “Giải toán đo lường”, kiểm tra đơn vị của các số đo trước khi thực hiện phép tính."
       ],
       "tags": [
         "measurement_real_world_one_step",
@@ -7571,7 +7571,7 @@
       "explanation_vi": "Trong danh sách có hai mục 'cam'. Vậy đáp án là 2.",
       "hints_vi": [
         "Nhớ kiến thức: Mỗi đối tượng được xếp theo một tiêu chí rõ ràng trước khi đếm số lượng của từng nhóm.",
-        "Viết một phép tính hoặc quan hệ ngắn cho “Phân loại và kiểm đếm”, tính xong đối chiếu lại điều đề đang hỏi."
+        "Với “Phân loại và kiểm đếm”, đếm đúng dữ liệu cần dùng và chú ý chú giải trước khi tính."
       ],
       "tags": [
         "data_collect_classify_count",
@@ -7664,7 +7664,7 @@
       "explanation_vi": "Mỗi hình đại diện 2 quyển nên phải dùng chú giải: 5 × 2 = 10 quyển; chỉ đếm 5 hình là chưa đủ.",
       "hints_vi": [
         "Nhớ kiến thức: Số lượng = số biểu tượng × giá trị mỗi biểu tượng theo chú giải.",
-        "Viết một phép tính hoặc quan hệ ngắn cho “Biểu đồ tranh”, tính xong đối chiếu lại điều đề đang hỏi."
+        "Với “Biểu đồ tranh”, đếm đúng dữ liệu cần dùng và chú ý chú giải trước khi tính."
       ],
       "tags": [
         "pictograph_read_describe",
@@ -7779,7 +7779,7 @@
       "explanation_vi": "B có 10 vật, A có 4 vật; 10 - 4 = 6.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng các số đã đọc từ biểu đồ để so sánh và nêu nhận xét có căn cứ.",
-        "Viết một phép tính hoặc quan hệ ngắn cho “Suy luận từ dữ liệu”, tính xong đối chiếu lại điều đề đang hỏi."
+        "Với “Suy luận từ dữ liệu”, đếm đúng dữ liệu cần dùng và chú ý chú giải trước khi tính."
       ],
       "tags": [
         "pictograph_simple_inference",

@@ -168,6 +168,36 @@ def answer_safe_hint(candidate: str, prompt: str, answer: object, answer_kind: s
     return table.get(question_type, table["numeric_input"])
 
 
+def numeric_application_hint(concept_name: str) -> str:
+    concept = concept_name.strip()
+    key = concept.casefold()
+    if "nhân" in key or "nhóm bằng nhau" in key:
+        return f"Với “{concept}”, xác định số nhóm và số phần tử mỗi nhóm rồi viết phép nhân phù hợp."
+    if "chia" in key:
+        return f"Với “{concept}”, xác định tổng và số phần cần chia đều rồi viết phép chia phù hợp."
+    if "giá trị theo hàng" in key or "đọc và viết số" in key:
+        return f"Với “{concept}”, giữ đúng vị trí trăm, chục, đơn vị rồi kiểm tra số vừa lập."
+    if "liền trước" in key or "liền sau" in key:
+        return f"Với “{concept}”, chỉ thay đổi một đơn vị theo đúng hướng rồi kiểm tra hai số kề nhau."
+    if "tia số" in key:
+        return f"Với “{concept}”, tìm độ tăng giữa hai vạch kề nhau rồi đếm đúng số bước cần đi."
+    if "lớn nhất" in key or "bé nhất" in key or "so sánh" in key:
+        return f"Với “{concept}”, so từ hàng trăm đến hàng chục, đơn vị trước khi chọn kết quả."
+    if any(token in key for token in ("cộng", "trừ", "tính từ trái sang phải", "nhẩm")):
+        return f"Với “{concept}”, viết đúng phép tính rồi kiểm tra lại từng bước theo thứ tự."
+    if any(token in key for token in ("đo bằng thước", "vạch chia", "độ dài đường gấp khúc", "vẽ đoạn thẳng")):
+        return f"Với “{concept}”, đánh dấu các vạch hoặc đoạn cần dùng rồi tính từ đúng đầu mút."
+    if "số đo" in key or "đo lường" in key or key in {"lít", "kilôgam"}:
+        return f"Với “{concept}”, kiểm tra đơn vị của các số đo trước khi thực hiện phép tính."
+    if "lịch" in key:
+        return f"Với “{concept}”, xác định đúng ngày và tháng rồi mới dịch sang ngày trước hoặc ngày sau."
+    if "biểu đồ" in key or "dữ liệu" in key or "phân loại" in key:
+        return f"Với “{concept}”, đếm đúng dữ liệu cần dùng và chú ý chú giải trước khi tính."
+    if "ước lượng" in key:
+        return f"Với “{concept}”, chọn mốc gần nhất rồi kiểm tra xem kết quả có cùng cỡ với dữ kiện."
+    return f"Với “{concept}”, nêu quy tắc cần dùng, viết bước tính ngắn rồi kiểm tra điều đề hỏi."
+
+
 def second_hint(question_type: str, difficulty: str, concept_name: str) -> str:
     """Give a child a concrete next move without revealing the authored answer."""
     concept = concept_name.strip()
@@ -185,7 +215,7 @@ def second_hint(question_type: str, difficulty: str, concept_name: str) -> str:
         "numeric_input": {
             "basic": f"Khoanh các số cần dùng, áp dụng “{concept}”, rồi viết phần số của kết quả.",
             "medium": f"Tách dữ kiện theo “{concept}”, tính từng phần cần thiết rồi kiểm tra ngược kết quả.",
-            "application": f"Viết một phép tính hoặc quan hệ ngắn cho “{concept}”, tính xong đối chiếu lại điều đề đang hỏi.",
+            "application": numeric_application_hint(concept_name),
         },
         "word_problem": {
             "basic": f"Gạch chân số đã cho và điều cần tìm; dùng quan hệ “{concept}” để chọn phép tính.",
