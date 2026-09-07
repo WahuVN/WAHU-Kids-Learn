@@ -144,7 +144,7 @@ namespace WAHU.Session
 
                     _session = _runtime.TryCreateSession(
                         _profile.ChildId, _performanceProfile, _seed, _targetQuestionCount, _sessionMode, _targetLessonId,
-                        _targetLesson == null ? null : _targetLesson.SkillId);
+                        _targetLesson == null ? null : _targetLesson.SkillId, PackId, PackVersion);
                     if (_session == null)
                     {
                         var raced = LoadLatestResumableRecoveringCorrupt(ref recovered);
@@ -799,15 +799,26 @@ namespace WAHU.Session
 
         private MathSessionRuntimeSnapshot LoadLatestResumableRecoveringCorrupt(ref int recoveredCount)
         {
-            try
+            for (var pass = 0; pass < 4; pass++)
             {
-                return _runtime.LoadLatestResumable(_profile.ChildId);
+                try
+                {
+                    var runtime = _runtime.LoadLatestResumable(_profile.ChildId);
+                    if (runtime == null) return null;
+                    runtime = _runtime.EnsurePackIdentity(runtime, PackId, PackVersion);
+                    if (string.Equals(runtime.PackId, PackId, StringComparison.Ordinal) &&
+                        string.Equals(runtime.PackVersion, PackVersion, StringComparison.Ordinal))
+                        return runtime;
+
+                    if (_runtime.RecoverIncompatiblePackSession(_profile.ChildId, runtime.SessionId)) recoveredCount++;
+                }
+                catch (MathSessionRuntimeCorruptException ex)
+                {
+                    if (_runtime.RecoverCorruptRuntimeSession(_profile.ChildId, ex.SessionId)) recoveredCount++;
+                }
             }
-            catch (MathSessionRuntimeCorruptException ex)
-            {
-                if (_runtime.RecoverCorruptRuntimeSession(_profile.ChildId, ex.SessionId)) recoveredCount++;
-                return _runtime.LoadLatestResumable(_profile.ChildId);
-            }
+
+            throw new InvalidOperationException("Không thể hòa giải phiên Toán đang lưu với phiên bản nội dung hiện tại.");
         }
 
         private void RestoreSession(

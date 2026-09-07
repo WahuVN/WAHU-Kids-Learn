@@ -32,6 +32,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestTargetedLessonUnlockAndResume(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedCompletionSurvivesNextLessonReadFailure(root, schemaPath, templatePath, lessonCatalogPath);
                 TestCorruptRuntimeMetadataIsQuarantined(root, schemaPath, templatePath);
+                TestRuntimePackIdentityResumePolicy(root, schemaPath, templatePath);
                 TestTargetedCorruptOpenQuestionReplaysAuthoredOrdinal(root, schemaPath, templatePath, lessonCatalogPath);
                 TestRetryAwareAnswerFlow(root, schemaPath, templatePath);
                 TestRetryWrongFinalizesOnce(root, schemaPath, templatePath);
@@ -360,6 +361,123 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
             }
         }
 
+        private static void TestRuntimePackIdentityResumePolicy(string root, string schemaPath, string templatePath)
+        {
+            var bindDatabase = NewDatabase(Path.Combine(root, "runtime-pack-bind.db"), schemaPath);
+            string bindSessionId;
+            using (var first = new MathSessionCoordinator(bindDatabase, templatePath, "LOW", 8081, 2))
+            {
+                var started = first.Start("Bé legacy runtime bind");
+                bindSessionId = started.SessionId;
+                first.Suspend("legacy_zero_attempt_runtime_fixture");
+            }
+
+            Exec(bindDatabase,
+                "UPDATE math_session_runtime SET pack_id=NULL,pack_version=NULL WHERE session_id=@session;",
+                "@session", bindSessionId);
+            using (var resumed = new MathSessionCoordinator(bindDatabase, templatePath, "NORMAL", 9991, 2))
+            {
+                var started = resumed.Start("Bé legacy runtime bind");
+                A(started.ResumedExistingSession && started.SessionId == bindSessionId && started.RecoveredDanglingSessions == 0,
+                    "legacy_zero_attempt_runtime_binds_current_pack_and_resumes");
+                A(Count(bindDatabase,
+                    "SELECT count(*) FROM math_session_runtime WHERE session_id='" + bindSessionId +
+                    "' AND pack_id='" + MathSessionCoordinator.PackId + "' AND pack_version='" + MathSessionCoordinator.PackVersion + "';") == 1,
+                    "legacy_zero_attempt_runtime_persists_current_pack_identity");
+                resumed.Abort("legacy_zero_attempt_runtime_cleanup");
+            }
+
+            var mismatchDatabase = NewDatabase(Path.Combine(root, "runtime-pack-mismatch.db"), schemaPath);
+            var sessions = new LearnerSessionService(mismatchDatabase);
+            var profile = sessions.EnsurePrimaryChild("Bé legacy pack mismatch");
+            var runtime = new MathSessionRuntimeService(mismatchDatabase);
+            var legacy = runtime.TryCreateSession(
+                profile.ChildId, "LOW", 8082, 2, "adaptive", null, null, "legacy-pack", "0.9");
+            A(legacy != null, "legacy_pack_fixture_creates_active_runtime");
+
+            var now = DateTime.UtcNow;
+            var legacyAttemptId = "attempt-legacy-pack-" + Guid.NewGuid().ToString("N");
+            new AnswerCommitService(mismatchDatabase).Commit(new AnswerCommitRequest
+            {
+                AttemptId = legacyAttemptId,
+                SessionId = legacy.SessionId,
+                ChildId = profile.ChildId,
+                PackId = "legacy-pack",
+                PackVersion = "0.9",
+                QuestionId = "legacy-pack-question",
+                SkillId = "LEGACY_PACK_SKILL",
+                Subject = "math",
+                StartedAtUtc = now.AddSeconds(-1),
+                AnsweredAtUtc = now,
+                AnswerJson = "{\"answer\":1}",
+                IsCorrect = true,
+                ResponseMs = 1000,
+                HintLevel = 0,
+                Representation = "symbolic",
+                InputMethod = "smoke",
+                AttemptIndex = 1,
+                ListenCount = 0
+            });
+            A(Count(mismatchDatabase,
+                "SELECT count(*) FROM attempt WHERE id='" + legacyAttemptId + "' AND pack_id='legacy-pack' AND pack_version='0.9';") == 1,
+                "legacy_pack_fixture_has_durable_old_pack_attempt");
+
+            using (var replacement = new MathSessionCoordinator(mismatchDatabase, templatePath, "NORMAL", 8083, 2))
+            {
+                var started = replacement.Start("Bé legacy pack mismatch");
+                A(!started.ResumedExistingSession && started.SessionId != legacy.SessionId && started.RecoveredDanglingSessions == 1,
+                    "old_pack_runtime_is_recovered_instead_of_mixed_with_current_pack");
+                A(Count(mismatchDatabase,
+                    "SELECT count(*) FROM session WHERE id='" + legacy.SessionId + "' AND state='recovered' AND ended_at_utc IS NOT NULL;") == 1,
+                    "old_pack_runtime_marks_only_legacy_session_recovered");
+                A(Count(mismatchDatabase,
+                    "SELECT count(*) FROM math_session_runtime WHERE session_id='" + legacy.SessionId + "';") == 0,
+                    "old_pack_runtime_checkpoint_is_removed_after_recovery");
+                A(Count(mismatchDatabase,
+                    "SELECT count(*) FROM attempt WHERE id='" + legacyAttemptId + "' AND session_id='" + legacy.SessionId + "';") == 1,
+                    "old_pack_recovery_preserves_durable_attempt_history");
+                A(Count(mismatchDatabase,
+                    "SELECT count(*) FROM math_session_runtime WHERE session_id='" + started.SessionId +
+                    "' AND pack_id='" + MathSessionCoordinator.PackId + "' AND pack_version='" + MathSessionCoordinator.PackVersion + "';") == 1,
+                    "replacement_runtime_is_pinned_to_current_pack_identity");
+                replacement.Abort("legacy_pack_mismatch_cleanup");
+            }
+
+            var blankDatabase = NewDatabase(Path.Combine(root, "runtime-pack-blank-history.db"), schemaPath);
+            var blankSessions = new LearnerSessionService(blankDatabase);
+            var blankProfile = blankSessions.EnsurePrimaryChild("Bé legacy blank pack");
+            var blankRuntime = new MathSessionRuntimeService(blankDatabase);
+            var blankLegacy = blankRuntime.TryCreateSession(
+                blankProfile.ChildId, "LOW", 8084, 2, "adaptive", null);
+            A(blankLegacy != null, "blank_pack_fixture_creates_legacy_unbound_runtime");
+            var blankAttemptId = "attempt-blank-pack-" + Guid.NewGuid().ToString("N");
+            Exec(blankDatabase, @"INSERT INTO attempt(
+id,session_id,child_id,pack_id,pack_version,question_id,skill_id,subject,started_at_utc,answered_at_utc,answer_json,is_correct,response_ms,hint_level,representation,input_method,attempt_index,listen_count)
+VALUES(@id,@session,@child,' ','','blank-pack-question','LEGACY_PACK_SKILL','math',@started,@answered,'{}',1,700,0,'symbolic','smoke',1,0);",
+                "@id", blankAttemptId,
+                "@session", blankLegacy.SessionId,
+                "@child", blankProfile.ChildId,
+                "@started", DateTime.UtcNow.AddSeconds(-1).ToString("o", CultureInfo.InvariantCulture),
+                "@answered", DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture));
+
+            using (var replacement = new MathSessionCoordinator(blankDatabase, templatePath, "NORMAL", 8085, 2))
+            {
+                var started = replacement.Start("Bé legacy blank pack");
+                A(!started.ResumedExistingSession && started.SessionId != blankLegacy.SessionId && started.RecoveredDanglingSessions == 1,
+                    "blank_pack_history_is_quarantined_instead_of_bound_to_current_pack");
+                A(Count(blankDatabase,
+                    "SELECT count(*) FROM session WHERE id='" + blankLegacy.SessionId + "' AND state='recovered' AND ended_at_utc IS NOT NULL;") == 1,
+                    "blank_pack_history_marks_legacy_session_recovered");
+                A(Count(blankDatabase,
+                    "SELECT count(*) FROM attempt WHERE id='" + blankAttemptId + "' AND session_id='" + blankLegacy.SessionId + "';") == 1,
+                    "blank_pack_history_preserves_durable_attempt");
+                A(Count(blankDatabase,
+                    "SELECT count(*) FROM math_session_runtime WHERE session_id='" + started.SessionId +
+                    "' AND pack_id='" + MathSessionCoordinator.PackId + "' AND pack_version='" + MathSessionCoordinator.PackVersion + "';") == 1,
+                    "blank_pack_history_replacement_is_pinned_to_current_pack");
+                replacement.Abort("blank_pack_history_cleanup");
+            }
+        }
         private static void TestTargetedCorruptOpenQuestionReplaysAuthoredOrdinal(string root, string schemaPath, string templatePath, string lessonCatalogPath)
         {
             var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
@@ -901,7 +1019,7 @@ END;");
         {
             var database = new LearningDatabase(dbPath, schemaPath);
             var init = database.Initialize("DELETE");
-            A(init.SchemaVersion == 4 && init.Health.IsHealthy, "database_ready_v4_" + Path.GetFileNameWithoutExtension(dbPath));
+            A(init.SchemaVersion == 5 && init.Health.IsHealthy, "database_ready_v5_" + Path.GetFileNameWithoutExtension(dbPath));
             return database;
         }
 

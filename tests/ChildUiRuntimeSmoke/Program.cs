@@ -805,7 +805,7 @@ namespace WAHU.ChildUiRuntimeSmoke
                     File.Copy(source, Path.Combine(schemaDir, Path.GetFileName(source)), true);
                 var database = new LearningDatabase(Path.Combine(tempRoot, "learning.db"), Path.Combine(schemaDir, "001_initial.sql"));
                 var init = database.Initialize("DELETE");
-                A(init.SchemaVersion == 4 && init.Health.IsHealthy, "targeted_ui_flow_database_v4_ready");
+                A(init.SchemaVersion == 5 && init.Health.IsHealthy, "targeted_ui_flow_database_v5_ready");
                 new LearnerSessionService(database).EnsurePrimaryChild("Bé UI targeted");
 
                 var lessonCtor = typeof(WAHUKidsLearn.MathLessonForm).GetConstructor(
@@ -974,7 +974,7 @@ namespace WAHU.ChildUiRuntimeSmoke
                     File.Copy(source, Path.Combine(schemaDir, Path.GetFileName(source)), true);
                 var database = new LearningDatabase(Path.Combine(tempRoot, "learning.db"), Path.Combine(schemaDir, "001_initial.sql"));
                 var init = database.Initialize("DELETE");
-                A(init.SchemaVersion == 4 && init.Health.IsHealthy, "choice_retry_database_v4_ready");
+                A(init.SchemaVersion == 5 && init.Health.IsHealthy, "choice_retry_database_v5_ready");
                 new LearnerSessionService(database).EnsurePrimaryChild("Bé UI choice retry");
 
                 var ctor = typeof(WAHUKidsLearn.MathLessonForm).GetConstructor(
@@ -1065,7 +1065,7 @@ namespace WAHU.ChildUiRuntimeSmoke
                     File.Copy(source, Path.Combine(schemaDir, Path.GetFileName(source)), true);
                 var database = new LearningDatabase(Path.Combine(tempRoot, "learning.db"), Path.Combine(schemaDir, "001_initial.sql"));
                 var init = database.Initialize("DELETE");
-                A(init.SchemaVersion == 4 && init.Health.IsHealthy, "submit_failure_database_v4_ready");
+                A(init.SchemaVersion == 5 && init.Health.IsHealthy, "submit_failure_database_v5_ready");
                 new LearnerSessionService(database).EnsurePrimaryChild("Bé UI write recovery");
 
                 var ctor = typeof(WAHUKidsLearn.MathLessonForm).GetConstructor(
@@ -1136,7 +1136,7 @@ END;");
 
                 var retryDatabase = new LearningDatabase(Path.Combine(tempRoot, "learning-retry.db"), Path.Combine(schemaDir, "001_initial.sql"));
                 var retryInit = retryDatabase.Initialize("DELETE");
-                A(retryInit.SchemaVersion == 4 && retryInit.Health.IsHealthy, "submit_retry_failure_database_v4_ready");
+                A(retryInit.SchemaVersion == 5 && retryInit.Health.IsHealthy, "submit_retry_failure_database_v5_ready");
                 new LearnerSessionService(retryDatabase).EnsurePrimaryChild("Bé UI retry write recovery");
                 using (var retryForm = (WAHUKidsLearn.MathLessonForm)ctor.Invoke(new object[]
                 {
@@ -1236,7 +1236,7 @@ END;");
 
                 var typedDatabase = new LearningDatabase(Path.Combine(tempRoot, "typed.db"), Path.Combine(schemaDir, "001_initial.sql"));
                 var typedInit = typedDatabase.Initialize("DELETE");
-                A(typedInit.SchemaVersion == 4 && typedInit.Health.IsHealthy, "submit_failure_typed_database_v4_ready");
+                A(typedInit.SchemaVersion == 5 && typedInit.Health.IsHealthy, "submit_failure_typed_database_v5_ready");
                 new LearnerSessionService(typedDatabase).EnsurePrimaryChild("Bé UI typed write recovery");
                 using (var typedForm = (WAHUKidsLearn.MathLessonForm)ctor.Invoke(new object[]
                 {
@@ -1285,7 +1285,7 @@ END;");
 
                 var interactionDatabase = new LearningDatabase(Path.Combine(tempRoot, "interaction.db"), Path.Combine(schemaDir, "001_initial.sql"));
                 var interactionInit = interactionDatabase.Initialize("DELETE");
-                A(interactionInit.SchemaVersion == 4 && interactionInit.Health.IsHealthy, "submit_failure_interaction_database_v4_ready");
+                A(interactionInit.SchemaVersion == 5 && interactionInit.Health.IsHealthy, "submit_failure_interaction_database_v5_ready");
                 new LearnerSessionService(interactionDatabase).EnsurePrimaryChild("Bé UI interaction write recovery");
                 CompleteTargetedLessonCorrectly(ctor, interactionDatabase, pointLesson.Id, "submit_failure_interaction_point_prerequisite");
                 CompleteTargetedLessonCorrectly(ctor, interactionDatabase, lineLesson.Id, "submit_failure_interaction_line_prerequisite");
@@ -1392,7 +1392,7 @@ END;");
                     File.Copy(source, Path.Combine(schemaDir, Path.GetFileName(source)), true);
                 var database = new LearningDatabase(Path.Combine(tempRoot, "learning.db"), Path.Combine(schemaDir, "001_initial.sql"));
                 var init = database.Initialize("DELETE");
-                A(init.SchemaVersion == 4 && init.Health.IsHealthy, "retry_resume_database_v4_ready");
+                A(init.SchemaVersion == 5 && init.Health.IsHealthy, "retry_resume_database_v5_ready");
                 new LearnerSessionService(database).EnsurePrimaryChild("Bé UI retry resume");
 
                 var ctor = typeof(WAHUKidsLearn.MathLessonForm).GetConstructor(
@@ -1548,7 +1548,7 @@ END;");
                     File.Copy(source, Path.Combine(schemaDir, Path.GetFileName(source)), true);
                 var database = new LearningDatabase(Path.Combine(tempRoot, "learning.db"), Path.Combine(schemaDir, "001_initial.sql"));
                 var init = database.Initialize("DELETE");
-                A(init.SchemaVersion == 4 && init.Health.IsHealthy, "interaction_retry_database_v4_ready");
+                A(init.SchemaVersion == 5 && init.Health.IsHealthy, "interaction_retry_database_v5_ready");
                 new LearnerSessionService(database).EnsurePrimaryChild("Bé UI interaction retry");
 
                 var ctor = typeof(WAHUKidsLearn.MathLessonForm).GetConstructor(

@@ -22,7 +22,7 @@ namespace WAHU.Data
     {
         public const string SafeDefaultJournalMode = "DELETE";
         public const int DefaultBusyTimeoutMs = 2500;
-        public const int CurrentSchemaVersion = 4;
+        public const int CurrentSchemaVersion = 5;
 
         private readonly string _databasePath;
         private readonly string _schemaPath;
@@ -65,6 +65,8 @@ namespace WAHU.Data
             if (!File.Exists(migrationV3Path)) throw new FileNotFoundException("Không tìm thấy SQLite migration V3.", migrationV3Path);
             var migrationV4Path = Path.Combine(_schemaDirectory, "004_math_lesson_progress.sql");
             if (!File.Exists(migrationV4Path)) throw new FileNotFoundException("Không tìm thấy SQLite migration V4.", migrationV4Path);
+            var migrationV5Path = Path.Combine(_schemaDirectory, "005_math_runtime_pack_identity.sql");
+            if (!File.Exists(migrationV5Path)) throw new FileNotFoundException("Không tìm thấy SQLite migration V5.", migrationV5Path);
 
             var parent = Path.GetDirectoryName(_databasePath);
             if (!string.IsNullOrWhiteSpace(parent)) Directory.CreateDirectory(parent);
@@ -114,6 +116,14 @@ namespace WAHU.Data
                         MigrationManager.MathLessonProgressVersion,
                         MigrationManager.MathLessonProgressName,
                         migrationV4Path);
+                }
+                if (schemaVersion >= MigrationManager.MathRuntimePackIdentityVersion)
+                {
+                    latestMigration = MigrationManager.VerifyRecordedMigration(
+                        connection,
+                        MigrationManager.MathRuntimePackIdentityVersion,
+                        MigrationManager.MathRuntimePackIdentityName,
+                        migrationV5Path);
                 }
             }
 
@@ -165,6 +175,15 @@ namespace WAHU.Data
                             migrationV4Path);
                         schemaVersion = MigrationManager.GetSchemaVersion(connection);
                     }
+                    if (schemaVersion < MigrationManager.MathRuntimePackIdentityVersion)
+                    {
+                        latestMigration = MigrationManager.ApplyMigration(
+                            connection,
+                            MigrationManager.MathRuntimePackIdentityVersion,
+                            MigrationManager.MathRuntimePackIdentityName,
+                            migrationV5Path);
+                        schemaVersion = MigrationManager.GetSchemaVersion(connection);
+                    }
                     if (schemaVersion != CurrentSchemaVersion)
                         throw new InvalidDataException("Migration completed without expected schema_version=" + CurrentSchemaVersion);
                 }
@@ -189,8 +208,13 @@ namespace WAHU.Data
                     MigrationManager.MathLessonProgressVersion,
                     MigrationManager.MathLessonProgressName,
                     migrationV4Path);
-                if (latestMigration == null || latestMigration.Version < verifiedV4.Version)
-                    latestMigration = verifiedV4;
+                var verifiedV5 = MigrationManager.VerifyRecordedMigration(
+                    connection,
+                    MigrationManager.MathRuntimePackIdentityVersion,
+                    MigrationManager.MathRuntimePackIdentityName,
+                    migrationV5Path);
+                if (latestMigration == null || latestMigration.Version < verifiedV5.Version)
+                    latestMigration = verifiedV5;
                 schemaVersion = MigrationManager.GetSchemaVersion(connection);
                 if (schemaVersion != CurrentSchemaVersion)
                     throw new InvalidDataException("Final learner DB schema_version mismatch=" + schemaVersion);

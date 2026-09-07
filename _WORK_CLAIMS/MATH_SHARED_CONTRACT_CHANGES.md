@@ -249,6 +249,20 @@ Core Math runtime metadata malformed không được khóa vĩnh viễn hồ sơ
 - Startup sau quarantine có thể mở một session mới; `RecoveredDanglingSessions` phản ánh cả corrupt-runtime recovery và dangling-session recovery.
 - Regression cố tình làm hỏng `updated_at_utc` của một resumable runtime sau khi đã có durable attempt/mastery; Start mới recovery đúng session cũ, giữ learning progress và tạo checkpoint mới hợp lệ.
 
+## 2026-09-07 — Runtime content-pack identity / schema V5 (AI2)
+
+Một Math session đang dở không được resume bằng content-pack version khác với version đã tạo learning attempts của session đó:
+
+- Schema V5 thêm nullable `pack_id`, `pack_version` vào `math_session_runtime`; runtime mới do coordinator tạo phải pin cả hai ngay lúc start.
+- DB invariant: runtime pack identity chỉ được phép là `NULL/NULL` cho legacy-unbound hoặc một cặp non-empty hoàn chỉnh; migration V5 trigger từ chối partial/blank pair ở INSERT/UPDATE.
+- V4 → V5 migration chỉ backfill runtime khi mọi durable Math attempt của session chứng minh đúng **một** `(pack_id, pack_version)`; zero-attempt runtime và lịch sử đã trộn nhiều identity không được đoán bừa.
+- Legacy zero-attempt runtime được bind atomically vào current pack ở lần resume đầu tiên.
+- Legacy runtime có một identity từ durable attempts được bind về identity đó; nếu identity khác current pack, session cũ bị `recovered` và checkpoint bị xóa thay vì tiếp tục bằng content mới.
+- Runtime/attempt history có nhiều pack identity là deterministic corruption: coordinator quarantine session, không chọn một version tùy ý.
+- Pack mismatch recovery chỉ terminalize đúng active Math session của child/session đó; attempts, mastery events, `child_skill`, lesson progress và các learning records durable khác không bị xóa/reset.
+- `RecoveredDanglingSessions` tính cả corrupt-runtime recovery và incompatible-pack recovery để UI có thể biết startup đã phải tự phục hồi.
+- Installer/portable/release payload phải ship `005_math_runtime_pack_identity.sql`; bootstrap report và release manifest dùng learner DB schema `5` / migration `5`.
+
 ## Contract còn chưa chốt
 
 Các mục sau chưa được UI/content tự invent cho tới khi AI2 publish contract:

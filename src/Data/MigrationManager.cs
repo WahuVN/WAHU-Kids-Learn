@@ -24,6 +24,8 @@ namespace WAHU.Data
         public const string MathAttemptRuntimeName = "003_math_attempt_idempotency_runtime";
         public const int MathLessonProgressVersion = 4;
         public const string MathLessonProgressName = "004_math_lesson_progress";
+        public const int MathRuntimePackIdentityVersion = 5;
+        public const string MathRuntimePackIdentityName = "005_math_runtime_pack_identity";
 
         public static int GetSchemaVersion(SQLiteConnection connection)
         {

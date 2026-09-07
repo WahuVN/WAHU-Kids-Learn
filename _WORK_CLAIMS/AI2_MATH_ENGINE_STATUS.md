@@ -19,12 +19,12 @@ Branch: `main`
 ## Tests
 
 - `tests/MathEngineRuntimeSmoke`: PASS — **47 assertions**.
-- `tests/MathDataEngineRuntimeSmoke`: PASS — **98 assertions** (idempotency + terminal-session guard + optimistic skill-state guard + true cross-process mastery/session contention + atomic startup + subject/child-scoped dangling recovery).
-- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **194 assertions** (authored bank + targeted lesson + prerequisite unlock + exact resume + mastery delta + next lesson + corrupt authored cursor/core-runtime recovery + retry/resume/anti-double-submit + stale coordinator/skill guards + injected write-failure rollback/retry + post-completion enrichment failure safety).
-- `tests/SQLiteRuntimeSmoke`: PASS — **166 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
+- `tests/MathDataEngineRuntimeSmoke`: PASS — **104 assertions** (idempotency + terminal-session guard + optimistic skill-state guard + true cross-process mastery/session contention + atomic startup + subject/child-scoped dangling recovery).
+- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **211 assertions** (authored bank + targeted lesson + prerequisite unlock + exact resume + mastery delta + next lesson + corrupt authored cursor/core-runtime recovery + retry/resume/anti-double-submit + stale coordinator/skill guards + injected write-failure rollback/retry + post-completion enrichment failure safety).
+- `tests/SQLiteRuntimeSmoke`: PASS — **179 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
 - `tests/LearningSessionRuntimeSmoke`: PASS — **794 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
-- PowerShell release/build scripts: schema V4 payload/bootstrap expectations đã cập nhật; parse/build gate PASS.
-- `git diff --check` / staged `--check`: PASS ở các wave đã commit; wave V4 phải chạy lại trước commit.
+- PowerShell release/build scripts: schema V5 payload/bootstrap expectations đã cập nhật; staged `Build-SetupArtifacts.ps1` PASS qua Release x86 + runtime smokes + staged payload/preflight + portable packaging.
+- `git diff --check` + staged `git diff --cached --check`: PASS cho wave V5.
 
 ## Session
 
@@ -36,6 +36,7 @@ Branch: `main`
 - deterministic generation qua restart: PASS — per-question seed = stable hash `(session seed, ordinal, template id)`.
 - stale open question sau committed answer: PASS — phát hiện qua `attempt_commit_key`, không hiển thị/ghi điểm lại.
 - corrupted current-question cache: PASS — chỉ bỏ cache câu mở, giữ committed attempts/mastery/progress; lesson-mode reconcile authored cursor về committed ordinal để không skip câu.
+- content-pack identity resume: PASS — runtime mới pin `pack_id` + `pack_version`; legacy zero-attempt runtime bind current pack, runtime đã học bằng pack khác bị recover thay vì trộn content version.
 - double-submit: PASS ở engine lane — coordinator serialize submit + DB semantic idempotency.
 - lesson-targeted session: PASS — constructor nhận `lessonId`, engine lấy đúng authored practice set của lesson theo thứ tự basic → medium → application.
 - prerequisite guard: PASS — lesson bị khóa bị chặn ngay ở coordinator, kể cả caller bypass UI.
@@ -54,9 +55,10 @@ Branch: `main`
 - single-active child+subject session guard: PASS — `BeginSession` atomic guard chặn duplicate active session khi hai process cold-start đồng thời; terminal state giải phóng slot.
 - atomic Math session/runtime startup: PASS — `TryCreateSession` commit session + runtime + targeted lesson `started_count` cùng transaction; race loser restore durable winner, không recovery/abort nhầm session process khác; fault ở lesson-progress rollback toàn chain.
 - dangling recovery subject/child scope: PASS — chỉ Math session thiếu `math_session_runtime` của child đang start bị recovery; active `english`/`mixed` và Math session của child khác không bị thu hồi nhầm. Global overload vẫn giữ cho maintenance.
-- schema V4: PASS — thêm `session_mode`, `target_lesson_id`, `math_lesson_progress`; checksum/tamper guard và deployment payload gate đã có.
-- V1 → V4: PASS với pre-migration verified backup; migration history giữ đủ V1/V2/V3/V4.
-- V2 → V3 historical duplicate semantic attempt: PASS, không xóa lịch sử; key pin vào earliest committed attempt; sau đó V4 apply bình thường.
+- schema V4: PASS — thêm `session_mode`, `target_lesson_id`, `math_lesson_progress`.
+- schema V5: PASS — thêm runtime `pack_id`/`pack_version`; migration backfill chỉ khi durable attempts có đúng một non-empty pack identity; mixed/blank history để unbound cho runtime quarantine; SQLite trigger cấm partial/blank pair; checksum/tamper/deployment payload gate đã có.
+- V1 → V5: PASS với pre-migration verified backup; migration history giữ đủ V1/V2/V3/V4/V5.
+- V2 → V3 historical duplicate semantic attempt: PASS, không xóa lịch sử; key pin vào earliest committed attempt; các migration V4/V5 apply bình thường.
 - session seed / target / generated ordinal / mode / targeted lesson id: PASS durable.
 - current question / selection / started timestamp / forced repair: PASS durable.
 - resume after close: PASS.
@@ -112,7 +114,8 @@ Còn phải làm: skip policy nếu product cho phép, numeric XP/daily streak n
 - `21cc224` — `fix(toán): giới hạn recovery đúng phiên toán` — pushed.
 - `d3f2d21` — `fix(toán): giới hạn recovery theo hồ sơ học` — pushed.
 - `a871626` — `fix(toán): cô lập lỗi sau khi hoàn tất bài` — pushed.
-- corrupt core runtime quarantine — đang chốt selective commit hiện tại.
+- `03fc6c1` — `fix(toán): cách ly runtime hỏng khi tiếp tục bài` — pushed.
+- schema V5 + runtime content-pack identity — đang chốt selective commit hiện tại.
 
 ## Blocker / coordination
 

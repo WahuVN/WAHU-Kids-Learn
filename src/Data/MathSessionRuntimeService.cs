@@ -15,6 +15,8 @@ namespace WAHU.Data
         public int GeneratedQuestionCount { get; set; }
         public string SessionMode { get; set; }
         public string TargetLessonId { get; set; }
+        public string PackId { get; set; }
+        public string PackVersion { get; set; }
         public string CurrentQuestionJson { get; set; }
         public string CurrentSelectionJson { get; set; }
         public DateTime? QuestionStartedAtUtc { get; set; }
@@ -66,7 +68,9 @@ namespace WAHU.Data
             int targetQuestionCount,
             string sessionMode,
             string targetLessonId,
-            string targetSkillId = null)
+            string targetSkillId = null,
+            string packId = null,
+            string packVersion = null)
         {
             Require(childId, "childId");
             if (targetQuestionCount < 1 || targetQuestionCount > 40) throw new ArgumentOutOfRangeException("targetQuestionCount");
@@ -81,6 +85,7 @@ namespace WAHU.Data
                 targetLessonId = null;
                 targetSkillId = null;
             }
+            ValidatePackIdentityArguments(packId, packVersion);
             if (performanceProfile != "LOW" && performanceProfile != "NORMAL") performanceProfile = "LOW";
 
             var sessionId = "session-" + Guid.NewGuid().ToString("N");
@@ -108,13 +113,15 @@ WHERE NOT EXISTS (
                 {
                     runtime.Transaction = transaction;
                     runtime.CommandText = @"INSERT INTO math_session_runtime(
-session_id,seed,target_question_count,generated_question_count,session_mode,target_lesson_id,updated_at_utc)
-VALUES(@session,@seed,@target,0,@mode,@lesson,@utc);";
+session_id,seed,target_question_count,generated_question_count,session_mode,target_lesson_id,pack_id,pack_version,updated_at_utc)
+VALUES(@session,@seed,@target,0,@mode,@lesson,@packId,@packVersion,@utc);";
                     runtime.Parameters.AddWithValue("@session", sessionId);
                     runtime.Parameters.AddWithValue("@seed", seed);
                     runtime.Parameters.AddWithValue("@target", targetQuestionCount);
                     runtime.Parameters.AddWithValue("@mode", sessionMode);
                     runtime.Parameters.AddWithValue("@lesson", string.IsNullOrWhiteSpace(targetLessonId) ? (object)DBNull.Value : targetLessonId);
+                    runtime.Parameters.AddWithValue("@packId", string.IsNullOrWhiteSpace(packId) ? (object)DBNull.Value : packId);
+                    runtime.Parameters.AddWithValue("@packVersion", string.IsNullOrWhiteSpace(packVersion) ? (object)DBNull.Value : packVersion);
                     runtime.Parameters.AddWithValue("@utc", Utc(startedAtUtc));
                     runtime.ExecuteNonQuery();
                 }
@@ -153,29 +160,44 @@ updated_at_utc=excluded.updated_at_utc;";
 
         public void Create(string sessionId, int seed, int targetQuestionCount)
         {
-            Create(sessionId, seed, targetQuestionCount, "adaptive", null);
+            Create(sessionId, seed, targetQuestionCount, "adaptive", null, null, null);
         }
 
         public void Create(string sessionId, int seed, int targetQuestionCount, string sessionMode, string targetLessonId)
+        {
+            Create(sessionId, seed, targetQuestionCount, sessionMode, targetLessonId, null, null);
+        }
+
+        public void Create(
+            string sessionId,
+            int seed,
+            int targetQuestionCount,
+            string sessionMode,
+            string targetLessonId,
+            string packId,
+            string packVersion)
         {
             Require(sessionId, "sessionId");
             if (targetQuestionCount < 1 || targetQuestionCount > 40) throw new ArgumentOutOfRangeException("targetQuestionCount");
             if (sessionMode != "adaptive" && sessionMode != "lesson") throw new ArgumentException("Invalid Math session mode.");
             if (sessionMode == "lesson") Require(targetLessonId, "targetLessonId");
             else targetLessonId = null;
+            ValidatePackIdentityArguments(packId, packVersion);
             _database.Writes.Execute((connection, transaction) =>
             {
                 using (var command = connection.CreateCommand())
                 {
                     command.Transaction = transaction;
                     command.CommandText = @"INSERT INTO math_session_runtime(
-session_id,seed,target_question_count,generated_question_count,session_mode,target_lesson_id,updated_at_utc)
-VALUES(@session,@seed,@target,0,@mode,@lesson,@utc);";
+session_id,seed,target_question_count,generated_question_count,session_mode,target_lesson_id,pack_id,pack_version,updated_at_utc)
+VALUES(@session,@seed,@target,0,@mode,@lesson,@packId,@packVersion,@utc);";
                     command.Parameters.AddWithValue("@session", sessionId);
                     command.Parameters.AddWithValue("@seed", seed);
                     command.Parameters.AddWithValue("@target", targetQuestionCount);
                     command.Parameters.AddWithValue("@mode", sessionMode);
                     command.Parameters.AddWithValue("@lesson", string.IsNullOrWhiteSpace(targetLessonId) ? (object)DBNull.Value : targetLessonId);
+                    command.Parameters.AddWithValue("@packId", string.IsNullOrWhiteSpace(packId) ? (object)DBNull.Value : packId);
+                    command.Parameters.AddWithValue("@packVersion", string.IsNullOrWhiteSpace(packVersion) ? (object)DBNull.Value : packVersion);
                     command.Parameters.AddWithValue("@utc", Utc(DateTime.UtcNow));
                     command.ExecuteNonQuery();
                 }
@@ -189,7 +211,7 @@ VALUES(@session,@seed,@target,0,@mode,@lesson,@utc);";
             using (var command = connection.CreateCommand())
             {
                 command.CommandText = @"SELECT s.id,s.child_id,s.started_at_utc,s.performance_profile,
-r.seed,r.target_question_count,r.generated_question_count,r.session_mode,r.target_lesson_id,r.current_question_json,
+r.seed,r.target_question_count,r.generated_question_count,r.session_mode,r.target_lesson_id,r.pack_id,r.pack_version,r.current_question_json,
 r.current_selection_json,r.question_started_at_utc,r.forced_repair_template_id,r.updated_at_utc
 FROM session s
 JOIN math_session_runtime r ON r.session_id=s.id
@@ -204,7 +226,7 @@ LIMIT 1;";
 
                     // Copy raw DB values first. Operational reader/SQLite failures must escape normally;
                     // only deterministic parsing/metadata failures below are classified as corruption.
-                    var values = new object[14];
+                    var values = new object[16];
                     reader.GetValues(values);
                     var sessionId = Text(values[0]);
                     try
@@ -222,11 +244,13 @@ LIMIT 1;";
                             GeneratedQuestionCount = Convert.ToInt32(values[6], CultureInfo.InvariantCulture),
                             SessionMode = mode,
                             TargetLessonId = NullableText(values[8]),
-                            CurrentQuestionJson = NullableText(values[9]),
-                            CurrentSelectionJson = NullableText(values[10]),
-                            QuestionStartedAtUtc = ReadNullableUtc(values[11]),
-                            ForcedRepairTemplateId = NullableText(values[12]),
-                            UpdatedAtUtc = ReadUtc(values[13])
+                            PackId = NullableText(values[9]),
+                            PackVersion = NullableText(values[10]),
+                            CurrentQuestionJson = NullableText(values[11]),
+                            CurrentSelectionJson = NullableText(values[12]),
+                            QuestionStartedAtUtc = ReadNullableUtc(values[13]),
+                            ForcedRepairTemplateId = NullableText(values[14]),
+                            UpdatedAtUtc = ReadUtc(values[15])
                         };
                         ValidateRuntimeSnapshot(snapshot);
                         return snapshot;
@@ -327,23 +351,133 @@ WHERE session_id=@session;";
             });
         }
 
+        public MathSessionRuntimeSnapshot EnsurePackIdentity(
+            MathSessionRuntimeSnapshot snapshot,
+            string currentPackId,
+            string currentPackVersion)
+        {
+            if (snapshot == null) throw new ArgumentNullException("snapshot");
+            Require(currentPackId, "currentPackId");
+            Require(currentPackVersion, "currentPackVersion");
+            ValidateSnapshotPackPair(snapshot);
+            if (!string.IsNullOrWhiteSpace(snapshot.PackId)) return snapshot;
+
+            return _database.Writes.Execute((connection, transaction) =>
+            {
+                string persistedPackId;
+                string persistedPackVersion;
+                using (var current = connection.CreateCommand())
+                {
+                    current.Transaction = transaction;
+                    current.CommandText = @"SELECT r.pack_id,r.pack_version
+FROM math_session_runtime r
+JOIN session s ON s.id=r.session_id
+WHERE r.session_id=@session AND s.child_id=@child AND s.planned_subject='math'
+  AND s.state IN ('started','active') AND s.ended_at_utc IS NULL;";
+                    current.Parameters.AddWithValue("@session", snapshot.SessionId);
+                    current.Parameters.AddWithValue("@child", snapshot.ChildId);
+                    using (var reader = current.ExecuteReader())
+                    {
+                        if (!reader.Read()) throw new InvalidOperationException("Math runtime session is no longer active.");
+                        persistedPackId = NullableText(reader[0]);
+                        persistedPackVersion = NullableText(reader[1]);
+                    }
+                }
+
+                if (string.IsNullOrWhiteSpace(persistedPackId) != string.IsNullOrWhiteSpace(persistedPackVersion))
+                    throw Corrupt(snapshot.SessionId, new InvalidOperationException("Math runtime pack identity is partially persisted."));
+                if (!string.IsNullOrWhiteSpace(persistedPackId))
+                {
+                    snapshot.PackId = persistedPackId;
+                    snapshot.PackVersion = persistedPackVersion;
+                    return snapshot;
+                }
+
+                var identities = new List<Tuple<string, string>>();
+                using (var attempts = connection.CreateCommand())
+                {
+                    attempts.Transaction = transaction;
+                    attempts.CommandText = @"SELECT a.pack_id,a.pack_version
+FROM attempt a
+WHERE a.session_id=@session AND a.subject='math' AND a.answered_at_utc IS NOT NULL
+GROUP BY a.pack_id,a.pack_version
+ORDER BY MIN(a.answered_at_utc) ASC,MIN(a.started_at_utc) ASC,MIN(a.id) ASC
+LIMIT 2;";
+                    attempts.Parameters.AddWithValue("@session", snapshot.SessionId);
+                    using (var reader = attempts.ExecuteReader())
+                    {
+                        while (reader.Read())
+                            identities.Add(Tuple.Create(Text(reader[0]), Text(reader[1])));
+                    }
+                }
+
+                if (identities.Count > 1)
+                    throw Corrupt(snapshot.SessionId, new InvalidOperationException("Legacy Math session contains multiple content-pack identities."));
+                var bindPackId = identities.Count == 1 ? identities[0].Item1 : currentPackId;
+                var bindPackVersion = identities.Count == 1 ? identities[0].Item2 : currentPackVersion;
+                try
+                {
+                    ValidatePackIdentityArguments(bindPackId, bindPackVersion);
+                }
+                catch (ArgumentException ex)
+                {
+                    throw Corrupt(snapshot.SessionId, ex);
+                }
+
+                using (var update = connection.CreateCommand())
+                {
+                    update.Transaction = transaction;
+                    update.CommandText = @"UPDATE math_session_runtime
+SET pack_id=@packId,pack_version=@packVersion,updated_at_utc=@utc
+WHERE session_id=@session AND pack_id IS NULL AND pack_version IS NULL
+  AND EXISTS (
+      SELECT 1 FROM session s
+      WHERE s.id=@session AND s.child_id=@child AND s.planned_subject='math'
+        AND s.state IN ('started','active') AND s.ended_at_utc IS NULL
+  );";
+                    update.Parameters.AddWithValue("@packId", bindPackId);
+                    update.Parameters.AddWithValue("@packVersion", bindPackVersion);
+                    update.Parameters.AddWithValue("@utc", Utc(DateTime.UtcNow));
+                    update.Parameters.AddWithValue("@session", snapshot.SessionId);
+                    update.Parameters.AddWithValue("@child", snapshot.ChildId);
+                    if (update.ExecuteNonQuery() != 1)
+                        throw new InvalidOperationException("Math runtime pack identity could not be bound to the active session.");
+                }
+
+                snapshot.PackId = bindPackId;
+                snapshot.PackVersion = bindPackVersion;
+                return snapshot;
+            });
+        }
+
         public bool RecoverCorruptRuntimeSession(string childId, string sessionId)
+        {
+            return RecoverRuntimeSession(childId, sessionId, "corrupt_math_runtime");
+        }
+
+        public bool RecoverIncompatiblePackSession(string childId, string sessionId)
+        {
+            return RecoverRuntimeSession(childId, sessionId, "content_pack_version_mismatch");
+        }
+
+        private bool RecoverRuntimeSession(string childId, string sessionId, string reason)
         {
             Require(childId, "childId");
             Require(sessionId, "sessionId");
+            Require(reason, "reason");
             return _database.Writes.Execute((connection, transaction) =>
             {
                 using (var session = connection.CreateCommand())
                 {
                     session.Transaction = transaction;
                     session.CommandText = @"UPDATE session
-SET state='recovered',ended_at_utc=@utc,
-    summary_json=COALESCE(summary_json,'{""reason"":""corrupt_math_runtime""}')
+SET state='recovered',ended_at_utc=@utc,summary_json=COALESCE(summary_json,@summary)
 WHERE id=@session AND child_id=@child AND planned_subject='math'
   AND state IN ('started','active') AND ended_at_utc IS NULL;";
                     session.Parameters.AddWithValue("@session", sessionId);
                     session.Parameters.AddWithValue("@child", childId);
                     session.Parameters.AddWithValue("@utc", Utc(DateTime.UtcNow));
+                    session.Parameters.AddWithValue("@summary", "{\"reason\":\"" + reason + "\"}");
                     if (session.ExecuteNonQuery() != 1) return false;
                 }
 
@@ -461,6 +595,22 @@ WHERE session_id=@session;";
                 throw new InvalidOperationException("Math runtime session_mode is invalid.");
             if (string.Equals(snapshot.SessionMode, "lesson", StringComparison.Ordinal) && string.IsNullOrWhiteSpace(snapshot.TargetLessonId))
                 throw new InvalidOperationException("Targeted Math runtime is missing target_lesson_id.");
+            ValidateSnapshotPackPair(snapshot);
+        }
+
+        private static void ValidatePackIdentityArguments(string packId, string packVersion)
+        {
+            if (packId == null && packVersion == null) return;
+            if (string.IsNullOrWhiteSpace(packId) || string.IsNullOrWhiteSpace(packVersion))
+                throw new ArgumentException("Math runtime pack_id and pack_version must be supplied together as non-empty values.");
+        }
+
+        private static void ValidateSnapshotPackPair(MathSessionRuntimeSnapshot snapshot)
+        {
+            var hasPackId = !string.IsNullOrWhiteSpace(snapshot.PackId);
+            var hasPackVersion = !string.IsNullOrWhiteSpace(snapshot.PackVersion);
+            if (hasPackId != hasPackVersion)
+                throw Corrupt(snapshot.SessionId, new InvalidOperationException("Math runtime pack identity is incomplete."));
         }
 
         private static MathSessionRuntimeCorruptException Corrupt(string sessionId, Exception innerException)

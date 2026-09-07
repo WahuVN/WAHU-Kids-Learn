@@ -34,6 +34,7 @@ namespace WAHU.MathDataEngineRuntimeSmoke
                 TestCrossProcessConcurrentSkillWrites(root, sourceSchema);
                 TestCrossProcessSingleActiveSessionGuard(root, sourceSchema);
                 TestCrossProcessAtomicMathRuntimeStart(root, sourceSchema);
+                TestRuntimePackIdentityArgumentValidation(root, sourceSchema);
                 TestTargetedAtomicStartRollsBackOnProgressFailure(root, sourceSchema);
                 TestDanglingRecoveryIsScopedToMath(root, sourceSchema);
                 TestDanglingRecoveryIsScopedToChild(root, sourceSchema);
@@ -59,8 +60,8 @@ namespace WAHU.MathDataEngineRuntimeSmoke
             CopySchemas(sourceSchema, schemaDir);
             var database = new LearningDatabase(Path.Combine(root, "fresh.db"), Path.Combine(schemaDir, "001_initial.sql"));
             var init = database.Initialize("DELETE");
-            A(init.SchemaVersion == 4, "fresh_schema_v4");
-            A(init.Migration != null && init.Migration.Version == 4, "fresh_latest_migration_v4");
+            A(init.SchemaVersion == 5, "fresh_schema_v5");
+            A(init.Migration != null && init.Migration.Version == 5, "fresh_latest_migration_v5");
             A(init.Health != null && init.Health.IsHealthy, "fresh_health_ok");
 
             var sessions = new LearnerSessionService(database);
@@ -459,6 +460,57 @@ namespace WAHU.MathDataEngineRuntimeSmoke
             }
         }
 
+        private static void TestRuntimePackIdentityArgumentValidation(string root, string sourceSchema)
+        {
+            var schemaDir = Path.Combine(root, "schema-pack-identity-validation");
+            CopySchemas(sourceSchema, schemaDir);
+            var schemaPath = Path.Combine(schemaDir, "001_initial.sql");
+            var database = new LearningDatabase(Path.Combine(root, "pack-identity-validation.db"), schemaPath);
+            database.Initialize("DELETE");
+            var profile = new LearnerSessionService(database).EnsurePrimaryChild("Bé pack identity validation");
+            var runtime = new MathSessionRuntimeService(database);
+
+            var blankRejected = false;
+            try
+            {
+                runtime.TryCreateSession(profile.ChildId, "LOW", 5511, 8, "adaptive", null, null, " ", "\t");
+            }
+            catch (ArgumentException)
+            {
+                blankRejected = true;
+            }
+            A(blankRejected, "runtime_pack_identity_rejects_blank_pair");
+
+            var partialRejected = false;
+            try
+            {
+                runtime.TryCreateSession(profile.ChildId, "LOW", 5512, 8, "adaptive", null, null, "pack-only", null);
+            }
+            catch (ArgumentException)
+            {
+                partialRejected = true;
+            }
+            A(partialRejected, "runtime_pack_identity_rejects_partial_pair");
+
+            using (var c = database.OpenConnection())
+            {
+                A(Count(c, "SELECT count(*) FROM session WHERE child_id='" + profile.ChildId + "' AND planned_subject='math';") == 0 &&
+                  Count(c, "SELECT count(*) FROM math_session_runtime;") == 0,
+                    "invalid_runtime_pack_identity_writes_nothing");
+            }
+
+            var valid = runtime.TryCreateSession(
+                profile.ChildId, "LOW", 5513, 8, "adaptive", null, null, "math-pack-test", "1.0");
+            A(valid != null, "runtime_pack_identity_accepts_complete_nonempty_pair");
+            using (var c = database.OpenConnection())
+            {
+                A(Count(c,
+                    "SELECT count(*) FROM math_session_runtime WHERE session_id='" + valid.SessionId + "' AND pack_id='math-pack-test' AND pack_version='1.0';") == 1,
+                    "runtime_pack_identity_persists_pair_atomically");
+            }
+            new LearnerSessionService(database).CompleteSession(valid.SessionId, false, "{}", "{}");
+            runtime.Delete(valid.SessionId);
+        }
         private static void TestCrossProcessAtomicMathRuntimeStart(string root, string sourceSchema)
         {
             var schemaDir = Path.Combine(root, "schema-atomic-runtime-start");
@@ -740,8 +792,8 @@ END;");
 
             var backupRoot = Path.Combine(root, "v1-upgrade-backups");
             var migrated = database.Initialize("DELETE", backupRoot, "ai2-smoke");
-            A(migrated.SchemaVersion == 4, "v1_upgrade_reaches_schema_four");
-            A(migrated.Migration != null && migrated.Migration.Version == 4, "v1_upgrade_latest_migration_four");
+            A(migrated.SchemaVersion == 5, "v1_upgrade_reaches_schema_five");
+            A(migrated.Migration != null && migrated.Migration.Version == 5, "v1_upgrade_latest_migration_five");
             A(migrated.PreMigrationBackup != null && File.Exists(migrated.PreMigrationBackup.DatabasePath), "v1_upgrade_prebackup_database_exists");
             A(migrated.PreMigrationBackup != null && File.Exists(migrated.PreMigrationBackup.MetadataPath), "v1_upgrade_prebackup_metadata_exists");
             var verified = ManagedBackupService.VerifyManagedBackup(migrated.PreMigrationBackup.MetadataPath);
@@ -751,6 +803,7 @@ END;");
                 A(Count(c, "SELECT count(*) FROM migration_history WHERE version=2;") == 1, "v1_upgrade_records_v2_once");
                 A(Count(c, "SELECT count(*) FROM migration_history WHERE version=3;") == 1, "v1_upgrade_records_v3_once");
                 A(Count(c, "SELECT count(*) FROM migration_history WHERE version=4;") == 1, "v1_upgrade_records_v4_once");
+                A(Count(c, "SELECT count(*) FROM migration_history WHERE version=5;") == 1, "v1_upgrade_records_v5_once");
             }
         }
 
@@ -855,7 +908,7 @@ END;");
         private static void CopySchemas(string source, string destination)
         {
             Directory.CreateDirectory(destination);
-            foreach (var name in new[] { "001_initial.sql", "002_attempt_immutability.sql", "003_math_attempt_idempotency_runtime.sql", "004_math_lesson_progress.sql" })
+            foreach (var name in new[] { "001_initial.sql", "002_attempt_immutability.sql", "003_math_attempt_idempotency_runtime.sql", "004_math_lesson_progress.sql", "005_math_runtime_pack_identity.sql" })
                 File.Copy(Path.Combine(source, name), Path.Combine(destination, name), true);
         }
 
