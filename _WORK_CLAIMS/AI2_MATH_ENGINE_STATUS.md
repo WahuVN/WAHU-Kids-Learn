@@ -20,7 +20,7 @@ Branch: `main`
 
 - `tests/MathEngineRuntimeSmoke`: PASS — **72 assertions** (baseline equivalence + adversarial Unicode/NFD, int overflow, answer-length, unit alias, expression depth/token-bomb, Unicode operators và invalid per-question whitelist fail-closed).
 - `tests/MathDataEngineRuntimeSmoke`: PASS — **104 assertions** (idempotency + terminal-session guard + optimistic skill-state guard + true cross-process mastery/session contention + atomic startup + subject/child-scoped dangling recovery).
-- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **7143 assertions** (toàn bộ gate cũ + real 402-bank selector breadth + targeted write-failure/corruption repair + concurrent authored-ordinal race hardening + operational DB failure fail-safe).
+- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **7159 assertions** (toàn bộ gate cũ + real 402-bank selector breadth + targeted write-failure/corruption repair + deterministic authored runtime IDs + concurrent pending-retry semantics + operational DB failure fail-safe).
 - `tests/SQLiteRuntimeSmoke`: PASS — **179 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
 - `tests/LearningSessionRuntimeSmoke`: PASS — **800 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
 - Request 009: CLOSED tại `05cdb2a` — authored pool >=6 dùng selected set đúng 3 câu (1 basic + 1 medium + 1 application), deterministic theo seed/lesson, persisted qua checkpoint JSON; retry/resume/corrupt-open recovery giữ nguyên selected set và complete sau 3 câu. Synthetic pool-6 regression + legacy path đạt **264 assertions PASS**.
@@ -33,7 +33,8 @@ Branch: `main`
 - Selected-set semantic-corruption repair matrix: JSON thiếu key, duplicate IDs, swap sai bucket và unknown ID đều self-heal về deterministic ordered set, giữ committed progress và tiếp tục đúng medium ordinal.
 - Concurrent targeted ordinal hardening: hai coordinator có thể giữ hai runtime GUID khác nhau cho cùng selected medium; nếu một coordinator đã finalize medium, coordinator stale bị reject một lần rồi reconcile theo stable `ContentQuestionId`, counters lên đúng 2 và chuyển application; stale cached medium sau restart cũng bị bỏ. Rebuild targeted history fail-closed nếu finalized authored IDs trùng hoặc sai selected ordinal order.
 - Operational DB failure guard: khóa file SQLite tạm thời làm `Start()` surface operational error; session cũ vẫn `active`, runtime checkpoint còn nguyên và resume đúng session ngay sau khi lock được gỡ — không bị classify nhầm thành corrupt/quarantine.
-- Expanded-bank integration: `373d9d1` bỏ test coupling `Single(...)`/`_01`, chạy được cả baseline 201 và pool 402; current real 402-bank persistence tổng **7143 assertions PASS**.
+- Deterministic authored runtime identity: lesson-mode `QuestionId` được derive ổn định từ `(session_id, content_question_id)`, nên hai coordinator cùng ordinal dùng cùng semantic idempotency key. Pending-wrong do coordinator A ghi buộc coordinator B reconcile sang attempt 2; retry-correct vẫn assisted (`IndependentSuccess=false`), counters được rebuild từ durable attempts và replay không tạo attempt thứ ba. Legacy random-GUID cache vẫn được nhận diện qua stable `ContentQuestionId` để resume an toàn.
+- Expanded-bank integration: `373d9d1` bỏ test coupling `Single(...)`/`_01`, chạy được cả baseline 201 và pool 402; current real 402-bank persistence tổng **7159 assertions PASS**.
 - PowerShell release/build scripts: schema V5 payload/bootstrap expectations đã cập nhật; staged `Build-SetupArtifacts.ps1` PASS qua Release x86 + runtime smokes + staged payload/preflight + portable packaging.
 - `git diff --check` + staged `git diff --cached --check`: PASS cho wave V5.
 

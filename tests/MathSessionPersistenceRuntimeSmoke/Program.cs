@@ -49,6 +49,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestExpandedTargetedPoolSelectsDurableThree(root, schemaPath, templatePath, lessonCatalogPath, questionBankPath);
                 TestTargetedSelectedSetSurvivesCommitFailure(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedConcurrentCoordinatorsCannotDuplicateOrdinal(root, schemaPath, templatePath, lessonCatalogPath);
+                TestTargetedConcurrentPendingRetryKeepsFirstTrySemantics(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedResumeDiscardsStaleConcurrentOrdinalCache(root, schemaPath, templatePath, lessonCatalogPath);
                 TestRetryAwareAnswerFlow(root, schemaPath, templatePath);
                 TestRetryWrongFinalizesOnce(root, schemaPath, templatePath);
@@ -1134,31 +1135,116 @@ END;");
                     var firstMedium = first.NextQuestion();
                     var secondMedium = second.NextQuestion();
                     A(firstMedium.ContentQuestionId == selected[1] && secondMedium.ContentQuestionId == selected[1] &&
-                      firstMedium.QuestionId != secondMedium.QuestionId,
-                        "targeted_concurrent_can_open_distinct_runtime_instances_for_same_selected_medium");
+                      firstMedium.QuestionId == secondMedium.QuestionId,
+                        "targeted_concurrent_same_selected_medium_uses_deterministic_runtime_id");
 
                     first.SubmitAnswerAt(firstMedium.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 800);
-                    var staleRejected = false;
-                    try
-                    {
-                        second.SubmitAnswerAt(secondMedium.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 820);
-                    }
-                    catch (InvalidOperationException)
-                    {
-                        staleRejected = true;
-                    }
-                    A(staleRejected,
-                        "targeted_concurrent_stale_medium_runtime_is_rejected_after_other_commit");
+                    var replayMedium = second.SubmitAnswerAt(secondMedium.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 820);
+                    A(replayMedium.QuestionCompleted && replayMedium.IsCorrect,
+                        "targeted_concurrent_second_medium_submit_replays_same_semantic_attempt");
                     A(Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + firstStart.SessionId + "';") == 2,
-                        "targeted_concurrent_stale_medium_rejection_writes_no_duplicate_attempt");
+                        "targeted_concurrent_medium_replay_writes_no_duplicate_attempt");
                     A(second.Summary.Attempts == 2 && !second.HasOpenQuestion,
-                        "targeted_concurrent_stale_medium_reconciles_to_two_committed_ordinals");
+                        "targeted_concurrent_medium_replay_reconciles_to_two_committed_ordinals");
 
                     var application = second.NextQuestion();
                     A(application != null && application.ContentQuestionId == selected[2] &&
                       lesson.PracticeSets.Application.Contains(application.ContentQuestionId),
                         "targeted_concurrent_reconciled_coordinator_advances_to_selected_application");
                     second.Abort("targeted_concurrent_cleanup");
+                }
+            }
+        }
+
+        private static void TestTargetedConcurrentPendingRetryKeepsFirstTrySemantics(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.Lessons.First(x =>
+                (x.PrerequisiteSkills == null || x.PrerequisiteSkills.Count == 0) &&
+                x.PracticeSets != null && x.PracticeSets.Basic.Count == 2 &&
+                x.PracticeSets.Medium.Count == 2 && x.PracticeSets.Application.Count == 2);
+            var database = NewDatabase(Path.Combine(root, "targeted-concurrent-pending-retry.db"), schemaPath);
+
+            using (var first = new MathSessionCoordinator(database, templatePath, "LOW", 8621, lesson.Id))
+            {
+                var firstStart = first.Start("Bé targeted pending retry");
+                var selected = firstStart.SelectedContentQuestionIds.ToList();
+                var firstBasic = first.NextQuestion();
+
+                using (var second = new MathSessionCoordinator(database, templatePath, "NORMAL", 987654, lesson.Id))
+                {
+                    var secondStart = second.Start("Bé targeted pending retry");
+                    var secondBasic = second.NextQuestion();
+                    A(secondStart.ResumedExistingSession && secondBasic.QuestionId == firstBasic.QuestionId,
+                        "targeted_pending_retry_second_coordinator_resumes_same_basic");
+
+                    first.SubmitAnswerAt(firstBasic.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 650);
+                    var basicReplay = second.SubmitAnswerAt(secondBasic.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 670);
+                    A(basicReplay.QuestionCompleted && second.Summary.Attempts == 1,
+                        "targeted_pending_retry_basic_replay_is_idempotent");
+
+                    var firstMedium = first.NextQuestion();
+                    var secondMedium = second.NextQuestion();
+                    A(firstMedium.ContentQuestionId == selected[1] && secondMedium.ContentQuestionId == selected[1] &&
+                      firstMedium.QuestionId == secondMedium.QuestionId,
+                        "targeted_pending_retry_medium_runtime_id_is_shared");
+                    var wrong = WrongAnswer(firstMedium);
+                    var firstWrong = first.SubmitAnswerWithRetryAt(wrong, 0, "smoke", DateTime.UtcNow, 700);
+                    A(firstWrong.CanRetry && !firstWrong.QuestionCompleted && firstWrong.AttemptIndex == 1 &&
+                      first.Summary.Attempts == 1,
+                        "targeted_pending_retry_first_wrong_stays_pending_without_completed_progress");
+                    A(Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + firstStart.SessionId +
+                      "' AND question_id='" + firstMedium.QuestionId + "' AND attempt_index=1;") == 1,
+                        "targeted_pending_retry_persists_exactly_one_first_wrong_attempt");
+                    A(Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" +
+                      firstStart.SessionId + "' AND a.question_id='" + firstMedium.QuestionId + "';") == 0,
+                        "targeted_pending_retry_first_wrong_has_no_mastery_finalization");
+
+                    var staleFirstTryRejected = false;
+                    try
+                    {
+                        second.SubmitAnswerAt(secondMedium.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 720);
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        staleFirstTryRejected = true;
+                    }
+                    A(staleFirstTryRejected,
+                        "targeted_pending_retry_other_coordinator_cannot_claim_first_try_after_wrong_attempt");
+                    A(second.HasOpenQuestion && second.Summary.Attempts == 1,
+                        "targeted_pending_retry_conflict_keeps_medium_open_without_progress_inflation");
+
+                    var retryCorrect = second.SubmitRetryAnswerAt(secondMedium.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 760);
+                    A(retryCorrect.IsCorrect && retryCorrect.QuestionCompleted && retryCorrect.IsRetry &&
+                      retryCorrect.AttemptIndex == 2 && !retryCorrect.IndependentSuccess,
+                        "targeted_pending_retry_second_attempt_is_assisted_not_independent");
+                    var afterRetry = second.Summary;
+                    A(afterRetry.Attempts == 2 && afterRetry.AnswerAttempts == 3 && afterRetry.Correct == 2 &&
+                      afterRetry.IndependentCorrect == 1 && afterRetry.RetriedQuestions == 1 && afterRetry.RetriedCorrect == 1,
+                        "targeted_pending_retry_summary_preserves_first_wrong_then_assisted_success_semantics");
+                    A(Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + firstStart.SessionId +
+                      "' AND question_id='" + firstMedium.QuestionId + "' AND attempt_index IN (1,2);") == 2,
+                        "targeted_pending_retry_writes_exactly_two_semantic_attempts_for_medium");
+                    A(Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" +
+                      firstStart.SessionId + "' AND a.question_id='" + firstMedium.QuestionId + "';") == 1,
+                        "targeted_pending_retry_writes_exactly_one_medium_mastery_finalization");
+
+                    var replayFromFirst = first.SubmitRetryAnswerAt(firstMedium.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 780);
+                    A(replayFromFirst.QuestionCompleted && replayFromFirst.IsRetry && first.Summary.Attempts == 2 &&
+                      first.Summary.AnswerAttempts == 3,
+                        "targeted_pending_retry_original_coordinator_replays_final_retry_without_duplication");
+                    A(Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + firstStart.SessionId +
+                      "' AND question_id='" + firstMedium.QuestionId + "';") == 2,
+                        "targeted_pending_retry_replay_never_creates_third_attempt");
+
+                    var application = second.NextQuestion();
+                    A(application != null && application.ContentQuestionId == selected[2],
+                        "targeted_pending_retry_advances_to_selected_application");
+                    second.Abort("targeted_pending_retry_cleanup");
                 }
             }
         }
@@ -1201,12 +1287,17 @@ END;");
                         "targeted_stale_cache_two_ordinals_committed_before_stale_open");
 
                     var staleMedium = second.NextQuestion();
-                    A(staleMedium.ContentQuestionId == selected[1] && staleMedium.QuestionId != firstMedium.QuestionId,
-                        "targeted_stale_cache_second_opens_distinct_stale_medium_after_commit");
+                    A(staleMedium.ContentQuestionId == selected[1] && staleMedium.QuestionId == firstMedium.QuestionId,
+                        "targeted_stale_cache_new_runtime_generation_is_deterministic");
+                    var legacyStaleQuestionId = selected[1] + "-" + Guid.NewGuid().ToString("N");
+                    var legacyStaleJson = Json.Serialize(staleMedium).Replace(staleMedium.QuestionId, legacyStaleQuestionId);
+                    Exec(database,
+                        "UPDATE math_session_runtime SET current_question_json=@question WHERE session_id=@session;",
+                        "@question", legacyStaleJson, "@session", sessionId);
                     var persistedStaleJson = ScalarText(database,
                         "SELECT current_question_json FROM math_session_runtime WHERE session_id='" + sessionId + "';");
-                    A(!string.IsNullOrWhiteSpace(persistedStaleJson) && persistedStaleJson.Contains(staleMedium.QuestionId),
-                        "targeted_stale_cache_persists_stale_medium_runtime_instance");
+                    A(!string.IsNullOrWhiteSpace(persistedStaleJson) && persistedStaleJson.Contains(legacyStaleQuestionId),
+                        "targeted_stale_cache_persists_legacy_random_runtime_instance");
                     second.Suspend("targeted_stale_cache_simulate_restart");
                 }
                 first.Suspend("targeted_stale_cache_first_coordinator_closed");

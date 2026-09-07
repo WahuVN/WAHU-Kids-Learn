@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Web.Script.Serialization;
 using WAHU.Content;
 using WAHU.Data;
@@ -216,6 +218,7 @@ namespace WAHU.Session
                 if (_generatedQuestionCount >= _targetQuestions.Count) return null;
                 var authored = _targetQuestions[_generatedQuestionCount];
                 _currentQuestion = MathAuthoredQuestionSource.CreateRuntimeInstance(authored);
+                _currentQuestion.QuestionId = DeterministicAuthoredRuntimeQuestionId(_session.SessionId, _currentQuestion.ContentQuestionId);
                 _currentSelection = new MathSelectionDecision
                 {
                     Template = new MathTemplateRef { TemplateId = _currentQuestion.TemplateId, SkillId = _currentQuestion.SkillId },
@@ -1091,7 +1094,10 @@ namespace WAHU.Session
                     return;
                 }
 
-                ResetBehaviorFromCommittedAttempts(committedAttempts);
+                // Another coordinator may have committed a pending retry attempt before this write failed.
+                // Rebuild every durable counter/behavior observation, not only behavior state, so AnswerAttempts
+                // and retry semantics cannot fall behind the database. The current question remains open below.
+                RebuildFromCommittedAttempts(committedAttempts);
                 _currentAttemptIndex = nextAttemptIndex;
             }
             catch
@@ -1361,6 +1367,18 @@ namespace WAHU.Session
                    !string.IsNullOrWhiteSpace(question.TemplateId) &&
                    !string.IsNullOrWhiteSpace(question.SkillId) &&
                    !string.IsNullOrWhiteSpace(question.PromptVi);
+        }
+
+        private static string DeterministicAuthoredRuntimeQuestionId(string sessionId, string contentQuestionId)
+        {
+            if (string.IsNullOrWhiteSpace(sessionId)) throw new ArgumentException("sessionId");
+            if (string.IsNullOrWhiteSpace(contentQuestionId)) throw new ArgumentException("contentQuestionId");
+            byte[] hash;
+            using (var sha = SHA256.Create())
+                hash = sha.ComputeHash(Encoding.UTF8.GetBytes(sessionId + "|" + contentQuestionId));
+            var guidBytes = new byte[16];
+            Array.Copy(hash, guidBytes, guidBytes.Length);
+            return contentQuestionId + "-" + new Guid(guidBytes).ToString("N");
         }
 
         private static string TemplateIdFromQuestionId(string questionId)
