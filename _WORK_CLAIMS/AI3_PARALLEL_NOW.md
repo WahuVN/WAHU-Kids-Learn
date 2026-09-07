@@ -13,8 +13,9 @@ ACTIVE_PHASE=PLAYABLE_EVENT_GAME_V1
 ACTIVE_FOCUS=FIRST_FIVE_QUICK_RESCUE_UI_E2E_RELEASE
 LAST_FULLY_VERIFIED_HEAD=`1c4ce9e`
 LATEST_UI_VERIFIED_HEAD=`86332de`
+LATEST_PERSISTENCE_VERIFIED_HEAD=`4ca169c`
 LAST_VERIFIED_CHILD_UI=3725_ASSERTIONS_PASS
-LAST_VERIFIED_PERSISTENCE=8018_ASSERTIONS_PASS
+LAST_VERIFIED_PERSISTENCE=8025_ASSERTIONS_PASS
 LAST_VERIFIED_CONTENT=90_OF_90_PASS
 LAST_VERIFIED_RELEASE=`0.1.68-dev`_POST_INSTALLER_PROVENANCE_CONTENT_90_PERSISTENCE_7933_PORTABLE_E2E_INSTALLER_PASS
 EARLY_LESSON_DEEP_HEAD=`e34136d`
@@ -32,7 +33,7 @@ EARLY_LESSON_DEEP_VALIDATOR=402_OF_402_VALID
 - `468dd55` landed the visual polish; `af48f89` then bound game-art motion to the existing performance policy. Current common-head verification is `86332de`.
 - Home/Hub/lesson/rescue use richer child cards, raised action states, mission/checkpoint styling, procedural rescue hero art, feedback FX and Garden completion art without changing grading/session semantics.
 - LOW keeps decorative game art static; NORMAL respects the configured FPS cap and disables decorative feedback during learning focus; `a0344f4` makes timers follow the full parent visibility hierarchy, so hiding a container/offscreen region stops child animation and showing it resumes safely. The visual integration still preserves focusable locked missions, exact prerequisite narration, Enter/Esc actions, 900×640 and 125% DPI regressions, resume/retry/failure safety and terminal completion behavior.
-- Current common-head verification: Child UI **3725 assertions PASS**, Math persistence **8018 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, `git diff --check` PASS.
+- UI/performance verification on `86332de`: Child UI **3725 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, `git diff --check` PASS. Persistence was reverified after the later persistence-only regression on `4ca169c`: **8025 assertions PASS**.
 - Release-full evidence remains pinned to `1c4ce9e` / `0.1.68-dev` until the full Build-Setup/Installer distribution gate is rerun; do not relabel the visual-only head as a new release artifact.
 
 Đọc và tuân thủ `_WORK_CLAIMS/MATH_PLAYABLE_EVENT_GAME_V1.md`. P0 mới là đưa first-five thành flow chơi được: Home/Hub entry → intro → 3 checkpoints dùng lại MathLessonForm → behavior-aware repair/break → completion restoration/Garden → resume E2E. Dùng internal fixture/view-model trước khi AI1/AI2 land; final adapter mỏng sau. Không chờ và không đổi engine/content semantics.
