@@ -945,6 +945,11 @@ namespace WAHU.Session
 
             if (string.IsNullOrWhiteSpace(runtime.CurrentQuestionJson))
             {
+                if (string.Equals(_sessionMode, "lesson", StringComparison.Ordinal) && _generatedQuestionCount != _attempts)
+                {
+                    _generatedQuestionCount = _attempts;
+                    lessonSelectionMetadataNeedsRepair = true;
+                }
                 var hasUnexpectedSelectionPayload = !string.IsNullOrWhiteSpace(runtime.CurrentSelectionJson) &&
                     !string.Equals(_sessionMode, "lesson", StringComparison.Ordinal);
                 if (hasUnexpectedSelectionPayload || runtime.QuestionStartedAtUtc.HasValue)

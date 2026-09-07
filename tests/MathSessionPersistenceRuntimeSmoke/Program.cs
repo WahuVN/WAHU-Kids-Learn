@@ -46,6 +46,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestOperationalDatabaseFailureDoesNotQuarantineRuntime(root, schemaPath, templatePath);
                 TestRuntimePackIdentityResumePolicy(root, schemaPath, templatePath);
                 TestTargetedCorruptOpenQuestionReplaysAuthoredOrdinal(root, schemaPath, templatePath, lessonCatalogPath);
+                TestTargetedGeneratedOrdinalSelfHealsWithoutOpenQuestion(root, schemaPath, templatePath, lessonCatalogPath);
                 TestExpandedTargetedPoolSelectsDurableThree(root, schemaPath, templatePath, lessonCatalogPath, questionBankPath);
                 TestTargetedSelectedSetSurvivesCommitFailure(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedConcurrentCoordinatorsCannotDuplicateOrdinal(root, schemaPath, templatePath, lessonCatalogPath);
@@ -774,6 +775,60 @@ VALUES(@id,@session,@child,' ','','blank-pack-question','LEGACY_PACK_SKILL','mat
                 var summary = resumed.Complete();
                 A(summary.LessonCompleted && summary.Attempts == 3 && summary.TargetLessonId == lesson.Id,
                     "targeted_corrupt_resume_completes_only_after_full_authored_set");
+            }
+        }
+
+        private static void TestTargetedGeneratedOrdinalSelfHealsWithoutOpenQuestion(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.Lessons.First(x =>
+                (x.PrerequisiteSkills == null || x.PrerequisiteSkills.Count == 0) &&
+                x.PracticeSets != null && x.PracticeSets.Basic.Count >= 1 &&
+                x.PracticeSets.Medium.Count >= 1 && x.PracticeSets.Application.Count >= 1);
+            var database = NewDatabase(Path.Combine(root, "targeted-corrupt-generated-ordinal.db"), schemaPath);
+            string sessionId;
+            IList<string> selected;
+
+            using (var first = new MathSessionCoordinator(database, templatePath, "LOW", 8111, lesson.Id))
+            {
+                var start = first.Start("Bé targeted ordinal repair");
+                sessionId = start.SessionId;
+                selected = start.SelectedContentQuestionIds.ToList();
+                var basic = first.NextQuestion();
+                A(basic.ContentQuestionId == selected[0],
+                    "targeted_ordinal_repair_fixture_opens_selected_basic");
+                first.SubmitAnswerAt(basic.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700);
+                A(first.Summary.Attempts == 1 && !first.HasOpenQuestion,
+                    "targeted_ordinal_repair_fixture_has_one_committed_question_no_open_cache");
+                first.Suspend("targeted_ordinal_repair_fixture");
+            }
+
+            Exec(database,
+                "UPDATE math_session_runtime SET generated_question_count=3,current_question_json=NULL,question_started_at_utc=NULL WHERE session_id=@session;",
+                "@session", sessionId);
+            A(Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + sessionId +
+                "' AND generated_question_count=3 AND current_question_json IS NULL;") == 1,
+                "targeted_ordinal_repair_fixture_persists_ahead_cursor_without_open_question");
+
+            using (var resumed = new MathSessionCoordinator(database, templatePath, "NORMAL", 999999, lesson.Id))
+            {
+                var start = resumed.Start("Bé targeted ordinal repair");
+                A(start.ResumedExistingSession && start.CompletedQuestionCount == 1 && !start.RestoredOpenQuestion,
+                    "targeted_ordinal_repair_resumes_one_committed_question");
+                A(start.SelectedContentQuestionIds.SequenceEqual(selected),
+                    "targeted_ordinal_repair_preserves_selected_set");
+                A(Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + sessionId +
+                    "' AND generated_question_count=1 AND current_question_json IS NULL;") == 1,
+                    "targeted_ordinal_repair_rewrites_cursor_to_committed_ordinal");
+                var medium = resumed.NextQuestion();
+                A(medium != null && medium.ContentQuestionId == selected[1] &&
+                  lesson.PracticeSets.Medium.Contains(medium.ContentQuestionId),
+                    "targeted_ordinal_repair_serves_selected_medium_not_end_of_session");
+                resumed.Abort("targeted_ordinal_repair_cleanup");
             }
         }
 
