@@ -33,6 +33,7 @@ namespace WAHU.ChildUiRuntimeSmoke
             TestMathHubRuntimeContinue(appAssembly);
             TestResumePresentation(appAssembly);
             TestCompletionPresentation(appAssembly);
+            TestFeedbackCardReadability(appAssembly);
             TestAnswerGridLayout(appAssembly);
             TestTypedAnswerInput(appAssembly);
             TestAllAuthoredAnswerSurfaces(appAssembly);
@@ -763,6 +764,50 @@ namespace WAHU.ChildUiRuntimeSmoke
                     Invoke(form, "HandleNextButton");
                     A(form.DialogResult == DialogResult.OK,
                         "math_completion_returns_ok_to_math_hub_modal_flow");
+                }
+            }
+            finally
+            {
+                try { Directory.Delete(tempRoot, true); } catch { }
+            }
+        }
+
+        private static void TestFeedbackCardReadability(Assembly appAssembly)
+        {
+            var tempRoot = Path.Combine(Path.GetTempPath(), "wahu-child-ui-feedback-fit-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempRoot);
+            try
+            {
+                var schema = Path.Combine(Directory.GetCurrentDirectory(), "data", "schema", "001_initial.sql");
+                var database = new LearningDatabase(Path.Combine(tempRoot, "learning.db"), schema);
+                using (var form = new WAHUKidsLearn.MathLessonForm(database,
+                    new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW }))
+                {
+                    form.ClientSize = new Size(900, 640);
+                    var feedbackCard = GetField<Control>(form, "_feedbackCard");
+                    var feedback = GetField<Label>(form, "_feedback");
+                    feedbackCard.Visible = true;
+                    CreateAndLayoutTree(form);
+                    A(feedback.ClientSize.Width > 0 && feedback.ClientSize.Height > 0,
+                        "math_feedback_region_available_at_min_window");
+
+                    var sessionPath = Path.Combine(Path.GetDirectoryName(appAssembly.Location), "WAHU.Session.dll");
+                    var sessionAssembly = Assembly.LoadFrom(sessionPath);
+                    var coordinatorType = sessionAssembly.GetType("WAHU.Session.MathSessionCoordinator", true);
+                    var retryMethod = coordinatorType.GetMethod("BuildRetryFeedback", BindingFlags.Static | BindingFlags.NonPublic);
+                    A(retryMethod != null, "math_feedback_retry_builder_available");
+                    var error = new MathErrorClassification { ErrorType = "ESTIMATION_ERROR" };
+                    var retryFeedback = (string)retryMethod.Invoke(null, new object[] { error });
+                    feedback.Text = retryFeedback;
+                    var measured = TextRenderer.MeasureText(
+                        retryFeedback,
+                        feedback.Font,
+                        new Size(Math.Max(120, feedback.ClientSize.Width - feedback.Padding.Horizontal), 4096),
+                        TextFormatFlags.WordBreak);
+                    A(measured.Height <= feedback.ClientSize.Height,
+                        "math_feedback_long_retry_fits_min_window");
+                    A(retryFeedback.IndexOf("ước lượng", StringComparison.OrdinalIgnoreCase) >= 0 && retryFeedback.Length >= 120,
+                        "math_feedback_fit_uses_real_long_engine_retry_copy");
                 }
             }
             finally

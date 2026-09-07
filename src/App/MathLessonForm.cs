@@ -302,8 +302,8 @@ namespace WAHUKidsLearn
             _feedbackCard = new ChildCard
             {
                 Dock = DockStyle.Fill,
-                Margin = new Padding(120, 7, 120, 8),
-                Padding = new Padding(18, 10, 18, 10),
+                Margin = new Padding(120, 3, 120, 3),
+                Padding = new Padding(18, 6, 18, 6),
                 CardColor = Color.FromArgb(245, 244, 236),
                 BorderColor = Color.FromArgb(229, 227, 217),
                 Radius = 18,
