@@ -49,6 +49,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestFirstFiveHintedSuccessMatrix(root, schemaPath, templatePath, lessonCatalogPath);
                 TestFirstLessonAllSixVariantsWithRetryResume(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedCompletionSurvivesNextLessonReadFailure(root, schemaPath, templatePath, lessonCatalogPath);
+                TestTargetedCompletionProgressFaultRollsBackAndRetriesExactlyOnce(root, schemaPath, templatePath, lessonCatalogPath);
                 TestCorruptRuntimeMetadataIsQuarantined(root, schemaPath, templatePath);
                 TestCorruptOpenQuestionTimestampSelfHealsExactOrdinal(root, schemaPath, templatePath, lessonCatalogPath);
                 TestAdaptiveCorruptOpenQuestionTimestampSelfHealsExactOrdinal(root, schemaPath, templatePath);
@@ -3052,6 +3053,61 @@ BEGIN SELECT RAISE(ABORT,'game event injected mastery failure'); END;");
                 "postcommit_failure_keeps_lesson_progress_exactly_once");
             A(Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + sessionId + "';") == 0,
                 "postcommit_failure_still_cleans_runtime_checkpoint");
+        }
+
+        private static void TestTargetedCompletionProgressFaultRollsBackAndRetriesExactlyOnce(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.Lessons.First(x => x.PrerequisiteSkills == null || x.PrerequisiteSkills.Count == 0);
+            var database = NewDatabase(Path.Combine(root, "targeted-completion-progress-fault.db"), schemaPath);
+            string sessionId;
+            string childId;
+
+            using (var coordinator = new MathSessionCoordinator(database, templatePath, "LOW", 8061, lesson.Id))
+            {
+                var started = coordinator.Start("Bé completion progress fault");
+                sessionId = started.SessionId;
+                childId = started.ChildId;
+                for (var ordinal = 0; ordinal < 3; ordinal++)
+                {
+                    var question = coordinator.NextQuestion();
+                    coordinator.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700 + ordinal * 100);
+                }
+                A(coordinator.Summary.Attempts == 3 && coordinator.NextQuestion() == null &&
+                  Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + sessionId + "';") == 3,
+                    "completion_progress_fault_fixture_has_three_durable_questions_before_complete");
+
+                Exec(database, @"CREATE TRIGGER smoke_fail_math_lesson_complete
+BEFORE UPDATE OF completed_count ON math_lesson_progress
+WHEN NEW.completed_count > OLD.completed_count
+BEGIN SELECT RAISE(ABORT,'injected lesson completion progress failure'); END;");
+                var failed = false;
+                try { coordinator.Complete(); }
+                catch (Exception) { failed = true; }
+                A(failed && coordinator.IsActive && SessionState(database, sessionId) == "active" &&
+                  Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + childId +
+                  "' AND lesson_id='" + lesson.Id + "' AND started_count=1 AND completed_count=0;") == 1,
+                    "completion_progress_fault_rolls_back_session_and_lesson_completion_atomically");
+                A(Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + sessionId + "';") == 0 &&
+                  Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + sessionId + "';") == 1 &&
+                  Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + sessionId + "';") == 3,
+                    "completion_progress_fault_keeps_durable_learning_resumable_without_reward");
+
+                Exec(database, "DROP TRIGGER smoke_fail_math_lesson_complete;");
+                var completed = coordinator.Complete();
+                A(completed.LessonCompleted && !coordinator.IsActive && SessionState(database, sessionId) == "completed" &&
+                  Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + childId +
+                  "' AND lesson_id='" + lesson.Id + "' AND started_count=1 AND completed_count=1;") == 1,
+                    "completion_progress_fault_retry_commits_terminal_state_exactly_once");
+                A(Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + sessionId + "';") == 1 &&
+                  Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + sessionId + "';") == 3 &&
+                  Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + sessionId + "';") == 3,
+                    "completion_progress_fault_retry_keeps_learning_and_reward_exactly_once");
+            }
         }
 
         private static void TestCorruptRuntimeMetadataIsQuarantined(string root, string schemaPath, string templatePath)
