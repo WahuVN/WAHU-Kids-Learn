@@ -24,6 +24,28 @@ def slug(skill: str) -> str:
     return skill.lower()
 
 
+def table_family_objectives(skill: str) -> list[str] | None:
+    """Keep sibling 2/5 table lessons pedagogically distinct instead of swapping only a digit."""
+    return {
+        "TIMES_TABLE_2": [
+            "Vận dụng nhân 2 (bảng nhân hai) để tìm tích bằng cách đếm thêm theo từng cặp hai.",
+            "Vận dụng nhân 2 trong tình huống nhóm đôi và kiểm tra tích bằng cách cộng thêm theo từng cặp hai.",
+        ],
+        "TIMES_TABLE_5": [
+            "Vận dụng nhân 5 (bảng nhân năm) để tìm tích bằng cách đếm thêm theo từng nhóm năm.",
+            "Vận dụng nhân 5 trong tình huống nhóm năm và kiểm tra tích theo nhịp tăng của bảng nhân năm.",
+        ],
+        "DIVIDE_TABLE_2": [
+            "Vận dụng chia 2 (bảng chia hai) để tìm thương bằng cách tách thành các cặp hai hoặc dùng phép nhân ngược.",
+            "Vận dụng chia 2 trong tình huống chia đều thành cặp và kiểm tra thương bằng bảng nhân hai.",
+        ],
+        "DIVIDE_TABLE_5": [
+            "Vận dụng chia 5 (bảng chia năm) để tìm thương bằng cách tách thành các nhóm năm hoặc dùng phép nhân ngược.",
+            "Vận dụng chia 5 trong tình huống chia đều thành nhóm năm và kiểm tra thương bằng bảng nhân năm.",
+        ],
+    }.get(skill)
+
+
 def first_objective(question_types: list[str], concept_name: str) -> str:
     """Describe the first concrete learning outcome instead of repeating the lesson title."""
     concept = concept_name.strip().lower()
@@ -1839,6 +1861,10 @@ def build() -> tuple[dict, dict]:
             if not isinstance(example["solution_steps_vi"], list) or len(example["solution_steps_vi"]) < 2 or not all(isinstance(x, str) and x.strip() for x in example["solution_steps_vi"]):
                 raise SystemExit(f"Worked example needs at least two solution steps for {skill}")
             lesson_question_types = [question["question_type"] for question in questions[-6:]]
+            lesson_objectives = table_family_objectives(skill) or [
+                first_objective(lesson_question_types, concept_name),
+                second_objective(lesson_question_types, concept_name),
+            ]
             lessons.append({
                 "id": lesson_id,
                 "chapter_id": chapter_id,
@@ -1846,10 +1872,7 @@ def build() -> tuple[dict, dict]:
                 "skill_id": skill,
                 "order_in_domain": order,
                 "title_vi": title,
-                "objectives_vi": [
-                    first_objective(lesson_question_types, concept_name),
-                    second_objective(lesson_question_types, concept_name),
-                ],
+                "objectives_vi": lesson_objectives,
                 "explanation_vi": explanation,
                 "concepts": [{
                     "id": f"m2_cp_{slug(skill)}_01",

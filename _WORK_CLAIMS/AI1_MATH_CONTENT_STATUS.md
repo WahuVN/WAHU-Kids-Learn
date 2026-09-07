@@ -149,7 +149,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - **24 câu cộng/trừ viết** khớp chính xác số lượt nhớ/mượn theo skill contract;
 - **166 phương trình số instructional** đang được kiểm bằng arithmetic parser, hiện **0 sai**; detector có regression cho cả phép cộng chuỗi và phép chia dùng dấu `:`.
 
-Latest runtime result: **49/49 PASS**; pool-6 regression **8/8 PASS**; full `MathContentDataSmoke` **60/60 PASS**; clean rebuild real 402-bank persistence/session smoke **289 assertions PASS**.
+Latest runtime result: **49/49 PASS**; pool-6 regression **8/8 PASS**; full `MathContentDataSmoke` **61/61 PASS**; clean rebuild real 402-bank persistence/session smoke **289 assertions PASS**.
 
 ## Commits / waves
 
@@ -213,13 +213,22 @@ Latest runtime result: **49/49 PASS**; pool-6 regression **8/8 PASS**; full `Mat
 - Kết quả: **60/60 content tests PASS**, validator 0 errors, không hint nào leak unseen answer.
 - Question-bank SHA mới: `A3F6FAFA1293699AD656F5AB25B61E347B85EF1C4597F499C2A9F808375C6CDB`.
 
+## P1 quality wave — distinct table 2/5 lesson objectives
+
+- Audit normalize-number phát hiện đúng **4 cặp objective** của bảng nhân/chia 2 và 5 chỉ khác chữ số.
+- Authoring nay dùng objective riêng theo skill: nhân hai nhấn cặp hai; nhân năm nhấn nhóm/bước năm; chia hai/năm nhấn tách nhóm và phép nhân ngược tương ứng.
+- Normalized objective duplicate groups toàn 67 lesson giảm **4 → 0**.
+- Validator thêm fail-closed `table_family_objective_template_duplicate`; content smoke khóa cả 8 objective surfaces của 4 lesson.
+- Kết quả: **61/61 content tests PASS**, validator 0 errors.
+- Lesson-catalog SHA mới: `82204B665BE8BA8D2CDB2205098E37AE3CFA5D90D51D0F63DD4DD42805A33F9D`; question bank giữ `A3F6FAFA1293699AD656F5AB25B61E347B85EF1C4597F499C2A9F808375C6CDB`.
+
 ## Pool-6 runtime publish — COMPLETE
 
 - 201 expansion questions `_04/_05/_06` đã được promote vào production; runtime bank hiện **402 questions**.
 - 67 lesson × 6 câu; mỗi lesson đúng **2 basic + 2 medium + 2 application**; IDs `_01..06` contiguous.
 - Production semantic validator: **402/402 valid, 0 errors**; pool-6 wrapper báo `draft_fallback_rationales=0`.
-- Full content tests hiện **60/60 PASS** sau ba P1 regressions (explanation uniqueness + application variant diversity + table 2/5 hint strategy); clean rebuild `MathSessionPersistenceRuntimeSmoke`: **289 assertions PASS** trên real bank.
-- Deterministic regenerate giữ nguyên SHA catalog `98AC39F0...8961E` và bank `A3F6FAFA...C6CDB`.
+- Full content tests hiện **61/61 PASS** sau bốn P1 regressions (explanation uniqueness + application variant diversity + table 2/5 hint strategy + table 2/5 objective strategy); clean rebuild `MathSessionPersistenceRuntimeSmoke`: **289 assertions PASS** trên real bank.
+- Deterministic regenerate hiện giữ SHA catalog `82204B66...3F9D` và bank `A3F6FAFA...C6CDB`.
 - Manifest `1.9.0`: **PASS**, 3/3 listed files khớp SHA256 và không thiếu/thừa file pack.
 - Request 009 content handoff `05cdb2a` đã được tiêu thụ; AI1 không còn breadth/replay content blocker.
 

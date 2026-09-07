@@ -1448,6 +1448,25 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
         if lesson.get("status") != "CHILD_READY":
             errors.append(f"lesson_not_child_ready:{where}")
 
+    # Sibling 2/5 table lessons need distinct objectives, not one template with a digit swapped.
+    for left_skill, right_skill in (("TIMES_TABLE_2", "TIMES_TABLE_5"), ("DIVIDE_TABLE_2", "DIVIDE_TABLE_5")):
+        left_lesson = lesson_by_skill.get(left_skill)
+        right_lesson = lesson_by_skill.get(right_skill)
+        if not isinstance(left_lesson, dict) or not isinstance(right_lesson, dict):
+            continue
+        left_objectives = left_lesson.get("objectives_vi")
+        right_objectives = right_lesson.get("objectives_vi")
+        if not isinstance(left_objectives, list) or not isinstance(right_objectives, list):
+            continue
+        for index in range(min(2, len(left_objectives), len(right_objectives))):
+            left_objective = left_objectives[index]
+            right_objective = right_objectives[index]
+            if not isinstance(left_objective, str) or not isinstance(right_objective, str):
+                continue
+            if normalize_prompt(left_objective) == normalize_prompt(right_objective):
+                errors.append(
+                    f"table_family_objective_template_duplicate:{left_skill}:{right_skill}:objective{index + 1}")
+
     for tid in sorted(topic_ids):
         if topic_lesson_counts[tid] < 1:
             errors.append(f"empty_topic:{tid}")

@@ -1384,8 +1384,8 @@
       "order_in_domain": 5,
       "title_vi": "Bảng nhân 2",
       "objectives_vi": [
-        "Vận dụng kiến thức về nhân 2 để tìm kết quả đúng trong bài tập cơ bản.",
-        "Vận dụng nhân 2 với dữ kiện mới, nêu cách tìm kết quả và tự kiểm tra bằng quy tắc đã học."
+        "Vận dụng nhân 2 (bảng nhân hai) để tìm tích bằng cách đếm thêm theo từng cặp hai.",
+        "Vận dụng nhân 2 trong tình huống nhóm đôi và kiểm tra tích bằng cách cộng thêm theo từng cặp hai."
       ],
       "explanation_vi": "Mỗi bước của bảng nhân 2 tăng thêm 2. Có thể hiểu 2 × n là n nhóm, mỗi nhóm 2 hoặc cộng số 2 n lần.",
       "concepts": [
@@ -1438,8 +1438,8 @@
       "order_in_domain": 6,
       "title_vi": "Bảng nhân 5",
       "objectives_vi": [
-        "Vận dụng kiến thức về nhân 5 để tìm kết quả đúng trong bài tập cơ bản.",
-        "Vận dụng nhân 5 với dữ kiện mới, nêu cách tìm kết quả và tự kiểm tra bằng quy tắc đã học."
+        "Vận dụng nhân 5 (bảng nhân năm) để tìm tích bằng cách đếm thêm theo từng nhóm năm.",
+        "Vận dụng nhân 5 trong tình huống nhóm năm và kiểm tra tích theo nhịp tăng của bảng nhân năm."
       ],
       "explanation_vi": "Mỗi bước của bảng nhân 5 tăng thêm 5. Các tích của 5 có chữ số tận cùng là 0 hoặc 5 trong phạm vi bảng học.",
       "concepts": [
@@ -1492,8 +1492,8 @@
       "order_in_domain": 7,
       "title_vi": "Bảng chia 2",
       "objectives_vi": [
-        "Vận dụng kiến thức về chia 2 để tìm kết quả đúng trong bài tập cơ bản.",
-        "Vận dụng chia 2 với dữ kiện mới, nêu cách tìm kết quả và tự kiểm tra bằng quy tắc đã học."
+        "Vận dụng chia 2 (bảng chia hai) để tìm thương bằng cách tách thành các cặp hai hoặc dùng phép nhân ngược.",
+        "Vận dụng chia 2 trong tình huống chia đều thành cặp và kiểm tra thương bằng bảng nhân hai."
       ],
       "explanation_vi": "Bảng chia 2 là phép tính ngược của bảng nhân 2. Nếu 2 × n = a thì a : 2 = n.",
       "concepts": [
@@ -1547,8 +1547,8 @@
       "order_in_domain": 8,
       "title_vi": "Bảng chia 5",
       "objectives_vi": [
-        "Vận dụng kiến thức về chia 5 để tìm kết quả đúng trong bài tập cơ bản.",
-        "Vận dụng chia 5 với dữ kiện mới, nêu cách tìm kết quả và tự kiểm tra bằng quy tắc đã học."
+        "Vận dụng chia 5 (bảng chia năm) để tìm thương bằng cách tách thành các nhóm năm hoặc dùng phép nhân ngược.",
+        "Vận dụng chia 5 trong tình huống chia đều thành nhóm năm và kiểm tra thương bằng bảng nhân năm."
       ],
       "explanation_vi": "Bảng chia 5 là phép tính ngược của bảng nhân 5. Nếu 5 × n = a thì a : 5 = n.",
       "concepts": [

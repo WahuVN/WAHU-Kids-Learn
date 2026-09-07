@@ -108,6 +108,23 @@ class MathContentDataSmoke(unittest.TestCase):
                 self.assertIn(concept_name, lesson["objectives_vi"][0].lower())
                 self.assertIn(concept_name, lesson["objectives_vi"][1].lower())
 
+    def test_table_2_and_5_objectives_use_distinct_strategies(self):
+        by_skill = {lesson["skill_id"]: lesson for lesson in self.lessons}
+        expectations = {
+            "TIMES_TABLE_2": "hai",
+            "TIMES_TABLE_5": "năm",
+            "DIVIDE_TABLE_2": "hai",
+            "DIVIDE_TABLE_5": "năm",
+        }
+        for skill, word in expectations.items():
+            objectives = by_skill[skill]["objectives_vi"]
+            self.assertEqual(2, len(objectives))
+            self.assertTrue(all(word in objective.casefold() for objective in objectives))
+
+        for left, right in (("TIMES_TABLE_2", "TIMES_TABLE_5"), ("DIVIDE_TABLE_2", "DIVIDE_TABLE_5")):
+            for left_objective, right_objective in zip(by_skill[left]["objectives_vi"], by_skill[right]["objectives_vi"]):
+                self.assertNotEqual(validator.normalize_prompt(left_objective), validator.normalize_prompt(right_objective))
+
     def test_every_lesson_has_basic_medium_application(self):
         for lesson in self.lessons:
             with self.subTest(lesson=lesson["id"]):
