@@ -252,10 +252,10 @@ namespace WAHUKidsLearn
 
             var titleRect = new Rectangle(rect.Left + 29, rect.Top + 11, Math.Max(60, rect.Width - 42), 32);
             var stateRect = new Rectangle(rect.Left + 29, rect.Top + 42, Math.Max(60, rect.Width - 42), Math.Max(22, rect.Height - 48));
-            TextRenderer.DrawText(e.Graphics, TitleText ?? Text, ChildVisualTheme.Font(10.2f, FontStyle.Bold), titleRect,
+            ChildVisualTheme.DrawTextWithOwnedFont(e.Graphics, TitleText ?? Text, ChildVisualTheme.Font(10.2f, FontStyle.Bold), titleRect,
                 _locked ? ChildVisualTheme.MutedInk : ChildVisualTheme.Ink,
                 TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
-            TextRenderer.DrawText(e.Graphics, StateText ?? string.Empty, ChildVisualTheme.Font(8.6f), stateRect,
+            ChildVisualTheme.DrawTextWithOwnedFont(e.Graphics, StateText ?? string.Empty, ChildVisualTheme.Font(8.6f), stateRect,
                 _locked ? Color.FromArgb(132, 137, 132) : ChildVisualTheme.MutedInk,
                 TextFormatFlags.Left | TextFormatFlags.Top | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
 
@@ -296,14 +296,14 @@ namespace WAHUKidsLearn
 
             var bubble = new Rectangle(14, 14, 34, 34);
             using (var brush = new SolidBrush(AccentColor)) e.Graphics.FillEllipse(brush, bubble);
-            TextRenderer.DrawText(e.Graphics, Math.Max(1, StepNumber).ToString(), ChildVisualTheme.Font(10f, FontStyle.Bold), bubble,
+            ChildVisualTheme.DrawTextWithOwnedFont(e.Graphics, Math.Max(1, StepNumber).ToString(), ChildVisualTheme.Font(10f, FontStyle.Bold), bubble,
                 Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
 
             var titleRect = new Rectangle(60, 9, Math.Max(80, Width - 72), 27);
             var subRect = new Rectangle(60, 35, Math.Max(80, Width - 72), 20);
-            TextRenderer.DrawText(e.Graphics, StepTitle ?? string.Empty, ChildVisualTheme.Font(10.2f, FontStyle.Bold), titleRect,
+            ChildVisualTheme.DrawTextWithOwnedFont(e.Graphics, StepTitle ?? string.Empty, ChildVisualTheme.Font(10.2f, FontStyle.Bold), titleRect,
                 ChildVisualTheme.Ink, TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
-            TextRenderer.DrawText(e.Graphics, "1 câu • không giới hạn thời gian", ChildVisualTheme.Font(8.5f), subRect,
+            ChildVisualTheme.DrawTextWithOwnedFont(e.Graphics, "1 câu • không giới hạn thời gian", ChildVisualTheme.Font(8.5f), subRect,
                 ChildVisualTheme.MutedInk, TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
         }
     }

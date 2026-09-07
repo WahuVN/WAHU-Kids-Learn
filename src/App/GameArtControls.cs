@@ -89,7 +89,7 @@ namespace WAHUKidsLearn
                 using (var glow = new SolidBrush(Color.FromArgb((int)(45 + 45 * pulse), colors[i])))
                     g.FillEllipse(glow, xs[i] - rr - 5, y - rr - 5, (rr + 5) * 2, (rr + 5) * 2);
                 using (var b = new SolidBrush(colors[i])) g.FillEllipse(b, xs[i] - rr, y - rr, rr * 2, rr * 2);
-                TextRenderer.DrawText(g, (i + 1).ToString(), ChildVisualTheme.Font(9f, FontStyle.Bold),
+                ChildVisualTheme.DrawTextWithOwnedFont(g, (i + 1).ToString(), ChildVisualTheme.Font(9f, FontStyle.Bold),
                     Rectangle.Round(new RectangleF(xs[i] - rr, y - rr, rr * 2, rr * 2)), Color.White,
                     TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
             }

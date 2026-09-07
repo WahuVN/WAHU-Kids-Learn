@@ -186,7 +186,7 @@ namespace WAHUKidsLearn
             }
 
             var status = BuildStatusText();
-            TextRenderer.DrawText(g, status, ChildVisualTheme.Font(10f, FontStyle.Bold),
+            ChildVisualTheme.DrawTextWithOwnedFont(g, status, ChildVisualTheme.Font(10f, FontStyle.Bold),
                 new Rectangle(18, 8, Math.Max(20, Width - 36), 26), ChildVisualTheme.Ink,
                 TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
 
@@ -213,7 +213,7 @@ namespace WAHUKidsLearn
                     g.DrawLine(tick, x, ruler.Top, x, ruler.Top + (major ? 18 : 11));
                 if (labelEveryMark || major)
                 {
-                    TextRenderer.DrawText(g, mark.ToString(CultureInfo.InvariantCulture), ChildVisualTheme.Font(7.5f),
+                    ChildVisualTheme.DrawTextWithOwnedFont(g, mark.ToString(CultureInfo.InvariantCulture), ChildVisualTheme.Font(7.5f),
                         new Rectangle(x - 15, ruler.Top + 17, 30, 16), ChildVisualTheme.MutedInk,
                         TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
                 }
@@ -242,7 +242,7 @@ namespace WAHUKidsLearn
             var hint = BuildHintText();
             if (!string.IsNullOrWhiteSpace(hint))
             {
-                TextRenderer.DrawText(g, hint, ChildVisualTheme.Font(8.7f, FontStyle.Bold),
+                ChildVisualTheme.DrawTextWithOwnedFont(g, hint, ChildVisualTheme.Font(8.7f, FontStyle.Bold),
                     new Rectangle(18, Math.Max(ruler.Bottom + 5, Height - 30), Math.Max(20, Width - 36), 24),
                     _hintLevel >= 2 ? ChildVisualTheme.PeachStrong : ChildVisualTheme.MutedInk,
                     TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
@@ -299,7 +299,7 @@ namespace WAHUKidsLearn
             var x = XForMark(mark.Value, ruler);
             var y = ruler.Top - 9;
             using (var dot = new SolidBrush(color)) g.FillEllipse(dot, x - 6, y - 6, 12, 12);
-            TextRenderer.DrawText(g, label, ChildVisualTheme.Font(8.8f, FontStyle.Bold),
+            ChildVisualTheme.DrawTextWithOwnedFont(g, label, ChildVisualTheme.Font(8.8f, FontStyle.Bold),
                 new Rectangle(x - 16, y - 26, 32, 18), color,
                 TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
         }
