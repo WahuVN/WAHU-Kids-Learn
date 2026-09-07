@@ -961,7 +961,8 @@ namespace WAHU.Session
 
         private MathSessionRuntimeSnapshot LoadLatestResumableRecoveringCorrupt(ref int recoveredCount)
         {
-            for (var pass = 0; pass < 4; pass++)
+            var reconciledSessionIds = new HashSet<string>(StringComparer.Ordinal);
+            while (true)
             {
                 try
                 {
@@ -972,15 +973,17 @@ namespace WAHU.Session
                         string.Equals(runtime.PackVersion, PackVersion, StringComparison.Ordinal))
                         return runtime;
 
+                    if (!reconciledSessionIds.Add(runtime.SessionId))
+                        throw new InvalidOperationException("Không thể hòa giải phiên Toán đang lưu với phiên bản nội dung hiện tại.");
                     if (_runtime.RecoverIncompatiblePackSession(_profile.ChildId, runtime.SessionId)) recoveredCount++;
                 }
                 catch (MathSessionRuntimeCorruptException ex)
                 {
+                    if (string.IsNullOrWhiteSpace(ex.SessionId) || !reconciledSessionIds.Add(ex.SessionId))
+                        throw new InvalidOperationException("Không thể hòa giải phiên Toán đang lưu với phiên bản nội dung hiện tại.", ex);
                     if (_runtime.RecoverCorruptRuntimeSession(_profile.ChildId, ex.SessionId)) recoveredCount++;
                 }
             }
-
-            throw new InvalidOperationException("Không thể hòa giải phiên Toán đang lưu với phiên bản nội dung hiện tại.");
         }
 
         private void RestoreSession(

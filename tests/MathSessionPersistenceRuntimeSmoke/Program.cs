@@ -51,6 +51,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestTargetedCompletionSurvivesNextLessonReadFailure(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedCompletionProgressFaultRollsBackAndRetriesExactlyOnce(root, schemaPath, templatePath, lessonCatalogPath);
                 TestCorruptRuntimeMetadataIsQuarantined(root, schemaPath, templatePath);
+                TestMoreThanFourInvalidRuntimeSessionsAllRecover(root, schemaPath, templatePath);
                 TestCorruptOpenQuestionTimestampSelfHealsExactOrdinal(root, schemaPath, templatePath, lessonCatalogPath);
                 TestAdaptiveCorruptOpenQuestionTimestampSelfHealsExactOrdinal(root, schemaPath, templatePath);
                 TestCorruptSessionStartedTimestampIsQuarantined(root, schemaPath, templatePath);
@@ -3409,6 +3410,66 @@ BEGIN SELECT RAISE(ABORT,'injected lesson completion progress failure'); END;");
                 A(Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + started.SessionId + "';") == 1,
                     "corrupt_runtime_quarantine_replacement_session_is_durably_resumable");
                 replacement.Abort("corrupt_runtime_metadata_cleanup");
+            }
+        }
+
+        private static void TestMoreThanFourInvalidRuntimeSessionsAllRecover(
+            string root,
+            string schemaPath,
+            string templatePath)
+        {
+            var database = NewDatabase(Path.Combine(root, "many-invalid-runtime-sessions.db"), schemaPath);
+            var profile = new LearnerSessionService(database).EnsurePrimaryChild("Bé many invalid runtime");
+            var invalidIds = new List<string>();
+            for (var ordinal = 0; ordinal < 5; ordinal++)
+            {
+                var sessionId = "session-many-corrupt-" + ordinal.ToString(CultureInfo.InvariantCulture);
+                invalidIds.Add(sessionId);
+                var utc = DateTime.UtcNow.AddMinutes(-20 + ordinal).ToString("o", CultureInfo.InvariantCulture);
+                Exec(database, @"INSERT INTO session(id,child_id,started_at_utc,state,planned_subject,performance_profile)
+VALUES(@session,@child,@utc,'active','math','LOW');
+INSERT INTO math_session_runtime(session_id,seed,target_question_count,generated_question_count,session_mode,target_lesson_id,updated_at_utc)
+VALUES(@session,@seed,2,0,'adaptive',NULL,@broken);",
+                    "@session", sessionId,
+                    "@child", profile.ChildId,
+                    "@utc", utc,
+                    "@seed", 9000 + ordinal,
+                    "@broken", "not-a-date-" + ordinal.ToString(CultureInfo.InvariantCulture));
+            }
+            for (var ordinal = 0; ordinal < 2; ordinal++)
+            {
+                var sessionId = "session-many-pack-mismatch-" + ordinal.ToString(CultureInfo.InvariantCulture);
+                invalidIds.Add(sessionId);
+                var utc = DateTime.UtcNow.AddMinutes(-5 + ordinal).ToString("o", CultureInfo.InvariantCulture);
+                Exec(database, @"INSERT INTO session(id,child_id,started_at_utc,state,planned_subject,performance_profile)
+VALUES(@session,@child,@utc,'active','math','LOW');
+INSERT INTO math_session_runtime(session_id,seed,target_question_count,generated_question_count,session_mode,target_lesson_id,pack_id,pack_version,updated_at_utc)
+VALUES(@session,@seed,2,0,'adaptive',NULL,'legacy-pack','0.9',@utc);",
+                    "@session", sessionId,
+                    "@child", profile.ChildId,
+                    "@utc", utc,
+                    "@seed", 9100 + ordinal);
+            }
+            A(Count(database, "SELECT count(*) FROM session WHERE child_id='" + profile.ChildId + "' AND state='active';") == 7 &&
+              Count(database, "SELECT count(*) FROM math_session_runtime WHERE updated_at_utc LIKE 'not-a-date-%';") == 5 &&
+              Count(database, "SELECT count(*) FROM math_session_runtime WHERE pack_id='legacy-pack' AND pack_version='0.9';") == 2,
+                "many_invalid_runtime_fixture_has_corrupt_and_pack_mismatch_checkpoints");
+
+            using (var coordinator = new MathSessionCoordinator(database, templatePath, "LOW", 9099, 2))
+            {
+                var started = coordinator.Start("Bé many invalid runtime");
+                A(!started.ResumedExistingSession && started.RecoveredDanglingSessions == 7 &&
+                  !invalidIds.Contains(started.SessionId),
+                    "many_invalid_runtime_start_recovers_all_before_fresh_session");
+                A(Count(database, "SELECT count(*) FROM session WHERE id IN ('" + string.Join("','", invalidIds) +
+                  "') AND state='recovered' AND ended_at_utc IS NOT NULL;") == 7 &&
+                  Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id IN ('" + string.Join("','", invalidIds) + "');") == 0,
+                    "many_invalid_runtime_recovery_quarantines_every_old_session_and_checkpoint");
+                A(Count(database, "SELECT count(*) FROM session WHERE child_id='" + profile.ChildId +
+                  "' AND state='active' AND ended_at_utc IS NULL;") == 1 &&
+                  Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + started.SessionId + "';") == 1,
+                    "many_invalid_runtime_recovery_leaves_one_fresh_resumable_session");
+                coordinator.Abort("many_invalid_runtime_cleanup");
             }
         }
 
