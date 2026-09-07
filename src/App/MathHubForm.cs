@@ -33,6 +33,7 @@ namespace WAHUKidsLearn
         private ChildActionButton _continueLessonButton;
         private ChildActionButton _missionButton;
         private MathLessonDescriptor _continueLesson;
+        private bool _continueResumesSession;
 
         public MathHubForm(LearningDatabase database, RuntimePerformanceSettings performance)
             : this(database, performance, ResolveCatalogPath())
@@ -94,6 +95,7 @@ namespace WAHUKidsLearn
                 _detailFlow.Controls.Clear();
                 _detailFlow.Visible = false;
                 _continueLesson = null;
+                _continueResumesSession = false;
                 if (_continueLessonButton != null)
                 {
                     _continueLessonButton.Text = "Chưa có bài đang học";
@@ -655,10 +657,15 @@ namespace WAHUKidsLearn
         private MathLessonDescriptor FindContinueLesson()
         {
             if (_catalog == null || _catalog.Lessons == null) return null;
+            _continueResumesSession = false;
 
             bool hasResumableMathSession;
             var resumableLesson = FindResumableTargetLesson(out hasResumableMathSession);
-            if (resumableLesson != null) return resumableLesson;
+            if (resumableLesson != null)
+            {
+                _continueResumesSession = true;
+                return resumableLesson;
+            }
             if (hasResumableMathSession) return null;
 
             if (_skills == null || _skills.Count == 0) return null;
@@ -713,19 +720,36 @@ namespace WAHUKidsLearn
             if (_continueLesson == null)
             {
                 _continueLessonButton.Text = "Chưa có bài đang học";
+                _continueLessonButton.AccessibleName = "Chưa có bài Toán đang học";
                 _continueLessonButton.Enabled = false;
                 _continueLessonButton.AccessibleDescription = "Chưa có bài học đang học dở để tiếp tục.";
                 return;
             }
-            _continueLessonButton.Text = "Tiếp tục bài đang học";
             _continueLessonButton.Enabled = true;
-            _continueLessonButton.AccessibleDescription = "Mở lại bài " + _continueLesson.TitleVi + ".";
+            if (_continueResumesSession)
+            {
+                _continueLessonButton.Text = "Tiếp tục bài đang học";
+                _continueLessonButton.AccessibleName = "Tiếp tục phiên bài Toán đang học";
+                _continueLessonButton.AccessibleDescription = "Tiếp tục đúng phiên bài " + _continueLesson.TitleVi + " đang học dở.";
+            }
+            else
+            {
+                _continueLessonButton.Text = "Học tiếp bài gần đây";
+                _continueLessonButton.AccessibleName = "Học tiếp bài Toán gần đây";
+                _continueLessonButton.AccessibleDescription = "Mở lại bài " + _continueLesson.TitleVi + " để xem và luyện tiếp.";
+            }
         }
 
         private void ContinueCurrentLesson()
         {
             if (_continueLesson == null) return;
-            SelectLessonInCatalog(_continueLesson);
+            var lesson = _continueLesson;
+            if (_continueResumesSession)
+            {
+                OpenLessonPractice(lesson);
+                return;
+            }
+            SelectLessonInCatalog(lesson);
         }
 
         private void SelectLessonInCatalog(MathLessonDescriptor lesson)

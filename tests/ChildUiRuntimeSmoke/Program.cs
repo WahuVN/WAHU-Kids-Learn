@@ -30,6 +30,7 @@ namespace WAHU.ChildUiRuntimeSmoke
             TestCompanionAndCompletion(appAssembly);
             TestRoadmap(appAssembly);
             TestMathCatalogAndHub(appAssembly);
+            TestMathHubRuntimeContinue(appAssembly);
             TestResumePresentation(appAssembly);
             TestCompletionPresentation(appAssembly);
             TestAnswerGridLayout(appAssembly);
@@ -350,7 +351,9 @@ namespace WAHU.ChildUiRuntimeSmoke
                     Invoke(form, "PopulateChapters");
                     Invoke(form, "RefreshContinueLessonState");
                     A(Get<string>(form, "ContinueLessonId") == secondLesson.Id, "math_hub_continue_selects_recent_active_lesson");
+                    A(!GetField<bool>(form, "_continueResumesSession"), "math_hub_recent_progress_is_not_active_runtime");
                     A(continueButton.Enabled, "math_hub_continue_enabled_with_progress");
+                    A(continueButton.Text == "Học tiếp bài gần đây", "math_hub_recent_progress_uses_recent_lesson_copy");
                     A(continueButton.AccessibleDescription.IndexOf(secondLesson.TitleVi, StringComparison.OrdinalIgnoreCase) >= 0,
                         "math_hub_continue_names_target_lesson");
                     A(chapterFlow.Controls[0].Text.IndexOf("1 đã học", StringComparison.OrdinalIgnoreCase) >= 0,
@@ -380,6 +383,105 @@ namespace WAHU.ChildUiRuntimeSmoke
                     A(GetField<Button>(missing, "_missionButton").Enabled,
                         "math_hub_missing_catalog_keeps_adaptive_mission_available");
                 }
+            }
+            finally
+            {
+                try { Directory.Delete(tempRoot, true); } catch { }
+            }
+        }
+
+        private static void TestMathHubRuntimeContinue(Assembly appAssembly)
+        {
+            var repo = Directory.GetCurrentDirectory();
+            var catalogPath = Path.Combine(repo, "content_packs", "math_grade2_v1", "lesson_catalog_v1.json");
+            var catalog = new MathLessonCatalogSource().Load(catalogPath);
+            var lesson = catalog.FindLesson("m2_ls_num_count_read_write_0_1000");
+            A(lesson != null, "math_hub_runtime_continue_fixture_lesson_exists");
+
+            var tempRoot = Path.Combine(Path.GetTempPath(), "wahu-child-ui-runtime-continue-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempRoot);
+            try
+            {
+                var sourceSchemaDir = Path.Combine(repo, "data", "schema");
+                var schemaDir = Path.Combine(tempRoot, "schema");
+                Directory.CreateDirectory(schemaDir);
+                foreach (var source in Directory.GetFiles(sourceSchemaDir, "*.sql"))
+                    File.Copy(source, Path.Combine(schemaDir, Path.GetFileName(source)), true);
+
+                var database = new LearningDatabase(Path.Combine(tempRoot, "learning.db"), Path.Combine(schemaDir, "001_initial.sql"));
+                var init = database.Initialize("DELETE");
+                A(init.SchemaVersion == 5 && init.Health.IsHealthy, "math_hub_runtime_continue_database_v5_ready");
+                var sessions = new LearnerSessionService(database);
+                var profile = sessions.EnsurePrimaryChild("Bé UI continue");
+                var runtime = new MathSessionRuntimeService(database);
+                var handle = runtime.TryCreateSession(profile.ChildId, "LOW", 7301, 3, "lesson", lesson.Id, lesson.SkillId);
+                A(handle != null, "math_hub_runtime_continue_targeted_session_created");
+
+                var progress = new MathLessonProgressStore(database).LoadOne(profile.ChildId, lesson.Id);
+                A(progress != null && progress.StartedCount == 1 && progress.CompletedCount == 0,
+                    "math_hub_runtime_continue_started_before_any_answer");
+                A(sessions.LoadSkillSnapshots(profile.ChildId, "math").Count == 0,
+                    "math_hub_runtime_continue_has_zero_skill_attempts");
+
+                var ctor = typeof(WAHUKidsLearn.MathHubForm).GetConstructor(
+                    BindingFlags.Instance | BindingFlags.NonPublic,
+                    null,
+                    new[] { typeof(LearningDatabase), typeof(RuntimePerformanceSettings), typeof(string) },
+                    null);
+                A(ctor != null, "math_hub_runtime_continue_constructor_available");
+
+                using (var form = (WAHUKidsLearn.MathHubForm)ctor.Invoke(new object[]
+                {
+                    database,
+                    new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW },
+                    catalogPath
+                }))
+                {
+                    Invoke(form, "LoadCatalogAndProgress");
+                    A(Get<string>(form, "ContinueLessonId") == lesson.Id,
+                        "math_hub_runtime_continue_uses_exact_target_lesson");
+                    A(GetField<bool>(form, "_continueResumesSession"),
+                        "math_hub_runtime_continue_marks_real_resume");
+                    var button = GetField<Button>(form, "_continueLessonButton");
+                    A(button.Enabled && button.Text == "Tiếp tục bài đang học",
+                        "math_hub_runtime_continue_button_enabled");
+                    A(button.AccessibleDescription.IndexOf("đúng phiên", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                        button.AccessibleDescription.IndexOf(lesson.TitleVi, StringComparison.OrdinalIgnoreCase) >= 0,
+                        "math_hub_runtime_continue_accessibility_names_exact_session");
+                }
+
+                sessions.CompleteSession(handle.SessionId, true, null, null);
+                var adaptive = runtime.TryCreateSession(profile.ChildId, "LOW", 7302, 2, "adaptive", null);
+                A(adaptive != null, "math_hub_runtime_continue_adaptive_fixture_created");
+                using (var adaptiveHub = (WAHUKidsLearn.MathHubForm)ctor.Invoke(new object[]
+                {
+                    database,
+                    new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW },
+                    catalogPath
+                }))
+                {
+                    Invoke(adaptiveHub, "LoadCatalogAndProgress");
+                    SetField(adaptiveHub, "_skills", new Dictionary<string, SkillSnapshot>(StringComparer.Ordinal)
+                    {
+                        {
+                            lesson.SkillId,
+                            new SkillSnapshot
+                            {
+                                SkillId = lesson.SkillId,
+                                AttemptsCount = 3,
+                                MasteryScore = 0.55,
+                                LearningState = "LEARNING",
+                                LastSeenAtUtc = DateTime.UtcNow
+                            }
+                        }
+                    });
+                    Invoke(adaptiveHub, "RefreshContinueLessonState");
+                    A(string.IsNullOrWhiteSpace(Get<string>(adaptiveHub, "ContinueLessonId")),
+                        "math_hub_adaptive_runtime_suppresses_false_lesson_continue");
+                    A(!GetField<Button>(adaptiveHub, "_continueLessonButton").Enabled,
+                        "math_hub_adaptive_runtime_keeps_lesson_continue_disabled");
+                }
+                sessions.CompleteSession(adaptive.SessionId, true, null, null);
             }
             finally
             {
