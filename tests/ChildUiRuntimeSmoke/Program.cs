@@ -1941,10 +1941,18 @@ namespace WAHU.ChildUiRuntimeSmoke
                       GetField<System.Collections.IDictionary>(reloadShell, "_access").Count == 0 &&
                       GetField<object>(reloadShell, "_selectedEvent") == null,
                         "quick_rescue_valid_to_corrupt_reload_clears_internal_state");
-                    A(!GetField<Button>(reloadShell, "_startButton").Enabled &&
+                    var unavailableStart = GetField<Button>(reloadShell, "_startButton");
+                    var unavailableIntro = GetField<Label>(reloadShell, "_intro");
+                    var unavailableStatus = GetField<Label>(reloadShell, "_status");
+                    A(!unavailableStart.Enabled &&
                       GetField<Label>(reloadShell, "_eventTitle").Text.IndexOf("đang chuẩn bị", StringComparison.OrdinalIgnoreCase) >= 0 &&
-                      GetField<Label>(reloadShell, "_intro").Text.IndexOf("vẫn có thể học Toán", StringComparison.OrdinalIgnoreCase) >= 0,
+                      unavailableIntro.Text.IndexOf("vẫn có thể học Toán", StringComparison.OrdinalIgnoreCase) >= 0,
                         "quick_rescue_valid_to_corrupt_reload_fails_closed_visibly");
+                    A(unavailableIntro.AccessibleDescription == unavailableIntro.Text &&
+                      unavailableStart.AccessibleDescription.IndexOf("chưa thể bắt đầu", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                      unavailableStart.AccessibleDescription.IndexOf("đang dở", StringComparison.OrdinalIgnoreCase) < 0 &&
+                      unavailableStatus.AccessibleDescription.IndexOf("đã lưu vẫn an toàn", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "quick_rescue_valid_to_corrupt_reload_clears_stale_accessibility");
                 }
                 File.Copy(Path.Combine(sourceContent, "game_events_v1.json"), runtimeEventPath, true);
                 File.Delete(runtimeEventPath);

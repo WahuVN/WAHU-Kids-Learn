@@ -736,11 +736,15 @@ namespace WAHUKidsLearn
             if (!_eventsInjected) _events.Clear();
             _eventFlow.Controls.Clear();
             _eventTitle.Text = "Nhiệm vụ cứu hộ đang chuẩn bị";
+            _eventTitle.AccessibleDescription = "Danh sách nhiệm vụ cứu hộ hiện chưa sẵn sàng.";
             _intro.Text = message;
+            _intro.AccessibleDescription = message;
             _checkpoints.Controls.Clear();
             _status.Text = "Không có tiến bộ nào bị mất.";
+            _status.AccessibleDescription = "Phần học đã lưu vẫn an toàn.";
             _startButton.Enabled = false;
             _startButton.Text = "Chưa thể bắt đầu";
+            _startButton.AccessibleDescription = "Nhiệm vụ cứu hộ hiện chưa thể bắt đầu. Con vẫn có thể học Toán theo bài như bình thường.";
         }
 
         private void ResizeEventButtons()
