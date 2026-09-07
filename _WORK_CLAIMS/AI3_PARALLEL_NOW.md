@@ -11,11 +11,11 @@ EXTERNAL_BLOCKERS=INSTALLER_E2E_UNOWNED_LOCAL_DATA;PRODUCTION_SIGNING_UNAVAILABL
 EXECUTION_MODE=PLAYABLE_EVENT_UI_NO_WAIT
 ACTIVE_PHASE=PLAYABLE_EVENT_GAME_V1
 ACTIVE_FOCUS=FIRST_FIVE_QUICK_RESCUE_UI_E2E_RELEASE
-LAST_FULLY_VERIFIED_HEAD=`eedd1d9`
-LAST_VERIFIED_CHILD_UI=3663_ASSERTIONS_PASS
-LAST_VERIFIED_PERSISTENCE=7829_ASSERTIONS_PASS
+LAST_FULLY_VERIFIED_HEAD=`a040eda`
+LAST_VERIFIED_CHILD_UI=3682_ASSERTIONS_PASS
+LAST_VERIFIED_PERSISTENCE=7852_ASSERTIONS_PASS
 LAST_VERIFIED_CONTENT=90_OF_90_PASS
-LAST_VERIFIED_RELEASE=`0.1.57-dev`_BUILD_15_OF_15_PORTABLE_PASS_INSTALLER_COMPILE_PASS
+LAST_VERIFIED_RELEASE=`0.1.59-dev`_BUILD_15_OF_15_PORTABLE_PASS_INSTALLER_COMPILE_PASS
 EARLY_LESSON_DEEP_HEAD=`e34136d`
 EARLY_LESSON_DEEP_CHILD_UI=3564_ASSERTIONS_PASS
 EARLY_LESSON_DEEP_PERSISTENCE=7592_ASSERTIONS_PASS
@@ -85,7 +85,7 @@ Milestones đã có, không làm lại implementation mù nếu HEAD vẫn chứ
 - 402-prompt min-window fit: `1e27ff8`
 - dynamic release smoke evidence: `3a53af7`
 
-Current closure evidence on `eedd1d9`: Child UI **3663 assertions PASS**, persistence **7829 assertions PASS**, content/event **90/90 PASS**, validator **402/402 valid**, Build-Setup `0.1.57-dev` **15/15 PASS**, Portable E2E **PASS**, installer compile **PASS**. Full Installer E2E is externally safety-blocked by unowned learner data; assertion counts may continue to grow.
+Current closure evidence on `a040eda`: Child UI **3682 assertions PASS**, persistence **7852 assertions PASS**, content/event **90/90 PASS**, validator **402/402 valid**, Build-Setup `0.1.59-dev` **15/15 PASS**, Portable E2E **PASS**, installer compile **PASS**. Full Installer E2E is externally safety-blocked by unowned learner data; assertion counts may continue to grow.
 
 ## 2. Ownership
 
