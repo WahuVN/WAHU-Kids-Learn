@@ -76,6 +76,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestInteractiveIntegerFinalization();
                 TestGameEventBehaviorMapping();
                 TestGameEventRuntimeResumeRewardAndFallback(root, schemaPath, templatePath, lessonCatalogPath);
+                TestGameEventCorruptCatalogCompletesLearningSafely(root, schemaPath, templatePath, lessonCatalogPath);
                 TestGameEventStaleIdFallsBackToLessonEvent(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestProductionFirstFiveGameEventsRuntime(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestProductionFirstEventResumeJourney(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
@@ -203,6 +204,13 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                   wrong.EventState.CompletedCheckpointCount == 1 && wrong.EventState.CurrentCheckpointNumber == 2 &&
                   wrong.EventState.RetryPending,
                     "game_event_wrong_retry_preserves_checkpoint_two");
+                var retryEarlyCompleteRejected = false;
+                try { first.Complete(); }
+                catch (InvalidOperationException) { retryEarlyCompleteRejected = true; }
+                A(retryEarlyCompleteRejected && first.CurrentState.RetryPending &&
+                  first.CurrentState.CompletedCheckpointCount == 1 && first.NextQuestion().QuestionId == q2Id &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE child_id='" + start.Session.ChildId + "';") == 0,
+                    "game_event_complete_during_pending_retry_is_rejected_without_state_loss_or_reward");
                 first.SuspendForBreak("event_safe_break");
                 A(Count(database, "SELECT count(*) FROM reward_event WHERE child_id='" + start.Session.ChildId + "';") == 0 &&
                   Count(database, "SELECT count(*) FROM session WHERE id='" + sessionId + "' AND state='active';") == 1,
@@ -307,6 +315,75 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                   Count(fallbackDb, "SELECT count(*) FROM reward_event WHERE child_id='" + fallbackChildId + "';") == 0,
                     "game_event_metadata_recovery_keeps_selected_q3_and_no_fake_reward");
                 restoredEvent.SuspendForBreak("metadata_recovery_cleanup");
+            }
+        }
+
+        private static void TestGameEventCorruptCatalogCompletesLearningSafely(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.Lessons[0];
+            var eventId = "m2_evt_corrupt_complete_01";
+            var eventPath = Path.Combine(root, "synthetic-game-event-corrupt-complete.json");
+            WriteSyntheticGameEventCatalog(eventPath, eventId, lesson.Id, lesson.SkillId);
+            var database = NewDatabase(Path.Combine(root, "game-event-corrupt-complete.db"), schemaPath);
+            string sessionId;
+            string childId;
+            IList<string> selected;
+
+            using (var first = new MathGameEventCoordinator(database, templatePath, eventPath, "LOW", 14003, eventId, lesson.Id))
+            {
+                var start = first.Start("Bé fallback hoàn thành");
+                sessionId = start.Session.SessionId;
+                childId = start.Session.ChildId;
+                selected = start.Session.SelectedContentQuestionIds.ToList();
+                var q1 = first.NextQuestion();
+                first.SubmitAnswerAt(q1.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700);
+                first.SuspendForBreak("corrupt_complete_before_catalog_loss");
+            }
+
+            File.WriteAllText(eventPath, "{ broken-until-after-completion ");
+            using (var fallback = new MathGameEventCoordinator(database, templatePath, eventPath, "NORMAL", 999999, eventId, lesson.Id))
+            {
+                var start = fallback.Start("Bé fallback hoàn thành");
+                A(start.Session.ResumedExistingSession && start.Session.SessionId == sessionId &&
+                  start.Event == null && start.EventState.FallbackToLessonPresentation &&
+                  start.EventState.CompletedCheckpointCount == 1,
+                    "game_event_corrupt_catalog_completion_resumes_learning_in_lesson_fallback");
+                for (var ordinal = 1; ordinal < 3; ordinal++)
+                {
+                    var question = fallback.NextQuestion();
+                    A(question.ContentQuestionId == selected[ordinal],
+                        "game_event_corrupt_catalog_completion_keeps_selected_question_" + (ordinal + 1));
+                    fallback.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 800 + ordinal * 100);
+                }
+                A(fallback.CurrentState.CompletedCheckpointCount == 3 && !fallback.CurrentState.IsComplete &&
+                  fallback.CurrentState.FallbackToLessonPresentation,
+                    "game_event_corrupt_catalog_completion_reaches_three_checkpoints_without_fake_terminal");
+                var completed = fallback.Complete();
+                A(completed.LearningSummary.LessonCompleted && completed.EventState.IsComplete &&
+                  completed.EventState.FallbackToLessonPresentation && !completed.EventState.EventPresentationAvailable,
+                    "game_event_corrupt_catalog_completion_terminalizes_learning_without_event_metadata");
+                A(Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + sessionId + "';") == 3 &&
+                  Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + sessionId + "';") == 3 &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + sessionId + "';") == 1,
+                    "game_event_corrupt_catalog_completion_keeps_exact_learning_chain_and_one_reward");
+            }
+
+            WriteSyntheticGameEventCatalog(eventPath, eventId, lesson.Id, lesson.SkillId);
+            using (var replay = new MathGameEventCoordinator(database, templatePath, eventPath, "LOW", 14004, eventId, lesson.Id))
+            {
+                var start = replay.Start("Bé fallback hoàn thành");
+                A(!start.Session.ResumedExistingSession && start.Session.SessionId != sessionId &&
+                  start.Event != null && start.Event.Id == eventId && start.EventState.EventPresentationAvailable &&
+                  start.EventState.CompletedCheckpointCount == 0 && !start.EventState.IsComplete,
+                    "game_event_after_corrupt_catalog_completion_reopens_as_fresh_event_session");
+                A(Count(database, "SELECT count(*) FROM reward_event WHERE child_id='" + childId + "';") == 1,
+                    "game_event_after_corrupt_catalog_completion_does_not_duplicate_prior_reward");
+                replay.SuspendForBreak("corrupt_complete_replay_cleanup");
             }
         }
 
