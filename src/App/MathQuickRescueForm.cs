@@ -663,6 +663,7 @@ namespace WAHUKidsLearn
             catch
             {
                 _status.Text = "Chưa thể mở nhiệm vụ lúc này. Phần học đã lưu vẫn an toàn; con có thể quay lại thư viện Toán.";
+                _status.AccessibleDescription = _status.Text;
             }
         }
 

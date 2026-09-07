@@ -1715,6 +1715,17 @@ namespace WAHU.ChildUiRuntimeSmoke
                         "quick_rescue_intro_cards_fit_900x640");
                 }
 
+                using (var failureShell = (Form)rescueCtor.Invoke(new object[] { database, settings }))
+                {
+                    Invoke(failureShell, "LoadEvents");
+                    var failureStatus = GetField<Label>(failureShell, "_status");
+                    SetField(failureShell, "_database", null);
+                    Invoke(failureShell, "StartSelectedEvent");
+                    A(failureStatus.Text.IndexOf("đã lưu vẫn an toàn", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                      failureStatus.AccessibleDescription == failureStatus.Text,
+                        "quick_rescue_start_failure_keeps_safe_status_accessible");
+                }
+
                 var eventLessonCtor = typeof(WAHUKidsLearn.MathLessonForm).GetConstructor(
                     BindingFlags.Instance | BindingFlags.NonPublic, null,
                     new[] { typeof(LearningDatabase), typeof(RuntimePerformanceSettings), typeof(string), presentationType }, null);
