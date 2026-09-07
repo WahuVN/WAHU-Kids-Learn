@@ -41,6 +41,7 @@ namespace WAHU.MathDataEngineRuntimeSmoke
                 TestCrossProcessRecoveryDoesNotReclaimLiveRuntime(root, sourceSchema);
                 TestCrossProcessRecoveryCannotSplitAtomicStart(root, sourceSchema);
                 TestCrossProcessTerminalCleanupPreservesFreshRuntime(root, sourceSchema);
+                TestDuplicateActiveRecoveryRequiresLiveKeeper(root, sourceSchema);
                 TestRuntimePackIdentityArgumentValidation(root, sourceSchema);
                 TestTargetedAtomicStartRollsBackOnProgressFailure(root, sourceSchema);
                 TestDanglingRecoveryIsScopedToMath(root, sourceSchema);
@@ -834,6 +835,38 @@ namespace WAHU.MathDataEngineRuntimeSmoke
             }
             sessions.CompleteSession(freshSessionId, true, "{}", "{}");
             runtime.Delete(freshSessionId);
+        }
+
+        private static void TestDuplicateActiveRecoveryRequiresLiveKeeper(string root, string sourceSchema)
+        {
+            var schemaDir = Path.Combine(root, "schema-duplicate-active-live-keeper");
+            CopySchemas(sourceSchema, schemaDir);
+            var schemaPath = Path.Combine(schemaDir, "001_initial.sql");
+            var database = new LearningDatabase(Path.Combine(root, "duplicate-active-live-keeper.db"), schemaPath);
+            database.Initialize("DELETE");
+            var sessions = new LearnerSessionService(database);
+            var profile = sessions.EnsurePrimaryChild("Bé duplicate active keeper");
+            var runtime = new MathSessionRuntimeService(database);
+
+            var staleKeeper = runtime.TryCreateSession(profile.ChildId, "LOW", 8810, 8, "adaptive", null);
+            A(staleKeeper != null, "duplicate_active_keeper_fixture_starts_keeper");
+            sessions.CompleteSession(staleKeeper.SessionId, true, "{}", "{}");
+            runtime.Delete(staleKeeper.SessionId);
+            var fresh = runtime.TryCreateSession(profile.ChildId, "LOW", 8811, 8, "adaptive", null);
+            A(fresh != null && fresh.SessionId != staleKeeper.SessionId,
+                "duplicate_active_keeper_fixture_starts_fresh_after_stale_keeper_terminal");
+
+            var recovered = runtime.RecoverDuplicateActiveMathSessions(profile.ChildId, staleKeeper.SessionId);
+            A(recovered == 0,
+                "duplicate_active_recovery_stale_keeper_cannot_recover_fresh_session");
+            using (var c = database.OpenConnection())
+            {
+                A(Count(c, "SELECT count(*) FROM session WHERE id='" + fresh.SessionId + "' AND state='active' AND ended_at_utc IS NULL;") == 1 &&
+                  Count(c, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + fresh.SessionId + "';") == 1,
+                    "duplicate_active_recovery_stale_keeper_preserves_fresh_runtime");
+            }
+            sessions.CompleteSession(fresh.SessionId, true, "{}", "{}");
+            runtime.Delete(fresh.SessionId);
         }
 
         private static void TestTargetedAtomicStartRollsBackOnProgressFailure(string root, string sourceSchema)

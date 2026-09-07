@@ -475,6 +475,54 @@ WHERE session_id=@session AND pack_id IS NULL AND pack_version IS NULL
             });
         }
 
+        public int RecoverDuplicateActiveMathSessions(string childId, string keepSessionId)
+        {
+            Require(childId, "childId");
+            Require(keepSessionId, "keepSessionId");
+            return _database.Writes.Execute((connection, transaction) =>
+            {
+                var utc = Utc(DateTime.UtcNow);
+                int recovered;
+                using (var session = connection.CreateCommand())
+                {
+                    session.Transaction = transaction;
+                    session.CommandText = @"UPDATE session
+SET state='recovered',ended_at_utc=@utc,
+    summary_json=COALESCE(summary_json,'{""reason"":""duplicate_active_math_session""}')
+WHERE child_id=@child AND planned_subject='math' AND id<>@keep
+  AND state IN ('started','active') AND ended_at_utc IS NULL
+  AND EXISTS (
+      SELECT 1 FROM session keeper
+      WHERE keeper.id=@keep AND keeper.child_id=@child AND keeper.planned_subject='math'
+        AND keeper.state IN ('started','active') AND keeper.ended_at_utc IS NULL
+  );";
+                    session.Parameters.AddWithValue("@child", childId);
+                    session.Parameters.AddWithValue("@keep", keepSessionId);
+                    session.Parameters.AddWithValue("@utc", utc);
+                    recovered = session.ExecuteNonQuery();
+                }
+
+                if (recovered > 0)
+                {
+                    using (var runtime = connection.CreateCommand())
+                    {
+                        runtime.Transaction = transaction;
+                        runtime.CommandText = @"DELETE FROM math_session_runtime
+WHERE session_id IN (
+    SELECT id FROM session
+    WHERE child_id=@child AND planned_subject='math' AND id<>@keep
+      AND state='recovered' AND ended_at_utc=@utc
+);";
+                        runtime.Parameters.AddWithValue("@child", childId);
+                        runtime.Parameters.AddWithValue("@keep", keepSessionId);
+                        runtime.Parameters.AddWithValue("@utc", utc);
+                        runtime.ExecuteNonQuery();
+                    }
+                }
+                return recovered;
+            });
+        }
+
         public bool RecoverCorruptRuntimeSession(string childId, string sessionId)
         {
             return RecoverRuntimeSession(childId, sessionId, "corrupt_math_runtime");

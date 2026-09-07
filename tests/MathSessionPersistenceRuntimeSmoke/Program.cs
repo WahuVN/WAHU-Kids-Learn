@@ -52,6 +52,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestTargetedCompletionProgressFaultRollsBackAndRetriesExactlyOnce(root, schemaPath, templatePath, lessonCatalogPath);
                 TestCorruptRuntimeMetadataIsQuarantined(root, schemaPath, templatePath);
                 TestMoreThanFourInvalidRuntimeSessionsAllRecover(root, schemaPath, templatePath);
+                TestMultipleValidActiveRuntimeSessionsKeepNewestOnly(root, schemaPath, templatePath);
                 TestCorruptOpenQuestionTimestampSelfHealsExactOrdinal(root, schemaPath, templatePath, lessonCatalogPath);
                 TestAdaptiveCorruptOpenQuestionTimestampSelfHealsExactOrdinal(root, schemaPath, templatePath);
                 TestCorruptSessionStartedTimestampIsQuarantined(root, schemaPath, templatePath);
@@ -3470,6 +3471,59 @@ VALUES(@session,@seed,2,0,'adaptive',NULL,'legacy-pack','0.9',@utc);",
                   Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + started.SessionId + "';") == 1,
                     "many_invalid_runtime_recovery_leaves_one_fresh_resumable_session");
                 coordinator.Abort("many_invalid_runtime_cleanup");
+            }
+        }
+
+        private static void TestMultipleValidActiveRuntimeSessionsKeepNewestOnly(
+            string root,
+            string schemaPath,
+            string templatePath)
+        {
+            var database = NewDatabase(Path.Combine(root, "multiple-valid-active-runtimes.db"), schemaPath);
+            var profile = new LearnerSessionService(database).EnsurePrimaryChild("Bé multiple valid runtime");
+            var oldSessionId = "session-valid-active-old";
+            var newSessionId = "session-valid-active-new";
+            var oldUtc = DateTime.UtcNow.AddMinutes(-10).ToString("o", CultureInfo.InvariantCulture);
+            var newUtc = DateTime.UtcNow.AddMinutes(-5).ToString("o", CultureInfo.InvariantCulture);
+            Exec(database, @"INSERT INTO session(id,child_id,started_at_utc,state,planned_subject,performance_profile)
+VALUES(@old,@child,@oldUtc,'active','math','LOW');
+INSERT INTO math_session_runtime(session_id,seed,target_question_count,generated_question_count,session_mode,target_lesson_id,pack_id,pack_version,updated_at_utc)
+VALUES(@old,9201,2,0,'adaptive',NULL,@pack,@version,@oldUtc);
+INSERT INTO session(id,child_id,started_at_utc,state,planned_subject,performance_profile)
+VALUES(@new,@child,@newUtc,'active','math','NORMAL');
+INSERT INTO math_session_runtime(session_id,seed,target_question_count,generated_question_count,session_mode,target_lesson_id,pack_id,pack_version,updated_at_utc)
+VALUES(@new,9202,2,0,'adaptive',NULL,@pack,@version,@newUtc);",
+                "@old", oldSessionId,
+                "@new", newSessionId,
+                "@child", profile.ChildId,
+                "@oldUtc", oldUtc,
+                "@newUtc", newUtc,
+                "@pack", MathSessionCoordinator.PackId,
+                "@version", MathSessionCoordinator.PackVersion);
+            A(Count(database, "SELECT count(*) FROM session WHERE child_id='" + profile.ChildId + "' AND state='active' AND ended_at_utc IS NULL;") == 2,
+                "multiple_valid_runtime_fixture_has_two_active_sessions");
+
+            using (var resumed = new MathSessionCoordinator(database, templatePath, "LOW", 9203, 2))
+            {
+                var started = resumed.Start("Bé multiple valid runtime");
+                A(started.ResumedExistingSession && started.SessionId == newSessionId && started.RecoveredDanglingSessions == 1,
+                    "multiple_valid_runtime_start_keeps_newest_and_recovers_older_duplicate");
+                A(Count(database, "SELECT count(*) FROM session WHERE id='" + oldSessionId + "' AND state='recovered' AND ended_at_utc IS NOT NULL;") == 1 &&
+                  Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + oldSessionId + "';") == 0,
+                    "multiple_valid_runtime_recovery_removes_older_active_checkpoint");
+                A(Count(database, "SELECT count(*) FROM session WHERE id='" + newSessionId + "' AND state='active' AND ended_at_utc IS NULL;") == 1 &&
+                  Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + newSessionId + "';") == 1,
+                    "multiple_valid_runtime_recovery_preserves_newest_active_checkpoint");
+                resumed.Abort("multiple_valid_runtime_cleanup");
+            }
+
+            using (var fresh = new MathSessionCoordinator(database, templatePath, "LOW", 9204, 2))
+            {
+                var started = fresh.Start("Bé multiple valid runtime");
+                A(!started.ResumedExistingSession && started.SessionId != oldSessionId && started.SessionId != newSessionId &&
+                  Count(database, "SELECT count(*) FROM session WHERE child_id='" + profile.ChildId + "' AND state='active' AND ended_at_utc IS NULL;") == 1,
+                    "multiple_valid_runtime_old_duplicate_never_resurfaces_after_newest_terminalizes");
+                fresh.Abort("multiple_valid_runtime_fresh_cleanup");
             }
         }
 
