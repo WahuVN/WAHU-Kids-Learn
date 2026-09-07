@@ -37,6 +37,16 @@ BANNED_PATTERNS = [
 SAFE_ID = re.compile(r"^[a-z0-9][a-z0-9_]{2,79}$")
 SAFE_THEME = re.compile(r"^[a-z0-9][a-z0-9_]{2,47}$")
 AMBIGUOUS_MATH_PATTERNS = ((r"\bphần\s+trăm\b", "percent_vs_hundreds"),)
+PRESSURE_PATTERNS = (
+    r"\bcon\s+phải\b", r"phải\s+làm\s+(?:đủ|hết)", r"chỉ\s+còn\s+\d+", r"cố\s+lên\s+để\s+nhận",
+)
+COMPLETION_REQUIRED_PATTERNS_BY_THEME = {
+    "forest_path": (r"đúng\s+chỗ", r"rõ\s+ràng"),
+    "hundred_station": (r"nhãn", r"rõ\s+ràng"),
+    "number_path": (r"đúng\s+thứ\s+tự", r"liền\s+mạch"),
+    "place_value_workshop": (r"đúng\s+ngăn", r"gọn"),
+    "number_machine": (r"đúng\s+giá\s+trị", r"chạy\s+êm"),
+}
 BREAK_PROGRESS_PATTERNS = (r"\blưu\b", r"giữ\s+nguyên")
 BREAK_PROMISE_PATTERNS = (r"hoàn\s+thành", r"nhận\s+(?:quà|thưởng)", r"mở\s+khóa", r"được\s+thưởng")
 MAX_BREAK_TOKEN_JACCARD = 0.60
@@ -143,6 +153,16 @@ def validate(events_path: Path = DEFAULT_EVENTS, lessons_path: Path = DEFAULT_LE
                 for pattern, label in AMBIGUOUS_MATH_PATTERNS:
                     if re.search(pattern, lowered_value, re.IGNORECASE):
                         errors.append(f"{where}:{key}:ambiguous_math_copy:{label}")
+                if any(re.search(pattern, lowered_value, re.IGNORECASE) for pattern in PRESSURE_PATTERNS):
+                    errors.append(f"{where}:{key}:pressure_copy")
+
+        completion_text = event.get("completion_vi")
+        theme_for_completion = event.get("theme")
+        required_completion_patterns = COMPLETION_REQUIRED_PATTERNS_BY_THEME.get(theme_for_completion, ())
+        if isinstance(completion_text, str) and required_completion_patterns:
+            lowered_completion = completion_text.casefold()
+            if not all(re.search(pattern, lowered_completion, re.IGNORECASE) for pattern in required_completion_patterns):
+                errors.append(f"{where}:completion_vi:not_restorative:{theme_for_completion}")
 
         break_text = event.get("break_copy_vi")
         if isinstance(break_text, str):

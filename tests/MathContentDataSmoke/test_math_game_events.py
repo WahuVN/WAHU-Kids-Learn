@@ -117,6 +117,24 @@ class MathGameEventsSmoke(unittest.TestCase):
             errors, _ = self.validator.validate(path, LESSON_PATH)
         self.assertTrue(any("repair_copy_vi:not_skill_specific" in x for x in errors), errors)
 
+    def test_event_validator_rejects_pressure_intro_copy(self):
+        broken = json.loads(EVENT_PATH.read_text(encoding="utf-8"))
+        broken["events"][0]["intro_vi"] = "Con phải làm đủ ba câu để hoàn thành nhiệm vụ."
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "events.json"
+            path.write_text(json.dumps(broken, ensure_ascii=False), encoding="utf-8")
+            errors, _ = self.validator.validate(path, LESSON_PATH)
+        self.assertTrue(any("pressure_copy" in x for x in errors), errors)
+
+    def test_event_validator_requires_restorative_completion_copy(self):
+        broken = json.loads(EVENT_PATH.read_text(encoding="utf-8"))
+        broken["events"][3]["completion_vi"] = "Giỏi lắm! Con đã hoàn thành nhiệm vụ và nhận thưởng."
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "events.json"
+            path.write_text(json.dumps(broken, ensure_ascii=False), encoding="utf-8")
+            errors, _ = self.validator.validate(path, LESSON_PATH)
+        self.assertTrue(any("completion_vi:not_restorative" in x for x in errors), errors)
+
     def test_event_validator_rejects_ambiguous_percent_wording(self):
         broken = json.loads(EVENT_PATH.read_text(encoding="utf-8"))
         broken["events"][4]["intro_vi"] = "Con giúp ghép lại phần trăm, chục và đơn vị nhé."
