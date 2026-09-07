@@ -238,6 +238,17 @@ Sau khi session completion transaction đã commit, mọi bước metadata/UX do
 - Runtime cleanup và game-world reward tiếp tục là best-effort downstream của durable learning state.
 - Regression dùng content-pack copy riêng, làm hỏng `lesson_catalog_v1.json` sau khi trả lời đủ câu nhưng trước `Complete()`; completion vẫn trả summary thành công, session/progress chỉ ghi một lần, runtime được cleanup và next-lesson metadata có thể để trống.
 
+## 2026-09-07 — Corrupt core runtime quarantine (AI2)
+
+Core Math runtime metadata malformed không được khóa vĩnh viễn hồ sơ học, nhưng cũng không được biến mọi lỗi SQLite thành corruption:
+
+- `LoadLatestResumable(childId)` đọc raw row trước, sau đó mới parse/validate metadata; chỉ lỗi deterministic parse/validation mới thành `MathSessionRuntimeCorruptException` có `SessionId`.
+- SQLite/I/O/busy/reader operational failure phải surfaced nguyên trạng; không tự quarantine session hợp lệ.
+- `RecoverCorruptRuntimeSession(childId, sessionId)` atomically đánh dấu đúng active Math session thành `recovered` và xóa `math_session_runtime` hỏng.
+- Attempt history, mastery events, `child_skill`, lesson progress và các learning records durable không bị xóa/reset khi quarantine runtime.
+- Startup sau quarantine có thể mở một session mới; `RecoveredDanglingSessions` phản ánh cả corrupt-runtime recovery và dangling-session recovery.
+- Regression cố tình làm hỏng `updated_at_utc` của một resumable runtime sau khi đã có durable attempt/mastery; Start mới recovery đúng session cũ, giữ learning progress và tạo checkpoint mới hợp lệ.
+
 ## Contract còn chưa chốt
 
 Các mục sau chưa được UI/content tự invent cho tới khi AI2 publish contract:

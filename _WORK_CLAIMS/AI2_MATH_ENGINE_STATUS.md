@@ -20,7 +20,7 @@ Branch: `main`
 
 - `tests/MathEngineRuntimeSmoke`: PASS — **47 assertions**.
 - `tests/MathDataEngineRuntimeSmoke`: PASS — **98 assertions** (idempotency + terminal-session guard + optimistic skill-state guard + true cross-process mastery/session contention + atomic startup + subject/child-scoped dangling recovery).
-- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **183 assertions** (authored bank + targeted lesson + prerequisite unlock + exact resume + mastery delta + next lesson + corrupt authored cursor recovery + retry/resume/anti-double-submit + stale coordinator/skill guards + injected write-failure rollback/retry + post-completion enrichment failure safety).
+- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **194 assertions** (authored bank + targeted lesson + prerequisite unlock + exact resume + mastery delta + next lesson + corrupt authored cursor/core-runtime recovery + retry/resume/anti-double-submit + stale coordinator/skill guards + injected write-failure rollback/retry + post-completion enrichment failure safety).
 - `tests/SQLiteRuntimeSmoke`: PASS — **166 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
 - `tests/LearningSessionRuntimeSmoke`: PASS — **794 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
 - PowerShell release/build scripts: schema V4 payload/bootstrap expectations đã cập nhật; parse/build gate PASS.
@@ -61,6 +61,7 @@ Branch: `main`
 - current question / selection / started timestamp / forced repair: PASS durable.
 - resume after close: PASS.
 - complete/abort removes runtime checkpoint: PASS.
+- corrupt core runtime quarantine: PASS — deterministic malformed runtime metadata được isolate theo đúng child/session; checkpoint hỏng bị xóa nhưng attempt/mastery/child_skill durable vẫn giữ nguyên; SQLite/I/O failure không bị classify nhầm thành corruption.
 - suspend leaves session resumable: PASS.
 - refresh/restart farming reward: PASS regression — suspend không reward; completed reward vẫn unique theo completed session.
 
@@ -110,7 +111,8 @@ Còn phải làm: skip policy nếu product cho phép, numeric XP/daily streak n
 - `c4ff314` — `fix(toán): khóa nguyên tử tiến độ khi mở bài` — pushed.
 - `21cc224` — `fix(toán): giới hạn recovery đúng phiên toán` — pushed.
 - `d3f2d21` — `fix(toán): giới hạn recovery theo hồ sơ học` — pushed.
-- post-completion enrichment failure safety — đang chốt selective commit hiện tại.
+- `a871626` — `fix(toán): cô lập lỗi sau khi hoàn tất bài` — pushed.
+- corrupt core runtime quarantine — đang chốt selective commit hiện tại.
 
 ## Blocker / coordination
 

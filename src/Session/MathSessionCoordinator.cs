@@ -116,7 +116,7 @@ namespace WAHU.Session
             var restoredOpenQuestion = false;
             var discardedCorruptOpenQuestion = false;
             var recovered = 0;
-            var resumable = _runtime.LoadLatestResumable(_profile.ChildId);
+            var resumable = LoadLatestResumableRecoveringCorrupt(ref recovered);
             if (resumable != null)
             {
                 if (!string.IsNullOrWhiteSpace(_requestedLessonId) &&
@@ -128,7 +128,7 @@ namespace WAHU.Session
             }
             else
             {
-                recovered = _sessionService.RecoverDanglingSessions(_profile.ChildId);
+                recovered += _sessionService.RecoverDanglingSessions(_profile.ChildId);
                 try
                 {
                     _seed = _requestedSeed;
@@ -147,7 +147,7 @@ namespace WAHU.Session
                         _targetLesson == null ? null : _targetLesson.SkillId);
                     if (_session == null)
                     {
-                        var raced = _runtime.LoadLatestResumable(_profile.ChildId);
+                        var raced = LoadLatestResumableRecoveringCorrupt(ref recovered);
                         if (raced == null)
                             throw new InvalidOperationException("Một phiên Toán khác vừa được mở. Hãy thử tiếp tục lại phiên đang học.");
                         if (!string.IsNullOrWhiteSpace(_requestedLessonId) &&
@@ -795,6 +795,19 @@ namespace WAHU.Session
             if (_profile == null || string.IsNullOrWhiteSpace(_targetLessonId)) return null;
             return new MathLessonProgressService(_database, ContentSiblingPath("lesson_catalog_v1.json"))
                 .GetAccess(_profile.ChildId, _targetLessonId);
+        }
+
+        private MathSessionRuntimeSnapshot LoadLatestResumableRecoveringCorrupt(ref int recoveredCount)
+        {
+            try
+            {
+                return _runtime.LoadLatestResumable(_profile.ChildId);
+            }
+            catch (MathSessionRuntimeCorruptException ex)
+            {
+                if (_runtime.RecoverCorruptRuntimeSession(_profile.ChildId, ex.SessionId)) recoveredCount++;
+                return _runtime.LoadLatestResumable(_profile.ChildId);
+            }
         }
 
         private void RestoreSession(

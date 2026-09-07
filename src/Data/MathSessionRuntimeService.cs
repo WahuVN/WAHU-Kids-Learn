@@ -22,6 +22,17 @@ namespace WAHU.Data
         public DateTime UpdatedAtUtc { get; set; }
     }
 
+    public sealed class MathSessionRuntimeCorruptException : InvalidOperationException
+    {
+        public string SessionId { get; private set; }
+
+        public MathSessionRuntimeCorruptException(string sessionId, string message, Exception innerException)
+            : base(message, innerException)
+        {
+            SessionId = sessionId;
+        }
+    }
+
     public sealed class MathCommittedAttemptSnapshot
     {
         public string AttemptId { get; set; }
@@ -190,23 +201,56 @@ LIMIT 1;";
                 using (var reader = command.ExecuteReader())
                 {
                     if (!reader.Read()) return null;
-                    return new MathSessionRuntimeSnapshot
+
+                    // Copy raw DB values first. Operational reader/SQLite failures must escape normally;
+                    // only deterministic parsing/metadata failures below are classified as corruption.
+                    var values = new object[14];
+                    reader.GetValues(values);
+                    var sessionId = Text(values[0]);
+                    try
                     {
-                        SessionId = Text(reader[0]),
-                        ChildId = Text(reader[1]),
-                        StartedAtUtc = ReadUtc(reader[2]),
-                        PerformanceProfile = Text(reader[3]),
-                        Seed = Convert.ToInt32(reader[4], CultureInfo.InvariantCulture),
-                        TargetQuestionCount = Convert.ToInt32(reader[5], CultureInfo.InvariantCulture),
-                        GeneratedQuestionCount = Convert.ToInt32(reader[6], CultureInfo.InvariantCulture),
-                        SessionMode = Text(reader[7]),
-                        TargetLessonId = NullableText(reader[8]),
-                        CurrentQuestionJson = NullableText(reader[9]),
-                        CurrentSelectionJson = NullableText(reader[10]),
-                        QuestionStartedAtUtc = ReadNullableUtc(reader[11]),
-                        ForcedRepairTemplateId = NullableText(reader[12]),
-                        UpdatedAtUtc = ReadUtc(reader[13])
-                    };
+                        var mode = Text(values[7]);
+                        if (string.IsNullOrWhiteSpace(mode)) mode = "adaptive";
+                        var snapshot = new MathSessionRuntimeSnapshot
+                        {
+                            SessionId = sessionId,
+                            ChildId = Text(values[1]),
+                            StartedAtUtc = ReadUtc(values[2]),
+                            PerformanceProfile = Text(values[3]),
+                            Seed = Convert.ToInt32(values[4], CultureInfo.InvariantCulture),
+                            TargetQuestionCount = Convert.ToInt32(values[5], CultureInfo.InvariantCulture),
+                            GeneratedQuestionCount = Convert.ToInt32(values[6], CultureInfo.InvariantCulture),
+                            SessionMode = mode,
+                            TargetLessonId = NullableText(values[8]),
+                            CurrentQuestionJson = NullableText(values[9]),
+                            CurrentSelectionJson = NullableText(values[10]),
+                            QuestionStartedAtUtc = ReadNullableUtc(values[11]),
+                            ForcedRepairTemplateId = NullableText(values[12]),
+                            UpdatedAtUtc = ReadUtc(values[13])
+                        };
+                        ValidateRuntimeSnapshot(snapshot);
+                        return snapshot;
+                    }
+                    catch (MathSessionRuntimeCorruptException)
+                    {
+                        throw;
+                    }
+                    catch (FormatException ex)
+                    {
+                        throw Corrupt(sessionId, ex);
+                    }
+                    catch (OverflowException ex)
+                    {
+                        throw Corrupt(sessionId, ex);
+                    }
+                    catch (InvalidCastException ex)
+                    {
+                        throw Corrupt(sessionId, ex);
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        throw Corrupt(sessionId, ex);
+                    }
                 }
             }
         }
@@ -280,6 +324,37 @@ WHERE session_id=@session;";
                     command.Parameters.AddWithValue("@session", sessionId);
                     command.ExecuteNonQuery();
                 }
+            });
+        }
+
+        public bool RecoverCorruptRuntimeSession(string childId, string sessionId)
+        {
+            Require(childId, "childId");
+            Require(sessionId, "sessionId");
+            return _database.Writes.Execute((connection, transaction) =>
+            {
+                using (var session = connection.CreateCommand())
+                {
+                    session.Transaction = transaction;
+                    session.CommandText = @"UPDATE session
+SET state='recovered',ended_at_utc=@utc,
+    summary_json=COALESCE(summary_json,'{""reason"":""corrupt_math_runtime""}')
+WHERE id=@session AND child_id=@child AND planned_subject='math'
+  AND state IN ('started','active') AND ended_at_utc IS NULL;";
+                    session.Parameters.AddWithValue("@session", sessionId);
+                    session.Parameters.AddWithValue("@child", childId);
+                    session.Parameters.AddWithValue("@utc", Utc(DateTime.UtcNow));
+                    if (session.ExecuteNonQuery() != 1) return false;
+                }
+
+                using (var runtime = connection.CreateCommand())
+                {
+                    runtime.Transaction = transaction;
+                    runtime.CommandText = "DELETE FROM math_session_runtime WHERE session_id=@session;";
+                    runtime.Parameters.AddWithValue("@session", sessionId);
+                    runtime.ExecuteNonQuery();
+                }
+                return true;
             });
         }
 
@@ -370,6 +445,30 @@ WHERE session_id=@session;";
                     if (command.ExecuteNonQuery() != 1) throw new InvalidOperationException("Math runtime session does not exist.");
                 }
             });
+        }
+
+        private static void ValidateRuntimeSnapshot(MathSessionRuntimeSnapshot snapshot)
+        {
+            if (snapshot == null) throw new InvalidOperationException("Missing Math runtime snapshot.");
+            if (string.IsNullOrWhiteSpace(snapshot.SessionId)) throw new InvalidOperationException("Math runtime session id is missing.");
+            if (string.IsNullOrWhiteSpace(snapshot.ChildId)) throw new InvalidOperationException("Math runtime child id is missing.");
+            if (snapshot.TargetQuestionCount < 1 || snapshot.TargetQuestionCount > 40)
+                throw new InvalidOperationException("Math runtime target_question_count is outside the supported range.");
+            if (snapshot.GeneratedQuestionCount < 0 || snapshot.GeneratedQuestionCount > snapshot.TargetQuestionCount)
+                throw new InvalidOperationException("Math runtime generated_question_count is inconsistent with target_question_count.");
+            if (!string.Equals(snapshot.SessionMode, "adaptive", StringComparison.Ordinal) &&
+                !string.Equals(snapshot.SessionMode, "lesson", StringComparison.Ordinal))
+                throw new InvalidOperationException("Math runtime session_mode is invalid.");
+            if (string.Equals(snapshot.SessionMode, "lesson", StringComparison.Ordinal) && string.IsNullOrWhiteSpace(snapshot.TargetLessonId))
+                throw new InvalidOperationException("Targeted Math runtime is missing target_lesson_id.");
+        }
+
+        private static MathSessionRuntimeCorruptException Corrupt(string sessionId, Exception innerException)
+        {
+            return new MathSessionRuntimeCorruptException(
+                sessionId,
+                "Persisted Math runtime metadata is malformed and cannot be resumed safely.",
+                innerException);
         }
 
         private static string NullableText(object value)

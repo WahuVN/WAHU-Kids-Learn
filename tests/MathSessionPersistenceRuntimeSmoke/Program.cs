@@ -31,6 +31,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestAuthoredQuestionBank(questionBankPath);
                 TestTargetedLessonUnlockAndResume(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedCompletionSurvivesNextLessonReadFailure(root, schemaPath, templatePath, lessonCatalogPath);
+                TestCorruptRuntimeMetadataIsQuarantined(root, schemaPath, templatePath);
                 TestTargetedCorruptOpenQuestionReplaysAuthoredOrdinal(root, schemaPath, templatePath, lessonCatalogPath);
                 TestRetryAwareAnswerFlow(root, schemaPath, templatePath);
                 TestRetryWrongFinalizesOnce(root, schemaPath, templatePath);
@@ -308,6 +309,55 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 "postcommit_failure_keeps_lesson_progress_exactly_once");
             A(Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + sessionId + "';") == 0,
                 "postcommit_failure_still_cleans_runtime_checkpoint");
+        }
+
+        private static void TestCorruptRuntimeMetadataIsQuarantined(string root, string schemaPath, string templatePath)
+        {
+            var database = NewDatabase(Path.Combine(root, "corrupt-runtime-metadata.db"), schemaPath);
+            string oldSessionId;
+            string childId;
+            string skillId;
+
+            using (var first = new MathSessionCoordinator(database, templatePath, "LOW", 8071, 2))
+            {
+                var started = first.Start("Bé corrupt runtime metadata");
+                oldSessionId = started.SessionId;
+                childId = started.ChildId;
+                var question = first.NextQuestion();
+                skillId = question.SkillId;
+                var outcome = first.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 850);
+                A(outcome.IsCorrect && outcome.QuestionCompleted && first.Summary.Attempts == 1,
+                    "corrupt_runtime_fixture_keeps_one_durable_completed_question");
+                first.Suspend("corrupt_runtime_metadata_fixture");
+            }
+
+            A(Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + oldSessionId + "';") == 1,
+                "corrupt_runtime_fixture_has_resumable_checkpoint_before_corruption");
+            Exec(database,
+                "UPDATE math_session_runtime SET updated_at_utc='not-a-date' WHERE session_id=@session;",
+                "@session", oldSessionId);
+
+            using (var replacement = new MathSessionCoordinator(database, templatePath, "NORMAL", 8072, 2))
+            {
+                var started = replacement.Start("Bé corrupt runtime metadata");
+                A(!started.ResumedExistingSession && started.SessionId != oldSessionId && started.RecoveredDanglingSessions == 1,
+                    "corrupt_runtime_metadata_is_quarantined_and_new_session_starts");
+                A(started.CompletedQuestionCount == 0 && replacement.Summary.Attempts == 0,
+                    "corrupt_runtime_quarantine_does_not_replay_partial_session_as_new_progress");
+                A(Count(database, "SELECT count(*) FROM session WHERE id='" + oldSessionId + "' AND state='recovered' AND ended_at_utc IS NOT NULL;") == 1,
+                    "corrupt_runtime_quarantine_marks_only_old_session_recovered");
+                A(Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + oldSessionId + "';") == 0,
+                    "corrupt_runtime_quarantine_removes_only_broken_checkpoint");
+                A(Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + oldSessionId + "';") == 1,
+                    "corrupt_runtime_quarantine_preserves_durable_attempt_history");
+                A(Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + oldSessionId + "';") == 1,
+                    "corrupt_runtime_quarantine_preserves_mastery_event_history");
+                A(Count(database, "SELECT count(*) FROM child_skill WHERE child_id='" + childId + "' AND skill_id='" + skillId + "' AND attempts_count=1;") == 1,
+                    "corrupt_runtime_quarantine_preserves_child_skill_progress");
+                A(Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + started.SessionId + "';") == 1,
+                    "corrupt_runtime_quarantine_replacement_session_is_durably_resumable");
+                replacement.Abort("corrupt_runtime_metadata_cleanup");
+            }
         }
 
         private static void TestTargetedCorruptOpenQuestionReplaysAuthoredOrdinal(string root, string schemaPath, string templatePath, string lessonCatalogPath)
