@@ -508,6 +508,10 @@ class MathContentDataSmoke(unittest.TestCase):
                     rationales.append(rationale)
                     self.assertIn(reason, rationale)
                     self.assertTrue(all(marker not in rationale.casefold() for marker in validator.SHALLOW_DISTRACTOR_RATIONALE_MARKERS))
+                    component_marker = (validator.COMPONENT_TERM_REASON_MARKERS.get(choice["text"].strip().casefold())
+                                        if item["skill_id"] in validator.COMPONENT_SKILLS else None)
+                    if component_marker:
+                        self.assertIn(component_marker, rationale.casefold())
         self.assertEqual(267, len(rationales))
         self.assertNotIn(validator.GENERIC_DISTRACTOR_RATIONALE, rationales)
         counts = Counter(rationales)

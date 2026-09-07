@@ -286,9 +286,33 @@ def second_hint(question_type: str, difficulty: str, concept_name: str) -> str:
     return by_type.get(difficulty, by_type["medium"])
 
 
-def distractor_rationale(choice_text: str, explanation: str) -> str:
-    """After a wrong choice, reuse the question-specific worked reason instead of a generic template."""
+COMPONENT_SKILLS = {
+    "ADD_COMPONENTS_RECOGNIZE",
+    "SUB_COMPONENTS_RECOGNIZE",
+    "MULTIPLICATION_COMPONENTS",
+    "DIVISION_COMPONENTS",
+}
+
+COMPONENT_TERM_REASONS = {
+    "số hạng": "Số hạng là số được đem cộng trong một phép cộng.",
+    "tổng": "Tổng là kết quả của phép cộng.",
+    "số bị trừ": "Số bị trừ là số đứng trước dấu trừ, tức lượng ban đầu bị bớt đi.",
+    "số trừ": "Số trừ là lượng được bớt khỏi số bị trừ.",
+    "hiệu": "Hiệu là kết quả của phép trừ.",
+    "thừa số": "Thừa số là số được đem nhân trong một phép nhân.",
+    "tích": "Tích là kết quả của phép nhân.",
+    "số bị chia": "Số bị chia là lượng được đem chia.",
+    "số chia": "Số chia là số dùng để chia số bị chia.",
+    "thương": "Thương là kết quả của phép chia.",
+}
+
+
+def distractor_rationale(choice_text: str, explanation: str, skill: str) -> str:
+    """Explain a wrong choice; use a term-specific diagnosis when its meaning is unambiguous."""
     reason = " ".join(explanation.strip().split())
+    term_reason = COMPONENT_TERM_REASONS.get(choice_text.strip().casefold()) if skill in COMPONENT_SKILLS else None
+    if term_reason:
+        return f"“{choice_text}” chưa đúng. {term_reason} {reason}"
     return f"“{choice_text}” chưa đúng. {reason}"
 
 
@@ -1139,7 +1163,7 @@ def build() -> tuple[dict, dict]:
                     for index, choice in enumerate(ordered):
                         choice["id"] = chr(ord("a") + index)
                         if choice is not correct:
-                            choice["rationale_vi"] = distractor_rationale(choice["text"], q["explanation_vi"])
+                            choice["rationale_vi"] = distractor_rationale(choice["text"], q["explanation_vi"], skill)
                     q["choices"] = ordered
                     q["correct_choice_id"] = ordered[target]["id"]
                 questions.append(q)

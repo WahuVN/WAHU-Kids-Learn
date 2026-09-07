@@ -1276,17 +1276,17 @@
         {
           "id": "b",
           "text": "tổng",
-          "rationale_vi": "“tổng” chưa đúng. 23 là một trong hai số được cộng nên là số hạng."
+          "rationale_vi": "“tổng” chưa đúng. Tổng là kết quả của phép cộng. 23 là một trong hai số được cộng nên là số hạng."
         },
         {
           "id": "c",
           "text": "hiệu",
-          "rationale_vi": "“hiệu” chưa đúng. 23 là một trong hai số được cộng nên là số hạng."
+          "rationale_vi": "“hiệu” chưa đúng. Hiệu là kết quả của phép trừ. 23 là một trong hai số được cộng nên là số hạng."
         },
         {
           "id": "d",
           "text": "số bị trừ",
-          "rationale_vi": "“số bị trừ” chưa đúng. 23 là một trong hai số được cộng nên là số hạng."
+          "rationale_vi": "“số bị trừ” chưa đúng. Số bị trừ là số đứng trước dấu trừ, tức lượng ban đầu bị bớt đi. 23 là một trong hai số được cộng nên là số hạng."
         }
       ],
       "correct_choice_id": "a"
@@ -1324,7 +1324,7 @@
         {
           "id": "a",
           "text": "số hạng",
-          "rationale_vi": "“số hạng” chưa đúng. Kết quả của phép cộng gọi là tổng."
+          "rationale_vi": "“số hạng” chưa đúng. Số hạng là số được đem cộng trong một phép cộng. Kết quả của phép cộng gọi là tổng."
         },
         {
           "id": "b",
@@ -1334,12 +1334,12 @@
         {
           "id": "c",
           "text": "số trừ",
-          "rationale_vi": "“số trừ” chưa đúng. Kết quả của phép cộng gọi là tổng."
+          "rationale_vi": "“số trừ” chưa đúng. Số trừ là lượng được bớt khỏi số bị trừ. Kết quả của phép cộng gọi là tổng."
         },
         {
           "id": "d",
           "text": "thương",
-          "rationale_vi": "“thương” chưa đúng. Kết quả của phép cộng gọi là tổng."
+          "rationale_vi": "“thương” chưa đúng. Thương là kết quả của phép chia. Kết quả của phép cộng gọi là tổng."
         }
       ],
       "correct_choice_id": "b"
@@ -1430,17 +1430,17 @@
         {
           "id": "a",
           "text": "số trừ",
-          "rationale_vi": "“số trừ” chưa đúng. 50 là số đứng trước dấu trừ nên là số bị trừ."
+          "rationale_vi": "“số trừ” chưa đúng. Số trừ là lượng được bớt khỏi số bị trừ. 50 là số đứng trước dấu trừ nên là số bị trừ."
         },
         {
           "id": "b",
           "text": "hiệu",
-          "rationale_vi": "“hiệu” chưa đúng. 50 là số đứng trước dấu trừ nên là số bị trừ."
+          "rationale_vi": "“hiệu” chưa đúng. Hiệu là kết quả của phép trừ. 50 là số đứng trước dấu trừ nên là số bị trừ."
         },
         {
           "id": "c",
           "text": "tổng",
-          "rationale_vi": "“tổng” chưa đúng. 50 là số đứng trước dấu trừ nên là số bị trừ."
+          "rationale_vi": "“tổng” chưa đúng. Tổng là kết quả của phép cộng. 50 là số đứng trước dấu trừ nên là số bị trừ."
         },
         {
           "id": "d",
@@ -1488,17 +1488,17 @@
         {
           "id": "b",
           "text": "số bị trừ",
-          "rationale_vi": "“số bị trừ” chưa đúng. 20 là lượng được bớt khỏi số bị trừ nên là số trừ."
+          "rationale_vi": "“số bị trừ” chưa đúng. Số bị trừ là số đứng trước dấu trừ, tức lượng ban đầu bị bớt đi. 20 là lượng được bớt khỏi số bị trừ nên là số trừ."
         },
         {
           "id": "c",
           "text": "hiệu",
-          "rationale_vi": "“hiệu” chưa đúng. 20 là lượng được bớt khỏi số bị trừ nên là số trừ."
+          "rationale_vi": "“hiệu” chưa đúng. Hiệu là kết quả của phép trừ. 20 là lượng được bớt khỏi số bị trừ nên là số trừ."
         },
         {
           "id": "d",
           "text": "số hạng",
-          "rationale_vi": "“số hạng” chưa đúng. 20 là lượng được bớt khỏi số bị trừ nên là số trừ."
+          "rationale_vi": "“số hạng” chưa đúng. Số hạng là số được đem cộng trong một phép cộng. 20 là lượng được bớt khỏi số bị trừ nên là số trừ."
         }
       ],
       "correct_choice_id": "a"
@@ -2457,17 +2457,17 @@
         {
           "id": "a",
           "text": "tích",
-          "rationale_vi": "“tích” chưa đúng. 2 là một số được nhân nên là thừa số."
+          "rationale_vi": "“tích” chưa đúng. Tích là kết quả của phép nhân. 2 là một số được nhân nên là thừa số."
         },
         {
           "id": "b",
           "text": "thương",
-          "rationale_vi": "“thương” chưa đúng. 2 là một số được nhân nên là thừa số."
+          "rationale_vi": "“thương” chưa đúng. Thương là kết quả của phép chia. 2 là một số được nhân nên là thừa số."
         },
         {
           "id": "c",
           "text": "số bị chia",
-          "rationale_vi": "“số bị chia” chưa đúng. 2 là một số được nhân nên là thừa số."
+          "rationale_vi": "“số bị chia” chưa đúng. Số bị chia là lượng được đem chia. 2 là một số được nhân nên là thừa số."
         },
         {
           "id": "d",
@@ -2515,17 +2515,17 @@
         {
           "id": "b",
           "text": "thừa số",
-          "rationale_vi": "“thừa số” chưa đúng. Kết quả của phép nhân gọi là tích."
+          "rationale_vi": "“thừa số” chưa đúng. Thừa số là số được đem nhân trong một phép nhân. Kết quả của phép nhân gọi là tích."
         },
         {
           "id": "c",
           "text": "hiệu",
-          "rationale_vi": "“hiệu” chưa đúng. Kết quả của phép nhân gọi là tích."
+          "rationale_vi": "“hiệu” chưa đúng. Hiệu là kết quả của phép trừ. Kết quả của phép nhân gọi là tích."
         },
         {
           "id": "d",
           "text": "số chia",
-          "rationale_vi": "“số chia” chưa đúng. Kết quả của phép nhân gọi là tích."
+          "rationale_vi": "“số chia” chưa đúng. Số chia là số dùng để chia số bị chia. Kết quả của phép nhân gọi là tích."
         }
       ],
       "correct_choice_id": "a"
@@ -2616,12 +2616,12 @@
         {
           "id": "a",
           "text": "số chia",
-          "rationale_vi": "“số chia” chưa đúng. 10 là lượng được đem chia nên là số bị chia."
+          "rationale_vi": "“số chia” chưa đúng. Số chia là số dùng để chia số bị chia. 10 là lượng được đem chia nên là số bị chia."
         },
         {
           "id": "b",
           "text": "thương",
-          "rationale_vi": "“thương” chưa đúng. 10 là lượng được đem chia nên là số bị chia."
+          "rationale_vi": "“thương” chưa đúng. Thương là kết quả của phép chia. 10 là lượng được đem chia nên là số bị chia."
         },
         {
           "id": "c",
@@ -2631,7 +2631,7 @@
         {
           "id": "d",
           "text": "tích",
-          "rationale_vi": "“tích” chưa đúng. 10 là lượng được đem chia nên là số bị chia."
+          "rationale_vi": "“tích” chưa đúng. Tích là kết quả của phép nhân. 10 là lượng được đem chia nên là số bị chia."
         }
       ],
       "correct_choice_id": "c"
@@ -2669,17 +2669,17 @@
         {
           "id": "a",
           "text": "số bị chia",
-          "rationale_vi": "“số bị chia” chưa đúng. 5 là số dùng để chia nên là số chia."
+          "rationale_vi": "“số bị chia” chưa đúng. Số bị chia là lượng được đem chia. 5 là số dùng để chia nên là số chia."
         },
         {
           "id": "b",
           "text": "thương",
-          "rationale_vi": "“thương” chưa đúng. 5 là số dùng để chia nên là số chia."
+          "rationale_vi": "“thương” chưa đúng. Thương là kết quả của phép chia. 5 là số dùng để chia nên là số chia."
         },
         {
           "id": "c",
           "text": "số hạng",
-          "rationale_vi": "“số hạng” chưa đúng. 5 là số dùng để chia nên là số chia."
+          "rationale_vi": "“số hạng” chưa đúng. Số hạng là số được đem cộng trong một phép cộng. 5 là số dùng để chia nên là số chia."
         },
         {
           "id": "d",

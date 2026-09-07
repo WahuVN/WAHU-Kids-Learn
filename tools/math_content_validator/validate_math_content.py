@@ -47,6 +47,24 @@ GENERIC_FIRST_OBJECTIVE_PREFIX = "Nhận biết và thực hiện đúng nội d
 GENERIC_SECOND_OBJECTIVE = "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
 GENERIC_DISTRACTOR_RATIONALE = "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
 SHALLOW_NUMERIC_EXPLANATION_MARKER = "kết quả này theo đúng quy tắc"
+COMPONENT_SKILLS = {
+    "ADD_COMPONENTS_RECOGNIZE",
+    "SUB_COMPONENTS_RECOGNIZE",
+    "MULTIPLICATION_COMPONENTS",
+    "DIVISION_COMPONENTS",
+}
+COMPONENT_TERM_REASON_MARKERS = {
+    "số hạng": "số hạng là số được đem cộng",
+    "tổng": "tổng là kết quả của phép cộng",
+    "số bị trừ": "số bị trừ là số đứng trước dấu trừ",
+    "số trừ": "số trừ là lượng được bớt khỏi số bị trừ",
+    "hiệu": "hiệu là kết quả của phép trừ",
+    "thừa số": "thừa số là số được đem nhân",
+    "tích": "tích là kết quả của phép nhân",
+    "số bị chia": "số bị chia là lượng được đem chia",
+    "số chia": "số chia là số dùng để chia số bị chia",
+    "thương": "thương là kết quả của phép chia",
+}
 SHALLOW_DISTRACTOR_RATIONALE_MARKERS = (
     "chưa thỏa đủ dữ kiện",
     "có ít nhất một bước của",
@@ -928,10 +946,13 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
                 correct_choice_positions_by_count[len(choice_ids)][correct_index] += 1
                 if correct_text != choice_texts[correct_index]:
                     errors.append(f"correct_choice_text_mismatch:{where}:{correct_id}:{correct_text!r}")
-            for cid, rationale in zip(choice_ids, choice_rationales):
+            for cid, text, rationale in zip(choice_ids, choice_texts, choice_rationales):
                 if cid == correct_id:
                     continue
                 normalized_rationale = " ".join(rationale.split())
+                component_marker = COMPONENT_TERM_REASON_MARKERS.get(text.strip().casefold()) if skill in COMPONENT_SKILLS else None
+                if component_marker and component_marker not in normalized_rationale.casefold():
+                    errors.append(f"component_distractor_missing_term_reason:{where}:{cid}:{text}")
                 distractor_rationale_counts[normalized_rationale] += 1
                 if normalized_rationale == GENERIC_DISTRACTOR_RATIONALE:
                     errors.append(f"generic_distractor_rationale:{where}:{cid}")
