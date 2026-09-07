@@ -108,6 +108,24 @@ class MathGameEventsSmoke(unittest.TestCase):
             errors, _ = self.validator.validate(path, LESSON_PATH)
         self.assertTrue(any("break_copy_template_reuse" in x for x in errors), errors)
 
+    def test_event_validator_rejects_generic_repair_copy(self):
+        broken = json.loads(EVENT_PATH.read_text(encoding="utf-8"))
+        broken["events"][2]["repair_copy_vi"] = "Mình thử lại một bước nhỏ nhé."
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "events.json"
+            path.write_text(json.dumps(broken, ensure_ascii=False), encoding="utf-8")
+            errors, _ = self.validator.validate(path, LESSON_PATH)
+        self.assertTrue(any("repair_copy_vi:not_skill_specific" in x for x in errors), errors)
+
+    def test_event_validator_rejects_answer_leak_in_repair_copy(self):
+        broken = json.loads(EVENT_PATH.read_text(encoding="utf-8"))
+        broken["events"][1]["repair_copy_vi"] = "Mình nhìn hai chữ số cuối nhé; đáp án là: 300."
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "events.json"
+            path.write_text(json.dumps(broken, ensure_ascii=False), encoding="utf-8")
+            errors, _ = self.validator.validate(path, LESSON_PATH)
+        self.assertTrue(any("repair_copy_vi:answer_leak" in x for x in errors), errors)
+
     def test_event_validator_rejects_wrong_lesson_skill_and_question_count(self):
         broken = json.loads(EVENT_PATH.read_text(encoding="utf-8"))
         broken["events"][1]["target_skill_id"] = "NUM_COUNT_READ_WRITE_0_1000"

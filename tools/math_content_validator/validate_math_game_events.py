@@ -39,6 +39,17 @@ SAFE_THEME = re.compile(r"^[a-z0-9][a-z0-9_]{2,47}$")
 BREAK_PROGRESS_PATTERNS = (r"\blưu\b", r"giữ\s+nguyên")
 BREAK_PROMISE_PATTERNS = (r"hoàn\s+thành", r"nhận\s+(?:quà|thưởng)", r"mở\s+khóa", r"được\s+thưởng")
 MAX_BREAK_TOKEN_JACCARD = 0.60
+REPAIR_REQUIRED_PATTERNS_BY_SKILL = {
+    "NUM_COUNT_READ_WRITE_0_1000": (r"\bhàng\b",),
+    "NUM_FULL_HUNDREDS_RECOGNIZE": (r"hai\s+chữ\s+số\s+cuối",),
+    "NUM_PREDECESSOR_SUCCESSOR": (r"bớt\s+1", r"thêm\s+1"),
+    "PLACE_VALUE_HUNDREDS_TENS_ONES": (r"vị\s+trí", r"\bhàng\b"),
+    "NUM_EXPANDED_FORM_HTO": (r"tách", r"từng\s+hàng"),
+}
+REPAIR_ANSWER_LEAK_PATTERNS = (
+    r"đáp\s+án\s*(?:là|:)", r"câu\s+trả\s+lời\s*(?:là|:)",
+    r"chọn\s+đáp\s+án\s+[a-d0-9]", r"=\s*\d+",
+)
 
 
 def load_json(path: Path):
@@ -134,6 +145,16 @@ def validate(events_path: Path = DEFAULT_EVENTS, lessons_path: Path = DEFAULT_LE
             if any(re.search(pattern, lowered_break, re.IGNORECASE) for pattern in BREAK_PROMISE_PATTERNS):
                 errors.append(f"{where}:break_copy_vi:completion_or_reward_promise")
             break_texts.append((where, break_text))
+
+        repair_text = event.get("repair_copy_vi")
+        repair_skill = event.get("target_skill_id")
+        if isinstance(repair_text, str):
+            lowered_repair = repair_text.casefold()
+            required_patterns = REPAIR_REQUIRED_PATTERNS_BY_SKILL.get(repair_skill, ())
+            if required_patterns and not all(re.search(pattern, lowered_repair, re.IGNORECASE) for pattern in required_patterns):
+                errors.append(f"{where}:repair_copy_vi:not_skill_specific:{repair_skill}")
+            if any(re.search(pattern, lowered_repair, re.IGNORECASE) for pattern in REPAIR_ANSWER_LEAK_PATTERNS):
+                errors.append(f"{where}:repair_copy_vi:answer_leak")
 
         checkpoints = event.get("checkpoint_nouns_vi")
         if not isinstance(checkpoints, list) or len(checkpoints) != 3:
