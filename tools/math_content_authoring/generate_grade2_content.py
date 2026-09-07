@@ -307,9 +307,63 @@ COMPONENT_TERM_REASONS = {
 }
 
 
-def distractor_rationale(choice_text: str, explanation: str, skill: str) -> str:
-    """Explain a wrong choice; use a term-specific diagnosis when its meaning is unambiguous."""
+def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str | None:
+    """Return a deterministic, choice-specific diagnosis for structures we can prove from the text."""
+    if skill == "NUM_EXPANDED_FORM_HTO":
+        prompt_numbers = [int(x) for x in re.findall(r"\d+", prompt)]
+        if not prompt_numbers:
+            return None
+        target = prompt_numbers[0]
+        rhs = choice_text.split("=", 1)[1].strip() if "=" in choice_text else choice_text.strip()
+        if re.fullmatch(r"\d+(?:\s*\+\s*\d+)+", rhs):
+            value = sum(int(x) for x in re.findall(r"\d+", rhs))
+            if value != target:
+                return f"Vế phải của “{choice_text}” bằng {value}, không bằng số {target} cần biểu diễn."
+
+    if skill == "NUM_COMPARE_0_1000":
+        prompt_numbers = [int(x) for x in re.findall(r"\d+", prompt)]
+        choice_numbers = [int(x) for x in re.findall(r"\d+", choice_text)]
+        if len(choice_numbers) >= 2:
+            left, right = choice_numbers[0], choice_numbers[1]
+        elif len(prompt_numbers) >= 2:
+            left, right = prompt_numbers[0], prompt_numbers[1]
+        else:
+            return None
+        if "+" in choice_text:
+            return "Dấu + là dấu phép cộng, không phải dấu dùng để so sánh hai số."
+        if re.search(r"(?<!\d)-(?!\d)", choice_text) or choice_text.strip() == "-":
+            return "Dấu - là dấu phép trừ, không phải dấu dùng để so sánh hai số."
+        actual = "=" if left == right else (">" if left > right else "<")
+        shown = next((symbol for symbol in (">", "<", "=") if symbol in choice_text), None)
+        if shown and shown != actual:
+            if actual == "=":
+                relation = f"{left} bằng {right}"
+            elif actual == ">":
+                relation = f"{left} lớn hơn {right}"
+            else:
+                relation = f"{left} nhỏ hơn {right}"
+            return f"Dấu {shown} chưa phù hợp vì {relation}; quan hệ đúng phải dùng dấu {actual}."
+
+    if skill == "NUM_SORT_UP_TO_4":
+        numbers = [int(x) for x in re.findall(r"\d+", choice_text)]
+        if len(numbers) < 2:
+            return None
+        descending = "giảm dần" in prompt.casefold()
+        direction = "giảm dần" if descending else "tăng dần"
+        for left, right in zip(numbers, numbers[1:]):
+            violates = left < right if descending else left > right
+            if violates:
+                sign = "<" if left < right else ">"
+                return f"Trong “{choice_text}”, {left} đứng trước {right} dù {left} {sign} {right}, nên thứ tự chưa {direction}."
+    return None
+
+
+def distractor_rationale(choice_text: str, explanation: str, skill: str, prompt: str) -> str:
+    """Explain a wrong choice; prefer a provable choice-specific diagnosis when available."""
     reason = " ".join(explanation.strip().split())
+    structured_reason = structured_choice_reason(skill, prompt, choice_text)
+    if structured_reason:
+        return f"“{choice_text}” chưa đúng. {structured_reason} {reason}"
     term_reason = COMPONENT_TERM_REASONS.get(choice_text.strip().casefold()) if skill in COMPONENT_SKILLS else None
     if term_reason:
         return f"“{choice_text}” chưa đúng. {term_reason} {reason}"
@@ -1163,7 +1217,8 @@ def build() -> tuple[dict, dict]:
                     for index, choice in enumerate(ordered):
                         choice["id"] = chr(ord("a") + index)
                         if choice is not correct:
-                            choice["rationale_vi"] = distractor_rationale(choice["text"], q["explanation_vi"], skill)
+                            choice["rationale_vi"] = distractor_rationale(
+                                choice["text"], q["explanation_vi"], skill, q["prompt_vi"])
                     q["choices"] = ordered
                     q["correct_choice_id"] = ordered[target]["id"]
                 questions.append(q)

@@ -508,6 +508,10 @@ class MathContentDataSmoke(unittest.TestCase):
                     rationales.append(rationale)
                     self.assertIn(reason, rationale)
                     self.assertTrue(all(marker not in rationale.casefold() for marker in validator.SHALLOW_DISTRACTOR_RATIONALE_MARKERS))
+                    structured_reason = validator.structured_choice_reason(
+                        item["skill_id"], item["prompt_vi"], choice["text"])
+                    if structured_reason:
+                        self.assertIn(structured_reason.casefold(), rationale.casefold())
                     component_marker = (validator.COMPONENT_TERM_REASON_MARKERS.get(choice["text"].strip().casefold())
                                         if item["skill_id"] in validator.COMPONENT_SKILLS else None)
                     if component_marker:

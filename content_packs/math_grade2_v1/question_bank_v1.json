@@ -515,17 +515,17 @@
         {
           "id": "a",
           "text": "300 + 5 + 2",
-          "rationale_vi": "“300 + 5 + 2” chưa đúng. 352 có 3 trăm, 5 chục và 2 đơn vị nên bằng 300 + 50 + 2."
+          "rationale_vi": "“300 + 5 + 2” chưa đúng. Vế phải của “300 + 5 + 2” bằng 307, không bằng số 352 cần biểu diễn. 352 có 3 trăm, 5 chục và 2 đơn vị nên bằng 300 + 50 + 2."
         },
         {
           "id": "b",
           "text": "30 + 50 + 2",
-          "rationale_vi": "“30 + 50 + 2” chưa đúng. 352 có 3 trăm, 5 chục và 2 đơn vị nên bằng 300 + 50 + 2."
+          "rationale_vi": "“30 + 50 + 2” chưa đúng. Vế phải của “30 + 50 + 2” bằng 82, không bằng số 352 cần biểu diễn. 352 có 3 trăm, 5 chục và 2 đơn vị nên bằng 300 + 50 + 2."
         },
         {
           "id": "c",
           "text": "300 + 50 + 20",
-          "rationale_vi": "“300 + 50 + 20” chưa đúng. 352 có 3 trăm, 5 chục và 2 đơn vị nên bằng 300 + 50 + 2."
+          "rationale_vi": "“300 + 50 + 20” chưa đúng. Vế phải của “300 + 50 + 20” bằng 370, không bằng số 352 cần biểu diễn. 352 có 3 trăm, 5 chục và 2 đơn vị nên bằng 300 + 50 + 2."
         },
         {
           "id": "d",
@@ -604,17 +604,17 @@
         {
           "id": "b",
           "text": "908 = 90 + 8",
-          "rationale_vi": "“908 = 90 + 8” chưa đúng. 908 có 9 trăm, 0 chục và 8 đơn vị; hàng chục bằng 0 nên dạng đúng là 900 + 8. Vậy đáp án là 908 = 900 + 8."
+          "rationale_vi": "“908 = 90 + 8” chưa đúng. Vế phải của “908 = 90 + 8” bằng 98, không bằng số 908 cần biểu diễn. 908 có 9 trăm, 0 chục và 8 đơn vị; hàng chục bằng 0 nên dạng đúng là 900 + 8. Vậy đáp án là 908 = 900 + 8."
         },
         {
           "id": "c",
           "text": "908 = 900 + 80 + 8",
-          "rationale_vi": "“908 = 900 + 80 + 8” chưa đúng. 908 có 9 trăm, 0 chục và 8 đơn vị; hàng chục bằng 0 nên dạng đúng là 900 + 8. Vậy đáp án là 908 = 900 + 8."
+          "rationale_vi": "“908 = 900 + 80 + 8” chưa đúng. Vế phải của “908 = 900 + 80 + 8” bằng 988, không bằng số 908 cần biểu diễn. 908 có 9 trăm, 0 chục và 8 đơn vị; hàng chục bằng 0 nên dạng đúng là 900 + 8. Vậy đáp án là 908 = 900 + 8."
         },
         {
           "id": "d",
           "text": "908 = 900 + 0 + 80",
-          "rationale_vi": "“908 = 900 + 0 + 80” chưa đúng. 908 có 9 trăm, 0 chục và 8 đơn vị; hàng chục bằng 0 nên dạng đúng là 900 + 8. Vậy đáp án là 908 = 900 + 8."
+          "rationale_vi": "“908 = 900 + 0 + 80” chưa đúng. Vế phải của “908 = 900 + 0 + 80” bằng 980, không bằng số 908 cần biểu diễn. 908 có 9 trăm, 0 chục và 8 đơn vị; hàng chục bằng 0 nên dạng đúng là 900 + 8. Vậy đáp án là 908 = 900 + 8."
         }
       ],
       "correct_choice_id": "a"
@@ -745,7 +745,7 @@
         {
           "id": "a",
           "text": ">",
-          "rationale_vi": "“>” chưa đúng. Cùng 6 trăm nhưng 0 chục nhỏ hơn 8 chục nên 608 < 680. Vậy đáp án là <."
+          "rationale_vi": "“>” chưa đúng. Dấu > chưa phù hợp vì 608 nhỏ hơn 680; quan hệ đúng phải dùng dấu <. Cùng 6 trăm nhưng 0 chục nhỏ hơn 8 chục nên 608 < 680. Vậy đáp án là <."
         },
         {
           "id": "b",
@@ -755,12 +755,12 @@
         {
           "id": "c",
           "text": "=",
-          "rationale_vi": "“=” chưa đúng. Cùng 6 trăm nhưng 0 chục nhỏ hơn 8 chục nên 608 < 680. Vậy đáp án là <."
+          "rationale_vi": "“=” chưa đúng. Dấu = chưa phù hợp vì 608 nhỏ hơn 680; quan hệ đúng phải dùng dấu <. Cùng 6 trăm nhưng 0 chục nhỏ hơn 8 chục nên 608 < 680. Vậy đáp án là <."
         },
         {
           "id": "d",
           "text": "+",
-          "rationale_vi": "“+” chưa đúng. Cùng 6 trăm nhưng 0 chục nhỏ hơn 8 chục nên 608 < 680. Vậy đáp án là <."
+          "rationale_vi": "“+” chưa đúng. Dấu + là dấu phép cộng, không phải dấu dùng để so sánh hai số. Cùng 6 trăm nhưng 0 chục nhỏ hơn 8 chục nên 608 < 680. Vậy đáp án là <."
         }
       ],
       "correct_choice_id": "b"
@@ -798,12 +798,12 @@
         {
           "id": "a",
           "text": "<",
-          "rationale_vi": "“<” chưa đúng. Cùng 9 trăm; 4 chục lớn hơn 2 chục nên 945 > 925. Vậy đáp án là >."
+          "rationale_vi": "“<” chưa đúng. Dấu < chưa phù hợp vì 945 lớn hơn 925; quan hệ đúng phải dùng dấu >. Cùng 9 trăm; 4 chục lớn hơn 2 chục nên 945 > 925. Vậy đáp án là >."
         },
         {
           "id": "b",
           "text": "=",
-          "rationale_vi": "“=” chưa đúng. Cùng 9 trăm; 4 chục lớn hơn 2 chục nên 945 > 925. Vậy đáp án là >."
+          "rationale_vi": "“=” chưa đúng. Dấu = chưa phù hợp vì 945 lớn hơn 925; quan hệ đúng phải dùng dấu >. Cùng 9 trăm; 4 chục lớn hơn 2 chục nên 945 > 925. Vậy đáp án là >."
         },
         {
           "id": "c",
@@ -813,7 +813,7 @@
         {
           "id": "d",
           "text": "-",
-          "rationale_vi": "“-” chưa đúng. Cùng 9 trăm; 4 chục lớn hơn 2 chục nên 945 > 925. Vậy đáp án là >."
+          "rationale_vi": "“-” chưa đúng. Dấu - là dấu phép trừ, không phải dấu dùng để so sánh hai số. Cùng 9 trăm; 4 chục lớn hơn 2 chục nên 945 > 925. Vậy đáp án là >."
         }
       ],
       "correct_choice_id": "c"
@@ -851,17 +851,17 @@
         {
           "id": "a",
           "text": "399 > 403",
-          "rationale_vi": "“399 > 403” chưa đúng. 399 còn dưới 400, trong khi 403 lớn hơn 400 nên 399 < 403."
+          "rationale_vi": "“399 > 403” chưa đúng. Dấu > chưa phù hợp vì 399 nhỏ hơn 403; quan hệ đúng phải dùng dấu <. 399 còn dưới 400, trong khi 403 lớn hơn 400 nên 399 < 403."
         },
         {
           "id": "b",
           "text": "399 = 403",
-          "rationale_vi": "“399 = 403” chưa đúng. 399 còn dưới 400, trong khi 403 lớn hơn 400 nên 399 < 403."
+          "rationale_vi": "“399 = 403” chưa đúng. Dấu = chưa phù hợp vì 399 nhỏ hơn 403; quan hệ đúng phải dùng dấu <. 399 còn dưới 400, trong khi 403 lớn hơn 400 nên 399 < 403."
         },
         {
           "id": "c",
           "text": "399 + 403",
-          "rationale_vi": "“399 + 403” chưa đúng. 399 còn dưới 400, trong khi 403 lớn hơn 400 nên 399 < 403."
+          "rationale_vi": "“399 + 403” chưa đúng. Dấu + là dấu phép cộng, không phải dấu dùng để so sánh hai số. 399 còn dưới 400, trong khi 403 lớn hơn 400 nên 399 < 403."
         },
         {
           "id": "d",
@@ -1002,17 +1002,17 @@
         {
           "id": "b",
           "text": "320, 302, 230, 203",
-          "rationale_vi": "“320, 302, 230, 203” chưa đúng. Tăng dần là từ bé đến lớn: 203 < 230 < 302 < 320."
+          "rationale_vi": "“320, 302, 230, 203” chưa đúng. Trong “320, 302, 230, 203”, 320 đứng trước 302 dù 320 > 302, nên thứ tự chưa tăng dần. Tăng dần là từ bé đến lớn: 203 < 230 < 302 < 320."
         },
         {
           "id": "c",
           "text": "203, 302, 230, 320",
-          "rationale_vi": "“203, 302, 230, 320” chưa đúng. Tăng dần là từ bé đến lớn: 203 < 230 < 302 < 320."
+          "rationale_vi": "“203, 302, 230, 320” chưa đúng. Trong “203, 302, 230, 320”, 302 đứng trước 230 dù 302 > 230, nên thứ tự chưa tăng dần. Tăng dần là từ bé đến lớn: 203 < 230 < 302 < 320."
         },
         {
           "id": "d",
           "text": "230, 203, 320, 302",
-          "rationale_vi": "“230, 203, 320, 302” chưa đúng. Tăng dần là từ bé đến lớn: 203 < 230 < 302 < 320."
+          "rationale_vi": "“230, 203, 320, 302” chưa đúng. Trong “230, 203, 320, 302”, 230 đứng trước 203 dù 230 > 203, nên thứ tự chưa tăng dần. Tăng dần là từ bé đến lớn: 203 < 230 < 302 < 320."
         }
       ],
       "correct_choice_id": "a"
@@ -1050,7 +1050,7 @@
         {
           "id": "a",
           "text": "405, 450, 504, 540",
-          "rationale_vi": "“405, 450, 504, 540” chưa đúng. Giảm dần là từ lớn đến bé: 540 > 504 > 450 > 405."
+          "rationale_vi": "“405, 450, 504, 540” chưa đúng. Trong “405, 450, 504, 540”, 405 đứng trước 450 dù 405 < 450, nên thứ tự chưa giảm dần. Giảm dần là từ lớn đến bé: 540 > 504 > 450 > 405."
         },
         {
           "id": "b",
@@ -1060,12 +1060,12 @@
         {
           "id": "c",
           "text": "540, 450, 504, 405",
-          "rationale_vi": "“540, 450, 504, 405” chưa đúng. Giảm dần là từ lớn đến bé: 540 > 504 > 450 > 405."
+          "rationale_vi": "“540, 450, 504, 405” chưa đúng. Trong “540, 450, 504, 405”, 450 đứng trước 504 dù 450 < 504, nên thứ tự chưa giảm dần. Giảm dần là từ lớn đến bé: 540 > 504 > 450 > 405."
         },
         {
           "id": "d",
           "text": "504, 540, 405, 450",
-          "rationale_vi": "“504, 540, 405, 450” chưa đúng. Giảm dần là từ lớn đến bé: 540 > 504 > 450 > 405."
+          "rationale_vi": "“504, 540, 405, 450” chưa đúng. Trong “504, 540, 405, 450”, 504 đứng trước 540 dù 504 < 540, nên thứ tự chưa giảm dần. Giảm dần là từ lớn đến bé: 540 > 504 > 450 > 405."
         }
       ],
       "correct_choice_id": "b"
@@ -1103,12 +1103,12 @@
         {
           "id": "a",
           "text": "111, 110, 101, 100",
-          "rationale_vi": "“111, 110, 101, 100” chưa đúng. So sánh hàng chục rồi hàng đơn vị để có 100 < 101 < 110 < 111."
+          "rationale_vi": "“111, 110, 101, 100” chưa đúng. Trong “111, 110, 101, 100”, 111 đứng trước 110 dù 111 > 110, nên thứ tự chưa tăng dần. So sánh hàng chục rồi hàng đơn vị để có 100 < 101 < 110 < 111."
         },
         {
           "id": "b",
           "text": "100, 110, 101, 111",
-          "rationale_vi": "“100, 110, 101, 111” chưa đúng. So sánh hàng chục rồi hàng đơn vị để có 100 < 101 < 110 < 111."
+          "rationale_vi": "“100, 110, 101, 111” chưa đúng. Trong “100, 110, 101, 111”, 110 đứng trước 101 dù 110 > 101, nên thứ tự chưa tăng dần. So sánh hàng chục rồi hàng đơn vị để có 100 < 101 < 110 < 111."
         },
         {
           "id": "c",
@@ -1118,7 +1118,7 @@
         {
           "id": "d",
           "text": "101, 100, 111, 110",
-          "rationale_vi": "“101, 100, 111, 110” chưa đúng. So sánh hàng chục rồi hàng đơn vị để có 100 < 101 < 110 < 111."
+          "rationale_vi": "“101, 100, 111, 110” chưa đúng. Trong “101, 100, 111, 110”, 101 đứng trước 100 dù 101 > 100, nên thứ tự chưa tăng dần. So sánh hàng chục rồi hàng đơn vị để có 100 < 101 < 110 < 111."
         }
       ],
       "correct_choice_id": "c"

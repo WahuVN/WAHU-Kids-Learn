@@ -80,6 +80,56 @@ INTERNAL_CHILD_VOCAB_RE = re.compile(
 )
 
 
+def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str | None:
+    if skill == "NUM_EXPANDED_FORM_HTO":
+        prompt_numbers = [int(x) for x in re.findall(r"\d+", prompt)]
+        if not prompt_numbers:
+            return None
+        target = prompt_numbers[0]
+        rhs = choice_text.split("=", 1)[1].strip() if "=" in choice_text else choice_text.strip()
+        if re.fullmatch(r"\d+(?:\s*\+\s*\d+)+", rhs):
+            value = sum(int(x) for x in re.findall(r"\d+", rhs))
+            if value != target:
+                return f"Vế phải của “{choice_text}” bằng {value}, không bằng số {target} cần biểu diễn."
+
+    if skill == "NUM_COMPARE_0_1000":
+        prompt_numbers = [int(x) for x in re.findall(r"\d+", prompt)]
+        choice_numbers = [int(x) for x in re.findall(r"\d+", choice_text)]
+        if len(choice_numbers) >= 2:
+            left, right = choice_numbers[0], choice_numbers[1]
+        elif len(prompt_numbers) >= 2:
+            left, right = prompt_numbers[0], prompt_numbers[1]
+        else:
+            return None
+        if "+" in choice_text:
+            return "Dấu + là dấu phép cộng, không phải dấu dùng để so sánh hai số."
+        if re.search(r"(?<!\d)-(?!\d)", choice_text) or choice_text.strip() == "-":
+            return "Dấu - là dấu phép trừ, không phải dấu dùng để so sánh hai số."
+        actual = "=" if left == right else (">" if left > right else "<")
+        shown = next((symbol for symbol in (">", "<", "=") if symbol in choice_text), None)
+        if shown and shown != actual:
+            if actual == "=":
+                relation = f"{left} bằng {right}"
+            elif actual == ">":
+                relation = f"{left} lớn hơn {right}"
+            else:
+                relation = f"{left} nhỏ hơn {right}"
+            return f"Dấu {shown} chưa phù hợp vì {relation}; quan hệ đúng phải dùng dấu {actual}."
+
+    if skill == "NUM_SORT_UP_TO_4":
+        numbers = [int(x) for x in re.findall(r"\d+", choice_text)]
+        if len(numbers) < 2:
+            return None
+        descending = "giảm dần" in prompt.casefold()
+        direction = "giảm dần" if descending else "tăng dần"
+        for left, right in zip(numbers, numbers[1:]):
+            violates = left < right if descending else left > right
+            if violates:
+                sign = "<" if left < right else ">"
+                return f"Trong “{choice_text}”, {left} đứng trước {right} dù {left} {sign} {right}, nên thứ tự chưa {direction}."
+    return None
+
+
 def redundant_prerequisite_edges(graph: dict[str, list[str]]) -> list[tuple[str, str]]:
     redundant: list[tuple[str, str]] = []
 
@@ -950,6 +1000,9 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
                 if cid == correct_id:
                     continue
                 normalized_rationale = " ".join(rationale.split())
+                structured_reason = structured_choice_reason(skill, prompt, text)
+                if structured_reason and structured_reason.casefold() not in normalized_rationale.casefold():
+                    errors.append(f"structured_distractor_missing_reason:{where}:{cid}:{text}")
                 component_marker = COMPONENT_TERM_REASON_MARKERS.get(text.strip().casefold()) if skill in COMPONENT_SKILLS else None
                 if component_marker and component_marker not in normalized_rationale.casefold():
                     errors.append(f"component_distractor_missing_term_reason:{where}:{cid}:{text}")
