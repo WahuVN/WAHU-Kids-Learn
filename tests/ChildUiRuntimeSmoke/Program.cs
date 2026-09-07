@@ -428,6 +428,8 @@ namespace WAHU.ChildUiRuntimeSmoke
                         accessCache != null && accessCache.Count == 67,
                         "math_hub_reload_fixture_populates_internal_caches");
 
+                    var reloadContinue = GetField<Button>(reload, "_continueLessonButton");
+                    reloadContinue.AccessibleName = "STale previous continue state";
                     File.WriteAllText(reloadCatalogPath, "{ invalid catalog json", System.Text.Encoding.UTF8);
                     Invoke(reload, "LoadCatalogAndProgress");
                     var reloadChapterFlow = GetField<FlowLayoutPanel>(reload, "_chapterFlow");
@@ -439,9 +441,11 @@ namespace WAHU.ChildUiRuntimeSmoke
                     A(reloadChapterFlow.Controls.Count == 0 && reloadLessonFlow.Controls.Count == 0 &&
                         !GetField<Control>(reload, "_detailFlow").Visible,
                         "math_hub_reload_failure_clears_visible_catalog_controls");
-                    A(!GetField<Button>(reload, "_continueLessonButton").Enabled &&
-                        GetField<Button>(reload, "_missionButton").Enabled,
+                    A(!reloadContinue.Enabled && GetField<Button>(reload, "_missionButton").Enabled,
                         "math_hub_reload_failure_keeps_only_safe_adaptive_action");
+                    A(reloadContinue.AccessibleName == "Chưa có bài Toán đang học" &&
+                        reloadContinue.AccessibleDescription.IndexOf("Chưa có bài học", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "math_hub_reload_failure_clears_stale_continue_accessibility");
                     A(GetField<Label>(reload, "_summary").Text.IndexOf("kiểm tra lại", StringComparison.OrdinalIgnoreCase) >= 0 &&
                         GetField<Label>(reload, "_detailEmpty").Text.IndexOf("Chưa thể mở", StringComparison.OrdinalIgnoreCase) >= 0,
                         "math_hub_reload_failure_uses_child_safe_error_copy");

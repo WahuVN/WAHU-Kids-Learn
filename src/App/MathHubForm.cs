@@ -99,6 +99,7 @@ namespace WAHUKidsLearn
                 if (_continueLessonButton != null)
                 {
                     _continueLessonButton.Text = "Chưa có bài đang học";
+                    _continueLessonButton.AccessibleName = "Chưa có bài Toán đang học";
                     _continueLessonButton.Enabled = false;
                     _continueLessonButton.AccessibleDescription = "Chưa có bài học đang học dở để tiếp tục.";
                 }
