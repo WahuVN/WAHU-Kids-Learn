@@ -14,6 +14,7 @@ namespace WAHU.Session
         public const string PackId = "math_grade2_verified_templates_v1";
         public const string PackVersion = "1.9.0";
         public const int DefaultTargetQuestionCount = 8;
+        public const int TargetedLessonQuestionCount = 3;
         public const int MaxAttemptsPerQuestion = 2;
 
         private readonly LearningDatabase _database;
@@ -46,7 +47,9 @@ namespace WAHU.Session
         private MathLessonCatalogSnapshot _lessonCatalog;
         private MathAuthoredQuestionBank _authoredBank;
         private MathLessonDescriptor _targetLesson;
+        private IList<MathQuestion> _targetQuestionPool;
         private IList<MathQuestion> _targetQuestions;
+        private IList<string> _selectedContentQuestionIds = new List<string>();
         private string _sessionMode = "adaptive";
         private string _targetLessonId;
         private IDictionary<string, SkillSnapshot> _skills;
@@ -139,6 +142,7 @@ namespace WAHU.Session
                     if (string.Equals(_sessionMode, "lesson", StringComparison.Ordinal))
                     {
                         PrepareTargetLessonForStart();
+                        SelectTargetLessonQuestionsForFreshSession();
                         _targetQuestionCount = _targetQuestions.Count;
                     }
 
@@ -160,6 +164,8 @@ namespace WAHU.Session
                     else
                     {
                         _skills = _sessionService.LoadSkillSnapshots(_profile.ChildId, "math");
+                        if (string.Equals(_sessionMode, "lesson", StringComparison.Ordinal))
+                            _runtime.SaveCheckpoint(_session.SessionId, 0, null, SerializeLessonSelectionCheckpoint());
                         _active = true;
                     }
                 }
@@ -188,6 +194,7 @@ namespace WAHU.Session
                 SessionMode = _sessionMode,
                 TargetLessonId = _targetLessonId,
                 TargetLessonTitleVi = _targetLesson == null ? null : _targetLesson.TitleVi,
+                SelectedContentQuestionIds = new List<string>(_selectedContentQuestionIds ?? new List<string>()),
                 LessonAccess = string.IsNullOrWhiteSpace(_targetLessonId) ? null : CurrentLessonAccess(),
                 RetryPending = _currentQuestion != null && _currentAttemptIndex > 1,
                 CurrentAttemptIndex = _currentQuestion == null ? 1 : _currentAttemptIndex
@@ -558,7 +565,7 @@ namespace WAHU.Session
 
             if (questionCompleted)
             {
-                try { _runtime.SaveCheckpoint(_session.SessionId, _generatedQuestionCount, _forcedRepairTemplateId); }
+                try { _runtime.SaveCheckpoint(_session.SessionId, _generatedQuestionCount, _forcedRepairTemplateId, RuntimeCheckpointSelectionJson()); }
                 catch
                 {
                     // Final attempt is already durable. Resume detects the final mastery-bearing attempt and drops stale cache.
@@ -768,15 +775,21 @@ namespace WAHU.Session
             LoadLessonContent();
             _targetLesson = _lessonCatalog.FindLesson(_targetLessonId);
             if (_targetLesson == null) throw new InvalidDataException("Targeted Math lesson no longer exists: " + _targetLessonId);
+            if (_targetLesson.PracticeSets == null ||
+                _targetLesson.PracticeSets.Basic == null || _targetLesson.PracticeSets.Basic.Count == 0 ||
+                _targetLesson.PracticeSets.Medium == null || _targetLesson.PracticeSets.Medium.Count == 0 ||
+                _targetLesson.PracticeSets.Application == null || _targetLesson.PracticeSets.Application.Count == 0)
+                throw new InvalidDataException("Targeted Math lesson requires at least one authored question per difficulty: " + _targetLesson.Id);
 
             var orderedIds = new List<string>();
-            if (_targetLesson.PracticeSets != null)
-            {
-                orderedIds.AddRange(_targetLesson.PracticeSets.Basic ?? new List<string>());
-                orderedIds.AddRange(_targetLesson.PracticeSets.Medium ?? new List<string>());
-                orderedIds.AddRange(_targetLesson.PracticeSets.Application ?? new List<string>());
-            }
-            _targetQuestions = new List<MathQuestion>();
+            orderedIds.AddRange(_targetLesson.PracticeSets.Basic);
+            orderedIds.AddRange(_targetLesson.PracticeSets.Medium);
+            orderedIds.AddRange(_targetLesson.PracticeSets.Application);
+            if (orderedIds.Count < TargetedLessonQuestionCount || orderedIds.Count > 40 ||
+                orderedIds.Distinct(StringComparer.Ordinal).Count() != orderedIds.Count)
+                throw new InvalidDataException("Targeted Math lesson has invalid authored pool: " + _targetLesson.Id);
+
+            _targetQuestionPool = new List<MathQuestion>();
             foreach (var id in orderedIds)
             {
                 var question = _authoredBank.FindContentQuestion(id);
@@ -784,10 +797,68 @@ namespace WAHU.Session
                 if (!string.Equals(question.LessonId, _targetLesson.Id, StringComparison.Ordinal) ||
                     !string.Equals(question.SkillId, _targetLesson.SkillId, StringComparison.Ordinal))
                     throw new InvalidDataException("Authored question lesson/skill mismatch: " + id);
+                _targetQuestionPool.Add(question);
+            }
+
+            if (_selectedContentQuestionIds != null && _selectedContentQuestionIds.Count > 0)
+                ApplySelectedTargetQuestions();
+            else
+                _targetQuestions = new List<MathQuestion>();
+        }
+
+        private void SelectTargetLessonQuestionsForFreshSession()
+        {
+            if (_targetLesson == null || _targetQuestionPool == null) EnsureTargetLessonLoaded();
+            var practice = _targetLesson.PracticeSets;
+            _selectedContentQuestionIds = new List<string>
+            {
+                SelectTargetBucketQuestion(practice.Basic, "basic"),
+                SelectTargetBucketQuestion(practice.Medium, "medium"),
+                SelectTargetBucketQuestion(practice.Application, "application")
+            };
+            ApplySelectedTargetQuestions();
+        }
+
+        private string SelectTargetBucketQuestion(IList<string> ids, string bucketName)
+        {
+            if (ids == null || ids.Count == 0) throw new InvalidDataException("Targeted Math bucket is empty: " + bucketName);
+            return ids[DeterministicBucketIndex(_seed, _targetLessonId, bucketName, ids.Count)];
+        }
+
+        private static int DeterministicBucketIndex(int seed, string lessonId, string bucketName, int count)
+        {
+            if (count < 1) throw new ArgumentOutOfRangeException("count");
+            unchecked
+            {
+                uint hash = 2166136261u;
+                hash = (hash ^ (uint)seed) * 16777619u;
+                var text = (lessonId ?? string.Empty) + "|" + (bucketName ?? string.Empty);
+                for (var i = 0; i < text.Length; i++) hash = (hash ^ text[i]) * 16777619u;
+                return (int)(hash % (uint)count);
+            }
+        }
+
+        private void ApplySelectedTargetQuestions()
+        {
+            if (_targetLesson == null || _targetQuestionPool == null) throw new InvalidOperationException("Targeted Math pool is not loaded.");
+            if (_selectedContentQuestionIds == null || _selectedContentQuestionIds.Count != TargetedLessonQuestionCount ||
+                _selectedContentQuestionIds.Distinct(StringComparer.Ordinal).Count() != TargetedLessonQuestionCount)
+                throw new InvalidDataException("Targeted Math selected question set must contain exactly three unique ids.");
+
+            var practice = _targetLesson.PracticeSets;
+            if (!practice.Basic.Contains(_selectedContentQuestionIds[0]) ||
+                !practice.Medium.Contains(_selectedContentQuestionIds[1]) ||
+                !practice.Application.Contains(_selectedContentQuestionIds[2]))
+                throw new InvalidDataException("Targeted Math selected question set does not match basic/medium/application buckets.");
+
+            var byId = _targetQuestionPool.ToDictionary(x => x.ContentQuestionId, StringComparer.Ordinal);
+            _targetQuestions = new List<MathQuestion>();
+            foreach (var id in _selectedContentQuestionIds)
+            {
+                MathQuestion question;
+                if (!byId.TryGetValue(id, out question)) throw new InvalidDataException("Selected authored question is missing from lesson pool: " + id);
                 _targetQuestions.Add(question);
             }
-            if (_targetQuestions.Count == 0 || _targetQuestions.Count > 40)
-                throw new InvalidDataException("Targeted Math lesson has invalid practice question count: " + _targetLesson.Id);
         }
 
         private MathLessonAccessSnapshot CurrentLessonAccess()
@@ -844,11 +915,16 @@ namespace WAHU.Session
             _targetLessonId = runtime.TargetLessonId;
             _forcedRepairTemplateId = string.Equals(_sessionMode, "adaptive", StringComparison.Ordinal)
                 ? runtime.ForcedRepairTemplateId : null;
+            var hadPersistedLessonSelection = false;
             if (string.Equals(_sessionMode, "lesson", StringComparison.Ordinal))
             {
+                _selectedContentQuestionIds = DeserializeLessonSelectedContentQuestionIds(runtime.CurrentSelectionJson);
+                hadPersistedLessonSelection = _selectedContentQuestionIds.Count > 0;
                 EnsureTargetLessonLoaded();
-                if (_targetQuestionCount != _targetQuestions.Count)
-                    throw new InvalidDataException("Targeted Math question count changed during an active session.");
+                if (!hadPersistedLessonSelection) SelectTargetLessonQuestionsForFreshSession();
+                if (_targetQuestions == null || _targetQuestions.Count != TargetedLessonQuestionCount ||
+                    _targetQuestionCount != TargetedLessonQuestionCount)
+                    throw new InvalidDataException("Targeted Math selected question count changed during an active session.");
             }
             _skills = _sessionService.LoadSkillSnapshots(_profile.ChildId, "math");
             _active = true;
@@ -859,11 +935,16 @@ namespace WAHU.Session
 
             if (string.IsNullOrWhiteSpace(runtime.CurrentQuestionJson))
             {
-                if (!string.IsNullOrWhiteSpace(runtime.CurrentSelectionJson) || runtime.QuestionStartedAtUtc.HasValue)
+                var hasUnexpectedSelectionPayload = !string.IsNullOrWhiteSpace(runtime.CurrentSelectionJson) &&
+                    !string.Equals(_sessionMode, "lesson", StringComparison.Ordinal);
+                if (hasUnexpectedSelectionPayload || runtime.QuestionStartedAtUtc.HasValue)
                 {
                     discardedCorruptOpenQuestion = true;
                     ReconcileTargetedGeneratedOrdinalAfterDiscard();
-                    try { _runtime.SaveCheckpoint(_session.SessionId, _generatedQuestionCount, _forcedRepairTemplateId); } catch { }
+                }
+                if (string.Equals(_sessionMode, "lesson", StringComparison.Ordinal) && !hadPersistedLessonSelection)
+                {
+                    try { _runtime.SaveCheckpoint(_session.SessionId, _generatedQuestionCount, _forcedRepairTemplateId, RuntimeCheckpointSelectionJson()); } catch { }
                 }
                 return;
             }
@@ -872,6 +953,12 @@ namespace WAHU.Session
             {
                 var question = _json.Deserialize<MathQuestion>(runtime.CurrentQuestionJson);
                 if (!IsUsableRestoredQuestion(question)) throw new InvalidOperationException("Invalid cached Math question.");
+                if (string.Equals(_sessionMode, "lesson", StringComparison.Ordinal))
+                {
+                    if (_generatedQuestionCount < 1 || _generatedQuestionCount > _targetQuestions.Count ||
+                        !string.Equals(question.ContentQuestionId, _targetQuestions[_generatedQuestionCount - 1].ContentQuestionId, StringComparison.Ordinal))
+                        throw new InvalidDataException("Cached targeted Math question is outside the persisted selected set.");
+                }
 
                 var nextAttemptIndex = NextAttemptIndexForQuestion(committedAttempts, question.QuestionId);
                 if (nextAttemptIndex == 0)
@@ -879,7 +966,7 @@ namespace WAHU.Session
                     if (string.Equals(_sessionMode, "adaptive", StringComparison.Ordinal) &&
                         _lastBehavior != null && _lastBehavior.TriggerPrerequisiteRepair)
                         _forcedRepairTemplateId = RepairTemplateFor(question);
-                    try { _runtime.SaveCheckpoint(_session.SessionId, _generatedQuestionCount, _forcedRepairTemplateId); } catch { }
+                    try { _runtime.SaveCheckpoint(_session.SessionId, _generatedQuestionCount, _forcedRepairTemplateId, RuntimeCheckpointSelectionJson()); } catch { }
                     return;
                 }
 
@@ -895,7 +982,7 @@ namespace WAHU.Session
                 _currentSelection = null;
                 discardedCorruptOpenQuestion = true;
                 ReconcileTargetedGeneratedOrdinalAfterDiscard();
-                try { _runtime.SaveCheckpoint(_session.SessionId, _generatedQuestionCount, _forcedRepairTemplateId); } catch { }
+                try { _runtime.SaveCheckpoint(_session.SessionId, _generatedQuestionCount, _forcedRepairTemplateId, RuntimeCheckpointSelectionJson()); } catch { }
             }
         }
 
@@ -956,7 +1043,7 @@ namespace WAHU.Session
                     _currentQuestion = null;
                     _currentSelection = null;
                     _currentAttemptIndex = 1;
-                    try { _runtime.SaveCheckpoint(_session.SessionId, _generatedQuestionCount, _forcedRepairTemplateId); } catch { }
+                    try { _runtime.SaveCheckpoint(_session.SessionId, _generatedQuestionCount, _forcedRepairTemplateId, RuntimeCheckpointSelectionJson()); } catch { }
                     return;
                 }
 
@@ -1083,7 +1170,7 @@ namespace WAHU.Session
         private string SerializeSelection(MathSelectionDecision selection)
         {
             if (selection == null || selection.Template == null) throw new ArgumentNullException("selection");
-            return _json.Serialize(new Dictionary<string, object>
+            var data = new Dictionary<string, object>
             {
                 { "template_id", selection.Template.TemplateId },
                 { "skill_id", selection.Template.SkillId },
@@ -1091,7 +1178,48 @@ namespace WAHU.Session
                 { "difficulty_fit", selection.DifficultyFit },
                 { "reasons", selection.Reasons ?? new string[0] },
                 { "candidate_summary", selection.CandidateSummary ?? new string[0] }
-            });
+            };
+            AddLessonSelectedIds(data);
+            return _json.Serialize(data);
+        }
+
+        private string SerializeLessonSelectionCheckpoint()
+        {
+            if (!string.Equals(_sessionMode, "lesson", StringComparison.Ordinal)) return null;
+            var data = new Dictionary<string, object>();
+            AddLessonSelectedIds(data);
+            return _json.Serialize(data);
+        }
+
+        private void AddLessonSelectedIds(IDictionary<string, object> data)
+        {
+            if (!string.Equals(_sessionMode, "lesson", StringComparison.Ordinal)) return;
+            if (_selectedContentQuestionIds == null || _selectedContentQuestionIds.Count != TargetedLessonQuestionCount ||
+                _selectedContentQuestionIds.Any(string.IsNullOrWhiteSpace) ||
+                _selectedContentQuestionIds.Distinct(StringComparer.Ordinal).Count() != TargetedLessonQuestionCount)
+                throw new InvalidOperationException("Targeted Math selected question set is not initialized.");
+            data["selected_content_question_ids"] = _selectedContentQuestionIds.ToArray();
+        }
+
+        private IList<string> DeserializeLessonSelectedContentQuestionIds(string json)
+        {
+            var result = new List<string>();
+            if (string.IsNullOrWhiteSpace(json)) return result;
+            var data = _json.Deserialize<Dictionary<string, object>>(json);
+            object raw;
+            if (data == null || !data.TryGetValue("selected_content_question_ids", out raw)) return result;
+            result = StringList(raw).ToList();
+            if (result.Count != TargetedLessonQuestionCount || result.Any(string.IsNullOrWhiteSpace) ||
+                result.Distinct(StringComparer.Ordinal).Count() != TargetedLessonQuestionCount)
+                throw new InvalidDataException("Persisted targeted Math selected question set is invalid.");
+            return result;
+        }
+
+        private string RuntimeCheckpointSelectionJson()
+        {
+            return string.Equals(_sessionMode, "lesson", StringComparison.Ordinal)
+                ? SerializeLessonSelectionCheckpoint()
+                : null;
         }
 
         private MathSelectionDecision DeserializeSelection(string json, MathQuestion question)

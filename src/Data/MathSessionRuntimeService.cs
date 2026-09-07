@@ -297,9 +297,14 @@ LIMIT 1;";
 
         public void SaveCheckpoint(string sessionId, int generatedQuestionCount, string forcedRepairTemplateId)
         {
+            SaveCheckpoint(sessionId, generatedQuestionCount, forcedRepairTemplateId, null);
+        }
+
+        public void SaveCheckpoint(string sessionId, int generatedQuestionCount, string forcedRepairTemplateId, string selectionJson)
+        {
             Require(sessionId, "sessionId");
             if (generatedQuestionCount < 0) throw new ArgumentOutOfRangeException("generatedQuestionCount");
-            UpdateRuntime(sessionId, generatedQuestionCount, null, null, DBNull.Value, forcedRepairTemplateId);
+            UpdateRuntime(sessionId, generatedQuestionCount, null, selectionJson, DBNull.Value, forcedRepairTemplateId);
         }
 
         public void ClearOpenQuestion(string sessionId)

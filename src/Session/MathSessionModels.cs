@@ -18,6 +18,7 @@ namespace WAHU.Session
         public string SessionMode { get; set; }
         public string TargetLessonId { get; set; }
         public string TargetLessonTitleVi { get; set; }
+        public IList<string> SelectedContentQuestionIds { get; set; }
         public MathLessonAccessSnapshot LessonAccess { get; set; }
         public bool RetryPending { get; set; }
         public int CurrentAttemptIndex { get; set; }

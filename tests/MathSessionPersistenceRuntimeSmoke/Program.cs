@@ -17,6 +17,15 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
         private static readonly JavaScriptSerializer Json = new JavaScriptSerializer();
         private static int _assertions;
 
+        private sealed class SyntheticPoolPack
+        {
+            public string TemplatePath { get; set; }
+            public string LessonId { get; set; }
+            public IList<string> Basic { get; set; }
+            public IList<string> Medium { get; set; }
+            public IList<string> Application { get; set; }
+        }
+
         private static int Main()
         {
             var root = Path.Combine(Path.GetTempPath(), "wahu-math-session-persistence-" + Guid.NewGuid().ToString("N"));
@@ -34,6 +43,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestCorruptRuntimeMetadataIsQuarantined(root, schemaPath, templatePath);
                 TestRuntimePackIdentityResumePolicy(root, schemaPath, templatePath);
                 TestTargetedCorruptOpenQuestionReplaysAuthoredOrdinal(root, schemaPath, templatePath, lessonCatalogPath);
+                TestExpandedTargetedPoolSelectsDurableThree(root, schemaPath, templatePath, lessonCatalogPath, questionBankPath);
                 TestRetryAwareAnswerFlow(root, schemaPath, templatePath);
                 TestRetryWrongFinalizesOnce(root, schemaPath, templatePath);
                 TestStaleCoordinatorCannotAppendAfterTerminalSession(root, schemaPath, templatePath);
@@ -180,28 +190,30 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
 
             string sessionId;
             string openQuestionId;
+            IList<string> targetedSelection;
             using (var first = new MathSessionCoordinator(database, templatePath, "LOW", 7002, prerequisite.Id))
             {
                 var started = first.Start("Bé targeted");
                 sessionId = started.SessionId;
                 A(started.SessionMode == "lesson" && started.TargetLessonId == prerequisite.Id,
                     "targeted_start_publishes_lesson_identity");
-                A(started.TargetQuestionCount == prerequisite.PracticeSets.TotalCount,
-                    "targeted_start_uses_catalog_practice_count");
+                targetedSelection = started.SelectedContentQuestionIds.ToList();
+                A(started.TargetQuestionCount == MathSessionCoordinator.TargetedLessonQuestionCount && targetedSelection.Count == 3,
+                    "targeted_start_uses_selected_three_question_target");
                 A(started.LessonAccess != null && started.LessonAccess.IsUnlocked,
                     "targeted_start_publishes_access_snapshot");
 
                 var q1 = first.NextQuestion();
                 A(q1.LessonId == prerequisite.Id && q1.SkillId == prerequisite.SkillId,
                     "targeted_question_matches_selected_lesson_skill");
-                A(q1.ContentQuestionId == prerequisite.PracticeSets.Basic[0],
-                    "targeted_first_question_uses_basic_practice_id");
+                A(q1.ContentQuestionId == targetedSelection[0] && prerequisite.PracticeSets.Basic.Contains(q1.ContentQuestionId),
+                    "targeted_first_question_uses_selected_basic_practice_id");
                 first.SubmitAnswerAt(q1.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 900);
 
                 var q2 = first.NextQuestion();
                 openQuestionId = q2.QuestionId;
-                A(q2.ContentQuestionId == prerequisite.PracticeSets.Medium[0],
-                    "targeted_second_question_uses_medium_practice_id");
+                A(q2.ContentQuestionId == targetedSelection[1] && prerequisite.PracticeSets.Medium.Contains(q2.ContentQuestionId),
+                    "targeted_second_question_uses_selected_medium_practice_id");
                 first.Suspend("targeted_resume_test");
             }
 
@@ -216,6 +228,8 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                     "adaptive_entry_resumes_existing_targeted_session");
                 A(started.SessionMode == "lesson" && started.TargetLessonId == prerequisite.Id,
                     "targeted_resume_restores_mode_and_lesson");
+                A(started.SelectedContentQuestionIds.SequenceEqual(targetedSelection),
+                    "targeted_resume_preserves_selected_question_set");
                 A(started.CompletedQuestionCount == 1 && started.RestoredOpenQuestion,
                     "targeted_resume_rebuilds_progress_and_open_question");
                 var resumedSummary = resumed.Summary;
@@ -229,15 +243,15 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                     "targeted_resume_publishes_target_skill_mastery_delta");
 
                 var q2 = resumed.NextQuestion();
-                A(q2.QuestionId == openQuestionId && q2.ContentQuestionId == prerequisite.PracticeSets.Medium[0],
+                A(q2.QuestionId == openQuestionId && q2.ContentQuestionId == targetedSelection[1],
                     "targeted_resume_returns_exact_open_authored_question");
                 resumed.SubmitAnswerAt(q2.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 950);
 
                 var q3 = resumed.NextQuestion();
-                A(q3.ContentQuestionId == prerequisite.PracticeSets.Application[0],
-                    "targeted_third_question_uses_application_practice_id");
+                A(q3.ContentQuestionId == targetedSelection[2] && prerequisite.PracticeSets.Application.Contains(q3.ContentQuestionId),
+                    "targeted_third_question_uses_selected_application_practice_id");
                 resumed.SubmitAnswerAt(q3.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 1000);
-                A(resumed.NextQuestion() == null, "targeted_session_stops_after_catalog_practice_set");
+                A(resumed.NextQuestion() == null, "targeted_session_stops_after_selected_three_question_set");
 
                 var summary = resumed.Complete();
                 A(summary.LessonCompleted && summary.TargetLessonId == prerequisite.Id,
@@ -296,7 +310,8 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
             var catalog = new MathLessonCatalogSource().Load(localCatalogPath);
             var lesson = catalog.Lessons.First(x =>
                 (x.PrerequisiteSkills == null || x.PrerequisiteSkills.Count == 0) &&
-                x.PracticeSets != null && x.PracticeSets.TotalCount == 3);
+                x.PracticeSets != null && x.PracticeSets.Basic.Count > 0 &&
+                x.PracticeSets.Medium.Count > 0 && x.PracticeSets.Application.Count > 0);
             var database = NewDatabase(Path.Combine(root, "targeted-complete-postcommit.db"), schemaPath);
             string sessionId;
 
@@ -511,22 +526,25 @@ VALUES(@id,@session,@child,' ','','blank-pack-question','LEGACY_PACK_SKILL','mat
         {
             var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
             var lesson = catalog.Lessons.First(x => (x.PrerequisiteSkills == null || x.PrerequisiteSkills.Count == 0) &&
-                                                     x.PracticeSets != null && x.PracticeSets.TotalCount == 3);
+                                                     x.PracticeSets != null && x.PracticeSets.Basic.Count > 0 &&
+                                                     x.PracticeSets.Medium.Count > 0 && x.PracticeSets.Application.Count > 0);
             var database = NewDatabase(Path.Combine(root, "targeted-corrupt-cache.db"), schemaPath);
             string sessionId;
+            IList<string> corruptSelectedIds;
 
             using (var first = new MathSessionCoordinator(database, templatePath, "LOW", 8101, lesson.Id))
             {
                 var start = first.Start("Bé targeted corrupt");
                 sessionId = start.SessionId;
+                corruptSelectedIds = start.SelectedContentQuestionIds.ToList();
                 var basic = first.NextQuestion();
-                A(basic.ContentQuestionId == lesson.PracticeSets.Basic[0],
-                    "targeted_corrupt_fixture_starts_with_basic");
+                A(basic.ContentQuestionId == corruptSelectedIds[0] && lesson.PracticeSets.Basic.Contains(basic.ContentQuestionId),
+                    "targeted_corrupt_fixture_starts_with_selected_basic");
                 first.SubmitAnswerAt(basic.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 800);
 
                 var medium = first.NextQuestion();
-                A(medium.ContentQuestionId == lesson.PracticeSets.Medium[0],
-                    "targeted_corrupt_fixture_opens_medium");
+                A(medium.ContentQuestionId == corruptSelectedIds[1] && lesson.PracticeSets.Medium.Contains(medium.ContentQuestionId),
+                    "targeted_corrupt_fixture_opens_selected_medium");
                 Exec(database, "UPDATE math_session_runtime SET current_question_json='not-json-at-all' WHERE session_id=@session;",
                     "@session", sessionId);
                 first.Suspend("simulate_targeted_corrupt_cache");
@@ -545,18 +563,20 @@ VALUES(@id,@session,@child,' ','','blank-pack-question','LEGACY_PACK_SKILL','mat
                     "targeted_corrupt_resume_keeps_target_lesson");
                 A(start.DiscardedCorruptOpenQuestion && !start.RestoredOpenQuestion && start.CompletedQuestionCount == 1,
                     "targeted_corrupt_resume_discards_only_open_question");
+                A(start.SelectedContentQuestionIds.SequenceEqual(corruptSelectedIds),
+                    "targeted_corrupt_resume_preserves_selected_set");
                 A(Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + sessionId +
                     "' AND generated_question_count=1 AND current_question_json IS NULL;") == 1,
                     "targeted_corrupt_resume_rolls_cursor_back_to_committed_ordinal");
 
                 var medium = resumed.NextQuestion();
-                A(medium != null && medium.ContentQuestionId == lesson.PracticeSets.Medium[0],
-                    "targeted_corrupt_resume_replays_medium_not_application");
+                A(medium != null && medium.ContentQuestionId == corruptSelectedIds[1],
+                    "targeted_corrupt_resume_replays_selected_medium_not_application");
                 resumed.SubmitAnswerAt(medium.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 850);
 
                 var application = resumed.NextQuestion();
-                A(application != null && application.ContentQuestionId == lesson.PracticeSets.Application[0],
-                    "targeted_corrupt_resume_then_serves_application");
+                A(application != null && application.ContentQuestionId == corruptSelectedIds[2],
+                    "targeted_corrupt_resume_then_serves_selected_application");
                 resumed.SubmitAnswerAt(application.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 900);
                 A(resumed.Summary.Attempts == 3 && resumed.NextQuestion() == null,
                     "targeted_corrupt_resume_requires_all_three_authored_attempts");
@@ -565,6 +585,208 @@ VALUES(@id,@session,@child,' ','','blank-pack-question','LEGACY_PACK_SKILL','mat
                 A(summary.LessonCompleted && summary.Attempts == 3 && summary.TargetLessonId == lesson.Id,
                     "targeted_corrupt_resume_completes_only_after_full_authored_set");
             }
+        }
+
+        private static void TestExpandedTargetedPoolSelectsDurableThree(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath,
+            string questionBankPath)
+        {
+            var pack = BuildSyntheticExpandedPoolPack(root, templatePath, lessonCatalogPath, questionBankPath);
+
+            IList<string> seedASelection;
+            var seedADatabase = NewDatabase(Path.Combine(root, "pool6-seed-a.db"), schemaPath);
+            using (var first = new MathSessionCoordinator(seedADatabase, pack.TemplatePath, "LOW", 9101, pack.LessonId))
+            {
+                var start = first.Start("Bé pool sáu A");
+                seedASelection = start.SelectedContentQuestionIds.ToList();
+                AssertValidSelectedSet(start, pack, "pool6_seed_a");
+                A(start.TargetQuestionCount == MathSessionCoordinator.TargetedLessonQuestionCount,
+                    "pool6_seed_a_target_is_three_not_pool_six");
+                var checkpoint = ScalarText(seedADatabase,
+                    "SELECT current_selection_json FROM math_session_runtime WHERE session_id='" + start.SessionId + "';");
+                A(!string.IsNullOrWhiteSpace(checkpoint) && checkpoint.Contains("selected_content_question_ids"),
+                    "pool6_seed_a_persists_selected_set_before_first_question");
+                first.Abort("pool6_seed_a_cleanup");
+            }
+
+            var seedBDatabase = NewDatabase(Path.Combine(root, "pool6-seed-b.db"), schemaPath);
+            using (var second = new MathSessionCoordinator(seedBDatabase, pack.TemplatePath, "LOW", 9102, pack.LessonId))
+            {
+                var start = second.Start("Bé pool sáu B");
+                AssertValidSelectedSet(start, pack, "pool6_seed_b");
+                A(!seedASelection.SequenceEqual(start.SelectedContentQuestionIds),
+                    "pool6_different_selection_identity_can_choose_different_set");
+                second.Abort("pool6_seed_b_cleanup");
+            }
+
+            var retryDatabase = NewDatabase(Path.Combine(root, "pool6-retry-resume.db"), schemaPath);
+            IList<string> retrySelection;
+            string retrySessionId;
+            string retryQuestionInstanceId;
+            using (var first = new MathSessionCoordinator(retryDatabase, pack.TemplatePath, "LOW", 9201, pack.LessonId))
+            {
+                var start = first.Start("Bé pool sáu retry");
+                retrySessionId = start.SessionId;
+                retrySelection = start.SelectedContentQuestionIds.ToList();
+                AssertValidSelectedSet(start, pack, "pool6_retry_fresh");
+                var q1 = first.NextQuestion();
+                A(q1.ContentQuestionId == retrySelection[0], "pool6_retry_serves_selected_basic");
+                first.SubmitAnswerAt(q1.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700);
+                var q2 = first.NextQuestion();
+                retryQuestionInstanceId = q2.QuestionId;
+                A(q2.ContentQuestionId == retrySelection[1], "pool6_retry_serves_selected_medium");
+                var wrong = first.SubmitAnswerWithRetryAt(WrongAnswer(q2), 0, "smoke", DateTime.UtcNow, 750);
+                A(!wrong.IsCorrect && wrong.CanRetry && !wrong.QuestionCompleted,
+                    "pool6_retry_keeps_selected_medium_open_after_first_wrong");
+                first.Suspend("pool6_retry_suspend");
+            }
+
+            using (var resumed = new MathSessionCoordinator(retryDatabase, pack.TemplatePath, "NORMAL", 999999, pack.LessonId))
+            {
+                var start = resumed.Start("Bé pool sáu retry");
+                A(start.ResumedExistingSession && start.SessionId == retrySessionId,
+                    "pool6_retry_resumes_same_session");
+                A(start.SelectedContentQuestionIds.SequenceEqual(retrySelection),
+                    "pool6_retry_resume_preserves_ordered_selected_set");
+                A(start.TargetQuestionCount == 3 && start.CompletedQuestionCount == 1 && start.RetryPending && start.CurrentAttemptIndex == 2,
+                    "pool6_retry_resume_keeps_three_target_and_attempt_two");
+                var q2 = resumed.NextQuestion();
+                A(q2.QuestionId == retryQuestionInstanceId && q2.ContentQuestionId == retrySelection[1],
+                    "pool6_retry_resume_restores_exact_selected_medium_instance");
+                var corrected = resumed.SubmitRetryAnswerAt(q2.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 800);
+                A(corrected.IsCorrect && corrected.QuestionCompleted,
+                    "pool6_retry_second_attempt_finalizes_selected_medium");
+                var q3 = resumed.NextQuestion();
+                A(q3.ContentQuestionId == retrySelection[2], "pool6_retry_then_serves_selected_application");
+                resumed.SubmitAnswerAt(q3.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 850);
+                A(resumed.Summary.Attempts == 3 && resumed.NextQuestion() == null,
+                    "pool6_retry_completes_after_three_selected_questions_not_six");
+                var summary = resumed.Complete();
+                A(summary.LessonCompleted, "pool6_retry_selected_three_can_complete_lesson");
+            }
+
+            var corruptDatabase = NewDatabase(Path.Combine(root, "pool6-corrupt-open.db"), schemaPath);
+            IList<string> corruptSelection;
+            string corruptSessionId;
+            using (var first = new MathSessionCoordinator(corruptDatabase, pack.TemplatePath, "LOW", 9301, pack.LessonId))
+            {
+                var start = first.Start("Bé pool sáu corrupt");
+                corruptSessionId = start.SessionId;
+                corruptSelection = start.SelectedContentQuestionIds.ToList();
+                AssertValidSelectedSet(start, pack, "pool6_corrupt_fresh");
+                var q1 = first.NextQuestion();
+                first.SubmitAnswerAt(q1.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700);
+                var q2 = first.NextQuestion();
+                A(q2.ContentQuestionId == corruptSelection[1], "pool6_corrupt_opens_selected_medium");
+                Exec(corruptDatabase,
+                    "UPDATE math_session_runtime SET current_question_json='not-json-at-all' WHERE session_id=@session;",
+                    "@session", corruptSessionId);
+                first.Suspend("pool6_corrupt_suspend");
+            }
+
+            using (var resumed = new MathSessionCoordinator(corruptDatabase, pack.TemplatePath, "NORMAL", 123456, pack.LessonId))
+            {
+                var start = resumed.Start("Bé pool sáu corrupt");
+                A(start.ResumedExistingSession && start.DiscardedCorruptOpenQuestion && start.CompletedQuestionCount == 1,
+                    "pool6_corrupt_resume_discards_only_open_question");
+                A(start.SelectedContentQuestionIds.SequenceEqual(corruptSelection),
+                    "pool6_corrupt_resume_preserves_selected_set");
+                var medium = resumed.NextQuestion();
+                A(medium.ContentQuestionId == corruptSelection[1],
+                    "pool6_corrupt_replays_selected_medium_not_other_pool_question");
+                resumed.SubmitAnswerAt(medium.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 800);
+                var application = resumed.NextQuestion();
+                A(application.ContentQuestionId == corruptSelection[2],
+                    "pool6_corrupt_then_serves_selected_application");
+                resumed.SubmitAnswerAt(application.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 850);
+                A(resumed.Summary.Attempts == 3 && resumed.NextQuestion() == null,
+                    "pool6_corrupt_recovery_completes_selected_three_only");
+                resumed.Abort("pool6_corrupt_cleanup");
+            }
+        }
+
+        private static void AssertValidSelectedSet(MathSessionStartResult start, SyntheticPoolPack pack, string prefix)
+        {
+            A(start.SelectedContentQuestionIds != null && start.SelectedContentQuestionIds.Count == 3 &&
+              start.SelectedContentQuestionIds.Distinct(StringComparer.Ordinal).Count() == 3,
+                prefix + "_selected_three_unique");
+            A(pack.Basic.Contains(start.SelectedContentQuestionIds[0]), prefix + "_selected_basic_from_basic_bucket");
+            A(pack.Medium.Contains(start.SelectedContentQuestionIds[1]), prefix + "_selected_medium_from_medium_bucket");
+            A(pack.Application.Contains(start.SelectedContentQuestionIds[2]), prefix + "_selected_application_from_application_bucket");
+        }
+
+        private static SyntheticPoolPack BuildSyntheticExpandedPoolPack(
+            string root,
+            string templatePath,
+            string lessonCatalogPath,
+            string questionBankPath)
+        {
+            var packDir = Path.Combine(root, "expanded-pool-pack");
+            Directory.CreateDirectory(packDir);
+            var localTemplate = Path.Combine(packDir, "verified_templates_v1.json");
+            var localCatalog = Path.Combine(packDir, "lesson_catalog_v1.json");
+            var localBank = Path.Combine(packDir, "question_bank_v1.json");
+            File.Copy(templatePath, localTemplate, true);
+
+            var catalogRoot = Json.Deserialize<Dictionary<string, object>>(File.ReadAllText(lessonCatalogPath));
+            var lessons = ((System.Collections.IEnumerable)catalogRoot["lessons"]).Cast<object>().Cast<Dictionary<string, object>>().ToList();
+            var lesson = lessons.First(x =>
+            {
+                var prerequisites = ((System.Collections.IEnumerable)x["prerequisite_skills"]).Cast<object>().ToList();
+                return prerequisites.Count == 0;
+            });
+            var lessonId = Convert.ToString(lesson["id"], CultureInfo.InvariantCulture);
+            var practice = (Dictionary<string, object>)lesson["practice_sets"];
+            var basic = ((System.Collections.IEnumerable)practice["basic"]).Cast<object>().Select(x => Convert.ToString(x, CultureInfo.InvariantCulture)).ToList();
+            var medium = ((System.Collections.IEnumerable)practice["medium"]).Cast<object>().Select(x => Convert.ToString(x, CultureInfo.InvariantCulture)).ToList();
+            var application = ((System.Collections.IEnumerable)practice["application"]).Cast<object>().Select(x => Convert.ToString(x, CultureInfo.InvariantCulture)).ToList();
+            A(basic.Count >= 1 && medium.Count >= 1 && application.Count >= 1,
+                "pool6_fixture_starts_from_valid_three_difficulty_lesson");
+
+            var bankRoot = Json.Deserialize<Dictionary<string, object>>(File.ReadAllText(questionBankPath));
+            var questions = ((System.Collections.IEnumerable)bankRoot["questions"]).Cast<object>().Cast<Dictionary<string, object>>().ToList();
+            var byId = questions.ToDictionary(x => Convert.ToString(x["id"], CultureInfo.InvariantCulture), StringComparer.Ordinal);
+            if (basic.Count < 2) basic.Add(DuplicateSyntheticQuestion(questions, byId[basic[0]], "04", " [biến thể B]"));
+            if (medium.Count < 2) medium.Add(DuplicateSyntheticQuestion(questions, byId[medium[0]], "05", " [biến thể B]"));
+            if (application.Count < 2) application.Add(DuplicateSyntheticQuestion(questions, byId[application[0]], "06", " [biến thể B]"));
+            A(basic.Count >= 2 && medium.Count >= 2 && application.Count >= 2,
+                "pool6_fixture_has_at_least_two_questions_per_difficulty");
+            practice["basic"] = basic.ToArray();
+            practice["medium"] = medium.ToArray();
+            practice["application"] = application.ToArray();
+            catalogRoot["lessons"] = lessons.Cast<object>().ToArray();
+            bankRoot["questions"] = questions.Cast<object>().ToArray();
+            File.WriteAllText(localCatalog, Json.Serialize(catalogRoot));
+            File.WriteAllText(localBank, Json.Serialize(bankRoot));
+
+            return new SyntheticPoolPack
+            {
+                TemplatePath = localTemplate,
+                LessonId = lessonId,
+                Basic = basic,
+                Medium = medium,
+                Application = application
+            };
+        }
+
+        private static string DuplicateSyntheticQuestion(
+            IList<Dictionary<string, object>> questions,
+            Dictionary<string, object> source,
+            string ordinal,
+            string promptSuffix)
+        {
+            var clone = Json.Deserialize<Dictionary<string, object>>(Json.Serialize(source));
+            var oldId = Convert.ToString(clone["id"], CultureInfo.InvariantCulture);
+            var split = oldId.LastIndexOf('_');
+            if (split < 0) throw new InvalidDataException("Synthetic authored id has no ordinal: " + oldId);
+            var newId = oldId.Substring(0, split + 1) + ordinal;
+            clone["id"] = newId;
+            clone["prompt_vi"] = Convert.ToString(clone["prompt_vi"], CultureInfo.InvariantCulture) + promptSuffix;
+            questions.Add(clone);
+            return newId;
         }
 
         private static void TestRetryAwareAnswerFlow(string root, string schemaPath, string templatePath)
@@ -1059,6 +1281,16 @@ END;");
             {
                 command.CommandText = "SELECT state FROM session WHERE id=@id;";
                 command.Parameters.AddWithValue("@id", sessionId);
+                return Convert.ToString(command.ExecuteScalar(), CultureInfo.InvariantCulture);
+            }
+        }
+
+        private static string ScalarText(LearningDatabase database, string sql)
+        {
+            using (var c = database.OpenConnection())
+            using (var command = c.CreateCommand())
+            {
+                command.CommandText = sql;
                 return Convert.ToString(command.ExecuteScalar(), CultureInfo.InvariantCulture);
             }
         }
