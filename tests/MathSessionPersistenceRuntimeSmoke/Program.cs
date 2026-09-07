@@ -44,6 +44,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestFirstFiveLessonsGoldenPath(root, schemaPath, templatePath, lessonCatalogPath);
                 TestFirstFiveAllAuthoredVariantsEndToEnd(root, schemaPath, templatePath, lessonCatalogPath);
                 TestFirstFiveRetryErrorMatrix(root, schemaPath, templatePath, lessonCatalogPath);
+                TestFirstFiveHintedSuccessMatrix(root, schemaPath, templatePath, lessonCatalogPath);
                 TestFirstLessonAllSixVariantsWithRetryResume(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedCompletionSurvivesNextLessonReadFailure(root, schemaPath, templatePath, lessonCatalogPath);
                 TestCorruptRuntimeMetadataIsQuarantined(root, schemaPath, templatePath);
@@ -741,6 +742,68 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 "first_five_retry_matrix_persists_five_completed_lessons");
             A(Count(database, "SELECT count(*) FROM session WHERE child_id='" + profile.ChildId + "' AND state='active';") == 0,
                 "first_five_retry_matrix_leaves_no_active_session");
+        }
+
+        private static void TestFirstFiveHintedSuccessMatrix(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var firstFive = catalog.Lessons.Take(5).ToList();
+            var database = NewDatabase(Path.Combine(root, "first-five-hint-matrix.db"), schemaPath);
+            var profile = new LearnerSessionService(database).EnsurePrimaryChild("Bé 5 bài dùng gợi ý");
+            var accessService = new MathLessonProgressService(database, lessonCatalogPath);
+
+            for (var lessonIndex = 0; lessonIndex < firstFive.Count; lessonIndex++)
+            {
+                var lesson = firstFive[lessonIndex];
+                A(accessService.GetAccess(profile.ChildId, lesson.Id).IsUnlocked,
+                    "first_five_hint_lesson_unlocked_" + (lessonIndex + 1));
+                using (var coordinator = new MathSessionCoordinator(database, templatePath, "LOW", 13000 + lessonIndex, lesson.Id))
+                {
+                    var start = coordinator.Start("Bé 5 bài dùng gợi ý");
+                    var q1 = coordinator.NextQuestion();
+                    A(q1 != null && !string.IsNullOrWhiteSpace(q1.HintLevel1) && !string.IsNullOrWhiteSpace(q1.HintLevel2),
+                        "first_five_hint_q1_has_two_child_hints_" + (lessonIndex + 1));
+                    var hinted = coordinator.SubmitAnswerAt(q1.CorrectAnswerDisplay, 2, "smoke", DateTime.UtcNow, 1000);
+                    A(hinted.IsCorrect && hinted.QuestionCompleted && !hinted.IndependentSuccess && hinted.Mastery != null &&
+                      hinted.Mastery.Reasons != null && hinted.Mastery.Reasons.Contains("hinted_correct_lower_weight"),
+                        "first_five_hint_correct_is_not_independent_" + (lessonIndex + 1));
+                    A(hinted.Review != null && string.Equals(hinted.Review.Reason, "hinted_success_short_recall", StringComparison.Ordinal),
+                        "first_five_hint_schedules_short_recall_" + (lessonIndex + 1));
+
+                    var q2 = coordinator.NextQuestion();
+                    var q2Outcome = coordinator.SubmitAnswerAt(q2.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 800);
+                    A(q2Outcome.IsCorrect && q2Outcome.IndependentSuccess,
+                        "first_five_hint_q2_is_independent_" + (lessonIndex + 1));
+                    var q3 = coordinator.NextQuestion();
+                    var q3Outcome = coordinator.SubmitAnswerAt(q3.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 850);
+                    A(q3Outcome.IsCorrect && q3Outcome.IndependentSuccess,
+                        "first_five_hint_q3_is_independent_" + (lessonIndex + 1));
+
+                    var summary = coordinator.Complete();
+                    A(summary.LessonCompleted && summary.Attempts == 3 && summary.AnswerAttempts == 3 && summary.Correct == 3 &&
+                      summary.IndependentCorrect == 2 && summary.HintedCorrect == 1 && summary.RetriedQuestions == 0,
+                        "first_five_hint_summary_separates_hinted_success_" + (lessonIndex + 1));
+                    A(Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + start.SessionId + "' AND hint_level=2;") == 1 &&
+                      Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + start.SessionId + "' AND hint_level=0;") == 2,
+                        "first_five_hint_persists_one_max_hint_two_independent_" + (lessonIndex + 1));
+                    A(Count(database, "SELECT count(*) FROM child_skill WHERE child_id='" + profile.ChildId + "' AND skill_id='" + lesson.SkillId +
+                      "' AND independent_success_count=2 AND hinted_success_count=1;") == 1,
+                        "first_five_hint_mastery_buckets_are_exact_" + (lessonIndex + 1));
+                }
+            }
+
+            A(Count(database, "SELECT count(*) FROM session WHERE child_id='" + profile.ChildId + "' AND state='completed';") == 5,
+                "first_five_hint_matrix_completes_five_sessions");
+            A(Count(database, "SELECT count(*) FROM attempt;") == 15 && Count(database, "SELECT count(*) FROM mastery_event;") == 15,
+                "first_five_hint_matrix_commits_fifteen_learning_events");
+            A(Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + profile.ChildId + "' AND completed_count=1;") == 5,
+                "first_five_hint_matrix_persists_five_completed_lessons");
+            A(Count(database, "SELECT count(*) FROM session WHERE child_id='" + profile.ChildId + "' AND state='active';") == 0,
+                "first_five_hint_matrix_leaves_no_active_session");
         }
 
         private static void TestFirstLessonAllSixVariantsWithRetryResume(

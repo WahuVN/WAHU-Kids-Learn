@@ -58,7 +58,7 @@ Milestone: `3cf7fc6`.
 - MathDataEngineRuntimeSmoke: 104 PASS.
 - LearningSessionRuntimeSmoke: 800 PASS.
 - SQLiteRuntimeSmoke production: 179 PASS.
-- MathSessionPersistenceRuntimeSmoke current: **7542 PASS**; gồm real 402-bank breadth stress + write-failure/corruption repair + deterministic authored runtime IDs + concurrent pending-retry semantics + generated/open-ordinal self-heal + late-review transaction rollback + operational DB failure fail-safe.
+- MathSessionPersistenceRuntimeSmoke current: **7592 PASS**; gồm real 402-bank breadth stress + write-failure/corruption repair + deterministic authored runtime IDs + concurrent pending-retry semantics + generated/open-ordinal self-heal + late-review transaction rollback + operational DB failure fail-safe.
 - Real 402-bank integration đã PASS; selector breadth hiện verify đủ **67/67 lesson**, mỗi basic/medium/application bucket đều deterministic, in-range và xoay đủ 2 variant qua 16 seed.
 
 Không hard-code assertion count; regression mới chỉ được tăng hoặc nếu giảm phải có lý do rõ.
@@ -77,7 +77,7 @@ AI2 phải ưu tiên theo thứ tự:
 Current evidence:
 - 5 bài đầu chạy sequential targeted completion trên bank thật: PASS.
 - Bài 1 chạy đủ 6/6 authored IDs qua real sessions, gồm wrong→retry→suspend→resume: PASS.
-- Persistence sau golden-slice hardening: **7542 PASS**.
+- Persistence sau golden-slice hardening: **7592 PASS**.
 
 ## 2. Ownership
 
