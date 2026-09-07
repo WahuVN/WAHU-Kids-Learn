@@ -76,6 +76,35 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
             A(expression.QuestionType == "expression_input" && expression.DisplayChoices.Count == 0,
                 "authored_expression_stays_input_without_fake_choices");
             A(expression.IsCorrectAnswer("75"), "authored_expression_accepts_equivalent_numeric_result");
+            A(expression.AllowedExpressionOperators != null &&
+              expression.AllowedExpressionOperators.SequenceEqual(new[] { "+", "-", "(", ")" }),
+                "authored_expression_loads_per_question_operator_whitelist");
+            A(expression.IsCorrectAnswer("100 - 30 + 5"), "authored_expression_accepts_declared_expression");
+            A(expression.IsCorrectAnswer("70 + 5"), "authored_expression_accepts_equivalent_allowed_expression");
+            A(!expression.IsCorrectAnswer("15*5"), "authored_expression_rejects_multiply_equivalent");
+            A(!expression.IsCorrectAnswer("150/2"), "authored_expression_rejects_divide_equivalent");
+
+            var expressionRuntime = MathAuthoredQuestionSource.CreateRuntimeInstance(expression);
+            A(expressionRuntime.AllowedExpressionOperators != null &&
+              expressionRuntime.AllowedExpressionOperators.SequenceEqual(expression.AllowedExpressionOperators),
+                "authored_expression_runtime_instance_preserves_operator_whitelist");
+            var expressionCurrentQuestionJson = Json.Serialize(expressionRuntime);
+            var restoredExpression = Json.Deserialize<MathQuestion>(expressionCurrentQuestionJson);
+            A(restoredExpression != null && restoredExpression.AllowedExpressionOperators != null &&
+              restoredExpression.AllowedExpressionOperators.SequenceEqual(expression.AllowedExpressionOperators),
+                "authored_expression_current_question_json_preserves_operator_whitelist");
+            A(restoredExpression.IsCorrectAnswer("75") && restoredExpression.IsCorrectAnswer("70 + 5") &&
+              !restoredExpression.IsCorrectAnswer("15*5") && !restoredExpression.IsCorrectAnswer("150/2"),
+                "authored_expression_restored_question_enforces_operator_whitelist");
+
+            var legacyExpression = new MathQuestion
+            {
+                AnswerKind = "expression",
+                CorrectAnswerText = "75",
+                AcceptedAnswers = new[] { "75" }
+            };
+            A(legacyExpression.IsCorrectAnswer("15*5") && legacyExpression.IsCorrectAnswer("150/2"),
+                "legacy_expression_without_whitelist_keeps_global_numeric_equivalence");
 
             var unit = bank.Questions.Single(x => x.AnswerKind == "unit");
             A(unit.QuestionType == "unit_input" && unit.DisplayChoices.Count == 0 && unit.ExpectedUnit == "kg",

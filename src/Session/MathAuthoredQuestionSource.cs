@@ -38,6 +38,10 @@ namespace WAHU.Session
             "integer", "interaction_integer", "number", "decimal", "fraction", "text", "unit", "expression"
         };
 
+        private static readonly HashSet<string> SupportedExpressionOperators = new HashSet<string>(StringComparer.Ordinal)
+        {
+            "+", "-", "*", "/", "(", ")"
+        };
         private static readonly HashSet<string> SupportedQuestionTypes = new HashSet<string>(StringComparer.Ordinal)
         {
             "expression_input", "interactive_measurement", "multiple_choice", "numeric_input", "true_false", "unit_input", "word_problem"
@@ -112,6 +116,7 @@ namespace WAHU.Session
                 NumericTolerance = authored.NumericTolerance,
                 ExpectedUnit = authored.ExpectedUnit,
                 AcceptedUnits = Copy(authored.AcceptedUnits),
+                AllowedExpressionOperators = Copy(authored.AllowedExpressionOperators),
                 ChoiceTexts = Copy(authored.ChoiceTexts),
                 IllustrationData = authored.IllustrationData,
                 Representation = authored.Representation,
@@ -170,6 +175,7 @@ namespace WAHU.Session
 
             var expectedUnit = OptionalString(item, "expected_unit");
             var acceptedUnits = ReadStringArray(item, "accepted_units", false);
+            var allowedExpressionOperators = ReadExpressionOperators(item, answerKind, id);
             var question = new MathQuestion
             {
                 ContentQuestionId = id,
@@ -186,6 +192,7 @@ namespace WAHU.Session
                 AcceptedAnswers = accepted,
                 ExpectedUnit = expectedUnit,
                 AcceptedUnits = acceptedUnits,
+                AllowedExpressionOperators = allowedExpressionOperators,
                 HintLevel1 = hints[0],
                 HintLevel2 = hints[1],
                 Representation = "authored_" + questionType,
@@ -220,6 +227,25 @@ namespace WAHU.Session
             return question;
         }
 
+        private static IList<string> ReadExpressionOperators(Dictionary<string, object> item, string answerKind, string id)
+        {
+            if (!string.Equals(answerKind, "expression", StringComparison.Ordinal)) return new List<string>();
+            object rawValidation;
+            if (!item.TryGetValue("validation", out rawValidation) || rawValidation == null)
+                throw new InvalidDataException("Expression question missing validation metadata: " + id);
+            var validation = rawValidation as Dictionary<string, object>;
+            if (validation == null) throw new InvalidDataException("Expression validation metadata must be object: " + id);
+            var operators = ReadStringArray(validation, "allowed_operators", true);
+            var unique = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var op in operators)
+            {
+                if (!SupportedExpressionOperators.Contains(op))
+                    throw new InvalidDataException("Expression question declares unsupported operator '" + op + "': " + id);
+                if (!unique.Add(op))
+                    throw new InvalidDataException("Expression question declares duplicate operator '" + op + "': " + id);
+            }
+            return operators;
+        }
         private static IList<string> ReadChoices(Dictionary<string, object> item, string questionType, string id)
         {
             object raw;

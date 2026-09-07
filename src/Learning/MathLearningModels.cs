@@ -47,6 +47,7 @@ namespace WAHU.Learning
         public double NumericTolerance { get; set; }
         public string ExpectedUnit { get; set; }
         public IList<string> AcceptedUnits { get; set; }
+        public IList<string> AllowedExpressionOperators { get; set; }
         public IList<string> ChoiceTexts { get; set; }
         public string IllustrationData { get; set; }
         public string Representation { get; set; }

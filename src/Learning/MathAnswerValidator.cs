@@ -76,7 +76,7 @@ namespace WAHU.Learning
                 case "fraction":
                     return NumericEquivalent(actual, expected, question.NumericTolerance, false);
                 case "expression":
-                    return NumericEquivalent(actual, expected, question.NumericTolerance, true);
+                    return ExpressionSyntaxAllowed(question, actual) && NumericEquivalent(actual, expected, question.NumericTolerance, true);
                 case "unit":
                     return UnitEquivalent(question, actual, expected);
                 case "text":
@@ -87,6 +87,39 @@ namespace WAHU.Learning
             }
         }
 
+        private static bool ExpressionSyntaxAllowed(MathQuestion question, string actual)
+        {
+            if (question == null || question.AllowedExpressionOperators == null || question.AllowedExpressionOperators.Count == 0)
+                return true;
+            if (string.IsNullOrWhiteSpace(actual) || actual.Length > MaxAnswerLength) return false;
+
+            var allowed = new HashSet<char>();
+            foreach (var token in question.AllowedExpressionOperators)
+            {
+                if (string.IsNullOrWhiteSpace(token) || token.Length != 1 || "+-*/()".IndexOf(token[0]) < 0)
+                    return false;
+                allowed.Add(token[0]);
+            }
+            if (allowed.Count == 0) return false;
+
+            var normalized = NormalizeSigns(actual.Trim());
+            if (IsPlainNumericExpressionResult(normalized)) return true;
+            foreach (var ch in normalized)
+            {
+                if ("+-*/()".IndexOf(ch) >= 0 && !allowed.Contains(ch)) return false;
+            }
+            return true;
+        }
+
+        private static bool IsPlainNumericExpressionResult(string normalized)
+        {
+            if (string.IsNullOrWhiteSpace(normalized)) return false;
+            if (normalized.IndexOf('*') >= 0 || normalized.IndexOf('/') >= 0 ||
+                normalized.IndexOf('(') >= 0 || normalized.IndexOf(')') >= 0)
+                return false;
+            Rational value;
+            return Rational.TryParseLiteral(normalized, out value);
+        }
         private static bool NumericEquivalent(string actual, string expected, double tolerance, bool allowExpression)
         {
             Rational left;
