@@ -614,7 +614,7 @@ Q = {
     "NUM_COUNT_READ_WRITE_0_1000": [
         nq("Số gồm 5 trăm, 0 chục và 7 đơn vị là số nào?", 507, "5 trăm là 500, 0 chục là 0 và 7 đơn vị là 7; 500 + 0 + 7 = 507."),
         mc("Cách đọc đúng của số 420 là gì?", "bốn trăm hai mươi", ["bốn trăm hai", "bốn mươi hai", "hai trăm bốn mươi"], "420 có 4 trăm, 2 chục và 0 đơn vị nên đọc là bốn trăm hai mươi."),
-        nq("Một thẻ số có 7 trăm, 3 chục và 4 đơn vị. Viết số trên thẻ.", 734, "7 trăm + 3 chục + 4 đơn vị = 700 + 30 + 4 = 734."),
+        nq("Bạn Mai viết 7 trăm, 3 chục và 4 đơn vị thành 704 vì bỏ quên hàng chục. Số đúng trên thẻ phải là bao nhiêu?", 734, "Phải giữ đủ cả ba hàng: 7 trăm là 700, 3 chục là 30 và 4 đơn vị là 4; 700 + 30 + 4 = 734."),
     ],
     "NUM_FULL_HUNDREDS_RECOGNIZE": [
         mc("Số nào là số tròn trăm?", "600", ["610", "606", "660"], "600 có hàng chục và hàng đơn vị đều bằng 0."),

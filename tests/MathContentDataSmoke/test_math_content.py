@@ -362,6 +362,7 @@ class MathContentDataSmoke(unittest.TestCase):
 
     def test_additional_application_questions_require_transfer_or_error_correction(self):
         expected_markers = {
+            "m2_q_num_count_read_write_0_1000_03": "bỏ quên hàng chục",
             "m2_q_num_predecessor_successor_03": "bạn an viết",
             "m2_q_place_value_hundreds_tens_ones_03": "bạn bình viết",
             "m2_q_multiplication_components_03": "sửa lời",

@@ -122,13 +122,13 @@
       "skill_id": "NUM_COUNT_READ_WRITE_0_1000",
       "difficulty": "application",
       "question_type": "numeric_input",
-      "prompt_vi": "Một thẻ số có 7 trăm, 3 chục và 4 đơn vị. Viết số trên thẻ.",
+      "prompt_vi": "Bạn Mai viết 7 trăm, 3 chục và 4 đơn vị thành 704 vì bỏ quên hàng chục. Số đúng trên thẻ phải là bao nhiêu?",
       "answer_kind": "integer",
       "correct_answer": 734,
       "accepted_answers": [
         "734"
       ],
-      "explanation_vi": "7 trăm + 3 chục + 4 đơn vị = 700 + 30 + 4 = 734.",
+      "explanation_vi": "Phải giữ đủ cả ba hàng: 7 trăm là 700, 3 chục là 30 và 4 đơn vị là 4; 700 + 30 + 4 = 734.",
       "hints_vi": [
         "Nhớ kiến thức: Ghép số trăm, số chục và số đơn vị theo đúng vị trí để tạo hoặc đọc một số.",
         "Viết một phép tính hoặc quan hệ ngắn cho “Đọc và viết số”, tính xong đối chiếu lại điều đề đang hỏi."

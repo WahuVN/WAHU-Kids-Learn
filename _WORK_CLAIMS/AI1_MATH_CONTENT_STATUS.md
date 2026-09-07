@@ -127,7 +127,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - 267/267 distractor có **rationale unique / max repeat 1**, mỗi rationale sai chứa lời giải riêng của chính câu; 3 họ mẫu shallow cũ đã giảm **267 → 0**;
 - vị trí đáp án đúng được cân bằng deterministic: 88 câu 4-choice = 22/22/22/22 cho A/B/C/D; 3 true/false = 2/1;
 - 23 câu integer có `answer_unit` giữ đúng contract display-only, không đổi sang unit-input;
-- **38 application regression quan trọng** được khóa riêng: 25 regression trước đó + 13 câu vừa nâng từ đổi số/recall sang error-analysis hoặc contextual transfer (thành phần cộng/trừ/chia, ý nghĩa phép nhân, chọn phép tính, lít, 60 phút, ba mức sự kiện, tứ giác và bài toán nhân một bước);
+- **39 application regression quan trọng** được khóa riêng: 38 regression trước đó + câu đọc/viết số đã đổi từ ghép hàng trực tiếp sang sửa lỗi bỏ quên hàng chục;
 - child-facing lesson/question text có **0 internal-engine vocabulary**; metadata kỹ thuật như `application`, `numeric_input`, `deterministic` vẫn được phép;
 - **67/67 worked example unique**, mỗi ví dụ có ít nhất 2 bước giải, **0 exact/near overlap** với 201 câu practice và 67/67 solution chốt đáp án tường minh;
 - cả hai mục tiêu học đạt **67/67 unique** và gắn concept; objective 1 đã loại **67/67** placeholder `Nhận biết và thực hiện đúng nội dung:` và đổi động từ theo answer surface, objective 2 placeholder chung = 0;
@@ -171,6 +171,7 @@ Latest result: **34 tests PASS**.
 - `732a2d2` — `Toán: đặc thù hóa rationale cho đáp án nhiễu`
 - `602bec7` — `Toán: nâng chất lượng đáp án nhiễu nhận dạng`
 - `def7313` — `Toán: nâng thêm câu vận dụng theo hướng chuyển giao`
+- `c7c2905` — `Toán: tăng chiều sâu câu vận dụng còn yếu`
 
 ## Current blockers outside AI1 content ownership
 
