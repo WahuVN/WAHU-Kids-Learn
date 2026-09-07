@@ -1638,6 +1638,9 @@ namespace WAHU.ChildUiRuntimeSmoke
                 var rescueCtor = rescueType.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
                     null, new[] { typeof(LearningDatabase), typeof(RuntimePerformanceSettings) }, null);
                 A(rescueCtor != null && presentationType != null, "quick_rescue_intro_types_available");
+                A(rescueType.GetFields(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+                    .All(x => !typeof(System.Windows.Forms.Timer).IsAssignableFrom(x.FieldType)),
+                    "quick_rescue_shell_has_no_countdown_timer_field");
 
                 object presentation;
                 string eventId;
@@ -1728,6 +1731,22 @@ namespace WAHU.ChildUiRuntimeSmoke
                         "quick_rescue_intro_125pct_keeps_missions_checkpoints_and_primary_cta");
                     A(ContainsControlText(scaledRescue, "KHÔNG ĐẾM NGƯỢC"),
                         "quick_rescue_intro_125pct_keeps_no_countdown_banner");
+                }
+
+                using (var normalRescue = (Form)rescueCtor.Invoke(new object[]
+                {
+                    database, new RuntimePerformanceSettings { Profile = PerformanceProfileKind.NORMAL }
+                }))
+                {
+                    Invoke(normalRescue, "LoadEvents");
+                    Invoke(normalRescue, "SelectEvent", presentation);
+                    A(Get<int>(normalRescue, "EventCount") == 5 &&
+                      GetField<Label>(normalRescue, "_eventTitle").Text == eventTitle &&
+                      GetField<FlowLayoutPanel>(normalRescue, "_checkpoints").Controls.Count == 3,
+                        "quick_rescue_normal_profile_keeps_same_mission_and_checkpoints");
+                    A(GetField<Button>(normalRescue, "_startButton").Enabled &&
+                      ContainsControlText(normalRescue, "KHÔNG ĐẾM NGƯỢC"),
+                        "quick_rescue_normal_profile_keeps_same_pressure_free_cta");
                 }
 
                 using (var failureShell = (Form)rescueCtor.Invoke(new object[] { database, settings }))
