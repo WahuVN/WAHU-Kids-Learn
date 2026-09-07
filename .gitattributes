@@ -1,0 +1,2 @@
+# Manifest-hashed content must keep exact repository bytes on every checkout.
+content_packs/english_grade2_v1/verified_core_v1.json -text
