@@ -89,6 +89,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestGameEventResumeRestoresExplicitRepairBeforeStateTransition(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventDifferentSelectionResumesDurableActiveEvent(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventRewardFaultReconcilesOnNextStart(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
+                TestGameEventRewardFaultReconcilesWhenSameEventReplayed(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventConcurrentRewardReconcileIsIdempotent(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventTerminalRuntimeCleanupReconcilesOnNextStart(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventCommitFaultPreservesCheckpoint(root, schemaPath, templatePath, lessonCatalogPath);
@@ -1113,6 +1114,63 @@ BEGIN SELECT RAISE(ABORT,'game event injected reward failure'); END;");
             A(SessionState(database, secondSessionId) == "active" &&
               Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + secondSessionId + "';") == 0,
                 "game_event_reward_reconcile_never_rewards_active_session");
+        }
+
+        private static void TestGameEventRewardFaultReconcilesWhenSameEventReplayed(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath,
+            string gameEventPath)
+        {
+            var events = new MathGameEventCatalogSource().Load(gameEventPath, lessonCatalogPath);
+            var definition = events.Events[0];
+            var database = NewDatabase(Path.Combine(root, "game-event-reward-fault-same-replay.db"), schemaPath);
+            string completedSessionId;
+            string childId;
+
+            Exec(database, @"CREATE TRIGGER fail_same_event_replay_reward BEFORE INSERT ON reward_event
+BEGIN SELECT RAISE(ABORT,'game event injected same replay reward failure'); END;");
+            using (var first = new MathGameEventCoordinator(database, templatePath, gameEventPath, "LOW", 15211,
+                definition.Id, definition.TargetLessonId))
+            {
+                var start = first.Start("Bé reward fault replay cùng event");
+                completedSessionId = start.Session.SessionId;
+                childId = start.Session.ChildId;
+                for (var ordinal = 0; ordinal < 3; ordinal++)
+                {
+                    var question = first.NextQuestion();
+                    first.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700 + ordinal * 100);
+                }
+                var completion = first.Complete();
+                A(completion.LearningSummary.LessonCompleted && completion.LearningSummary.GardenGrowthSteps == 0 &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + completedSessionId + "';") == 0,
+                    "game_event_same_replay_reward_fault_fixture_completed_without_reward");
+            }
+            Exec(database, "DROP TRIGGER fail_same_event_replay_reward;");
+
+            using (var replay = new MathGameEventCoordinator(database, templatePath, gameEventPath, "NORMAL", 15212,
+                definition.Id, definition.TargetLessonId))
+            {
+                var start = replay.Start("Bé reward fault replay cùng event");
+                A(!start.Session.ResumedExistingSession && start.Session.SessionId != completedSessionId &&
+                  start.Session.CompletedQuestionCount == 0 && start.EventState.CompletedCheckpointCount == 0,
+                    "game_event_same_replay_after_reward_fault_starts_fresh_session");
+                A(Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + completedSessionId + "' AND reward_type='garden_growth';") == 1 &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + start.Session.SessionId + "';") == 0,
+                    "game_event_same_replay_repairs_old_reward_without_rewarding_new_session");
+                A(Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + childId +
+                  "' AND lesson_id='" + definition.TargetLessonId + "' AND started_count=2 AND completed_count=1;") == 1,
+                    "game_event_same_replay_reward_repair_keeps_started_and_completed_progress_distinct");
+                var progress = new GameWorldRewardService(database).ReadProgress(childId);
+                A(progress.GrowthSteps == 1 && progress.CompletedMathSessions == 1,
+                    "game_event_same_replay_reward_repair_counts_only_old_completed_session");
+                var q1 = replay.NextQuestion();
+                A(q1 != null && q1.ContentQuestionId == start.Session.SelectedContentQuestionIds[0] &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE child_id='" + childId + "';") == 1,
+                    "game_event_same_replay_remains_playable_without_early_new_reward");
+                replay.SuspendForBreak("same_event_reward_replay_cleanup");
+            }
         }
 
         private static void TestGameEventConcurrentRewardReconcileIsIdempotent(
