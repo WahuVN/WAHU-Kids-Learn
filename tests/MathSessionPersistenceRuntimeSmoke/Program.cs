@@ -78,6 +78,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestGameEventStaleIdFallsBackToLessonEvent(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestProductionFirstFiveGameEventsRuntime(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestProductionFirstEventResumeJourney(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
+                TestGameEventResumeAfterThirdAnswerBeforeComplete(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventResumeRestoresBehaviorAction(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventDifferentSelectionResumesDurableActiveEvent(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventRewardFaultReconcilesOnNextStart(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
@@ -211,7 +212,10 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                   retry.EventState.CompletedCheckpointCount == 2 && retry.EventState.CurrentCheckpointNumber == 3,
                     "game_event_retry_correct_advances_to_third_checkpoint_as_assisted");
                 var q3 = resumed.NextQuestion();
-                resumed.SubmitAnswerAt(q3.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 900);
+                var q3Answer = resumed.SubmitAnswerAt(q3.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 900);
+                A(q3Answer.EventState.CompletedCheckpointCount == 3 && !q3Answer.EventState.IsComplete &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + sessionId + "';") == 0,
+                    "game_event_three_checkpoints_ready_but_not_terminal_before_complete");
                 var complete = resumed.Complete();
                 A(complete.LearningSummary.LessonCompleted && complete.LearningSummary.Attempts == 3 &&
                   complete.EventState.IsComplete && complete.EventState.CompletedCheckpointCount == 3 &&
@@ -427,6 +431,64 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 A(Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + sessionId + "';") == 1 &&
                   Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + sessionId + "';") == 3,
                     "production_first_event_resume_journey_grants_one_reward_three_mastery");
+            }
+        }
+
+        private static void TestGameEventResumeAfterThirdAnswerBeforeComplete(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath,
+            string gameEventPath)
+        {
+            var events = new MathGameEventCatalogSource().Load(gameEventPath, lessonCatalogPath);
+            var definition = events.Events[0];
+            var database = NewDatabase(Path.Combine(root, "game-event-resume-after-q3.db"), schemaPath);
+            string sessionId;
+            string childId;
+            IList<string> selected;
+
+            using (var first = new MathGameEventCoordinator(database, templatePath, gameEventPath, "LOW", 15121,
+                definition.Id, definition.TargetLessonId))
+            {
+                var start = first.Start("Bé resume sau câu ba");
+                sessionId = start.Session.SessionId;
+                childId = start.Session.ChildId;
+                selected = start.Session.SelectedContentQuestionIds.ToList();
+                MathGameEventAnswerResult last = null;
+                for (var ordinal = 0; ordinal < 3; ordinal++)
+                {
+                    var question = first.NextQuestion();
+                    last = first.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700 + ordinal * 100);
+                }
+                A(last != null && last.EventState.CompletedCheckpointCount == 3 && !last.EventState.IsComplete &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + sessionId + "';") == 0,
+                    "game_event_after_q3_before_complete_has_three_checkpoints_but_no_terminal_reward");
+                first.SuspendForBreak("crash_after_q3_before_complete");
+            }
+
+            A(SessionState(database, sessionId) == "active" &&
+              Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + sessionId + "';") == 3 &&
+              Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + sessionId + "';") == 0,
+                "game_event_suspend_after_q3_keeps_learning_active_without_reward");
+
+            using (var resumed = new MathGameEventCoordinator(database, templatePath, gameEventPath, "NORMAL", 999999,
+                null, definition.TargetLessonId))
+            {
+                var start = resumed.Start("Bé resume sau câu ba");
+                A(start.Session.ResumedExistingSession && start.Session.SessionId == sessionId &&
+                  start.Session.CompletedQuestionCount == 3 && start.Session.SelectedContentQuestionIds.SequenceEqual(selected),
+                    "game_event_resume_after_q3_restores_three_completed_checkpoints");
+                A(start.EventState.CompletedCheckpointCount == 3 && !start.EventState.IsComplete &&
+                  start.EventState.CurrentCheckpointNumber == 3 && resumed.NextQuestion() == null,
+                    "game_event_resume_after_q3_is_ready_to_complete_not_false_terminal");
+                var completion = resumed.Complete();
+                A(completion.EventState.IsComplete && completion.LearningSummary.LessonCompleted &&
+                  completion.LearningSummary.Attempts == 3 && SessionState(database, sessionId) == "completed",
+                    "game_event_resume_after_q3_terminalizes_existing_session");
+                A(Count(database, "SELECT count(*) FROM reward_event WHERE child_id='" + childId +
+                  "' AND source_ref='" + sessionId + "' AND reward_type='garden_growth';") == 1,
+                    "game_event_resume_after_q3_grants_exactly_one_reward");
             }
         }
 

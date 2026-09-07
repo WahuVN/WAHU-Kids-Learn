@@ -507,7 +507,7 @@ namespace WAHU.Session
                 CurrentCheckpointNumber = current,
                 CurrentCheckpointNounVi = CheckpointNoun(current),
                 RetryPending = _session.HasOpenQuestion && summary.AnswerAttempts > summary.Attempts,
-                IsComplete = completed >= MathSessionCoordinator.TargetedLessonQuestionCount,
+                IsComplete = _completion != null && _completion.LearningSummary != null && _completion.LearningSummary.LessonCompleted,
                 Action = _lastAction
             };
         }
