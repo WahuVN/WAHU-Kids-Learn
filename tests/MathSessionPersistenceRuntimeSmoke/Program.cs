@@ -46,6 +46,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestRuntimePackIdentityResumePolicy(root, schemaPath, templatePath);
                 TestTargetedCorruptOpenQuestionReplaysAuthoredOrdinal(root, schemaPath, templatePath, lessonCatalogPath);
                 TestExpandedTargetedPoolSelectsDurableThree(root, schemaPath, templatePath, lessonCatalogPath, questionBankPath);
+                TestTargetedSelectedSetSurvivesCommitFailure(root, schemaPath, templatePath, lessonCatalogPath);
                 TestRetryAwareAnswerFlow(root, schemaPath, templatePath);
                 TestRetryWrongFinalizesOnce(root, schemaPath, templatePath);
                 TestStaleCoordinatorCannotAppendAfterTerminalSession(root, schemaPath, templatePath);
@@ -919,6 +920,73 @@ VALUES(@id,@session,@child,' ','','blank-pack-question','LEGACY_PACK_SKILL','mat
                 A(medium.ContentQuestionId == selectionBeforeCorruption[1],
                     "pool6_corrupt_selection_metadata_continues_selected_medium_ordinal");
                 resumed.Abort("pool6_selection_corrupt_cleanup");
+            }
+        }
+
+        private static void TestTargetedSelectedSetSurvivesCommitFailure(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.Lessons.First(x =>
+                (x.PrerequisiteSkills == null || x.PrerequisiteSkills.Count == 0) &&
+                x.PracticeSets != null && x.PracticeSets.Basic.Count == 2 &&
+                x.PracticeSets.Medium.Count == 2 && x.PracticeSets.Application.Count == 2);
+            var database = NewDatabase(Path.Combine(root, "targeted-selected-set-commit-failure.db"), schemaPath);
+
+            using (var coordinator = new MathSessionCoordinator(database, templatePath, "LOW", 8451, lesson.Id))
+            {
+                var start = coordinator.Start("Bé targeted selected-set rollback");
+                A(start.TargetQuestionCount == 3 && start.SelectedContentQuestionIds != null && start.SelectedContentQuestionIds.Count == 3,
+                    "targeted_commit_failure_fixture_selects_three");
+                var selected = start.SelectedContentQuestionIds.ToList();
+                var question = coordinator.NextQuestion();
+                A(question.ContentQuestionId == selected[0] && lesson.PracticeSets.Basic.Contains(question.ContentQuestionId),
+                    "targeted_commit_failure_opens_selected_basic");
+                var checkpointBeforeFailure = ScalarText(database,
+                    "SELECT current_selection_json FROM math_session_runtime WHERE session_id='" + start.SessionId + "';");
+                A(!string.IsNullOrWhiteSpace(checkpointBeforeFailure) && selected.All(checkpointBeforeFailure.Contains),
+                    "targeted_commit_failure_checkpoint_contains_selected_set_before_failure");
+
+                Exec(database, @"CREATE TRIGGER smoke_fail_targeted_math_mastery
+BEFORE INSERT ON mastery_event
+BEGIN
+    SELECT RAISE(ABORT, 'injected_targeted_math_commit_failure');
+END;");
+
+                var failed = false;
+                try
+                {
+                    coordinator.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 900);
+                }
+                catch (SQLiteException)
+                {
+                    failed = true;
+                }
+                A(failed, "targeted_commit_failure_surfaces_injected_error");
+                A(coordinator.HasOpenQuestion && coordinator.Summary.Attempts == 0 && coordinator.Summary.AnswerAttempts == 0,
+                    "targeted_commit_failure_keeps_selected_basic_open_and_counters_unadvanced");
+                var sameQuestion = coordinator.NextQuestion();
+                A(sameQuestion.QuestionId == question.QuestionId && sameQuestion.ContentQuestionId == selected[0],
+                    "targeted_commit_failure_keeps_exact_selected_basic_instance");
+                var checkpointAfterFailure = ScalarText(database,
+                    "SELECT current_selection_json FROM math_session_runtime WHERE session_id='" + start.SessionId + "';");
+                A(checkpointAfterFailure == checkpointBeforeFailure && selected.All(checkpointAfterFailure.Contains),
+                    "targeted_commit_failure_preserves_selected_set_checkpoint_exactly");
+                A(Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + start.SessionId + "';") == 0 &&
+                  Count(database, "SELECT count(*) FROM mastery_event WHERE child_id='" + start.ChildId + "';") == 0,
+                    "targeted_commit_failure_writes_no_ghost_learning_state");
+
+                Exec(database, "DROP TRIGGER smoke_fail_targeted_math_mastery;");
+                var recovered = coordinator.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 950);
+                A(recovered.QuestionCompleted && recovered.IsCorrect && coordinator.Summary.Attempts == 1,
+                    "targeted_commit_failure_retry_commits_selected_basic_once");
+                var medium = coordinator.NextQuestion();
+                A(medium != null && medium.ContentQuestionId == selected[1] && lesson.PracticeSets.Medium.Contains(medium.ContentQuestionId),
+                    "targeted_commit_failure_retry_continues_same_selected_medium");
+                coordinator.Abort("targeted_selected_set_commit_failure_cleanup");
             }
         }
 
