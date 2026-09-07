@@ -22,6 +22,31 @@ function Sha256([string]$Path) {
     (Get-FileHash -Algorithm SHA256 -LiteralPath $Path).Hash
 }
 
+function Invoke-SmokeWithAssertions {
+    param(
+        [string]$Name,
+        [string]$Path,
+        [string]$PassPrefix,
+        [object[]]$Arguments = @()
+    )
+
+    $output = @(& $Path @Arguments 2>&1)
+    $exitCode = $LASTEXITCODE
+    foreach ($line in $output) { Write-Host ([string]$line) }
+    if ($exitCode -ne 0) { throw "$Name fail: $exitCode" }
+
+    $pattern = '^' + [regex]::Escape($PassPrefix) + '\s+assertions=(\d+)\s*$'
+    $matches = @()
+    foreach ($line in $output) {
+        $candidate = [regex]::Match([string]$line, $pattern)
+        if ($candidate.Success) { $matches += $candidate }
+    }
+    if ($matches.Count -ne 1) {
+        throw "$Name did not publish exactly one assertion count with prefix $PassPrefix."
+    }
+    return [int]$matches[0].Groups[1].Value
+}
+
 $msbuild = Find-FirstExisting @(
     'C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe',
     'C:\Program Files\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\MSBuild.exe',
@@ -69,48 +94,37 @@ Require-File $mathLessonCatalogSource
 Require-File $mathQuestionBankSource
 
 Write-Host '[2/15] Setup preflight smoke'
-& $preflightSmoke
-if ($LASTEXITCODE -ne 0) { throw "SetupPreflight smoke fail: $LASTEXITCODE" }
+$preflightAssertions = Invoke-SmokeWithAssertions -Name 'SetupPreflight smoke' -Path $preflightSmoke -PassPrefix 'SETUP_PREFLIGHT_SMOKE_PASS'
 
 Write-Host '[3/15] Behavior runtime smoke'
-& $behaviorSmoke
-if ($LASTEXITCODE -ne 0) { throw "Behavior runtime smoke fail: $LASTEXITCODE" }
+$behaviorAssertions = Invoke-SmokeWithAssertions -Name 'Behavior runtime smoke' -Path $behaviorSmoke -PassPrefix 'BEHAVIOR_RUNTIME_SMOKE_PASS'
 
 Write-Host '[4/15] Learning session vertical-slice smoke'
-& $learningSessionSmoke $schemaSource $mathTemplateSource
-if ($LASTEXITCODE -ne 0) { throw "Learning session runtime smoke fail: $LASTEXITCODE" }
+$learningSessionAssertions = Invoke-SmokeWithAssertions -Name 'Learning session runtime smoke' -Path $learningSessionSmoke -PassPrefix 'LEARNING_SESSION_RUNTIME_SMOKE_PASS' -Arguments @($schemaSource, $mathTemplateSource)
 
 Write-Host '[5/15] Motion runtime smoke'
-& $motionSmoke
-if ($LASTEXITCODE -ne 0) { throw "Motion runtime smoke fail: $LASTEXITCODE" }
+$motionAssertions = Invoke-SmokeWithAssertions -Name 'Motion runtime smoke' -Path $motionSmoke -PassPrefix 'MOTION_RUNTIME_SMOKE_PASS'
 
 Write-Host '[5b/15] Child UI GDI+ render smoke (100% + 125%)'
-& $childUiSmoke
-if ($LASTEXITCODE -ne 0) { throw "Child UI runtime smoke fail: $LASTEXITCODE" }
+$childUiAssertions = Invoke-SmokeWithAssertions -Name 'Child UI runtime smoke' -Path $childUiSmoke -PassPrefix 'CHILD_UI_RUNTIME_SMOKE_PASS'
 
 Write-Host '[6/15] Content runtime + secure import smoke'
-& $contentSmoke
-if ($LASTEXITCODE -ne 0) { throw "Content runtime smoke fail: $LASTEXITCODE" }
+$contentAssertions = Invoke-SmokeWithAssertions -Name 'Content runtime smoke' -Path $contentSmoke -PassPrefix 'CONTENT_RUNTIME_SMOKE_PASS'
 
 Write-Host '[7/15] Parent PIN security smoke'
-& $securitySmoke
-if ($LASTEXITCODE -ne 0) { throw "Security runtime smoke fail: $LASTEXITCODE" }
+$securityAssertions = Invoke-SmokeWithAssertions -Name 'Security runtime smoke' -Path $securitySmoke -PassPrefix 'SECURITY_RUNTIME_SMOKE_PASS'
 
 Write-Host '[8/15] Audio runtime smoke'
-& $audioSmoke
-if ($LASTEXITCODE -ne 0) { throw "Audio runtime smoke fail: $LASTEXITCODE" }
+$audioAssertions = Invoke-SmokeWithAssertions -Name 'Audio runtime smoke' -Path $audioSmoke -PassPrefix 'AUDIO_RUNTIME_SMOKE_PASS'
 
 Write-Host '[9/15] Performance autotune + degradation smoke'
-& $performanceSmoke
-if ($LASTEXITCODE -ne 0) { throw "Performance runtime smoke fail: $LASTEXITCODE" }
+$performanceAssertions = Invoke-SmokeWithAssertions -Name 'Performance runtime smoke' -Path $performanceSmoke -PassPrefix 'PERFORMANCE_RUNTIME_SMOKE_PASS'
 
 Write-Host '[9b/15] GitHub updater manifest/staging smoke'
-& $updateSmoke
-if ($LASTEXITCODE -ne 0) { throw "Update runtime smoke fail: $LASTEXITCODE" }
+$updateAssertions = Invoke-SmokeWithAssertions -Name 'Update runtime smoke' -Path $updateSmoke -PassPrefix 'UPDATE_RUNTIME_SMOKE_PASS'
 
 Write-Host '[10/15] SQLite/Data smoke + backup/restore integration'
-& $sqliteSmoke $schemaSource
-if ($LASTEXITCODE -ne 0) { throw "SQLite runtime smoke fail: $LASTEXITCODE" }
+$sqliteAssertions = Invoke-SmokeWithAssertions -Name 'SQLite runtime smoke' -Path $sqliteSmoke -PassPrefix 'SQLITE_RUNTIME_SMOKE_PASS' -Arguments @($schemaSource)
 
 $publish = Join-Path $root 'build\win7_x86\publish'
 if (Test-Path $publish) { Remove-Item -LiteralPath $publish -Recurse -Force }
@@ -235,29 +249,29 @@ $manifest = [ordered]@{
         native_binary = 'e_sqlite3.dll'
         native_sha256 = Sha256 $nativePath
         default_journal = 'DELETE'
-        sqlite_runtime_smoke_assertions = 179
+        sqlite_runtime_smoke_assertions = $sqliteAssertions
     }
     gates = [ordered]@{
         preflight_smoke = 'PASS'
-        preflight_smoke_assertions = 42
+        preflight_smoke_assertions = $preflightAssertions
         behavior_runtime_smoke = 'PASS'
-        behavior_runtime_smoke_assertions = 15
+        behavior_runtime_smoke_assertions = $behaviorAssertions
         learning_session_runtime_smoke = 'PASS'
-        learning_session_runtime_smoke_assertions = 800
+        learning_session_runtime_smoke_assertions = $learningSessionAssertions
         motion_runtime_smoke = 'PASS'
-        motion_runtime_smoke_assertions = 25
+        motion_runtime_smoke_assertions = $motionAssertions
         child_ui_render_smoke = 'PASS'
-        child_ui_render_smoke_assertions = 2267
+        child_ui_render_smoke_assertions = $childUiAssertions
         content_runtime_smoke = 'PASS'
-        content_runtime_smoke_assertions = 21
+        content_runtime_smoke_assertions = $contentAssertions
         security_runtime_smoke = 'PASS'
-        security_runtime_smoke_assertions = 19
+        security_runtime_smoke_assertions = $securityAssertions
         audio_runtime_smoke = 'PASS'
-        audio_runtime_smoke_assertions = 14
+        audio_runtime_smoke_assertions = $audioAssertions
         performance_runtime_smoke = 'PASS'
-        performance_runtime_smoke_assertions = 13
+        performance_runtime_smoke_assertions = $performanceAssertions
         update_runtime_smoke = 'PASS'
-        update_runtime_smoke_assertions = 33
+        update_runtime_smoke_assertions = $updateAssertions
         sqlite_runtime_smoke = 'PASS'
         backup_restore_smoke = 'PASS'
         staged_payload_guard = 'PASS'
