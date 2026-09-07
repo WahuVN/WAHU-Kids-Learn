@@ -1,18 +1,30 @@
 # MATH LIVE STATUS
 
 Updated: 2026-09-07
-LAST_FULLY_VERIFIED_HEAD=`3a53af7`
+LAST_FULLY_VERIFIED_HEAD=`65afcf2`
 MATH_3AI_DONE=YES
+PLAYABLE_FIRST_FIVE_P0=GREEN
+PLAYABLE_INSTALLER_E2E=BLOCKED_SAFETY_UNOWNED_LOCAL_DATA
 
 Definition: trạng thái dưới đây dùng strict three-lane Math Definition of Done, không lấy việc “mở được màn hình” làm DONE.
 
+## Playable Event V1 — current
+
+- **First-five playable P0: GREEN** — Home/Hub → 5 nhiệm vụ cứu hộ production → intro → 3 checkpoint → wrong/retry/hint/repair → suspend/resume exact event/session/question → completion → Garden reward idempotent.
+- Child UI **3644 assertions PASS**; persistence **7772 assertions PASS**; full Math content/event/pool suite **90/90 PASS**.
+- `0.1.49-dev`: Build-Setup **15/15 PASS**, Portable E2E **PASS**, installer compile **PASS**.
+- Portable SHA256 `C0F97CAC947E1C322DC108BA22D9E95ED8672DE353205CEFB471A9362C84F700`; Installer SHA256 `575FE41621FE6506FEBCFF3AFCECA1709BD56281ABFA6CCE1345E40EE88F6BFD`.
+- Release payload hard-requires `game_events_v1.json`; fresh checkout SHA của cả 4 Math runtime JSON khớp manifest. Event SHA `F9F25EA94DA7FCD20E360509EE53E6E758039CCF788FAFEC729A35F80D39A8B1`.
+- Full Installer E2E **BLOCKED_SAFETY** vì learner DB hiện hữu không có `.wahu-e2e-owned`; Portable E2E xác nhận DB hash trước/sau không đổi.
+- Production signing và real Windows 7 validation vẫn `UNAVAILABLE/PENDING`.
+
 ## Overall
 
-- **Content: 100% theo Math lane** — 7 chương, 17 chủ đề, 67 lesson, **402 authored questions**, đúng 6 câu/lesson = 2 basic + 2 medium + 2 application. Production semantic validator: **402/402 valid, 0 errors**; difficulty distribution **134 basic / 134 medium / 134 application**. `MathContentDataSmoke` **53/53 PASS**.
-- **Engine: 100% theo Math lane** — schema V5 + pack identity, targeted session 3 câu từ pool 6, durable ordered selected-set, exact resume/retry/corrupt recovery, prerequisite unlock, validation/equivalence, mastery/result/next lesson, Request 010 expression whitelist, Request 006 display-only answer unit, adaptive segment generation, idempotency/write-failure/concurrency guards. `MathSessionPersistenceRuntimeSmoke`: **7159 assertions PASS** trên runtime 402, gồm stress/race/self-heal coverage mới nhất.
-- **UI/QA: 100% theo AI3 scope** — Hub + 67 lesson detail/accessibility, theory/worked examples, targeted/adaptive session, choice/typed/interaction, hint/retry, exact resume, child-safe write failure, mastery/result/next lesson, error/empty/no-stale-state, responsive/keyboard. `ChildUiRuntimeSmoke`: **3267 assertions PASS**; **402/402 authored answer surfaces renderable**; **402/402 prompts fit** vùng câu hỏi ở 900×640 với font >=12pt; 48 answer-unit questions / 8 units được quét.
-- **Distribution E2E: CLOSED cho Math dev artifact** — full Build-Setup 15/15, Portable E2E PASS, Installer E2E PASS trên clean `3a53af7`, artifact `0.1.45-dev`.
-- **Three-AI Math DoD: DONE** — AI1, AI2 và AI3 đều `LANE_DONE=YES`; final cross-lane gate chạy trên cùng common HEAD.
+- **Content: 100% theo Math lane** — 7 chương, 17 chủ đề, 67 lesson, **402 authored questions**, đúng 6 câu/lesson = 2 basic + 2 medium + 2 application. Production semantic validator: **402/402 valid, 0 errors**; full Math content/event/pool suite **90/90 PASS**.
+- **Engine: 100% theo Math lane** — schema V5 + pack identity, targeted session 3 câu từ pool 6, durable ordered selected-set, exact resume/retry/corrupt recovery, rescue runtime/checkpoint/repair/terminal/reward idempotency. `MathSessionPersistenceRuntimeSmoke`: **7772 assertions PASS**.
+- **UI/QA: playable P0 GREEN cho 5 bài đầu** — Home/Hub rescue entry, 5 mission cards, 3 checkpoint cards, behavior-aware repair/break, exact rescue resume, fail-safe event fallback, Garden completion, accessibility/keyboard/responsive. `ChildUiRuntimeSmoke`: **3644 assertions PASS**.
+- **Distribution playable dev artifact** — Build-Setup 15/15 + Portable E2E PASS + installer compile PASS trên clean `65afcf2`, artifact `0.1.49-dev`; full Installer E2E safety-blocked trên máy hiện tại.
+- **Three-AI Math DoD: DONE** — AI1, AI2 và AI3 đã hoàn tất baseline; playable first-five đang là focus hardening hiện tại.
 
 ## Contract hiện hành
 

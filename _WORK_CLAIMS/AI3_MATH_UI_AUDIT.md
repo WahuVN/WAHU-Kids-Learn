@@ -2,24 +2,36 @@
 
 Updated: 2026-09-07
 Owner: AI3
-Last fully verified HEAD: `3a53af7`
-Status: `LANE_DONE=YES`
+Last fully verified HEAD: `65afcf2`
+Status: `PLAYABLE_UI_P0=GREEN`; `INSTALLER_E2E=BLOCKED_SAFETY_UNOWNED_LOCAL_DATA`
+
+## PLAYABLE EVENT V1 — current evidence
+
+- Home/Math Hub có entry **Toán nhanh — Nhiệm vụ cứu hộ**; 5 event production cho 5 bài đầu.
+- Flow UI E2E khóa: intro → 3 checkpoint → cố tình sai → repair/hint → suspend khi retry pending → resume exact event/session/open question → hoàn thành → Garden tăng đúng 1 lần.
+- Behavior presentation FLOW / STRAINED / FRUSTRATED / FATIGUED đọc public action DTO của engine; không tự suy state.
+- Missing/corrupt event metadata fail-safe về lesson presentation, không mất session/progress.
+- Mission cards + checkpoint cards có accessibility và fit 900×640; banner **KHÔNG ĐẾM NGƯỢC** được regression bảo vệ.
+- Child UI: **3644 assertions PASS**; persistence: **7772 assertions PASS**; Math content/event/pool suite: **90/90 PASS**.
+- `0.1.49-dev`: Build-Setup **15/15 PASS**, Portable E2E **PASS**, installer compile **PASS**; publish payload chứa `game_events_v1.json` SHA `F9F25EA94DA7FCD20E360509EE53E6E758039CCF788FAFEC729A35F80D39A8B1`.
+- Full Installer E2E hiện **BLOCKED_SAFETY** vì `%LOCALAPPDATA%\WAHU Kids Learn\data\learning.db` tồn tại nhưng không có `.wahu-e2e-owned`; không được xóa/ghi đè dữ liệu này để ép test qua.
+- Production signing và real Windows 7 validation vẫn `UNAVAILABLE/PENDING`.
 
 ## 1. Kết luận
 
-AI3 Math UI/QA/integration lane đã hoàn tất strict board 3-AI và tiếp tục hardening no-wait. Lần full gate gần nhất chạy trên clean `main` HEAD `3a53af7`.
+AI3 Math UI/QA/integration lane đã hoàn tất playable P0 cho 5 bài đầu và tiếp tục hardening no-wait. Lần full gate gần nhất chạy trên clean `main` HEAD `65afcf2`.
 
-Final evidence:
+Current evidence:
 
 - runtime Math bank: **402 questions / 67 lessons / 6 per lesson / 2 per difficulty**;
-- Child UI: **3267 assertions PASS**;
+- Child UI: **3644 assertions PASS**;
 - production Math validator: **402/402 valid**;
-- `MathContentDataSmoke`: **53/53 PASS**;
+- full Math content/event/pool suite: **90/90 PASS**;
 - difficulty distribution: **134 basic / 134 medium / 134 application**;
-- Math persistence: **7159 assertions PASS** (`dotnet build` 0 warning / 0 error);
-- full Build-Setup `0.1.45-dev`: **15/15 PASS**;
+- Math persistence: **7772 assertions PASS** (`dotnet build` 0 warning / 0 error);
+- full Build-Setup `0.1.49-dev`: **15/15 PASS**;
 - Portable E2E: **PASS**;
-- Installer/reinstall/uninstall E2E: **PASS**.
+- Installer compile: **PASS**; full installer E2E **BLOCKED_SAFETY** trên máy hiện tại.
 
 No P0/P1 remains inside AI3 Math scope.
 
