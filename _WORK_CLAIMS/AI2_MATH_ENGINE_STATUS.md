@@ -20,14 +20,15 @@ Branch: `main`
 
 - `tests/MathEngineRuntimeSmoke`: PASS — **47 assertions**.
 - `tests/MathDataEngineRuntimeSmoke`: PASS — **104 assertions** (idempotency + terminal-session guard + optimistic skill-state guard + true cross-process mastery/session contention + atomic startup + subject/child-scoped dangling recovery).
-- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **289 assertions** (authored bank + targeted lesson + prerequisite unlock + exact resume + mastery delta + next lesson + corrupt authored cursor/core-runtime recovery + retry/resume/anti-double-submit + stale coordinator/skill guards + injected write-failure rollback/retry + post-completion enrichment failure safety).
+- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **374 assertions** (authored bank + targeted lesson + prerequisite unlock + exact resume + mastery delta + next lesson + corrupt authored cursor/core-runtime recovery + retry/resume/anti-double-submit + stale coordinator/skill guards + injected write-failure rollback/retry + post-completion enrichment failure safety).
 - `tests/SQLiteRuntimeSmoke`: PASS — **179 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
 - `tests/LearningSessionRuntimeSmoke`: PASS — **800 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
 - Request 009: CLOSED tại `05cdb2a` — authored pool >=6 dùng selected set đúng 3 câu (1 basic + 1 medium + 1 application), deterministic theo seed/lesson, persisted qua checkpoint JSON; retry/resume/corrupt-open recovery giữ nguyên selected set và complete sau 3 câu. Synthetic pool-6 regression + legacy path đạt **264 assertions PASS**.
 - Request 010: CLOSED tại `7afbb7b` — authored expression preserve `allowed_operators`; `75`, `100 - 30 + 5`, `70 + 5` PASS; `15*5`, `150/2` FAIL; JSON roundtrip giữ whitelist; expression legacy không whitelist vẫn backward-compatible.
 - Request 006: CLOSED tại `3cf7fc6` — integer `answer_unit` được preserve qua authored loader -> runtime instance -> current-question JSON -> coordinator resume; raw grading vẫn chỉ nhận số, còn feedback outcome xuất `N đơn vị` cho UI. Persistence **277 assertions PASS**.
 - Selected-set corruption stress: CLOSED tại `3b8a10b` — malformed/missing persisted selection metadata được dựng lại deterministic theo seed+lesson trong cùng pack, checkpoint được sửa và ordinal tiếp tục đúng; same seed giữ cùng ordered set.
-- Expanded-bank integration: `373d9d1` bỏ test coupling `Single(...)`/`_01`, chạy được cả baseline 201 và pool 402; AI1 working pool 402 đã chạy **289 assertions PASS** mà không đổi content trong suốt gate.
+- Selected-set stress: real/synthetic pool-6 chạy 16 seed liên tiếp, mỗi bucket basic/medium/application đều xoay đủ 2 biến thể, target luôn 3; persistence **374 assertions PASS**.
+- Expanded-bank integration: `373d9d1` bỏ test coupling `Single(...)`/`_01`, chạy được cả baseline 201 và pool 402; AI1 working pool 402 đã chạy **374 assertions PASS** mà không đổi content trong suốt gate.
 - PowerShell release/build scripts: schema V5 payload/bootstrap expectations đã cập nhật; staged `Build-SetupArtifacts.ps1` PASS qua Release x86 + runtime smokes + staged payload/preflight + portable packaging.
 - `git diff --check` + staged `git diff --cached --check`: PASS cho wave V5.
 
@@ -131,6 +132,6 @@ AI1/AI3 đang sửa song song content/Math Hub/UI trên cùng `main`. AI2 chỉ 
 - MathEngineRuntimeSmoke: **47 PASS**.
 - MathDataEngineRuntimeSmoke: **104 PASS** — race/idempotency/concurrency.
 - LearningSessionRuntimeSmoke: **800 PASS** — selector/generator fuzz.
-- MathSessionPersistenceRuntimeSmoke: **289 PASS** — targeted pool, retry, corrupt cache, selected-set repair, Request 006/009/010, V5 resume.
-- AI1 working pool 402 integration: **289 PASS** trên engine AI2.
+- MathSessionPersistenceRuntimeSmoke: **374 PASS** — targeted pool, retry, corrupt cache, selected-set repair, Request 006/009/010, V5 resume.
+- AI1 working pool 402 integration: **374 PASS** trên engine AI2.
 - Lane AI2 core engine/session/persistence: **DONE**. Các mục `skip policy` và numeric XP/daily streak không có product contract nên không tự invent semantics.

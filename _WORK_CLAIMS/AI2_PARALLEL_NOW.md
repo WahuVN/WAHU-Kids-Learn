@@ -20,7 +20,8 @@ AI2 **không chờ AI1/AI3**. Request 009 dùng synthetic pool >=6 ngay trong en
 - DONE/commit-now: adaptive `draw_segment_given_length` — LearningSession 800 PASS.
 - DONE: Request 009 at `05cdb2a` — synthetic pool >=6 selects/persists exactly 3; persistence 264 PASS.
 - DONE: Request 006 at `3cf7fc6` — `answer_unit` display-only survives loader/runtime/resume; raw integer grading unchanged; persistence 277 PASS.
-- DONE: final stress — selected-set metadata self-heal `3b8a10b`; expanded-bank persistence regression `373d9d1`; MathEngine 47 + MathData 104 + LearningSession 800 + Persistence 289 PASS; current AI1 pool-402 WIP cũng Persistence 289 PASS.
+- DONE: 16-seed selected-set rotation stress — cả 3 bucket xoay đủ 2 biến thể, target luôn 3; persistence 374 PASS.
+- DONE: final stress — selected-set metadata self-heal `3b8a10b`; expanded-bank persistence regression `373d9d1`; MathEngine 47 + MathData 104 + LearningSession 800 + Persistence 374 PASS; current AI1 pool-402 WIP cũng Persistence 374 PASS.
 
 ## Mission now
 

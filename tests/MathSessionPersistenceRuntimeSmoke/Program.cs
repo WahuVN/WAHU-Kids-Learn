@@ -697,6 +697,31 @@ VALUES(@id,@session,@child,' ','','blank-pack-question','LEGACY_PACK_SKILL','mat
                 second.Abort("pool6_seed_b_cleanup");
             }
 
+            var stressDatabase = NewDatabase(Path.Combine(root, "pool6-selection-stress.db"), schemaPath);
+            var stressBasic = new HashSet<string>(StringComparer.Ordinal);
+            var stressMedium = new HashSet<string>(StringComparer.Ordinal);
+            var stressApplication = new HashSet<string>(StringComparer.Ordinal);
+            var stressSignatures = new HashSet<string>(StringComparer.Ordinal);
+            for (var i = 0; i < 16; i++)
+            {
+                using (var coordinator = new MathSessionCoordinator(stressDatabase, pack.TemplatePath, "LOW", 9600 + i, pack.LessonId))
+                {
+                    var start = coordinator.Start("Bé pool sáu stress");
+                    AssertValidSelectedSet(start, pack, "pool6_stress_" + i.ToString(CultureInfo.InvariantCulture));
+                    A(start.TargetQuestionCount == MathSessionCoordinator.TargetedLessonQuestionCount,
+                        "pool6_stress_target_three_" + i.ToString(CultureInfo.InvariantCulture));
+                    stressBasic.Add(start.SelectedContentQuestionIds[0]);
+                    stressMedium.Add(start.SelectedContentQuestionIds[1]);
+                    stressApplication.Add(start.SelectedContentQuestionIds[2]);
+                    stressSignatures.Add(string.Join("|", start.SelectedContentQuestionIds));
+                    coordinator.Abort("pool6_stress_cleanup");
+                }
+            }
+            A(stressBasic.Count == pack.Basic.Count, "pool6_stress_rotates_all_basic_variants");
+            A(stressMedium.Count == pack.Medium.Count, "pool6_stress_rotates_all_medium_variants");
+            A(stressApplication.Count == pack.Application.Count, "pool6_stress_rotates_all_application_variants");
+            A(stressSignatures.Count >= 2, "pool6_stress_produces_multiple_valid_selected_sets");
+
             var retryDatabase = NewDatabase(Path.Combine(root, "pool6-retry-resume.db"), schemaPath);
             IList<string> retrySelection;
             string retrySessionId;
