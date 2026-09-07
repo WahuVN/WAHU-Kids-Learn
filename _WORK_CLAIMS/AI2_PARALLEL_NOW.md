@@ -5,7 +5,7 @@ LANE_DONE=NO
 BASELINE=3d8674d
 MANIFEST_LOCK=FREE
 BUILD_SETUP_LOCK=AI3
-REQUEST_009_READY=NO
+REQUEST_009_READY=05cdb2a
 REQUEST_010_READY=7afbb7b
 ADAPTIVE_SEGMENT_READY=THIS_COMMIT
 
@@ -16,8 +16,8 @@ AI2 **không chờ AI1/AI3**. Request 009 dùng synthetic pool >=6 ngay trong en
 ### Queue luôn có việc
 - DONE: Request 010 isolated at `7afbb7b` — expression whitelist + current-question JSON regression, persistence 220 PASS.
 - DONE/commit-now: adaptive `draw_segment_given_length` — LearningSession 800 PASS.
-- NOW: Request 009 synthetic selected-set engine/persistence.
-- NEXT: Request 006 `answer_unit` model/loader/runtime/resume.
+- DONE: Request 009 at `05cdb2a` — synthetic pool >=6 selects/persists exactly 3; persistence 264 PASS.
+- NOW: Request 006 `answer_unit` model/loader/runtime/resume.
 - FALLBACK: validator/generator fuzz, retry/idempotency/corrupt-cache/persistence stress, selector determinism, V5 pack-identity regression.
 
 ## Mission now
