@@ -105,6 +105,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestGardenProgressIgnoresZeroAttemptCompletedSessions(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGardenRewardUsesDurableEligibilityInsteadOfCallerOrForeignAttempts(root, schemaPath);
                 TestGardenRewardRepairsCanonicalKeyCollisionAndIgnoresOrphanGrowth(root, schemaPath);
+                TestGardenConcurrentCanonicalCollisionRepairIsIdempotent(root, schemaPath);
                 TestGardenMilestonesOneThreeSixTenAreExactAndReplaySafe(root, schemaPath);
                 TestGardenPartialRewardRepairKeepsCanonicalMilestonesAndInventory(root, schemaPath);
                 TestDirectTargetedLessonRejectsEarlyComplete(root, schemaPath, templatePath, lessonCatalogPath);
@@ -1604,6 +1605,83 @@ VALUES(@id,@child,'garden_growth','growth_step','session_completed','missing-ses
             A(orphanProgress.GrowthSteps == 0 && orphanProgress.CompletedMathSessions == 0 &&
               orphanProgress.UnlockedItems.Count == 0 && orphanProgress.NextMilestoneSessionCount == 1,
                 "garden_orphan_reward_event_does_not_inflate_growth_progress");
+        }
+
+        private static void TestGardenConcurrentCanonicalCollisionRepairIsIdempotent(
+            string root,
+            string schemaPath)
+        {
+            var database = NewDatabase(Path.Combine(root, "garden-concurrent-canonical-collision.db"), schemaPath);
+            var sessions = new LearnerSessionService(database);
+            var owner = sessions.EnsurePrimaryChild("Bé garden concurrent collision");
+            var session = sessions.BeginSession(owner.ChildId, "math", "LOW");
+            Exec(database, @"INSERT INTO attempt(
+id,session_id,child_id,pack_id,pack_version,question_id,skill_id,subject,started_at_utc,answered_at_utc,answer_json,is_correct,response_ms,hint_level,representation,input_method,attempt_index,listen_count)
+VALUES(@id,@session,@child,'math-grade2-verified-core','1.0','collision-race-question','M2_COLLISION_RACE','math',@started,@answered,'{}',1,700,0,'symbolic','smoke',1,0);",
+                "@id", "attempt-garden-collision-race-" + Guid.NewGuid().ToString("N"),
+                "@session", session.SessionId,
+                "@child", owner.ChildId,
+                "@started", DateTime.UtcNow.AddSeconds(-1).ToString("o", CultureInfo.InvariantCulture),
+                "@answered", DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture));
+            sessions.CompleteSession(session.SessionId, false, "{\"fixture\":\"source_key_collision_race\"}", "{}");
+            var canonicalKey = "garden_growth:session:" + session.SessionId;
+            Exec(database, @"INSERT INTO reward_event(
+id,child_id,reward_type,reward_id,source_event,source_ref,source_key,created_at_utc)
+VALUES(@id,@child,'cosmetic','stale_reward','legacy_import','wrong-session',@key,@utc);",
+                "@id", "reward-stale-garden-race-" + Guid.NewGuid().ToString("N"),
+                "@child", owner.ChildId,
+                "@key", canonicalKey,
+                "@utc", DateTime.UtcNow.AddMinutes(-5).ToString("o", CultureInfo.InvariantCulture));
+
+            var workerA = new LearningDatabase(database.DatabasePath, schemaPath);
+            var workerB = new LearningDatabase(database.DatabasePath, schemaPath);
+            var gate = new ManualResetEvent(false);
+            var readyA = new ManualResetEvent(false);
+            var readyB = new ManualResetEvent(false);
+            Exception errorA = null;
+            Exception errorB = null;
+            var repairedA = -1;
+            var repairedB = -1;
+            var threadA = new Thread(() =>
+            {
+                readyA.Set();
+                gate.WaitOne();
+                try { repairedA = new GameWorldRewardService(workerA).ReconcileMissingCompletedMathSessionRewards(owner.ChildId); }
+                catch (Exception ex) { errorA = ex; }
+            });
+            var threadB = new Thread(() =>
+            {
+                readyB.Set();
+                gate.WaitOne();
+                try { repairedB = new GameWorldRewardService(workerB).ReconcileMissingCompletedMathSessionRewards(owner.ChildId); }
+                catch (Exception ex) { errorB = ex; }
+            });
+            threadA.Start();
+            threadB.Start();
+            A(readyA.WaitOne(5000) && readyB.WaitOne(5000),
+                "garden_concurrent_canonical_collision_workers_ready");
+            gate.Set();
+            A(threadA.Join(10000) && threadB.Join(10000),
+                "garden_concurrent_canonical_collision_workers_finish");
+            gate.Dispose();
+            readyA.Dispose();
+            readyB.Dispose();
+
+            A(errorA == null && errorB == null && repairedA + repairedB == 1,
+                "garden_concurrent_canonical_collision_reports_exactly_one_repair");
+            A(Count(database, "SELECT count(*) FROM reward_event WHERE child_id='" + owner.ChildId +
+              "' AND source_key='" + canonicalKey + "' AND reward_type='garden_growth' AND reward_id='growth_step'" +
+              " AND source_event='session_completed' AND source_ref='" + session.SessionId + "';") == 1 &&
+              Count(database, "SELECT count(*) FROM reward_event WHERE child_id='" + owner.ChildId +
+              "' AND source_key='" + canonicalKey + "';") == 1,
+                "garden_concurrent_canonical_collision_keeps_one_canonical_reward_row");
+            var progress = new GameWorldRewardService(database).ReadProgress(owner.ChildId);
+            A(progress.GrowthSteps == 1 && progress.CompletedMathSessions == 1 &&
+              progress.UnlockedItems.Count(x => x == "garden_seedling") == 1 &&
+              Count(database, "SELECT count(*) FROM inventory WHERE child_id='" + owner.ChildId + "' AND item_id='garden_seedling';") == 1,
+                "garden_concurrent_canonical_collision_unlocks_first_milestone_once");
+            A(new GameWorldRewardService(database).ReconcileMissingCompletedMathSessionRewards(owner.ChildId) == 0,
+                "garden_concurrent_canonical_collision_replay_is_noop");
         }
 
         private static void TestGardenMilestonesOneThreeSixTenAreExactAndReplaySafe(
