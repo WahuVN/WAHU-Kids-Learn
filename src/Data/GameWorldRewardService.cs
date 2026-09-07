@@ -99,6 +99,46 @@ VALUES(@child,@item,@utc,0);";
             return SnapshotResult(childId, created, unlocked);
         }
 
+        public int ReconcileMissingCompletedMathSessionRewards(string childId)
+        {
+            Require(childId, "childId");
+            var missing = new List<KeyValuePair<string, int>>();
+            using (var connection = _database.OpenConnection())
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = @"SELECT s.id, count(a.id)
+FROM session s
+JOIN attempt a ON a.session_id=s.id
+WHERE s.child_id=@child AND s.state='completed' AND s.planned_subject='math'
+  AND NOT EXISTS (
+      SELECT 1 FROM reward_event r
+      WHERE r.child_id=s.child_id AND r.reward_type=@type
+        AND r.source_event='session_completed' AND r.source_ref=s.id)
+GROUP BY s.id
+HAVING count(a.id)>0
+ORDER BY s.started_at_utc,s.id;";
+                command.Parameters.AddWithValue("@child", childId);
+                command.Parameters.AddWithValue("@type", RewardType);
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        missing.Add(new KeyValuePair<string, int>(
+                            Convert.ToString(reader[0], CultureInfo.InvariantCulture),
+                            Convert.ToInt32(reader[1], CultureInfo.InvariantCulture)));
+                    }
+                }
+            }
+
+            var repaired = 0;
+            foreach (var item in missing)
+            {
+                var result = GrantCompletedMathSession(childId, item.Key, item.Value);
+                if (result.RewardCreated) repaired++;
+            }
+            return repaired;
+        }
+
         public GameWorldProgress ReadProgress(string childId)
         {
             Require(childId, "childId");

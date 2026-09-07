@@ -77,6 +77,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestGameEventRuntimeResumeRewardAndFallback(root, schemaPath, templatePath, lessonCatalogPath);
                 TestProductionFirstFiveGameEventsRuntime(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestProductionFirstEventResumeJourney(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
+                TestGameEventRewardFaultReconcilesOnNextStart(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventCommitFaultPreservesCheckpoint(root, schemaPath, templatePath, lessonCatalogPath);
                 TestGameEventConcurrentCoordinatorsStayIdempotent(root, schemaPath, templatePath, lessonCatalogPath);
                 Console.WriteLine("MATH_SESSION_PERSISTENCE_RUNTIME_SMOKE_PASS assertions=" + _assertions);
@@ -400,6 +401,69 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                   Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + sessionId + "';") == 3,
                     "production_first_event_resume_journey_grants_one_reward_three_mastery");
             }
+        }
+
+        private static void TestGameEventRewardFaultReconcilesOnNextStart(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath,
+            string gameEventPath)
+        {
+            var events = new MathGameEventCatalogSource().Load(gameEventPath, lessonCatalogPath);
+            var firstEvent = events.Events[0];
+            var secondEvent = events.Events[1];
+            var database = NewDatabase(Path.Combine(root, "game-event-reward-fault-reconcile.db"), schemaPath);
+            string firstSessionId;
+            string childId;
+
+            Exec(database, @"CREATE TRIGGER fail_game_event_reward BEFORE INSERT ON reward_event
+BEGIN SELECT RAISE(ABORT,'game event injected reward failure'); END;");
+            using (var first = new MathGameEventCoordinator(database, templatePath, gameEventPath, "LOW",
+                15201, firstEvent.Id, firstEvent.TargetLessonId))
+            {
+                var start = first.Start("Bé event reward fault");
+                firstSessionId = start.Session.SessionId;
+                childId = start.Session.ChildId;
+                for (var ordinal = 0; ordinal < 3; ordinal++)
+                {
+                    var question = first.NextQuestion();
+                    first.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700 + ordinal * 100);
+                }
+                var completion = first.Complete();
+                A(completion.LearningSummary.LessonCompleted && completion.EventState.IsComplete &&
+                  completion.LearningSummary.GardenGrowthSteps == 0,
+                    "game_event_reward_fault_keeps_learning_completed_without_fake_growth");
+                A(SessionState(database, firstSessionId) == "completed" &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + firstSessionId + "';") == 0 &&
+                  Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + firstSessionId + "';") == 3,
+                    "game_event_reward_fault_does_not_roll_back_learning_or_create_partial_reward");
+            }
+
+            Exec(database, "DROP TRIGGER fail_game_event_reward;");
+            string secondSessionId;
+            using (var second = new MathGameEventCoordinator(database, templatePath, gameEventPath, "LOW",
+                15202, secondEvent.Id, secondEvent.TargetLessonId))
+            {
+                var start = second.Start("Bé event reward fault");
+                secondSessionId = start.Session.SessionId;
+                A(start.Event != null && start.Event.Id == secondEvent.Id && start.Session.TargetLessonId == secondEvent.TargetLessonId,
+                    "game_event_reward_reconcile_next_unlocked_event_starts_normally");
+                A(Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + firstSessionId +
+                  "' AND reward_type='garden_growth';") == 1,
+                    "game_event_next_start_repairs_missing_completed_session_reward");
+                var progress = new GameWorldRewardService(database).ReadProgress(childId);
+                A(progress.GrowthSteps == 1 && progress.CompletedMathSessions == 1,
+                    "game_event_reward_reconcile_progress_reflects_repaired_growth_once");
+                A(new GameWorldRewardService(database).ReconcileMissingCompletedMathSessionRewards(childId) == 0 &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + firstSessionId + "';") == 1,
+                    "game_event_reward_reconcile_replay_is_idempotent");
+                second.SuspendForBreak("reward_reconcile_active_cleanup");
+            }
+
+            A(SessionState(database, secondSessionId) == "active" &&
+              Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + secondSessionId + "';") == 0,
+                "game_event_reward_reconcile_never_rewards_active_session");
         }
 
         private static void TestGameEventCommitFaultPreservesCheckpoint(

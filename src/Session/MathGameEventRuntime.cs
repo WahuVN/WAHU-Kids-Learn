@@ -350,6 +350,17 @@ namespace WAHU.Session
             _session = new MathSessionCoordinator(_database, _templatePath, _performanceProfile, _seed, lessonId);
             _start = _session.Start(displayName);
             _started = true;
+            try
+            {
+                // A prior completed Math session may have become durable just before a transient
+                // Garden reward write failed. Reward absence is discoverable from durable session
+                // history, so repair it idempotently when the next game event opens; never block play.
+                new GameWorldRewardService(_database).ReconcileMissingCompletedMathSessionRewards(_start.ChildId);
+            }
+            catch
+            {
+                // Game-world repair is downstream of learning and must not make the event unplayable.
+            }
             if (!string.Equals(_start.SessionMode, "lesson", StringComparison.Ordinal) ||
                 !string.Equals(_start.TargetLessonId, lessonId, StringComparison.Ordinal) ||
                 _start.TargetQuestionCount != MathSessionCoordinator.TargetedLessonQuestionCount)
