@@ -36,6 +36,7 @@ BANNED_PATTERNS = [
 ]
 SAFE_ID = re.compile(r"^[a-z0-9][a-z0-9_]{2,79}$")
 SAFE_THEME = re.compile(r"^[a-z0-9][a-z0-9_]{2,47}$")
+AMBIGUOUS_MATH_PATTERNS = ((r"\bphần\s+trăm\b", "percent_vs_hundreds"),)
 BREAK_PROGRESS_PATTERNS = (r"\blưu\b", r"giữ\s+nguyên")
 BREAK_PROMISE_PATTERNS = (r"hoàn\s+thành", r"nhận\s+(?:quà|thưởng)", r"mở\s+khóa", r"được\s+thưởng")
 MAX_BREAK_TOKEN_JACCARD = 0.60
@@ -133,9 +134,15 @@ def validate(events_path: Path = DEFAULT_EVENTS, lessons_path: Path = DEFAULT_LE
             errors.append(f"{where}:theme")
 
         for key, limit in TEXT_LIMITS.items():
-            reason = bad_text_reason(event.get(key), limit)
+            value = event.get(key)
+            reason = bad_text_reason(value, limit)
             if reason:
                 errors.append(f"{where}:{key}:{reason}")
+            if isinstance(value, str):
+                lowered_value = value.casefold()
+                for pattern, label in AMBIGUOUS_MATH_PATTERNS:
+                    if re.search(pattern, lowered_value, re.IGNORECASE):
+                        errors.append(f"{where}:{key}:ambiguous_math_copy:{label}")
 
         break_text = event.get("break_copy_vi")
         if isinstance(break_text, str):

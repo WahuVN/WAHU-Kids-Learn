@@ -117,6 +117,15 @@ class MathGameEventsSmoke(unittest.TestCase):
             errors, _ = self.validator.validate(path, LESSON_PATH)
         self.assertTrue(any("repair_copy_vi:not_skill_specific" in x for x in errors), errors)
 
+    def test_event_validator_rejects_ambiguous_percent_wording(self):
+        broken = json.loads(EVENT_PATH.read_text(encoding="utf-8"))
+        broken["events"][4]["intro_vi"] = "Con giúp ghép lại phần trăm, chục và đơn vị nhé."
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "events.json"
+            path.write_text(json.dumps(broken, ensure_ascii=False), encoding="utf-8")
+            errors, _ = self.validator.validate(path, LESSON_PATH)
+        self.assertTrue(any("ambiguous_math_copy:percent_vs_hundreds" in x for x in errors), errors)
+
     def test_event_validator_rejects_answer_leak_in_repair_copy(self):
         broken = json.loads(EVENT_PATH.read_text(encoding="utf-8"))
         broken["events"][1]["repair_copy_vi"] = "Mình nhìn hai chữ số cuối nhé; đáp án là: 300."

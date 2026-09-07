@@ -75,7 +75,7 @@ EVENT_SPECS = [
         "id": "m2_evt_expanded_number_machine_repair_01",
         "kind": "quick_rescue",
         "title_vi": "Sửa máy ghép số",
-        "intro_vi": "Máy ghép số đang tách các hàng chưa đúng. Con giúp ghép lại phần trăm, chục và đơn vị để máy chạy êm nhé.",
+        "intro_vi": "Máy ghép số đang tách các hàng chưa đúng. Con giúp ghép lại phần hàng trăm, hàng chục và hàng đơn vị để máy chạy êm nhé.",
         "completion_vi": "Ba bộ phận đã ghép đúng giá trị từng hàng. Máy ghép số lại chạy êm rồi.",
         "target_lesson_id": "m2_ls_num_expanded_form_hto",
         "target_skill_id": "NUM_EXPANDED_FORM_HTO",
