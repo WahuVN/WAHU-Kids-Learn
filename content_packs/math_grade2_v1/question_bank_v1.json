@@ -238,7 +238,7 @@
         {
           "id": "b",
           "text": "Sai",
-          "rationale_vi": "“Sai” chưa đúng. 700 có hàng chục và hàng đơn vị đều bằng 0 nên đây là số tròn trăm. Vậy đáp án là Đúng."
+          "rationale_vi": "“Sai” chưa đúng. 700 có hàng chục và hàng đơn vị đều bằng 0 nên đúng là một số tròn trăm; chọn Sai phủ nhận một tính chất đúng. 700 có hàng chục và hàng đơn vị đều bằng 0 nên đây là số tròn trăm. Vậy đáp án là Đúng."
         }
       ],
       "correct_choice_id": "a"
@@ -3162,7 +3162,7 @@
         {
           "id": "d",
           "text": "4 + 2",
-          "rationale_vi": "“4 + 2” chưa đúng. Gộp hai lượng lại là quan hệ cộng; hai nhóm 4 là 4 + 4."
+          "rationale_vi": "“4 + 2” chưa đúng. Dấu cộng đã phù hợp với việc gộp, nhưng hai nhóm đều có 4 chấm nên phải cộng 4 + 4; lựa chọn 4 + 2 đã đổi số chấm của nhóm thứ hai. Gộp hai lượng lại là quan hệ cộng; hai nhóm 4 là 4 + 4."
         }
       ],
       "correct_choice_id": "b"
@@ -6285,7 +6285,7 @@
         {
           "id": "a",
           "text": "Sai",
-          "rationale_vi": "“Sai” chưa đúng. Từ 6 giờ sáng hôm nay đến 6 giờ sáng hôm sau là 24 giờ, đúng bằng một ngày đầy đủ."
+          "rationale_vi": "“Sai” chưa đúng. Từ 6 giờ sáng hôm nay đến đúng 6 giờ sáng hôm sau là đủ 24 giờ, tức một ngày đầy đủ; chọn Sai trái với quan hệ này. Từ 6 giờ sáng hôm nay đến 6 giờ sáng hôm sau là 24 giờ, đúng bằng một ngày đầy đủ."
         },
         {
           "id": "b",
@@ -6641,7 +6641,7 @@
         {
           "id": "b",
           "text": "Đúng",
-          "rationale_vi": "“Đúng” chưa đúng. Màu sắc có thể hỗ trợ quan sát nhưng cần đọc con số mệnh giá và đơn vị đồng để nhận biết giá trị. Vậy đáp án là Sai."
+          "rationale_vi": "“Đúng” chưa đúng. Màu sắc một mình không xác định chắc chắn giá trị tờ tiền; vẫn phải đọc con số mệnh giá và đơn vị đồng, nên chọn Đúng là sai. Màu sắc có thể hỗ trợ quan sát nhưng cần đọc con số mệnh giá và đơn vị đồng để nhận biết giá trị. Vậy đáp án là Sai."
         }
       ],
       "correct_choice_id": "a"

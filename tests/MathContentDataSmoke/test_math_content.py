@@ -516,6 +516,8 @@ class MathContentDataSmoke(unittest.TestCase):
                                         if item["skill_id"] in validator.COMPONENT_SKILLS else None)
                     if component_marker:
                         self.assertIn(component_marker, rationale.casefold())
+                    self.assertTrue(structured_reason or component_marker,
+                                    f"missing choice-specific diagnosis: {item['id']} / {choice['text']}")
         self.assertEqual(267, len(rationales))
         self.assertNotIn(validator.GENERIC_DISTRACTOR_RATIONALE, rationales)
         counts = Counter(rationales)

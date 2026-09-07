@@ -816,6 +816,18 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
         }
         if label in reasons: return reasons[label]
 
+    if skill == "NUM_FULL_HUNDREDS_RECOGNIZE" and prompt.strip().startswith("700") and choice_text.strip().casefold() == "sai":
+        return "700 có hàng chục và hàng đơn vị đều bằng 0 nên đúng là một số tròn trăm; chọn Sai phủ nhận một tính chất đúng."
+
+    if skill == "OPERATION_MEANING_FROM_VISUAL" and "Hai nhóm 4 chấm được gộp lại" in prompt and choice_text.strip() == "4 + 2":
+        return "Dấu cộng đã phù hợp với việc gộp, nhưng hai nhóm đều có 4 chấm nên phải cộng 4 + 4; lựa chọn 4 + 2 đã đổi số chấm của nhóm thứ hai."
+
+    if skill == "TIME_DAY_24_HOURS" and "6 giờ sáng hôm sau" in prompt.casefold() and choice_text.strip().casefold() == "sai":
+        return "Từ 6 giờ sáng hôm nay đến đúng 6 giờ sáng hôm sau là đủ 24 giờ, tức một ngày đầy đủ; chọn Sai trái với quan hệ này."
+
+    if skill == "MONEY_VND_NOTE_RECOGNITION" and "chỉ nhìn màu sắc" in prompt.casefold() and choice_text.strip().casefold() == "đúng":
+        return "Màu sắc một mình không xác định chắc chắn giá trị tờ tiền; vẫn phải đọc con số mệnh giá và đơn vị đồng, nên chọn Đúng là sai."
+
     return None
 
 
