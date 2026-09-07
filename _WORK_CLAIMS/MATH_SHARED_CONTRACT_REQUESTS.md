@@ -31,7 +31,7 @@
 - Contract cũ/WIP: `DrawSegmentGivenLength()` tạo `AnswerKind = "interaction_integer"`, không có choice; nhưng `MathQuestionGenerator.FinalizeAnswerOptions()` hiện ép mọi non-text question về `AnswerKind = "integer"` và tự sinh 4 lựa chọn.
 - Contract cần: nếu `AnswerKind == "interaction_integer"`, giữ nguyên answer kind, `CorrectAnswerText`, để `Choices`/`ChoiceTexts` rỗng và return trước nhánh auto-build numeric choices.
 - Lý do: AI3 đã có UI tương tác vẽ đoạn thẳng; nếu generator đổi kind thành `integer`, runtime không bao giờ đi vào control tương tác và bài mới lại thành trắc nghiệm.
-- Regression cần từ AI2: generated `draw_segment_given_length` phải có `AnswerKind == "interaction_integer"`, `DisplayChoices.Count == 0`, và `IsCorrectAnswer()` vẫn chấm numeric đúng.
+- Regression cần từ AI2: generated `draw_segment_given_length` phải có `AnswerKind == "interaction_integer"`, `DisplayChoices.Count == 0`, và `IsCorrectAnswer()` vẫn chấm numeric đúng. AI3 đã tách WIP generator lên clean `0dc756a` và fuzz 100 seed: **1.100 assertions PASS**; temp Child UI thay fixture dựng tay bằng `MathQuestionGenerator(...).Generate(...)` vẫn **1596 assertions PASS**. Vì vậy behavior kỹ thuật đã được verify, nhưng Request 004 chỉ CLOSED khi owner AI2 commit generator + engine smoke vào stable HEAD.
 - File owner sửa: `src/Learning/MathQuestionGenerator.cs` + engine smoke tương ứng.
 - Owner: AI2 engine. AI3 không sửa generator để tránh conflict ownership.
 
@@ -74,7 +74,7 @@
 
 ## Request 009 — Decouple authored lesson pool size from 3-question session target
 
-- Contract hiện tại: mỗi lesson có đúng `1 basic + 1 medium + 1 application`; `MathSessionCoordinator` nối toàn bộ `PracticeSets` theo thứ tự `basic -> medium -> application` rồi đặt `TargetQuestionCount = PracticeSets.TotalCount`. Vì vậy tăng bank lên 6/9 câu sẽ đồng thời kéo dài một phiên lên 6/9 câu; học lại lesson hiện cũng luôn gặp đúng cùng 3 `ContentQuestionId`.
+- Contract hiện tại: mỗi lesson có đúng `1 basic + 1 medium + 1 application`; `MathSessionCoordinator` nối toàn bộ `PracticeSets` theo thứ tự `basic -> medium -> application` rồi đặt `TargetQuestionCount = PracticeSets.TotalCount`. AI3 đã dựng synthetic pool 6 ngoài repo trên stable `424185f`: coordinator trả `TargetQuestionCount=6`, tiêu thụ đủ 6 `ContentQuestionId` theo toàn bộ bucket order và chỉ complete sau 6 attempts (**32 assertions PASS**). Vì vậy tăng bank lên 6/9 câu hiện chắc chắn đồng thời kéo dài phiên lên 6/9 câu; Request 009 engine vẫn OPEN.
 - Mục tiêu UX/content: cho phép AI1 mở rộng mỗi lesson thành **pool >= 6 câu** (tối thiểu 2 basic + 2 medium + 2 application) nhưng **mỗi lesson session mặc định vẫn 3 câu**, lấy cân bằng **1 basic + 1 medium + 1 application**. `Luyện 3 câu bài này` không được biến thành phiên dài chỉ vì pool lớn hơn.
 - Contract engine cần: tách `authored_pool_count` khỏi `TargetQuestionCount`; khi bắt đầu fresh targeted session, chọn một ordered set 3 `ContentQuestionId` từ ba difficulty buckets. Cùng seed/selection identity phải deterministic để test; các fresh session với selection identity khác phải có khả năng chọn set khác thay vì luôn lấy phần tử đầu.
 - Persistence bắt buộc: ordered selected `ContentQuestionId` của session phải survive suspend/resume. Resume, retry và corrupt-open-question recovery phải tiếp tục trên **selected session set**, không re-select từ pool và không skip ordinal. Request 007 semantics vẫn áp dụng trên selected set.
