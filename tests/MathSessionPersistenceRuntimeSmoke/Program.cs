@@ -47,6 +47,8 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestTargetedCorruptOpenQuestionReplaysAuthoredOrdinal(root, schemaPath, templatePath, lessonCatalogPath);
                 TestExpandedTargetedPoolSelectsDurableThree(root, schemaPath, templatePath, lessonCatalogPath, questionBankPath);
                 TestTargetedSelectedSetSurvivesCommitFailure(root, schemaPath, templatePath, lessonCatalogPath);
+                TestTargetedConcurrentCoordinatorsCannotDuplicateOrdinal(root, schemaPath, templatePath, lessonCatalogPath);
+                TestTargetedResumeDiscardsStaleConcurrentOrdinalCache(root, schemaPath, templatePath, lessonCatalogPath);
                 TestRetryAwareAnswerFlow(root, schemaPath, templatePath);
                 TestRetryWrongFinalizesOnce(root, schemaPath, templatePath);
                 TestStaleCoordinatorCannotAppendAfterTerminalSession(root, schemaPath, templatePath);
@@ -1047,6 +1049,139 @@ END;");
                 A(medium != null && medium.ContentQuestionId == selected[1] && lesson.PracticeSets.Medium.Contains(medium.ContentQuestionId),
                     "targeted_commit_failure_retry_continues_same_selected_medium");
                 coordinator.Abort("targeted_selected_set_commit_failure_cleanup");
+            }
+        }
+
+        private static void TestTargetedConcurrentCoordinatorsCannotDuplicateOrdinal(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.Lessons.First(x =>
+                (x.PrerequisiteSkills == null || x.PrerequisiteSkills.Count == 0) &&
+                x.PracticeSets != null && x.PracticeSets.Basic.Count == 2 &&
+                x.PracticeSets.Medium.Count == 2 && x.PracticeSets.Application.Count == 2);
+            var database = NewDatabase(Path.Combine(root, "targeted-concurrent-ordinal.db"), schemaPath);
+
+            using (var first = new MathSessionCoordinator(database, templatePath, "LOW", 8601, lesson.Id))
+            {
+                var firstStart = first.Start("Bé targeted concurrent");
+                var selected = firstStart.SelectedContentQuestionIds.ToList();
+                var firstBasic = first.NextQuestion();
+
+                using (var second = new MathSessionCoordinator(database, templatePath, "NORMAL", 999999, lesson.Id))
+                {
+                    var secondStart = second.Start("Bé targeted concurrent");
+                    A(secondStart.ResumedExistingSession && secondStart.RestoredOpenQuestion &&
+                      secondStart.SessionId == firstStart.SessionId,
+                        "targeted_concurrent_second_coordinator_resumes_active_session");
+                    A(secondStart.SelectedContentQuestionIds.SequenceEqual(selected),
+                        "targeted_concurrent_second_coordinator_uses_winner_selected_set");
+                    var secondBasic = second.NextQuestion();
+                    A(secondBasic.QuestionId == firstBasic.QuestionId && secondBasic.ContentQuestionId == selected[0],
+                        "targeted_concurrent_both_hold_same_selected_basic_instance");
+
+                    first.SubmitAnswerAt(firstBasic.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700);
+                    var replay = second.SubmitAnswerAt(secondBasic.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 720);
+                    A(replay.QuestionCompleted && second.Summary.Attempts == 1,
+                        "targeted_concurrent_basic_replay_is_idempotent");
+
+                    var firstMedium = first.NextQuestion();
+                    var secondMedium = second.NextQuestion();
+                    A(firstMedium.ContentQuestionId == selected[1] && secondMedium.ContentQuestionId == selected[1] &&
+                      firstMedium.QuestionId != secondMedium.QuestionId,
+                        "targeted_concurrent_can_open_distinct_runtime_instances_for_same_selected_medium");
+
+                    first.SubmitAnswerAt(firstMedium.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 800);
+                    var staleRejected = false;
+                    try
+                    {
+                        second.SubmitAnswerAt(secondMedium.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 820);
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        staleRejected = true;
+                    }
+                    A(staleRejected,
+                        "targeted_concurrent_stale_medium_runtime_is_rejected_after_other_commit");
+                    A(Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + firstStart.SessionId + "';") == 2,
+                        "targeted_concurrent_stale_medium_rejection_writes_no_duplicate_attempt");
+                    A(second.Summary.Attempts == 2 && !second.HasOpenQuestion,
+                        "targeted_concurrent_stale_medium_reconciles_to_two_committed_ordinals");
+
+                    var application = second.NextQuestion();
+                    A(application != null && application.ContentQuestionId == selected[2] &&
+                      lesson.PracticeSets.Application.Contains(application.ContentQuestionId),
+                        "targeted_concurrent_reconciled_coordinator_advances_to_selected_application");
+                    second.Abort("targeted_concurrent_cleanup");
+                }
+            }
+        }
+
+        private static void TestTargetedResumeDiscardsStaleConcurrentOrdinalCache(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.Lessons.First(x =>
+                (x.PrerequisiteSkills == null || x.PrerequisiteSkills.Count == 0) &&
+                x.PracticeSets != null && x.PracticeSets.Basic.Count == 2 &&
+                x.PracticeSets.Medium.Count == 2 && x.PracticeSets.Application.Count == 2);
+            var database = NewDatabase(Path.Combine(root, "targeted-stale-concurrent-cache.db"), schemaPath);
+            IList<string> selected;
+            string sessionId;
+
+            using (var first = new MathSessionCoordinator(database, templatePath, "LOW", 8611, lesson.Id))
+            {
+                var firstStart = first.Start("Bé targeted stale cache");
+                sessionId = firstStart.SessionId;
+                selected = firstStart.SelectedContentQuestionIds.ToList();
+                var firstBasic = first.NextQuestion();
+
+                using (var second = new MathSessionCoordinator(database, templatePath, "NORMAL", 123456, lesson.Id))
+                {
+                    var secondStart = second.Start("Bé targeted stale cache");
+                    var secondBasic = second.NextQuestion();
+                    A(secondStart.ResumedExistingSession && secondBasic.QuestionId == firstBasic.QuestionId,
+                        "targeted_stale_cache_second_coordinator_resumes_basic");
+
+                    first.SubmitAnswerAt(firstBasic.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700);
+                    second.SubmitAnswerAt(secondBasic.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 720);
+
+                    var firstMedium = first.NextQuestion();
+                    first.SubmitAnswerAt(firstMedium.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 800);
+                    A(Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + sessionId + "';") == 2,
+                        "targeted_stale_cache_two_ordinals_committed_before_stale_open");
+
+                    var staleMedium = second.NextQuestion();
+                    A(staleMedium.ContentQuestionId == selected[1] && staleMedium.QuestionId != firstMedium.QuestionId,
+                        "targeted_stale_cache_second_opens_distinct_stale_medium_after_commit");
+                    var persistedStaleJson = ScalarText(database,
+                        "SELECT current_question_json FROM math_session_runtime WHERE session_id='" + sessionId + "';");
+                    A(!string.IsNullOrWhiteSpace(persistedStaleJson) && persistedStaleJson.Contains(staleMedium.QuestionId),
+                        "targeted_stale_cache_persists_stale_medium_runtime_instance");
+                    second.Suspend("targeted_stale_cache_simulate_restart");
+                }
+                first.Suspend("targeted_stale_cache_first_coordinator_closed");
+            }
+
+            using (var resumed = new MathSessionCoordinator(database, templatePath, "NORMAL", 999999, lesson.Id))
+            {
+                var start = resumed.Start("Bé targeted stale cache");
+                A(start.ResumedExistingSession && start.CompletedQuestionCount == 2 && !start.RestoredOpenQuestion,
+                    "targeted_stale_cache_resume_discards_already_finalized_medium_cache");
+                A(start.SelectedContentQuestionIds.SequenceEqual(selected),
+                    "targeted_stale_cache_resume_preserves_selected_set");
+                A(Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + sessionId + "';") == 2,
+                    "targeted_stale_cache_resume_keeps_two_durable_attempts");
+                var application = resumed.NextQuestion();
+                A(application != null && application.ContentQuestionId == selected[2],
+                    "targeted_stale_cache_resume_advances_to_selected_application");
+                resumed.Abort("targeted_stale_cache_cleanup");
             }
         }
 

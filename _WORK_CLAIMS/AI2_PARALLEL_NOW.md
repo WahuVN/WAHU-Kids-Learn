@@ -58,7 +58,7 @@ Milestone: `3cf7fc6`.
 - MathDataEngineRuntimeSmoke: 104 PASS.
 - LearningSessionRuntimeSmoke: 800 PASS.
 - SQLiteRuntimeSmoke production: 179 PASS.
-- MathSessionPersistenceRuntimeSmoke current: **7119 PASS**; gồm real 402-bank breadth stress + targeted selected-set write-failure rollback/retry + selected-set semantic-corruption repair matrix.
+- MathSessionPersistenceRuntimeSmoke current: **7138 PASS**; gồm real 402-bank breadth stress + write-failure/corruption repair + concurrent-coordinator authored-ordinal race hardening.
 - Real 402-bank integration đã PASS; selector breadth hiện verify đủ **67/67 lesson**, mỗi basic/medium/application bucket đều deterministic, in-range và xoay đủ 2 variant qua 16 seed.
 
 Không hard-code assertion count; regression mới chỉ được tăng hoặc nếu giảm phải có lý do rõ.

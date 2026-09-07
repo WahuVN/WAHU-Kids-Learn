@@ -968,6 +968,14 @@ namespace WAHU.Session
                         throw new InvalidDataException("Cached targeted Math question is outside the persisted selected set.");
                 }
 
+                if (string.Equals(_sessionMode, "lesson", StringComparison.Ordinal) &&
+                    IsFinalizedSelectedContentQuestion(committedAttempts, question.ContentQuestionId))
+                {
+                    ReconcileTargetedGeneratedOrdinalAfterDiscard();
+                    try { _runtime.SaveCheckpoint(_session.SessionId, _generatedQuestionCount, _forcedRepairTemplateId, RuntimeCheckpointSelectionJson()); } catch { }
+                    return;
+                }
+
                 var nextAttemptIndex = NextAttemptIndexForQuestion(committedAttempts, question.QuestionId);
                 if (nextAttemptIndex == 0)
                 {
@@ -1043,6 +1051,15 @@ namespace WAHU.Session
             return matches.Count + 1;
         }
 
+        private bool IsFinalizedSelectedContentQuestion(IList<MathCommittedAttemptSnapshot> attempts, string contentQuestionId)
+        {
+            if (!string.Equals(_sessionMode, "lesson", StringComparison.Ordinal) || string.IsNullOrWhiteSpace(contentQuestionId))
+                return false;
+            return (attempts ?? new List<MathCommittedAttemptSnapshot>()).Any(x =>
+                x.MasteryScoreAfter.HasValue &&
+                string.Equals(TemplateIdFromQuestionId(x.QuestionId), contentQuestionId, StringComparison.Ordinal));
+        }
+
         private void ReconcileAfterFailedAnswerCommit(MathQuestion question)
         {
             try
@@ -1050,6 +1067,16 @@ namespace WAHU.Session
                 var committedAttempts = _runtime.LoadCommittedAttempts(_session.SessionId);
                 var durableSkills = _sessionService.LoadSkillSnapshots(_profile.ChildId, "math");
                 _skills = durableSkills;
+                if (question != null && IsFinalizedSelectedContentQuestion(committedAttempts, question.ContentQuestionId))
+                {
+                    RebuildFromCommittedAttempts(committedAttempts);
+                    ReconcileTargetedGeneratedOrdinalAfterDiscard();
+                    _currentQuestion = null;
+                    _currentSelection = null;
+                    _currentAttemptIndex = 1;
+                    try { _runtime.SaveCheckpoint(_session.SessionId, _generatedQuestionCount, _forcedRepairTemplateId, RuntimeCheckpointSelectionJson()); } catch { }
+                    return;
+                }
                 var nextAttemptIndex = question == null ? 1 : NextAttemptIndexForQuestion(committedAttempts, question.QuestionId);
                 if (question != null && nextAttemptIndex == 0)
                 {
@@ -1159,7 +1186,19 @@ namespace WAHU.Session
                 });
 
                 if (!attempt.MasteryScoreAfter.HasValue) continue;
-                if (!finalizedQuestionIds.Add(attempt.QuestionId))
+                var finalizedQuestionKey = attempt.QuestionId;
+                if (string.Equals(_sessionMode, "lesson", StringComparison.Ordinal))
+                {
+                    var contentQuestionId = TemplateIdFromQuestionId(attempt.QuestionId);
+                    if (string.IsNullOrWhiteSpace(contentQuestionId) || _selectedContentQuestionIds == null ||
+                        !_selectedContentQuestionIds.Contains(contentQuestionId))
+                        throw new InvalidDataException("Persisted targeted Math attempt is outside the selected authored set.");
+                    if (_attempts >= _selectedContentQuestionIds.Count ||
+                        !string.Equals(_selectedContentQuestionIds[_attempts], contentQuestionId, StringComparison.Ordinal))
+                        throw new InvalidDataException("Persisted targeted Math finalized attempts are outside selected ordinal order.");
+                    finalizedQuestionKey = contentQuestionId;
+                }
+                if (!finalizedQuestionIds.Add(finalizedQuestionKey))
                     throw new InvalidDataException("Persisted Math question has multiple final mastery-bearing attempts.");
 
                 _attempts++;
