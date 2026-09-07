@@ -20,8 +20,8 @@ Playable Event Engine P0: **GREEN**
 ## Tests
 
 - `tests/MathEngineRuntimeSmoke`: PASS — **72 assertions** (baseline equivalence + adversarial Unicode/NFD, int overflow, answer-length, unit alias, expression depth/token-bomb, Unicode operators và invalid per-question whitelist fail-closed).
-- `tests/MathDataEngineRuntimeSmoke`: PASS — **104 assertions** (idempotency + terminal-session guard + optimistic skill-state guard + true cross-process mastery/session contention + atomic startup + subject/child-scoped dangling recovery).
-- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **7997 assertions** (toàn bộ gate cũ + real 402-bank selector breadth + targeted write-failure/corruption repair + deterministic authored runtime IDs + concurrent pending-retry/completion semantics + generated/open-ordinal/timestamp self-heal + late-review transaction rollback + operational DB failure fail-safe).
+- `tests/MathDataEngineRuntimeSmoke`: PASS — **118 assertions** (idempotency + terminal-session guard + optimistic skill-state guard + true cross-process mastery/session contention + atomic startup + cross-process recovery/cleanup races + subject/child-scoped dangling recovery).
+- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **8002 assertions** (toàn bộ gate cũ + real 402-bank selector breadth + targeted write-failure/corruption repair + deterministic authored runtime IDs + concurrent pending-retry/completion semantics + generated/open-ordinal/timestamp self-heal + multi-runtime reconciliation + late-review transaction rollback + operational DB failure fail-safe).
 - Pending-retry early complete: q2 wrong/pending retry rồi gọi `Complete()` bị reject nhưng `RetryPending`, checkpoint=1, exact q2 và reward=0 đều giữ nguyên; suspend/resume tiếp tục flow cũ.
 - Corrupt-catalog completion: synthetic event q1 complete rồi catalog hỏng; fallback lesson giữ selected q2/q3, đạt 3/3 nhưng chưa terminal cho tới `Complete()`, sau đó đúng 3 attempts/3 mastery + 1 reward; khôi phục catalog mở cùng event tạo session mới 0/3 và không duplicate reward.
 - Mismatched event/lesson fail-closed: production event 1 ID ghép nhầm fallback lesson event 2 bị `ResolveEventFailSafe()` reject trước session start; regression xác nhận 0 active session, 0 `math_session_runtime`, 0 `math_lesson_progress`, 0 reward.
@@ -55,7 +55,7 @@ Playable Event Engine P0: **GREEN**
 - FIRST-5 hint/mastery matrix: mỗi bài đầu có một câu đúng với `hint_level=2` và hai câu independent; outcome hinted không được tính independent, mastery reason chứa `hinted_correct_lower_weight`, review reason `hinted_success_short_recall`, DB persist đúng 1 max-hint + 2 no-hint attempts và child_skill đúng `independent_success_count=2`, `hinted_success_count=1`.
 - Pack-byte identity audit: production `Program.BootstrapRuntime()` bắt buộc `ContentPackValidator.ValidateDirectory(..., true)` cho bundled Math pack trước UI; manifest SHA-256 mismatch fail startup, nên V5 `pack_id+version` kết hợp verified manifest đủ contract hiện tại, chưa cần invent schema V6 chỉ để lưu hash lần hai.
 - Late-review transaction fault: injected failure tại `review_schedule` (sau attempt/mastery/child_skill trong cùng transaction) rollback sạch toàn chain + semantic key; retry sau khi gỡ trigger ghi đúng một attempt/mastery/child_skill/review duy nhất.
-- Expanded-bank integration: `373d9d1` bỏ test coupling `Single(...)`/`_01`, chạy được cả baseline 201 và pool 402; current real 402-bank persistence tổng **7997 assertions PASS**.
+- Expanded-bank integration: `373d9d1` bỏ test coupling `Single(...)`/`_01`, chạy được cả baseline 201 và pool 402; current real 402-bank persistence tổng **8002 assertions PASS**.
 - PowerShell release/build scripts: schema V5 payload/bootstrap expectations đã cập nhật; staged `Build-SetupArtifacts.ps1` PASS qua Release x86 + runtime smokes + staged payload/preflight + portable packaging.
 - `git diff --check` + staged `git diff --cached --check`: PASS cho wave V5.
 
@@ -97,7 +97,7 @@ Playable Event Engine P0: **GREEN**
 - Zero-attempt Garden eligibility: `GameWorldRewardService` giờ thống nhất reward/progress/milestone trên completed Math sessions có `EXISTS(attempt)`. Regression tạo adaptive session complete 0 câu rồi một Rescue 3/3: phiên rỗng có 0 reward và không tăng Garden completed count/milestone; Rescue hợp lệ tạo đúng 1 growth + seedling, `CompletedMathSessions=1`, còn 2 phiên tới mốc 3; reconcile không backfill phiên rỗng.
 - Durable-attempt reward guard: reward transaction query actual durable attempts của completed Math session trước insert. Regression gọi trực tiếp `GrantCompletedMathSession(child, emptyCompletedSession, 999)` vẫn `RewardCreated=false`/0 row; normal Rescue 3/3 reward vẫn đúng 1.
 - Root completion evidence guard: `MathSessionCoordinator.Complete()` fail-closed nếu adaptive `_attempts==0` hoặc lesson-mode `_attempts < _targetQuestionCount`. Regression zero-attempt giữ session active/0 reward rồi Abort cleanup; direct targeted lesson sau q1 reject Complete, `started=1/completed=0`, reward=0 và exact q2 vẫn mở. Legacy zero-attempt completed fixture vẫn được tạo qua persistence thấp để kiểm backward-compatible Garden filtering.
-- Playable Event P0 persistence total trên current HEAD: **7997 assertions PASS**. Production AI1 catalog `bd1809e` đã tích hợp thật 5/5 event; synthetic fixtures vẫn giữ để fault/corruption/race test độc lập.
+- Playable Event P0 persistence total trên current HEAD: **8002 assertions PASS**. Production AI1 catalog `bd1809e` đã tích hợp thật 5/5 event; synthetic fixtures vẫn giữ để fault/corruption/race test độc lập.
 
 ## Session
 
@@ -126,7 +126,7 @@ Playable Event Engine P0: **GREEN**
 - optimistic child-skill guard: PASS — mastery-bearing write kiểm expected mastery score + attempts count trong transaction; stale snapshot bị rollback trước attempt/key/mastery/review.
 - injected write-failure rollback: PASS — failure tại `mastery_event` rollback toàn attempt/key/mastery/child_skill/review chain; coordinator giữ câu mở và retry sạch.
 - single-active child+subject session guard: PASS — `BeginSession` atomic guard chặn duplicate active session khi hai process cold-start đồng thời; terminal state giải phóng slot.
-- atomic Math session/runtime startup: PASS — `TryCreateSession` commit session + runtime + targeted lesson `started_count` cùng transaction; race loser restore durable winner, không recovery/abort nhầm session process khác; fault ở lesson-progress rollback toàn chain.
+- atomic Math session/runtime startup: PASS — `TryCreateSession` commit session + runtime + targeted lesson `started_count` cùng transaction; race loser restore durable winner, không recovery/abort nhầm session process khác; fault ở lesson-progress rollback toàn chain. Cross-process regression `0b2f822` còn barrier-thả recovery↔answer commit, recovery↔atomic Start và terminal-cleanup↔fresh Start: live runtime không bị reclaim, không lộ half-created session và cleanup không xóa fresh runtime.
 - dangling recovery subject/child scope: PASS — chỉ Math session thiếu `math_session_runtime` của child đang start bị recovery; active `english`/`mixed` và Math session của child khác không bị thu hồi nhầm. Global overload vẫn giữ cho maintenance.
 - schema V4: PASS — thêm `session_mode`, `target_lesson_id`, `math_lesson_progress`.
 - schema V5: PASS — thêm runtime `pack_id`/`pack_version`; migration backfill chỉ khi durable attempts có đúng một non-empty pack identity; mixed/blank history để unbound cho runtime quarantine; SQLite trigger cấm partial/blank pair; checksum/tamper/deployment payload gate đã có.
@@ -136,7 +136,7 @@ Playable Event Engine P0: **GREEN**
 - current question / selection / started timestamp / forced repair: PASS durable; open-question clock malformed/future self-heal exact ordinal, còn core session timestamp malformed quarantine fail-closed.
 - resume after close: PASS.
 - complete/abort removes runtime checkpoint: PASS.
-- corrupt core runtime quarantine: PASS — deterministic malformed runtime metadata được isolate theo đúng child/session; checkpoint hỏng bị xóa nhưng attempt/mastery/child_skill durable vẫn giữ nguyên; SQLite/I/O failure không bị classify nhầm thành corruption.
+- corrupt core runtime quarantine: PASS — deterministic malformed runtime metadata được isolate theo đúng child/session; checkpoint hỏng bị xóa nhưng attempt/mastery/child_skill durable vẫn giữ nguyên; SQLite/I/O failure không bị classify nhầm thành corruption. `f2abed6` bỏ hard-cap 4-pass: fixture 5 corrupt timestamp + 2 incompatible-pack active runtimes được reconcile hết 7 rồi tạo đúng một fresh resumable session; repeat cùng session ID vẫn fail-safe để tránh loop vô hạn.
 - suspend leaves session resumable: PASS.
 - refresh/restart farming reward: PASS regression — suspend không reward; completed reward vẫn unique theo completed session.
 
@@ -196,9 +196,9 @@ AI1/AI3 đang sửa song song content/Math Hub/UI trên cùng `main`. AI2 chỉ 
 
 ## Final AI2 gate
 
-- MathEngineRuntimeSmoke: **47 PASS**.
-- MathDataEngineRuntimeSmoke: **104 PASS** — race/idempotency/concurrency.
+- MathEngineRuntimeSmoke: **72 PASS**.
+- MathDataEngineRuntimeSmoke: **118 PASS** — race/idempotency/concurrency/recovery.
 - LearningSessionRuntimeSmoke: **800 PASS** — selector/generator fuzz.
-- MathSessionPersistenceRuntimeSmoke: **378 PASS** — targeted pool, retry, corrupt cache, selected-set repair, Request 006/009/010, V5 resume.
-- AI1 working pool 402 integration: **378 PASS** trên engine AI2.
+- MathSessionPersistenceRuntimeSmoke: **8002 PASS** — current full persistence/event/corruption/concurrency gate.
+- AI1 working pool 402 integration: covered trong current **8002 PASS** persistence gate.
 - Lane AI2 core engine/session/persistence: **DONE**. Các mục `skip policy` và numeric XP/daily streak không có product contract nên không tự invent semantics.
