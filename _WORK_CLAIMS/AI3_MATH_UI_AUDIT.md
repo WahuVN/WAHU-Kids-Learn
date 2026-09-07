@@ -247,7 +247,20 @@ UI-side Request 009 coupling được đóng mà không hard-code `3`:
 
 Clean detached `31e1991`: production solution Rebuild Release/x86 **PASS**, Child UI **1596 assertions PASS**, persistence **194 assertions PASS**, content **36/36 PASS**, release-required smokes **11/11 PASS**.
 
-## 15. Verification gates
+## 15. AI3-013 — schema V5 / runtime pack-identity preflight — NOT STABLE
+
+AI3 tách đúng V5 Data/Session/schema/smoke WIP đang staged khỏi shared tree và áp lên detached `d241573`; generator/release-script WIP không được trộn vào gate này. Evidence chỉ là compatibility preflight cho tới khi owner commit V5 vào stable HEAD.
+
+- Production solution Rebuild Release/x86: **PASS**; ChildUiRuntimeSmoke: **1596 assertions PASS**.
+- MathSessionPersistenceRuntimeSmoke V5: **205 assertions PASS**.
+- MathDataEngineRuntimeSmoke V5: **99 assertions PASS** bằng `dotnet build` x86/net48; lần gọi Visual Studio MSBuild trực tiếp gặp `MSB4237 DotNetMSBuildSdkResolver` là toolchain resolver issue, không phải product failure.
+- SQLiteRuntimeSmoke V5: **175 assertions PASS**.
+- V4 completed-lesson fixture: **12 assertions PASS**; V4→V5 migration theo production contract với managed pre-migration backup: **15 assertions PASS**. Backup metadata verify schema 4; lesson completion/last/best 100%, 3 attempts, 3 mastery events và `child_skill.attempts_count=3` đều giữ nguyên.
+- Math Hub trên chính DB đã migrate: **9 assertions PASS** — bài đầu vẫn `Đã hoàn thành`, `Tốt nhất: 100%`, CTA `Luyện lại bài này` enabled, neutral badge và render 1080×720.
+- V4 suspended lesson có 1 durable attempt pack 1.8: fixture **9 assertions PASS**. Sau V5 migration + coordinator pack 1.9, reconcile **16 assertions PASS** — runtime được backfill 1.8, mismatch không resume bằng content mới, old session chuyển `recovered`, old runtime bị xóa nhưng attempt/mastery/child-skill được giữ, replacement session target 3 pinned 1.9 và không ghost attempt.
+- Migration V4→V5 không có backup context đã fail-closed đúng contract trước khi chạy lại với backup context hợp lệ.
+
+## 16. Verification gates
 
 Current clean release evidence tại `31e1991`:
 
@@ -266,7 +279,7 @@ Current clean release evidence tại `31e1991`:
 - Retry/first-try engine contract `7c9a9ea` và write-failure reconcile `400fd0c` đã được AI3 UI consume; clean persistence suite hiện **194 assertions**.
 - Generated `draw_segment_given_length` vẫn chỉ ở WIP AI2; chưa coi adaptive-generator blocker CLOSED trước upstream commit.
 
-## 16. Production release build audit
+## 17. Production release build audit
 
 Clean detached `31e1991` dùng đúng Visual Studio 2022 Community MSBuild production toolchain:
 
@@ -282,7 +295,7 @@ Release-required smoke executables trên cùng clean tree: **11/11 PASS**.
 
 Vì vậy release runtime smoke chain đã **CLOSED**; strict distribution DoD hiện còn packaging/installer payload Request 008 và Math pool/session contract Request 009.
 
-## 17. Remaining blockers
+## 18. Remaining blockers
 
 ### P1-01 — adaptive interaction generator ownership
 
@@ -290,7 +303,7 @@ Authored `interaction_integer` + UI control pass. Shared WIP AI2 đã có `draw_
 
 ### P1-02 — release packaging/E2E — Request 008
 
-- Staging logic copy toàn `content_packs` + `data/schema`; schema V4 đã có guard.
+- Staging logic copy toàn `content_packs` + `data/schema`; stable release hiện guard V4, còn shared staged wave đã thêm guard `005_math_runtime_pack_identity.sql` cho V5. Request 008 vẫn OPEN vì ba Math runtime JSON chưa được hard-require trong staged/portable/installer checks.
 - `Build-SetupArtifacts.ps1`, `Test-PortableE2E.ps1`, `Test-InstallerE2E.ps1` vẫn chưa hard-require đủ `lesson_catalog_v1.json`, `question_bank_v1.json`, `verified_templates_v1.json`.
 - Artifact `0.1.41-dev` cũ không phải release evidence cho Math hiện tại.
 - Chờ release lane đóng Request 008 rồi AI3 chạy portable/installer Math load + relaunch/reinstall regression.
@@ -306,7 +319,7 @@ UI audit hiện tại:
 
 Phần còn mở của Request 009 là engine first-class selected 3-question session set/target từ pool mở rộng; sau khi AI2 publish contract, AI3 sẽ khóa E2E pool >=6 nhưng session/progress/result vẫn 3.
 
-## 18. Next AI3 actions
+## 19. Next AI3 actions
 
 1. Theo dõi release lane đóng Request 008; không sửa `tools/build/*` khi đang có owner/WIP khác.
 2. Theo dõi AI2 Request 009; khi có first-class target/selected-set contract, thêm >=6-pool → 3-question E2E cho session/progress/result.

@@ -151,9 +151,19 @@ Source/test đã qua clean gate tại `31e1991`.
 - Existing Flow 5/prerequisite unlock vẫn route đúng targeted practice.
 - Clean detached `31e1991`: production rebuild **PASS**, Child UI **1596 assertions PASS**, persistence **194 assertions PASS**, content **36/36 PASS**, release-required smokes **11/11 PASS**.
 
+### AI3-013 — preflight tương thích schema V5 / pack identity — NOT STABLE
+Evidence này chạy trên detached `d241573` + đúng V5 Data/Session/schema/smoke WIP đang staged của AI2/release; **không thay thế stable gate V4 cho tới khi upstream commit**.
+
+- Production solution Rebuild Release/x86: **PASS**; Child UI **1596 assertions PASS**.
+- V5 persistence: **205 assertions PASS**; MathData engine **99 assertions PASS**; SQLite **175 assertions PASS**.
+- V4 completed-lesson fixture: **12 assertions PASS**; migrate V4→V5 bằng production backup context: **15 assertions PASS** — pre-migration backup verify schema 4, lesson completed/best 100%, 3 attempts, 3 mastery events và child-skill đều giữ nguyên.
+- Math Hub mở trên chính DB đã migrate: **9 assertions PASS** — vẫn `Đã hoàn thành`, `Tốt nhất: 100%`, CTA `Luyện lại bài này` enabled và render 1080×720.
+- V4 open-session pack 1.8 → V5 coordinator pack 1.9: fixture V4 **9 assertions PASS**, reconcile V5 **16 assertions PASS** — không resume bằng content mới, recover đúng old session, giữ durable attempt/mastery/child-skill, tạo fresh runtime pinned 1.9 và không ghost attempt.
+- V5 migration fail-closed nếu thiếu migration backup context đã được quan sát đúng contract trước khi chạy lại với backup context hợp lệ.
+
 ## Next integration gates
 
-1. Release lane đóng Request 008: hard-guard 3 Math runtime JSON trong staged payload + portable/installer E2E, rồi rebuild artifact schema V4 từ commit hiện tại.
+1. Release lane đóng Request 008: hard-guard 3 Math runtime JSON trong staged payload + portable/installer E2E, rồi rebuild artifact với **schema hiện hành** (V5 nếu wave staged hiện tại được commit), không được lùi manifest/bootstrap về V4.
 2. AI2 đóng phần engine của Request 009 bằng first-class selected 3-question session target; AI3 sau đó khóa E2E pool >=6 → session/progress/result vẫn 3.
 3. Theo dõi AI2 commit generator `draw_segment_given_length`, rồi khóa adaptive interaction regression.
 4. Khi có artifact mới, chạy portable/installer upgrade regression và xác nhận learner DB + lesson progress không mất.
