@@ -1859,6 +1859,11 @@ namespace WAHU.ChildUiRuntimeSmoke
                 }))
                 {
                     Invoke(resumed, "StartSession");
+                    resumed.Scale(new SizeF(1.25f, 1.25f));
+                    RenderFormAndAssert(resumed, 1125, 800, "quick_rescue_resume_retry_125pct");
+                    A(GetField<Button>(resumed, "_hintButton").Height >= 44 &&
+                      GetField<Button>(resumed, "_stopButton").Height >= 44,
+                        "quick_rescue_resume_retry_125pct_keeps_support_targets");
                     var state = GetField<object>(resumed, "_eventState");
                     var question = GetField<MathQuestion>(resumed, "_question");
                     A(Get<string>(state, "SessionId") == sessionId && Get<string>(state, "EventId") == eventId,
@@ -1916,6 +1921,11 @@ namespace WAHU.ChildUiRuntimeSmoke
                 }))
                 {
                     Invoke(terminalResume, "StartSession");
+                    terminalResume.Scale(new SizeF(1.25f, 1.25f));
+                    RenderFormAndAssert(terminalResume, 1125, 800, "quick_rescue_completion_125pct");
+                    A(GetField<Button>(terminalResume, "_nextButton").Height >= 44 &&
+                      GetField<Control>(terminalResume, "_completionVisual").Width > 300,
+                        "quick_rescue_completion_125pct_keeps_result_and_garden_visual");
                     var state = GetField<object>(terminalResume, "_eventState");
                     A(GetField<bool>(terminalResume, "_finished") && Get<bool>(state, "IsComplete") &&
                       Get<int>(state, "CompletedCheckpointCount") == 3 && GetField<MathQuestion>(terminalResume, "_question") == null,
