@@ -1257,6 +1257,9 @@ namespace WAHU.ChildUiRuntimeSmoke
                     SetField(first, "_finished", true);
                 }
 
+                ExecuteDatabaseSql(database,
+                    "UPDATE math_session_runtime SET current_selection_json='{}';");
+
                 using (var resumed = (WAHUKidsLearn.MathLessonForm)lessonCtor.Invoke(new object[]
                 {
                     database,
@@ -1276,9 +1279,13 @@ namespace WAHU.ChildUiRuntimeSmoke
                     A(GetField<int>(resumed, "_targetQuestionCount") == 3 &&
                         GetField<Label>(resumed, "_progressText").Text.IndexOf("Câu 2 / 3", StringComparison.OrdinalIgnoreCase) >= 0,
                         "pool6_ui_resume_keeps_three_question_progress_target");
-                    A(GetField<Label>(resumed, "_support").Text.IndexOf("đang làm dở", StringComparison.OrdinalIgnoreCase) >= 0 &&
-                        GetField<Label>(resumed, "_support").Text.IndexOf("6 câu", StringComparison.OrdinalIgnoreCase) < 0,
+                    var resumedSupportText = GetField<Label>(resumed, "_support").Text;
+                    A(resumedSupportText.IndexOf("đang làm dở", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                        resumedSupportText.IndexOf("6 câu", StringComparison.OrdinalIgnoreCase) < 0,
                         "pool6_ui_resume_copy_does_not_leak_pool_size");
+                    A(resumedSupportText.IndexOf("lỗi", StringComparison.OrdinalIgnoreCase) < 0 &&
+                        resumedSupportText.IndexOf("hỏng", StringComparison.OrdinalIgnoreCase) < 0,
+                        "pool6_ui_selection_self_heal_stays_child_safe");
 
                     SubmitCurrentMathQuestionCorrectly(resumed, "pool6_ui_medium");
                     A(GetField<Label>(resumed, "_progressText").Text.IndexOf("2 / 3", StringComparison.Ordinal) >= 0,
