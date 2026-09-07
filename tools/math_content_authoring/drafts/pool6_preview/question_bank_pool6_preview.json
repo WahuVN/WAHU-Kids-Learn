@@ -1439,8 +1439,8 @@
         },
         {
           "id": "d",
-          "text": "+",
-          "rationale_vi": "“+” chưa đúng. Dấu + là dấu phép cộng, không phải dấu dùng để so sánh hai số. Cùng 6 trăm nhưng 0 chục nhỏ hơn 8 chục nên 608 < 680. Vậy đáp án là <."
+          "text": "không thể so sánh",
+          "rationale_vi": "“không thể so sánh” chưa đúng. Hai số 608 và 680 đều đã được cho đầy đủ; có thể so sánh lần lượt hàng trăm, hàng chục rồi hàng đơn vị để kết luận quan hệ. Cùng 6 trăm nhưng 0 chục nhỏ hơn 8 chục nên 608 < 680. Vậy đáp án là <."
         }
       ],
       "correct_choice_id": "c"
@@ -1487,8 +1487,8 @@
         },
         {
           "id": "c",
-          "text": "-",
-          "rationale_vi": "“-” chưa đúng. Dấu - là dấu phép trừ, không phải dấu dùng để so sánh hai số. Cùng 9 trăm; 4 chục lớn hơn 2 chục nên 945 > 925. Vậy đáp án là >."
+          "text": "không đủ dữ kiện",
+          "rationale_vi": "“không đủ dữ kiện” chưa đúng. Hai số 945 và 925 đều đã được cho đầy đủ; có thể so sánh lần lượt hàng trăm, hàng chục rồi hàng đơn vị để kết luận quan hệ. Cùng 9 trăm; 4 chục lớn hơn 2 chục nên 945 > 925. Vậy đáp án là >."
         },
         {
           "id": "d",
@@ -1545,8 +1545,8 @@
         },
         {
           "id": "d",
-          "text": "399 + 403",
-          "rationale_vi": "“399 + 403” chưa đúng. Dấu + là dấu phép cộng, không phải dấu dùng để so sánh hai số. 399 còn dưới 400, trong khi 403 lớn hơn 400 nên 399 < 403."
+          "text": "chưa thể kết luận",
+          "rationale_vi": "“chưa thể kết luận” chưa đúng. Hai số 399 và 403 đều đã được cho đầy đủ; có thể so sánh lần lượt hàng trăm, hàng chục rồi hàng đơn vị để kết luận quan hệ. 399 còn dưới 400, trong khi 403 lớn hơn 400 nên 399 < 403."
         }
       ],
       "correct_choice_id": "a"
@@ -1598,8 +1598,8 @@
         },
         {
           "id": "d",
-          "text": "+",
-          "rationale_vi": "“+” chưa đúng. Dấu + là dấu phép cộng, không phải dấu dùng để so sánh hai số. Cùng 7 trăm nhưng 0 chục nhỏ hơn 9 chục nên 709 < 790. Vậy đáp án là <."
+          "text": "không thể so sánh",
+          "rationale_vi": "“không thể so sánh” chưa đúng. Hai số 709 và 790 đều đã được cho đầy đủ; có thể so sánh lần lượt hàng trăm, hàng chục rồi hàng đơn vị để kết luận quan hệ. Cùng 7 trăm nhưng 0 chục nhỏ hơn 9 chục nên 709 < 790. Vậy đáp án là <."
         }
       ],
       "correct_choice_id": "b"
@@ -1651,8 +1651,8 @@
         },
         {
           "id": "d",
-          "text": "-",
-          "rationale_vi": "“-” chưa đúng. Dấu - là dấu phép trừ, không phải dấu dùng để so sánh hai số. Cùng 8 trăm; 3 chục lớn hơn 2 chục nên 836 > 829. Vậy đáp án là >."
+          "text": "không đủ dữ kiện",
+          "rationale_vi": "“không đủ dữ kiện” chưa đúng. Hai số 836 và 829 đều đã được cho đầy đủ; có thể so sánh lần lượt hàng trăm, hàng chục rồi hàng đơn vị để kết luận quan hệ. Cùng 8 trăm; 3 chục lớn hơn 2 chục nên 836 > 829. Vậy đáp án là >."
         }
       ],
       "correct_choice_id": "c"
@@ -1699,8 +1699,8 @@
         },
         {
           "id": "c",
-          "text": "508 + 580",
-          "rationale_vi": "“508 + 580” chưa đúng. Dấu + là dấu phép cộng, không phải dấu dùng để so sánh hai số. Hai số cùng 5 trăm nhưng 0 chục nhỏ hơn 8 chục, nên 508 < 580."
+          "text": "chưa thể kết luận",
+          "rationale_vi": "“chưa thể kết luận” chưa đúng. Hai số 508 và 580 đều đã được cho đầy đủ; có thể so sánh lần lượt hàng trăm, hàng chục rồi hàng đơn vị để kết luận quan hệ. Hai số cùng 5 trăm nhưng 0 chục nhỏ hơn 8 chục, nên 508 < 580."
         },
         {
           "id": "d",
@@ -2308,13 +2308,13 @@
       "choices": [
         {
           "id": "a",
-          "text": "khoảng 7",
-          "rationale_vi": "“khoảng 7” chưa đúng. Ước lượng 73 theo chục gần nhất phải chọn 70; “khoảng 7” chưa phải mốc chục gần nhất với số lượng quan sát. 73 gần 70 hơn 80 khi ước lượng theo chục gần nhất. Vậy đáp án là khoảng 70."
+          "text": "khoảng 60",
+          "rationale_vi": "“khoảng 60” chưa đúng. Ước lượng 73 theo chục gần nhất phải chọn 70; “khoảng 60” chưa phải mốc chục gần nhất với số lượng quan sát. 73 gần 70 hơn 80 khi ước lượng theo chục gần nhất. Vậy đáp án là khoảng 70."
         },
         {
           "id": "b",
-          "text": "khoảng 700",
-          "rationale_vi": "“khoảng 700” chưa đúng. Ước lượng 73 theo chục gần nhất phải chọn 70; “khoảng 700” chưa phải mốc chục gần nhất với số lượng quan sát. 73 gần 70 hơn 80 khi ước lượng theo chục gần nhất. Vậy đáp án là khoảng 70."
+          "text": "khoảng 80",
+          "rationale_vi": "“khoảng 80” chưa đúng. Ước lượng 73 theo chục gần nhất phải chọn 70; “khoảng 80” chưa phải mốc chục gần nhất với số lượng quan sát. 73 gần 70 hơn 80 khi ước lượng theo chục gần nhất. Vậy đáp án là khoảng 70."
         },
         {
           "id": "c",
@@ -2323,8 +2323,8 @@
         },
         {
           "id": "d",
-          "text": "khoảng 20",
-          "rationale_vi": "“khoảng 20” chưa đúng. Ước lượng 73 theo chục gần nhất phải chọn 70; “khoảng 20” chưa phải mốc chục gần nhất với số lượng quan sát. 73 gần 70 hơn 80 khi ước lượng theo chục gần nhất. Vậy đáp án là khoảng 70."
+          "text": "khoảng 73",
+          "rationale_vi": "“khoảng 73” chưa đúng. Ước lượng 73 theo chục gần nhất phải chọn 70; “khoảng 73” chưa phải mốc chục gần nhất với số lượng quan sát. 73 gần 70 hơn 80 khi ước lượng theo chục gần nhất. Vậy đáp án là khoảng 70."
         }
       ],
       "correct_choice_id": "c"

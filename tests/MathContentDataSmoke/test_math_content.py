@@ -717,6 +717,31 @@ class MathContentDataSmoke(unittest.TestCase):
                         fallback.append((qid, choice["text"]))
         self.assertEqual([], fallback)
 
+    def test_first_ten_compare_distractors_stay_in_comparison_domain(self):
+        lesson = next(item for item in self.lessons[:10] if item["skill_id"] == "NUM_COMPARE_0_1000")
+        forbidden = {"+", "-"}
+        checked = 0
+        for qid in sum(lesson["practice_sets"].values(), []):
+            item = self.question_by_id[qid]
+            for choice in item.get("choices", []):
+                if choice["id"] == item["correct_choice_id"]:
+                    continue
+                text = choice["text"].strip()
+                with self.subTest(qid=qid, choice=text):
+                    self.assertNotIn(text, forbidden)
+                    self.assertNotRegex(text, r"^\d+\s*[+-]\s*\d+$")
+                checked += 1
+        self.assertEqual(18, checked)
+
+    def test_first_ten_estimate_application_uses_nearby_tens_misconceptions(self):
+        item = self.question_by_id["m2_q_estimate_objects_by_tens_03"]
+        texts = {choice["text"] for choice in item["choices"]}
+        self.assertEqual({"khoảng 60", "khoảng 70", "khoảng 80", "khoảng 73"}, texts)
+        for choice in item["choices"]:
+            if choice["id"] == item["correct_choice_id"]:
+                continue
+            self.assertIsNotNone(validator.structured_choice_reason(item["skill_id"], item["prompt_vi"], choice["text"]))
+
     def test_first_ten_application_pairs_are_structurally_distinct(self):
         for lesson in self.lessons[:10]:
             refs = lesson["practice_sets"]["application"]

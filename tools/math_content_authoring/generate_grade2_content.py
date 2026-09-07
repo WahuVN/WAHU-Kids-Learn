@@ -496,6 +496,10 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
             return "Dấu + là dấu phép cộng, không phải dấu dùng để so sánh hai số."
         if re.search(r"(?<!\d)-(?!\d)", choice_text) or choice_text.strip() == "-":
             return "Dấu - là dấu phép trừ, không phải dấu dùng để so sánh hai số."
+        label = choice_text.strip().casefold()
+        if label in {"không thể so sánh", "không đủ dữ kiện", "chưa thể kết luận"}:
+            return (f"Hai số {left} và {right} đều đã được cho đầy đủ; có thể so sánh lần lượt hàng trăm, "
+                    "hàng chục rồi hàng đơn vị để kết luận quan hệ.")
         actual = "=" if left == right else (">" if left > right else "<")
         shown = next((symbol for symbol in (">", "<", "=") if symbol in choice_text), None)
         if shown and shown != actual:
@@ -1616,9 +1620,9 @@ Q = {
         nq("Trên tia số, mỗi bước tăng 100. Từ số 300 đi 3 bước sang phải thì đến số nào?", 600, "Từ 300 đi lần lượt đến 400, 500 rồi 600; ba bước sang phải đưa ta đến 600."),
     ],
     "NUM_COMPARE_0_1000": [
-        mc("Điền dấu đúng: 608 __ 680", "<", [">", "=", "+"], "Cùng 6 trăm nhưng 0 chục nhỏ hơn 8 chục nên 608 < 680."),
-        mc("Điền dấu đúng: 945 __ 925", ">", ["<", "=", "-"], "Cùng 9 trăm; 4 chục lớn hơn 2 chục nên 945 > 925."),
-        mc("Bạn An có 399 thẻ, bạn Bình có 403 thẻ. So sánh 399 và 403.", "399 < 403", ["399 > 403", "399 = 403", "399 + 403"], "399 còn dưới 400, trong khi 403 lớn hơn 400 nên 399 < 403."),
+        mc("Điền dấu đúng: 608 __ 680", "<", [">", "=", "không thể so sánh"], "Cùng 6 trăm nhưng 0 chục nhỏ hơn 8 chục nên 608 < 680."),
+        mc("Điền dấu đúng: 945 __ 925", ">", ["<", "=", "không đủ dữ kiện"], "Cùng 9 trăm; 4 chục lớn hơn 2 chục nên 945 > 925."),
+        mc("Bạn An có 399 thẻ, bạn Bình có 403 thẻ. So sánh 399 và 403.", "399 < 403", ["399 > 403", "399 = 403", "chưa thể kết luận"], "399 còn dưới 400, trong khi 403 lớn hơn 400 nên 399 < 403."),
     ],
     "NUM_MIN_MAX_UP_TO_4": [
         nq("Số bé nhất trong nhóm 407, 470, 704, 740 là số nào?", 407, "Cả bốn số đều khác nhau; so sánh hàng trăm cho thấy 407 và 470 nhỏ hơn các số 7 trăm, rồi 407 < 470."),
@@ -1633,7 +1637,7 @@ Q = {
     "ESTIMATE_OBJECTS_BY_TENS": [
         nq("Có 6 nhóm, mỗi nhóm khoảng 10 que tính. Ước lượng có khoảng bao nhiêu que?", 60, "6 nhóm chục tương ứng khoảng 60 que."),
         nq("Một hộp được nhìn thấy khoảng 8 chục viên bi. Ước lượng số viên bi là bao nhiêu?", 80, "8 chục nghĩa là khoảng 80."),
-        mc("Một khay có khoảng 73 hạt. Nếu chỉ ước lượng theo chục gần nhất, chọn số nào hợp lý nhất?", "khoảng 70", ["khoảng 7", "khoảng 700", "khoảng 20"], "73 gần 70 hơn 80 khi ước lượng theo chục gần nhất."),
+        mc("Một khay có khoảng 73 hạt. Nếu chỉ ước lượng theo chục gần nhất, chọn số nào hợp lý nhất?", "khoảng 70", ["khoảng 60", "khoảng 80", "khoảng 73"], "73 gần 70 hơn 80 khi ước lượng theo chục gần nhất."),
     ],
 
     "ADD_COMPONENTS_RECOGNIZE": [

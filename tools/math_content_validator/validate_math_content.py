@@ -216,6 +216,10 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
             return "Dấu + là dấu phép cộng, không phải dấu dùng để so sánh hai số."
         if re.search(r"(?<!\d)-(?!\d)", choice_text) or choice_text.strip() == "-":
             return "Dấu - là dấu phép trừ, không phải dấu dùng để so sánh hai số."
+        label = choice_text.strip().casefold()
+        if label in {"không thể so sánh", "không đủ dữ kiện", "chưa thể kết luận"}:
+            return (f"Hai số {left} và {right} đều đã được cho đầy đủ; có thể so sánh lần lượt hàng trăm, "
+                    "hàng chục rồi hàng đơn vị để kết luận quan hệ.")
         actual = "=" if left == right else (">" if left > right else "<")
         shown = next((symbol for symbol in (">", "<", "=") if symbol in choice_text), None)
         if shown and shown != actual:

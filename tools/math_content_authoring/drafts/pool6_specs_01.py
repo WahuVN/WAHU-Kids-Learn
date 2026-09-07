@@ -36,9 +36,9 @@ def build(g):
             nq("Bắt đầu ở 250 trên tia số, mỗi bước sang phải tăng 50. Sau 4 bước em đứng ở số nào?", 450, "250 → 300 → 350 → 400 → 450, nên bốn bước đến 450."),
         ],
         "NUM_COMPARE_0_1000": [
-            mc("Chọn dấu thích hợp cho 709 __ 790.", "<", [">", "=", "+"], "Cùng 7 trăm nhưng 0 chục nhỏ hơn 9 chục nên 709 < 790."),
-            mc("So sánh 836 __ 829 bằng dấu nào?", ">", ["<", "=", "-"], "Cùng 8 trăm; 3 chục lớn hơn 2 chục nên 836 > 829."),
-            mc("Kho A có 508 hộp, kho B có 580 hộp. Quan hệ nào mô tả đúng hai số lượng?", "508 < 580", ["508 > 580", "508 = 580", "508 + 580"], "Hai số cùng 5 trăm nhưng 0 chục nhỏ hơn 8 chục, nên 508 < 580."),
+            mc("Chọn dấu thích hợp cho 709 __ 790.", "<", [">", "=", "không thể so sánh"], "Cùng 7 trăm nhưng 0 chục nhỏ hơn 9 chục nên 709 < 790."),
+            mc("So sánh 836 __ 829 bằng dấu nào?", ">", ["<", "=", "không đủ dữ kiện"], "Cùng 8 trăm; 3 chục lớn hơn 2 chục nên 836 > 829."),
+            mc("Kho A có 508 hộp, kho B có 580 hộp. Quan hệ nào mô tả đúng hai số lượng?", "508 < 580", ["508 > 580", "508 = 580", "chưa thể kết luận"], "Hai số cùng 5 trăm nhưng 0 chục nhỏ hơn 8 chục, nên 508 < 580."),
         ],
         "NUM_MIN_MAX_UP_TO_4": [
             nq("Trong 612, 621, 216, 261, số nhỏ nhất là số nào?", 216, "Hai số bắt đầu bằng 2 nhỏ hơn các số bắt đầu bằng 6; giữa 216 và 261 thì 216 nhỏ hơn."),
