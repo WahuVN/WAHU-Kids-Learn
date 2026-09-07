@@ -117,6 +117,24 @@ class MathGameEventsSmoke(unittest.TestCase):
             errors, _ = self.validator.validate(path, LESSON_PATH)
         self.assertTrue(any("repair_copy_vi:not_skill_specific" in x for x in errors), errors)
 
+    def test_event_validator_rejects_theme_checkpoint_mismatch(self):
+        broken = json.loads(EVENT_PATH.read_text(encoding="utf-8"))
+        broken["events"][0]["checkpoint_nouns_vi"][1] = "ngăn hàng thứ hai"
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "events.json"
+            path.write_text(json.dumps(broken, ensure_ascii=False), encoding="utf-8")
+            errors, _ = self.validator.validate(path, LESSON_PATH)
+        self.assertTrue(any("checkpoint[1]:theme_mismatch:forest_path" in x for x in errors), errors)
+
+    def test_event_validator_rejects_lesson_theme_swap(self):
+        broken = json.loads(EVENT_PATH.read_text(encoding="utf-8"))
+        broken["events"][2]["theme"] = "forest_path"
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "events.json"
+            path.write_text(json.dumps(broken, ensure_ascii=False), encoding="utf-8")
+            errors, _ = self.validator.validate(path, LESSON_PATH)
+        self.assertTrue(any("theme_mismatch:forest_path:number_path" in x for x in errors), errors)
+
     def test_event_validator_rejects_pressure_intro_copy(self):
         broken = json.loads(EVENT_PATH.read_text(encoding="utf-8"))
         broken["events"][0]["intro_vi"] = "Con phải làm đủ ba câu để hoàn thành nhiệm vụ."

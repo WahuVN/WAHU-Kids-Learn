@@ -11,6 +11,21 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_EVENTS = ROOT / "content_packs" / "math_grade2_v1" / "game_events_v1.json"
 DEFAULT_LESSONS = ROOT / "content_packs" / "math_grade2_v1" / "lesson_catalog_v1.json"
 
+EXPECTED_THEME_BY_LESSON = {
+    "m2_ls_num_count_read_write_0_1000": "forest_path",
+    "m2_ls_num_full_hundreds_recognize": "hundred_station",
+    "m2_ls_num_predecessor_successor": "number_path",
+    "m2_ls_place_value_hundreds_tens_ones": "place_value_workshop",
+    "m2_ls_num_expanded_form_hto": "number_machine",
+}
+CHECKPOINT_REQUIRED_PATTERN_BY_THEME = {
+    "forest_path": r"biển\s+số",
+    "hundred_station": r"trạm",
+    "number_path": r"đoạn",
+    "place_value_workshop": r"ngăn\s+hàng",
+    "number_machine": r"bộ\s+phận",
+}
+
 EXPECTED_FIRST_FIVE = [
     "m2_ls_num_count_read_write_0_1000",
     "m2_ls_num_full_hundreds_recognize",
@@ -200,6 +215,14 @@ def validate(events_path: Path = DEFAULT_EVENTS, lessons_path: Path = DEFAULT_LE
         lesson_id = event.get("target_lesson_id")
         skill_id = event.get("target_skill_id")
         seen_lessons.append(lesson_id)
+        expected_theme = EXPECTED_THEME_BY_LESSON.get(lesson_id)
+        if expected_theme is not None and theme != expected_theme:
+            errors.append(f"{where}:theme_mismatch:{theme}:{expected_theme}")
+        checkpoint_pattern = CHECKPOINT_REQUIRED_PATTERN_BY_THEME.get(theme)
+        if checkpoint_pattern and isinstance(checkpoints, list):
+            for cp_index, value in enumerate(checkpoints):
+                if isinstance(value, str) and not re.search(checkpoint_pattern, value.casefold(), re.IGNORECASE):
+                    errors.append(f"{where}:checkpoint[{cp_index}]:theme_mismatch:{theme}")
         lesson = lesson_by_id.get(lesson_id)
         if lesson is None:
             errors.append(f"{where}:unknown_lesson:{lesson_id}")
