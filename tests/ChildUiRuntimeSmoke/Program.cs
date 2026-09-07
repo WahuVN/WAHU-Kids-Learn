@@ -382,6 +382,44 @@ namespace WAHU.ChildUiRuntimeSmoke
                     RenderFormAndAssert(form, 900, 640, "math_hub_min_window");
                 }
 
+                var reloadCatalogPath = Path.Combine(tempRoot, "reload_lesson_catalog.json");
+                File.Copy(catalogPath, reloadCatalogPath, true);
+                using (var reload = (WAHUKidsLearn.MathHubForm)ctor.Invoke(new object[]
+                {
+                    database,
+                    new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW },
+                    reloadCatalogPath
+                }))
+                {
+                    Invoke(reload, "LoadCatalogAndProgress");
+                    var chapterCache = GetField<object>(reload, "_chapterButtons") as System.Collections.IDictionary;
+                    var lessonCache = GetField<object>(reload, "_lessonButtons") as System.Collections.IDictionary;
+                    var accessCache = GetField<object>(reload, "_lessonAccess") as System.Collections.IDictionary;
+                    A(Get<int>(reload, "ChapterCount") == 7 && Get<int>(reload, "LessonCount") == 67,
+                        "math_hub_reload_fixture_starts_valid");
+                    A(chapterCache != null && chapterCache.Count == 7 && lessonCache != null && lessonCache.Count > 0 &&
+                        accessCache != null && accessCache.Count == 67,
+                        "math_hub_reload_fixture_populates_internal_caches");
+
+                    File.WriteAllText(reloadCatalogPath, "{ invalid catalog json", System.Text.Encoding.UTF8);
+                    Invoke(reload, "LoadCatalogAndProgress");
+                    var reloadChapterFlow = GetField<FlowLayoutPanel>(reload, "_chapterFlow");
+                    var reloadLessonFlow = GetField<FlowLayoutPanel>(reload, "_lessonFlow");
+                    A(Get<int>(reload, "ChapterCount") == 0 && Get<int>(reload, "LessonCount") == 0,
+                        "math_hub_reload_failure_clears_catalog_snapshot");
+                    A(chapterCache.Count == 0 && lessonCache.Count == 0 && accessCache.Count == 0,
+                        "math_hub_reload_failure_clears_internal_caches");
+                    A(reloadChapterFlow.Controls.Count == 0 && reloadLessonFlow.Controls.Count == 0 &&
+                        !GetField<Control>(reload, "_detailFlow").Visible,
+                        "math_hub_reload_failure_clears_visible_catalog_controls");
+                    A(!GetField<Button>(reload, "_continueLessonButton").Enabled &&
+                        GetField<Button>(reload, "_missionButton").Enabled,
+                        "math_hub_reload_failure_keeps_only_safe_adaptive_action");
+                    A(GetField<Label>(reload, "_summary").Text.IndexOf("kiểm tra lại", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                        GetField<Label>(reload, "_detailEmpty").Text.IndexOf("Chưa thể mở", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "math_hub_reload_failure_uses_child_safe_error_copy");
+                }
+
                 using (var missing = (WAHUKidsLearn.MathHubForm)ctor.Invoke(new object[]
                 {
                     database,
