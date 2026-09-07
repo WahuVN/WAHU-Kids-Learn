@@ -2,7 +2,7 @@
 
 Updated: 2026-09-07
 Owner: AI3
-Last fully verified HEAD: `cd9ad12`
+Last fully verified HEAD: `eedd1d9`
 Status: `LANE_DONE=YES`; `PLAYABLE_UI_P0=GREEN`; `INSTALLER_E2E=BLOCKED_SAFETY_UNOWNED_LOCAL_DATA`
 
 ## PLAYABLE EVENT V1 — current evidence
@@ -15,24 +15,25 @@ Status: `LANE_DONE=YES`; `PLAYABLE_UI_P0=GREEN`; `INSTALLER_E2E=BLOCKED_SAFETY_U
 - Mission khóa vẫn focus được để nghe đúng prerequisite nhưng không thể start; Enter/Esc wired; shell ưu tiên đúng lesson session đang dở.
 - Rescue shell khóa valid→corrupt→valid recovery; dynamic AccessibleName/Description đồng bộ đúng Bắt đầu/Tiếp tục/Chưa thể.
 - Khi mở rescue lesson gặp exception, visible status và screen-reader status cùng báo phần học đã lưu an toàn; shell không văng khỏi flow.
-- Child UI: **3661 assertions PASS**; persistence: **7821 assertions PASS**; Math content/event/pool suite: **90/90 PASS**.
-- `0.1.56-dev`: Build-Setup **15/15 PASS**, Portable E2E **PASS**, installer compile **PASS**; publish payload chứa `game_events_v1.json` SHA `F9F25EA94DA7FCD20E360509EE53E6E758039CCF788FAFEC729A35F80D39A8B1`.
+- Lifecycle UI khóa thêm trạng thái 3/3 đã trả lời nhưng chưa complete: suspend không grant reward; reopen tự complete không tạo câu 4 và Garden chỉ +1 sau completion.
+- Child UI: **3663 assertions PASS**; persistence: **7829 assertions PASS**; Math content/event/pool suite: **90/90 PASS**.
+- `0.1.57-dev`: Build-Setup **15/15 PASS**, Portable E2E **PASS**, installer compile **PASS**; publish payload chứa `game_events_v1.json` SHA `F9F25EA94DA7FCD20E360509EE53E6E758039CCF788FAFEC729A35F80D39A8B1`.
 - Full Installer E2E hiện **BLOCKED_SAFETY** vì `%LOCALAPPDATA%\WAHU Kids Learn\data\learning.db` tồn tại nhưng không có `.wahu-e2e-owned`; không được xóa/ghi đè dữ liệu này để ép test qua.
 - Production signing và real Windows 7 validation vẫn `UNAVAILABLE/PENDING`.
 
 ## 1. Kết luận
 
-AI3 Math UI/QA/integration lane đã hoàn tất playable P0/P1 cho 5 bài đầu và đạt STOP RULE. Lần closure gate chạy trên clean `main` HEAD `cd9ad12`; lane chuyển `LANE_DONE=YES`.
+AI3 Math UI/QA/integration lane đã hoàn tất playable P0/P1 cho 5 bài đầu và đạt STOP RULE. Lần closure gate chạy trên clean `main` HEAD `eedd1d9`; lane chuyển `LANE_DONE=YES`.
 
 Current evidence:
 
 - runtime Math bank: **402 questions / 67 lessons / 6 per lesson / 2 per difficulty**;
-- Child UI: **3661 assertions PASS**;
+- Child UI: **3663 assertions PASS**;
 - production Math validator: **402/402 valid**;
 - full Math content/event/pool suite: **90/90 PASS**;
 - difficulty distribution: **134 basic / 134 medium / 134 application**;
-- Math persistence: **7821 assertions PASS** (`dotnet build` 0 warning / 0 error);
-- full Build-Setup `0.1.56-dev`: **15/15 PASS**;
+- Math persistence: **7829 assertions PASS** (`dotnet build` 0 warning / 0 error);
+- full Build-Setup `0.1.57-dev`: **15/15 PASS**;
 - Portable E2E: **PASS**;
 - Installer compile: **PASS**; full installer E2E **BLOCKED_SAFETY** trên máy hiện tại.
 
