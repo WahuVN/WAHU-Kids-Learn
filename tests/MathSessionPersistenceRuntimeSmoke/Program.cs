@@ -43,6 +43,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestTargetedLessonUnlockAndResume(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedCompletionSurvivesNextLessonReadFailure(root, schemaPath, templatePath, lessonCatalogPath);
                 TestCorruptRuntimeMetadataIsQuarantined(root, schemaPath, templatePath);
+                TestOperationalDatabaseFailureDoesNotQuarantineRuntime(root, schemaPath, templatePath);
                 TestRuntimePackIdentityResumePolicy(root, schemaPath, templatePath);
                 TestTargetedCorruptOpenQuestionReplaysAuthoredOrdinal(root, schemaPath, templatePath, lessonCatalogPath);
                 TestExpandedTargetedPoolSelectsDurableThree(root, schemaPath, templatePath, lessonCatalogPath, questionBankPath);
@@ -516,6 +517,48 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 A(Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + started.SessionId + "';") == 1,
                     "corrupt_runtime_quarantine_replacement_session_is_durably_resumable");
                 replacement.Abort("corrupt_runtime_metadata_cleanup");
+            }
+        }
+
+        private static void TestOperationalDatabaseFailureDoesNotQuarantineRuntime(string root, string schemaPath, string templatePath)
+        {
+            var dbPath = Path.Combine(root, "operational-db-failure.db");
+            var database = NewDatabase(dbPath, schemaPath);
+            string sessionId;
+            using (var first = new MathSessionCoordinator(database, templatePath, "LOW", 8075, 2))
+            {
+                var started = first.Start("Bé operational DB failure");
+                sessionId = started.SessionId;
+                first.Suspend("operational_db_failure_fixture");
+            }
+
+            SQLiteConnection.ClearAllPools();
+            var surfacedOperationalError = false;
+            using (var fileLock = new FileStream(dbPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+            {
+                try
+                {
+                    using (var blocked = new MathSessionCoordinator(database, templatePath, "NORMAL", 8076, 2))
+                        blocked.Start("Bé operational DB failure");
+                }
+                catch (Exception ex)
+                {
+                    surfacedOperationalError = ex is SQLiteException || ex is IOException || ex.InnerException is SQLiteException;
+                }
+            }
+            A(surfacedOperationalError,
+                "operational_db_failure_surfaces_instead_of_being_classified_as_runtime_corruption");
+            A(Count(database, "SELECT count(*) FROM session WHERE id='" + sessionId + "' AND state='active' AND ended_at_utc IS NULL;") == 1,
+                "operational_db_failure_does_not_mark_resumable_session_recovered");
+            A(Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + sessionId + "';") == 1,
+                "operational_db_failure_does_not_delete_runtime_checkpoint");
+
+            using (var resumed = new MathSessionCoordinator(database, templatePath, "NORMAL", 8077, 2))
+            {
+                var start = resumed.Start("Bé operational DB failure");
+                A(start.ResumedExistingSession && start.SessionId == sessionId,
+                    "operational_db_failure_session_resumes_after_lock_is_released");
+                resumed.Abort("operational_db_failure_cleanup");
             }
         }
 
