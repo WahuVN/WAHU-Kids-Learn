@@ -53,6 +53,8 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestCorruptRuntimeMetadataIsQuarantined(root, schemaPath, templatePath);
                 TestMoreThanFourInvalidRuntimeSessionsAllRecover(root, schemaPath, templatePath);
                 TestMultipleValidActiveRuntimeSessionsKeepNewestOnly(root, schemaPath, templatePath);
+                TestTargetedRuntimeWrongQuestionCountIsQuarantined(root, schemaPath, templatePath, lessonCatalogPath);
+                TestAdaptiveRuntimeWithTargetLessonIsQuarantined(root, schemaPath, templatePath, lessonCatalogPath);
                 TestCorruptOpenQuestionTimestampSelfHealsExactOrdinal(root, schemaPath, templatePath, lessonCatalogPath);
                 TestAdaptiveCorruptOpenQuestionTimestampSelfHealsExactOrdinal(root, schemaPath, templatePath);
                 TestCorruptSessionStartedTimestampIsQuarantined(root, schemaPath, templatePath);
@@ -3524,6 +3526,91 @@ VALUES(@new,9202,2,0,'adaptive',NULL,@pack,@version,@newUtc);",
                   Count(database, "SELECT count(*) FROM session WHERE child_id='" + profile.ChildId + "' AND state='active' AND ended_at_utc IS NULL;") == 1,
                     "multiple_valid_runtime_old_duplicate_never_resurfaces_after_newest_terminalizes");
                 fresh.Abort("multiple_valid_runtime_fresh_cleanup");
+            }
+        }
+
+        private static void TestTargetedRuntimeWrongQuestionCountIsQuarantined(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.Lessons.First(x => x.PrerequisiteSkills == null || x.PrerequisiteSkills.Count == 0);
+            var database = NewDatabase(Path.Combine(root, "targeted-runtime-wrong-question-count.db"), schemaPath);
+            var profile = new LearnerSessionService(database).EnsurePrimaryChild("Bé targeted wrong count");
+            var oldSessionId = "session-targeted-wrong-count";
+            var utc = DateTime.UtcNow.AddMinutes(-5).ToString("o", CultureInfo.InvariantCulture);
+            Exec(database, @"INSERT INTO session(id,child_id,started_at_utc,state,planned_subject,performance_profile)
+VALUES(@session,@child,@utc,'active','math','LOW');
+INSERT INTO math_session_runtime(session_id,seed,target_question_count,generated_question_count,session_mode,target_lesson_id,pack_id,pack_version,updated_at_utc)
+VALUES(@session,9301,4,0,'lesson',@lesson,@pack,@version,@utc);",
+                "@session", oldSessionId,
+                "@child", profile.ChildId,
+                "@utc", utc,
+                "@lesson", lesson.Id,
+                "@pack", MathSessionCoordinator.PackId,
+                "@version", MathSessionCoordinator.PackVersion);
+            A(Count(database, "SELECT count(*) FROM session WHERE id='" + oldSessionId + "' AND state='active';") == 1 &&
+              Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + oldSessionId + "' AND target_question_count=4;") == 1,
+                "targeted_wrong_count_fixture_has_parseable_but_contract_invalid_runtime");
+
+            using (var coordinator = new MathSessionCoordinator(database, templatePath, "LOW", 9302, lesson.Id))
+            {
+                var started = coordinator.Start("Bé targeted wrong count");
+                A(!started.ResumedExistingSession && started.SessionId != oldSessionId &&
+                  started.RecoveredDanglingSessions == 1 && started.TargetQuestionCount == MathSessionCoordinator.TargetedLessonQuestionCount &&
+                  started.SelectedContentQuestionIds.Count == MathSessionCoordinator.TargetedLessonQuestionCount,
+                    "targeted_wrong_count_runtime_is_quarantined_before_restore_and_fresh_session_starts");
+                A(Count(database, "SELECT count(*) FROM session WHERE id='" + oldSessionId + "' AND state='recovered' AND ended_at_utc IS NOT NULL;") == 1 &&
+                  Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + oldSessionId + "';") == 0,
+                    "targeted_wrong_count_quarantine_removes_old_runtime_only");
+                A(Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + profile.ChildId +
+                  "' AND lesson_id='" + lesson.Id + "' AND started_count=1 AND completed_count=0;") == 1,
+                    "targeted_wrong_count_fresh_start_records_lesson_progress_once");
+                coordinator.Abort("targeted_wrong_count_cleanup");
+            }
+        }
+
+        private static void TestAdaptiveRuntimeWithTargetLessonIsQuarantined(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.Lessons.First(x => x.PrerequisiteSkills == null || x.PrerequisiteSkills.Count == 0);
+            var database = NewDatabase(Path.Combine(root, "adaptive-runtime-target-lesson.db"), schemaPath);
+            var profile = new LearnerSessionService(database).EnsurePrimaryChild("Bé adaptive target lesson");
+            var oldSessionId = "session-adaptive-with-target-lesson";
+            var utc = DateTime.UtcNow.AddMinutes(-5).ToString("o", CultureInfo.InvariantCulture);
+            Exec(database, @"INSERT INTO session(id,child_id,started_at_utc,state,planned_subject,performance_profile)
+VALUES(@session,@child,@utc,'active','math','LOW');
+INSERT INTO math_session_runtime(session_id,seed,target_question_count,generated_question_count,session_mode,target_lesson_id,pack_id,pack_version,updated_at_utc)
+VALUES(@session,9311,2,0,'adaptive',@lesson,@pack,@version,@utc);",
+                "@session", oldSessionId,
+                "@child", profile.ChildId,
+                "@utc", utc,
+                "@lesson", lesson.Id,
+                "@pack", MathSessionCoordinator.PackId,
+                "@version", MathSessionCoordinator.PackVersion);
+            A(Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + oldSessionId +
+              "' AND session_mode='adaptive' AND target_lesson_id='" + lesson.Id + "';") == 1,
+                "adaptive_target_lesson_fixture_has_parseable_but_mode_invalid_runtime");
+
+            using (var coordinator = new MathSessionCoordinator(database, templatePath, "LOW", 9312, 2))
+            {
+                var started = coordinator.Start("Bé adaptive target lesson");
+                A(!started.ResumedExistingSession && started.SessionId != oldSessionId &&
+                  started.RecoveredDanglingSessions == 1 && string.Equals(started.SessionMode, "adaptive", StringComparison.Ordinal) &&
+                  string.IsNullOrWhiteSpace(started.TargetLessonId),
+                    "adaptive_target_lesson_runtime_is_quarantined_before_resume");
+                A(Count(database, "SELECT count(*) FROM session WHERE id='" + oldSessionId + "' AND state='recovered' AND ended_at_utc IS NOT NULL;") == 1 &&
+                  Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + oldSessionId + "';") == 0,
+                    "adaptive_target_lesson_quarantine_removes_old_runtime_only");
+                A(started.LessonAccess == null,
+                    "adaptive_target_lesson_fresh_session_never_exposes_targeted_lesson_access");
+                coordinator.Abort("adaptive_target_lesson_cleanup");
             }
         }
 
