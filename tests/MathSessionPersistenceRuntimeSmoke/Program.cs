@@ -93,6 +93,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestGameEventRewardRepairFailureDoesNotBlockReplay(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventConcurrentRewardReconcileIsIdempotent(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGardenProgressIgnoresZeroAttemptCompletedSessions(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
+                TestGardenRewardUsesDurableEligibilityInsteadOfCallerOrForeignAttempts(root, schemaPath);
                 TestDirectTargetedLessonRejectsEarlyComplete(root, schemaPath, templatePath, lessonCatalogPath);
                 TestGameEventTerminalRuntimeCleanupReconcilesOnNextStart(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventCommitFaultPreservesCheckpoint(root, schemaPath, templatePath, lessonCatalogPath);
@@ -1456,6 +1457,61 @@ BEGIN SELECT RAISE(ABORT,'game event injected concurrent reward seed failure'); 
             A(new GameWorldRewardService(database).ReconcileMissingCompletedMathSessionRewards(childId) == 0 &&
               Count(database, "SELECT count(*) FROM reward_event WHERE child_id='" + childId + "';") == 1,
                 "garden_zero_attempt_session_is_never_backfilled_as_rewardable");
+        }
+
+        private static void TestGardenRewardUsesDurableEligibilityInsteadOfCallerOrForeignAttempts(
+            string root,
+            string schemaPath)
+        {
+            var corruptDatabase = NewDatabase(Path.Combine(root, "garden-foreign-attempt-isolation.db"), schemaPath);
+            var corruptSessions = new LearnerSessionService(corruptDatabase);
+            var owner = corruptSessions.EnsurePrimaryChild("Bé garden owner");
+            var foreignChildId = "child-foreign-garden";
+            var now = DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture);
+            Exec(corruptDatabase, @"INSERT INTO child(id,display_name,grade_level,created_at_utc,updated_at_utc)
+VALUES(@id,'Bé khác',2,@utc,@utc);", "@id", foreignChildId, "@utc", now);
+            var corruptSession = corruptSessions.BeginSession(owner.ChildId, "math", "LOW");
+            Exec(corruptDatabase, @"INSERT INTO attempt(
+id,session_id,child_id,pack_id,pack_version,question_id,skill_id,subject,started_at_utc,answered_at_utc,answer_json,is_correct,response_ms,hint_level,representation,input_method,attempt_index,listen_count)
+VALUES(@id,@session,@child,'math-grade2-verified-core','1.0','foreign-question','M2_FOREIGN','math',@started,@answered,'{}',1,700,0,'symbolic','smoke',1,0);",
+                "@id", "attempt-foreign-garden-" + Guid.NewGuid().ToString("N"),
+                "@session", corruptSession.SessionId,
+                "@child", foreignChildId,
+                "@started", DateTime.UtcNow.AddSeconds(-1).ToString("o", CultureInfo.InvariantCulture),
+                "@answered", DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture));
+            corruptSessions.CompleteSession(corruptSession.SessionId, false, "{\"fixture\":\"foreign_attempt\"}", "{}");
+
+            var corruptReward = new GameWorldRewardService(corruptDatabase);
+            var foreignResult = corruptReward.GrantCompletedMathSession(owner.ChildId, corruptSession.SessionId, 1);
+            var foreignProgress = corruptReward.ReadProgress(owner.ChildId);
+            A(!foreignResult.RewardCreated && foreignProgress.GrowthSteps == 0 && foreignProgress.CompletedMathSessions == 0 &&
+              Count(corruptDatabase, "SELECT count(*) FROM reward_event WHERE child_id='" + owner.ChildId + "';") == 0 &&
+              Count(corruptDatabase, "SELECT count(*) FROM inventory WHERE child_id='" + owner.ChildId + "';") == 0,
+                "garden_foreign_child_attempt_cannot_make_owner_session_rewardable");
+            A(corruptReward.ReconcileMissingCompletedMathSessionRewards(owner.ChildId) == 0 &&
+              corruptReward.ReadProgress(owner.ChildId).CompletedMathSessions == 0,
+                "garden_foreign_child_attempt_is_ignored_by_reconcile_and_progress");
+
+            var validDatabase = NewDatabase(Path.Combine(root, "garden-caller-attempt-undercount.db"), schemaPath);
+            var validSessions = new LearnerSessionService(validDatabase);
+            var validOwner = validSessions.EnsurePrimaryChild("Bé garden caller count");
+            var validSession = validSessions.BeginSession(validOwner.ChildId, "math", "LOW");
+            Exec(validDatabase, @"INSERT INTO attempt(
+id,session_id,child_id,pack_id,pack_version,question_id,skill_id,subject,started_at_utc,answered_at_utc,answer_json,is_correct,response_ms,hint_level,representation,input_method,attempt_index,listen_count)
+VALUES(@id,@session,@child,'math-grade2-verified-core','1.0','valid-question','M2_VALID','math',@started,@answered,'{}',1,700,0,'symbolic','smoke',1,0);",
+                "@id", "attempt-valid-garden-" + Guid.NewGuid().ToString("N"),
+                "@session", validSession.SessionId,
+                "@child", validOwner.ChildId,
+                "@started", DateTime.UtcNow.AddSeconds(-1).ToString("o", CultureInfo.InvariantCulture),
+                "@answered", DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture));
+            validSessions.CompleteSession(validSession.SessionId, false, "{\"fixture\":\"durable_attempt\"}", "{}");
+
+            var validReward = new GameWorldRewardService(validDatabase);
+            var underreported = validReward.GrantCompletedMathSession(validOwner.ChildId, validSession.SessionId, 0);
+            A(underreported.RewardCreated && underreported.GrowthSteps == 1 && underreported.CompletedMathSessions == 1 &&
+              underreported.NewlyUnlockedItems.SequenceEqual(new[] { "garden_seedling" }) &&
+              Count(validDatabase, "SELECT count(*) FROM reward_event WHERE source_ref='" + validSession.SessionId + "';") == 1,
+                "garden_reward_uses_durable_attempt_even_when_caller_reports_zero");
         }
 
         private static void TestDirectTargetedLessonRejectsEarlyComplete(

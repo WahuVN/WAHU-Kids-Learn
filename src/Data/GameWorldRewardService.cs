@@ -47,7 +47,7 @@ namespace WAHU.Data
         {
             Require(childId, "childId");
             Require(sessionId, "sessionId");
-            if (attempts <= 0) return SnapshotResult(childId, false, new List<string>());
+            // Caller attempt count is advisory only. Durable SQLite evidence decides eligibility.
 
             var created = false;
             var unlocked = new List<string>();
@@ -58,7 +58,7 @@ namespace WAHU.Data
                     verify.Transaction = transaction;
                     verify.CommandText = @"SELECT count(a.id)
 FROM session s
-LEFT JOIN attempt a ON a.session_id=s.id
+LEFT JOIN attempt a ON a.session_id=s.id AND a.child_id=s.child_id AND a.subject='math'
 WHERE s.id=@session AND s.child_id=@child AND s.state='completed' AND s.planned_subject='math'
 GROUP BY s.id;";
                     verify.Parameters.AddWithValue("@session", sessionId);
@@ -113,7 +113,7 @@ VALUES(@child,@item,@utc,0);";
             {
                 command.CommandText = @"SELECT s.id, count(a.id)
 FROM session s
-JOIN attempt a ON a.session_id=s.id
+JOIN attempt a ON a.session_id=s.id AND a.child_id=s.child_id AND a.subject='math'
 WHERE s.child_id=@child AND s.state='completed' AND s.planned_subject='math'
   AND NOT EXISTS (
       SELECT 1 FROM reward_event r
@@ -156,7 +156,7 @@ ORDER BY s.started_at_utc,s.id;";
                     CompletedMathSessions = Count(connection,
                         @"SELECT count(*) FROM session s
 WHERE s.child_id=@child AND s.state='completed' AND s.planned_subject='math'
-  AND EXISTS (SELECT 1 FROM attempt a WHERE a.session_id=s.id);", childId),
+  AND EXISTS (SELECT 1 FROM attempt a WHERE a.session_id=s.id AND a.child_id=s.child_id AND a.subject='math');", childId),
                     UnlockedItems = new List<string>()
                 };
                 using (var command = connection.CreateCommand())
@@ -210,7 +210,7 @@ WHERE s.child_id=@child AND s.state='completed' AND s.planned_subject='math'
                 command.Transaction = transaction;
                 command.CommandText = @"SELECT count(*) FROM session s
 WHERE s.child_id=@child AND s.state='completed' AND s.planned_subject='math'
-  AND EXISTS (SELECT 1 FROM attempt a WHERE a.session_id=s.id);";
+  AND EXISTS (SELECT 1 FROM attempt a WHERE a.session_id=s.id AND a.child_id=s.child_id AND a.subject='math');";
                 command.Parameters.AddWithValue("@child", childId);
                 return Convert.ToInt32(command.ExecuteScalar(), CultureInfo.InvariantCulture);
             }
