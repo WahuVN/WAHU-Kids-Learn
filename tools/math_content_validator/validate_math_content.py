@@ -325,12 +325,13 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
         prompt_cf = prompt.casefold()
         expected_hour = expected_minute = None
         minute_basis = None
-        if "kim phút chỉ số 3" in prompt_cf and "vừa qua số 4" in prompt_cf:
-            expected_hour, expected_minute, minute_basis = 4, 15, "Kim phút ở số 3 tương ứng 15 phút"
-        elif "kim phút chỉ số 6" in prompt_cf and "giữa 7 và 8" in prompt_cf:
-            expected_hour, expected_minute, minute_basis = 7, 30, "Kim phút ở số 6 tương ứng 30 phút"
-        elif "từ số 3 đến số 6" in prompt_cf and "giữa 5 và 6" in prompt_cf:
-            expected_hour, expected_minute, minute_basis = 5, 30, "Kim phút đi đến số 6 nên chuyển thành 30 phút"
+        hour_after = re.search(r"vừa qua số (\d+)", prompt_cf)
+        hour_between = re.search(r"giữa (\d+) và (\d+)", prompt_cf)
+        if "kim phút" in prompt_cf and "số 3" in prompt_cf and hour_after:
+            expected_hour, expected_minute, minute_basis = int(hour_after.group(1)), 15, "Kim phút ở số 3 tương ứng 15 phút"
+        elif "kim phút" in prompt_cf and "số 6" in prompt_cf and hour_between:
+            expected_hour, expected_minute = int(hour_between.group(1)), 30
+            minute_basis = "Kim phút ở số 6 tương ứng 30 phút"
         match = re.fullmatch(r"(\d+)\s+giờ\s+(\d+)\s+phút", choice_text.strip().casefold())
         if expected_hour is not None and match:
             hour, minute = int(match.group(1)), int(match.group(2))
@@ -359,6 +360,28 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
                 return "100 cm lớn hơn nhiều so với hai lần thanh 10 cm nên không phải ước lượng gấp đôi."
             if label == "2 km":
                 return "2 km là quãng đường rất dài, hoàn toàn khác thang đo xăng-ti-mét của thanh tham chiếu."
+
+        if "chiếc tẩy" in prompt_cf:
+            if label.endswith("km"):
+                return f"“{choice_text}” dùng ki-lô-mét cho một vật rất nhỏ; chiều dài chiếc tẩy hợp lý ở cỡ xăng-ti-mét."
+            if label.endswith("m"):
+                return f"“{choice_text}” tính theo mét là quá lớn cho một chiếc tẩy học sinh; cỡ xăng-ti-mét hợp lý hơn."
+        if "chiếc bàn học" in prompt_cf:
+            if label.endswith("km"):
+                return f"“{choice_text}” dùng ki-lô-mét, lớn hơn rất nhiều so với chiều cao một chiếc bàn học."
+            if label.endswith("cm"):
+                return f"“{choice_text}” theo xăng-ti-mét quá nhỏ cho chiều cao cả chiếc bàn; cỡ mét hợp lý hơn."
+            if label.endswith("m"):
+                nums = [int(x) for x in re.findall(r"\d+", label)]
+                if nums and nums[0] >= 10:
+                    return f"“{choice_text}” cao cỡ nhiều mét, vượt xa kích thước một bàn học thông thường; khoảng 1 m hợp lý hơn."
+        if "ba lần" in prompt_cf and "10 cm" in prompt_cf:
+            if label == "3 cm":
+                return "Ba lần thanh 10 cm phải dài hơn 10 cm; 3 cm còn ngắn hơn cả thanh chuẩn."
+            if label == "300 cm":
+                return "300 cm là ba mươi lần 10 cm, không phải ba lần thanh chuẩn."
+            if label == "10 cm":
+                return "10 cm chỉ bằng đúng một thanh chuẩn, chưa gấp ba lần chiều dài đó."
 
     if skill == "NUM_COUNT_READ_WRITE_0_1000" and "420" in prompt:
         label = choice_text.strip().casefold()
@@ -402,6 +425,28 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
                 "bên trái nặng hơn": "Cân đang ngang nên không có căn cứ nói bên trái nặng hơn bên phải.",
                 "bên phải nặng hơn": "Cân đang ngang nên không có căn cứ nói bên phải nặng hơn bên trái.",
                 "không thể so sánh khối lượng hai bên": "Hai đĩa ngang bằng chính là dữ kiện cho thấy khối lượng hai bên bằng nhau trong phép cân đó.",
+            }
+            if label in reasons: return reasons[label]
+
+        if "đĩa chứa vật a thấp hơn" in prompt_cf and "đĩa chứa vật b" in prompt_cf:
+            reasons = {
+                "nhẹ hơn": "Đĩa chứa A thấp hơn nên A là phía nặng hơn, không thể nhẹ hơn B.",
+                "bằng nhau": "Nếu A và B bằng nhau thì hai đĩa phải ngang; ở đây đĩa A thấp hơn.",
+                "không thể so sánh": "Độ cao hai đĩa đã đủ để so sánh: đĩa A thấp hơn nên A nặng hơn B.",
+            }
+            if label in reasons: return reasons[label]
+        if "hộp x nhẹ hơn hộp y" in prompt_cf:
+            reasons = {
+                "nhẹ hơn": "Nếu X nhẹ hơn Y thì theo chiều ngược lại Y phải nặng hơn X, không thể nhẹ hơn X.",
+                "bằng nhau": "X đã nhẹ hơn Y nên hai hộp không thể có khối lượng bằng nhau.",
+                "không có quan hệ": "Quan hệ X nhẹ hơn Y cho phép suy ra trực tiếp Y nặng hơn X.",
+            }
+            if label in reasons: return reasons[label]
+        if "hai đĩa cân nằm ngang" in prompt_cf:
+            reasons = {
+                "túi trái nặng hơn": "Hai đĩa đang ngang nên không có căn cứ nói túi trái nặng hơn túi phải.",
+                "túi phải nặng hơn": "Hai đĩa đang ngang nên không có căn cứ nói túi phải nặng hơn túi trái.",
+                "một túi chắc chắn rỗng": "Cân ngang chỉ cho biết hai bên cân bằng về khối lượng; không chứng minh túi nào rỗng.",
             }
             if label in reasons: return reasons[label]
 

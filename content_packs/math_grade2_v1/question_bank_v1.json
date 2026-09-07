@@ -11464,17 +11464,17 @@
         {
           "id": "a",
           "text": "nhẹ hơn",
-          "rationale_vi": "“nhẹ hơn” chưa đúng. Dữ kiện dẫn tới “nặng hơn”. Khi cân hoạt động đúng, phía thấp hơn là phía nặng hơn."
+          "rationale_vi": "“nhẹ hơn” chưa đúng. Đĩa chứa A thấp hơn nên A là phía nặng hơn, không thể nhẹ hơn B. Khi cân hoạt động đúng, phía thấp hơn là phía nặng hơn."
         },
         {
           "id": "b",
           "text": "bằng nhau",
-          "rationale_vi": "“bằng nhau” chưa đúng. Dữ kiện dẫn tới “nặng hơn”. Khi cân hoạt động đúng, phía thấp hơn là phía nặng hơn."
+          "rationale_vi": "“bằng nhau” chưa đúng. Nếu A và B bằng nhau thì hai đĩa phải ngang; ở đây đĩa A thấp hơn. Khi cân hoạt động đúng, phía thấp hơn là phía nặng hơn."
         },
         {
           "id": "c",
           "text": "không thể so sánh",
-          "rationale_vi": "“không thể so sánh” chưa đúng. Dữ kiện dẫn tới “nặng hơn”. Khi cân hoạt động đúng, phía thấp hơn là phía nặng hơn."
+          "rationale_vi": "“không thể so sánh” chưa đúng. Độ cao hai đĩa đã đủ để so sánh: đĩa A thấp hơn nên A nặng hơn B. Khi cân hoạt động đúng, phía thấp hơn là phía nặng hơn."
         },
         {
           "id": "d",
@@ -11522,17 +11522,17 @@
         {
           "id": "b",
           "text": "nhẹ hơn",
-          "rationale_vi": "“nhẹ hơn” chưa đúng. Dữ kiện dẫn tới “nặng hơn”. Quan hệ nhẹ hơn và nặng hơn đảo chiều khi đổi thứ tự hai vật."
+          "rationale_vi": "“nhẹ hơn” chưa đúng. Nếu X nhẹ hơn Y thì theo chiều ngược lại Y phải nặng hơn X, không thể nhẹ hơn X. Quan hệ nhẹ hơn và nặng hơn đảo chiều khi đổi thứ tự hai vật."
         },
         {
           "id": "c",
           "text": "bằng nhau",
-          "rationale_vi": "“bằng nhau” chưa đúng. Dữ kiện dẫn tới “nặng hơn”. Quan hệ nhẹ hơn và nặng hơn đảo chiều khi đổi thứ tự hai vật."
+          "rationale_vi": "“bằng nhau” chưa đúng. X đã nhẹ hơn Y nên hai hộp không thể có khối lượng bằng nhau. Quan hệ nhẹ hơn và nặng hơn đảo chiều khi đổi thứ tự hai vật."
         },
         {
           "id": "d",
           "text": "không có quan hệ",
-          "rationale_vi": "“không có quan hệ” chưa đúng. Dữ kiện dẫn tới “nặng hơn”. Quan hệ nhẹ hơn và nặng hơn đảo chiều khi đổi thứ tự hai vật."
+          "rationale_vi": "“không có quan hệ” chưa đúng. Quan hệ X nhẹ hơn Y cho phép suy ra trực tiếp Y nặng hơn X. Quan hệ nhẹ hơn và nặng hơn đảo chiều khi đổi thứ tự hai vật."
         }
       ],
       "correct_choice_id": "a"
@@ -11570,7 +11570,7 @@
         {
           "id": "a",
           "text": "Túi trái nặng hơn",
-          "rationale_vi": "“Túi trái nặng hơn” chưa đúng. Dữ kiện dẫn tới “Hai túi có khối lượng bằng nhau”. Cân thăng bằng cho thấy hai phía có khối lượng bằng nhau trong phép cân. Vậy đáp án là Hai túi có khối lượng bằng nhau."
+          "rationale_vi": "“Túi trái nặng hơn” chưa đúng. Hai đĩa đang ngang nên không có căn cứ nói túi trái nặng hơn túi phải. Cân thăng bằng cho thấy hai phía có khối lượng bằng nhau trong phép cân. Vậy đáp án là Hai túi có khối lượng bằng nhau."
         },
         {
           "id": "b",
@@ -11580,12 +11580,12 @@
         {
           "id": "c",
           "text": "Túi phải nặng hơn",
-          "rationale_vi": "“Túi phải nặng hơn” chưa đúng. Dữ kiện dẫn tới “Hai túi có khối lượng bằng nhau”. Cân thăng bằng cho thấy hai phía có khối lượng bằng nhau trong phép cân. Vậy đáp án là Hai túi có khối lượng bằng nhau."
+          "rationale_vi": "“Túi phải nặng hơn” chưa đúng. Hai đĩa đang ngang nên không có căn cứ nói túi phải nặng hơn túi trái. Cân thăng bằng cho thấy hai phía có khối lượng bằng nhau trong phép cân. Vậy đáp án là Hai túi có khối lượng bằng nhau."
         },
         {
           "id": "d",
           "text": "Một túi chắc chắn rỗng",
-          "rationale_vi": "“Một túi chắc chắn rỗng” chưa đúng. Dữ kiện dẫn tới “Hai túi có khối lượng bằng nhau”. Cân thăng bằng cho thấy hai phía có khối lượng bằng nhau trong phép cân. Vậy đáp án là Hai túi có khối lượng bằng nhau."
+          "rationale_vi": "“Một túi chắc chắn rỗng” chưa đúng. Cân ngang chỉ cho biết hai bên cân bằng về khối lượng; không chứng minh túi nào rỗng. Cân thăng bằng cho thấy hai phía có khối lượng bằng nhau trong phép cân. Vậy đáp án là Hai túi có khối lượng bằng nhau."
         }
       ],
       "correct_choice_id": "b"
@@ -13881,7 +13881,7 @@
         {
           "id": "a",
           "text": "5 giờ 15 phút",
-          "rationale_vi": "“5 giờ 15 phút” chưa đúng. Kim phút đi đến số 6 nên chuyển thành 30 phút; “5 giờ 15 phút” ghi 15 phút nên sai vị trí kim phút. Kim phút từ số 3 đến số 6 chuyển từ 15 phút sang 30 phút; kim giờ vẫn trong khoảng sau 5 nên là 5 giờ 30 phút."
+          "rationale_vi": "“5 giờ 15 phút” chưa đúng. Kim phút ở số 6 tương ứng 30 phút; “5 giờ 15 phút” ghi 15 phút nên sai vị trí kim phút. Kim phút từ số 3 đến số 6 chuyển từ 15 phút sang 30 phút; kim giờ vẫn trong khoảng sau 5 nên là 5 giờ 30 phút."
         },
         {
           "id": "b",
@@ -13896,7 +13896,7 @@
         {
           "id": "d",
           "text": "5 giờ 45 phút",
-          "rationale_vi": "“5 giờ 45 phút” chưa đúng. Kim phút đi đến số 6 nên chuyển thành 30 phút; “5 giờ 45 phút” ghi 45 phút nên sai vị trí kim phút. Kim phút từ số 3 đến số 6 chuyển từ 15 phút sang 30 phút; kim giờ vẫn trong khoảng sau 5 nên là 5 giờ 30 phút."
+          "rationale_vi": "“5 giờ 45 phút” chưa đúng. Kim phút ở số 6 tương ứng 30 phút; “5 giờ 45 phút” ghi 45 phút nên sai vị trí kim phút. Kim phút từ số 3 đến số 6 chuyển từ 15 phút sang 30 phút; kim giờ vẫn trong khoảng sau 5 nên là 5 giờ 30 phút."
         }
       ],
       "correct_choice_id": "c"
@@ -13934,17 +13934,17 @@
         {
           "id": "a",
           "text": "2 giờ 30 phút",
-          "rationale_vi": "“2 giờ 30 phút” chưa đúng. Dữ kiện dẫn tới “2 giờ 15 phút”. Kim phút ở số 3 tương ứng 15 phút; kim giờ vừa qua 2 nên là 2 giờ 15 phút."
+          "rationale_vi": "“2 giờ 30 phút” chưa đúng. Kim phút ở số 3 tương ứng 15 phút; “2 giờ 30 phút” ghi 30 phút nên sai vị trí kim phút. Kim phút ở số 3 tương ứng 15 phút; kim giờ vừa qua 2 nên là 2 giờ 15 phút."
         },
         {
           "id": "b",
           "text": "3 giờ 15 phút",
-          "rationale_vi": "“3 giờ 15 phút” chưa đúng. Dữ kiện dẫn tới “2 giờ 15 phút”. Kim phút ở số 3 tương ứng 15 phút; kim giờ vừa qua 2 nên là 2 giờ 15 phút."
+          "rationale_vi": "“3 giờ 15 phút” chưa đúng. Kim giờ vẫn thuộc giờ 2; “3 giờ 15 phút” đổi sang giờ 3 quá sớm. Kim phút ở số 3 tương ứng 15 phút; kim giờ vừa qua 2 nên là 2 giờ 15 phút."
         },
         {
           "id": "c",
           "text": "2 giờ 3 phút",
-          "rationale_vi": "“2 giờ 3 phút” chưa đúng. Dữ kiện dẫn tới “2 giờ 15 phút”. Kim phút ở số 3 tương ứng 15 phút; kim giờ vừa qua 2 nên là 2 giờ 15 phút."
+          "rationale_vi": "“2 giờ 3 phút” chưa đúng. Kim phút ở số 3 tương ứng 15 phút; “2 giờ 3 phút” ghi 3 phút nên sai vị trí kim phút. Kim phút ở số 3 tương ứng 15 phút; kim giờ vừa qua 2 nên là 2 giờ 15 phút."
         },
         {
           "id": "d",
@@ -13992,17 +13992,17 @@
         {
           "id": "b",
           "text": "9 giờ 15 phút",
-          "rationale_vi": "“9 giờ 15 phút” chưa đúng. Dữ kiện dẫn tới “9 giờ 30 phút”. Kim phút ở số 6 tương ứng 30 phút; kim giờ giữa 9 và 10 nên là 9 giờ 30 phút."
+          "rationale_vi": "“9 giờ 15 phút” chưa đúng. Kim phút ở số 6 tương ứng 30 phút; “9 giờ 15 phút” ghi 15 phút nên sai vị trí kim phút. Kim phút ở số 6 tương ứng 30 phút; kim giờ giữa 9 và 10 nên là 9 giờ 30 phút."
         },
         {
           "id": "c",
           "text": "10 giờ 30 phút",
-          "rationale_vi": "“10 giờ 30 phút” chưa đúng. Dữ kiện dẫn tới “9 giờ 30 phút”. Kim phút ở số 6 tương ứng 30 phút; kim giờ giữa 9 và 10 nên là 9 giờ 30 phút."
+          "rationale_vi": "“10 giờ 30 phút” chưa đúng. Kim giờ vẫn thuộc giờ 9; “10 giờ 30 phút” đổi sang giờ 10 quá sớm. Kim phút ở số 6 tương ứng 30 phút; kim giờ giữa 9 và 10 nên là 9 giờ 30 phút."
         },
         {
           "id": "d",
           "text": "6 giờ 9 phút",
-          "rationale_vi": "“6 giờ 9 phút” chưa đúng. Dữ kiện dẫn tới “9 giờ 30 phút”. Kim phút ở số 6 tương ứng 30 phút; kim giờ giữa 9 và 10 nên là 9 giờ 30 phút."
+          "rationale_vi": "“6 giờ 9 phút” chưa đúng. Kim phút ở số 6 tương ứng 30 phút; “6 giờ 9 phút” ghi 9 phút nên sai vị trí kim phút. Kim phút ở số 6 tương ứng 30 phút; kim giờ giữa 9 và 10 nên là 9 giờ 30 phút."
         }
       ],
       "correct_choice_id": "a"
@@ -14040,7 +14040,7 @@
         {
           "id": "a",
           "text": "3 giờ 45 phút",
-          "rationale_vi": "“3 giờ 45 phút” chưa đúng. Dữ kiện dẫn tới “3 giờ 30 phút”. Từ vị trí số 3 đến số 6 của kim phút chuyển từ 15 phút sang 30 phút; giờ vẫn là 3. Vậy đáp án là 3 giờ 30 phút."
+          "rationale_vi": "“3 giờ 45 phút” chưa đúng. Kim phút ở số 6 tương ứng 30 phút; “3 giờ 45 phút” ghi 45 phút nên sai vị trí kim phút. Từ vị trí số 3 đến số 6 của kim phút chuyển từ 15 phút sang 30 phút; giờ vẫn là 3. Vậy đáp án là 3 giờ 30 phút."
         },
         {
           "id": "b",
@@ -14050,12 +14050,12 @@
         {
           "id": "c",
           "text": "4 giờ 30 phút",
-          "rationale_vi": "“4 giờ 30 phút” chưa đúng. Dữ kiện dẫn tới “3 giờ 30 phút”. Từ vị trí số 3 đến số 6 của kim phút chuyển từ 15 phút sang 30 phút; giờ vẫn là 3. Vậy đáp án là 3 giờ 30 phút."
+          "rationale_vi": "“4 giờ 30 phút” chưa đúng. Kim giờ vẫn thuộc giờ 3; “4 giờ 30 phút” đổi sang giờ 4 quá sớm. Từ vị trí số 3 đến số 6 của kim phút chuyển từ 15 phút sang 30 phút; giờ vẫn là 3. Vậy đáp án là 3 giờ 30 phút."
         },
         {
           "id": "d",
           "text": "6 giờ 30 phút",
-          "rationale_vi": "“6 giờ 30 phút” chưa đúng. Dữ kiện dẫn tới “3 giờ 30 phút”. Từ vị trí số 3 đến số 6 của kim phút chuyển từ 15 phút sang 30 phút; giờ vẫn là 3. Vậy đáp án là 3 giờ 30 phút."
+          "rationale_vi": "“6 giờ 30 phút” chưa đúng. Kim giờ vẫn thuộc giờ 3; “6 giờ 30 phút” đổi sang giờ 6 quá sớm. Từ vị trí số 3 đến số 6 của kim phút chuyển từ 15 phút sang 30 phút; giờ vẫn là 3. Vậy đáp án là 3 giờ 30 phút."
         }
       ],
       "correct_choice_id": "b"
@@ -14444,7 +14444,7 @@
         {
           "id": "a",
           "text": "5 m",
-          "rationale_vi": "“5 m” chưa đúng. Dữ kiện dẫn tới “5 cm”. Một chiếc tẩy nhỏ thường dài vài xăng-ti-mét; 5 cm là mốc hợp lý."
+          "rationale_vi": "“5 m” chưa đúng. “5 m” tính theo mét là quá lớn cho một chiếc tẩy học sinh; cỡ xăng-ti-mét hợp lý hơn. Một chiếc tẩy nhỏ thường dài vài xăng-ti-mét; 5 cm là mốc hợp lý."
         },
         {
           "id": "b",
@@ -14454,12 +14454,12 @@
         {
           "id": "c",
           "text": "50 m",
-          "rationale_vi": "“50 m” chưa đúng. Dữ kiện dẫn tới “5 cm”. Một chiếc tẩy nhỏ thường dài vài xăng-ti-mét; 5 cm là mốc hợp lý."
+          "rationale_vi": "“50 m” chưa đúng. “50 m” tính theo mét là quá lớn cho một chiếc tẩy học sinh; cỡ xăng-ti-mét hợp lý hơn. Một chiếc tẩy nhỏ thường dài vài xăng-ti-mét; 5 cm là mốc hợp lý."
         },
         {
           "id": "d",
           "text": "500 km",
-          "rationale_vi": "“500 km” chưa đúng. Dữ kiện dẫn tới “5 cm”. Một chiếc tẩy nhỏ thường dài vài xăng-ti-mét; 5 cm là mốc hợp lý."
+          "rationale_vi": "“500 km” chưa đúng. “500 km” dùng ki-lô-mét cho một vật rất nhỏ; chiều dài chiếc tẩy hợp lý ở cỡ xăng-ti-mét. Một chiếc tẩy nhỏ thường dài vài xăng-ti-mét; 5 cm là mốc hợp lý."
         }
       ],
       "correct_choice_id": "b"
@@ -14497,12 +14497,12 @@
         {
           "id": "a",
           "text": "1 km",
-          "rationale_vi": "“1 km” chưa đúng. Dữ kiện dẫn tới “1 m”. Bàn học có kích thước cỡ mét; 1 m hợp lý hơn các mốc quá lớn hoặc quá nhỏ."
+          "rationale_vi": "“1 km” chưa đúng. “1 km” dùng ki-lô-mét, lớn hơn rất nhiều so với chiều cao một chiếc bàn học. Bàn học có kích thước cỡ mét; 1 m hợp lý hơn các mốc quá lớn hoặc quá nhỏ."
         },
         {
           "id": "b",
           "text": "10 m",
-          "rationale_vi": "“10 m” chưa đúng. Dữ kiện dẫn tới “1 m”. Bàn học có kích thước cỡ mét; 1 m hợp lý hơn các mốc quá lớn hoặc quá nhỏ."
+          "rationale_vi": "“10 m” chưa đúng. “10 m” cao cỡ nhiều mét, vượt xa kích thước một bàn học thông thường; khoảng 1 m hợp lý hơn. Bàn học có kích thước cỡ mét; 1 m hợp lý hơn các mốc quá lớn hoặc quá nhỏ."
         },
         {
           "id": "c",
@@ -14512,7 +14512,7 @@
         {
           "id": "d",
           "text": "1 cm",
-          "rationale_vi": "“1 cm” chưa đúng. Dữ kiện dẫn tới “1 m”. Bàn học có kích thước cỡ mét; 1 m hợp lý hơn các mốc quá lớn hoặc quá nhỏ."
+          "rationale_vi": "“1 cm” chưa đúng. “1 cm” theo xăng-ti-mét quá nhỏ cho chiều cao cả chiếc bàn; cỡ mét hợp lý hơn. Bàn học có kích thước cỡ mét; 1 m hợp lý hơn các mốc quá lớn hoặc quá nhỏ."
         }
       ],
       "correct_choice_id": "c"
@@ -14550,17 +14550,17 @@
         {
           "id": "a",
           "text": "3 cm",
-          "rationale_vi": "“3 cm” chưa đúng. Dữ kiện dẫn tới “30 cm”. Ba lần mốc 10 cm cho khoảng 30 cm."
+          "rationale_vi": "“3 cm” chưa đúng. Ba lần thanh 10 cm phải dài hơn 10 cm; 3 cm còn ngắn hơn cả thanh chuẩn. Ba lần mốc 10 cm cho khoảng 30 cm."
         },
         {
           "id": "b",
           "text": "300 cm",
-          "rationale_vi": "“300 cm” chưa đúng. Dữ kiện dẫn tới “30 cm”. Ba lần mốc 10 cm cho khoảng 30 cm."
+          "rationale_vi": "“300 cm” chưa đúng. 300 cm là ba mươi lần 10 cm, không phải ba lần thanh chuẩn. Ba lần mốc 10 cm cho khoảng 30 cm."
         },
         {
           "id": "c",
           "text": "10 cm",
-          "rationale_vi": "“10 cm” chưa đúng. Dữ kiện dẫn tới “30 cm”. Ba lần mốc 10 cm cho khoảng 30 cm."
+          "rationale_vi": "“10 cm” chưa đúng. 10 cm chỉ bằng đúng một thanh chuẩn, chưa gấp ba lần chiều dài đó. Ba lần mốc 10 cm cho khoảng 30 cm."
         },
         {
           "id": "d",
