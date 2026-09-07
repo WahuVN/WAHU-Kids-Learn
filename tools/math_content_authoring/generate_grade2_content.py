@@ -1626,6 +1626,25 @@ Q = {
 DIFFICULTIES = ["basic", "medium", "application"]
 
 
+SKILL_NUMERIC_MAX = {
+    "MENTAL_ADD_SUB_WITHIN_20": 20,
+    "MULTIPLICATION_MEANING": 50,
+    "DIVISION_MEANING": 10,
+    "TIMES_TABLE_2": 20,
+    "TIMES_TABLE_5": 50,
+    "DIVIDE_TABLE_2": 10,
+    "DIVIDE_TABLE_5": 10,
+    "WP_ONE_STEP_MULTIPLICATION_CONTEXT": 50,
+    "WP_ONE_STEP_DIVISION_CONTEXT": 10,
+}
+
+for _skill, _numeric_max in SKILL_NUMERIC_MAX.items():
+    for _question in Q[_skill]:
+        if _question.get("answer_kind") in {"integer", "interaction_integer"}:
+            _question["validation"]["numeric_min"] = 0
+            _question["validation"]["numeric_max"] = _numeric_max
+
+
 def build() -> tuple[dict, dict]:
     baseline = json.loads(BASELINE_PATH.read_text(encoding="utf-8"))
     domain_skills = {k: list(v) for k, v in baseline["domains"].items()}

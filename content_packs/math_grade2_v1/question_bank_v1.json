@@ -2294,7 +2294,7 @@
       "validation": {
         "integer_required": true,
         "numeric_min": 0,
-        "numeric_max": 1000
+        "numeric_max": 50
       },
       "status": "CHILD_READY"
     },
@@ -2325,7 +2325,7 @@
       "validation": {
         "integer_required": true,
         "numeric_min": 0,
-        "numeric_max": 1000
+        "numeric_max": 50
       },
       "status": "CHILD_READY"
     },
@@ -2356,7 +2356,7 @@
       "validation": {
         "integer_required": true,
         "numeric_min": 0,
-        "numeric_max": 1000
+        "numeric_max": 10
       },
       "status": "CHILD_READY"
     },
@@ -2387,7 +2387,7 @@
       "validation": {
         "integer_required": true,
         "numeric_min": 0,
-        "numeric_max": 1000
+        "numeric_max": 10
       },
       "status": "CHILD_READY"
     },
@@ -2418,7 +2418,7 @@
       "validation": {
         "integer_required": true,
         "numeric_min": 0,
-        "numeric_max": 1000
+        "numeric_max": 10
       },
       "status": "CHILD_READY"
     },
@@ -2767,7 +2767,7 @@
       "validation": {
         "integer_required": true,
         "numeric_min": 0,
-        "numeric_max": 1000
+        "numeric_max": 20
       },
       "status": "CHILD_READY"
     },
@@ -2798,7 +2798,7 @@
       "validation": {
         "integer_required": true,
         "numeric_min": 0,
-        "numeric_max": 1000
+        "numeric_max": 20
       },
       "status": "CHILD_READY"
     },
@@ -2829,7 +2829,7 @@
       "validation": {
         "integer_required": true,
         "numeric_min": 0,
-        "numeric_max": 1000
+        "numeric_max": 20
       },
       "status": "CHILD_READY"
     },
@@ -2860,7 +2860,7 @@
       "validation": {
         "integer_required": true,
         "numeric_min": 0,
-        "numeric_max": 1000
+        "numeric_max": 50
       },
       "status": "CHILD_READY"
     },
@@ -2891,7 +2891,7 @@
       "validation": {
         "integer_required": true,
         "numeric_min": 0,
-        "numeric_max": 1000
+        "numeric_max": 50
       },
       "status": "CHILD_READY"
     },
@@ -2922,7 +2922,7 @@
       "validation": {
         "integer_required": true,
         "numeric_min": 0,
-        "numeric_max": 1000
+        "numeric_max": 50
       },
       "status": "CHILD_READY"
     },
@@ -2953,7 +2953,7 @@
       "validation": {
         "integer_required": true,
         "numeric_min": 0,
-        "numeric_max": 1000
+        "numeric_max": 10
       },
       "status": "CHILD_READY"
     },
@@ -2984,7 +2984,7 @@
       "validation": {
         "integer_required": true,
         "numeric_min": 0,
-        "numeric_max": 1000
+        "numeric_max": 10
       },
       "status": "CHILD_READY"
     },
@@ -3015,7 +3015,7 @@
       "validation": {
         "integer_required": true,
         "numeric_min": 0,
-        "numeric_max": 1000
+        "numeric_max": 10
       },
       "status": "CHILD_READY"
     },
@@ -3046,7 +3046,7 @@
       "validation": {
         "integer_required": true,
         "numeric_min": 0,
-        "numeric_max": 1000
+        "numeric_max": 10
       },
       "status": "CHILD_READY"
     },
@@ -3077,7 +3077,7 @@
       "validation": {
         "integer_required": true,
         "numeric_min": 0,
-        "numeric_max": 1000
+        "numeric_max": 10
       },
       "status": "CHILD_READY"
     },
@@ -3108,7 +3108,7 @@
       "validation": {
         "integer_required": true,
         "numeric_min": 0,
-        "numeric_max": 1000
+        "numeric_max": 10
       },
       "status": "CHILD_READY"
     },
@@ -3672,7 +3672,7 @@
       "validation": {
         "integer_required": true,
         "numeric_min": 0,
-        "numeric_max": 1000
+        "numeric_max": 50
       },
       "status": "CHILD_READY"
     },
@@ -3703,7 +3703,7 @@
       "validation": {
         "integer_required": true,
         "numeric_min": 0,
-        "numeric_max": 1000
+        "numeric_max": 50
       },
       "status": "CHILD_READY"
     },
@@ -3734,7 +3734,7 @@
       "validation": {
         "integer_required": true,
         "numeric_min": 0,
-        "numeric_max": 1000
+        "numeric_max": 50
       },
       "status": "CHILD_READY"
     },
@@ -3765,7 +3765,7 @@
       "validation": {
         "integer_required": true,
         "numeric_min": 0,
-        "numeric_max": 1000
+        "numeric_max": 10
       },
       "status": "CHILD_READY"
     },
@@ -3796,7 +3796,7 @@
       "validation": {
         "integer_required": true,
         "numeric_min": 0,
-        "numeric_max": 1000
+        "numeric_max": 10
       },
       "status": "CHILD_READY"
     },
@@ -3827,7 +3827,7 @@
       "validation": {
         "integer_required": true,
         "numeric_min": 0,
-        "numeric_max": 1000
+        "numeric_max": 10
       },
       "status": "CHILD_READY"
     },

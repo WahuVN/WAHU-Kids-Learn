@@ -50,6 +50,17 @@ ENGINE_ANSWER_KINDS = {"integer", "interaction_integer", "number", "decimal", "f
 GRADE2_USED_ANSWER_KINDS = {"integer", "interaction_integer", "text", "unit", "expression"}
 QUESTION_TYPES = {"numeric_input", "multiple_choice", "true_false", "expression_input", "unit_input", "interactive_measurement", "word_problem"}
 ADD_SUB_EXPRESSION_ALLOWED_OPERATORS = {"+", "-", "(", ")"}
+SKILL_NUMERIC_MAX = {
+    "MENTAL_ADD_SUB_WITHIN_20": 20,
+    "MULTIPLICATION_MEANING": 50,
+    "DIVISION_MEANING": 10,
+    "TIMES_TABLE_2": 20,
+    "TIMES_TABLE_5": 50,
+    "DIVIDE_TABLE_2": 10,
+    "DIVIDE_TABLE_5": 10,
+    "WP_ONE_STEP_MULTIPLICATION_CONTEXT": 50,
+    "WP_ONE_STEP_DIVISION_CONTEXT": 10,
+}
 ADD_CARRY_RULES = {"ADD_WITHIN_1000_NO_CARRY": 0, "ADD_WITHIN_1000_ONE_CARRY_MAX": 1}
 SUB_BORROW_RULES = {"SUB_WITHIN_1000_NO_BORROW": 0, "SUB_WITHIN_1000_ONE_BORROW_MAX": 1}
 MONEY_DENOMINATION_RE = re.compile(r"\b\d[\d\s.,]*\s*đồng\b", re.IGNORECASE)
@@ -1640,10 +1651,10 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
         }.get(kind)
         if expected_validation_keys is not None and set(validation) != expected_validation_keys:
             errors.append(f"validation_schema_mismatch:{where}:{sorted(validation)}:{sorted(expected_validation_keys)}")
-        if skill == "MENTAL_ADD_SUB_WITHIN_20":
-            mental_max = baseline.get("hard_guards", {}).get("mental_add_sub_max", 20) if isinstance(baseline.get("hard_guards"), dict) else 20
-            if validation.get("numeric_min") != 0 or validation.get("numeric_max") != mental_max:
-                errors.append(f"mental_range_metadata_mismatch:{where}:{validation.get('numeric_min')}:{validation.get('numeric_max')}:{mental_max}")
+        expected_skill_numeric_max = SKILL_NUMERIC_MAX.get(skill)
+        if expected_skill_numeric_max is not None and kind in {"integer", "interaction_integer"}:
+            if validation.get("numeric_min") != 0 or validation.get("numeric_max") != expected_skill_numeric_max:
+                errors.append(f"skill_numeric_range_metadata_mismatch:{where}:{skill}:{validation.get('numeric_min')}:{validation.get('numeric_max')}:{expected_skill_numeric_max}")
         if "answer_unit" in q:
             answer_unit = q.get("answer_unit")
             if not isinstance(answer_unit, str) or not answer_unit.strip():

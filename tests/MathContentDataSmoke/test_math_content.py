@@ -678,14 +678,19 @@ class MathContentDataSmoke(unittest.TestCase):
         self.assertGreaterEqual(len(counts), int(len(rationales) * 0.9))
         self.assertTrue(all(len(x.strip()) >= 50 for x in rationales))
 
-    def test_mental_add_sub_validation_range_matches_baseline(self):
-        items = [x for x in self.questions if x["skill_id"] == "MENTAL_ADD_SUB_WITHIN_20"]
-        self.assertEqual(3, len(items))
-        expected_max = self.baseline["hard_guards"]["mental_add_sub_max"]
-        self.assertEqual(20, expected_max)
-        for item in items:
-            self.assertEqual(0, item["validation"]["numeric_min"])
-            self.assertEqual(expected_max, item["validation"]["numeric_max"])
+    def test_skill_specific_numeric_ranges_match_grade2_scope(self):
+        self.assertEqual(self.baseline["hard_guards"]["mental_add_sub_max"], validator.SKILL_NUMERIC_MAX["MENTAL_ADD_SUB_WITHIN_20"])
+        checked = 0
+        for item in self.questions:
+            expected_max = validator.SKILL_NUMERIC_MAX.get(item["skill_id"])
+            if expected_max is None or item["answer_kind"] not in {"integer", "interaction_integer"}:
+                continue
+            with self.subTest(item=item["id"]):
+                self.assertEqual(0, item["validation"]["numeric_min"])
+                self.assertEqual(expected_max, item["validation"]["numeric_max"])
+                self.assertLessEqual(item["correct_answer"], expected_max)
+            checked += 1
+        self.assertEqual(26, checked)
 
     def test_measurement_scale_feedback_is_not_misclassified_as_division(self):
         item = self.question_by_id["m2_q_measure_with_common_scale_03"]
