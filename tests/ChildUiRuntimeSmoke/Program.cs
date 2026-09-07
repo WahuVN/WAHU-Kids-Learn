@@ -1681,6 +1681,26 @@ namespace WAHU.ChildUiRuntimeSmoke
                     A(missionCards.All(x => x.GetType().Name == "RescueMissionButton" && x.Height == 78 &&
                       !string.IsNullOrWhiteSpace(x.AccessibleName) && !string.IsNullOrWhiteSpace(x.AccessibleDescription)),
                         "quick_rescue_intro_five_mission_cards_accessible");
+                    A(object.ReferenceEquals(rescue.AcceptButton, startButton) && rescue.CancelButton != null &&
+                      ((Control)rescue.CancelButton).AccessibleName.IndexOf("Đóng nhiệm vụ cứu hộ", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "quick_rescue_intro_keyboard_enter_and_escape_actions_wired");
+                    var eventItems = ((System.Collections.IEnumerable)GetField<object>(rescue, "_events")).Cast<object>().ToList();
+                    var lockedPresentation = eventItems.FirstOrDefault(x =>
+                        Get<string>(x, "TargetLessonId") == "m2_ls_num_full_hundreds_recognize");
+                    A(lockedPresentation != null, "quick_rescue_locked_mission_fixture_available");
+                    var lockedId = Get<string>(lockedPresentation, "Id");
+                    var lockedButton = (Button)buttons[lockedId];
+                    A(lockedButton.Enabled && lockedButton.TabStop,
+                        "quick_rescue_locked_mission_stays_focusable_for_keyboard_explanation");
+                    Invoke(rescue, "SelectEvent", lockedPresentation);
+                    var prerequisiteTitle = new MathLessonCatalogSource().Load(catalogPath).FindLesson(lessonId).TitleVi;
+                    A(!startButton.Enabled && startButton.Text.IndexOf("Học bài nền", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "quick_rescue_locked_mission_cannot_start");
+                    A(GetField<Label>(rescue, "_status").Text.IndexOf(prerequisiteTitle, StringComparison.OrdinalIgnoreCase) >= 0 &&
+                      lockedButton.AccessibleDescription.IndexOf(prerequisiteTitle, StringComparison.OrdinalIgnoreCase) >= 0 &&
+                      startButton.AccessibleDescription.IndexOf(prerequisiteTitle, StringComparison.OrdinalIgnoreCase) >= 0,
+                        "quick_rescue_locked_mission_names_exact_prerequisite_everywhere");
+                    Invoke(rescue, "SelectEvent", presentation);
                     var checkpointPanel = GetField<FlowLayoutPanel>(rescue, "_checkpoints");
                     A(checkpointPanel.Controls.Count == 3,
                         "quick_rescue_intro_renders_three_checkpoint_rows");
@@ -1829,9 +1849,11 @@ namespace WAHU.ChildUiRuntimeSmoke
                     Invoke(afterCompletion, "LoadEvents");
                     var buttons = GetField<System.Collections.IDictionary>(afterCompletion, "_eventButtons");
                     var replay = buttons == null ? null : buttons[eventId] as Button;
-                    A(replay != null && replay.Enabled && replay.Text.IndexOf("Đã hoàn thành", StringComparison.OrdinalIgnoreCase) >= 0 &&
-                      replay.Text.IndexOf("chơi lại", StringComparison.OrdinalIgnoreCase) >= 0,
-                        "quick_rescue_list_marks_completed_event_replayable");
+                    A(replay != null && replay.Enabled &&
+                      replay.Text.IndexOf("Bài nền đã xong", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                      replay.Text.IndexOf("Đã hoàn thành", StringComparison.OrdinalIgnoreCase) < 0 &&
+                      replay.Text.IndexOf("chơi lại", StringComparison.OrdinalIgnoreCase) < 0,
+                        "quick_rescue_list_does_not_invent_event_completion_history");
                     A(garden.ReadProgress(learner.ChildId).GrowthSteps == 1,
                         "quick_rescue_reopening_list_does_not_duplicate_reward");
                 }

@@ -176,10 +176,16 @@ namespace WAHUKidsLearn
     {
         private bool _hover;
         private bool _selected;
+        private bool _locked;
 
         public string TitleText { get; set; }
         public string StateText { get; set; }
         public Color AccentColor { get; set; } = ChildVisualTheme.MintStrong;
+        public bool Locked
+        {
+            get { return _locked; }
+            set { _locked = value; Invalidate(); }
+        }
         public bool Selected
         {
             get { return _selected; }
@@ -205,7 +211,7 @@ namespace WAHUKidsLearn
         {
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             var rect = new Rectangle(1, 1, Math.Max(1, Width - 3), Math.Max(1, Height - 3));
-            var fill = !Enabled
+            var fill = _locked
                 ? Color.FromArgb(242, 241, 235)
                 : (_selected ? Color.FromArgb(246, 250, 241) : (_hover ? Color.FromArgb(251, 249, 241) : Color.White));
             var border = _selected ? AccentColor : Color.FromArgb(226, 223, 210);
@@ -219,16 +225,16 @@ namespace WAHUKidsLearn
 
             var accent = new Rectangle(10, 14, 7, Math.Max(24, Height - 28));
             using (var path = ChildVisualTheme.RoundedRect(accent, 4))
-            using (var brush = new SolidBrush(Enabled ? AccentColor : Color.FromArgb(184, 188, 181)))
+            using (var brush = new SolidBrush(_locked ? Color.FromArgb(184, 188, 181) : AccentColor))
                 e.Graphics.FillPath(brush, path);
 
             var titleRect = new Rectangle(30, 12, Math.Max(60, Width - 42), 32);
             var stateRect = new Rectangle(30, 43, Math.Max(60, Width - 42), Math.Max(22, Height - 49));
             TextRenderer.DrawText(e.Graphics, TitleText ?? Text, ChildVisualTheme.Font(10.2f, FontStyle.Bold), titleRect,
-                Enabled ? ChildVisualTheme.Ink : ChildVisualTheme.MutedInk,
+                _locked ? ChildVisualTheme.MutedInk : ChildVisualTheme.Ink,
                 TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
             TextRenderer.DrawText(e.Graphics, StateText ?? string.Empty, ChildVisualTheme.Font(8.6f), stateRect,
-                Enabled ? ChildVisualTheme.MutedInk : Color.FromArgb(132, 137, 132),
+                _locked ? Color.FromArgb(132, 137, 132) : ChildVisualTheme.MutedInk,
                 TextFormatFlags.Left | TextFormatFlags.Top | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
 
             if (Focused && ShowFocusCues)
@@ -378,6 +384,7 @@ namespace WAHUKidsLearn
                 AccessibleDescription = "Đóng màn hình này. Không mất phần học đã lưu."
             };
             exit.Click += delegate { Close(); };
+            CancelButton = exit;
             header.Controls.Add(exit, 1, 0);
             root.Controls.Add(header, 0, 0);
 
@@ -496,6 +503,7 @@ namespace WAHUKidsLearn
                 Enabled = false
             };
             _startButton.Click += delegate { StartSelectedEvent(); };
+            AcceptButton = _startButton;
             introLayout.Controls.Add(_startButton, 0, 4);
             introCard.Controls.Add(introLayout);
             body.Controls.Add(introCard, 1, 0);
@@ -530,7 +538,7 @@ namespace WAHUKidsLearn
                     .ToDictionary(x => x.LessonId, StringComparer.Ordinal);
                 PopulateEventButtons();
                 var preferred = _events.FirstOrDefault(x => string.Equals(x.TargetLessonId, _preferredLessonId, StringComparison.Ordinal) && IsUnlocked(x));
-                var recommended = preferred ?? _events.FirstOrDefault(x => IsUnlocked(x) && !IsCompleted(x)) ?? _events.FirstOrDefault(IsUnlocked);
+                var recommended = preferred ?? _events.FirstOrDefault(x => IsUnlocked(x) && !IsLessonCompleted(x)) ?? _events.FirstOrDefault(IsUnlocked);
                 if (recommended != null) SelectEvent(recommended);
                 else ShowUnavailable("Các nhiệm vụ đầu đang chờ bài nền được mở. Con vẫn có thể học trong thư viện Toán.");
             }
@@ -550,9 +558,11 @@ namespace WAHUKidsLearn
                 foreach (var item in _events)
                 {
                     var lesson = _catalog == null ? null : _catalog.FindLesson(item.TargetLessonId);
-                    var unlocked = IsUnlocked(item);
-                    var completed = IsCompleted(item);
-                    var state = completed ? "Đã xong • có thể chơi lại" : (unlocked ? "Sẵn sàng • 3 chặng" : "Mở sau khi học bài nền");
+                    var access = AccessFor(item);
+                    var unlocked = access != null && access.IsUnlocked;
+                    var completed = access != null && access.IsCompleted;
+                    var lockReason = unlocked ? string.Empty : BuildLockReason(access);
+                    var state = completed ? "Bài nền đã xong • có thể chơi" : (unlocked ? "Sẵn sàng • 3 chặng" : "Xem bài cần học trước");
                     var captured = item;
                     var button = new RescueMissionButton
                     {
@@ -560,13 +570,14 @@ namespace WAHUKidsLearn
                         Width = 300,
                         Height = 78,
                         Margin = new Padding(4, 5, 4, 5),
-                        Text = item.TitleVi + "\r\n" + (completed ? "Đã hoàn thành • có thể chơi lại" : state),
+                        Text = item.TitleVi + "\r\n" + state,
                         TitleText = item.TitleVi,
                         StateText = state,
                         AccentColor = AccentForTheme(item.Theme),
-                        Enabled = unlocked,
+                        Locked = !unlocked,
+                        Enabled = true,
                         AccessibleName = "Nhiệm vụ " + item.TitleVi,
-                        AccessibleDescription = state + (lesson == null ? "." : ". Bài Toán: " + lesson.TitleVi + ".")
+                        AccessibleDescription = (unlocked ? state : lockReason) + (lesson == null ? "." : " Bài Toán: " + lesson.TitleVi + ".")
                     };
                     button.Click += delegate { SelectEvent(captured); };
                     _eventButtons[item.Id] = button;
@@ -604,11 +615,18 @@ namespace WAHUKidsLearn
                     AccessibleDescription = "Một câu Toán. Không có giới hạn thời gian."
                 });
             }
-            _status.Text = IsCompleted(item)
-                ? "Nhiệm vụ này đã hoàn thành trước đó. Con có thể chơi lại mà không mất tiến bộ cũ."
-                : "Ba chặng, mỗi chặng một câu. Làm chắc từng bước là được.";
-            _startButton.Enabled = IsUnlocked(item);
-            _startButton.Text = IsCompleted(item) ? "Chơi lại 3 chặng" : "Bắt đầu 3 chặng";
+            var access = AccessFor(item);
+            var unlocked = access != null && access.IsUnlocked;
+            var completed = access != null && access.IsCompleted;
+            var lockReason = unlocked ? string.Empty : BuildLockReason(access);
+            _status.Text = completed
+                ? "Bài nền của nhiệm vụ này đã hoàn thành. Con có thể bắt đầu ba chặng mà tiến bộ cũ vẫn được giữ nguyên."
+                : (unlocked ? "Ba chặng, mỗi chặng một câu. Làm chắc từng bước là được." : lockReason);
+            _startButton.Enabled = unlocked;
+            _startButton.Text = unlocked ? "Bắt đầu 3 chặng" : "Học bài nền trước";
+            _startButton.AccessibleDescription = unlocked
+                ? "Mở ba câu Toán của bài đã chọn. Không có giới hạn thời gian."
+                : lockReason;
             foreach (var pair in _eventButtons)
             {
                 var missionButton = pair.Value as RescueMissionButton;
@@ -631,16 +649,37 @@ namespace WAHUKidsLearn
             }
         }
 
-        private bool IsUnlocked(MathQuickRescueEventPresentation item)
+        private MathLessonAccessSnapshot AccessFor(MathQuickRescueEventPresentation item)
         {
             MathLessonAccessSnapshot access;
-            return item != null && _access != null && _access.TryGetValue(item.TargetLessonId, out access) && access != null && access.IsUnlocked;
+            return item != null && _access != null && _access.TryGetValue(item.TargetLessonId, out access) ? access : null;
         }
 
-        private bool IsCompleted(MathQuickRescueEventPresentation item)
+        private bool IsUnlocked(MathQuickRescueEventPresentation item)
         {
-            MathLessonAccessSnapshot access;
-            return item != null && _access != null && _access.TryGetValue(item.TargetLessonId, out access) && access != null && access.IsCompleted;
+            var access = AccessFor(item);
+            return access != null && access.IsUnlocked;
+        }
+
+        private string BuildLockReason(MathLessonAccessSnapshot access)
+        {
+            var missing = access == null || access.UnsatisfiedPrerequisiteLessonIds == null
+                ? new List<string>()
+                : access.UnsatisfiedPrerequisiteLessonIds
+                    .Select(id => _catalog == null ? null : _catalog.FindLesson(id))
+                    .Where(x => x != null && !string.IsNullOrWhiteSpace(x.TitleVi))
+                    .Select(x => x.TitleVi)
+                    .Distinct(StringComparer.Ordinal)
+                    .ToList();
+            return missing.Count == 0
+                ? "Nhiệm vụ này đang khóa vì còn bài nền cần hoàn thành trước."
+                : "Cần hoàn thành trước: " + string.Join(", ", missing) + ".";
+        }
+
+        private bool IsLessonCompleted(MathQuickRescueEventPresentation item)
+        {
+            var access = AccessFor(item);
+            return access != null && access.IsCompleted;
         }
 
         private void ShowUnavailable(string message)
