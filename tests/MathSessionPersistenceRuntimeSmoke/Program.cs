@@ -513,13 +513,12 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 A(last != null && last.EventState.CompletedCheckpointCount == 3 && !last.EventState.IsComplete &&
                   Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + sessionId + "';") == 0,
                     "game_event_after_q3_before_complete_has_three_checkpoints_but_no_terminal_reward");
-                first.SuspendForBreak("crash_after_q3_before_complete");
             }
 
             A(SessionState(database, sessionId) == "active" &&
               Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + sessionId + "';") == 3 &&
               Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + sessionId + "';") == 0,
-                "game_event_suspend_after_q3_keeps_learning_active_without_reward");
+                "game_event_dispose_after_q3_keeps_learning_active_without_reward");
 
             using (var resumed = new MathGameEventCoordinator(database, templatePath, gameEventPath, "NORMAL", 999999,
                 null, definition.TargetLessonId))

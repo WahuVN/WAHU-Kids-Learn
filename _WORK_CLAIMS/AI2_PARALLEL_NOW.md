@@ -21,7 +21,7 @@ ACTIVE_FOCUS=FIRST_FIVE_EVENT_RUNTIME_BEHAVIOR_RESUME_REWARD
 - Behavior-action resume: support action cuối được rebuild từ durable behavior history khi resume; không reset về `normal`. FATIGUED không bị ép bằng cách hạ threshold single-skill; CTA `Nghỉ ở đây` vẫn là explicit safe suspend path.
 - Terminal-runtime cleanup: nếu completion durable nhưng xóa runtime checkpoint lỗi/crash, lần Math start kế tiếp tự dọn chỉ checkpoint terminal cũ; attempts/mastery/progress/reward giữ nguyên.
 - Stale event-id fallback: event ID cũ/không còn tồn tại nhưng lesson vẫn hợp lệ sẽ resolve event production hiện tại theo `target_lesson_id`; không rơi mất game presentation.
-- Post-q3 crash boundary: 3/3 checkpoint đã commit nhưng chưa gọi `Complete()` vẫn `IsComplete=false`, chưa reward; resume không còn câu và có thể terminalize đúng session + reward một lần.
+- Post-q3 close boundary: 3/3 checkpoint đã commit nhưng chưa gọi `Complete()` vẫn `IsComplete=false`, chưa reward; đóng coordinator bằng `Dispose()` (không gọi Suspend thủ công), mở lại không còn câu và terminalize đúng session + reward một lần.
 - Explicit repair precedence: `TriggerPrerequisiteRepair`/`prerequisite_repair` action thắng state-only cue; full durable BehaviorDecision được restore nên nghỉ/resume không làm mất repair signal trước state transition.
 - Concurrent reward reconcile: hai `LearningDatabase`/reward service cùng repair reward thiếu sau crash vẫn tổng `RewardCreated` đúng 1, `reward_event`/`garden_seedling` unique và event kế tiếp start bình thường.
 - Dispose-safe resume: đóng cửa sổ/event coordinator bằng `Dispose()` khi q2 đang pending retry chỉ safe-suspend; session vẫn active, checkpoint còn, 0 reward, mở lại đúng session/selected set/q2 + retry state; retry đúng vẫn assisted.
