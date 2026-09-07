@@ -971,7 +971,10 @@ namespace WAHU.Session
                     runtime = _runtime.EnsurePackIdentity(runtime, PackId, PackVersion);
                     if (string.Equals(runtime.PackId, PackId, StringComparison.Ordinal) &&
                         string.Equals(runtime.PackVersion, PackVersion, StringComparison.Ordinal))
+                    {
+                        recoveredCount += _runtime.RecoverDuplicateActiveMathSessions(_profile.ChildId, runtime.SessionId);
                         return runtime;
+                    }
 
                     if (!reconciledSessionIds.Add(runtime.SessionId))
                         throw new InvalidOperationException("Không thể hòa giải phiên Toán đang lưu với phiên bản nội dung hiện tại.");
