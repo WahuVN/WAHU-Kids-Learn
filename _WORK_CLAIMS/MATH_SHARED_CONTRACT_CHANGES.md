@@ -229,6 +229,15 @@ Math startup chỉ được recovery dangling Math session của đúng child đ
 - Overload `RecoverDanglingSessions()` không tham số vẫn giữ semantics global cho maintenance/backward compatibility, nhưng không được dùng trong normal Math startup.
 - Regression tạo hai child, mỗi child có một dangling Math session; scoped recovery chỉ thu hồi child được chỉ định, sau đó global overload mới thu hồi session còn lại.
 
+## 2026-09-07 — Post-completion enrichment failure safety (AI2)
+
+Sau khi session completion transaction đã commit, mọi bước metadata/UX downstream không được làm caller nghĩ completion thất bại:
+
+- `MathSessionCoordinator.Complete()` đặt `_active=false` ngay sau khi terminal learning transaction thành công.
+- `PopulateNextLesson(...)` là derived UX enrichment; lỗi đọc/parsing lesson catalog sau durable completion phải bị cô lập, không rollback và không surfaced như completion failure.
+- Runtime cleanup và game-world reward tiếp tục là best-effort downstream của durable learning state.
+- Regression dùng content-pack copy riêng, làm hỏng `lesson_catalog_v1.json` sau khi trả lời đủ câu nhưng trước `Complete()`; completion vẫn trả summary thành công, session/progress chỉ ghi một lần, runtime được cleanup và next-lesson metadata có thể để trống.
+
 ## Contract còn chưa chốt
 
 Các mục sau chưa được UI/content tự invent cho tới khi AI2 publish contract:

@@ -30,6 +30,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 var lessonCatalogPath = Path.Combine(repo, "content_packs", "math_grade2_v1", "lesson_catalog_v1.json");
                 TestAuthoredQuestionBank(questionBankPath);
                 TestTargetedLessonUnlockAndResume(root, schemaPath, templatePath, lessonCatalogPath);
+                TestTargetedCompletionSurvivesNextLessonReadFailure(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedCorruptOpenQuestionReplaysAuthoredOrdinal(root, schemaPath, templatePath, lessonCatalogPath);
                 TestRetryAwareAnswerFlow(root, schemaPath, templatePath);
                 TestRetryWrongFinalizesOnce(root, schemaPath, templatePath);
@@ -248,6 +249,65 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 A(question.LessonId == dependent.Id, "newly_unlocked_session_targets_exact_lesson");
                 next.Abort("targeted_cleanup");
             }
+        }
+
+        private static void TestTargetedCompletionSurvivesNextLessonReadFailure(string root, string schemaPath, string templatePath, string lessonCatalogPath)
+        {
+            var packDir = Path.Combine(root, "targeted-complete-postcommit-pack");
+            Directory.CreateDirectory(packDir);
+            var localTemplatePath = Path.Combine(packDir, "verified_templates_v1.json");
+            var localCatalogPath = Path.Combine(packDir, "lesson_catalog_v1.json");
+            var localQuestionBankPath = Path.Combine(packDir, "question_bank_v1.json");
+            File.Copy(templatePath, localTemplatePath, true);
+            File.Copy(lessonCatalogPath, localCatalogPath, true);
+            File.Copy(Path.Combine(Path.GetDirectoryName(templatePath), "question_bank_v1.json"), localQuestionBankPath, true);
+
+            var catalog = new MathLessonCatalogSource().Load(localCatalogPath);
+            var lesson = catalog.Lessons.First(x =>
+                (x.PrerequisiteSkills == null || x.PrerequisiteSkills.Count == 0) &&
+                x.PracticeSets != null && x.PracticeSets.TotalCount == 3);
+            var database = NewDatabase(Path.Combine(root, "targeted-complete-postcommit.db"), schemaPath);
+            string sessionId;
+
+            using (var coordinator = new MathSessionCoordinator(database, localTemplatePath, "LOW", 8051, lesson.Id))
+            {
+                var started = coordinator.Start("Bé complete postcommit");
+                sessionId = started.SessionId;
+                A(started.TargetLessonId == lesson.Id && started.TargetQuestionCount == 3,
+                    "postcommit_fixture_starts_targeted_lesson");
+
+                for (var i = 0; i < 3; i++)
+                {
+                    var question = coordinator.NextQuestion();
+                    A(question != null && question.LessonId == lesson.Id,
+                        "postcommit_fixture_serves_authored_question_" + (i + 1));
+                    coordinator.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 800 + i * 50);
+                }
+                A(coordinator.NextQuestion() == null,
+                    "postcommit_fixture_finishes_all_targeted_questions");
+
+                File.WriteAllText(localCatalogPath, "{ broken catalog after durable answers ");
+                var summary = coordinator.Complete();
+                A(summary.LessonCompleted && summary.LessonScorePercent.HasValue &&
+                  Math.Abs(summary.LessonScorePercent.Value - 100.0) < 0.0001,
+                    "postcommit_next_lesson_failure_does_not_fail_completion");
+                A(string.IsNullOrWhiteSpace(summary.NextLessonId),
+                    "postcommit_next_lesson_failure_only_drops_derived_recommendation");
+
+                var secondCompleteRejected = false;
+                try { coordinator.Complete(); }
+                catch (InvalidOperationException) { secondCompleteRejected = true; }
+                A(secondCompleteRejected,
+                    "postcommit_success_marks_coordinator_inactive_before_downstream_enrichment");
+            }
+
+            A(Count(database, "SELECT count(*) FROM session WHERE id='" + sessionId + "' AND state='completed' AND ended_at_utc IS NOT NULL;") == 1,
+                "postcommit_failure_keeps_session_durably_completed");
+            A(Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + LearnerSessionService.PrimaryChildId +
+                "' AND lesson_id='" + lesson.Id + "' AND started_count=1 AND completed_count=1;") == 1,
+                "postcommit_failure_keeps_lesson_progress_exactly_once");
+            A(Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + sessionId + "';") == 0,
+                "postcommit_failure_still_cleans_runtime_checkpoint");
         }
 
         private static void TestTargetedCorruptOpenQuestionReplaysAuthoredOrdinal(string root, string schemaPath, string templatePath, string lessonCatalogPath)

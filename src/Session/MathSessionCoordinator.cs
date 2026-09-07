@@ -648,12 +648,23 @@ namespace WAHU.Session
                 _lessonProgressStore.CompleteActiveSession(
                     _session.SessionId, _profile.ChildId, _targetLesson.Id, _targetLesson.SkillId,
                     _correct, _targetQuestionCount, _json.Serialize(summaryData), behaviorJson, ended);
-                PopulateNextLesson(summary);
             }
             else
             {
                 summaryData["lesson_completed"] = false;
                 _sessionService.CompleteSession(_session.SessionId, false, _json.Serialize(summaryData), behaviorJson);
+            }
+
+            // From this point the terminal learning transaction is durable. Any downstream enrichment or
+            // cleanup failure must not leave the coordinator looking active or make the caller retry completion.
+            _active = false;
+            if (summary.LessonCompleted)
+            {
+                try { PopulateNextLesson(summary); }
+                catch
+                {
+                    // Next-lesson recommendation is derived UX metadata, never part of durable completion.
+                }
             }
             try { _runtime.Delete(_session.SessionId); } catch { }
             try

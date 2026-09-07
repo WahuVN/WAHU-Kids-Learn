@@ -20,7 +20,7 @@ Branch: `main`
 
 - `tests/MathEngineRuntimeSmoke`: PASS — **47 assertions**.
 - `tests/MathDataEngineRuntimeSmoke`: PASS — **98 assertions** (idempotency + terminal-session guard + optimistic skill-state guard + true cross-process mastery/session contention + atomic startup + subject/child-scoped dangling recovery).
-- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **171 assertions** (authored bank + targeted lesson + prerequisite unlock + exact resume + mastery delta + next lesson + corrupt authored cursor recovery + retry/resume/anti-double-submit + stale coordinator/skill guards + injected write-failure rollback/retry).
+- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **183 assertions** (authored bank + targeted lesson + prerequisite unlock + exact resume + mastery delta + next lesson + corrupt authored cursor recovery + retry/resume/anti-double-submit + stale coordinator/skill guards + injected write-failure rollback/retry + post-completion enrichment failure safety).
 - `tests/SQLiteRuntimeSmoke`: PASS — **166 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
 - `tests/LearningSessionRuntimeSmoke`: PASS — **794 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
 - PowerShell release/build scripts: schema V4 payload/bootstrap expectations đã cập nhật; parse/build gate PASS.
@@ -109,7 +109,8 @@ Còn phải làm: skip policy nếu product cho phép, numeric XP/daily streak n
 - `2da39b5` — `fix(toán): tạo phiên và runtime nguyên tử` — pushed.
 - `c4ff314` — `fix(toán): khóa nguyên tử tiến độ khi mở bài` — pushed.
 - `21cc224` — `fix(toán): giới hạn recovery đúng phiên toán` — pushed.
-- child-scoped dangling recovery — đang chốt selective commit hiện tại.
+- `d3f2d21` — `fix(toán): giới hạn recovery theo hồ sơ học` — pushed.
+- post-completion enrichment failure safety — đang chốt selective commit hiện tại.
 
 ## Blocker / coordination
 
