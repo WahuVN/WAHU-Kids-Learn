@@ -75,6 +75,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - question tag contract lệch/stale/duplicate: 201/201 câu phải có đúng 5 tag `{skill.lower, domain, difficulty, question_type, answer_kind}`; không cho tag dư hoặc thiếu sau khi đổi surface/difficulty;
 - missing lesson/question/reference;
 - orphan question;
+- curriculum roadmap phải có đúng 1 chapter cho mỗi baseline domain, mọi topic có ít nhất 1 lesson, và `order_in_domain` contiguous `1..N` không duplicate/gap; hiện **7/7 domain, 17/17 topic, 67/67 lesson** đạt gate;
 - bad prerequisite + prerequisite cycle + prerequisite trỏ về bài ở phía sau lộ trình; direct prerequisite dư thừa do đã được một prerequisite khác bao hàm cũng bị chặn;
 - invalid difficulty / practice-set mismatch;
 - invalid numeric range;
@@ -144,7 +145,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract;
 - **166 phương trình số instructional** đang được kiểm bằng arithmetic parser, hiện **0 sai**; detector có regression cho cả phép cộng chuỗi và phép chia dùng dấu `:`.
 
-Latest result: **44 tests PASS**.
+Latest result: **45 tests PASS**.
 
 ## Commits / waves
 

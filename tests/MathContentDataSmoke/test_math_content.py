@@ -168,6 +168,20 @@ class MathContentDataSmoke(unittest.TestCase):
         self.assertEqual(set(self.question_by_id), set(counts))
         self.assertTrue(all(v == 1 for v in counts.values()))
 
+    def test_curriculum_roadmap_has_one_chapter_per_domain_nonempty_topics_and_contiguous_lesson_order(self):
+        chapter_domains = Counter(x["domain_key"] for x in self.catalog["chapters"])
+        self.assertEqual(set(self.baseline["domains"]), set(chapter_domains))
+        self.assertTrue(all(count == 1 for count in chapter_domains.values()))
+        topic_counts = Counter(x["topic_id"] for x in self.lessons)
+        self.assertEqual({x["id"] for x in self.catalog["topics"]}, set(topic_counts))
+        self.assertTrue(all(count >= 1 for count in topic_counts.values()))
+        skill_domain = {skill: domain for domain, skills in self.baseline["domains"].items() for skill in skills}
+        orders = {}
+        for lesson in self.lessons:
+            orders.setdefault(skill_domain[lesson["skill_id"]], []).append(lesson["order_in_domain"])
+        for domain, skills in self.baseline["domains"].items():
+            self.assertEqual(list(range(1, len(skills) + 1)), sorted(orders[domain]))
+
     def test_prerequisites_resolve_and_are_acyclic(self):
         graph = {x["skill_id"]: x["prerequisite_skills"] for x in self.lessons}
         chapter_position = {x["id"]: i for i, x in enumerate(self.catalog["chapters"])}

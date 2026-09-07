@@ -1219,6 +1219,7 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
     question_ids: set[str] = set()
 
     chapter_domain: dict[str, str] = {}
+    chapter_domain_counts = Counter()
     for i, chapter in enumerate(chapters):
         where = f"chapter[{i}]"
         if not isinstance(chapter, dict):
@@ -1231,7 +1232,13 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
         domain = required_text(chapter, "domain_key", where, errors)
         if domain and domain not in domains:
             errors.append(f"unknown_domain:{where}:{domain}")
+        if domain:
+            chapter_domain_counts[domain] += 1
         chapter_domain[cid] = domain
+
+    for domain in domains:
+        if chapter_domain_counts[domain] != 1:
+            errors.append(f"chapter_domain_count:{domain}:{chapter_domain_counts[domain]}")
 
     topic_chapter: dict[str, str] = {}
     for i, topic in enumerate(topics):
@@ -1253,6 +1260,8 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
     prereq_graph: dict[str, list[str]] = {}
     referenced_question_ids: list[str] = []
     lesson_skill_counts = Counter()
+    topic_lesson_counts = Counter()
+    lesson_orders_by_domain: dict[str, list[int]] = defaultdict(list)
     first_objective_counts = Counter()
     second_objective_counts = Counter()
 
@@ -1268,6 +1277,8 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
         order_in_domain = lesson.get("order_in_domain")
         if type(order_in_domain) is not int or order_in_domain < 1:
             errors.append(f"invalid_lesson_order:{where}:{order_in_domain!r}")
+        elif skill in skill_domain:
+            lesson_orders_by_domain[skill_domain[skill]].append(order_in_domain)
         if skill not in baseline_skill_set:
             errors.append(f"unknown_lesson_skill:{where}:{skill}")
         lesson_skill_counts[skill] += 1
@@ -1280,6 +1291,8 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             errors.append(f"bad_lesson_chapter_ref:{where}:{cid}")
         if tid not in topic_ids:
             errors.append(f"bad_lesson_topic_ref:{where}:{tid}")
+        else:
+            topic_lesson_counts[tid] += 1
         if tid in topic_chapter and cid and topic_chapter[tid] != cid:
             errors.append(f"topic_chapter_mismatch:{where}:{tid}:{cid}")
         if cid in chapter_domain and skill in baseline_skill_set:
@@ -1392,6 +1405,17 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
                     referenced_question_ids.extend([x for x in refs if isinstance(x, str)])
         if lesson.get("status") != "CHILD_READY":
             errors.append(f"lesson_not_child_ready:{where}")
+
+    for tid in sorted(topic_ids):
+        if topic_lesson_counts[tid] < 1:
+            errors.append(f"empty_topic:{tid}")
+    for domain, skills in domains.items():
+        if not isinstance(skills, list):
+            continue
+        actual_orders = sorted(lesson_orders_by_domain.get(domain, []))
+        expected_orders = list(range(1, len(skills) + 1))
+        if actual_orders != expected_orders:
+            errors.append(f"non_contiguous_domain_lesson_order:{domain}:{actual_orders}:{expected_orders}")
 
     missing_lesson_skills = sorted(baseline_skill_set - set(lesson_by_skill))
     extra_lesson_skills = sorted(set(lesson_by_skill) - baseline_skill_set)
