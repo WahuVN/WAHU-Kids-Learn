@@ -2,22 +2,22 @@
 
 Updated: 2026-09-07
 Owner: AI3
-Final common HEAD: `e728204`
+Last fully verified HEAD: `3a53af7`
 Status: `LANE_DONE=YES`
 
 ## 1. Kết luận
 
-AI3 Math UI/QA/integration lane đã hoàn tất strict board 3-AI trên cùng clean `main` HEAD `e728204`.
+AI3 Math UI/QA/integration lane đã hoàn tất strict board 3-AI và tiếp tục hardening no-wait. Lần full gate gần nhất chạy trên clean `main` HEAD `3a53af7`.
 
 Final evidence:
 
 - runtime Math bank: **402 questions / 67 lessons / 6 per lesson / 2 per difficulty**;
-- Child UI: **2267 assertions PASS**;
+- Child UI: **3267 assertions PASS**;
 - production Math validator: **402/402 valid**;
-- core content smoke: **49/49 PASS**;
-- pool-6 publish smoke: **8/8 PASS**;
-- Math persistence: **378 assertions PASS** (`dotnet build` 0 warning / 0 error);
-- full Build-Setup `0.1.43-dev`: **15/15 PASS**;
+- `MathContentDataSmoke`: **53/53 PASS**;
+- difficulty distribution: **134 basic / 134 medium / 134 application**;
+- Math persistence: **7159 assertions PASS** (`dotnet build` 0 warning / 0 error);
+- full Build-Setup `0.1.45-dev`: **15/15 PASS**;
 - Portable E2E: **PASS**;
 - Installer/reinstall/uninstall E2E: **PASS**.
 
@@ -83,7 +83,11 @@ Distribution:
 - `f567be8`: Request 009 real selected-set UI E2E.
 - `3c0cfaa`: Request 006 answer-unit UI E2E.
 - `73d4c93`: release ContentRuntime version guard follows runtime `PackVersion`.
-- `e728204`: full 402-bank Child UI compatibility + release evidence 2267.
+- `e728204`: full 402-bank Child UI compatibility.
+- `08a9268`: selected-set metadata self-heal remains child-safe through real UI resume.
+- `bb0f636`: all 48 integer answer-unit questions across 8 units covered by UI sweep.
+- `1e27ff8`: prompt typography measures real text; 402/402 prompts fit at 900×640 with font >=12pt.
+- `3a53af7`: release manifest assertion counts derive from actual smoke outputs, not stale literals.
 
 ## 5. 402-question answer-surface audit
 
@@ -134,7 +138,7 @@ AI3 verifies:
 
 Engine: `3cf7fc6`; AI3: `3c0cfaa`.
 
-Regression uses `m2_ls_time_day_24_hours`:
+Deep resume regression uses `m2_ls_time_day_24_hours`; full-bank matrix additionally covers **48 answer-unit questions / 8 units** (`cm`, `dm`, `m`, `kg`, `l`, `ngày`, `giờ`, `phút`):
 
 - `AnswerKind=integer`, `AnswerUnit=giờ`;
 - raw correct display/input is `24`;
@@ -151,15 +155,15 @@ Guards:
 - `109ee5d`: Portable/Installer required lists;
 - `490fd41`: source + staged payload required lists;
 - `73d4c93`: manifest/runtime version contract;
-- `e728204`: current Child UI release evidence.
+- `3a53af7`: smoke assertion evidence is captured dynamically from each executable.
 
-Artifact `0.1.43-dev`, clean `e728204`:
+Artifact `0.1.45-dev`, clean `3a53af7`:
 
-- release manifest schema 5, publish file count 55, Child UI evidence 2267;
+- release manifest schema 5, publish file count 55, Child UI evidence **3267**;
 - staged payload includes 3 Math runtime JSON and migrations `001..005`;
-- full release smokes PASS: SetupPreflight 42, Behavior 15, LearningSession 800, Motion 25, Child UI 2267, Content 21, Security 19, Audio 14, Performance 13, Update 33, SQLite 179;
-- Portable SHA256 `210D073E1ED6A7A2AAE12EEFEF9DCC629F22DB6D3A1BEABB5D828524C4428806`;
-- Installer SHA256 `A379B31DA947EB5DD42B17C929E2E2CDCFB0E6D9A79007E34085B754FC506F3F`.
+- full release smokes PASS: SetupPreflight 42, Behavior 15, LearningSession 800, Motion 25, Child UI **3267**, Content 21, Security 19, Audio 14, Performance 13, Update 33, SQLite 179; counts are captured directly from smoke outputs;
+- Portable SHA256 `E644E73F49E28156E065DDDD944F8C46A154A7AE8E01D05381BE762C10CBE2CE`;
+- Installer SHA256 `6D79CDD3B43B4E9CCF1DCCB42C521DDA08D680B4070C525DDB7F280E1AD322E8`.
 
 Portable E2E:
 
@@ -179,15 +183,14 @@ Installer E2E:
 - uninstall exit 0, app removed, learner DB + sentinel preserved, startup registry removed;
 - owned test data cleaned only after `.wahu-e2e-owned` marker verification.
 
-## 10. Final cross-lane gate
+## 10. Latest full cross-lane gate
 
-All on clean `e728204`:
+All on clean `3a53af7`:
 
-- production validator: **402/402 valid**;
-- `MathContentDataSmoke`: **49/49 PASS**;
-- pool-6 publish smoke: **8/8 PASS**;
-- `MathSessionPersistenceRuntimeSmoke`: **378 assertions PASS**;
-- Child UI: **2267 assertions PASS**;
+- production validator: **402/402 valid**, 134 basic + 134 medium + 134 application;
+- `MathContentDataSmoke`: **53/53 PASS**;
+- `MathSessionPersistenceRuntimeSmoke`: **7159 assertions PASS**;
+- Child UI: **3267 assertions PASS**;
 - full Build-Setup: **PASS**;
 - Portable E2E: **PASS**;
 - Installer E2E: **PASS**;
@@ -202,4 +205,4 @@ No remaining Math UI/QA/integration blocker. The following are release-wide appl
 - production Authenticode signing;
 - compatibility execution on a real Windows 7 machine.
 
-`0.1.43-dev` is an unsigned dev artifact and must not be represented as a production-signed release.
+`0.1.45-dev` is an unsigned dev artifact and must not be represented as a production-signed release. Real Windows 7 execution remains `UNAVAILABLE` in the current environment; the manifest correctly leaves that gate `PENDING`.

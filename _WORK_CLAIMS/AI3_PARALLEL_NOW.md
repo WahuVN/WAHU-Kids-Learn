@@ -4,6 +4,11 @@ LANE=AI3
 ROLE=MATH_UI_QA_RELEASE_INTEGRATION_OWNER
 LANE_DONE=YES
 EXECUTION_MODE=VERIFY_THEN_HARDEN_NO_WAIT
+LAST_FULLY_VERIFIED_HEAD=`3a53af7`
+LAST_VERIFIED_CHILD_UI=3267_ASSERTIONS_PASS
+LAST_VERIFIED_PERSISTENCE=7159_ASSERTIONS_PASS
+LAST_VERIFIED_CONTENT=53_OF_53_PASS
+LAST_VERIFIED_RELEASE=`0.1.45-dev`_PORTABLE_INSTALLER_PASS
 
 > Khi người dùng bảo “đọc file và làm”: đọc toàn bộ file này, inspect current HEAD, verify UI/release trên contract hiện hành rồi tiếp tục QA/hardening. Không dừng chỉ vì `LANE_DONE=YES`.
 
@@ -37,8 +42,12 @@ Milestones đã có, không làm lại implementation mù nếu HEAD vẫn chứ
 - answer-unit UI: `3c0cfaa`
 - runtime 402 sweep: `e728204`
 - release payload: `109ee5d`, `490fd41`, version guard `73d4c93`
+- selected-set self-heal presentation: `08a9268`
+- full answer-unit matrix (48 questions / 8 units): `bb0f636`
+- 402-prompt min-window fit: `1e27ff8`
+- dynamic release smoke evidence: `3a53af7`
 
-Historical evidence: Child UI 2267 assertions, Build-Setup 15/15, Portable/Installer E2E PASS. Assertion counts may grow.
+Current verified evidence on `3a53af7`: Child UI **3267 assertions PASS**, persistence **7159 assertions PASS**, content **53/53 PASS**, validator **402/402 valid**, Build-Setup `0.1.45-dev` **15/15 PASS**, Portable/Installer E2E **PASS**. Assertion counts may continue to grow.
 
 ## 2. Ownership
 
