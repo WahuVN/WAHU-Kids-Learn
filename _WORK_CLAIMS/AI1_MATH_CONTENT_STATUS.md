@@ -149,7 +149,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - **24 câu cộng/trừ viết** khớp chính xác số lượt nhớ/mượn theo skill contract;
 - **166 phương trình số instructional** đang được kiểm bằng arithmetic parser, hiện **0 sai**; detector có regression cho cả phép cộng chuỗi và phép chia dùng dấu `:`.
 
-Latest runtime result: **49/49 PASS**; pool-6 regression **8/8 PASS**; full `MathContentDataSmoke` **63/63 PASS**; clean rebuild real 402-bank persistence/session smoke **289 assertions PASS**.
+Latest runtime result: **49/49 PASS**; pool-6 regression **8/8 PASS**; full `MathContentDataSmoke` **64/64 PASS**; clean rebuild real 402-bank persistence/session smoke **289 assertions PASS**.
 
 ## Commits / waves
 
@@ -240,13 +240,23 @@ Latest runtime result: **49/49 PASS**; pool-6 regression **8/8 PASS**; full `Mat
 - Kết quả: **63/63 content tests PASS**, validator 0 errors.
 - Question-bank SHA mới: `7D503EDB64A06B3B1766868C8DEF51FD2F64634D32F5A8BF08164A4C6C003CAB`.
 
+## P1 quality wave — structured shape-reasoning distractor diagnoses
+
+- Audit `SPHERE_RECOGNIZE`, `THREE_COLLINEAR_POINTS`, `FOLD_CUT_COMPOSE_SHAPES` cho thấy 22/27 distractor mở rộng còn rơi vào fallback do wording alias mới.
+- Generator + validator mở rộng đồng bộ cho vật gần khối cầu, đặc trưng cạnh/đáy/đỉnh, ba điểm trên/ngoài một đường thẳng, và ghép/cắt hình phẳng.
+- Regression khóa **27/27** distractor `_04/_05/_06` của ba skill phải có structured diagnosis.
+- Whole-bank fallback classifier giảm **103 → 81**; structured distractors tăng **392 → 414**.
+- Rationale dài nhất sau hardening là **300 ký tự**, đúng trần validator.
+- Kết quả: **64/64 content tests PASS**, validator 0 errors.
+- Question-bank SHA mới: `F3B6952594AF484EB2E33BEF50B186DAD474DDF0B03FE5C72B2899C36CC76858`.
+
 ## Pool-6 runtime publish — COMPLETE
 
 - 201 expansion questions `_04/_05/_06` đã được promote vào production; runtime bank hiện **402 questions**.
 - 67 lesson × 6 câu; mỗi lesson đúng **2 basic + 2 medium + 2 application**; IDs `_01..06` contiguous.
 - Production semantic validator: **402/402 valid, 0 errors**; pool-6 wrapper báo `draft_fallback_rationales=0`.
-- Full content tests hiện **63/63 PASS** sau P1 hardening thêm structured distractor diagnosis cho geometry + mass/time/measurement expansions; clean rebuild `MathSessionPersistenceRuntimeSmoke`: **289 assertions PASS** trên real bank.
-- Deterministic regenerate hiện giữ SHA catalog `82204B66...3F9D` và bank `7D503EDB...03CAB`.
+- Full content tests hiện **64/64 PASS** sau P1 hardening thêm structured distractor diagnosis cho geometry + mass/time/measurement + shape-reasoning expansions; clean rebuild `MathSessionPersistenceRuntimeSmoke`: **289 assertions PASS** trên real bank.
+- Deterministic regenerate hiện giữ SHA catalog `82204B66...3F9D` và bank `F3B69525...76858`.
 - Manifest `1.9.0`: **PASS**, 3/3 listed files khớp SHA256 và không thiếu/thừa file pack.
 - Request 009 content handoff `05cdb2a` đã được tiêu thụ; AI1 không còn breadth/replay content blocker.
 

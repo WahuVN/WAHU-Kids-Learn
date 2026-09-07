@@ -606,6 +606,13 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
             "không thẳng hàng": "Cả A, B, C đã cùng nằm trên một đường thẳng nên theo định nghĩa ba điểm là thẳng hàng.",
             "tạo thành tam giác": "Ba điểm cùng trên một đường thẳng không tạo được một tam giác có diện tích.",
             "chỉ a và b thẳng hàng": "Không chỉ A và B; đề đã cho cả C cũng nằm trên cùng đường thẳng đó.",
+            "chỉ d và e thẳng hàng": "Đề đã cho cả D, E, F cùng nằm trên đường thẳng m nên không chỉ D và E mà cả ba điểm đều thẳng hàng.",
+            "p, q, r thẳng hàng": "R nằm ngoài đường a trong khi P và Q nằm trên a, nên ba điểm không cùng nằm trên một đường thẳng.",
+            "r chắc chắn nằm giữa p và q": "R nằm ngoài đường a nên không thể nằm giữa P và Q trên chính đường thẳng đó.",
+            "không thể dùng vị trí của r để kết luận": "Vị trí R nằm ngoài đường a là dữ kiện trực tiếp để kết luận P, Q, R không thẳng hàng.",
+            "đo xem ab và bc có bằng nhau": "Độ dài AB và BC bằng nhau không quyết định ba điểm có thẳng hàng; cần kiểm tra cùng một đường thẳng.",
+            "xem tên ba điểm có liên tiếp": "Tên A, B, C liên tiếp trong bảng chữ cái không cho biết vị trí hình học của ba điểm.",
+            "đếm số chữ cái trong tên điểm": "Số chữ cái trong tên điểm không liên quan đến điều kiện thẳng hàng; phải xét vị trí trên một đường thẳng.",
             "có": "C nằm lệch khỏi đường d trong khi A và B nằm trên d, nên cả ba không cùng một đường thẳng.",
             "luôn luôn": "Không thể nói luôn thẳng hàng khi dữ kiện cụ thể cho C nằm lệch khỏi đường chứa A và B.",
             "không thể biết từ vị trí của c": "Vị trí C lệch khỏi d chính là dữ kiện đủ để kết luận ba điểm không thẳng hàng.",
@@ -646,13 +653,21 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
         reasons = {
             "lon nước": "Lon nước gần dạng khối trụ với hai đáy tròn, không phải khối cầu tròn đều mọi phía.",
             "hộp chữ nhật": "Hộp chữ nhật có các mặt phẳng và cạnh, khác khối cầu không có cạnh hay đỉnh.",
+            "hộp sữa chữ nhật": "Hộp sữa chữ nhật có mặt phẳng và cạnh, nên không gần dạng khối cầu tròn đều.",
             "thước thẳng": "Thước thẳng là vật dài và gần dạng phẳng, không gần dạng khối cầu.",
+            "thước kẻ": "Thước kẻ là vật dài, mỏng và có cạnh thẳng; không gần dạng khối cầu.",
             "có cạnh nhưng không có đỉnh": "Khối cầu không có cạnh lẫn đỉnh, nên nói có cạnh là sai đặc trưng.",
             "không có cạnh nhưng có hai đỉnh": "Khối cầu không có cạnh và cũng không có đỉnh; hai đỉnh không thuộc đặc trưng của khối cầu.",
             "có cả cạnh và đỉnh": "Bề mặt khối cầu trơn liên tục nên không có cạnh hoặc đỉnh.",
+            "có hai đáy tròn": "Hai đáy tròn là đặc trưng của khối trụ; khối cầu không có đáy phẳng.",
+            "có bốn cạnh": "Khối cầu có bề mặt cong trơn liên tục nên không có bốn cạnh hay bất kỳ cạnh thẳng nào.",
+            "có một đỉnh nhọn": "Khối cầu không có đỉnh nhọn; bề mặt của nó cong đều mọi phía.",
             "khối cầu có hai đáy tròn song song": "Hai đáy tròn song song là đặc điểm của khối trụ, không phải khối cầu.",
             "khối cầu có một đáy phẳng và một đỉnh": "Khối cầu không có đáy phẳng hay đỉnh; bề mặt của nó tròn đều.",
             "khối cầu có các mặt phẳng và cạnh": "Khối cầu không được tạo bởi các mặt phẳng và không có cạnh.",
+            "khối cầu có hai đáy tròn như lon": "Hai đáy tròn thuộc đặc trưng của lon dạng khối trụ; khối cầu không có đáy.",
+            "khối cầu có cạnh thẳng": "Bề mặt khối cầu cong liên tục nên không có cạnh thẳng.",
+            "lon không có mặt cong": "Lon có mặt cong bao quanh; điểm khác là lon còn có hai đáy phẳng còn khối cầu thì không.",
         }
         if label in reasons: return reasons[label]
 
@@ -661,17 +676,25 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
         prompt_cf = prompt.casefold()
         reasons = {
             "một điểm": "Ghép hai tam giác theo cạnh tạo một hình có diện tích, không thể thu lại thành một điểm đơn lẻ.",
+            "một điểm duy nhất": "Hai tam giác có diện tích ghép sát theo cạnh vẫn tạo một hình có diện tích, không thể chỉ còn một điểm.",
             "một khối cầu": "Hai tam giác phẳng ghép theo cạnh vẫn tạo hình phẳng, không tự biến thành một khối cầu ba chiều.",
             "một đường thẳng vô hạn": "Hai tam giác là các hình hữu hạn; ghép chúng không thể tạo một đường thẳng kéo dài vô hạn.",
             "chỉ đặt hai đỉnh chạm nhau rồi để hở cạnh": "Chỉ chạm một đỉnh vẫn để hình hở; muốn kín phải ghép hai cạnh sát nhau.",
             "chồng khít hai tam giác lên cùng một vị trí": "Chồng hai mảnh không tạo tứ giác mới; cần đặt kề nhau theo cạnh.",
             "để hai tam giác cách xa nhau": "Hai mảnh cách xa nhau không tạo thành một hình kín chung.",
+            "để hai mảnh cách xa nhau": "Hai mảnh cách xa nhau không thể tạo thành một hình kín chung.",
+            "chỉ chạm hai đỉnh và để hở": "Chỉ cho hai đỉnh chạm nhau vẫn để khoảng hở; muốn ghép hình kín cần đặt các cạnh phù hợp sát nhau.",
+            "chồng cả hai mảnh lên đúng một vị trí": "Chồng hai mảnh không làm hình lớn hơn; cần ghép kề các cạnh mà không chồng.",
         }
         if label in reasons: return reasons[label]
         if "cắt một tờ giấy hình vuông" in prompt_cf:
             nums = [int(x) for x in re.findall(r"\d+", choice_text)]
             if nums and nums[0] != 2:
                 return f"Một đường cắt thẳng từ một góc đến góc đối diện chia hình vuông thành đúng 2 mảnh; chọn {nums[0]} là sai số mảnh."
+        if "tờ giấy hình chữ nhật" in prompt_cf and "từ cạnh này sang cạnh đối diện" in prompt_cf:
+            nums = [int(x) for x in re.findall(r"\d+", choice_text)]
+            if nums and nums[0] != 2:
+                return f"Một đường cắt thẳng đi xuyên từ cạnh này sang cạnh đối diện tách tờ giấy thành đúng 2 mảnh; chọn {nums[0]} là sai số mảnh."
 
     if skill == "ADD_COMPONENTS_RECOGNIZE" and "hai số hạng" in prompt.casefold():
         match = re.search(r"(\d+)\s*\+\s*(\d+)\s*=\s*(\d+)", prompt)

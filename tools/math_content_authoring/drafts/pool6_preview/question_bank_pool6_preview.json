@@ -9740,7 +9740,7 @@
         {
           "id": "c",
           "text": "chỉ D và E thẳng hàng",
-          "rationale_vi": "“chỉ D và E thẳng hàng” chưa đúng. Dữ kiện dẫn tới “thẳng hàng”. Ba điểm cùng thuộc một đường thẳng là ba điểm thẳng hàng."
+          "rationale_vi": "“chỉ D và E thẳng hàng” chưa đúng. Đề đã cho cả D, E, F cùng nằm trên đường thẳng m nên không chỉ D và E mà cả ba điểm đều thẳng hàng. Ba điểm cùng thuộc một đường thẳng là ba điểm thẳng hàng."
         },
         {
           "id": "d",
@@ -9788,17 +9788,17 @@
         {
           "id": "b",
           "text": "P, Q, R thẳng hàng",
-          "rationale_vi": "“P, Q, R thẳng hàng” chưa đúng. Dữ kiện dẫn tới “P, Q, R không thẳng hàng”. R không thuộc đường thẳng đi qua P và Q nên ba điểm không thẳng hàng. Vậy đáp án là P, Q, R không thẳng hàng."
+          "rationale_vi": "“P, Q, R thẳng hàng” chưa đúng. R nằm ngoài đường a trong khi P và Q nằm trên a, nên ba điểm không cùng nằm trên một đường thẳng. R không thuộc đường thẳng đi qua P và Q nên ba điểm không thẳng hàng. Vậy đáp án là P, Q, R không thẳng hàng."
         },
         {
           "id": "c",
           "text": "R chắc chắn nằm giữa P và Q",
-          "rationale_vi": "“R chắc chắn nằm giữa P và Q” chưa đúng. Dữ kiện dẫn tới “P, Q, R không thẳng hàng”. R không thuộc đường thẳng đi qua P và Q nên ba điểm không thẳng hàng. Vậy đáp án là P, Q, R không thẳng hàng."
+          "rationale_vi": "“R chắc chắn nằm giữa P và Q” chưa đúng. R nằm ngoài đường a nên không thể nằm giữa P và Q trên chính đường thẳng đó. R không thuộc đường thẳng đi qua P và Q nên ba điểm không thẳng hàng. Vậy đáp án là P, Q, R không thẳng hàng."
         },
         {
           "id": "d",
           "text": "Không thể dùng vị trí của R để kết luận",
-          "rationale_vi": "“Không thể dùng vị trí của R để kết luận” chưa đúng. Dữ kiện dẫn tới “P, Q, R không thẳng hàng”. R không thuộc đường thẳng đi qua P và Q nên ba điểm không thẳng hàng. Vậy đáp án là P, Q, R không thẳng hàng."
+          "rationale_vi": "“Không thể dùng vị trí của R để kết luận” chưa đúng. Vị trí R nằm ngoài đường a là dữ kiện trực tiếp để kết luận P, Q, R không thẳng hàng. R không thuộc đường thẳng đi qua P và Q nên ba điểm không thẳng hàng. Vậy đáp án là P, Q, R không thẳng hàng."
         }
       ],
       "correct_choice_id": "a"
@@ -9836,7 +9836,7 @@
         {
           "id": "a",
           "text": "Đo xem AB và BC có bằng nhau",
-          "rationale_vi": "“Đo xem AB và BC có bằng nhau” chưa đúng. Dữ kiện dẫn tới “Xem cả ba điểm có cùng nằm trên một đường thẳng”. Điều kiện cần kiểm tra là cả ba điểm cùng thuộc một đường thẳng. Vậy đáp án là Xem cả ba điểm có cùng nằm trên một đường thẳng."
+          "rationale_vi": "“Đo xem AB và BC có bằng nhau” chưa đúng. Độ dài AB và BC bằng nhau không quyết định ba điểm có thẳng hàng; cần kiểm tra cùng một đường thẳng. Điều kiện cần kiểm tra là cả ba điểm cùng thuộc một đường thẳng. Vậy đáp án là Xem cả ba điểm có cùng nằm trên một đường thẳng."
         },
         {
           "id": "b",
@@ -9846,12 +9846,12 @@
         {
           "id": "c",
           "text": "Xem tên ba điểm có liên tiếp",
-          "rationale_vi": "“Xem tên ba điểm có liên tiếp” chưa đúng. Dữ kiện dẫn tới “Xem cả ba điểm có cùng nằm trên một đường thẳng”. Điều kiện cần kiểm tra là cả ba điểm cùng thuộc một đường thẳng. Vậy đáp án là Xem cả ba điểm có cùng nằm trên một đường thẳng."
+          "rationale_vi": "“Xem tên ba điểm có liên tiếp” chưa đúng. Tên A, B, C liên tiếp trong bảng chữ cái không cho biết vị trí hình học của ba điểm. Điều kiện cần kiểm tra là cả ba điểm cùng thuộc một đường thẳng. Vậy đáp án là Xem cả ba điểm có cùng nằm trên một đường thẳng."
         },
         {
           "id": "d",
           "text": "Đếm số chữ cái trong tên điểm",
-          "rationale_vi": "“Đếm số chữ cái trong tên điểm” chưa đúng. Dữ kiện dẫn tới “Xem cả ba điểm có cùng nằm trên một đường thẳng”. Điều kiện cần kiểm tra là cả ba điểm cùng thuộc một đường thẳng. Vậy đáp án là Xem cả ba điểm có cùng nằm trên một đường thẳng."
+          "rationale_vi": "“Đếm số chữ cái trong tên điểm” chưa đúng. Số chữ cái trong tên điểm không liên quan đến điều kiện thẳng hàng; phải xét vị trí trên một đường thẳng. Điều kiện cần kiểm tra là cả ba điểm cùng thuộc một đường thẳng. Vậy đáp án là Xem cả ba điểm có cùng nằm trên một đường thẳng."
         }
       ],
       "correct_choice_id": "b"
@@ -10645,12 +10645,12 @@
         {
           "id": "b",
           "text": "hộp sữa chữ nhật",
-          "rationale_vi": "“hộp sữa chữ nhật” chưa đúng. Dữ kiện dẫn tới “viên bi tròn”. Viên bi tròn đều theo mọi hướng nên gần dạng khối cầu."
+          "rationale_vi": "“hộp sữa chữ nhật” chưa đúng. Hộp sữa chữ nhật có mặt phẳng và cạnh, nên không gần dạng khối cầu tròn đều. Viên bi tròn đều theo mọi hướng nên gần dạng khối cầu."
         },
         {
           "id": "c",
           "text": "thước kẻ",
-          "rationale_vi": "“thước kẻ” chưa đúng. Dữ kiện dẫn tới “viên bi tròn”. Viên bi tròn đều theo mọi hướng nên gần dạng khối cầu."
+          "rationale_vi": "“thước kẻ” chưa đúng. Thước kẻ là vật dài, mỏng và có cạnh thẳng; không gần dạng khối cầu. Viên bi tròn đều theo mọi hướng nên gần dạng khối cầu."
         },
         {
           "id": "d",
@@ -10698,17 +10698,17 @@
         {
           "id": "b",
           "text": "Có hai đáy tròn",
-          "rationale_vi": "“Có hai đáy tròn” chưa đúng. Dữ kiện dẫn tới “Không có cạnh và không có đỉnh”. Khối cầu tròn đều và không có cạnh hay đỉnh. Vậy đáp án là Không có cạnh và không có đỉnh."
+          "rationale_vi": "“Có hai đáy tròn” chưa đúng. Hai đáy tròn là đặc trưng của khối trụ; khối cầu không có đáy phẳng. Khối cầu tròn đều và không có cạnh hay đỉnh. Vậy đáp án là Không có cạnh và không có đỉnh."
         },
         {
           "id": "c",
           "text": "Có bốn cạnh",
-          "rationale_vi": "“Có bốn cạnh” chưa đúng. Dữ kiện dẫn tới “Không có cạnh và không có đỉnh”. Khối cầu tròn đều và không có cạnh hay đỉnh. Vậy đáp án là Không có cạnh và không có đỉnh."
+          "rationale_vi": "“Có bốn cạnh” chưa đúng. Khối cầu có bề mặt cong trơn liên tục nên không có bốn cạnh hay bất kỳ cạnh thẳng nào. Khối cầu tròn đều và không có cạnh hay đỉnh. Vậy đáp án là Không có cạnh và không có đỉnh."
         },
         {
           "id": "d",
           "text": "Có một đỉnh nhọn",
-          "rationale_vi": "“Có một đỉnh nhọn” chưa đúng. Dữ kiện dẫn tới “Không có cạnh và không có đỉnh”. Khối cầu tròn đều và không có cạnh hay đỉnh. Vậy đáp án là Không có cạnh và không có đỉnh."
+          "rationale_vi": "“Có một đỉnh nhọn” chưa đúng. Khối cầu không có đỉnh nhọn; bề mặt của nó cong đều mọi phía. Khối cầu tròn đều và không có cạnh hay đỉnh. Vậy đáp án là Không có cạnh và không có đỉnh."
         }
       ],
       "correct_choice_id": "a"
@@ -10746,7 +10746,7 @@
         {
           "id": "a",
           "text": "Khối cầu có hai đáy tròn như lon",
-          "rationale_vi": "“Khối cầu có hai đáy tròn như lon” chưa đúng. Dữ kiện dẫn tới “Lon có hai đáy phẳng còn khối cầu thì không”. Khối trụ có hai đáy phẳng; khối cầu không có đáy phẳng. Vậy đáp án là Lon có hai đáy phẳng còn khối cầu thì không."
+          "rationale_vi": "“Khối cầu có hai đáy tròn như lon” chưa đúng. Hai đáy tròn thuộc đặc trưng của lon dạng khối trụ; khối cầu không có đáy. Khối trụ có hai đáy phẳng; khối cầu không có đáy phẳng. Vậy đáp án là Lon có hai đáy phẳng còn khối cầu thì không."
         },
         {
           "id": "b",
@@ -10756,12 +10756,12 @@
         {
           "id": "c",
           "text": "Khối cầu có cạnh thẳng",
-          "rationale_vi": "“Khối cầu có cạnh thẳng” chưa đúng. Dữ kiện dẫn tới “Lon có hai đáy phẳng còn khối cầu thì không”. Khối trụ có hai đáy phẳng; khối cầu không có đáy phẳng. Vậy đáp án là Lon có hai đáy phẳng còn khối cầu thì không."
+          "rationale_vi": "“Khối cầu có cạnh thẳng” chưa đúng. Bề mặt khối cầu cong liên tục nên không có cạnh thẳng. Khối trụ có hai đáy phẳng; khối cầu không có đáy phẳng. Vậy đáp án là Lon có hai đáy phẳng còn khối cầu thì không."
         },
         {
           "id": "d",
           "text": "Lon không có mặt cong",
-          "rationale_vi": "“Lon không có mặt cong” chưa đúng. Dữ kiện dẫn tới “Lon có hai đáy phẳng còn khối cầu thì không”. Khối trụ có hai đáy phẳng; khối cầu không có đáy phẳng. Vậy đáp án là Lon có hai đáy phẳng còn khối cầu thì không."
+          "rationale_vi": "“Lon không có mặt cong” chưa đúng. Lon có mặt cong bao quanh; điểm khác là lon còn có hai đáy phẳng còn khối cầu thì không. Khối trụ có hai đáy phẳng; khối cầu không có đáy phẳng. Vậy đáp án là Lon có hai đáy phẳng còn khối cầu thì không."
         }
       ],
       "correct_choice_id": "b"
@@ -11146,7 +11146,7 @@
         {
           "id": "a",
           "text": "một điểm duy nhất",
-          "rationale_vi": "“một điểm duy nhất” chưa đúng. Dữ kiện dẫn tới “một hình kín mới”. Ghép các cạnh phù hợp của hai mảnh có thể tạo thành một hình kín mới."
+          "rationale_vi": "“một điểm duy nhất” chưa đúng. Hai tam giác có diện tích ghép sát theo cạnh vẫn tạo một hình có diện tích, không thể chỉ còn một điểm. Ghép các cạnh phù hợp của hai mảnh có thể tạo thành một hình kín mới."
         },
         {
           "id": "b",
@@ -11199,12 +11199,12 @@
         {
           "id": "a",
           "text": "1",
-          "rationale_vi": "“1” chưa đúng. Dữ kiện dẫn tới “2”. Một đường cắt xuyên hết tờ giấy chia nó thành hai phần. Vậy đáp án là 2."
+          "rationale_vi": "“1” chưa đúng. Một đường cắt thẳng đi xuyên từ cạnh này sang cạnh đối diện tách tờ giấy thành đúng 2 mảnh; chọn 1 là sai số mảnh. Một đường cắt xuyên hết tờ giấy chia nó thành hai phần. Vậy đáp án là 2."
         },
         {
           "id": "b",
           "text": "3",
-          "rationale_vi": "“3” chưa đúng. Dữ kiện dẫn tới “2”. Một đường cắt xuyên hết tờ giấy chia nó thành hai phần. Vậy đáp án là 2."
+          "rationale_vi": "“3” chưa đúng. Một đường cắt thẳng đi xuyên từ cạnh này sang cạnh đối diện tách tờ giấy thành đúng 2 mảnh; chọn 3 là sai số mảnh. Một đường cắt xuyên hết tờ giấy chia nó thành hai phần. Vậy đáp án là 2."
         },
         {
           "id": "c",
@@ -11214,7 +11214,7 @@
         {
           "id": "d",
           "text": "4",
-          "rationale_vi": "“4” chưa đúng. Dữ kiện dẫn tới “2”. Một đường cắt xuyên hết tờ giấy chia nó thành hai phần. Vậy đáp án là 2."
+          "rationale_vi": "“4” chưa đúng. Một đường cắt thẳng đi xuyên từ cạnh này sang cạnh đối diện tách tờ giấy thành đúng 2 mảnh; chọn 4 là sai số mảnh. Một đường cắt xuyên hết tờ giấy chia nó thành hai phần. Vậy đáp án là 2."
         }
       ],
       "correct_choice_id": "c"
@@ -11252,17 +11252,17 @@
         {
           "id": "a",
           "text": "Để hai mảnh cách xa nhau",
-          "rationale_vi": "“Để hai mảnh cách xa nhau” chưa đúng. Dữ kiện dẫn tới “Đặt các cạnh phù hợp sát nhau mà không chồng hai mảnh”. Ghép hình cần các cạnh tiếp xúc phù hợp để tạo đường bao kín mà không chồng mảnh. Vậy đáp án là Đặt các cạnh phù hợp sát nhau mà không chồng hai mảnh."
+          "rationale_vi": "“Để hai mảnh cách xa nhau” chưa đúng. Hai mảnh cách xa nhau không thể tạo thành một hình kín chung. Ghép hình cần các cạnh tiếp xúc phù hợp để tạo đường bao kín mà không chồng mảnh. Vậy đáp án là Đặt các cạnh phù hợp sát nhau mà không chồng hai mảnh."
         },
         {
           "id": "b",
           "text": "Chỉ chạm hai đỉnh và để hở",
-          "rationale_vi": "“Chỉ chạm hai đỉnh và để hở” chưa đúng. Dữ kiện dẫn tới “Đặt các cạnh phù hợp sát nhau mà không chồng hai mảnh”. Ghép hình cần các cạnh tiếp xúc phù hợp để tạo đường bao kín mà không chồng mảnh. Vậy đáp án là Đặt các cạnh phù hợp sát nhau mà không chồng hai mảnh."
+          "rationale_vi": "“Chỉ chạm hai đỉnh và để hở” chưa đúng. Chỉ cho hai đỉnh chạm nhau vẫn để khoảng hở; muốn ghép hình kín cần đặt các cạnh phù hợp sát nhau. Ghép hình cần các cạnh tiếp xúc phù hợp để tạo đường bao kín mà không chồng mảnh. Vậy đáp án là Đặt các cạnh phù hợp sát nhau mà không chồng hai mảnh."
         },
         {
           "id": "c",
           "text": "Chồng cả hai mảnh lên đúng một vị trí",
-          "rationale_vi": "“Chồng cả hai mảnh lên đúng một vị trí” chưa đúng. Dữ kiện dẫn tới “Đặt các cạnh phù hợp sát nhau mà không chồng hai mảnh”. Ghép hình cần các cạnh tiếp xúc phù hợp để tạo đường bao kín mà không chồng mảnh. Vậy đáp án là Đặt các cạnh phù hợp sát nhau mà không chồng hai mảnh."
+          "rationale_vi": "“Chồng cả hai mảnh lên đúng một vị trí” chưa đúng. Chồng hai mảnh không làm hình lớn hơn; cần ghép kề các cạnh mà không chồng. Ghép hình cần các cạnh tiếp xúc phù hợp để tạo đường bao kín mà không chồng mảnh. Vậy đáp án là Đặt các cạnh phù hợp sát nhau mà không chồng hai mảnh."
         },
         {
           "id": "d",
