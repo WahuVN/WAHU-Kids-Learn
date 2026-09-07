@@ -72,6 +72,8 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestAdaptiveTamperedOpenQuestionIsDiscarded(root, schemaPath, templatePath);
                 TestDeterministicSecondQuestionAcrossResume(root, schemaPath, templatePath);
                 TestInteractiveIntegerFinalization();
+                TestGameEventBehaviorMapping();
+                TestGameEventRuntimeResumeRewardAndFallback(root, schemaPath, templatePath, lessonCatalogPath);
                 Console.WriteLine("MATH_SESSION_PERSISTENCE_RUNTIME_SMOKE_PASS assertions=" + _assertions);
                 return 0;
             }
@@ -84,6 +86,205 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
             {
                 try { Directory.Delete(root, true); } catch { }
             }
+        }
+
+        private static void TestGameEventBehaviorMapping()
+        {
+            var ready = MathGameEventBehaviorMapper.Map(new BehaviorDecision { State = BehaviorState.READY });
+            A(ready.Action == "normal" && !ready.OfferBreak && !ready.UseRepair && ready.PreserveCheckpoint,
+                "game_event_behavior_ready_maps_normal");
+            var flow = MathGameEventBehaviorMapper.Map(new BehaviorDecision { State = BehaviorState.FLOW_LIKELY });
+            A(flow.Action == "minimize_interruptions" && flow.MinimizeInterruptions && flow.PreserveCheckpoint,
+                "game_event_behavior_flow_minimizes_interruptions");
+            var bored = MathGameEventBehaviorMapper.Map(new BehaviorDecision { State = BehaviorState.BORED_OR_UNDERCHALLENGED });
+            A(bored.Action == "context_transfer" && !bored.OfferBreak && bored.PreserveCheckpoint,
+                "game_event_behavior_bored_uses_transfer_without_more_questions");
+            var strained = MathGameEventBehaviorMapper.Map(new BehaviorDecision { State = BehaviorState.STRAINED });
+            A(strained.Action == "small_cue" && strained.UseSmallCue && strained.PreserveCheckpoint,
+                "game_event_behavior_strained_uses_small_cue");
+            var frustrated = MathGameEventBehaviorMapper.Map(new BehaviorDecision { State = BehaviorState.FRUSTRATED_LIKELY });
+            A(frustrated.Action == "repair" && frustrated.UseRepair && frustrated.PreserveCheckpoint,
+                "game_event_behavior_frustrated_uses_repair_without_losing_checkpoint");
+            var fatigued = MathGameEventBehaviorMapper.Map(new BehaviorDecision { State = BehaviorState.FATIGUED_LIKELY });
+            A(fatigued.Action == "offer_break" && fatigued.OfferBreak && fatigued.SuggestPositiveClose && fatigued.PreserveCheckpoint,
+                "game_event_behavior_fatigued_offers_safe_break_and_positive_close");
+        }
+
+        private static void TestGameEventRuntimeResumeRewardAndFallback(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var eventPath = Path.Combine(root, "synthetic-game-events-v1.json");
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.Lessons[0];
+            var eventId = "m2_evt_test_rescue_01";
+            WriteSyntheticGameEventCatalog(eventPath, eventId, lesson.Id, lesson.SkillId);
+
+            var loaded = new MathGameEventCatalogSource().Load(eventPath, lessonCatalogPath);
+            A(loaded.SchemaVersion == 1 && loaded.CatalogId == MathGameEventCatalogSource.CatalogId &&
+              loaded.Events.Count == 1 && loaded.Events[0].QuestionCount == 3,
+                "game_event_catalog_loads_frozen_v1_schema");
+            A(loaded.FindById(eventId) != null && loaded.FindByLesson(lesson.Id) != null &&
+              loaded.Events[0].CheckpointNounsVi.SequenceEqual(new[] { "biển số 1", "biển số 2", "biển số 3" }),
+                "game_event_catalog_supports_deterministic_id_and_lesson_lookup");
+
+            var strictPath = Path.Combine(root, "synthetic-game-events-extra-key.json");
+            File.Copy(eventPath, strictPath, true);
+            var strictRaw = Json.Deserialize<Dictionary<string, object>>(File.ReadAllText(strictPath));
+            var strictEvents = ((System.Collections.IEnumerable)strictRaw["events"]).Cast<object>().ToList();
+            var strictEvent = (Dictionary<string, object>)strictEvents[0];
+            strictEvent["timer_seconds"] = 30;
+            strictRaw["events"] = strictEvents;
+            File.WriteAllText(strictPath, Json.Serialize(strictRaw));
+            MathGameEventCatalog ignoredCatalog;
+            A(!new MathGameEventCatalogSource().TryLoad(strictPath, lessonCatalogPath, out ignoredCatalog),
+                "game_event_catalog_rejects_unknown_timer_like_schema_field");
+
+            var database = NewDatabase(Path.Combine(root, "game-event-runtime.db"), schemaPath);
+            string sessionId;
+            string q2Id;
+            IList<string> selected;
+            using (var first = new MathGameEventCoordinator(database, templatePath, eventPath, "LOW", 14001, eventId, lesson.Id))
+            {
+                var start = first.Start("Bé event cứu hộ");
+                sessionId = start.Session.SessionId;
+                selected = start.Session.SelectedContentQuestionIds.ToList();
+                A(start.Event != null && start.Event.Id == eventId && start.EventState.EventPresentationAvailable &&
+                  !start.EventState.FallbackToLessonPresentation && start.EventState.CompletedCheckpointCount == 0 &&
+                  start.EventState.CurrentCheckpointNumber == 1 && start.EventState.CurrentCheckpointNounVi == "biển số 1",
+                    "game_event_start_binds_event_and_checkpoint_one");
+                A(start.Session.SessionMode == "lesson" && start.Session.TargetLessonId == lesson.Id &&
+                  start.Session.TargetQuestionCount == 3 && selected.Count == 3,
+                    "game_event_start_reuses_exact_targeted_three_question_session");
+
+                var earlyRejected = false;
+                try { first.Complete(); }
+                catch (InvalidOperationException) { earlyRejected = true; }
+                A(earlyRejected && Count(database, "SELECT count(*) FROM reward_event WHERE child_id='" + start.Session.ChildId + "';") == 0,
+                    "game_event_early_complete_is_rejected_without_reward");
+
+                var q1 = first.NextQuestion();
+                var r1 = first.SubmitAnswerAt(q1.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700);
+                A(r1.Learning.IsCorrect && r1.Learning.QuestionCompleted &&
+                  r1.EventState.CompletedCheckpointCount == 1 && r1.EventState.CurrentCheckpointNumber == 2 &&
+                  r1.EventState.CurrentCheckpointNounVi == "biển số 2",
+                    "game_event_correct_answer_advances_one_checkpoint");
+
+                var q2 = first.NextQuestion();
+                q2Id = q2.QuestionId;
+                var wrong = first.SubmitAnswerWithRetryAt(WrongAnswer(q2), 2, "smoke", DateTime.UtcNow, 800);
+                A(!wrong.Learning.IsCorrect && wrong.Learning.CanRetry && !wrong.Learning.QuestionCompleted &&
+                  wrong.EventState.CompletedCheckpointCount == 1 && wrong.EventState.CurrentCheckpointNumber == 2 &&
+                  wrong.EventState.RetryPending,
+                    "game_event_wrong_retry_preserves_checkpoint_two");
+                first.SuspendForBreak("event_safe_break");
+                A(Count(database, "SELECT count(*) FROM reward_event WHERE child_id='" + start.Session.ChildId + "';") == 0 &&
+                  Count(database, "SELECT count(*) FROM session WHERE id='" + sessionId + "' AND state='active';") == 1,
+                    "game_event_suspend_preserves_active_session_and_grants_no_reward");
+            }
+
+            using (var resumed = new MathGameEventCoordinator(database, templatePath, eventPath, "NORMAL", 999999, eventId, lesson.Id))
+            {
+                var start = resumed.Start("Bé event cứu hộ");
+                A(start.Session.ResumedExistingSession && start.Session.SessionId == sessionId &&
+                  start.Session.SelectedContentQuestionIds.SequenceEqual(selected) && start.Session.RetryPending &&
+                  start.EventState.EventId == eventId && start.EventState.CompletedCheckpointCount == 1 &&
+                  start.EventState.CurrentCheckpointNumber == 2 && start.EventState.RetryPending,
+                    "game_event_resume_restores_exact_event_session_selected_set_checkpoint_retry");
+                var q2 = resumed.NextQuestion();
+                A(q2.QuestionId == q2Id && q2.ContentQuestionId == selected[1],
+                    "game_event_resume_restores_exact_open_question");
+                var retry = resumed.SubmitRetryAnswerAt(q2.CorrectAnswerDisplay, 1, "smoke", DateTime.UtcNow, 850);
+                A(retry.Learning.IsCorrect && retry.Learning.IsRetry && !retry.Learning.IndependentSuccess &&
+                  retry.EventState.CompletedCheckpointCount == 2 && retry.EventState.CurrentCheckpointNumber == 3,
+                    "game_event_retry_correct_advances_to_third_checkpoint_as_assisted");
+                var q3 = resumed.NextQuestion();
+                resumed.SubmitAnswerAt(q3.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 900);
+                var complete = resumed.Complete();
+                A(complete.LearningSummary.LessonCompleted && complete.LearningSummary.Attempts == 3 &&
+                  complete.EventState.IsComplete && complete.EventState.CompletedCheckpointCount == 3 &&
+                  complete.EventState.EventId == eventId,
+                    "game_event_completion_finishes_three_checkpoint_targeted_session");
+                A(complete.LearningSummary.GardenGrowthSteps == 1 &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE child_id='" + start.Session.ChildId +
+                    "' AND reward_type='garden_growth' AND source_ref='" + sessionId + "';") == 1,
+                    "game_event_completion_grants_existing_garden_reward_exactly_once");
+                var replay = resumed.Complete();
+                A(object.ReferenceEquals(complete, replay) &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + sessionId + "';") == 1,
+                    "game_event_completion_replay_is_wrapper_idempotent_and_does_not_duplicate_reward");
+            }
+
+            var fallbackDb = NewDatabase(Path.Combine(root, "game-event-corrupt-fallback.db"), schemaPath);
+            string fallbackSessionId;
+            string fallbackQ2Id;
+            IList<string> fallbackSelected;
+            string fallbackChildId;
+            WriteSyntheticGameEventCatalog(eventPath, eventId, lesson.Id, lesson.SkillId);
+            using (var first = new MathGameEventCoordinator(fallbackDb, templatePath, eventPath, "LOW", 14002, eventId, lesson.Id))
+            {
+                var start = first.Start("Bé event fallback");
+                fallbackSessionId = start.Session.SessionId;
+                fallbackSelected = start.Session.SelectedContentQuestionIds.ToList();
+                fallbackChildId = start.Session.ChildId;
+                var q1 = first.NextQuestion();
+                first.SubmitAnswerAt(q1.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700);
+                var q2 = first.NextQuestion();
+                fallbackQ2Id = q2.QuestionId;
+                first.SuspendForBreak("event_before_metadata_corruption");
+            }
+            File.WriteAllText(eventPath, "{ definitely-not-valid-event-json ");
+            using (var fallback = new MathGameEventCoordinator(fallbackDb, templatePath, eventPath, "LOW", 123, eventId, lesson.Id))
+            {
+                var start = fallback.Start("Bé event fallback");
+                A(start.Session.ResumedExistingSession && start.Session.SessionId == fallbackSessionId &&
+                  start.Session.SelectedContentQuestionIds.SequenceEqual(fallbackSelected) && start.Session.CompletedQuestionCount == 1,
+                    "game_event_corrupt_metadata_fallback_preserves_math_session_progress");
+                A(start.Event == null && !start.EventState.EventPresentationAvailable && start.EventState.FallbackToLessonPresentation &&
+                  start.EventState.EventId == null && start.EventState.TargetLessonId == lesson.Id,
+                    "game_event_corrupt_metadata_falls_back_to_ordinary_lesson_presentation");
+                var q2 = fallback.NextQuestion();
+                A(q2.QuestionId == fallbackQ2Id && q2.ContentQuestionId == fallbackSelected[1],
+                    "game_event_corrupt_metadata_fallback_keeps_exact_open_question");
+                fallback.SuspendForBreak("fallback_cleanup_suspend");
+                A(Count(fallbackDb, "SELECT count(*) FROM attempt WHERE session_id='" + fallbackSessionId + "';") == 1 &&
+                  Count(fallbackDb, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + fallbackSessionId + "';") == 1 &&
+                  Count(fallbackDb, "SELECT count(*) FROM reward_event WHERE child_id='" + fallbackChildId + "';") == 0,
+                    "game_event_corrupt_metadata_fallback_loses_no_learning_and_grants_no_fake_reward");
+            }
+        }
+
+        private static void WriteSyntheticGameEventCatalog(string path, string eventId, string lessonId, string skillId)
+        {
+            var payload = new Dictionary<string, object>
+            {
+                { "schema_version", 1 },
+                { "catalog_id", MathGameEventCatalogSource.CatalogId },
+                { "language", "vi" },
+                { "events", new object[]
+                    {
+                        new Dictionary<string, object>
+                        {
+                            { "id", eventId },
+                            { "kind", "quick_rescue" },
+                            { "title_vi", "Sửa biển số trong Rừng Toán" },
+                            { "intro_vi", "Ba biển số đang lộn xộn. Con giúp đặt lại từng biển nhé." },
+                            { "completion_vi", "Ba biển số đã về đúng chỗ. Đường trong rừng lại rõ ràng rồi." },
+                            { "target_lesson_id", lessonId },
+                            { "target_skill_id", skillId },
+                            { "question_count", 3 },
+                            { "checkpoint_nouns_vi", new[] { "biển số 1", "biển số 2", "biển số 3" } },
+                            { "theme", "forest_path" },
+                            { "repair_copy_vi", "Mình xem lại một bước nhỏ rồi sửa tiếp nhé." },
+                            { "break_copy_vi", "Phần đã làm được lưu rồi. Khi nào muốn mình quay lại tiếp nhé." },
+                            { "reward_presentation", "garden_progress" }
+                        }
+                    }
+                }
+            };
+            File.WriteAllText(path, Json.Serialize(payload));
         }
 
         private static void TestAuthoredQuestionBank(string questionBankPath)
