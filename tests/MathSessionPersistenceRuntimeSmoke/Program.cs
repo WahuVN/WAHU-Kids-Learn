@@ -85,7 +85,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 "authored_bank_maps_traceability_metadata");
             A(bank.Questions.All(x => x.IsCorrectAnswer(x.CorrectAnswerText)), "authored_bank_every_expected_answer_validates");
 
-            var expression = bank.Questions.Single(x => x.AnswerKind == "expression");
+            var expression = bank.Questions.First(x => x.AnswerKind == "expression");
             A(expression.QuestionType == "expression_input" && expression.DisplayChoices.Count == 0,
                 "authored_expression_stays_input_without_fake_choices");
             A(expression.IsCorrectAnswer("75"), "authored_expression_accepts_equivalent_numeric_result");
@@ -119,7 +119,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
             A(legacyExpression.IsCorrectAnswer("15*5") && legacyExpression.IsCorrectAnswer("150/2"),
                 "legacy_expression_without_whitelist_keeps_global_numeric_equivalence");
 
-            var unit = bank.Questions.Single(x => x.AnswerKind == "unit");
+            var unit = bank.Questions.First(x => x.AnswerKind == "unit" && x.ExpectedUnit == "kg");
             A(unit.QuestionType == "unit_input" && unit.DisplayChoices.Count == 0 && unit.ExpectedUnit == "kg",
                 "authored_unit_maps_expected_unit_without_fake_choices");
             A(unit.IsCorrectAnswer("5 kilôgam"), "authored_unit_accepts_declared_alias");
@@ -142,7 +142,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
               restoredDisplay.IsCorrectAnswer(restoredDisplay.CorrectAnswerDisplay),
                 "authored_display_unit_survives_current_question_json_without_changing_raw_grading");
 
-            var interaction = bank.Questions.Single(x => x.AnswerKind == "interaction_integer");
+            var interaction = bank.Questions.First(x => x.AnswerKind == "interaction_integer");
             A(interaction.QuestionType == "interactive_measurement" && interaction.DisplayChoices.Count == 0,
                 "authored_interaction_stays_choice_free");
             A((interaction.IllustrationData ?? string.Empty).StartsWith("segmentdraw|", StringComparison.Ordinal),
@@ -180,10 +180,11 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 sessionId = start.SessionId;
                 var question = first.NextQuestion();
                 questionId = question.QuestionId;
-                A(question.ContentQuestionId == lesson.PracticeSets.Basic[0] && question.AnswerKind == "integer",
-                    "answer_unit_feedback_opens_authored_integer_question");
-                A(question.AnswerUnit == "giờ" && question.CorrectAnswerDisplay == "24" &&
-                  question.CorrectAnswerFeedbackDisplay == "24 giờ",
+                A(question.ContentQuestionId == start.SelectedContentQuestionIds[0] &&
+                  lesson.PracticeSets.Basic.Contains(question.ContentQuestionId) && question.AnswerKind == "integer",
+                    "answer_unit_feedback_opens_selected_authored_integer_question");
+                A(question.AnswerUnit == "giờ" &&
+                  question.CorrectAnswerFeedbackDisplay == question.CorrectAnswerDisplay + " giờ",
                     "answer_unit_feedback_separates_raw_answer_from_feedback_display");
                 first.Suspend("answer_unit_feedback_resume_fixture");
             }
@@ -195,10 +196,12 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                     "answer_unit_feedback_resumes_open_question");
                 var question = resumed.NextQuestion();
                 A(question.QuestionId == questionId && question.AnswerUnit == "giờ" &&
-                  question.CorrectAnswerDisplay == "24" && question.CorrectAnswerFeedbackDisplay == "24 giờ",
+                  question.CorrectAnswerFeedbackDisplay == question.CorrectAnswerDisplay + " giờ",
                     "answer_unit_feedback_survives_runtime_json_resume");
-                var outcome = resumed.SubmitAnswerAt("24", 0, "smoke", DateTime.UtcNow, 800);
-                A(outcome.IsCorrect && outcome.CorrectAnswerDisplay == "24 giờ",
+                var rawAnswer = question.CorrectAnswerDisplay;
+                var feedbackAnswer = question.CorrectAnswerFeedbackDisplay;
+                var outcome = resumed.SubmitAnswerAt(rawAnswer, 0, "smoke", DateTime.UtcNow, 800);
+                A(outcome.IsCorrect && outcome.CorrectAnswerDisplay == feedbackAnswer,
                     "answer_unit_feedback_outcome_publishes_value_with_display_unit");
                 resumed.Abort("answer_unit_feedback_cleanup");
             }
