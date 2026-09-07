@@ -654,7 +654,14 @@ namespace WAHUKidsLearn
 
         private MathLessonDescriptor FindContinueLesson()
         {
-            if (_catalog == null || _catalog.Lessons == null || _skills == null || _skills.Count == 0) return null;
+            if (_catalog == null || _catalog.Lessons == null) return null;
+
+            bool hasResumableMathSession;
+            var resumableLesson = FindResumableTargetLesson(out hasResumableMathSession);
+            if (resumableLesson != null) return resumableLesson;
+            if (hasResumableMathSession) return null;
+
+            if (_skills == null || _skills.Count == 0) return null;
             var active = new List<MathLessonDescriptor>();
             var studied = new List<MathLessonDescriptor>();
             foreach (var lesson in _catalog.Lessons)
@@ -673,6 +680,30 @@ namespace WAHUKidsLearn
                 })
                 .ThenBy(x => x.OrderInDomain)
                 .FirstOrDefault();
+        }
+
+        private MathLessonDescriptor FindResumableTargetLesson(out bool hasResumableMathSession)
+        {
+            hasResumableMathSession = false;
+            try
+            {
+                var runtime = new MathSessionRuntimeService(_database)
+                    .LoadLatestResumable(LearnerSessionService.PrimaryChildId);
+                if (runtime == null) return null;
+                hasResumableMathSession = true;
+                if (!string.Equals(runtime.SessionMode, "lesson", StringComparison.Ordinal) ||
+                    string.IsNullOrWhiteSpace(runtime.TargetLessonId)) return null;
+                return _catalog.FindLesson(runtime.TargetLessonId);
+            }
+            catch (MathSessionRuntimeCorruptException)
+            {
+                hasResumableMathSession = true;
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private void RefreshContinueLessonState()
