@@ -562,6 +562,18 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                   Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + childId +
                   "' AND lesson_id='" + definition.TargetLessonId + "' AND started_count=2 AND completed_count=1;") == 1,
                     "game_event_fresh_replay_does_not_grant_reward_or_fake_completion_before_play");
+                using (var racingReplay = new MathGameEventCoordinator(database, templatePath, gameEventPath, "LOW", 515124,
+                    definition.Id, definition.TargetLessonId))
+                {
+                    var raced = racingReplay.Start("Bé replay event đã xong");
+                    A(raced.Session.ResumedExistingSession && raced.Session.SessionId == replaySessionId &&
+                      raced.Session.SelectedContentQuestionIds.SequenceEqual(replaySelected) && raced.Session.CompletedQuestionCount == 0,
+                        "game_event_concurrent_fresh_replay_binds_single_new_active_session");
+                    A(Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + childId +
+                      "' AND lesson_id='" + definition.TargetLessonId + "' AND started_count=2 AND completed_count=1;") == 1 &&
+                      Count(database, "SELECT count(*) FROM reward_event WHERE child_id='" + childId + "';") == 1,
+                        "game_event_concurrent_fresh_replay_does_not_double_start_or_reward");
+                }
                 var q1 = replay.NextQuestion();
                 replayQ1Id = q1.QuestionId;
                 A(q1.ContentQuestionId == replaySelected[0],
