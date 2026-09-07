@@ -1784,6 +1784,7 @@ namespace WAHU.ChildUiRuntimeSmoke
                         "quick_rescue_shell_prioritizes_exact_resumable_event");
                     var resumeShellStart = GetField<Button>(resumeShell, "_startButton");
                     A(resumeShellStart.Enabled && resumeShellStart.Text.IndexOf("Tiếp tục", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                      resumeShellStart.AccessibleName.IndexOf("Tiếp tục", StringComparison.OrdinalIgnoreCase) >= 0 &&
                       resumeShellStart.AccessibleDescription.IndexOf("đang dở", StringComparison.OrdinalIgnoreCase) >= 0,
                         "quick_rescue_shell_marks_saved_session_as_continue");
                     A(GetField<Label>(resumeShell, "_status").Text.IndexOf("đã được lưu", StringComparison.OrdinalIgnoreCase) >= 0,
@@ -1949,10 +1950,29 @@ namespace WAHU.ChildUiRuntimeSmoke
                       unavailableIntro.Text.IndexOf("vẫn có thể học Toán", StringComparison.OrdinalIgnoreCase) >= 0,
                         "quick_rescue_valid_to_corrupt_reload_fails_closed_visibly");
                     A(unavailableIntro.AccessibleDescription == unavailableIntro.Text &&
+                      unavailableStart.AccessibleName.IndexOf("chưa thể", StringComparison.OrdinalIgnoreCase) >= 0 &&
                       unavailableStart.AccessibleDescription.IndexOf("chưa thể bắt đầu", StringComparison.OrdinalIgnoreCase) >= 0 &&
                       unavailableStart.AccessibleDescription.IndexOf("đang dở", StringComparison.OrdinalIgnoreCase) < 0 &&
                       unavailableStatus.AccessibleDescription.IndexOf("đã lưu vẫn an toàn", StringComparison.OrdinalIgnoreCase) >= 0,
                         "quick_rescue_valid_to_corrupt_reload_clears_stale_accessibility");
+                    File.Copy(Path.Combine(sourceContent, "game_events_v1.json"), runtimeEventPath, true);
+                    Invoke(reloadShell, "LoadEvents");
+                    A(Get<int>(reloadShell, "EventCount") == 5 &&
+                      GetField<System.Collections.IDictionary>(reloadShell, "_eventButtons").Count == 5 &&
+                      GetField<System.Collections.IDictionary>(reloadShell, "_access").Count > 0 &&
+                      GetField<object>(reloadShell, "_selectedEvent") != null,
+                        "quick_rescue_corrupt_to_valid_reload_restores_catalog_state");
+                    var recoveredStart = GetField<Button>(reloadShell, "_startButton");
+                    var recoveredTitle = GetField<Label>(reloadShell, "_eventTitle");
+                    var recoveredStatus = GetField<Label>(reloadShell, "_status");
+                    A(recoveredStart.Enabled &&
+                      recoveredTitle.Text.IndexOf("đang chuẩn bị", StringComparison.OrdinalIgnoreCase) < 0 &&
+                      GetField<Label>(reloadShell, "_intro").Text.IndexOf("vẫn có thể học Toán", StringComparison.OrdinalIgnoreCase) < 0,
+                        "quick_rescue_corrupt_to_valid_reload_restores_playable_chrome");
+                    A(recoveredTitle.AccessibleDescription.IndexOf(recoveredTitle.Text, StringComparison.OrdinalIgnoreCase) >= 0 &&
+                      recoveredStatus.AccessibleDescription == recoveredStatus.Text &&
+                      recoveredStart.AccessibleName.IndexOf("chưa thể", StringComparison.OrdinalIgnoreCase) < 0,
+                        "quick_rescue_corrupt_to_valid_reload_restores_accessibility_state");
                 }
                 File.Copy(Path.Combine(sourceContent, "game_events_v1.json"), runtimeEventPath, true);
                 File.Delete(runtimeEventPath);

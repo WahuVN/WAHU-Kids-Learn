@@ -605,6 +605,7 @@ namespace WAHUKidsLearn
             if (item == null) return;
             _selectedEvent = item;
             _eventTitle.Text = item.TitleVi;
+            _eventTitle.AccessibleDescription = "Nhiệm vụ " + item.TitleVi + ".";
             _intro.Text = item.IntroVi;
             _intro.AccessibleDescription = item.IntroVi;
             _checkpoints.Controls.Clear();
@@ -634,8 +635,12 @@ namespace WAHUKidsLearn
                 : (completed
                     ? "Bài nền của nhiệm vụ này đã hoàn thành. Con có thể bắt đầu ba chặng mà tiến bộ cũ vẫn được giữ nguyên."
                     : (unlocked ? "Ba chặng, mỗi chặng một câu. Làm chắc từng bước là được." : lockReason));
+            _status.AccessibleDescription = _status.Text;
             _startButton.Enabled = unlocked;
             _startButton.Text = resumable ? "Tiếp tục chặng đang dở" : (unlocked ? "Bắt đầu 3 chặng" : "Học bài nền trước");
+            _startButton.AccessibleName = resumable
+                ? "Tiếp tục nhiệm vụ cứu hộ đang dở"
+                : (unlocked ? "Bắt đầu nhiệm vụ cứu hộ ba chặng" : "Học bài nền trước để mở nhiệm vụ cứu hộ");
             _startButton.AccessibleDescription = resumable
                 ? "Tiếp tục đúng chặng Toán đang dở đã được lưu. Không có giới hạn thời gian."
                 : (unlocked ? "Mở ba câu Toán của bài đã chọn. Không có giới hạn thời gian." : lockReason);
@@ -744,6 +749,7 @@ namespace WAHUKidsLearn
             _status.AccessibleDescription = "Phần học đã lưu vẫn an toàn.";
             _startButton.Enabled = false;
             _startButton.Text = "Chưa thể bắt đầu";
+            _startButton.AccessibleName = "Nhiệm vụ cứu hộ chưa thể bắt đầu";
             _startButton.AccessibleDescription = "Nhiệm vụ cứu hộ hiện chưa thể bắt đầu. Con vẫn có thể học Toán theo bài như bình thường.";
         }
 
