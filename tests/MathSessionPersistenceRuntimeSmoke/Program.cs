@@ -1363,7 +1363,12 @@ BEGIN SELECT RAISE(ABORT,'game event injected concurrent reward seed failure'); 
                     "garden_zero_attempt_completed_fixture_has_no_learning_or_reward");
             }
 
-            var before = new GameWorldRewardService(database).ReadProgress(childId);
+            var rewardService = new GameWorldRewardService(database);
+            var spoofed = rewardService.GrantCompletedMathSession(childId, emptySessionId, 999);
+            A(!spoofed.RewardCreated &&
+              Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + emptySessionId + "';") == 0,
+                "garden_reward_service_rejects_positive_caller_attempts_when_durable_session_has_zero_attempts");
+            var before = rewardService.ReadProgress(childId);
             A(before.GrowthSteps == 0 && before.CompletedMathSessions == 0 &&
               before.NextMilestoneSessionCount == 1 && before.SessionsUntilNextMilestone == 1,
                 "garden_progress_ignores_zero_attempt_completed_session");

@@ -56,12 +56,17 @@ namespace WAHU.Data
                 using (var verify = connection.CreateCommand())
                 {
                     verify.Transaction = transaction;
-                    verify.CommandText = @"SELECT count(*) FROM session
-WHERE id=@session AND child_id=@child AND state='completed' AND planned_subject='math';";
+                    verify.CommandText = @"SELECT count(a.id)
+FROM session s
+LEFT JOIN attempt a ON a.session_id=s.id
+WHERE s.id=@session AND s.child_id=@child AND s.state='completed' AND s.planned_subject='math'
+GROUP BY s.id;";
                     verify.Parameters.AddWithValue("@session", sessionId);
                     verify.Parameters.AddWithValue("@child", childId);
-                    if (Convert.ToInt32(verify.ExecuteScalar(), CultureInfo.InvariantCulture) != 1)
+                    var durableAttempts = verify.ExecuteScalar();
+                    if (durableAttempts == null || durableAttempts == DBNull.Value)
                         throw new InvalidOperationException("Garden reward requires one completed math session.");
+                    if (Convert.ToInt32(durableAttempts, CultureInfo.InvariantCulture) <= 0) return;
                 }
 
                 using (var reward = connection.CreateCommand())

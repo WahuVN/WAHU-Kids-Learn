@@ -14,7 +14,7 @@ ACTIVE_FOCUS=FIRST_FIVE_EVENT_RUNTIME_BEHAVIOR_RESUME_REWARD
 
 - Public runtime landed: `492a942` — `MathGameEventCatalogSource`, DTO/state/action mapper, `MathGameEventCoordinator`.
 - Synthetic P0: **PASS** — exact targeted 3-question session, checkpoint progress, retry+suspend/resume, behavior action mapping, early-complete guard, Garden reward once, corrupt/missing metadata fallback, answer-transaction fault recovery, concurrent coordinator idempotency.
-- Persistence current: **7858 PASS**.
+- Persistence current: **7859 PASS**.
 - Pending-retry early complete: gọi `Complete()` nhầm khi q2 còn retry bị reject fail-safe; exact q2/retry/checkpoint giữ nguyên và không Garden reward.
 - Corrupt-catalog completion: event metadata có thể hỏng tới tận completion; fallback lesson vẫn complete 3 câu + reward đúng 1, restore catalog rồi reopen tạo fresh event session 0/3.
 - Mismatched event/lesson fail-closed: event ID hợp lệ nhưng fallback lesson lệch bị reject trước `_session.Start`; không ghost active session/runtime/progress/reward.
@@ -39,6 +39,7 @@ ACTIVE_FOCUS=FIRST_FIVE_EVENT_RUNTIME_BEHAVIOR_RESUME_REWARD
 - Same-event reward repair: nếu event cũ complete nhưng Garden write lỗi, bấm chơi lại cùng event tự repair reward session cũ rồi tạo replay session mới 0/3; replay chưa chơi không bị reward nhầm.
 - Repeated reward-repair fault: nếu reconciliation vẫn lỗi khi mở replay, event vẫn playable 0/3 và không fake reward; sau khi fault hết, reopen resume đúng replay session/q1 rồi repair session cũ, không tạo session thứ ba.
 - Zero-attempt Garden eligibility: completed Math session có 0 durable attempt không còn được tính vào `CompletedMathSessions`/milestone; một Rescue hợp lệ sau đó vẫn chỉ là growth=1, completed-rewardable=1 và còn 2 phiên tới mốc 3.
+- Durable-attempt reward guard: `GrantCompletedMathSession` không còn tin `attempts` caller để quyết định eligibility; transaction verify actual durable attempt count, nên session completed 0 câu vẫn 0 reward dù caller truyền số dương.
 
 ## PLAYABLE EVENT V1 OVERRIDE
 
@@ -95,7 +96,7 @@ Milestone: `3cf7fc6`.
 - MathDataEngineRuntimeSmoke: 104 PASS.
 - LearningSessionRuntimeSmoke: 800 PASS.
 - SQLiteRuntimeSmoke production: 179 PASS.
-- MathSessionPersistenceRuntimeSmoke current: **7858 PASS**; gồm real 402-bank breadth stress + write-failure/corruption repair + deterministic authored runtime IDs + concurrent pending-retry semantics + generated/open-ordinal self-heal + late-review transaction rollback + operational DB failure fail-safe.
+- MathSessionPersistenceRuntimeSmoke current: **7859 PASS**; gồm real 402-bank breadth stress + write-failure/corruption repair + deterministic authored runtime IDs + concurrent pending-retry semantics + generated/open-ordinal self-heal + late-review transaction rollback + operational DB failure fail-safe.
 - Real 402-bank integration đã PASS; selector breadth hiện verify đủ **67/67 lesson**, mỗi basic/medium/application bucket đều deterministic, in-range và xoay đủ 2 variant qua 16 seed.
 
 Không hard-code assertion count; regression mới chỉ được tăng hoặc nếu giảm phải có lý do rõ.
