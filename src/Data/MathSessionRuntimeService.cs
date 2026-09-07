@@ -341,6 +341,26 @@ WHERE session_id=@session;";
             });
         }
 
+        public int DeleteTerminalCheckpoints(string childId)
+        {
+            Require(childId, "childId");
+            return _database.Writes.Execute((connection, transaction) =>
+            {
+                using (var command = connection.CreateCommand())
+                {
+                    command.Transaction = transaction;
+                    command.CommandText = @"DELETE FROM math_session_runtime
+WHERE session_id IN (
+    SELECT id FROM session
+    WHERE child_id=@child AND planned_subject='math'
+      AND (state NOT IN ('started','active') OR ended_at_utc IS NOT NULL)
+);";
+                    command.Parameters.AddWithValue("@child", childId);
+                    return command.ExecuteNonQuery();
+                }
+            });
+        }
+
         public void Delete(string sessionId)
         {
             Require(sessionId, "sessionId");

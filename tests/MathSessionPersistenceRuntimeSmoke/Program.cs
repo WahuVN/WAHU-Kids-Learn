@@ -80,6 +80,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestGameEventResumeRestoresBehaviorAction(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventDifferentSelectionResumesDurableActiveEvent(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventRewardFaultReconcilesOnNextStart(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
+                TestGameEventTerminalRuntimeCleanupReconcilesOnNextStart(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventCommitFaultPreservesCheckpoint(root, schemaPath, templatePath, lessonCatalogPath);
                 TestGameEventConcurrentCoordinatorsStayIdempotent(root, schemaPath, templatePath, lessonCatalogPath);
                 Console.WriteLine("MATH_SESSION_PERSISTENCE_RUNTIME_SMOKE_PASS assertions=" + _assertions);
@@ -612,6 +613,65 @@ BEGIN SELECT RAISE(ABORT,'game event injected reward failure'); END;");
             A(SessionState(database, secondSessionId) == "active" &&
               Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + secondSessionId + "';") == 0,
                 "game_event_reward_reconcile_never_rewards_active_session");
+        }
+
+        private static void TestGameEventTerminalRuntimeCleanupReconcilesOnNextStart(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath,
+            string gameEventPath)
+        {
+            var events = new MathGameEventCatalogSource().Load(gameEventPath, lessonCatalogPath);
+            var firstEvent = events.Events[0];
+            var secondEvent = events.Events[1];
+            var database = NewDatabase(Path.Combine(root, "game-event-terminal-runtime-cleanup.db"), schemaPath);
+            string firstSessionId;
+            string childId;
+
+            using (var first = new MathGameEventCoordinator(database, templatePath, gameEventPath, "LOW", 15251,
+                firstEvent.Id, firstEvent.TargetLessonId))
+            {
+                var start = first.Start("Bé terminal cleanup");
+                firstSessionId = start.Session.SessionId;
+                childId = start.Session.ChildId;
+                for (var ordinal = 0; ordinal < 3; ordinal++)
+                {
+                    var question = first.NextQuestion();
+                    first.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700 + ordinal * 100);
+                }
+                Exec(database, @"CREATE TRIGGER fail_terminal_runtime_delete BEFORE DELETE ON math_session_runtime
+BEGIN SELECT RAISE(ABORT,'game event injected terminal runtime delete failure'); END;");
+                var completed = first.Complete();
+                A(completed.LearningSummary.LessonCompleted && SessionState(database, firstSessionId) == "completed" &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + firstSessionId + "';") == 1,
+                    "game_event_terminal_runtime_delete_fault_keeps_completion_and_reward_durable");
+                A(Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + firstSessionId + "';") == 1,
+                    "game_event_terminal_runtime_delete_fault_leaves_repairable_checkpoint");
+            }
+
+            Exec(database, "DROP TRIGGER fail_terminal_runtime_delete;");
+            string secondSessionId;
+            using (var second = new MathGameEventCoordinator(database, templatePath, gameEventPath, "LOW", 15252,
+                secondEvent.Id, secondEvent.TargetLessonId))
+            {
+                var start = second.Start("Bé terminal cleanup");
+                secondSessionId = start.Session.SessionId;
+                A(!start.Session.ResumedExistingSession && start.Session.TargetLessonId == secondEvent.TargetLessonId,
+                    "game_event_after_terminal_cleanup_starts_next_event_normally");
+                A(Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + firstSessionId + "';") == 0,
+                    "game_event_next_start_cleans_stale_terminal_runtime_checkpoint");
+                A(Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + secondSessionId + "';") == 1,
+                    "game_event_terminal_cleanup_preserves_new_active_runtime_checkpoint");
+                A(Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + firstSessionId + "';") == 3 &&
+                  Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + firstSessionId + "';") == 3 &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + firstSessionId + "';") == 1,
+                    "game_event_terminal_cleanup_preserves_learning_history_and_reward");
+                second.SuspendForBreak("terminal_cleanup_next_event");
+            }
+
+            A(Count(database, "SELECT count(*) FROM session WHERE child_id='" + childId + "' AND state='completed';") == 1,
+                "game_event_terminal_cleanup_does_not_change_terminal_session_history");
         }
 
         private static void TestGameEventCommitFaultPreservesCheckpoint(

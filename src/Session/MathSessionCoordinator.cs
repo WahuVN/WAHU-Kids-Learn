@@ -121,6 +121,18 @@ namespace WAHU.Session
             LoadTemplates();
             if (!string.IsNullOrWhiteSpace(_requestedLessonId)) LoadLessonContent();
             _profile = _sessionService.EnsurePrimaryChild(displayName);
+            try
+            {
+                // A terminal session may retain a runtime row if the prior process died or SQLite
+                // failed after the learning completion transaction. It is never resumable; clean
+                // only that derived checkpoint state while preserving durable learning history.
+                _runtime.DeleteTerminalCheckpoints(_profile.ChildId);
+            }
+            catch
+            {
+                // Cleanup is self-healing metadata maintenance. Load/start below remains the
+                // source of truth and will still surface operational DB failures when relevant.
+            }
 
             var resumed = false;
             var restoredOpenQuestion = false;
