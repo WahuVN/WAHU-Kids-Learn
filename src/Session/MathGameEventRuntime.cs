@@ -449,8 +449,16 @@ namespace WAHU.Session
             MathGameEventCatalog catalog;
             if (!new MathGameEventCatalogSource().TryLoad(_eventCatalogPath, lessonCatalogPath, out catalog)) return;
 
-            if (_requestedEventId != null) _event = catalog.FindById(_requestedEventId);
-            else if (_fallbackLessonId != null) _event = catalog.FindByLesson(_fallbackLessonId);
+            if (_requestedEventId != null)
+            {
+                _event = catalog.FindById(_requestedEventId);
+                if (_event == null && _fallbackLessonId != null)
+                    _event = catalog.FindByLesson(_fallbackLessonId);
+            }
+            else if (_fallbackLessonId != null)
+            {
+                _event = catalog.FindByLesson(_fallbackLessonId);
+            }
             if (_event != null && _fallbackLessonId != null &&
                 !string.Equals(_event.TargetLessonId, _fallbackLessonId, StringComparison.Ordinal))
                 throw new InvalidOperationException("Math game event does not match requested fallback lesson.");

@@ -75,6 +75,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestInteractiveIntegerFinalization();
                 TestGameEventBehaviorMapping();
                 TestGameEventRuntimeResumeRewardAndFallback(root, schemaPath, templatePath, lessonCatalogPath);
+                TestGameEventStaleIdFallsBackToLessonEvent(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestProductionFirstFiveGameEventsRuntime(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestProductionFirstEventResumeJourney(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventResumeRestoresBehaviorAction(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
@@ -262,6 +263,29 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                   Count(fallbackDb, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + fallbackSessionId + "';") == 1 &&
                   Count(fallbackDb, "SELECT count(*) FROM reward_event WHERE child_id='" + fallbackChildId + "';") == 0,
                     "game_event_corrupt_metadata_fallback_loses_no_learning_and_grants_no_fake_reward");
+            }
+        }
+
+        private static void TestGameEventStaleIdFallsBackToLessonEvent(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath,
+            string gameEventPath)
+        {
+            var events = new MathGameEventCatalogSource().Load(gameEventPath, lessonCatalogPath);
+            var expected = events.Events[0];
+            var database = NewDatabase(Path.Combine(root, "game-event-stale-id-fallback.db"), schemaPath);
+            using (var game = new MathGameEventCoordinator(database, templatePath, gameEventPath, "LOW", 14951,
+                "legacy_event_id_that_no_longer_exists", expected.TargetLessonId))
+            {
+                var start = game.Start("Bé stale event id");
+                A(start.Event != null && start.Event.Id == expected.Id &&
+                  start.EventState.EventPresentationAvailable && !start.EventState.FallbackToLessonPresentation,
+                    "game_event_stale_requested_id_falls_back_to_current_event_by_lesson");
+                A(start.Session.TargetLessonId == expected.TargetLessonId && start.Session.TargetQuestionCount == 3,
+                    "game_event_stale_requested_id_keeps_targeted_three_question_session");
+                game.SuspendForBreak("stale_event_id_cleanup");
             }
         }
 

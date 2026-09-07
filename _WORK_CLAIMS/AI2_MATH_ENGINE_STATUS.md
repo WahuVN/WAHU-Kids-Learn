@@ -21,7 +21,7 @@ Playable Event Engine P0: **GREEN**
 
 - `tests/MathEngineRuntimeSmoke`: PASS — **72 assertions** (baseline equivalence + adversarial Unicode/NFD, int overflow, answer-length, unit alias, expression depth/token-bomb, Unicode operators và invalid per-question whitelist fail-closed).
 - `tests/MathDataEngineRuntimeSmoke`: PASS — **104 assertions** (idempotency + terminal-session guard + optimistic skill-state guard + true cross-process mastery/session contention + atomic startup + subject/child-scoped dangling recovery).
-- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **7753 assertions** (toàn bộ gate cũ + real 402-bank selector breadth + targeted write-failure/corruption repair + deterministic authored runtime IDs + concurrent pending-retry semantics + generated/open-ordinal self-heal + late-review transaction rollback + operational DB failure fail-safe).
+- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **7756 assertions** (toàn bộ gate cũ + real 402-bank selector breadth + targeted write-failure/corruption repair + deterministic authored runtime IDs + concurrent pending-retry semantics + generated/open-ordinal self-heal + late-review transaction rollback + operational DB failure fail-safe).
 - `tests/SQLiteRuntimeSmoke`: PASS — **179 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
 - `tests/LearningSessionRuntimeSmoke`: PASS — **800 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
 - Request 009: CLOSED tại `05cdb2a` — authored pool >=6 dùng selected set đúng 3 câu (1 basic + 1 medium + 1 application), deterministic theo seed/lesson, persisted qua checkpoint JSON; retry/resume/corrupt-open recovery giữ nguyên selected set và complete sau 3 câu. Synthetic pool-6 regression + legacy path đạt **264 assertions PASS**.
@@ -46,7 +46,7 @@ Playable Event Engine P0: **GREEN**
 - FIRST-5 hint/mastery matrix: mỗi bài đầu có một câu đúng với `hint_level=2` và hai câu independent; outcome hinted không được tính independent, mastery reason chứa `hinted_correct_lower_weight`, review reason `hinted_success_short_recall`, DB persist đúng 1 max-hint + 2 no-hint attempts và child_skill đúng `independent_success_count=2`, `hinted_success_count=1`.
 - Pack-byte identity audit: production `Program.BootstrapRuntime()` bắt buộc `ContentPackValidator.ValidateDirectory(..., true)` cho bundled Math pack trước UI; manifest SHA-256 mismatch fail startup, nên V5 `pack_id+version` kết hợp verified manifest đủ contract hiện tại, chưa cần invent schema V6 chỉ để lưu hash lần hai.
 - Late-review transaction fault: injected failure tại `review_schedule` (sau attempt/mastery/child_skill trong cùng transaction) rollback sạch toàn chain + semantic key; retry sau khi gỡ trigger ghi đúng một attempt/mastery/child_skill/review duy nhất.
-- Expanded-bank integration: `373d9d1` bỏ test coupling `Single(...)`/`_01`, chạy được cả baseline 201 và pool 402; current real 402-bank persistence tổng **7753 assertions PASS**.
+- Expanded-bank integration: `373d9d1` bỏ test coupling `Single(...)`/`_01`, chạy được cả baseline 201 và pool 402; current real 402-bank persistence tổng **7756 assertions PASS**.
 - PowerShell release/build scripts: schema V5 payload/bootstrap expectations đã cập nhật; staged `Build-SetupArtifacts.ps1` PASS qua Release x86 + runtime smokes + staged payload/preflight + portable packaging.
 - `git diff --check` + staged `git diff --cached --check`: PASS cho wave V5.
 
@@ -68,7 +68,8 @@ Playable Event Engine P0: **GREEN**
 - Behavior-action resume: targeted event can naturally reach non-READY support after repeated wrong/max-hint attempts; suspend/resume now maps rebuilt `Summary.FinalBehaviorState` back to the same event action, preserving support mode and exact open q3/retry state.
 - Fatigue audit: V1 targeted event has 3 questions on one skill, while conservative BehaviorController fatigue requires >=4 recent observations and >=2 distinct skills. AI2 intentionally does **not** weaken global thresholds to force fatigue. Explicit `Nghỉ ở đây`/`SuspendForBreak` remains available independent of fatigue detection; FATIGUED mapper contract remains covered for UI consumption when engine evidence legitimately produces it.
 - Terminal-runtime cleanup: `MathSessionRuntimeService.DeleteTerminalCheckpoints(childId)` removes only derived runtime rows whose Math session is already terminal. `MathSessionCoordinator.Start` invokes it best-effort before resume lookup. Injected DELETE failure after event completion leaves learning + reward durable and one repairable runtime row; next event start cleans old row, keeps new active runtime, and preserves prior 3 attempts/3 mastery/1 reward.
-- Playable Event P0 persistence total: **7753 assertions PASS**. Production AI1 catalog `bd1809e` đã tích hợp thật 5/5 event; synthetic fixtures vẫn giữ để fault/corruption/race test độc lập.
+- Stale event-id fallback: nếu caller giữ một `event_id` cũ không còn trong catalog nhưng `fallbackLessonId` vẫn trỏ đúng lesson, runtime resolve lại event hiện tại bằng lesson; ID tồn tại nhưng trỏ sai lesson vẫn fail-closed.
+- Playable Event P0 persistence total: **7756 assertions PASS**. Production AI1 catalog `bd1809e` đã tích hợp thật 5/5 event; synthetic fixtures vẫn giữ để fault/corruption/race test độc lập.
 
 ## Session
 
