@@ -110,6 +110,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestGameEventConcurrentCoordinatorsStayIdempotent(root, schemaPath, templatePath, lessonCatalogPath);
                 TestGameEventConcurrentCompletionRejectsAbortedTerminal(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTerminalLoserCoordinatorsBecomeInactive(root, schemaPath, templatePath, lessonCatalogPath);
+                TestRecoveredTerminalRejectsStaleCompleteAndAbort(root, schemaPath, templatePath, lessonCatalogPath);
                 TestCompleteVsAbortRaceHasSingleDurableWinner(root, schemaPath, templatePath, lessonCatalogPath);
                 TestGameEventCompleteVsSuspendRaceStaysTerminal(root, schemaPath, templatePath, lessonCatalogPath);
                 Console.WriteLine("MATH_SESSION_PERSISTENCE_RUNTIME_SMOKE_PASS assertions=" + _assertions);
@@ -2153,6 +2154,55 @@ BEGIN SELECT RAISE(ABORT,'game event injected mastery failure'); END;");
                   Count(completedDb, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + firstStart.ChildId +
                   "' AND lesson_id='" + lesson.Id + "' AND started_count=1 AND completed_count=1;") == 1,
                     "terminal_loser_abort_after_complete_rejects_but_converges_inactive");
+            }
+        }
+
+        private static void TestRecoveredTerminalRejectsStaleCompleteAndAbort(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.Lessons[0];
+            var database = NewDatabase(Path.Combine(root, "recovered-terminal-stale-operations.db"), schemaPath);
+
+            using (var staleComplete = new MathSessionCoordinator(database, templatePath, "LOW", 14227, lesson.Id))
+            using (var staleAbort = new MathSessionCoordinator(database, templatePath, "NORMAL", 999999, lesson.Id))
+            {
+                var firstStart = staleComplete.Start("Bé recovered terminal stale ops");
+                var secondStart = staleAbort.Start("Bé recovered terminal stale ops");
+                A(secondStart.ResumedExistingSession && secondStart.SessionId == firstStart.SessionId,
+                    "recovered_terminal_stale_ops_wrappers_share_session");
+                for (var ordinal = 0; ordinal < 3; ordinal++)
+                {
+                    var qA = staleComplete.NextQuestion();
+                    var qB = staleAbort.NextQuestion();
+                    staleComplete.SubmitAnswerAt(qA.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700 + ordinal * 100);
+                    staleAbort.SubmitAnswerAt(qB.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 720 + ordinal * 100);
+                }
+                Exec(database, "DELETE FROM math_session_runtime WHERE session_id=@session;", "@session", firstStart.SessionId);
+                var recovered = new LearnerSessionService(database).RecoverDanglingSessions(firstStart.ChildId);
+                A(recovered == 1 && SessionState(database, firstStart.SessionId) == "recovered" &&
+                  Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + firstStart.SessionId + "';") == 0,
+                    "recovered_terminal_stale_ops_fixture_marks_missing_runtime_session_recovered");
+
+                var completeRejected = false;
+                try { staleComplete.Complete(); }
+                catch (InvalidOperationException) { completeRejected = true; }
+                var abortRejected = false;
+                try { staleAbort.Abort("recovered_terminal_stale_abort"); }
+                catch (InvalidOperationException) { abortRejected = true; }
+                A(completeRejected && abortRejected && !staleComplete.IsActive && !staleAbort.IsActive &&
+                  SessionState(database, firstStart.SessionId) == "recovered",
+                    "recovered_terminal_stale_complete_and_abort_reject_but_converge_inactive");
+                A(Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + firstStart.ChildId +
+                  "' AND lesson_id='" + lesson.Id + "' AND started_count=1 AND completed_count=0;") == 1 &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + firstStart.SessionId + "';") == 0,
+                    "recovered_terminal_stale_ops_never_fake_completion_or_reward");
+                A(Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + firstStart.SessionId + "';") == 3 &&
+                  Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + firstStart.SessionId + "';") == 3,
+                    "recovered_terminal_stale_ops_preserve_durable_learning_history");
             }
         }
 
