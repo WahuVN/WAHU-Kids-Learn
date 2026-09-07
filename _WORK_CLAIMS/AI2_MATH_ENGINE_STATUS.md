@@ -2,6 +2,7 @@
 
 Cập nhật: 2026-09-07
 Branch: `main`
+Playable Event Engine P0: **GREEN**
 
 ## Question types / answer validation
 
