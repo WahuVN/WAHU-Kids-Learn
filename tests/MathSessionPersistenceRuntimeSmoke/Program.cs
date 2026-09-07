@@ -63,6 +63,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestResumeOpenQuestionAndComplete(root, schemaPath, templatePath);
                 TestCommittedStaleQuestionIsNotReplayed(root, schemaPath, templatePath);
                 TestCorruptOpenQuestionRecoversWithoutProgressReset(root, schemaPath, templatePath);
+                TestAdaptiveTamperedOpenQuestionIsDiscarded(root, schemaPath, templatePath);
                 TestDeterministicSecondQuestionAcrossResume(root, schemaPath, templatePath);
                 TestInteractiveIntegerFinalization();
                 Console.WriteLine("MATH_SESSION_PERSISTENCE_RUNTIME_SMOKE_PASS assertions=" + _assertions);
@@ -2026,13 +2027,15 @@ END;");
         {
             var database = NewDatabase(Path.Combine(root, "corrupt-cache.db"), schemaPath);
             string sessionId;
+            string expectedSecondFingerprint;
             using (var first = new MathSessionCoordinator(database, templatePath, "LOW", 314159, 3))
             {
                 var start = first.Start("Bé corrupt");
                 sessionId = start.SessionId;
                 var q1 = first.NextQuestion();
                 first.SubmitAnswerAt(q1.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 1000);
-                first.NextQuestion();
+                var q2 = first.NextQuestion();
+                expectedSecondFingerprint = q2.TemplateId + "|" + q2.PromptVi + "|" + q2.CorrectAnswerDisplay + "|" + string.Join("~", q2.DisplayChoices);
                 Exec(database, "UPDATE math_session_runtime SET current_question_json='not-json-at-all' WHERE session_id=@session;", "@session", sessionId);
                 first.Suspend("simulate_corrupt_cache");
             }
@@ -2045,9 +2048,92 @@ END;");
                 A(start.CompletedQuestionCount == 1 && resumed.Summary.Correct == 1, "corrupt_cache_keeps_committed_progress");
                 A(Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + sessionId + "';") == 1,
                     "corrupt_cache_does_not_reset_attempts");
+                A(Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + sessionId +
+                    "' AND generated_question_count=1 AND current_question_json IS NULL;") == 1,
+                    "corrupt_adaptive_cache_rolls_cursor_back_to_committed_ordinal");
                 var replacement = resumed.NextQuestion();
-                A(replacement != null, "corrupt_cache_can_continue_with_new_question");
+                var replacementFingerprint = replacement.TemplateId + "|" + replacement.PromptVi + "|" + replacement.CorrectAnswerDisplay + "|" + string.Join("~", replacement.DisplayChoices);
+                A(replacement != null && replacementFingerprint == expectedSecondFingerprint,
+                    "corrupt_adaptive_cache_regenerates_same_second_question_not_third");
                 resumed.Abort("cleanup");
+            }
+        }
+
+        private static void TestAdaptiveTamperedOpenQuestionIsDiscarded(string root, string schemaPath, string templatePath)
+        {
+            var database = NewDatabase(Path.Combine(root, "adaptive-tampered-cache.db"), schemaPath);
+            string sessionId;
+            string canonicalFingerprint;
+            using (var first = new MathSessionCoordinator(database, templatePath, "LOW", 271828, 3))
+            {
+                var start = first.Start("Bé adaptive tampered cache");
+                sessionId = start.SessionId;
+                var q1 = first.NextQuestion();
+                canonicalFingerprint = q1.TemplateId + "|" + q1.PromptVi + "|" + q1.CorrectAnswerDisplay + "|" + string.Join("~", q1.DisplayChoices);
+                first.Suspend("adaptive_tampered_cache_fixture");
+            }
+
+            var cachedJson = ScalarText(database,
+                "SELECT current_question_json FROM math_session_runtime WHERE session_id='" + sessionId + "';");
+            var tampered = Json.Deserialize<MathQuestion>(cachedJson);
+            tampered.PromptVi = tampered.PromptVi + " [TAMPERED]";
+            tampered.CorrectAnswer = tampered.CorrectAnswer + 111;
+            tampered.CorrectAnswerText = "__adaptive_tampered__";
+            tampered.AcceptedAnswers = new[] { "__adaptive_tampered__" };
+            Exec(database,
+                "UPDATE math_session_runtime SET current_question_json=@question WHERE session_id=@session;",
+                "@question", Json.Serialize(tampered), "@session", sessionId);
+
+            using (var resumed = new MathSessionCoordinator(database, templatePath, "NORMAL", 999999, 9))
+            {
+                var start = resumed.Start("Bé adaptive tampered cache");
+                A(start.ResumedExistingSession && start.CompletedQuestionCount == 0 &&
+                  start.DiscardedCorruptOpenQuestion && !start.RestoredOpenQuestion,
+                    "adaptive_tampered_cache_is_discarded_not_trusted");
+                A(Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + sessionId +
+                    "' AND generated_question_count=0 AND current_question_json IS NULL;") == 1,
+                    "adaptive_tampered_cache_rewinds_generated_cursor_to_zero");
+                var regenerated = resumed.NextQuestion();
+                var regeneratedFingerprint = regenerated.TemplateId + "|" + regenerated.PromptVi + "|" + regenerated.CorrectAnswerDisplay + "|" + string.Join("~", regenerated.DisplayChoices);
+                A(regeneratedFingerprint == canonicalFingerprint,
+                    "adaptive_tampered_cache_regenerates_canonical_first_question");
+                resumed.Abort("adaptive_tampered_cache_cleanup");
+            }
+
+            var selectionDatabase = NewDatabase(Path.Combine(root, "adaptive-tampered-selection.db"), schemaPath);
+            string selectionSessionId;
+            string selectionCanonicalFingerprint;
+            using (var first = new MathSessionCoordinator(selectionDatabase, templatePath, "LOW", 271829, 3))
+            {
+                var start = first.Start("Bé adaptive tampered selection");
+                selectionSessionId = start.SessionId;
+                var q1 = first.NextQuestion();
+                selectionCanonicalFingerprint = q1.TemplateId + "|" + q1.PromptVi + "|" + q1.CorrectAnswerDisplay + "|" + string.Join("~", q1.DisplayChoices);
+                first.Suspend("adaptive_tampered_selection_fixture");
+            }
+            var selectionJson = ScalarText(selectionDatabase,
+                "SELECT current_selection_json FROM math_session_runtime WHERE session_id='" + selectionSessionId + "';");
+            var selectionData = Json.Deserialize<Dictionary<string, object>>(selectionJson);
+            selectionData["template_id"] = "__tampered_template__";
+            selectionData["skill_id"] = "__tampered_skill__";
+            Exec(selectionDatabase,
+                "UPDATE math_session_runtime SET current_selection_json=@selection WHERE session_id=@session;",
+                "@selection", Json.Serialize(selectionData), "@session", selectionSessionId);
+
+            using (var resumed = new MathSessionCoordinator(selectionDatabase, templatePath, "NORMAL", 999999, 9))
+            {
+                var start = resumed.Start("Bé adaptive tampered selection");
+                A(start.ResumedExistingSession && start.DiscardedCorruptOpenQuestion && !start.RestoredOpenQuestion &&
+                  start.CompletedQuestionCount == 0,
+                    "adaptive_tampered_selection_metadata_is_discarded");
+                A(Count(selectionDatabase, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + selectionSessionId +
+                    "' AND generated_question_count=0 AND current_question_json IS NULL;") == 1,
+                    "adaptive_tampered_selection_rewinds_generated_cursor");
+                var regenerated = resumed.NextQuestion();
+                var fingerprint = regenerated.TemplateId + "|" + regenerated.PromptVi + "|" + regenerated.CorrectAnswerDisplay + "|" + string.Join("~", regenerated.DisplayChoices);
+                A(fingerprint == selectionCanonicalFingerprint,
+                    "adaptive_tampered_selection_regenerates_canonical_question");
+                resumed.Abort("adaptive_tampered_selection_cleanup");
             }
         }
 

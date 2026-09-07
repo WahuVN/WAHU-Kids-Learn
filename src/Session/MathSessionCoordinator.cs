@@ -980,6 +980,18 @@ namespace WAHU.Session
                         throw new InvalidDataException("Cached targeted Math question does not match canonical authored content.");
                 }
 
+                MathSelectionDecision restoredSelection = null;
+                if (string.Equals(_sessionMode, "adaptive", StringComparison.Ordinal))
+                {
+                    restoredSelection = DeserializeSelection(runtime.CurrentSelectionJson, question);
+                    if (restoredSelection == null || restoredSelection.Template == null)
+                        throw new InvalidDataException("Cached adaptive Math selection is invalid.");
+                    var regenerated = new MathQuestionGenerator(QuestionSeed(
+                        _seed, _generatedQuestionCount, restoredSelection.Template.TemplateId)).Generate(restoredSelection);
+                    if (!MatchesAuthoredRuntimeContract(question, regenerated))
+                        throw new InvalidDataException("Cached adaptive Math question does not match deterministic regeneration.");
+                }
+
                 if (string.Equals(_sessionMode, "lesson", StringComparison.Ordinal) &&
                     IsFinalizedSelectedContentQuestion(committedAttempts, question.ContentQuestionId))
                 {
@@ -999,7 +1011,7 @@ namespace WAHU.Session
                 }
 
                 _currentQuestion = question;
-                _currentSelection = DeserializeSelection(runtime.CurrentSelectionJson, question);
+                _currentSelection = restoredSelection ?? DeserializeSelection(runtime.CurrentSelectionJson, question);
                 _currentAttemptIndex = nextAttemptIndex;
                 _questionStartedAtUtc = runtime.QuestionStartedAtUtc ?? DateTime.UtcNow;
                 if (string.Equals(_sessionMode, "lesson", StringComparison.Ordinal) && lessonSelectionMetadataNeedsRepair)
@@ -1026,7 +1038,9 @@ namespace WAHU.Session
         private void ReconcileTargetedGeneratedOrdinalAfterDiscard()
         {
             _currentAttemptIndex = 1;
-            if (!string.Equals(_sessionMode, "lesson", StringComparison.Ordinal)) return;
+            // A discarded open question was generated but never finalized. Rewind to durable
+            // completed-question progress for both adaptive and targeted sessions so the same
+            // ordinal is regenerated instead of being silently skipped.
             _generatedQuestionCount = Math.Max(0, Math.Min(_targetQuestionCount, _attempts));
         }
 
@@ -1337,6 +1351,18 @@ namespace WAHU.Session
 
             var data = _json.Deserialize<Dictionary<string, object>>(json);
             object value;
+            if (data != null && data.TryGetValue("template_id", out value))
+            {
+                var persistedTemplateId = Convert.ToString(value, System.Globalization.CultureInfo.InvariantCulture);
+                if (!string.Equals(persistedTemplateId, template.TemplateId, StringComparison.Ordinal))
+                    throw new InvalidDataException("Persisted Math selection template does not match cached question.");
+            }
+            if (data != null && data.TryGetValue("skill_id", out value))
+            {
+                var persistedSkillId = Convert.ToString(value, System.Globalization.CultureInfo.InvariantCulture);
+                if (!string.Equals(persistedSkillId, template.SkillId, StringComparison.Ordinal))
+                    throw new InvalidDataException("Persisted Math selection skill does not match cached question.");
+            }
             var decision = new MathSelectionDecision { Template = template };
             if (data != null && data.TryGetValue("score", out value)) decision.Score = DoubleValue(value, 0);
             if (data != null && data.TryGetValue("difficulty_fit", out value)) decision.DifficultyFit = DoubleValue(value, question.DifficultyFit);
