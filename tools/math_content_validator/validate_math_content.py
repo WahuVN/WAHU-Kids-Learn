@@ -1289,6 +1289,8 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
         if lid:
             lesson_ids.add(lid); all_ids.append((lid, where)); lesson_by_id[lid] = lesson
         skill = required_text(lesson, "skill_id", where, errors)
+        if skill and lid and lid != "m2_ls_" + skill.lower():
+            errors.append(f"lesson_id_skill_mismatch:{where}:{lid}:{skill}")
         order_in_domain = lesson.get("order_in_domain")
         if type(order_in_domain) is not int or order_in_domain < 1:
             errors.append(f"invalid_lesson_order:{where}:{order_in_domain!r}")
@@ -1354,6 +1356,9 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             x = check_id(concept.get("id"), cwhere, errors)
             if x:
                 concept_ids.add(x); all_ids.append((x, cwhere))
+                expected_concept_id = f"m2_cp_{skill.lower()}_{j + 1:02d}"
+                if x != expected_concept_id:
+                    errors.append(f"concept_id_skill_ordinal_mismatch:{cwhere}:{x}:{expected_concept_id}")
             concept_name = required_text(concept, "name_vi", cwhere, errors)
             if concept_name and len(concept_name) > MAX_CONCEPT_NAME_CHARS:
                 errors.append(f"concept_name_too_long:{cwhere}:{len(concept_name)}")
@@ -1372,6 +1377,9 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             x = check_id(example.get("id"), ewhere, errors)
             if x:
                 example_ids.add(x); all_ids.append((x, ewhere))
+                expected_example_id = f"m2_ex_{skill.lower()}_{j + 1:02d}"
+                if x != expected_example_id:
+                    errors.append(f"example_id_skill_ordinal_mismatch:{ewhere}:{x}:{expected_example_id}")
             example_prompt = required_text(example, "prompt_vi", ewhere, errors)
             if example_prompt and len(example_prompt) > MAX_WORKED_PROMPT_CHARS:
                 errors.append(f"worked_prompt_too_long:{ewhere}:{len(example_prompt)}")
@@ -1484,6 +1492,7 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
     second_hint_counts = Counter()
     distractor_rationale_counts = Counter()
     correct_choice_positions_by_count: dict[int, Counter] = defaultdict(Counter)
+    question_ordinals_by_skill: dict[str, list[int]] = defaultdict(list)
 
     for i, q in enumerate(questions):
         where = f"question[{i}]"
@@ -1501,6 +1510,13 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             errors.append(f"question_skill_lesson_mismatch:{where}:{skill}:{lid}")
         if skill not in baseline_skill_set:
             errors.append(f"unknown_question_skill:{where}:{skill}")
+        if skill and qid:
+            prefix = "m2_q_" + skill.lower() + "_"
+            suffix = qid[len(prefix):] if qid.startswith(prefix) else ""
+            if not qid.startswith(prefix) or not re.fullmatch(r"\d{2}", suffix):
+                errors.append(f"question_id_skill_ordinal_mismatch:{where}:{qid}:{prefix}NN")
+            else:
+                question_ordinals_by_skill[skill].append(int(suffix))
         question_counts_by_skill[skill] += 1
         difficulty = q.get("difficulty")
         if difficulty not in DIFFICULTIES:
@@ -1924,6 +1940,12 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
                 continue
             if prompts_are_near_duplicate(prompt_a, prompt_b, 0.95):
                 errors.append(f"cross_lesson_near_duplicate_prompt:{qid_a}:{qid_b}")
+
+    for skill, count in question_counts_by_skill.items():
+        actual_ordinals = sorted(question_ordinals_by_skill.get(skill, []))
+        expected_ordinals = list(range(1, count + 1))
+        if actual_ordinals != expected_ordinals:
+            errors.append(f"non_contiguous_question_ordinals:{skill}:{actual_ordinals}:{expected_ordinals}")
 
     # Global ID uniqueness, including nested content entities.
     id_counts = Counter(x for x, _ in all_ids if x)

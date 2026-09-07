@@ -168,6 +168,25 @@ class MathContentDataSmoke(unittest.TestCase):
                 else:
                     self.fail(f"out-of-grade answer_kind: {kind}")
 
+    def test_content_ids_are_skill_bound_and_question_ordinals_are_contiguous(self):
+        by_skill = {}
+        for lesson in self.lessons:
+            skill_slug = lesson["skill_id"].lower()
+            self.assertEqual("m2_ls_" + skill_slug, lesson["id"])
+            for index, concept in enumerate(lesson["concepts"], 1):
+                self.assertEqual(f"m2_cp_{skill_slug}_{index:02d}", concept["id"])
+            for index, example in enumerate(lesson["worked_examples"], 1):
+                self.assertEqual(f"m2_ex_{skill_slug}_{index:02d}", example["id"])
+        for item in self.questions:
+            skill_slug = item["skill_id"].lower()
+            prefix = "m2_q_" + skill_slug + "_"
+            self.assertTrue(item["id"].startswith(prefix))
+            suffix = item["id"][len(prefix):]
+            self.assertRegex(suffix, r"^\d{2}$")
+            by_skill.setdefault(item["skill_id"], []).append(int(suffix))
+        for skill, ordinals in by_skill.items():
+            self.assertEqual(list(range(1, len(ordinals) + 1)), sorted(ordinals), skill)
+
     def test_no_orphan_question_and_every_question_referenced_once(self):
         refs = []
         for lesson in self.lessons:
