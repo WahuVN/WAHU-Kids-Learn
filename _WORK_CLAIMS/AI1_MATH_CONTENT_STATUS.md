@@ -28,7 +28,7 @@ Owner: AI1 — Math Content & Data
   - interactive measurement
   - word problem
 - Semantic validator errors: **0**
-- Math content unittest: **70 / 70 PASS**
+- Math content unittest: **71 / 71 PASS**
 - Pack manifest/hash/listing check on current working tree: **PASS** (`version=1.9.0`, 3 listed files)
 - Real 402-bank session/persistence integration: **289 assertions PASS** trên snapshot trước final engine stress; AI2 committed status ghi final persistence **374 PASS**. Current unstaged AI2 partial-pack-identity fixture đang được phát triển riêng và không thuộc AI1.
 - Child UI targeted build (`BuildProjectReferences=false`) + runtime smoke: **1593 assertions PASS**
@@ -149,7 +149,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - **24 câu cộng/trừ viết** khớp chính xác số lượt nhớ/mượn theo skill contract;
 - **166 phương trình số instructional** đang được kiểm bằng arithmetic parser, hiện **0 sai**; detector có regression cho cả phép cộng chuỗi và phép chia dùng dấu `:`.
 
-Latest runtime result: **49/49 PASS**; pool-6 regression **8/8 PASS**; full `MathContentDataSmoke` **70/70 PASS**; clean rebuild real 402-bank persistence/session smoke **289 assertions PASS**.
+Latest runtime result: **49/49 PASS**; pool-6 regression **8/8 PASS**; full `MathContentDataSmoke` **71/71 PASS**; clean rebuild real 402-bank persistence/session smoke **289 assertions PASS**.
 
 ## Current priority — FIRST 10 LESSONS FIRST
 
@@ -160,7 +160,7 @@ Theo ưu tiên hiện tại của người dùng, AI1 **không tiếp tục poli
 - Hint normalized reuse trong first block: **0 group** ở cả hint cấp 1 và cấp 2.
 - Hai application pair máy móc nhất đã được viết lại: `NUM_MIN_MAX_UP_TO_4` similarity **0.75 → 0.293**; `ESTIMATE_OBJECTS_BY_TENS` **0.803 → 0.521**.
 - Max application-pair similarity của cả 10 bài đầu hiện **0.597 < 0.70** và có regression fail-closed.
-- Full content tests hiện **70/70 PASS**, validator **402/402 valid / 0 errors**.
+- Full content tests hiện **71/71 PASS**, validator **402/402 valid / 0 errors**.
 - Whole-bank fallback generic giảm thêm **36 → 31** như hệ quả phụ; **không dùng thời gian hiện tại để polish 31 case phía sau** trước khi first block được kiểm kỹ hơn.
 - Question-bank SHA hiện tại: `C15B08D33F4165137B19AA46D95DE230352BAD3B1F60FEDE976AA50A87076907`.
 
@@ -171,6 +171,14 @@ Theo ưu tiên hiện tại của người dùng, AI1 **không tiếp tục poli
 - Regressions lock all **18 comparison distractors** to the comparison domain and lock the 73-rounding misconception set.
 - Result: **70/70 content tests PASS**, validator 402/402 valid, first-block generic fallback remains **0**.
 - Question-bank SHA: `C15B08D33F4165137B19AA46D95DE230352BAD3B1F60FEDE976AA50A87076907`.
+
+## First-five polish wave — child-friendly concept language
+
+- Audit lesson instruction found algebraic placeholder notation in two concepts: `n00` for full hundreds and `n - 1 / n + 1` for predecessor/successor.
+- Rewritten for Grade-2 readers: full hundreds are explained by **two final digits both being 0**; predecessor/successor by **bớt 1 / thêm 1**.
+- Regression scans explanation/objective/concept/worked-example surfaces of the first 5 lessons and forbids standalone `n` / `n00`.
+- Result: **71/71 content tests PASS**, validator 402/402 valid.
+- Lesson-catalog SHA: `C52D4EAE3E1F12AB4CB5DDA9B51680A615C37D8134AC6AFFD15144E5F242ECAF`; question bank unchanged at `C15B08D33F4165137B19AA46D95DE230352BAD3B1F60FEDE976AA50A87076907`.
 
 ## Commits / waves
 

@@ -199,7 +199,7 @@
         {
           "id": "m2_cp_num_full_hundreds_recognize_01",
           "name_vi": "Số tròn trăm",
-          "definition_vi": "Số có dạng n00 trong phạm vi 1000, với hàng chục và đơn vị bằng 0."
+          "definition_vi": "Số tròn trăm có hàng chục và hàng đơn vị đều bằng 0; vì vậy hai chữ số cuối của số đều là 0."
         }
       ],
       "worked_examples": [
@@ -253,7 +253,7 @@
         {
           "id": "m2_cp_num_predecessor_successor_01",
           "name_vi": "Liền trước và liền sau",
-          "definition_vi": "Với số n, số liền trước là n - 1 và số liền sau là n + 1 khi còn trong phạm vi học."
+          "definition_vi": "Số liền trước được tìm bằng cách bớt 1; số liền sau được tìm bằng cách thêm 1, miễn là số vẫn trong phạm vi đã học."
         }
       ],
       "worked_examples": [

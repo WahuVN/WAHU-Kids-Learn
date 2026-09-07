@@ -717,6 +717,22 @@ class MathContentDataSmoke(unittest.TestCase):
                         fallback.append((qid, choice["text"]))
         self.assertEqual([], fallback)
 
+    def test_first_five_instruction_avoids_algebraic_placeholder_notation(self):
+        forbidden = (r"\bn\b", r"n00")
+        checked = 0
+        for lesson in self.lessons[:5]:
+            child_texts = [lesson["explanation_vi"], *lesson["objectives_vi"]]
+            for concept in lesson["concepts"]:
+                child_texts.extend([concept["name_vi"], concept["definition_vi"]])
+            for example in lesson["worked_examples"]:
+                child_texts.extend([example["prompt_vi"], example["answer"], *example["solution_steps_vi"]])
+            for text in child_texts:
+                with self.subTest(skill=lesson["skill_id"], text=text):
+                    for pattern in forbidden:
+                        self.assertIsNone(re.search(pattern, text, re.IGNORECASE))
+                checked += 1
+        self.assertGreaterEqual(checked, 40)
+
     def test_first_ten_compare_distractors_stay_in_comparison_domain(self):
         lesson = next(item for item in self.lessons[:10] if item["skill_id"] == "NUM_COMPARE_0_1000")
         forbidden = {"+", "-"}
