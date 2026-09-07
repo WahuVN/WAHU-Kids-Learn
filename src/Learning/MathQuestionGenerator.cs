@@ -87,6 +87,7 @@ namespace WAHU.Learning
                     case "write_number_to_1000": question = WriteNumberTo1000(decision.Template); break;
                     case "estimate_objects_by_tens": question = EstimateObjectsByTens(decision.Template); break;
                     case "measurement_estimate_reference_10cm": question = MeasurementEstimateReference10Cm(decision.Template); break;
+                    case "draw_segment_given_length": question = DrawSegmentGivenLength(decision.Template); break;
                     default: throw new InvalidOperationException("Unsupported VERIFIED math template: " + decision.Template.TemplateId);
                 }
             }
@@ -567,6 +568,26 @@ namespace WAHU.Learning
                 "Chia đều nghĩa là mỗi bạn nhận số bánh bằng nhau. Hãy phân " + total + " chiếc bánh vào " + divisor + " phần bằng nhau.",
                 "Phép tính phù hợp là " + total + " : " + divisor + ".");
             question.IllustrationData = "wordshare|" + total + "|" + divisor;
+            return question;
+        }
+
+        private MathQuestion DrawSegmentGivenLength(MathTemplateRef template)
+        {
+            var target = _random.Next(2, 13);
+            var question = new MathQuestion
+            {
+                TemplateId = template.TemplateId,
+                SkillId = template.SkillId,
+                PromptVi = "Vẽ đoạn thẳng AB dài " + target + " cm bằng cách chọn hai đầu mút trên thước.",
+                CorrectAnswer = target,
+                AnswerKind = "interaction_integer",
+                CorrectAnswerText = target.ToString(CultureInfo.InvariantCulture),
+                Choices = new int[0],
+                ChoiceTexts = new string[0],
+                HintLevel1 = "Chọn điểm A trước, rồi đếm đúng số khoảng 1 cm để chọn điểm B.",
+                HintLevel2 = "Độ dài AB là khoảng cách giữa hai số trên thước: |B − A|."
+            };
+            question.IllustrationData = "segmentdraw|" + target + "|15";
             return question;
         }
 

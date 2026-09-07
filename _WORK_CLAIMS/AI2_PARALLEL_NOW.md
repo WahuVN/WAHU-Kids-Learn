@@ -3,18 +3,20 @@
 LANE: AI2
 LANE_DONE=NO
 BASELINE=3d8674d
-MANIFEST_LOCK=AI2
-BUILD_SETUP_LOCK=AI2
+MANIFEST_LOCK=FREE
+BUILD_SETUP_LOCK=AI3
 REQUEST_009_READY=NO
+REQUEST_010_READY=7afbb7b
+ADAPTIVE_SEGMENT_READY=THIS_COMMIT
 
 
 ## NO-WAIT rule
 AI2 **không chờ AI1/AI3**. Request 009 dùng synthetic pool >=6 ngay trong engine tests; Request 006/010/generator đều có fixture độc lập. Nếu một file đang lock bởi chính AI2 wave khác, commit wave nhỏ trước rồi chuyển task kế tiếp.
 
 ### Queue luôn có việc
-- NOW: Request 010 isolated + mandatory regressions.
-- NEXT: adaptive `draw_segment_given_length` isolated commit.
-- NEXT: Request 009 synthetic selected-set engine/persistence.
+- DONE: Request 010 isolated at `7afbb7b` — expression whitelist + current-question JSON regression, persistence 220 PASS.
+- DONE/commit-now: adaptive `draw_segment_given_length` — LearningSession 800 PASS.
+- NOW: Request 009 synthetic selected-set engine/persistence.
 - NEXT: Request 006 `answer_unit` model/loader/runtime/resume.
 - FALLBACK: validator/generator fuzz, retry/idempotency/corrupt-cache/persistence stress, selector determinism, V5 pack-identity regression.
 

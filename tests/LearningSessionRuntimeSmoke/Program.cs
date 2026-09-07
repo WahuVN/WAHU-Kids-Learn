@@ -40,7 +40,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
         private static IList<MathTemplateRef> TestVerifiedContentAndCore(string templatePath)
         {
             var descriptors = new MathVerifiedTemplateSource().Load(templatePath);
-            A(descriptors.Count == 70, "verified_template_source_flattens_all_verified_variants");
+            A(descriptors.Count == 71, "verified_template_source_flattens_all_verified_variants");
             A(descriptors.All(x => x.Status == "VERIFIED_A_TEMPLATE"), "template_source_filters_verified_a_only");
             var refs = descriptors.Select(x => new MathTemplateRef
             {
@@ -51,7 +51,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 StatementVi = x.StatementVi,
                 AnswerText = x.AnswerText
             }).Where(AdaptiveMathSelector.IsSupported).ToList();
-            A(refs.Count == 70, "generator_supports_all_seventy_verified_runtime_candidates");
+            A(refs.Count == 71, "generator_supports_all_seventy_one_verified_runtime_candidates");
             var chanceRefs = refs.Where(x => x.TemplateId.StartsWith("possible_certain_impossible_die__", StringComparison.Ordinal)).ToList();
             A(chanceRefs.Count == 3, "compound_probability_template_flattens_three_variants");
             A(chanceRefs.All(x => x.SourceTemplateId == "possible_certain_impossible_die" &&
@@ -95,7 +95,7 @@ namespace WAHU.LearningSessionRuntimeSmoke
             var first = selector.Select(refs, empty, new DateTime(2026, 9, 6, 10, 0, 0, DateTimeKind.Utc), new string[0], new string[0]);
             A(first != null && first.Template != null, "selector_returns_candidate");
             A(first.DifficultyFit >= 0 && first.DifficultyFit <= 1, "selector_difficulty_fit_bounded");
-            A(first.CandidateSummary.Count == 70, "selector_audits_all_candidates");
+            A(first.CandidateSummary.Count == 71, "selector_audits_all_candidates");
 
             var dueSkills = new Dictionary<string, SkillSnapshot>(StringComparer.Ordinal);
             foreach (var r in refs) dueSkills[r.SkillId] = new SkillSnapshot { SkillId = r.SkillId, MasteryScore = 0.20, Confidence = 0.20, AttemptsCount = 1, LearningState = "LEARNING" };
@@ -111,9 +111,16 @@ namespace WAHU.LearningSessionRuntimeSmoke
                 A(!string.IsNullOrWhiteSpace(q.QuestionId), "question_id_" + r.TemplateId);
                 A(!string.IsNullOrWhiteSpace(q.PromptVi), "prompt_" + r.TemplateId);
                 A(q.Representation == ExpectedRepresentation(r.TemplateId), "representation_matches_instruction_visual_" + r.TemplateId);
-                A(q.DisplayChoices.Count >= 2 && q.DisplayChoices.Count <= 4, "choice_count_2_to_4_" + r.TemplateId);
-                A(q.DisplayChoices.Distinct(StringComparer.Ordinal).Count() == q.DisplayChoices.Count, "unique_display_choices_" + r.TemplateId);
-                A(q.DisplayChoices.Contains(q.CorrectAnswerDisplay), "correct_choice_present_" + r.TemplateId);
+                if (string.Equals(q.AnswerKind, "interaction_integer", StringComparison.Ordinal))
+                {
+                    A(q.DisplayChoices.Count == 0, "interactive_has_no_fake_choices_" + r.TemplateId);
+                }
+                else
+                {
+                    A(q.DisplayChoices.Count >= 2 && q.DisplayChoices.Count <= 4, "choice_count_2_to_4_" + r.TemplateId);
+                    A(q.DisplayChoices.Distinct(StringComparer.Ordinal).Count() == q.DisplayChoices.Count, "unique_display_choices_" + r.TemplateId);
+                    A(q.DisplayChoices.Contains(q.CorrectAnswerDisplay), "correct_choice_present_" + r.TemplateId);
+                }
                 A(q.IsCorrectAnswer(q.CorrectAnswerDisplay), "correct_answer_roundtrip_" + r.TemplateId);
                 if (r.TemplateId == "add_within_1000_no_carry") A(CarryCount(ParseA(q), ParseB(q)) == 0, "add_no_carry_constraint");
                 if (r.TemplateId == "add_within_1000_one_carry") A(CarryCount(ParseA(q), ParseB(q)) == 1, "add_one_carry_constraint");
@@ -696,12 +703,22 @@ VALUES(@child,'MEASUREMENT_ESTIMATE_BASIC','math',0.58,0.50,@measureAttempts,1,1
         {
             if (q == null || string.IsNullOrWhiteSpace(q.QuestionId) || string.IsNullOrWhiteSpace(q.PromptVi))
                 throw new Exception("FUZZ_FAIL missing identity/prompt");
-            if (q.DisplayChoices == null || q.DisplayChoices.Count < 2 || q.DisplayChoices.Count > 4)
-                throw new Exception("FUZZ_FAIL invalid choice count: " + q.TemplateId);
-            if (q.DisplayChoices.Distinct(StringComparer.Ordinal).Count() != q.DisplayChoices.Count)
-                throw new Exception("FUZZ_FAIL duplicate choices: " + q.TemplateId);
-            if (!q.DisplayChoices.Contains(q.CorrectAnswerDisplay) || !q.IsCorrectAnswer(q.CorrectAnswerDisplay))
-                throw new Exception("FUZZ_FAIL missing correct answer: " + q.TemplateId);
+            if (string.Equals(q.AnswerKind, "interaction_integer", StringComparison.Ordinal))
+            {
+                if (q.DisplayChoices == null || q.DisplayChoices.Count != 0)
+                    throw new Exception("FUZZ_FAIL interactive question exposed fake choices: " + q.TemplateId);
+                if (!q.IsCorrectAnswer(q.CorrectAnswerDisplay))
+                    throw new Exception("FUZZ_FAIL interactive correct answer mismatch: " + q.TemplateId);
+            }
+            else
+            {
+                if (q.DisplayChoices == null || q.DisplayChoices.Count < 2 || q.DisplayChoices.Count > 4)
+                    throw new Exception("FUZZ_FAIL invalid choice count: " + q.TemplateId);
+                if (q.DisplayChoices.Distinct(StringComparer.Ordinal).Count() != q.DisplayChoices.Count)
+                    throw new Exception("FUZZ_FAIL duplicate choices: " + q.TemplateId);
+                if (!q.DisplayChoices.Contains(q.CorrectAnswerDisplay) || !q.IsCorrectAnswer(q.CorrectAnswerDisplay))
+                    throw new Exception("FUZZ_FAIL missing correct answer: " + q.TemplateId);
+            }
             if (q.Representation != ExpectedRepresentation(q.TemplateId))
                 throw new Exception("FUZZ_FAIL representation mismatch: " + q.TemplateId);
 

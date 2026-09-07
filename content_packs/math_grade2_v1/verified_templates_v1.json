@@ -737,6 +737,12 @@
                           "skill":  "MEASUREMENT_ESTIMATE_BASIC",
                           "status":  "VERIFIED_A_TEMPLATE",
                           "prompt_vi":  "Ước lượng độ dài dựa trên một thanh tham chiếu 10 cm."
+                      },
+                      {
+                          "id":  "draw_segment_given_length",
+                          "skill":  "DRAW_SEGMENT_GIVEN_LENGTH",
+                          "status":  "VERIFIED_A_TEMPLATE",
+                          "prompt_vi":  "Tạo đoạn thẳng có độ dài cho trước bằng cách chọn hai đầu mút trên thước cm."
                       }
                   ]
 }

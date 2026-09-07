@@ -161,6 +161,7 @@ namespace WAHU.Learning
                 case "write_number_to_1000":
                 case "estimate_objects_by_tens":
                 case "measurement_estimate_reference_10cm":
+                case "draw_segment_given_length":
                     return true;
                 default:
                     return false;

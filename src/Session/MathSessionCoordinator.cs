@@ -12,7 +12,7 @@ namespace WAHU.Session
     public sealed class MathSessionCoordinator : IDisposable
     {
         public const string PackId = "math_grade2_verified_templates_v1";
-        public const string PackVersion = "1.8.0";
+        public const string PackVersion = "1.9.0";
         public const int DefaultTargetQuestionCount = 8;
         public const int MaxAttemptsPerQuestion = 2;
 
