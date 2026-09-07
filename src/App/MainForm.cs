@@ -394,8 +394,22 @@ namespace WAHUKidsLearn
             try
             {
                 var summary = ParentSummaryService.Read(_learningDatabase);
-                var world = new GameWorldRewardService(_learningDatabase).ReadProgress(LearnerSessionService.PrimaryChildId);
-                var roadmap = new MathRoadmapService(_learningDatabase).Read(LearnerSessionService.PrimaryChildId);
+                var childId = LearnerSessionService.PrimaryChildId;
+                var worldService = new GameWorldRewardService(_learningDatabase);
+                try
+                {
+                    // Learning completion is durable before Garden enrichment. If a downstream reward
+                    // write failed transiently, Home is a natural convergence point even when the child
+                    // never opens another rescue event. Keep ReadProgress read-only and repair explicitly.
+                    worldService.ReconcileMissingCompletedMathSessionRewards(childId);
+                }
+                catch
+                {
+                    // Garden repair must never make Home unreadable. Render the last canonical state and
+                    // retry convergence on the next Home refresh.
+                }
+                var world = worldService.ReadProgress(childId);
+                var roadmap = new MathRoadmapService(_learningDatabase).Read(childId);
                 _mathRoadmap.SetSnapshot(roadmap);
                 var growth = Math.Min(8, Math.Max(1, 1 + world.GrowthSteps));
                 _garden.GrowthLevel = growth;

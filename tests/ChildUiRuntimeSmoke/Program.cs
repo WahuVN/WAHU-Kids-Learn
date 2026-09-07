@@ -41,6 +41,7 @@ namespace WAHU.ChildUiRuntimeSmoke
             TestTargetedLessonUiFlow(appAssembly);
             TestFirstFiveLessonsDeepUiFlow(appAssembly);
             TestQuickRescuePlayableUiFlow(appAssembly);
+            TestHomeGardenRewardSelfHeal(appAssembly);
             TestExpandedPoolTargetedUiFlow(appAssembly);
             TestTargetedCursorSelfHealUiFlow(appAssembly);
             TestIntegerAnswerUnitUiFlow(appAssembly);
@@ -1559,6 +1560,86 @@ namespace WAHU.ChildUiRuntimeSmoke
                     }
                     catch { }
                 }
+                try { Directory.Delete(tempRoot, true); } catch { }
+            }
+        }
+
+        private static void TestHomeGardenRewardSelfHeal(Assembly appAssembly)
+        {
+            var repo = Directory.GetCurrentDirectory();
+            var tempRoot = Path.Combine(Path.GetTempPath(), "wahu-child-ui-home-garden-repair-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempRoot);
+            try
+            {
+                var schemaSource = Path.Combine(repo, "data", "schema");
+                var schemaDir = Path.Combine(tempRoot, "schema");
+                Directory.CreateDirectory(schemaDir);
+                foreach (var source in Directory.GetFiles(schemaSource, "*.sql"))
+                    File.Copy(source, Path.Combine(schemaDir, Path.GetFileName(source)), true);
+
+                var database = new LearningDatabase(Path.Combine(tempRoot, "learning.db"), Path.Combine(schemaDir, "001_initial.sql"));
+                var init = database.Initialize("DELETE");
+                A(init.SchemaVersion == 5 && init.Health.IsHealthy, "home_garden_repair_database_v5_ready");
+                var sessions = new LearnerSessionService(database);
+                var profile = sessions.EnsurePrimaryChild("Bé Home Garden repair");
+                var session = sessions.BeginSession(profile.ChildId, "math", "LOW");
+                var now = DateTime.UtcNow.ToString("o", System.Globalization.CultureInfo.InvariantCulture);
+                ExecuteDatabaseSql(database, @"INSERT INTO attempt(
+id,session_id,child_id,pack_id,pack_version,question_id,skill_id,subject,started_at_utc,answered_at_utc,answer_json,is_correct,response_ms,hint_level,representation,input_method,attempt_index,listen_count)
+VALUES('attempt-home-garden-repair','" + session.SessionId + "','" + profile.ChildId + @"','math-grade2-verified-core','1.0','home-garden-repair-q1','M2_HOME_GARDEN_REPAIR','math','" + now + "','" + now + "','{}',1,700,0,'symbolic','smoke',1,0);");
+                sessions.CompleteSession(session.SessionId, false, "{}", "{}");
+                var rewards = new GameWorldRewardService(database);
+                var before = rewards.ReadProgress(profile.ChildId);
+                A(before.CompletedMathSessions == 1 && before.GrowthSteps == 0 && before.UnlockedItems.Count == 0,
+                    "home_garden_repair_fixture_has_durable_completion_without_reward");
+
+                var platformAssembly = Assembly.LoadFrom(Path.Combine(Path.GetDirectoryName(appAssembly.Location), "WAHU.Platform.dll"));
+                var configType = platformAssembly.GetType("WAHU.Platform.RuntimeConfigBundle", true);
+                var configLoad = configType.GetMethod("Load", BindingFlags.Static | BindingFlags.Public, null,
+                    new[] { typeof(string), typeof(string), typeof(bool) }, null);
+                A(configLoad != null, "home_garden_repair_runtime_config_loader_available");
+                var portableBase = Path.Combine(tempRoot, "home-portable");
+                Directory.CreateDirectory(portableBase);
+                var config = configLoad.Invoke(null, new object[] { Path.Combine(repo, "setup", "config"), portableBase, true });
+                var homeCtor = typeof(WAHUKidsLearn.MainForm).GetConstructors(BindingFlags.Instance | BindingFlags.Public)
+                    .FirstOrDefault(x => x.GetParameters().Length == 7);
+                A(homeCtor != null, "home_garden_repair_constructor_available");
+
+                ExecuteDatabaseSql(database, @"CREATE TRIGGER fail_home_garden_reward BEFORE INSERT ON reward_event
+BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
+                using (var home = (Form)homeCtor.Invoke(new object[]
+                {
+                    config, database, null, init, null, false,
+                    new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW }
+                }))
+                {
+                    Invoke(home, "RefreshHomeProgress");
+                    var failedRepairProgress = rewards.ReadProgress(profile.ChildId);
+                    var gardenProgress = GetField<Label>(home, "_gardenProgress");
+                    A(failedRepairProgress.GrowthSteps == 0 && failedRepairProgress.CompletedMathSessions == 1 &&
+                      gardenProgress.Text.IndexOf("Bé đã làm 1 câu", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                      gardenProgress.Text.IndexOf("vẫn an toàn", StringComparison.OrdinalIgnoreCase) < 0,
+                        "home_garden_repair_failure_does_not_break_home_rendering");
+
+                    ExecuteDatabaseSql(database, "DROP TRIGGER fail_home_garden_reward;");
+                    Invoke(home, "RefreshHomeProgress");
+                    var repaired = rewards.ReadProgress(profile.ChildId);
+                    var garden = GetField<object>(home, "_garden");
+                    A(repaired.GrowthSteps == 1 && repaired.CompletedMathSessions == 1 &&
+                      repaired.UnlockedItems.SequenceEqual(new[] { "garden_seedling" }) &&
+                      Get<int>(garden, "GrowthLevel") == 2 && Get<bool>(garden, "HasSeedling") &&
+                      gardenProgress.Text.IndexOf("1 bước", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "home_garden_refresh_repairs_missing_reward_and_renders_seedling");
+
+                    Invoke(home, "RefreshHomeProgress");
+                    var replay = rewards.ReadProgress(profile.ChildId);
+                    A(replay.GrowthSteps == 1 && replay.UnlockedItems.Count(x => x == "garden_seedling") == 1 &&
+                      rewards.ReconcileMissingCompletedMathSessionRewards(profile.ChildId) == 0,
+                        "home_garden_reward_repair_is_idempotent_on_repeated_refresh");
+                }
+            }
+            finally
+            {
                 try { Directory.Delete(tempRoot, true); } catch { }
             }
         }
