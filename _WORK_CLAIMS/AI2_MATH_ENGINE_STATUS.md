@@ -21,7 +21,7 @@ Playable Event Engine P0: **GREEN**
 
 - `tests/MathEngineRuntimeSmoke`: PASS — **72 assertions** (baseline equivalence + adversarial Unicode/NFD, int overflow, answer-length, unit alias, expression depth/token-bomb, Unicode operators và invalid per-question whitelist fail-closed).
 - `tests/MathDataEngineRuntimeSmoke`: PASS — **104 assertions** (idempotency + terminal-session guard + optimistic skill-state guard + true cross-process mastery/session contention + atomic startup + subject/child-scoped dangling recovery).
-- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **7844 assertions** (toàn bộ gate cũ + real 402-bank selector breadth + targeted write-failure/corruption repair + deterministic authored runtime IDs + concurrent pending-retry semantics + generated/open-ordinal self-heal + late-review transaction rollback + operational DB failure fail-safe).
+- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **7852 assertions** (toàn bộ gate cũ + real 402-bank selector breadth + targeted write-failure/corruption repair + deterministic authored runtime IDs + concurrent pending-retry semantics + generated/open-ordinal self-heal + late-review transaction rollback + operational DB failure fail-safe).
 - Pending-retry early complete: q2 wrong/pending retry rồi gọi `Complete()` bị reject nhưng `RetryPending`, checkpoint=1, exact q2 và reward=0 đều giữ nguyên; suspend/resume tiếp tục flow cũ.
 - Corrupt-catalog completion: synthetic event q1 complete rồi catalog hỏng; fallback lesson giữ selected q2/q3, đạt 3/3 nhưng chưa terminal cho tới `Complete()`, sau đó đúng 3 attempts/3 mastery + 1 reward; khôi phục catalog mở cùng event tạo session mới 0/3 và không duplicate reward.
 - Mismatched event/lesson fail-closed: production event 1 ID ghép nhầm fallback lesson event 2 bị `ResolveEventFailSafe()` reject trước session start; regression xác nhận 0 active session, 0 `math_session_runtime`, 0 `math_lesson_progress`, 0 reward.
@@ -49,7 +49,7 @@ Playable Event Engine P0: **GREEN**
 - FIRST-5 hint/mastery matrix: mỗi bài đầu có một câu đúng với `hint_level=2` và hai câu independent; outcome hinted không được tính independent, mastery reason chứa `hinted_correct_lower_weight`, review reason `hinted_success_short_recall`, DB persist đúng 1 max-hint + 2 no-hint attempts và child_skill đúng `independent_success_count=2`, `hinted_success_count=1`.
 - Pack-byte identity audit: production `Program.BootstrapRuntime()` bắt buộc `ContentPackValidator.ValidateDirectory(..., true)` cho bundled Math pack trước UI; manifest SHA-256 mismatch fail startup, nên V5 `pack_id+version` kết hợp verified manifest đủ contract hiện tại, chưa cần invent schema V6 chỉ để lưu hash lần hai.
 - Late-review transaction fault: injected failure tại `review_schedule` (sau attempt/mastery/child_skill trong cùng transaction) rollback sạch toàn chain + semantic key; retry sau khi gỡ trigger ghi đúng một attempt/mastery/child_skill/review duy nhất.
-- Expanded-bank integration: `373d9d1` bỏ test coupling `Single(...)`/`_01`, chạy được cả baseline 201 và pool 402; current real 402-bank persistence tổng **7844 assertions PASS**.
+- Expanded-bank integration: `373d9d1` bỏ test coupling `Single(...)`/`_01`, chạy được cả baseline 201 và pool 402; current real 402-bank persistence tổng **7852 assertions PASS**.
 - PowerShell release/build scripts: schema V5 payload/bootstrap expectations đã cập nhật; staged `Build-SetupArtifacts.ps1` PASS qua Release x86 + runtime smokes + staged payload/preflight + portable packaging.
 - `git diff --check` + staged `git diff --cached --check`: PASS cho wave V5.
 
@@ -85,7 +85,8 @@ Playable Event Engine P0: **GREEN**
 - Concurrent terminal completion: hai wrapper đã cùng replay đủ 3 checkpoint được barrier-thả `Complete()` song song; ít nhất một completion thành công, session cuối `completed`, lesson `completed_count=1`, attempts/mastery giữ 3/3 và `garden_growth` source_ref duy nhất = 1.
 - Complete-vs-suspend race: sau 3/3, barrier thả một wrapper `Complete()` và wrapper stale `SuspendForBreak()` cùng lúc; không surface error, session cuối `completed`, runtime checkpoint=0, attempts/mastery=3/3, reward=1; Dispose stale sau đó vẫn không revive checkpoint/reward.
 - Same-event reward repair: injected reward failure terminalizes event cũ với reward=0; sau khi bỏ fault, Start cùng event tạo session replay mới 0/3, repair đúng reward source_ref cũ=1, source_ref replay=0, progress `started=2/completed=1`, Garden progress chỉ tính completed session cũ.
-- Playable Event P0 persistence total: **7844 assertions PASS**. Production AI1 catalog `bd1809e` đã tích hợp thật 5/5 event; synthetic fixtures vẫn giữ để fault/corruption/race test độc lập.
+- Repeated reward-repair fault: giữ trigger reward failure cả lúc mở replay; `Start()` vẫn thành công với replay session 0/3, old/new reward đều 0 và progress `started=2/completed=1`. Sau khi bỏ trigger, reopen bằng lesson fallback resume đúng replay session + exact q1, repair old reward=1, replay reward=0 và không tăng started_count lần ba.
+- Playable Event P0 persistence total: **7852 assertions PASS**. Production AI1 catalog `bd1809e` đã tích hợp thật 5/5 event; synthetic fixtures vẫn giữ để fault/corruption/race test độc lập.
 
 ## Session
 
