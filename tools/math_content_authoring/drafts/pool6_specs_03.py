@@ -61,7 +61,7 @@ def build(g):
             tf("Từ 9 giờ sáng hôm nay đến 9 giờ sáng hôm sau là một ngày đầy đủ.", True, "Hai thời điểm cùng giờ ở hai ngày liên tiếp cách nhau 24 giờ, tức một ngày đầy đủ."),
         ],
         "TIME_HOUR_60_MINUTES": [
-            nq("Một giờ đầy đủ có bao nhiêu phút?", 60, "Theo quan hệ thời gian, 1 giờ = 60 phút.", unit="phút"),
+            nq("Một giờ đầy đủ có bao nhiêu phút?", 60, "Một giờ đầy đủ gồm 60 phút, nên số phút cần điền là 60.", unit="phút"),
             mc("30 phút so với 1 giờ là khoảng thời gian thế nào?", "ngắn hơn", ["dài hơn", "bằng nhau", "không thể so sánh"], "Một giờ có 60 phút; 30 nhỏ hơn 60 nên 30 phút ngắn hơn 1 giờ."),
             mc("Một hoạt động kéo dài từ 10 giờ đến 11 giờ cùng buổi. Cách gọi nào tương đương khoảng thời gian đó?", "60 phút", ["24 giờ", "30 phút", "2 ngày"], "Từ 10 giờ đến 11 giờ là đúng một giờ, tương đương 60 phút."),
         ],

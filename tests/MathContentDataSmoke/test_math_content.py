@@ -647,6 +647,11 @@ class MathContentDataSmoke(unittest.TestCase):
         self.assertEqual(10, measurement_story["correct_answer"])
         self.assertEqual("kg", measurement_story["answer_unit"])
 
+    def test_question_explanations_are_unique_after_normalization(self):
+        normalized = [" ".join(item["explanation_vi"].split()).casefold() for item in self.questions]
+        self.assertEqual(402, len(normalized))
+        self.assertEqual(402, len(set(normalized)))
+
     def test_distractor_rationales_are_specific_not_placeholders(self):
         rationales = []
         for item in self.questions:

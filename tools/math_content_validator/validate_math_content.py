@@ -1510,6 +1510,7 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
     first_hint_counts = Counter()
     second_hint_counts = Counter()
     distractor_rationale_counts = Counter()
+    question_explanation_ids: dict[str, list[str]] = defaultdict(list)
     correct_choice_positions_by_count: dict[int, Counter] = defaultdict(Counter)
     question_ordinals_by_skill: dict[str, list[int]] = defaultdict(list)
 
@@ -1549,6 +1550,8 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             prompts_by_lesson[lid].append((qid, prompt))
             all_question_prompts.append((lid, qid, prompt))
         explanation = required_text(q, "explanation_vi", where, errors)
+        if explanation and qid:
+            question_explanation_ids[" ".join(explanation.split()).casefold()].append(qid)
         validate_numeric_equalities(explanation, where + ".explanation_vi", errors)
         validate_numeric_relations(explanation, where + ".explanation_vi", errors)
         if SHALLOW_NUMERIC_EXPLANATION_MARKER in explanation.casefold():
@@ -1955,6 +1958,11 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             errors.append(f"orphan_question_unreferenced:{qid}")
         elif count > 1:
             errors.append(f"question_referenced_multiple_times:{qid}:{count}")
+
+    # Exact duplicate explanations make distinct practice questions feel machine-generated.
+    for explanation_key, ids in question_explanation_ids.items():
+        if len(ids) > 1:
+            errors.append(f"duplicate_question_explanation:{'|'.join(ids)}:{explanation_key[:100]}")
 
     # Exact and very-near duplicate prompts inside one lesson.
     for lid, entries in prompts_by_lesson.items():
