@@ -38,6 +38,7 @@ namespace WAHU.ChildUiRuntimeSmoke
             TestTargetedLessonUiFlow(appAssembly);
             TestChoiceRetryUiFlow(appAssembly);
             TestSubmitFailureRecoveryUiFlow(appAssembly);
+            TestTypedAndInteractionSubmitFailureRecoveryUiFlow(appAssembly);
             TestRetryResumeUiFlow(appAssembly);
             TestInteractionRetryUiFlow(appAssembly);
             TestInteractiveSegmentAnswer(appAssembly);
@@ -1168,6 +1169,175 @@ END;");
 
                     Invoke(retryCoordinator, "Abort", "submit_retry_failure_cleanup");
                     SetField(retryForm, "_finished", true);
+                }
+            }
+            finally
+            {
+                try { Directory.Delete(tempRoot, true); } catch { }
+            }
+        }
+
+        private static void TestTypedAndInteractionSubmitFailureRecoveryUiFlow(Assembly appAssembly)
+        {
+            var repo = Directory.GetCurrentDirectory();
+            var sourceContent = Path.Combine(repo, "content_packs", "math_grade2_v1");
+            var runtimeContent = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "content_packs", "math_grade2_v1");
+            Directory.CreateDirectory(runtimeContent);
+            foreach (var name in new[] { "verified_templates_v1.json", "lesson_catalog_v1.json", "question_bank_v1.json" })
+                File.Copy(Path.Combine(sourceContent, name), Path.Combine(runtimeContent, name), true);
+
+            var catalog = new MathLessonCatalogSource().Load(Path.Combine(sourceContent, "lesson_catalog_v1.json"));
+            var typedLesson = catalog.FindLesson("m2_ls_num_count_read_write_0_1000");
+            var pointLesson = catalog.FindLesson("m2_ls_point_recognize");
+            var lineLesson = catalog.FindLesson("m2_ls_line_segment_recognize");
+            var segmentLesson = catalog.FindLesson("m2_ls_draw_segment_given_length");
+            A(typedLesson != null && pointLesson != null && lineLesson != null && segmentLesson != null,
+                "submit_failure_multi_surface_fixtures_exist");
+            A(typedLesson.PrerequisiteSkills.Count == 0,
+                "submit_failure_typed_fixture_is_root_lesson");
+
+            var tempRoot = Path.Combine(Path.GetTempPath(), "wahu-child-ui-submit-failure-surfaces-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempRoot);
+            try
+            {
+                var schemaSource = Path.Combine(repo, "data", "schema");
+                var schemaDir = Path.Combine(tempRoot, "schema");
+                Directory.CreateDirectory(schemaDir);
+                foreach (var source in Directory.GetFiles(schemaSource, "*.sql"))
+                    File.Copy(source, Path.Combine(schemaDir, Path.GetFileName(source)), true);
+
+                var ctor = typeof(WAHUKidsLearn.MathLessonForm).GetConstructor(
+                    BindingFlags.Instance | BindingFlags.NonPublic,
+                    null,
+                    new[] { typeof(LearningDatabase), typeof(RuntimePerformanceSettings), typeof(string) },
+                    null);
+                A(ctor != null, "submit_failure_multi_surface_constructor_available");
+
+                var typedDatabase = new LearningDatabase(Path.Combine(tempRoot, "typed.db"), Path.Combine(schemaDir, "001_initial.sql"));
+                var typedInit = typedDatabase.Initialize("DELETE");
+                A(typedInit.SchemaVersion == 4 && typedInit.Health.IsHealthy, "submit_failure_typed_database_v4_ready");
+                new LearnerSessionService(typedDatabase).EnsurePrimaryChild("Bé UI typed write recovery");
+                using (var typedForm = (WAHUKidsLearn.MathLessonForm)ctor.Invoke(new object[]
+                {
+                    typedDatabase,
+                    new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW },
+                    typedLesson.Id
+                }))
+                {
+                    Invoke(typedForm, "StartSession");
+                    var question = GetField<MathQuestion>(typedForm, "_question");
+                    var input = GetField<TextBox>(typedForm, "_typedAnswerBox");
+                    A(question != null && question.ContentQuestionId == "m2_q_num_count_read_write_0_1000_01" &&
+                        question.DisplayChoices.Count == 0 && input.Enabled,
+                        "submit_failure_typed_fixture_uses_real_typed_surface");
+                    input.Text = question.CorrectAnswerDisplay;
+                    ExecuteDatabaseSql(typedDatabase, @"CREATE TRIGGER ui_fail_typed_mastery
+BEFORE INSERT ON mastery_event
+BEGIN
+    SELECT RAISE(ABORT, 'ui_injected_typed_commit_failure');
+END;");
+                    Invoke(typedForm, "SubmitTypedAnswer", "ui_typed_write_failure");
+
+                    var coordinator = GetField<object>(typedForm, "_coordinator");
+                    var failed = Get<object>(coordinator, "Summary");
+                    A(!GetField<bool>(typedForm, "_finished") && Get<bool>(coordinator, "IsActive") &&
+                        Get<bool>(coordinator, "HasOpenQuestion") && Get<int>(failed, "Attempts") == 0 &&
+                        Get<int>(failed, "AnswerAttempts") == 0,
+                        "submit_failure_typed_keeps_same_session_and_zero_counters");
+                    A(input.Enabled && GetField<Button>(typedForm, "_typedSubmitButton").Enabled &&
+                        input.AccessibleDescription.IndexOf("chưa lưu", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "submit_failure_typed_reenables_accessible_input");
+                    A(GetField<Label>(typedForm, "_support").Text.IndexOf("an toàn", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "submit_failure_typed_child_message_is_safe");
+
+                    ExecuteDatabaseSql(typedDatabase, "DROP TRIGGER ui_fail_typed_mastery;");
+                    Invoke(typedForm, "SubmitTypedAnswer", "ui_typed_write_recovered");
+                    var recovered = Get<object>(coordinator, "Summary");
+                    A(Get<int>(recovered, "Attempts") == 1 && Get<int>(recovered, "AnswerAttempts") == 1 &&
+                        Get<int>(recovered, "IndependentCorrect") == 1 && Get<int>(recovered, "RetriedQuestions") == 0,
+                        "submit_failure_typed_recovery_commits_once_as_independent");
+                    A(!input.Enabled && !GetField<Button>(typedForm, "_typedSubmitButton").Enabled,
+                        "submit_failure_typed_final_result_locks_input");
+                    Invoke(coordinator, "Abort", "submit_failure_typed_cleanup");
+                    SetField(typedForm, "_finished", true);
+                }
+
+                var interactionDatabase = new LearningDatabase(Path.Combine(tempRoot, "interaction.db"), Path.Combine(schemaDir, "001_initial.sql"));
+                var interactionInit = interactionDatabase.Initialize("DELETE");
+                A(interactionInit.SchemaVersion == 4 && interactionInit.Health.IsHealthy, "submit_failure_interaction_database_v4_ready");
+                new LearnerSessionService(interactionDatabase).EnsurePrimaryChild("Bé UI interaction write recovery");
+                CompleteTargetedLessonCorrectly(ctor, interactionDatabase, pointLesson.Id, "submit_failure_interaction_point_prerequisite");
+                CompleteTargetedLessonCorrectly(ctor, interactionDatabase, lineLesson.Id, "submit_failure_interaction_line_prerequisite");
+
+                using (var interactionForm = (WAHUKidsLearn.MathLessonForm)ctor.Invoke(new object[]
+                {
+                    interactionDatabase,
+                    new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW },
+                    segmentLesson.Id
+                }))
+                {
+                    Invoke(interactionForm, "StartSession");
+                    var basic = GetField<MathQuestion>(interactionForm, "_question");
+                    var basicInput = GetField<TextBox>(interactionForm, "_typedAnswerBox");
+                    A(basic != null && basic.ContentQuestionId == "m2_q_draw_segment_given_length_01",
+                        "submit_failure_interaction_starts_with_basic");
+                    basicInput.Text = basic.CorrectAnswerDisplay;
+                    Invoke(interactionForm, "SubmitTypedAnswer", "submit_failure_interaction_basic");
+                    Invoke(interactionForm, "HandleNextButton");
+
+                    var medium = GetField<MathQuestion>(interactionForm, "_question");
+                    var interactive = GetField<Control>(interactionForm, "_interactiveAnswer");
+                    A(medium != null && medium.ContentQuestionId == "m2_q_draw_segment_given_length_02" &&
+                        string.Equals(medium.AnswerKind, "interaction_integer", StringComparison.Ordinal),
+                        "submit_failure_interaction_fixture_uses_real_segment_surface");
+                    Invoke(interactive, "SelectCursor");
+                    Invoke(interactive, "MoveCursor", medium.CorrectAnswer);
+                    Invoke(interactive, "SelectCursor");
+                    A(Get<int>(interactive, "SelectedLength") == medium.CorrectAnswer,
+                        "submit_failure_interaction_draws_correct_segment_before_failure");
+
+                    ExecuteDatabaseSql(interactionDatabase, @"CREATE TRIGGER ui_fail_interaction_mastery
+BEFORE INSERT ON mastery_event
+BEGIN
+    SELECT RAISE(ABORT, 'ui_injected_interaction_commit_failure');
+END;");
+                    Invoke(interactionForm, "SubmitInteractiveAnswer", "ui_interaction_write_failure");
+                    var coordinator = GetField<object>(interactionForm, "_coordinator");
+                    var failed = Get<object>(coordinator, "Summary");
+                    A(!GetField<bool>(interactionForm, "_finished") && Get<bool>(coordinator, "IsActive") &&
+                        Get<bool>(coordinator, "HasOpenQuestion") && Get<int>(failed, "Attempts") == 1 &&
+                        Get<int>(failed, "AnswerAttempts") == 1,
+                        "submit_failure_interaction_keeps_medium_open_without_ghost_attempt");
+                    A(GetField<Button>(interactionForm, "_interactiveSubmitButton").Enabled &&
+                        GetField<Label>(interactionForm, "_support").Text.IndexOf("an toàn", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "submit_failure_interaction_reenables_submit_with_safe_message");
+
+                    Invoke(interactive, "SelectCursor");
+                    A(Get<int>(interactive, "SelectedLength") == 0,
+                        "submit_failure_interaction_control_remains_editable_after_failure");
+                    Invoke(interactive, "SetQuestion", medium);
+                    Invoke(interactive, "SelectCursor");
+                    Invoke(interactive, "MoveCursor", medium.CorrectAnswer);
+                    Invoke(interactive, "SelectCursor");
+                    A(Get<int>(interactive, "SelectedLength") == medium.CorrectAnswer,
+                        "submit_failure_interaction_can_redraw_correct_segment");
+
+                    ExecuteDatabaseSql(interactionDatabase, "DROP TRIGGER ui_fail_interaction_mastery;");
+                    Invoke(interactionForm, "SubmitInteractiveAnswer", "ui_interaction_write_recovered");
+                    var recovered = Get<object>(coordinator, "Summary");
+                    A(Get<int>(recovered, "Attempts") == 2 && Get<int>(recovered, "AnswerAttempts") == 2 &&
+                        Get<int>(recovered, "IndependentCorrect") == 2 && Get<int>(recovered, "RetriedQuestions") == 0,
+                        "submit_failure_interaction_recovery_commits_medium_once_as_independent");
+                    A(!GetField<Button>(interactionForm, "_interactiveSubmitButton").Enabled,
+                        "submit_failure_interaction_final_result_disables_submit");
+                    var lockedLength = Get<int>(interactive, "SelectedLength");
+                    Invoke(interactive, "MoveCursor", -1);
+                    Invoke(interactive, "SelectCursor");
+                    A(Get<int>(interactive, "SelectedLength") == lockedLength,
+                        "submit_failure_interaction_final_result_locks_control");
+
+                    Invoke(coordinator, "Abort", "submit_failure_interaction_cleanup");
+                    SetField(interactionForm, "_finished", true);
                 }
             }
             finally

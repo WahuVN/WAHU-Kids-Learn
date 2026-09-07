@@ -226,27 +226,35 @@ Upstream durable reconcile contract: `400fd0c`; concurrent active-session guard 
 
 Clean detached `2da39b5`: Child UI **1558 assertions PASS**, persistence **171 assertions PASS**, content **34/34 PASS**. Data/Session SDK x86/net48 được clean-build trực tiếp từ cùng runtime HEAD với **0 warning / 0 error**.
 
-## 13. Verification gates
+## 13. AI3-011 — multi-surface write-failure recovery regression
 
-Current clean HEAD `2da39b5` + đúng 2 file AI3-010:
+Test-only wave mở rộng E2E của AI3-010 sang hai answer surfaces còn lại:
 
-- Data SDK x86/net48 source-equivalent build: **PASS — 0 warning / 0 error**.
-- Session SDK x86/net48 source-equivalent build: **PASS — 0 warning / 0 error**.
-- App Release x86 targeted build: **PASS**.
-- ChildUiRuntimeSmoke: **PASS — 1558 assertions**.
+- typed authored root lesson: inject trigger fail `mastery_event`, submit đúng phải giữ session active/open question, `Attempts=0`, `AnswerAttempts=0`, textbox + submit được mở lại và accessibility báo câu chưa lưu; bỏ trigger rồi submit lại cho `IndependentCorrect=1`, không tạo retry giả;
+- authored interaction lesson: hoàn thành prerequisite qua UI thật, vào medium segment, vẽ đúng rồi inject write failure; session giữ medium open, thước vẫn chỉnh/redraw được và submit được mở lại; bỏ trigger rồi submit lại commit medium đúng một lần, sau final mới khóa thước;
+- cùng choice first-attempt/retry-attempt recovery đã có ở AI3-010, cả choice/typed/interaction đều được khóa bằng SQLite transaction failure thật.
+
+Clean detached `8f10d4d`: production solution Rebuild Release/x86 **PASS**, Child UI **1593 assertions PASS**, persistence **171 assertions PASS**, content **36/36 PASS**.
+
+## 14. Verification gates
+
+Current clean HEAD `8f10d4d` + đúng 1 file test AI3-011:
+
+- Production `WAHUKidsLearn.sln` Rebuild Release/x86 bằng Visual Studio 2022 Community MSBuild: **PASS**.
+- ChildUiRuntimeSmoke: **PASS — 1593 assertions**.
 - MathSessionPersistenceRuntimeSmoke: **PASS — 171 assertions**.
-- MathContentDataSmoke: **PASS — 34/34**.
+- MathContentDataSmoke: **PASS — 36/36**.
 - `git diff --check`: **PASS**.
 - 67/67 lesson-detail/access sweep: **PASS**.
 - 201/201 authored answer-surface sweep: **PASS**.
 - Retry typed/choice/authored-interaction E2E: **PASS**.
 - Exact retry-resume UI E2E: **PASS**.
-- Recoverable first-attempt/retry-attempt SQLite write-failure E2E: **PASS**.
+- Recoverable SQLite write-failure E2E trên choice/typed/interaction: **PASS**.
 - Request 007 corrupt-medium ordinal recovery có regression chính thức tại `7f79367`.
 - Retry/first-try engine contract `7c9a9ea` và write-failure reconcile `400fd0c` đã được AI3 UI consume; clean persistence suite hiện 171 assertions.
 - Generated `draw_segment_given_length` vẫn chỉ ở WIP AI2; chưa coi adaptive-generator blocker CLOSED trước upstream commit.
 
-## 14. Production release build audit
+## 15. Production release build audit
 
 Clean detached `12cb5ee` dùng đúng toolchain mà `Build-SetupArtifacts.ps1` chọn:
 
@@ -263,7 +271,7 @@ Release-required smoke executables trên cùng clean tree:
 
 Do đó full distribution gate vẫn chưa xanh, nhưng blocker hiện nằm ở Platform/runtime config + English bundled content + packaging, không nằm ở Math Data compile.
 
-## 15. Remaining blockers
+## 16. Remaining blockers
 
 ### P1-01 — release runtime-config schema mismatch
 
@@ -294,7 +302,7 @@ UI audit hiện tại:
 
 AI3 chưa hard-code `3` vì `MathLessonAccessSnapshot` chưa publish target/session preview count. Chờ AI2 first-class contract cho selected 3-question session set/target, sau đó khóa regression pool >=6 nhưng CTA/progress/result vẫn 3.
 
-## 16. Next AI3 actions
+## 17. Next AI3 actions
 
 1. Theo dõi Platform/release fix runtime-config schema 4 và English bundled-content smoke; rerun exact release smoke chain khi upstream ổn định.
 2. Theo dõi release lane đóng Request 008; không sửa `tools/build/*` khi đang có owner/WIP khác.
