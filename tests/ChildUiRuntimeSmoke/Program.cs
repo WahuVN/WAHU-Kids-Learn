@@ -1795,6 +1795,19 @@ namespace WAHU.ChildUiRuntimeSmoke
 
                     var question = GetField<MathQuestion>(first, "_question");
                     A(question != null && question.LessonId == lessonId, "quick_rescue_journey_first_question_targets_event_lesson");
+                    first.Scale(new SizeF(1.25f, 1.25f));
+                    RenderFormAndAssert(first, 1125, 800, "quick_rescue_event_active_125pct");
+                    var scaledPrompt = GetField<Label>(first, "_prompt");
+                    var scaledPromptMeasure = TextRenderer.MeasureText(
+                        scaledPrompt.Text,
+                        scaledPrompt.Font,
+                        new Size(Math.Max(120, scaledPrompt.ClientSize.Width - 4), 4096),
+                        TextFormatFlags.WordBreak);
+                    A(scaledPromptMeasure.Height <= Math.Max(20, scaledPrompt.ClientSize.Height - 4) && scaledPrompt.Font.Size >= 12f,
+                        "quick_rescue_event_active_125pct_prompt_fits_readably");
+                    A(GetField<Control>(first, "_eventCheckpointStrip").Width > 300 &&
+                      GetField<Button>(first, "_stopButton").Height >= 44,
+                        "quick_rescue_event_active_125pct_keeps_checkpoint_and_break_targets");
                     openQuestionId = question.QuestionId;
                     openContentQuestionId = question.ContentQuestionId;
                     SubmitCurrentMathQuestionWrongForRetry(first, "quick_rescue_wrong");
