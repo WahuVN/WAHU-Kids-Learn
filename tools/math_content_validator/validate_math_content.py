@@ -429,24 +429,37 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
     if skill == "POINT_RECOGNIZE":
         label = choice_text.strip().casefold()
         prompt_cf = prompt.casefold()
-        if "kí hiệu nào phù hợp" in prompt_cf:
+        if "kí hiệu nào phù hợp" in prompt_cf or "tên nào phù hợp" in prompt_cf:
             reasons = {
                 "ab": "AB gồm hai chữ cái nên thường dùng để chỉ đối tượng gắn với hai điểm A và B, không phải tên của một điểm duy nhất.",
+                "mn": "MN gồm hai chữ cái nên gợi hai điểm M và N, không phải tên của một điểm duy nhất.",
                 "1": "Tên điểm trong hình học thường dùng một chữ cái in hoa; số 1 không phải kí hiệu tên điểm trong quy ước này.",
                 "5 cm": "5 cm là một số đo độ dài, không phải kí hiệu dùng để đặt tên một vị trí hình học.",
+                "3 cm": "3 cm là một số đo độ dài, không phải tên dùng để ghi một điểm.",
+                "đường m": "Cụm “đường M” đang gọi một đường, còn tên của một điểm chỉ cần chữ cái M.",
             }
             if label in reasons: return reasons[label]
-        if "phát biểu nào đúng về một điểm" in prompt_cf:
+        if "phát biểu nào đúng về một điểm" in prompt_cf or "điều nào đúng khi nói về điểm" in prompt_cf:
             reasons = {
                 "điểm có một độ dài xác định": "Điểm chỉ biểu diễn một vị trí nên không có độ dài riêng để đo.",
                 "điểm có hai đầu mút": "Hai đầu mút là đặc điểm của đoạn thẳng, không phải của một điểm.",
                 "điểm có thể kéo dài về hai phía": "Khả năng kéo dài về hai phía là đặc điểm của đường thẳng; một điểm chỉ là một vị trí.",
+                "p có độ dài 5 cm": "Điểm P chỉ biểu diễn một vị trí nên không có độ dài 5 cm hay bất kì độ dài riêng nào.",
+                "p có hai đầu mút": "Hai đầu mút thuộc về đoạn thẳng; điểm P không có hai đầu mút.",
+                "p kéo dài mãi về hai phía": "Kéo dài mãi về hai phía là đặc điểm của đường thẳng, không phải của điểm P.",
             }
             if label in reasons: return reasons[label]
+        expected_points = None
+        point_names = None
         if "ba vị trí được đánh dấu a, b, c" in prompt_cf:
+            expected_points, point_names = 3, "A, B, C"
+        elif "bốn vị trí p, q, r, s" in prompt_cf:
+            expected_points, point_names = 4, "P, Q, R, S"
+        if expected_points is not None:
             nums = [int(x) for x in re.findall(r"\d+", choice_text)]
-            if nums and nums[0] != 3:
-                return f"Hình đã nêu ba vị trí A, B, C nên có đúng 3 điểm được đặt tên; chọn {nums[0]} là đếm thiếu hoặc thừa."
+            if nums and nums[0] != expected_points:
+                return (f"Hình đã nêu {expected_points} vị trí {point_names} nên có đúng {expected_points} điểm được đặt tên; "
+                        f"chọn {nums[0]} là đếm thiếu hoặc thừa.")
 
     if skill == "LINE_SEGMENT_RECOGNIZE":
         label = choice_text.strip().casefold()
@@ -455,18 +468,31 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
             nums = [int(x) for x in re.findall(r"\d+", choice_text)]
             if nums and nums[0] != 2:
                 return f"Một đoạn thẳng luôn có đúng 2 đầu mút; lựa chọn {nums[0]} không đúng số đầu mút của đoạn AB."
-        if "mô tả nào đúng về đoạn thẳng" in prompt_cf:
+        if "đoạn thẳng pq" in prompt_cf and "hai đầu mút" in prompt_cf:
             reasons = {
-                "phần thẳng kéo dài mãi về hai phía": "Nét thẳng kéo dài mãi về hai phía là đường thẳng; đoạn thẳng bị giới hạn bởi hai đầu mút.",
-                "nét uốn cong nối hai vị trí": "Đoạn thẳng phải là phần thẳng giữa hai đầu mút, không phải một nét uốn cong.",
-                "chỉ một vị trí không có độ dài": "Một vị trí đơn lẻ là điểm; đoạn thẳng phải nối hai đầu mút và có độ dài.",
+                "chỉ p": "Đoạn thẳng PQ có hai đầu mút P và Q; chỉ chọn P đã bỏ mất đầu mút Q.",
+                "chỉ q": "Đoạn thẳng PQ có hai đầu mút P và Q; chỉ chọn Q đã bỏ mất đầu mút P.",
+                "không có đầu mút": "Đoạn thẳng luôn bị giới hạn bởi hai đầu mút; với PQ đó chính là P và Q.",
             }
             if label in reasons: return reasons[label]
-        if "nối thẳng điểm m với điểm n" in prompt_cf:
+        if "mô tả nào đúng về đoạn thẳng" in prompt_cf or "mô tả nào nhận ra một đoạn thẳng" in prompt_cf:
+            reasons = {
+                "phần thẳng kéo dài mãi về hai phía": "Nét thẳng kéo dài mãi về hai phía là đường thẳng; đoạn thẳng bị giới hạn bởi hai đầu mút.",
+                "nét thẳng kéo dài mãi hai phía": "Nét thẳng kéo dài mãi hai phía là đường thẳng; đoạn thẳng phải dừng ở hai đầu mút.",
+                "nét uốn cong nối hai vị trí": "Đoạn thẳng phải là phần thẳng giữa hai đầu mút, không phải một nét uốn cong.",
+                "nét cong không có đầu mút": "Nét cong không có đầu mút không phải đoạn thẳng vì đoạn thẳng vừa thẳng vừa bị giới hạn bởi hai đầu mút.",
+                "chỉ một vị trí không có độ dài": "Một vị trí đơn lẻ là điểm; đoạn thẳng phải nối hai đầu mút và có độ dài.",
+                "một chấm chỉ vị trí": "Một chấm chỉ một điểm; đoạn thẳng phải là phần thẳng nối giữa hai đầu mút.",
+            }
+            if label in reasons: return reasons[label]
+        if "nối thẳng điểm m với điểm n" in prompt_cf or ("nối thẳng c với d" in prompt_cf and "dừng nét" in prompt_cf):
             reasons = {
                 "đường thẳng mn": "Nối hai điểm M và N bằng phần thẳng chỉ giữa hai điểm tạo đoạn thẳng MN; đường thẳng còn kéo dài qua hai phía.",
                 "đường cong mn": "Đề yêu cầu nối thẳng M với N nên kết quả không thể là đường cong.",
                 "chỉ điểm m": "Hình mới phải liên hệ cả M và N; chỉ giữ điểm M thì chưa thực hiện việc nối hai điểm.",
+                "đường thẳng cd": "Nét dừng đúng tại C và D nên bị giới hạn bởi hai đầu mút; đó là đoạn thẳng CD chứ không phải đường thẳng kéo dài.",
+                "đường cong cd": "Đề yêu cầu nối thẳng C với D nên nét tạo ra không thể là đường cong.",
+                "điểm cd": "CD gồm hai vị trí được nối bằng một nét thẳng; đó không phải một điểm đơn lẻ.",
             }
             if label in reasons: return reasons[label]
 
@@ -507,17 +533,27 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
         prompt_cf = prompt.casefold()
         reasons = {
             "nhiều đoạn thẳng rời nhau": "Đường gấp khúc cần các đoạn thẳng nối tiếp nhau tại đầu mút; các đoạn rời nhau chưa tạo thành một đường gấp khúc.",
+            "ba đoạn thẳng rời nhau": "Ba đoạn thẳng còn rời nhau nên chưa nối tiếp tại các đầu mút để tạo đường gấp khúc.",
             "một đoạn thẳng duy nhất": "Đường gấp khúc phải gồm nhiều đoạn thẳng nối tiếp, không chỉ một đoạn duy nhất.",
             "một nét cong liên tục": "Đường gấp khúc được tạo bởi các đoạn thẳng, không phải một nét cong liên tục.",
+            "một nét cong duy nhất": "Một nét cong duy nhất không tạo thành chuỗi các đoạn thẳng nối tiếp của đường gấp khúc.",
+            "một điểm và một đoạn rời": "Một điểm và một đoạn còn rời nhau không tạo thành nhiều đoạn thẳng nối tiếp, nên chưa phải đường gấp khúc.",
             "đoạn thẳng ad": "Ba đoạn AB, BC, CD có các chỗ đổi hướng tại B và C nên không thể gộp thành một đoạn thẳng AD.",
             "đường thẳng ad": "Chuỗi AB, BC, CD gồm nhiều đoạn nối tiếp và có thể đổi hướng, không phải một đường thẳng duy nhất AD.",
             "đường cong abcd": "Các phần AB, BC, CD đều là đoạn thẳng nên toàn hình là đường gấp khúc, không phải đường cong.",
+            "đoạn thẳng mq": "MN, NP, PQ là ba đoạn nối tiếp qua N và P; chúng tạo đường gấp khúc MNPQ chứ không phải một đoạn thẳng MQ duy nhất.",
+            "đường thẳng mq": "Chuỗi MN, NP, PQ gồm nhiều đoạn nối tiếp, không phải một đường thẳng duy nhất MQ.",
+            "đường cong mnpq": "MN, NP, PQ đều là các đoạn thẳng nối tiếp nên hình là đường gấp khúc, không phải đường cong MNPQ.",
         }
         if label in reasons: return reasons[label]
         if "có 4 đoạn thẳng" in prompt_cf:
             nums = [int(x) for x in re.findall(r"\d+", choice_text)]
             if nums and nums[0] != 5:
                 return f"Chuỗi mở có 4 đoạn thẳng cần 5 điểm theo thứ tự để tạo 4 khoảng nối; chọn {nums[0]} là thiếu điểm."
+        if "sáu điểm liên tiếp" in prompt_cf:
+            nums = [int(x) for x in re.findall(r"\d+", choice_text)]
+            if nums and nums[0] != 5:
+                return f"Sáu điểm liên tiếp tạo 5 khoảng nối giữa các điểm kề nhau, nên đường gấp khúc có 5 đoạn; chọn {nums[0]} là đếm sai số khoảng."
 
     if skill == "THREE_COLLINEAR_POINTS":
         label = choice_text.strip().casefold()

@@ -8092,17 +8092,17 @@
         {
           "id": "b",
           "text": "1",
-          "rationale_vi": "“1” chưa đúng. Hình đã nêu ba vị trí A, B, C nên có đúng 3 điểm được đặt tên; chọn 1 là đếm thiếu hoặc thừa. Mỗi tên A, B, C chỉ một điểm, nên có 3 điểm."
+          "rationale_vi": "“1” chưa đúng. Hình đã nêu 3 vị trí A, B, C nên có đúng 3 điểm được đặt tên; chọn 1 là đếm thiếu hoặc thừa. Mỗi tên A, B, C chỉ một điểm, nên có 3 điểm."
         },
         {
           "id": "c",
           "text": "2",
-          "rationale_vi": "“2” chưa đúng. Hình đã nêu ba vị trí A, B, C nên có đúng 3 điểm được đặt tên; chọn 2 là đếm thiếu hoặc thừa. Mỗi tên A, B, C chỉ một điểm, nên có 3 điểm."
+          "rationale_vi": "“2” chưa đúng. Hình đã nêu 3 vị trí A, B, C nên có đúng 3 điểm được đặt tên; chọn 2 là đếm thiếu hoặc thừa. Mỗi tên A, B, C chỉ một điểm, nên có 3 điểm."
         },
         {
           "id": "d",
           "text": "4",
-          "rationale_vi": "“4” chưa đúng. Hình đã nêu ba vị trí A, B, C nên có đúng 3 điểm được đặt tên; chọn 4 là đếm thiếu hoặc thừa. Mỗi tên A, B, C chỉ một điểm, nên có 3 điểm."
+          "rationale_vi": "“4” chưa đúng. Hình đã nêu 3 vị trí A, B, C nên có đúng 3 điểm được đặt tên; chọn 4 là đếm thiếu hoặc thừa. Mỗi tên A, B, C chỉ một điểm, nên có 3 điểm."
         }
       ],
       "correct_choice_id": "a"
@@ -8140,7 +8140,7 @@
         {
           "id": "a",
           "text": "MN",
-          "rationale_vi": "“MN” chưa đúng. Dữ kiện dẫn tới “M”. Một điểm thường được đặt tên bằng một chữ cái in hoa như M."
+          "rationale_vi": "“MN” chưa đúng. MN gồm hai chữ cái nên gợi hai điểm M và N, không phải tên của một điểm duy nhất. Một điểm thường được đặt tên bằng một chữ cái in hoa như M."
         },
         {
           "id": "b",
@@ -8150,12 +8150,12 @@
         {
           "id": "c",
           "text": "3 cm",
-          "rationale_vi": "“3 cm” chưa đúng. Dữ kiện dẫn tới “M”. Một điểm thường được đặt tên bằng một chữ cái in hoa như M."
+          "rationale_vi": "“3 cm” chưa đúng. 3 cm là một số đo độ dài, không phải tên dùng để ghi một điểm. Một điểm thường được đặt tên bằng một chữ cái in hoa như M."
         },
         {
           "id": "d",
           "text": "đường M",
-          "rationale_vi": "“đường M” chưa đúng. Dữ kiện dẫn tới “M”. Một điểm thường được đặt tên bằng một chữ cái in hoa như M."
+          "rationale_vi": "“đường M” chưa đúng. Cụm “đường M” đang gọi một đường, còn tên của một điểm chỉ cần chữ cái M. Một điểm thường được đặt tên bằng một chữ cái in hoa như M."
         }
       ],
       "correct_choice_id": "b"
@@ -8193,12 +8193,12 @@
         {
           "id": "a",
           "text": "P có độ dài 5 cm",
-          "rationale_vi": "“P có độ dài 5 cm” chưa đúng. Dữ kiện dẫn tới “P chỉ một vị trí”. Điểm biểu diễn một vị trí và không có độ dài. Vậy đáp án là P chỉ một vị trí."
+          "rationale_vi": "“P có độ dài 5 cm” chưa đúng. Điểm P chỉ biểu diễn một vị trí nên không có độ dài 5 cm hay bất kì độ dài riêng nào. Điểm biểu diễn một vị trí và không có độ dài. Vậy đáp án là P chỉ một vị trí."
         },
         {
           "id": "b",
           "text": "P có hai đầu mút",
-          "rationale_vi": "“P có hai đầu mút” chưa đúng. Dữ kiện dẫn tới “P chỉ một vị trí”. Điểm biểu diễn một vị trí và không có độ dài. Vậy đáp án là P chỉ một vị trí."
+          "rationale_vi": "“P có hai đầu mút” chưa đúng. Hai đầu mút thuộc về đoạn thẳng; điểm P không có hai đầu mút. Điểm biểu diễn một vị trí và không có độ dài. Vậy đáp án là P chỉ một vị trí."
         },
         {
           "id": "c",
@@ -8208,7 +8208,7 @@
         {
           "id": "d",
           "text": "P kéo dài mãi về hai phía",
-          "rationale_vi": "“P kéo dài mãi về hai phía” chưa đúng. Dữ kiện dẫn tới “P chỉ một vị trí”. Điểm biểu diễn một vị trí và không có độ dài. Vậy đáp án là P chỉ một vị trí."
+          "rationale_vi": "“P kéo dài mãi về hai phía” chưa đúng. Kéo dài mãi về hai phía là đặc điểm của đường thẳng, không phải của điểm P. Điểm biểu diễn một vị trí và không có độ dài. Vậy đáp án là P chỉ một vị trí."
         }
       ],
       "correct_choice_id": "c"
@@ -8246,17 +8246,17 @@
         {
           "id": "a",
           "text": "1",
-          "rationale_vi": "“1” chưa đúng. Dữ kiện dẫn tới “4”. Mỗi chữ P, Q, R, S đặt tên cho một điểm riêng, nên có 4 điểm."
+          "rationale_vi": "“1” chưa đúng. Hình đã nêu 4 vị trí P, Q, R, S nên có đúng 4 điểm được đặt tên; chọn 1 là đếm thiếu hoặc thừa. Mỗi chữ P, Q, R, S đặt tên cho một điểm riêng, nên có 4 điểm."
         },
         {
           "id": "b",
           "text": "2",
-          "rationale_vi": "“2” chưa đúng. Dữ kiện dẫn tới “4”. Mỗi chữ P, Q, R, S đặt tên cho một điểm riêng, nên có 4 điểm."
+          "rationale_vi": "“2” chưa đúng. Hình đã nêu 4 vị trí P, Q, R, S nên có đúng 4 điểm được đặt tên; chọn 2 là đếm thiếu hoặc thừa. Mỗi chữ P, Q, R, S đặt tên cho một điểm riêng, nên có 4 điểm."
         },
         {
           "id": "c",
           "text": "3",
-          "rationale_vi": "“3” chưa đúng. Dữ kiện dẫn tới “4”. Mỗi chữ P, Q, R, S đặt tên cho một điểm riêng, nên có 4 điểm."
+          "rationale_vi": "“3” chưa đúng. Hình đã nêu 4 vị trí P, Q, R, S nên có đúng 4 điểm được đặt tên; chọn 3 là đếm thiếu hoặc thừa. Mỗi chữ P, Q, R, S đặt tên cho một điểm riêng, nên có 4 điểm."
         },
         {
           "id": "d",
@@ -8458,17 +8458,17 @@
         {
           "id": "a",
           "text": "chỉ P",
-          "rationale_vi": "“chỉ P” chưa đúng. Dữ kiện dẫn tới “P và Q”. Tên đoạn thẳng PQ cho biết hai đầu mút là P và Q."
+          "rationale_vi": "“chỉ P” chưa đúng. Đoạn thẳng PQ có hai đầu mút P và Q; chỉ chọn P đã bỏ mất đầu mút Q. Tên đoạn thẳng PQ cho biết hai đầu mút là P và Q."
         },
         {
           "id": "b",
           "text": "chỉ Q",
-          "rationale_vi": "“chỉ Q” chưa đúng. Dữ kiện dẫn tới “P và Q”. Tên đoạn thẳng PQ cho biết hai đầu mút là P và Q."
+          "rationale_vi": "“chỉ Q” chưa đúng. Đoạn thẳng PQ có hai đầu mút P và Q; chỉ chọn Q đã bỏ mất đầu mút P. Tên đoạn thẳng PQ cho biết hai đầu mút là P và Q."
         },
         {
           "id": "c",
           "text": "không có đầu mút",
-          "rationale_vi": "“không có đầu mút” chưa đúng. Dữ kiện dẫn tới “P và Q”. Tên đoạn thẳng PQ cho biết hai đầu mút là P và Q."
+          "rationale_vi": "“không có đầu mút” chưa đúng. Đoạn thẳng luôn bị giới hạn bởi hai đầu mút; với PQ đó chính là P và Q. Tên đoạn thẳng PQ cho biết hai đầu mút là P và Q."
         },
         {
           "id": "d",
@@ -8516,17 +8516,17 @@
         {
           "id": "b",
           "text": "Nét thẳng kéo dài mãi hai phía",
-          "rationale_vi": "“Nét thẳng kéo dài mãi hai phía” chưa đúng. Dữ kiện dẫn tới “Nét thẳng bị giới hạn bởi hai đầu mút”. Đoạn thẳng là phần thẳng nằm giữa hai đầu mút. Vậy đáp án là Nét thẳng bị giới hạn bởi hai đầu mút."
+          "rationale_vi": "“Nét thẳng kéo dài mãi hai phía” chưa đúng. Nét thẳng kéo dài mãi hai phía là đường thẳng; đoạn thẳng phải dừng ở hai đầu mút. Đoạn thẳng là phần thẳng nằm giữa hai đầu mút. Vậy đáp án là Nét thẳng bị giới hạn bởi hai đầu mút."
         },
         {
           "id": "c",
           "text": "Nét cong không có đầu mút",
-          "rationale_vi": "“Nét cong không có đầu mút” chưa đúng. Dữ kiện dẫn tới “Nét thẳng bị giới hạn bởi hai đầu mút”. Đoạn thẳng là phần thẳng nằm giữa hai đầu mút. Vậy đáp án là Nét thẳng bị giới hạn bởi hai đầu mút."
+          "rationale_vi": "“Nét cong không có đầu mút” chưa đúng. Nét cong không có đầu mút không phải đoạn thẳng vì đoạn thẳng vừa thẳng vừa bị giới hạn bởi hai đầu mút. Đoạn thẳng là phần thẳng nằm giữa hai đầu mút. Vậy đáp án là Nét thẳng bị giới hạn bởi hai đầu mút."
         },
         {
           "id": "d",
           "text": "Một chấm chỉ vị trí",
-          "rationale_vi": "“Một chấm chỉ vị trí” chưa đúng. Dữ kiện dẫn tới “Nét thẳng bị giới hạn bởi hai đầu mút”. Đoạn thẳng là phần thẳng nằm giữa hai đầu mút. Vậy đáp án là Nét thẳng bị giới hạn bởi hai đầu mút."
+          "rationale_vi": "“Một chấm chỉ vị trí” chưa đúng. Một chấm chỉ một điểm; đoạn thẳng phải là phần thẳng nối giữa hai đầu mút. Đoạn thẳng là phần thẳng nằm giữa hai đầu mút. Vậy đáp án là Nét thẳng bị giới hạn bởi hai đầu mút."
         }
       ],
       "correct_choice_id": "a"
@@ -8564,7 +8564,7 @@
         {
           "id": "a",
           "text": "đường thẳng CD",
-          "rationale_vi": "“đường thẳng CD” chưa đúng. Dữ kiện dẫn tới “đoạn thẳng CD”. Nét thẳng bị giới hạn bởi C và D là đoạn thẳng CD."
+          "rationale_vi": "“đường thẳng CD” chưa đúng. Nét dừng đúng tại C và D nên bị giới hạn bởi hai đầu mút; đó là đoạn thẳng CD chứ không phải đường thẳng kéo dài. Nét thẳng bị giới hạn bởi C và D là đoạn thẳng CD."
         },
         {
           "id": "b",
@@ -8574,12 +8574,12 @@
         {
           "id": "c",
           "text": "đường cong CD",
-          "rationale_vi": "“đường cong CD” chưa đúng. Dữ kiện dẫn tới “đoạn thẳng CD”. Nét thẳng bị giới hạn bởi C và D là đoạn thẳng CD."
+          "rationale_vi": "“đường cong CD” chưa đúng. Đề yêu cầu nối thẳng C với D nên nét tạo ra không thể là đường cong. Nét thẳng bị giới hạn bởi C và D là đoạn thẳng CD."
         },
         {
           "id": "d",
           "text": "điểm CD",
-          "rationale_vi": "“điểm CD” chưa đúng. Dữ kiện dẫn tới “đoạn thẳng CD”. Nét thẳng bị giới hạn bởi C và D là đoạn thẳng CD."
+          "rationale_vi": "“điểm CD” chưa đúng. CD gồm hai vị trí được nối bằng một nét thẳng; đó không phải một điểm đơn lẻ. Nét thẳng bị giới hạn bởi C và D là đoạn thẳng CD."
         }
       ],
       "correct_choice_id": "b"
@@ -9412,7 +9412,7 @@
         {
           "id": "a",
           "text": "Ba đoạn thẳng rời nhau",
-          "rationale_vi": "“Ba đoạn thẳng rời nhau” chưa đúng. Dữ kiện dẫn tới “Ba đoạn thẳng nối tiếp tại các đầu”. Đường gấp khúc gồm nhiều đoạn thẳng nối tiếp nhau. Vậy đáp án là Ba đoạn thẳng nối tiếp tại các đầu."
+          "rationale_vi": "“Ba đoạn thẳng rời nhau” chưa đúng. Ba đoạn thẳng còn rời nhau nên chưa nối tiếp tại các đầu mút để tạo đường gấp khúc. Đường gấp khúc gồm nhiều đoạn thẳng nối tiếp nhau. Vậy đáp án là Ba đoạn thẳng nối tiếp tại các đầu."
         },
         {
           "id": "b",
@@ -9422,12 +9422,12 @@
         {
           "id": "c",
           "text": "Một nét cong duy nhất",
-          "rationale_vi": "“Một nét cong duy nhất” chưa đúng. Dữ kiện dẫn tới “Ba đoạn thẳng nối tiếp tại các đầu”. Đường gấp khúc gồm nhiều đoạn thẳng nối tiếp nhau. Vậy đáp án là Ba đoạn thẳng nối tiếp tại các đầu."
+          "rationale_vi": "“Một nét cong duy nhất” chưa đúng. Một nét cong duy nhất không tạo thành chuỗi các đoạn thẳng nối tiếp của đường gấp khúc. Đường gấp khúc gồm nhiều đoạn thẳng nối tiếp nhau. Vậy đáp án là Ba đoạn thẳng nối tiếp tại các đầu."
         },
         {
           "id": "d",
           "text": "Một điểm và một đoạn rời",
-          "rationale_vi": "“Một điểm và một đoạn rời” chưa đúng. Dữ kiện dẫn tới “Ba đoạn thẳng nối tiếp tại các đầu”. Đường gấp khúc gồm nhiều đoạn thẳng nối tiếp nhau. Vậy đáp án là Ba đoạn thẳng nối tiếp tại các đầu."
+          "rationale_vi": "“Một điểm và một đoạn rời” chưa đúng. Một điểm và một đoạn còn rời nhau không tạo thành nhiều đoạn thẳng nối tiếp, nên chưa phải đường gấp khúc. Đường gấp khúc gồm nhiều đoạn thẳng nối tiếp nhau. Vậy đáp án là Ba đoạn thẳng nối tiếp tại các đầu."
         }
       ],
       "correct_choice_id": "b"
@@ -9465,12 +9465,12 @@
         {
           "id": "a",
           "text": "đoạn thẳng MQ",
-          "rationale_vi": "“đoạn thẳng MQ” chưa đúng. Dữ kiện dẫn tới “đường gấp khúc MNPQ”. Ba đoạn nối tiếp tại N và P tạo thành đường gấp khúc MNPQ."
+          "rationale_vi": "“đoạn thẳng MQ” chưa đúng. MN, NP, PQ là ba đoạn nối tiếp qua N và P; chúng tạo đường gấp khúc MNPQ chứ không phải một đoạn thẳng MQ duy nhất. Ba đoạn nối tiếp tại N và P tạo thành đường gấp khúc MNPQ."
         },
         {
           "id": "b",
           "text": "đường thẳng MQ",
-          "rationale_vi": "“đường thẳng MQ” chưa đúng. Dữ kiện dẫn tới “đường gấp khúc MNPQ”. Ba đoạn nối tiếp tại N và P tạo thành đường gấp khúc MNPQ."
+          "rationale_vi": "“đường thẳng MQ” chưa đúng. Chuỗi MN, NP, PQ gồm nhiều đoạn nối tiếp, không phải một đường thẳng duy nhất MQ. Ba đoạn nối tiếp tại N và P tạo thành đường gấp khúc MNPQ."
         },
         {
           "id": "c",
@@ -9480,7 +9480,7 @@
         {
           "id": "d",
           "text": "đường cong MNPQ",
-          "rationale_vi": "“đường cong MNPQ” chưa đúng. Dữ kiện dẫn tới “đường gấp khúc MNPQ”. Ba đoạn nối tiếp tại N và P tạo thành đường gấp khúc MNPQ."
+          "rationale_vi": "“đường cong MNPQ” chưa đúng. MN, NP, PQ đều là các đoạn thẳng nối tiếp nên hình là đường gấp khúc, không phải đường cong MNPQ. Ba đoạn nối tiếp tại N và P tạo thành đường gấp khúc MNPQ."
         }
       ],
       "correct_choice_id": "c"
@@ -9518,17 +9518,17 @@
         {
           "id": "a",
           "text": "3",
-          "rationale_vi": "“3” chưa đúng. Dữ kiện dẫn tới “5”. Giữa sáu điểm liên tiếp có năm khoảng nối, nên tạo năm đoạn thẳng. Vậy đáp án là 5."
+          "rationale_vi": "“3” chưa đúng. Sáu điểm liên tiếp tạo 5 khoảng nối giữa các điểm kề nhau, nên đường gấp khúc có 5 đoạn; chọn 3 là đếm sai số khoảng. Giữa sáu điểm liên tiếp có năm khoảng nối, nên tạo năm đoạn thẳng. Vậy đáp án là 5."
         },
         {
           "id": "b",
           "text": "4",
-          "rationale_vi": "“4” chưa đúng. Dữ kiện dẫn tới “5”. Giữa sáu điểm liên tiếp có năm khoảng nối, nên tạo năm đoạn thẳng. Vậy đáp án là 5."
+          "rationale_vi": "“4” chưa đúng. Sáu điểm liên tiếp tạo 5 khoảng nối giữa các điểm kề nhau, nên đường gấp khúc có 5 đoạn; chọn 4 là đếm sai số khoảng. Giữa sáu điểm liên tiếp có năm khoảng nối, nên tạo năm đoạn thẳng. Vậy đáp án là 5."
         },
         {
           "id": "c",
           "text": "6",
-          "rationale_vi": "“6” chưa đúng. Dữ kiện dẫn tới “5”. Giữa sáu điểm liên tiếp có năm khoảng nối, nên tạo năm đoạn thẳng. Vậy đáp án là 5."
+          "rationale_vi": "“6” chưa đúng. Sáu điểm liên tiếp tạo 5 khoảng nối giữa các điểm kề nhau, nên đường gấp khúc có 5 đoạn; chọn 6 là đếm sai số khoảng. Giữa sáu điểm liên tiếp có năm khoảng nối, nên tạo năm đoạn thẳng. Vậy đáp án là 5."
         },
         {
           "id": "d",
