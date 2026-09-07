@@ -1859,6 +1859,10 @@ namespace WAHU.ChildUiRuntimeSmoke
                     SetField(resumed, "_finished", true);
                 }
 
+                var terminalReadyGarden = garden.ReadProgress(learner.ChildId);
+                A(terminalReadyGarden.GrowthSteps == 0 && terminalReadyGarden.CompletedMathSessions == 0,
+                    "quick_rescue_third_answer_suspend_does_not_grant_completion_reward");
+
                 using (var terminalResume = (WAHUKidsLearn.MathLessonForm)eventLessonCtor.Invoke(new object[]
                 {
                     database, settings, lessonId, presentation
