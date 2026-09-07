@@ -1,134 +1,201 @@
-# MATH — 3 AI PARALLEL BOARD (READ-ONLY)
+# MATH — 3 AI MASTER PARALLEL BOARD
 
-Baseline after coordination: `3d8674d` (`Toán: chia 3 lane AI chạy song song không xung đột`).
+Updated: 2026-09-07
+Mode: **STRICT NO-WAIT / SAME WORKTREE / SMALL COMMITS**
 
-Purpose: keep AI1/AI2/AI3 productive in parallel on the same working tree without overwriting, staging or committing another lane's work. This file is coordinator-owned and **READ-ONLY for AI1/AI2/AI3**. Each AI updates only its own `AI*_PARALLEL_NOW.md` status file.
+Mục đích của board này: AI1, AI2, AI3 có thể chạy **đồng thời liên tục** trên cùng repo mà không ghi đè nhau. Dependency chỉ là **publish/integration gate**, tuyệt đối không phải wait gate.
 
+> Lệnh dùng cho người điều phối:
+> - AI1: `Đọc _WORK_CLAIMS/AI1_PARALLEL_NOW.md và tự làm liên tục theo file đến khi đạt STOP RULE. Không hỏi lại nếu có thể tự kiểm repo.`
+> - AI2: `Đọc _WORK_CLAIMS/AI2_PARALLEL_NOW.md và tự làm liên tục theo file đến khi đạt STOP RULE. Không hỏi lại nếu có thể tự kiểm repo.`
+> - AI3: `Đọc _WORK_CLAIMS/AI3_PARALLEL_NOW.md và tự làm liên tục theo file đến khi đạt STOP RULE. Không hỏi lại nếu có thể tự kiểm repo.`
 
-## 0. NO-WAIT policy — 3 AI chạy cùng lúc liên tục
+Mỗi file AI riêng đã chứa đủ: trạng thái ổn định, việc phải verify, backlog tiếp theo, fallback, ownership, test gate, commit rule và điều kiện dừng. AI không cần người dùng nhắc lại lịch sử hội thoại.
 
-**Không AI nào được đứng chờ dependency của AI khác.** Mọi dependency chỉ chặn bước *publish/merge vào runtime*, không chặn công việc. Nếu gặp lock/handoff chưa mở, AI phải lập tức chuyển sang task độc lập kế tiếp trong backlog của chính lane.
+---
 
-- AI1 không chờ Request 009: làm **shadow pool-6 hoàn chỉnh** trong draft-only path, validator/test riêng, preview catalog/bank riêng. Chỉ bước copy/merge vào runtime `question_bank_v1.json` + `lesson_catalog_v1.json` mới phụ thuộc AI2.
-- AI2 không chờ AI1 pool thật: Request 009 được phát triển/test bằng **synthetic >=6 pool fixture** trong engine tests. Request 010, adaptive generator và Request 006 đều độc lập với AI1 publish.
-- AI3 không chờ AI2: UI target hard-code, Request 008 portable/installer lists, V5 status cleanup, accessibility/Child UI regression, synthetic pool-6 UI E2E đều làm ngay. Chỉ bước sửa `Build-SetupArtifacts.ps1` và real-bank pool6 E2E phụ thuộc handoff; khi chưa mở thì chuyển task khác.
+## 1. Luật NO-WAIT bắt buộc
 
-Mỗi lane dùng queue `NOW -> NEXT -> FALLBACK`. Khi task NOW bị khóa bởi file-owner khác, **không đợi**: chạy NEXT/FALLBACK.
+1. AI nào bị block bởi file/dependency của lane khác phải **chuyển ngay sang NEXT/FALLBACK** của chính mình.
+2. Không được ngồi chờ một commit của AI khác nếu vẫn còn audit/test/hardening độc lập có thể làm.
+3. Chỉ bước publish/merge thật vào file shared mới được chờ handoff; code/fixture/draft/test phải làm trước bằng synthetic fixture hoặc draft path.
+4. Một AI thấy `LANE_DONE=YES` **không được dừng ngay** khi người dùng vừa gọi lại. Phải:
+   - đọc current `git status` + `git log`;
+   - verify các contract quan trọng trên HEAD mới;
+   - chạy backlog cải tiến trong file riêng;
+   - chỉ dừng khi STOP RULE cuối file vẫn đạt.
+5. Không phát minh product semantics chưa có contract. Ví dụ skip/XP/streak chỉ làm khi product contract đã tồn tại; nếu chưa có thì test/harden phần đã định nghĩa và ghi blocker rõ.
 
-## 1. Non-negotiable shared-tree rules
+---
 
-1. Never run `git reset`, `git checkout -- <file>`, `git restore`, `git clean`, `git stash`, `git rebase` or broad rollback in the shared working tree.
-2. Before editing any owned file, run `git status --short -- <file...>`. If a file is already modified and is not explicitly listed as owned by your lane below, do not edit it.
-3. Never use `git add -A` or `git add .`. Commit with `git commit --only -- <explicit file list>` or equivalent exact staging.
-4. One concern per commit. Push immediately after a passing gate. Do not bundle another AI's WIP into your commit.
-5. Shared contract docs are read-only during the parallel run: `MATH_SHARED_CONTRACT_REQUESTS.md`, `MATH_SHARED_CONTRACT_CHANGES.md`. Put handoff evidence in your own lane status file instead.
-6. `content_packs/math_grade2_v1/manifest.json` is a **single-writer handoff file**. Current lock: AI2 until its template/generator wave is committed. AI1 may touch it only after AI2 writes `MANIFEST_LOCK=FREE` in `AI2_PARALLEL_NOW.md`. AI3 never edits it.
-7. `tools/build/Build-SetupArtifacts.ps1` is also a **single-writer handoff file**. Current lock: AI2 because it already contains the pending LearningSession assertion-count update. After AI2 commits that WIP and writes `BUILD_SETUP_LOCK=AI3`, AI3 owns it for Request 008.
-8. Same worktree means commits from one AI become visible immediately. Do not `pull --rebase` while another lane has uncommitted work. If push is rejected, inspect `git log/status` first; never solve it by resetting others.
+## 2. Luật shared worktree — không thương lượng
 
-## 2. Current lock snapshot
+- Cấm: `git reset`, `git checkout -- <file>`, `git restore`, `git clean`, `git stash`, `git rebase` trên shared working tree.
+- Cấm `git add -A` và `git add .`.
+- Trước khi sửa file: `git status --short -- <file...>`.
+- Nếu file đang modified bởi lane khác và không nằm trong ownership của mình: **không sửa**.
+- Commit bằng exact file list, ưu tiên `git commit --only -- <files>`.
+- Một concern/commit; gate xanh thì push sớm.
+- Push rejected: inspect `git status/log`; không reset/overwrite người khác.
+- Không sửa shared contract docs để “giành trạng thái”; handoff/status ghi vào file lane riêng.
+- Build làm bẩn `packages.lock.json`/line endings nhưng `git diff` rỗng: chỉ refresh/dọn exact HEAD bytes khi chắc chắn đó là side effect của chính mình; không dọn file content/UI của lane khác.
 
-### AI1 — CONTENT/DATA
-Owned now and currently clean after `d1665dc`:
-- `tools/math_content_authoring/**` except files explicitly created by another lane
-- `tools/math_content_validator/**`
-- `tests/MathContentDataSmoke/**`
+---
+
+## 3. Ownership cứng
+
+### AI1 — CONTENT / DATA / AUTHORING
+Own:
 - `content_packs/math_grade2_v1/lesson_catalog_v1.json`
 - `content_packs/math_grade2_v1/question_bank_v1.json`
+- `tools/math_content_authoring/**`
+- `tools/math_content_validator/**`
+- `tests/MathContentDataSmoke/**`
 - `_WORK_CLAIMS/AI1_MATH_CONTENT_STATUS.md`
 - `_WORK_CLAIMS/AI1_PARALLEL_NOW.md`
 
-Temporary no-touch:
-- `content_packs/math_grade2_v1/manifest.json` until AI2 releases lock
-- `content_packs/math_grade2_v1/verified_templates_v1.json` (AI2 generator/template lane)
+Conditional shared file:
+- `content_packs/math_grade2_v1/manifest.json`: AI1 chỉ sửa khi không có template/pack wave đang giữ lock; phải preserve template hash/version của current HEAD và chỉ thay hash content mình sở hữu.
 
-### AI2 — ENGINE/SESSION
-Current WIP lock:
-- `src/Learning/AdaptiveMathSelector.cs`
-- `src/Learning/MathAnswerValidator.cs`
-- `src/Learning/MathLearningModels.cs`
-- `src/Learning/MathQuestionGenerator.cs`
-- `src/Session/MathAuthoredQuestionSource.cs`
-- `src/Session/MathSessionCoordinator.cs`
-- `tests/LearningSessionRuntimeSmoke/Program.cs`
-- engine/session persistence tests needed by Requests 006/009/010
-- `content_packs/math_grade2_v1/verified_templates_v1.json`
-- `content_packs/math_grade2_v1/manifest.json` until generator/template wave lands
+Never edit:
+- `src/Learning/**`, `src/Session/**`, `src/Data/**`, Math UI/release files.
+
+### AI2 — ENGINE / SESSION / PERSISTENCE
+Own:
+- `src/Learning/**` cho Math engine/validator/selector/generator
+- `src/Session/**` cho Math authored/session/progress
+- Math-specific persistence/runtime code dưới `src/Data/**`
+- `tests/MathEngineRuntimeSmoke/**`
+- `tests/MathDataEngineRuntimeSmoke/**`
+- `tests/LearningSessionRuntimeSmoke/**` khi sửa Math generator/selector
+- `tests/MathSessionPersistenceRuntimeSmoke/**`
 - `_WORK_CLAIMS/AI2_MATH_ENGINE_STATUS.md`
 - `_WORK_CLAIMS/AI2_PARALLEL_NOW.md`
-- `tools/build/Build-SetupArtifacts.ps1` **only until current one-line assertion-count WIP is committed**
 
-AI2 must not edit AI1 question bank/catalog or AI3 UI/release-E2E files.
+Conditional shared file:
+- `verified_templates_v1.json` + `manifest.json` chỉ khi có adaptive-template wave thực sự; commit nhỏ rồi trả lock FREE.
 
-### AI3 — UI/RELEASE/INTEGRATION
-Owned now; these files are clean at coordination time:
+Never edit:
+- AI1 authored catalog/bank/source content; AI3 UI/release E2E.
+
+### AI3 — UI / QA / RELEASE / INTEGRATION
+Own:
 - `src/App/MathHubForm.cs`
 - `src/App/MathLessonForm.cs`
-- `tests/ChildUiRuntimeSmoke/Program.cs`
+- `tests/ChildUiRuntimeSmoke/**`
+- `tools/build/Build-SetupArtifacts.ps1`
 - `tools/build/Test-PortableE2E.ps1`
 - `tools/build/Test-InstallerE2E.ps1`
-- `_WORK_CLAIMS/MATH_LIVE_STATUS.md`
+- Math-related release/preflight/integration tests
 - `_WORK_CLAIMS/AI3_MATH_UI_AUDIT.md`
 - `_WORK_CLAIMS/AI3_PARALLEL_NOW.md`
+- `_WORK_CLAIMS/MATH_LIVE_STATUS.md`
 
-Deferred ownership:
-- `tools/build/Build-SetupArtifacts.ps1` only after AI2 explicitly hands it off.
+Never edit:
+- `src/Learning/**`, `src/Session/**`, authored question/catalog JSON, authoring generator/validator.
 
-AI3 must not edit `src/Learning/**`, `src/Session/**`, Math runtime content JSON, or the manifest.
+---
 
-## 3. Parallel execution graph
+## 4. Stable contracts hiện hành — mọi AI phải bảo vệ
 
-### Phase P0 — chạy NGAY đồng thời, không dependency
+- Curriculum: 7 chapters / 17 topics / 67 lessons.
+- Runtime authored bank: **402 questions**.
+- Mỗi lesson: **6 questions = 2 basic + 2 medium + 2 application**.
+- Stable IDs: `m2_q_<skill>_01..06` contiguous.
+- Targeted lesson session: **exactly 3 questions**, selected durable **1 basic + 1 medium + 1 application**.
+- Pool size 6 không được biến thành session target 6.
+- Selected IDs survive suspend/resume/retry/corrupt-open recovery; corrupt selection metadata chỉ được self-heal deterministic trong cùng content pack.
+- Request 010: expression per-question `allowed_operators` được preserve/enforce; bài add/sub không chấp nhận multiply/divide equivalent.
+- Request 006: integer `answer_unit` là display-only metadata; raw grading vẫn số, feedback có unit.
+- Adaptive `draw_segment_given_length`: `interaction_integer`, không fake choices.
+- Adaptive UI mission count derive từ `MathSessionCoordinator.DefaultTargetQuestionCount`, không hard-code `8/tám`.
+- Schema: V5; runtime session pin `pack_id + pack_version`; partial pair bị DB reject; mismatched old pack không được mixed-resume.
+- Math runtime payload phải có đủ `verified_templates_v1.json`, `lesson_catalog_v1.json`, `question_bank_v1.json`.
+- Product không có first-class numeric XP/daily streak/skip contract thì UI/engine không tự invent.
 
-**AI1:** prepare authored breadth expansion without changing runtime bank yet. Curate one additional `basic`, `medium`, `application` question per skill (201 new draft questions total) in new draft-only source under `tools/math_content_authoring/drafts/`; add draft-only validation/tests. IDs must be future runtime IDs `_04`, `_05`, `_06`. Do not import the draft into `generate_grade2_content.py` yet. Continue independent content audits only in AI1-owned files.
+Milestone commits cần biết, không nhất thiết phải re-run implementation nếu vẫn hiện diện:
+- Request 010: `7afbb7b`
+- adaptive segment: `d21a665`
+- Request 009 selected-set: `05cdb2a`, self-heal `3b8a10b`
+- Request 006: `3cf7fc6`
+- runtime 402 publish: `68145ea`
+- UI pool6/session3: `f567be8`
+- UI answer-unit: `3c0cfaa`
+- AI2 stress: `99fd100`, `98fd589`
 
-**AI2:** first finish Request 010 as a small isolated commit: preserve/enforce per-question expression operators and add mandatory regression (`75`, `100 - 30 + 5`, `70 + 5` PASS; `15*5`, `150/2` FAIL; metadata survives runtime instance/resume). Do not include generator/template WIP in that commit. Then land the already-working adaptive `draw_segment_given_length` generator/template wave as a second commit.
+Không tin tuyệt đối SHA “common head” cũ trong status docs. Khi bắt đầu phiên mới, lấy `git rev-parse HEAD` và verify trên HEAD hiện tại.
 
-**AI3:** fix adaptive mission UI hard-code (`Luyện 8 câu hôm nay`, badge/accessibility wording) to derive from `MathSessionCoordinator.DefaultTargetQuestionCount`; add Child UI regression. In parallel, update portable/installer required payload lists for Request 008 to require `verified_templates_v1.json`, `lesson_catalog_v1.json`, `question_bank_v1.json`. Do not touch `Build-SetupArtifacts.ps1` yet.
+---
 
-### Phase P1 — tiếp tục đồng thời; dependency chỉ quyết định publish, không quyết định có việc làm hay không
+## 5. Cách chạy 3 AI đồng thời
 
-**AI1:** finish draft pool quality gates: every skill exactly 3 draft questions (1 per difficulty), no prompt near-duplicate against runtime 01..03 or other draft questions, Grade-2 operation/range/unit guards, deterministic `_04..06` IDs. Publish only draft artifacts/tests.
+### AI1 queue
+1. Verify production 402-bank + deterministic regeneration + manifest hashes.
+2. Chạy semantic/content gates.
+3. Audit pedagogy/content regressions: duplicate, difficulty progression, hint leak, distractor diagnosis, explanation evidence, source/ID/readability/Unicode/prerequisite.
+4. Nếu có lỗi: sửa AI1 files, regenerate, test, commit/push.
+5. Nếu không có lỗi: tiếp tục audit/fuzz authoring/draft-only improvements; không tự tăng runtime bank >402 nếu chưa có product contract mới.
 
-**AI2:** implement Request 009 first-class selected authored set: pool may be >=6, targeted session target remains 3, select exactly 1 basic + 1 medium + 1 application deterministically per selection identity, persist ordered selected `ContentQuestionId` set across suspend/resume/retry/corrupt-cache recovery, completion still 3 attempts. Use synthetic pool >=6 tests; do not alter AI1 runtime bank.
+### AI2 queue
+1. Verify Request 006/009/010 + V5 on current HEAD.
+2. Real 402-bank persistence/session stress.
+3. Selector/answer-validator/generator fuzz + deterministic stress.
+4. Retry/idempotency/write-failure/corrupt-cache/pack-identity/concurrency hardening.
+5. Nếu product contract mới xuất hiện, implement trong engine ownership; nếu chưa, không invent skip/XP/streak.
 
-**AI3:** after AI2 hands off `Build-SetupArtifacts.ps1`, finish Request 008 preflight/staging hard guards for all three Math runtime JSON and run portable/installer payload tests. Also keep UI tests parameterized from engine constants; no numeric target hard-code.
+### AI3 queue
+1. Verify Child UI on current HEAD and 402 answer surfaces.
+2. Verify pool6/session3, answer-unit, adaptive target, generated interaction, 67-lesson accessibility/error-state.
+3. Run release Build-Setup + staged payload + portable + installer E2E when source changes warrant it.
+4. Maintain no stale state/no hard-code/reflection/accessibility guards.
+5. Signing/real Windows 7 only when actual signing credentials/machine exist; otherwise keep explicit release-wide blocker and continue automation/readiness work.
 
-### Sync S1 — Request 009 chỉ là publish gate, KHÔNG phải wait gate
+---
 
-AI2 writes `REQUEST_009_READY=<commit>` in `AI2_PARALLEL_NOW.md` only after its synthetic pool >=6 persistence/regression suite passes.
+## 6. Cross-lane handoff protocol
 
-Khi marker xuất hiện, AI1 chuyển từ shadow/draft sang publish runtime:
-- AI1 merges the draft 201 questions into the runtime authoring pipeline, yielding 402 authored questions / 6 per lesson / 2 per difficulty, updates catalog practice sets, validator/tests and final manifest hash after manifest lock is free.
-- AI3 runs real-bank E2E: pool=6 but targeted session/progress/result remains 3; fresh selection identities can produce different valid sets; resume/retry preserves set.
+- AI1 content contract change → update AI1 own status + commit SHA; AI2/AI3 verify consumer via current HEAD, không cần AI1 sửa engine/UI.
+- AI2 runtime contract change → update AI2 own status + commit SHA; AI1 chỉ sửa metadata/content contract nếu cần; AI3 thêm presentation/E2E.
+- AI3 không thay runtime semantics; nếu UI test phát hiện engine/content bug, ghi evidence trong AI3 status và chuyển sang fallback, không sửa chéo lane.
+- Manifest/template lock: người cần file shared phải kiểm status first. Nếu dirty bởi lane khác, chuyển fallback; không chờ.
 
-### Permanent fallback backlog — dùng ngay nếu task chính chạm lock
+---
 
-**AI1 fallback:** audit/curate shadow pool quality, distractor/hint/explanation uniqueness, difficulty progression, prerequisite/source/ID/Unicode/readability guards, draft deterministic regeneration, content preview statistics. Không chạm engine/UI.
+## 7. Common-head final gates
 
-**AI2 fallback:** fuzz MathAnswerValidator, generated-template coverage, selector determinism, retry/idempotency/corrupt-cache/persistence stress, schema-V5 pack identity, synthetic selected-set permutations. Không chạm UI/content runtime bank.
+Một common HEAD chỉ được coi là Math green khi tối thiểu:
 
-**AI3 fallback:** accessibility strings, no-hard-code reflection tests, 67-lesson render sweep, stale-state/error-state UI, portable/installer required-file tests, status-doc cleanup, synthetic fixtures for pool 6 / display unit. Không chạm engine/content runtime bank.
+- Production content validator: 402/402 valid, 0 errors.
+- Content tests + pool6 publish tests: PASS.
+- 67 lesson × 6; exactly 2/difficulty.
+- MathEngineRuntimeSmoke: PASS.
+- MathDataEngineRuntimeSmoke: PASS.
+- LearningSessionRuntimeSmoke: PASS.
+- MathSessionPersistenceRuntimeSmoke: PASS trên real 402-bank.
+- SQLite production runtime smoke: PASS.
+- ChildUiRuntimeSmoke: PASS, 402/402 surfaces renderable.
+- ContentRuntime/release manifest pack-version contract: PASS.
+- Build-Setup Release/x86: PASS khi chạy final distribution gate.
+- Portable E2E: PASS.
+- Installer/reinstall/uninstall E2E: PASS.
+- `git diff --check`: PASS cho files của wave.
+- Không commit nhầm WIP lane khác.
 
-### Phase P2 — final closure
+Số assertion có thể tăng theo regression mới; **không hard-code rằng phải đúng bằng số lịch sử**. Chỉ được giảm assertion khi có giải thích/contract change rõ.
 
-**AI2:** Request 006 `answer_unit` display metadata: preserve through loader/model/runtime/resume without changing integer grading; regression for raw `8` accepted + display `8 cm`.
+---
 
-**AI3:** consume/display Request 006 if UI needs explicit formatting; otherwise add presentation E2E only. Update stale V5 status text now that `ece2a0c` is stable.
+## 8. STOP RULE chung
 
-**AI1:** final static validator + deterministic regeneration + content hash/manifest verification on 402-bank; no engine/UI edits.
+AI chỉ được dừng khi:
 
-## 4. Required end-state gates
+1. Đã verify contract thuộc lane trên **current HEAD**;
+2. Không còn P0/P1 bug/regression có bằng chứng trong ownership;
+3. Backlog cải tiến có thể làm an toàn đã được xử lý hoặc ghi rõ vì sao không có product contract/tool/machine;
+4. Tests lane xanh;
+5. Files lane không còn uncommitted diff của chính AI;
+6. Commit/push đã xong;
+7. Own status file được cập nhật với evidence mới;
+8. Nếu common-head final gate bị lane khác làm đỏ, AI không tuyên bố toàn Math DONE — chỉ tuyên bố own lane green và tiếp tục fallback work.
 
-- Content validator: 0 errors; all AI1 tests PASS; runtime bank 67 lessons × 6 questions = 402, exactly 2 per difficulty per lesson.
-- Request 010: add/sub expression accepts numeric/equivalent add-sub forms and rejects multiply/divide equivalents.
-- Request 009: synthetic and real pool >=6 -> session target exactly 3, selected set durable through resume/retry/corrupt recovery.
-- Request 006: 23 integer `answer_unit` questions keep raw integer grading while correct-answer display includes unit.
-- Adaptive generated `draw_segment_given_length`: `interaction_integer`, zero fake choices, engine + UI smoke PASS.
-- Adaptive UI mission count derives from `DefaultTargetQuestionCount`, no literal `8/tám` coupling.
-- Request 008: staged/portable/installer all hard-require the three Math runtime JSON; schema remains V5.
-- Production Release/x86 + Math engine/data/session/SQLite/Learning/ChildUI/content + portable/installer E2E all PASS.
-
-## 5. Completion rule
-
-No AI declares Math done based only on its own suite. Final closure requires all three lane status files to contain `LANE_DONE=YES` and the final cross-lane gate above to pass on one common `main` HEAD.
+`LANE_DONE=YES` nghĩa là strict current DoD đã đạt, **không phải lệnh bỏ qua verify/backlog khi người dùng gọi AI trở lại**.
