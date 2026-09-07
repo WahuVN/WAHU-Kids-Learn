@@ -18,6 +18,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_BASELINE = ROOT / "curriculum" / "math_grade2" / "moet_baseline_v1.json"
 DEFAULT_LESSONS = ROOT / "content_packs" / "math_grade2_v1" / "lesson_catalog_v1.json"
 DEFAULT_QUESTIONS = ROOT / "content_packs" / "math_grade2_v1" / "question_bank_v1.json"
+DEFAULT_EVENTS = ROOT / "content_packs" / "math_grade2_v1" / "game_events_v1.json"
 
 ID_RE = re.compile(r"^[a-z0-9][a-z0-9_]{2,127}$")
 EXPECTED_CURRICULUM_ID = "vn_moet_math_grade2_tt32_2018"
@@ -2322,10 +2323,19 @@ def main() -> int:
     parser.add_argument("--baseline", type=Path, default=DEFAULT_BASELINE)
     parser.add_argument("--lessons", type=Path, default=DEFAULT_LESSONS)
     parser.add_argument("--questions", type=Path, default=DEFAULT_QUESTIONS)
+    parser.add_argument("--events", type=Path, default=DEFAULT_EVENTS)
     parser.add_argument("--json", action="store_true", dest="as_json")
     args = parser.parse_args()
 
     errors, metrics = validate(args.baseline, args.lessons, args.questions)
+    validator_dir = str(Path(__file__).resolve().parent)
+    if validator_dir not in sys.path:
+        sys.path.insert(0, validator_dir)
+    from validate_math_game_events import validate as validate_game_events
+    event_errors, event_metrics = validate_game_events(args.events, args.lessons)
+    errors.extend("game_event:" + error for error in event_errors)
+    metrics["game_events"] = event_metrics.get("events", 0)
+    metrics["game_events_first_five"] = event_metrics.get("covered_first_five", 0)
     result = {"ok": not errors, "errors": errors, "metrics": metrics}
     if args.as_json:
         print(json.dumps(result, ensure_ascii=False, indent=2))

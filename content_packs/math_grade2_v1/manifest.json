@@ -18,6 +18,10 @@
         {
             "path": "question_bank_v1.json",
             "sha256": "C15B08D33F4165137B19AA46D95DE230352BAD3B1F60FEDE976AA50A87076907"
+        },
+        {
+            "path": "game_events_v1.json",
+            "sha256": "4E6DCD1DC319EE1971214A389D10403856021165E148F47A20D037879260C727"
         }
     ]
 }

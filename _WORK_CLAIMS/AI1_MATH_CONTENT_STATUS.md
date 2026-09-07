@@ -28,8 +28,8 @@ Owner: AI1 — Math Content & Data
   - interactive measurement
   - word problem
 - Semantic validator errors: **0**
-- Math content unittest: **71 / 71 PASS**
-- Pack manifest/hash/listing check on current working tree: **PASS** (`version=1.9.0`, 3 listed files)
+- Math content unittest: **79 / 79 PASS**
+- Pack manifest/hash/listing check on current working tree: **PASS** (`version=1.9.0`, 4 listed files, gồm `game_events_v1.json`)
 - Real 402-bank session/persistence integration: **289 assertions PASS** trên snapshot trước final engine stress; AI2 committed status ghi final persistence **374 PASS**. Current unstaged AI2 partial-pack-identity fixture đang được phát triển riêng và không thuộc AI1.
 - Child UI targeted build (`BuildProjectReferences=false`) + runtime smoke: **1593 assertions PASS**
 
@@ -149,18 +149,18 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - **24 câu cộng/trừ viết** khớp chính xác số lượt nhớ/mượn theo skill contract;
 - **166 phương trình số instructional** đang được kiểm bằng arithmetic parser, hiện **0 sai**; detector có regression cho cả phép cộng chuỗi và phép chia dùng dấu `:`.
 
-Latest runtime result: **49/49 PASS**; pool-6 regression **8/8 PASS**; full `MathContentDataSmoke` **71/71 PASS**; clean rebuild real 402-bank persistence/session smoke **289 assertions PASS**.
+Latest runtime result: **49/49 PASS**; pool-6 regression **8/8 PASS**; full `MathContentDataSmoke` **79/79 PASS**; game-event validator **5/5 events PASS**; generic `ContentRuntimeSmoke` **21 assertions PASS**; clean rebuild real 402-bank persistence/session smoke **289 assertions PASS**.
 
-## Current priority — FIRST 10 LESSONS FIRST
+## Current priority — PLAYABLE FIRST FIVE
 
-Theo ưu tiên hiện tại của người dùng, AI1 **không tiếp tục polish đồng đều 67 bài**. Trước mắt khóa chất lượng thật kỹ 10 lesson đầu của Chương 1 (`NUM_COUNT_READ_WRITE_0_1000` → `ESTIMATE_OBJECTS_BY_TENS`); các lesson phía sau vẫn giữ production-valid và sẽ update sau.
+Theo phase hiện tại, AI1 **không tiếp tục polish đồng đều 67 bài**. P0 là 5 lesson đầu + event content để chúng chơi được ngay; kết quả polish 10 bài trước đó vẫn được giữ làm regression, còn bài 6+ tạm deferred cho tới khi playable P0 xanh.
 
 - First block: **10 lessons / 60 questions**.
 - Generic distractor fallback trong first block: **5 → 0**.
 - Hint normalized reuse trong first block: **0 group** ở cả hint cấp 1 và cấp 2.
 - Hai application pair máy móc nhất đã được viết lại: `NUM_MIN_MAX_UP_TO_4` similarity **0.75 → 0.293**; `ESTIMATE_OBJECTS_BY_TENS` **0.803 → 0.521**.
 - Max application-pair similarity của cả 10 bài đầu hiện **0.597 < 0.70** và có regression fail-closed.
-- Full content tests hiện **71/71 PASS**, validator **402/402 valid / 0 errors**.
+- Full content tests hiện **79/79 PASS**, validator **402/402 questions + 5/5 game events valid / 0 errors**.
 - Whole-bank fallback generic giảm thêm **36 → 31** như hệ quả phụ; **không dùng thời gian hiện tại để polish 31 case phía sau** trước khi first block được kiểm kỹ hơn.
 - Question-bank SHA hiện tại: `C15B08D33F4165137B19AA46D95DE230352BAD3B1F60FEDE976AA50A87076907`.
 
@@ -179,6 +179,19 @@ Theo ưu tiên hiện tại của người dùng, AI1 **không tiếp tục poli
 - Regression scans explanation/objective/concept/worked-example surfaces of the first 5 lessons and forbids standalone `n` / `n00`.
 - Result: **71/71 content tests PASS**, validator 402/402 valid.
 - Lesson-catalog SHA: `C52D4EAE3E1F12AB4CB5DDA9B51680A615C37D8134AC6AFFD15144E5F242ECAF`; question bank unchanged at `C15B08D33F4165137B19AA46D95DE230352BAD3B1F60FEDE976AA50A87076907`.
+
+
+## Playable Event V1 — AI1 content ready
+
+- Production file: `content_packs/math_grade2_v1/game_events_v1.json`.
+- **5/5 first lessons** có exactly one `quick_rescue` event, mỗi event `question_count=3`, 3 checkpoint labels, `garden_progress` reward presentation.
+- Event themes: `forest_path`, `hundred_station`, `number_path`, `place_value_workshop`, `number_machine`.
+- Copy được thiết kế theo restoration/safe-rescue: không countdown, speed pressure, streak-loss, mất quà, shame, fake danger, companion distress hoặc random reward.
+- Validator fail-closed kiểm schema exact, unique ID, lesson/skill reference, first-five order/coverage, 3 checkpoints, length/NFC/control chars và dark-pattern phrases.
+- Event generator deterministic qua 2 lượt; event SHA256: `4E6DCD1DC319EE1971214A389D10403856021165E148F47A20D037879260C727`.
+- Manifest `1.9.0` đã list **4 files**, SHA event khớp bytes production; generic ContentPack runtime **21 assertions PASS**.
+- Full `MathContentDataSmoke`: **79/79 PASS**.
+- Handoff: AI2 consume schema/runtime; AI3 thêm file event vào build/portable/installer payload. AI1 **không sửa** Session/App/release scripts.
 
 ## Commits / waves
 
