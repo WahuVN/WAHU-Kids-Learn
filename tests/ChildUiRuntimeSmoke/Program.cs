@@ -276,6 +276,11 @@ namespace WAHU.ChildUiRuntimeSmoke
                         string.Equals(expandedPoolPractice.Text, "Luyện bài này", StringComparison.Ordinal) &&
                         string.IsNullOrWhiteSpace(Get<string>(expandedPoolPractice, "BadgeText")),
                         "math_hub_expanded_pool_does_not_claim_six_question_session");
+                    var expandedPoolCountText = firstLesson.PracticeSets.TotalCount + " câu";
+                    A(expandedPoolPractice.AccessibleDescription.IndexOf(expandedPoolCountText, StringComparison.OrdinalIgnoreCase) < 0,
+                        "math_hub_expanded_pool_accessibility_does_not_invent_session_count");
+                    A(expandedPoolPractice.AccessibleDescription.IndexOf(firstLesson.TitleVi, StringComparison.OrdinalIgnoreCase) >= 0,
+                        "math_hub_expanded_pool_accessibility_still_names_lesson");
                     firstLesson.PracticeSets.Basic = originalBasic;
                     firstLesson.PracticeSets.Medium = originalMedium;
                     firstLesson.PracticeSets.Application = originalApplication;
