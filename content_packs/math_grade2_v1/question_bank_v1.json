@@ -2374,7 +2374,7 @@
       "accepted_answers": [
         "3"
       ],
-      "explanation_vi": "15 : 5 = 3 nhóm. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
+      "explanation_vi": "15 : 5 = 3 nhóm. Kiểm tra số nhóm và số phần tử mỗi nhóm có ghép lại đúng tổng ban đầu.",
       "hints_vi": [
         "Tách dữ kiện của “Chia đều” thành từng phần; chỉ tính sau khi biết rõ điều cần tìm.",
         "Tách dữ kiện theo “Chia đều”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
@@ -2754,7 +2754,7 @@
       "accepted_answers": [
         "12"
       ],
-      "explanation_vi": "Bảng nhân 2: 2 × 6 = 12. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
+      "explanation_vi": "Bảng nhân 2: 2 × 6 = 12. Đếm thêm theo đúng bước của bảng nhân để kiểm tra tích vừa tìm được.",
       "hints_vi": [
         "Gạch dưới số hoặc vị trí liên quan đến “Nhân 2”, rồi xác định điều cần tìm trước khi tính.",
         "Khoanh các số cần dùng, áp dụng “Nhân 2”, rồi viết phần số của kết quả."
@@ -2785,7 +2785,7 @@
       "accepted_answers": [
         "18"
       ],
-      "explanation_vi": "Bảng nhân 2: 2 × 9 = 18. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
+      "explanation_vi": "Bảng nhân 2: 2 × 9 = 18. Đếm thêm theo đúng bước của bảng nhân để kiểm tra tích vừa tìm được.",
       "hints_vi": [
         "Tách dữ kiện của “Nhân 2” thành từng phần; chỉ tính sau khi biết rõ điều cần tìm.",
         "Tách dữ kiện theo “Nhân 2”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
@@ -2816,7 +2816,7 @@
       "accepted_answers": [
         "14"
       ],
-      "explanation_vi": "7 nhóm 2 chiếc: 7 × 2 = 14. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
+      "explanation_vi": "7 nhóm 2 chiếc: 7 × 2 = 14. Đếm thêm theo đúng bước của bảng nhân để kiểm tra tích vừa tìm được.",
       "hints_vi": [
         "Tìm chỗ dễ nhầm của “Nhân 2” trong tình huống và xác định bước đầu tiên cần làm.",
         "Với “Nhân 2”, xác định số nhóm và số phần tử mỗi nhóm rồi viết phép nhân phù hợp."
@@ -2847,7 +2847,7 @@
       "accepted_answers": [
         "20"
       ],
-      "explanation_vi": "Bảng nhân 5: 5 × 4 = 20. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
+      "explanation_vi": "Bảng nhân 5: 5 × 4 = 20. Đếm thêm theo đúng bước của bảng nhân để kiểm tra tích vừa tìm được.",
       "hints_vi": [
         "Gạch dưới số hoặc vị trí liên quan đến “Nhân 5”, rồi xác định điều cần tìm trước khi tính.",
         "Khoanh các số cần dùng, áp dụng “Nhân 5”, rồi viết phần số của kết quả."
@@ -2878,7 +2878,7 @@
       "accepted_answers": [
         "40"
       ],
-      "explanation_vi": "Bảng nhân 5: 5 × 8 = 40. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
+      "explanation_vi": "Bảng nhân 5: 5 × 8 = 40. Đếm thêm theo đúng bước của bảng nhân để kiểm tra tích vừa tìm được.",
       "hints_vi": [
         "Tách dữ kiện của “Nhân 5” thành từng phần; chỉ tính sau khi biết rõ điều cần tìm.",
         "Tách dữ kiện theo “Nhân 5”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
@@ -2909,7 +2909,7 @@
       "accepted_answers": [
         "30"
       ],
-      "explanation_vi": "6 nhóm 5 bút: 6 × 5 = 30. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
+      "explanation_vi": "6 nhóm 5 bút: 6 × 5 = 30. Đếm thêm theo đúng bước của bảng nhân để kiểm tra tích vừa tìm được.",
       "hints_vi": [
         "Tìm chỗ dễ nhầm của “Nhân 5” trong tình huống và xác định bước đầu tiên cần làm.",
         "Với “Nhân 5”, xác định số nhóm và số phần tử mỗi nhóm rồi viết phép nhân phù hợp."
@@ -2940,7 +2940,7 @@
       "accepted_answers": [
         "8"
       ],
-      "explanation_vi": "Vì 2 × 8 = 16 nên 16 : 2 = 8. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
+      "explanation_vi": "Vì 2 × 8 = 16 nên 16 : 2 = 8. Dùng phép nhân ngược để kiểm tra thương nhân với số chia có trở lại số bị chia.",
       "hints_vi": [
         "Gạch dưới số hoặc vị trí liên quan đến “Chia 2”, rồi xác định điều cần tìm trước khi tính.",
         "Khoanh các số cần dùng, áp dụng “Chia 2”, rồi viết phần số của kết quả."
@@ -2971,7 +2971,7 @@
       "accepted_answers": [
         "10"
       ],
-      "explanation_vi": "Vì 2 × 10 = 20 nên 20 : 2 = 10. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
+      "explanation_vi": "Vì 2 × 10 = 20 nên 20 : 2 = 10. Dùng phép nhân ngược để kiểm tra thương nhân với số chia có trở lại số bị chia.",
       "hints_vi": [
         "Tách dữ kiện của “Chia 2” thành từng phần; chỉ tính sau khi biết rõ điều cần tìm.",
         "Tách dữ kiện theo “Chia 2”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
@@ -3002,7 +3002,7 @@
       "accepted_answers": [
         "9"
       ],
-      "explanation_vi": "18 : 2 = 9. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
+      "explanation_vi": "18 : 2 = 9. Dùng phép nhân ngược để kiểm tra thương nhân với số chia có trở lại số bị chia.",
       "hints_vi": [
         "Tìm chỗ dễ nhầm của “Chia 2” trong tình huống và xác định bước đầu tiên cần làm.",
         "Với “Chia 2”, xác định tổng và số phần cần chia đều rồi viết phép chia phù hợp."
@@ -3033,7 +3033,7 @@
       "accepted_answers": [
         "5"
       ],
-      "explanation_vi": "Vì 5 × 5 = 25 nên 25 : 5 = 5. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
+      "explanation_vi": "Vì 5 × 5 = 25 nên 25 : 5 = 5. Dùng phép nhân ngược để kiểm tra thương nhân với số chia có trở lại số bị chia.",
       "hints_vi": [
         "Gạch dưới số hoặc vị trí liên quan đến “Chia 5”, rồi xác định điều cần tìm trước khi tính.",
         "Khoanh các số cần dùng, áp dụng “Chia 5”, rồi viết phần số của kết quả."
@@ -3064,7 +3064,7 @@
       "accepted_answers": [
         "8"
       ],
-      "explanation_vi": "Vì 5 × 8 = 40 nên 40 : 5 = 8. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
+      "explanation_vi": "Vì 5 × 8 = 40 nên 40 : 5 = 8. Dùng phép nhân ngược để kiểm tra thương nhân với số chia có trở lại số bị chia.",
       "hints_vi": [
         "Tách dữ kiện của “Chia 5” thành từng phần; chỉ tính sau khi biết rõ điều cần tìm.",
         "Tách dữ kiện theo “Chia 5”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
@@ -3095,7 +3095,7 @@
       "accepted_answers": [
         "10"
       ],
-      "explanation_vi": "50 : 5 = 10 túi. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
+      "explanation_vi": "50 : 5 = 10 túi. Dùng phép nhân ngược để kiểm tra thương nhân với số chia có trở lại số bị chia.",
       "hints_vi": [
         "Tìm chỗ dễ nhầm của “Chia 5” trong tình huống và xác định bước đầu tiên cần làm.",
         "Với “Chia 5”, xác định tổng và số phần cần chia đều rồi viết phép chia phù hợp."
@@ -3316,7 +3316,7 @@
       "accepted_answers": [
         "368"
       ],
-      "explanation_vi": "125 + 243 = 368. Đây là cách dùng thêm vào để trả lời đúng đại lượng mà đề đang hỏi.",
+      "explanation_vi": "125 + 243 = 368. Đề cho thêm vào lượng ban đầu và hỏi tất cả sau khi thêm, nên dùng phép cộng.",
       "hints_vi": [
         "Chia đề thành phần đã biết và phần cần tìm, rồi nhận ra quan hệ “Thêm vào” giữa chúng.",
         "Nói lại đề theo mẫu “đã biết gì, cần tìm gì”, rồi chọn phép tính phù hợp với “Thêm vào”."
@@ -3409,7 +3409,7 @@
       "accepted_answers": [
         "552"
       ],
-      "explanation_vi": "786 - 234 = 552. Đây là cách dùng bớt đi để trả lời đúng đại lượng mà đề đang hỏi.",
+      "explanation_vi": "786 - 234 = 552. Đề cho bớt khỏi lượng ban đầu và hỏi phần còn lại, nên dùng phép trừ.",
       "hints_vi": [
         "Chia đề thành phần đã biết và phần cần tìm, rồi nhận ra quan hệ “Bớt đi” giữa chúng.",
         "Nói lại đề theo mẫu “đã biết gì, cần tìm gì”, rồi chọn phép tính phù hợp với “Bớt đi”."
@@ -3502,7 +3502,7 @@
       "accepted_answers": [
         "150"
       ],
-      "explanation_vi": "120 + 30 = 150 cm. Đây là cách dùng nhiều hơn để trả lời đúng đại lượng mà đề đang hỏi.",
+      "explanation_vi": "120 + 30 = 150 cm. Đại lượng cần tìm nhiều hơn đại lượng đã biết một phần cho trước, nên cộng phần hơn.",
       "hints_vi": [
         "Chia đề thành phần đã biết và phần cần tìm, rồi nhận ra quan hệ “Nhiều hơn” giữa chúng.",
         "Nói lại đề theo mẫu “đã biết gì, cần tìm gì”, rồi chọn phép tính phù hợp với “Nhiều hơn”."
@@ -3596,7 +3596,7 @@
       "accepted_answers": [
         "70"
       ],
-      "explanation_vi": "90 - 20 = 70 cm. Đây là cách dùng ít hơn để trả lời đúng đại lượng mà đề đang hỏi.",
+      "explanation_vi": "90 - 20 = 70 cm. Đại lượng cần tìm ít hơn đại lượng đã biết một phần cho trước, nên trừ phần kém.",
       "hints_vi": [
         "Chia đề thành phần đã biết và phần cần tìm, rồi nhận ra quan hệ “Ít hơn” giữa chúng.",
         "Nói lại đề theo mẫu “đã biết gì, cần tìm gì”, rồi chọn phép tính phù hợp với “Ít hơn”."
@@ -3659,7 +3659,7 @@
       "accepted_answers": [
         "12"
       ],
-      "explanation_vi": "6 nhóm 2 bạn nên 6 × 2 = 12. Đây là cách dùng nhân trong tình huống để trả lời đúng đại lượng mà đề đang hỏi.",
+      "explanation_vi": "6 nhóm 2 bạn nên 6 × 2 = 12. Có nhiều nhóm bằng nhau và đề hỏi tất cả, nên dùng phép nhân.",
       "hints_vi": [
         "Nói lại bằng lời: đề đã cho gì và hỏi gì; sau đó nối dữ kiện với “Nhân trong tình huống”.",
         "Gạch chân số đã cho và điều cần tìm; dùng quan hệ “Nhân trong tình huống” để chọn phép tính."
@@ -3690,7 +3690,7 @@
       "accepted_answers": [
         "20"
       ],
-      "explanation_vi": "4 × 5 = 20. Đây là cách dùng nhân trong tình huống để trả lời đúng đại lượng mà đề đang hỏi.",
+      "explanation_vi": "4 × 5 = 20. Có nhiều nhóm bằng nhau và đề hỏi tất cả, nên dùng phép nhân.",
       "hints_vi": [
         "Chia đề thành phần đã biết và phần cần tìm, rồi nhận ra quan hệ “Nhân trong tình huống” giữa chúng.",
         "Nói lại đề theo mẫu “đã biết gì, cần tìm gì”, rồi chọn phép tính phù hợp với “Nhân trong tình huống”."
@@ -3752,7 +3752,7 @@
       "accepted_answers": [
         "7"
       ],
-      "explanation_vi": "14 : 2 = 7. Đây là cách dùng chia trong tình huống để trả lời đúng đại lượng mà đề đang hỏi.",
+      "explanation_vi": "14 : 2 = 7. Đề chia thành các phần bằng nhau hoặc hỏi số nhóm, nên dùng phép chia.",
       "hints_vi": [
         "Nói lại bằng lời: đề đã cho gì và hỏi gì; sau đó nối dữ kiện với “Chia trong tình huống”.",
         "Gạch chân số đã cho và điều cần tìm; dùng quan hệ “Chia trong tình huống” để chọn phép tính."
@@ -3783,7 +3783,7 @@
       "accepted_answers": [
         "7"
       ],
-      "explanation_vi": "35 : 5 = 7. Đây là cách dùng chia trong tình huống để trả lời đúng đại lượng mà đề đang hỏi.",
+      "explanation_vi": "35 : 5 = 7. Đề chia thành các phần bằng nhau hoặc hỏi số nhóm, nên dùng phép chia.",
       "hints_vi": [
         "Chia đề thành phần đã biết và phần cần tìm, rồi nhận ra quan hệ “Chia trong tình huống” giữa chúng.",
         "Nói lại đề theo mẫu “đã biết gì, cần tìm gì”, rồi chọn phép tính phù hợp với “Chia trong tình huống”."
@@ -5413,7 +5413,7 @@
       "accepted_answers": [
         "7"
       ],
-      "explanation_vi": "Vị trí B = 2 + 5 = 7 cm. Kiểm tra lại các vạch hoặc từng đoạn đã dùng trước khi chốt số đo.",
+      "explanation_vi": "Vị trí B = 2 + 5 = 7 cm. Kiểm tra lại khoảng cách giữa các vạch hoặc từng đoạn đã dùng trước khi chốt số đo.",
       "hints_vi": [
         "Gạch dưới số hoặc vị trí liên quan đến “Vẽ đoạn thẳng theo độ dài”, rồi xác định điều cần tìm trước khi tính.",
         "Khoanh các số cần dùng, áp dụng “Vẽ đoạn thẳng theo độ dài”, rồi viết phần số của kết quả."
@@ -5475,7 +5475,7 @@
       "accepted_answers": [
         "9"
       ],
-      "explanation_vi": "3 + 6 = 9 cm. Kiểm tra lại các vạch hoặc từng đoạn đã dùng trước khi chốt số đo.",
+      "explanation_vi": "3 + 6 = 9 cm. Kiểm tra lại khoảng cách giữa các vạch hoặc từng đoạn đã dùng trước khi chốt số đo.",
       "hints_vi": [
         "Tìm chỗ dễ nhầm của “Vẽ đoạn thẳng theo độ dài” trong tình huống và xác định bước đầu tiên cần làm.",
         "Với “Vẽ đoạn thẳng theo độ dài”, đánh dấu các vạch hoặc đoạn cần dùng rồi tính từ đúng đầu mút."
@@ -6711,7 +6711,7 @@
       "accepted_answers": [
         "8"
       ],
-      "explanation_vi": "8 - 0 = 8 cm. Kiểm tra lại các vạch hoặc từng đoạn đã dùng trước khi chốt số đo.",
+      "explanation_vi": "8 - 0 = 8 cm. Kiểm tra lại khoảng cách giữa các vạch hoặc từng đoạn đã dùng trước khi chốt số đo.",
       "hints_vi": [
         "Gạch dưới số hoặc vị trí liên quan đến “Đo bằng thước cm”, rồi xác định điều cần tìm trước khi tính.",
         "Khoanh các số cần dùng, áp dụng “Đo bằng thước cm”, rồi viết phần số của kết quả."
@@ -6743,7 +6743,7 @@
       "accepted_answers": [
         "7"
       ],
-      "explanation_vi": "10 - 3 = 7 cm. Kiểm tra lại các vạch hoặc từng đoạn đã dùng trước khi chốt số đo.",
+      "explanation_vi": "10 - 3 = 7 cm. Kiểm tra lại khoảng cách giữa các vạch hoặc từng đoạn đã dùng trước khi chốt số đo.",
       "hints_vi": [
         "Tách dữ kiện của “Đo bằng thước cm” thành từng phần; chỉ tính sau khi biết rõ điều cần tìm.",
         "Tách dữ kiện theo “Đo bằng thước cm”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
@@ -6869,7 +6869,7 @@
       "accepted_answers": [
         "15"
       ],
-      "explanation_vi": "Các vạch lần lượt 0, 5, 10, 15. Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học.",
+      "explanation_vi": "Các vạch lần lượt 0, 5, 10, 15. Kiểm tra lại khoảng cách giữa các vạch hoặc từng đoạn đã dùng trước khi chốt số đo.",
       "hints_vi": [
         "Tìm chỗ dễ nhầm của “Vạch chia” trong tình huống và xác định bước đầu tiên cần làm.",
         "Với “Vạch chia”, xác định tổng và số phần cần chia đều rồi viết phép chia phù hợp."
@@ -7314,7 +7314,7 @@
       "accepted_answers": [
         "10"
       ],
-      "explanation_vi": "4 + 6 = 10 cm. Kiểm tra lại các vạch hoặc từng đoạn đã dùng trước khi chốt số đo.",
+      "explanation_vi": "4 + 6 = 10 cm. Kiểm tra lại khoảng cách giữa các vạch hoặc từng đoạn đã dùng trước khi chốt số đo.",
       "hints_vi": [
         "Gạch dưới số hoặc vị trí liên quan đến “Độ dài đường gấp khúc”, rồi xác định điều cần tìm trước khi tính.",
         "Khoanh các số cần dùng, áp dụng “Độ dài đường gấp khúc”, rồi viết phần số của kết quả."
@@ -7346,7 +7346,7 @@
       "accepted_answers": [
         "10"
       ],
-      "explanation_vi": "3 + 5 + 2 = 10 cm. Kiểm tra lại các vạch hoặc từng đoạn đã dùng trước khi chốt số đo.",
+      "explanation_vi": "3 + 5 + 2 = 10 cm. Kiểm tra lại khoảng cách giữa các vạch hoặc từng đoạn đã dùng trước khi chốt số đo.",
       "hints_vi": [
         "Tách dữ kiện của “Độ dài đường gấp khúc” thành từng phần; chỉ tính sau khi biết rõ điều cần tìm.",
         "Tách dữ kiện theo “Độ dài đường gấp khúc”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."

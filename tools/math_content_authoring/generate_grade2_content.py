@@ -66,14 +66,24 @@ def second_objective(question_types: list[str], concept_name: str) -> str:
 
 def numeric_feedback_check(concept_name: str) -> str:
     concept = concept_name.strip().lower()
-    if any(token in concept for token in ("nhân", "chia")):
-        return " Có thể kiểm tra lại bằng quan hệ nhân/chia tương ứng trong bảng đã học."
-    if any(token in concept for token in ("cộng", "trừ", "tính từ trái sang phải", "nhẩm")):
-        return " Tính lại từng bước theo đúng thứ tự để kiểm tra kết quả."
+    # Measurement concepts must be classified before multiplication/division: "vạch chia"
+    # contains the word "chia" but is not a division skill.
     if any(token in concept for token in ("đo bằng thước", "vạch chia", "độ dài đường gấp khúc", "vẽ đoạn thẳng")):
-        return " Kiểm tra lại các vạch hoặc từng đoạn đã dùng trước khi chốt số đo."
+        return " Kiểm tra lại khoảng cách giữa các vạch hoặc từng đoạn đã dùng trước khi chốt số đo."
     if "tính với số đo" in concept or "giải toán đo lường" in concept:
         return " Kiểm tra các số đo đã cùng đơn vị rồi làm lại phép tính một lần nữa."
+    if concept in {"nhân 2", "nhân 5"}:
+        return " Đếm thêm theo đúng bước của bảng nhân để kiểm tra tích vừa tìm được."
+    if concept in {"chia 2", "chia 5"}:
+        return " Dùng phép nhân ngược để kiểm tra thương nhân với số chia có trở lại số bị chia."
+    if concept == "chia đều":
+        return " Kiểm tra số nhóm và số phần tử mỗi nhóm có ghép lại đúng tổng ban đầu."
+    if "nhân" in concept:
+        return " Kiểm tra số nhóm bằng nhau và số phần tử mỗi nhóm trước khi chốt tích."
+    if "chia" in concept:
+        return " Dùng quan hệ ngược với phép nhân để kiểm tra kết quả chia."
+    if any(token in concept for token in ("cộng", "trừ", "tính từ trái sang phải", "nhẩm")):
+        return " Tính lại từng bước theo đúng thứ tự để kiểm tra kết quả."
     if "biểu đồ" in concept or "dữ liệu" in concept:
         return " Đếm lại biểu tượng hoặc dữ liệu cần dùng rồi kiểm tra phép tính."
     if "đọc lịch" in concept:
@@ -85,6 +95,19 @@ def numeric_feedback_check(concept_name: str) -> str:
     return f" Làm lại bước chính của {concept} để kiểm tra kết quả vừa tìm được."
 
 
+def word_problem_feedback_check(concept_name: str) -> str:
+    concept = concept_name.strip().lower()
+    reasons = {
+        "thêm vào": " Đề cho thêm vào lượng ban đầu và hỏi tất cả sau khi thêm, nên dùng phép cộng.",
+        "bớt đi": " Đề cho bớt khỏi lượng ban đầu và hỏi phần còn lại, nên dùng phép trừ.",
+        "nhiều hơn": " Đại lượng cần tìm nhiều hơn đại lượng đã biết một phần cho trước, nên cộng phần hơn.",
+        "ít hơn": " Đại lượng cần tìm ít hơn đại lượng đã biết một phần cho trước, nên trừ phần kém.",
+        "nhân trong tình huống": " Có nhiều nhóm bằng nhau và đề hỏi tất cả, nên dùng phép nhân.",
+        "chia trong tình huống": " Đề chia thành các phần bằng nhau hoặc hỏi số nhóm, nên dùng phép chia.",
+    }
+    return reasons.get(concept, f" Đối chiếu quan hệ {concept} trong đề với phép tính vừa dùng để kiểm tra kết quả.")
+
+
 def deepen_explanation(explanation: str, question_type: str, concept_name: str) -> str:
     """Keep concise authored math, but add the missing why/check step when feedback is too terse."""
     text = explanation.strip()
@@ -92,7 +115,7 @@ def deepen_explanation(explanation: str, question_type: str, concept_name: str) 
         return text
     concept = concept_name.strip().lower()
     suffixes = {
-        "word_problem": f" Đây là cách dùng {concept} để trả lời đúng đại lượng mà đề đang hỏi.",
+        "word_problem": word_problem_feedback_check(concept_name),
         "numeric_input": numeric_feedback_check(concept_name),
         "expression_input": f" Thứ tự các bước phải đúng với {concept}; tính lại từng bước sẽ kiểm tra được kết quả.",
         "multiple_choice": f" Lựa chọn này khớp với {concept}; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng.",

@@ -132,18 +132,18 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - 201/201 hint cấp 1 và 201/201 hint cấp 2 hiện actionable, **mỗi cấp 201 unique / max repeat 1**; toàn bộ 402 hint slots đạt **0 unseen-answer leak** và **0 hint >130 ký tự**; readability hiện hint1 p90/max = **103/115**, hint2 = **108/119** (trước các wave max 168/167); **176 hint1** dùng khung `Nhớ kiến thức:` đã giảm **176 → 0** và chuyển thành bước quan sát theo question type/difficulty/concept; **28 application numeric hint2** dùng khung `Viết một phép tính hoặc quan hệ ngắn...` đã giảm **28 → 0**;
 - 267/267 distractor có **rationale unique / max repeat 1** và **choice-specific diagnosis**; 3 họ mẫu shallow cũ đã giảm **267 → 0**. Các wave structured reasoning bao phủ thuật ngữ phép tính (24), cấu trúc số (24), số tròn trăm/ý nghĩa/chọn phép tính (26), sự kiện (27), đơn vị-thời gian-lịch-đồng hồ-ước lượng (39), đọc số/cân/tiền/pictograph (24), hình học (87), và các case sửa vai trò thành phần phép tính; số câu MC/TF dùng chung thân rationale đã giảm **88 → 0**. Hard gate hiện bắt buộc **267/267 diagnosis coverage** (`missing_choice_specific_diagnosis` nếu thiếu), test xác nhận `covered=267, missing=0, shared=0`; readability rationale hiện **p90/p95/max = 245/267/300 ký tự, over300=0**, validator chặn mọi distractor rationale >300 ký tự;
 - vị trí đáp án đúng được cân bằng deterministic: 88 câu 4-choice = 22/22/22/22 cho A/B/C/D; 3 true/false = 2/1;
-- 23 câu integer có `answer_unit` giữ đúng contract display-only, không đổi sang unit-input;
+- 23 câu integer có `answer_unit` giữ đúng contract display-only, không đổi sang unit-input; **23/23 prompt tự nêu đơn vị theo alias chuẩn** (`cm/xăng-ti-mét`, `l/lít`, `m/mét`, ...), validator fail nếu metadata unit tồn tại nhưng đề không nói rõ đơn vị;
 - **39 application regression quan trọng** được khóa riêng: 38 regression trước đó + câu đọc/viết số đã đổi từ ghép hàng trực tiếp sang sửa lỗi bỏ quên hàng chục;
 - child-facing lesson/question text có **0 internal-engine vocabulary** và **0 Unicode/whitespace/control-character hygiene violation**; metadata kỹ thuật như `application`, `numeric_input`, `deterministic` vẫn được phép;
 - **67/67 worked example unique**, mỗi ví dụ có ít nhất 2 bước giải, **0 exact/near overlap** với 201 câu practice và 67/67 solution chốt đáp án tường minh;
 - cả hai mục tiêu học đạt **67/67 unique** và gắn concept; objective 1 đã loại **67/67** placeholder `Nhận biết và thực hiện đúng nội dung:` và đổi động từ theo answer surface, objective 2 placeholder chung = 0;
 - 67/67 concept definition hiện dài ít nhất **40 ký tự**; 3 definition quá mỏng (`Thêm vào`, `Ngày và giờ`, `Giờ và phút`) đã được nâng thành quan hệ có ý nghĩa, vẫn giữ Grade-2 scope;
-- 201/201 `explanation_vi` unique và dài ít nhất 32 ký tự; **57 lời giải quá ngắn đã được nâng lên 0**, MCQ giữ correct-rationale đồng bộ với explanation; **201/201 lời giải có evidence của đáp án**, 44 câu thiếu kết luận tường minh đã được nâng về 0; **33 numeric feedback tail máy móc** `Kết quả này theo đúng quy tắc...` đã giảm **33 → 0** và được thay bằng check-step theo nhóm concept;
+- 201/201 `explanation_vi` unique và dài ít nhất 32 ký tự; **57 lời giải quá ngắn đã được nâng lên 0**, MCQ giữ correct-rationale đồng bộ với explanation; **201/201 lời giải có evidence của đáp án**, 44 câu thiếu kết luận tường minh đã được nâng về 0; **33 numeric feedback tail máy móc** `Kết quả này theo đúng quy tắc...` đã giảm **33 → 0**; thêm wave mới loại **14** suffix chung `quan hệ nhân/chia tương ứng...` và **8** suffix `đại lượng mà đề đang hỏi` về **0**, thay bằng check-step theo đúng concept/tình huống; regression riêng khóa bug `vạch chia` bị phân loại nhầm thành phép chia;
 - toàn ngân hàng đạt **0 exact duplicate + 0 cross-lesson near-duplicate ≥ 0.95**; 2 cặp near-duplicate đã được viết lại theo ngữ cảnh khác;
 - 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract;
 - **166 phương trình số instructional** đang được kiểm bằng arithmetic parser, hiện **0 sai**; detector có regression cho cả phép cộng chuỗi và phép chia dùng dấu `:`.
 
-Latest result: **40 tests PASS**.
+Latest result: **41 tests PASS**.
 
 ## Commits / waves
 

@@ -416,6 +416,8 @@ class MathContentDataSmoke(unittest.TestCase):
                 explanation = item["explanation_vi"].strip()
                 self.assertGreaterEqual(len(explanation), validator.MIN_QUESTION_EXPLANATION_CHARS)
                 self.assertNotIn(validator.SHALLOW_NUMERIC_EXPLANATION_MARKER, explanation.casefold())
+                self.assertNotIn(validator.GENERIC_MULDIV_EXPLANATION_MARKER, explanation.casefold())
+                self.assertNotIn(validator.GENERIC_WORD_PROBLEM_EXPLANATION_MARKER, explanation.casefold())
                 self.assertTrue(validator.explanation_states_answer(item, explanation))
                 choices = item.get("choices", [])
                 if choices:
@@ -596,6 +598,13 @@ class MathContentDataSmoke(unittest.TestCase):
         self.assertGreaterEqual(len(counts), int(len(rationales) * 0.9))
         self.assertTrue(all(len(x.strip()) >= 50 for x in rationales))
 
+    def test_measurement_scale_feedback_is_not_misclassified_as_division(self):
+        item = self.question_by_id["m2_q_measure_with_common_scale_03"]
+        explanation = item["explanation_vi"].casefold()
+        self.assertIn("vạch", explanation)
+        self.assertNotIn("nhân/chia", explanation)
+        self.assertNotIn("phép chia", explanation)
+
     def test_integer_answer_unit_is_display_only_metadata(self):
         unit_questions = [x for x in self.questions if "answer_unit" in x]
         self.assertEqual(23, len(unit_questions))
@@ -606,6 +615,11 @@ class MathContentDataSmoke(unittest.TestCase):
                 self.assertIn(item["question_type"], {"numeric_input", "word_problem"})
                 self.assertIs(type(item["correct_answer"]), int)
                 self.assertIn(str(item["correct_answer"]), item["accepted_answers"])
+                self.assertTrue(validator.prompt_mentions_answer_unit(item["prompt_vi"], item["answer_unit"]))
+        self.assertTrue(validator.prompt_mentions_answer_unit("Dài bao nhiêu xăng-ti-mét?", "cm"))
+        self.assertTrue(validator.prompt_mentions_answer_unit("Còn bao nhiêu lít?", "l"))
+        self.assertFalse(validator.prompt_mentions_answer_unit("Đáp án là bao nhiêu?", "cm"))
+        self.assertFalse(validator.prompt_mentions_answer_unit("Một cm dài bao nhiêu?", "m"))
 
     def test_correct_choice_positions_are_balanced(self):
         choice_questions = [x for x in self.questions if x.get("choices")]

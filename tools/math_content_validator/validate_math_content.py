@@ -31,6 +31,16 @@ EXPECTED_BASELINE_HARD_GUARDS = {
     "mental_add_sub_max": 20,
     "clock_minute_hand_allowed_numbers_for_baseline_tasks": [3, 6],
 }
+ANSWER_UNIT_PROMPT_ALIASES = {
+    "cm": ("cm", "xăng-ti-mét", "xăng ti mét"),
+    "kg": ("kg", "ki-lô-gam", "kilôgam", "ki lô gam"),
+    "l": ("l", "lít"),
+    "dm": ("dm", "đề-xi-mét", "đề xi mét"),
+    "m": ("m", "mét"),
+    "ngày": ("ngày",),
+    "giờ": ("giờ",),
+    "phút": ("phút",),
+}
 DIFFICULTIES = {"basic", "medium", "application"}
 ENGINE_ANSWER_KINDS = {"integer", "interaction_integer", "number", "decimal", "fraction", "text", "unit", "expression"}
 GRADE2_USED_ANSWER_KINDS = {"integer", "interaction_integer", "text", "unit", "expression"}
@@ -71,6 +81,8 @@ GENERIC_FIRST_OBJECTIVE_PREFIX = "Nhận biết và thực hiện đúng nội d
 GENERIC_SECOND_OBJECTIVE = "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
 GENERIC_DISTRACTOR_RATIONALE = "Lựa chọn này không phù hợp với quy tắc hoặc dữ kiện của bài."
 SHALLOW_NUMERIC_EXPLANATION_MARKER = "kết quả này theo đúng quy tắc"
+GENERIC_MULDIV_EXPLANATION_MARKER = "quan hệ nhân/chia tương ứng trong bảng đã học"
+GENERIC_WORD_PROBLEM_EXPLANATION_MARKER = "để trả lời đúng đại lượng mà đề đang hỏi"
 COMPONENT_SKILLS = {
     "ADD_COMPONENTS_RECOGNIZE",
     "SUB_COMPONENTS_RECOGNIZE",
@@ -988,6 +1000,21 @@ def try_eval_numeric_choice(text: str) -> Fraction | None:
         return None
 
 
+def prompt_mentions_answer_unit(prompt: object, answer_unit: object) -> bool:
+    if not isinstance(prompt, str) or not isinstance(answer_unit, str):
+        return False
+    unit = answer_unit.strip().casefold()
+    aliases = ANSWER_UNIT_PROMPT_ALIASES.get(unit)
+    if not aliases:
+        return False
+    text = unicodedata.normalize("NFC", prompt.casefold())
+    for alias in aliases:
+        escaped = re.escape(alias.casefold())
+        if re.search(rf"(?<![\w]){escaped}(?![\w])", text, flags=re.UNICODE):
+            return True
+    return False
+
+
 def parse_unit_answer(text: str) -> tuple[Fraction, str]:
     if not isinstance(text, str):
         raise ValueError("unit_answer_not_text")
@@ -1404,6 +1431,10 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
         validate_numeric_relations(explanation, where + ".explanation_vi", errors)
         if SHALLOW_NUMERIC_EXPLANATION_MARKER in explanation.casefold():
             errors.append(f"shallow_numeric_explanation:{where}")
+        if GENERIC_MULDIV_EXPLANATION_MARKER in explanation.casefold():
+            errors.append(f"generic_muldiv_explanation:{where}")
+        if GENERIC_WORD_PROBLEM_EXPLANATION_MARKER in explanation.casefold():
+            errors.append(f"generic_word_problem_explanation:{where}")
         if explanation and len(explanation) < MIN_QUESTION_EXPLANATION_CHARS:
             errors.append(f"question_explanation_too_short:{where}:{len(explanation)}")
         if explanation and len(explanation) > MAX_QUESTION_EXPLANATION_CHARS:
@@ -1499,6 +1530,8 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
                 errors.append(f"answer_unit_requires_integer_kind:{where}:{kind}")
             elif question_type not in {"numeric_input", "word_problem"}:
                 errors.append(f"answer_unit_question_type_mismatch:{where}:{question_type}")
+            elif not prompt_mentions_answer_unit(prompt, answer_unit):
+                errors.append(f"answer_unit_not_stated_in_prompt:{where}:{answer_unit}")
 
         if kind in {"integer", "interaction_integer"}:
             answer = q.get("correct_answer")
