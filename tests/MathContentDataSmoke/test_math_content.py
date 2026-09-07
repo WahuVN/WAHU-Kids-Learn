@@ -61,6 +61,15 @@ class MathContentDataSmoke(unittest.TestCase):
         broken["curriculum_id"] = "other_curriculum"
         self.assertIn("baseline_curriculum_id_mismatch", validator.baseline_traceability_violations(broken))
 
+    def test_catalog_and_bank_root_metadata_are_stable(self):
+        self.assertEqual(validator.EXPECTED_CATALOG_ID, self.catalog["catalog_id"])
+        self.assertEqual(validator.EXPECTED_BANK_ID, self.bank["bank_id"])
+        self.assertEqual(validator.EXPECTED_LANGUAGE, self.catalog["language"])
+        self.assertEqual(validator.EXPECTED_LANGUAGE, self.bank["language"])
+        self.assertEqual(validator.EXPECTED_ID_POLICY, self.catalog["id_policy"])
+        for key in ("supported_answer_kinds", "grade2_used_answer_kinds", "question_types"):
+            self.assertEqual(len(self.bank[key]), len(set(self.bank[key])))
+
     def test_every_baseline_skill_has_exactly_one_loadable_lesson(self):
         self.assertEqual(67, len(self.skills))
         self.assertEqual(67, len(self.lessons))

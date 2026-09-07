@@ -21,6 +21,10 @@ DEFAULT_QUESTIONS = ROOT / "content_packs" / "math_grade2_v1" / "question_bank_v
 
 ID_RE = re.compile(r"^[a-z0-9][a-z0-9_]{2,127}$")
 EXPECTED_CURRICULUM_ID = "vn_moet_math_grade2_tt32_2018"
+EXPECTED_CATALOG_ID = "math_grade2_lesson_catalog_v1"
+EXPECTED_BANK_ID = "math_grade2_static_question_bank_v1"
+EXPECTED_LANGUAGE = "vi"
+EXPECTED_ID_POLICY = "deterministic_ascii_lower_snake_preserve_existing_uppercase_skill_ids"
 EXPECTED_BASELINE_STATUS = "VERIFIED_A_BASELINE"
 REQUIRED_BASELINE_SOURCE_IDS = {"MOET_TT32_2018", "TT32_FULL_ANNEX_MIRROR"}
 EXPECTED_BASELINE_HARD_GUARDS = {
@@ -1180,6 +1184,17 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
         for path, number, _text in child_facing_numeric_literal_violations(root, max_number):
             errors.append(f"child_facing_number_above_baseline:{name}:{path}:{number}:{max_number}")
 
+    if catalog.get("catalog_id") != EXPECTED_CATALOG_ID:
+        errors.append(f"catalog_id_mismatch:{catalog.get('catalog_id')!r}")
+    if catalog.get("language") != EXPECTED_LANGUAGE:
+        errors.append(f"catalog_language_mismatch:{catalog.get('language')!r}")
+    if catalog.get("id_policy") != EXPECTED_ID_POLICY:
+        errors.append(f"catalog_id_policy_mismatch:{catalog.get('id_policy')!r}")
+    if bank.get("bank_id") != EXPECTED_BANK_ID:
+        errors.append(f"bank_id_mismatch:{bank.get('bank_id')!r}")
+    if bank.get("language") != EXPECTED_LANGUAGE:
+        errors.append(f"bank_language_mismatch:{bank.get('language')!r}")
+
     baseline_skills = []
     skill_domain: dict[str, str] = {}
     domains = baseline.get("domains")
@@ -1919,15 +1934,18 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
 
     # Bank contract must match the engine contract while Grade-2 content uses only in-scope kinds.
     declared_engine_kinds = bank.get("supported_answer_kinds")
-    if not isinstance(declared_engine_kinds, list) or set(declared_engine_kinds) != ENGINE_ANSWER_KINDS:
+    if (not isinstance(declared_engine_kinds, list) or set(declared_engine_kinds) != ENGINE_ANSWER_KINDS or
+            len(declared_engine_kinds) != len(ENGINE_ANSWER_KINDS)):
         errors.append(f"bank_supported_answer_kinds_mismatch:{declared_engine_kinds!r}")
     actual_answer_kinds = {q.get("answer_kind") for q in questions if isinstance(q, dict)}
     declared_used_kinds = bank.get("grade2_used_answer_kinds")
-    if not isinstance(declared_used_kinds, list) or set(declared_used_kinds) != actual_answer_kinds:
+    if (not isinstance(declared_used_kinds, list) or set(declared_used_kinds) != actual_answer_kinds or
+            len(declared_used_kinds) != len(actual_answer_kinds)):
         errors.append(f"bank_used_answer_kinds_mismatch:{declared_used_kinds!r}:{sorted(actual_answer_kinds)}")
     actual_question_types = {q.get("question_type") for q in questions if isinstance(q, dict)}
     declared_question_types = bank.get("question_types")
-    if not isinstance(declared_question_types, list) or set(declared_question_types) != actual_question_types:
+    if (not isinstance(declared_question_types, list) or set(declared_question_types) != actual_question_types or
+            len(declared_question_types) != len(actual_question_types)):
         errors.append(f"bank_question_types_mismatch:{declared_question_types!r}:{sorted(actual_question_types)}")
     required_grade2_types = {"numeric_input", "multiple_choice", "true_false", "expression_input", "unit_input", "interactive_measurement", "word_problem"}
     missing_grade2_types = sorted(required_grade2_types - actual_question_types)
