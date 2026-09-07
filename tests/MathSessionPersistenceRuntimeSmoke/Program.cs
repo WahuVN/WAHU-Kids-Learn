@@ -105,6 +105,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestGardenPartialRewardRepairKeepsCanonicalMilestonesAndInventory(root, schemaPath);
                 TestDirectTargetedLessonRejectsEarlyComplete(root, schemaPath, templatePath, lessonCatalogPath);
                 TestGameEventTerminalRuntimeCleanupReconcilesOnNextStart(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
+                TestAbortedTerminalRuntimeCleanupReconcilesOnNextStart(root, schemaPath, templatePath, lessonCatalogPath);
                 TestGameEventCommitFaultPreservesCheckpoint(root, schemaPath, templatePath, lessonCatalogPath);
                 TestGameEventConcurrentCoordinatorsStayIdempotent(root, schemaPath, templatePath, lessonCatalogPath);
                 TestGameEventConcurrentCompletionRejectsAbortedTerminal(root, schemaPath, templatePath, lessonCatalogPath);
@@ -1845,6 +1846,56 @@ BEGIN SELECT RAISE(ABORT,'game event injected terminal runtime delete failure');
 
             A(Count(database, "SELECT count(*) FROM session WHERE child_id='" + childId + "' AND state='completed';") == 1,
                 "game_event_terminal_cleanup_does_not_change_terminal_session_history");
+        }
+
+        private static void TestAbortedTerminalRuntimeCleanupReconcilesOnNextStart(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.Lessons.First(x => x.PrerequisiteSkills == null || x.PrerequisiteSkills.Count == 0);
+            var database = NewDatabase(Path.Combine(root, "aborted-terminal-runtime-cleanup.db"), schemaPath);
+            string abortedSessionId;
+            string childId;
+
+            using (var first = new MathSessionCoordinator(database, templatePath, "LOW", 15253, lesson.Id))
+            {
+                var start = first.Start("Bé aborted terminal cleanup");
+                abortedSessionId = start.SessionId;
+                childId = start.ChildId;
+                var question = first.NextQuestion();
+                first.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700);
+                Exec(database, @"CREATE TRIGGER fail_aborted_runtime_delete BEFORE DELETE ON math_session_runtime
+BEGIN SELECT RAISE(ABORT,'injected aborted runtime delete failure'); END;");
+                var aborted = first.Abort("aborted_runtime_cleanup_fault");
+                A(!first.IsActive && aborted.Attempts == 1 && SessionState(database, abortedSessionId) == "aborted" &&
+                  Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + abortedSessionId + "';") == 1,
+                    "aborted_terminal_runtime_delete_fault_leaves_only_repairable_checkpoint");
+                A(Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + abortedSessionId + "';") == 1 &&
+                  Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + abortedSessionId + "';") == 1 &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + abortedSessionId + "';") == 0,
+                    "aborted_terminal_runtime_delete_fault_preserves_learning_without_reward");
+            }
+
+            Exec(database, "DROP TRIGGER fail_aborted_runtime_delete;");
+            string replacementSessionId;
+            using (var replacement = new MathSessionCoordinator(database, templatePath, "NORMAL", 15254, lesson.Id))
+            {
+                var start = replacement.Start("Bé aborted terminal cleanup");
+                replacementSessionId = start.SessionId;
+                A(!start.ResumedExistingSession && replacementSessionId != abortedSessionId && start.CompletedQuestionCount == 0,
+                    "aborted_terminal_runtime_cleanup_starts_fresh_session_not_aborted_resume");
+                A(Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + abortedSessionId + "';") == 0 &&
+                  Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + replacementSessionId + "';") == 1,
+                    "aborted_terminal_runtime_cleanup_removes_old_and_preserves_new_checkpoint");
+                A(Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + childId +
+                  "' AND lesson_id='" + lesson.Id + "' AND started_count=2 AND completed_count=0;") == 1 &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE child_id='" + childId + "';") == 0,
+                    "aborted_terminal_runtime_cleanup_keeps_progress_and_reward_semantics");
+                replacement.Suspend("aborted_terminal_cleanup_replacement_pause");
+            }
         }
 
         private static void TestGameEventCommitFaultPreservesCheckpoint(
