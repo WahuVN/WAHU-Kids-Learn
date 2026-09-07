@@ -1928,6 +1928,25 @@ namespace WAHU.ChildUiRuntimeSmoke
                 }
 
                 var runtimeEventPath = Path.Combine(runtimeContent, "game_events_v1.json");
+                using (var reloadShell = (Form)rescueCtor.Invoke(new object[] { database, settings }))
+                {
+                    Invoke(reloadShell, "LoadEvents");
+                    A(Get<int>(reloadShell, "EventCount") == 5 &&
+                      GetField<System.Collections.IDictionary>(reloadShell, "_eventButtons").Count == 5,
+                        "quick_rescue_reload_fixture_starts_valid");
+                    File.WriteAllText(runtimeEventPath, "{ not-valid-json", System.Text.Encoding.UTF8);
+                    Invoke(reloadShell, "LoadEvents");
+                    A(Get<int>(reloadShell, "EventCount") == 0 &&
+                      GetField<System.Collections.IDictionary>(reloadShell, "_eventButtons").Count == 0 &&
+                      GetField<System.Collections.IDictionary>(reloadShell, "_access").Count == 0 &&
+                      GetField<object>(reloadShell, "_selectedEvent") == null,
+                        "quick_rescue_valid_to_corrupt_reload_clears_internal_state");
+                    A(!GetField<Button>(reloadShell, "_startButton").Enabled &&
+                      GetField<Label>(reloadShell, "_eventTitle").Text.IndexOf("đang chuẩn bị", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                      GetField<Label>(reloadShell, "_intro").Text.IndexOf("vẫn có thể học Toán", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "quick_rescue_valid_to_corrupt_reload_fails_closed_visibly");
+                }
+                File.Copy(Path.Combine(sourceContent, "game_events_v1.json"), runtimeEventPath, true);
                 File.Delete(runtimeEventPath);
                 using (var missingShell = (Form)rescueCtor.Invoke(new object[] { database, settings }))
                 {

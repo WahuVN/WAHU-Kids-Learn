@@ -288,6 +288,7 @@ namespace WAHUKidsLearn
         private readonly string _catalogPath;
         private readonly string _preferredLessonId;
         private readonly IList<MathQuickRescueEventPresentation> _events;
+        private readonly bool _eventsInjected;
         private readonly Dictionary<string, Button> _eventButtons = new Dictionary<string, Button>(StringComparer.Ordinal);
         private MathLessonCatalogSnapshot _catalog;
         private IDictionary<string, MathLessonAccessSnapshot> _access = new Dictionary<string, MathLessonAccessSnapshot>(StringComparer.Ordinal);
@@ -314,6 +315,7 @@ namespace WAHUKidsLearn
             _catalogPath = string.IsNullOrWhiteSpace(catalogPath) ? throw new ArgumentException("catalogPath") : catalogPath;
             _preferredLessonId = preferredLessonId;
             _events = events == null ? new List<MathQuickRescueEventPresentation>() : events.ToList();
+            _eventsInjected = _events.Count > 0;
 
             Text = "Toán nhanh — Nhiệm vụ cứu hộ";
             AccessibleName = "Toán nhanh — Nhiệm vụ cứu hộ";
@@ -528,8 +530,9 @@ namespace WAHUKidsLearn
             try
             {
                 _catalog = new MathLessonCatalogSource().Load(_catalogPath);
-                if (_events.Count == 0)
+                if (!_eventsInjected)
                 {
+                    _events.Clear();
                     var eventPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(_catalogPath), "game_events_v1.json");
                     var eventCatalog = new MathGameEventCatalogSource().Load(eventPath, _catalogPath);
                     foreach (var definition in eventCatalog.Events ?? new List<MathGameEventDefinition>())
@@ -725,6 +728,12 @@ namespace WAHUKidsLearn
         private void ShowUnavailable(string message)
         {
             _selectedEvent = null;
+            _resumableLessonId = null;
+            _resumableSessionId = null;
+            _catalog = null;
+            _access.Clear();
+            _eventButtons.Clear();
+            if (!_eventsInjected) _events.Clear();
             _eventFlow.Controls.Clear();
             _eventTitle.Text = "Nhiệm vụ cứu hộ đang chuẩn bị";
             _intro.Text = message;
