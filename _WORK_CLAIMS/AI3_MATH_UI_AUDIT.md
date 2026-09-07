@@ -247,9 +247,9 @@ UI-side Request 009 coupling được đóng mà không hard-code `3`:
 
 Clean detached `31e1991`: production solution Rebuild Release/x86 **PASS**, Child UI **1596 assertions PASS**, persistence **194 assertions PASS**, content **36/36 PASS**, release-required smokes **11/11 PASS**.
 
-## 15. AI3-013 — schema V5 / runtime pack-identity preflight — NOT STABLE
+## 15. AI3-013 — schema V5 / runtime pack identity — STABLE SINCE `ece2a0c`
 
-AI3 tách đúng V5 Data/Session/schema/smoke WIP đang staged khỏi shared tree và áp lên detached `d241573`; generator/release-script WIP không được trộn vào gate này. Evidence chỉ là compatibility preflight cho tới khi owner commit V5 vào stable HEAD.
+Preflight detached `d241573` ban đầu kiểm compatibility trước publish. V5 Data/Session/schema + runtime pack identity đã vào stable `main` ở `ece2a0c`; evidence migration/reconcile dưới đây giờ là lịch sử đã upstream hóa, không còn trạng thái `NOT STABLE`.
 
 - Production solution Rebuild Release/x86: **PASS**; ChildUiRuntimeSmoke: **1596 assertions PASS**.
 - MathSessionPersistenceRuntimeSmoke V5: **205 assertions PASS**.
@@ -262,7 +262,13 @@ AI3 tách đúng V5 Data/Session/schema/smoke WIP đang staged khỏi shared tre
 
 ## 16. Verification gates
 
-Current clean release evidence tại `31e1991`:
+Latest AI3 UI/integration evidence:
+
+- `82629a8`: adaptive target text/badge/accessibility derive engine constant; production Rebuild PASS, Child UI **1615**, content data **49/49**.
+- `09c6551`: synthetic pool-6 CTA/badge/accessibility regression; Child UI **1617**.
+- `ef3d35a`: generated segment output routed through real UI; Child UI **1619**.
+
+Historical full clean release evidence tại `31e1991`:
 
 - Production `WAHUKidsLearn.sln` Rebuild Release/x86 bằng Visual Studio 2022 Community MSBuild: **PASS**.
 - ChildUiRuntimeSmoke: **PASS — 1596 assertions**.
@@ -277,7 +283,7 @@ Current clean release evidence tại `31e1991`:
 - Recoverable SQLite write-failure E2E trên choice/typed/interaction: **PASS**.
 - Request 007 corrupt-medium ordinal recovery có regression chính thức tại `7f79367`.
 - Retry/first-try engine contract `7c9a9ea` và write-failure reconcile `400fd0c` đã được AI3 UI consume; clean persistence suite hiện **194 assertions**.
-- Generated `draw_segment_given_length` vẫn chỉ ở WIP AI2; chưa coi adaptive-generator blocker CLOSED trước upstream commit.
+- Generated `draw_segment_given_length` đã stable ở `d21a665`; LearningSession trong release attempt đạt **800 assertions PASS**. AI3 `ef3d35a` dùng output generator thật qua ruler control + form, đưa Child UI lên **1619 assertions PASS**.
 
 ## 17. Production release build audit
 
@@ -297,16 +303,16 @@ Vì vậy release runtime smoke chain đã **CLOSED**; strict distribution DoD h
 
 ## 18. Remaining blockers
 
-### P1-01 — adaptive interaction generator ownership
+### CLOSED — adaptive interaction generator ownership
 
-Authored `interaction_integer` + UI control pass. Shared WIP AI2 đã có `draw_segment_given_length` + LearningSession smoke cho interactive no-fake-choice, nhưng chưa nằm trong stable HEAD. AI3 không stage/edit generator-owned WIP.
+AI2 đã publish `draw_segment_given_length` tại `d21a665`: generator trả `interaction_integer`, không fake choices và LearningSession smoke đạt 800 assertions trong release attempt. AI3 `ef3d35a` bỏ fixture thủ công, lấy trực tiếp output `MathQuestionGenerator` để chạy `SegmentDrawingAnswerControl` + `MathLessonForm`; Child UI **1619 assertions PASS**.
 
 ### P1-02 — release packaging/E2E — Request 008
 
-- Staging logic copy toàn `content_packs` + `data/schema`; stable release hiện guard V4, còn shared staged wave đã thêm guard `005_math_runtime_pack_identity.sql` cho V5. Request 008 vẫn OPEN vì ba Math runtime JSON chưa được hard-require trong staged/portable/installer checks.
-- `Build-SetupArtifacts.ps1`, `Test-PortableE2E.ps1`, `Test-InstallerE2E.ps1` vẫn chưa hard-require đủ `lesson_catalog_v1.json`, `question_bank_v1.json`, `verified_templates_v1.json`.
-- Artifact `0.1.41-dev` cũ không phải release evidence cho Math hiện tại.
-- Chờ release lane đóng Request 008 rồi AI3 chạy portable/installer Math load + relaunch/reinstall regression.
+- Guard implementation đã vào stable `main`: `109ee5d` hard-require 3 Math runtime JSON trong Portable/Installer E2E; `490fd41` hard-require cùng 3 file ở source preflight và staged publish, bên cạnh migration V5.
+- Artifact `0.1.41-dev` là negative evidence: có template nhưng thiếu lesson catalog, question bank và migration V5; test mới bắt đúng lỗ hổng cũ.
+- Full `0.1.42-dev` attempt trên detached `d21a665` + producer guards dừng **trước staging** tại `ContentRuntimeSmoke`: `bundled_versions_explicit` vẫn expect Math manifest `1.8.0` trong khi `d21a665` đã publish `1.9.0`. Trước điểm dừng: SetupPreflight **42**, Behavior **15**, LearningSession **800**, Motion **25**, Child UI **1617** đều PASS.
+- Vì vậy Request 008 **guard code CLOSED nhưng full distribution E2E vẫn OPEN** cho tới khi owner upstream sửa content-version regression; AI3 không sửa `ContentRuntimeSmoke` ngoài ownership.
 
 ### P1-03 — expanded authored pool vs 3-question session — Request 009
 
@@ -315,13 +321,13 @@ UI audit hiện tại:
 - lesson detail **đúng**: dùng `PracticeSets.TotalCount` để hiển thị `N câu trong ngân hàng bài học`;
 - lesson form/progress/result **đúng**: dùng `StartResult.TargetQuestionCount` / outcome `TargetQuestionCount` thật;
 - Hub CTA **đã decouple AI3-012**: `CreateLessonPracticeButton()` không còn nhận pool count; unlocked/completed dùng `Luyện bài này` / `Luyện lại bài này` và badge rỗng.
-- Synthetic pool 6 đã khóa regression: detail hiện bank size 6 nhưng CTA không claim session 6 câu.
+- Synthetic pool 6 đã khóa regression và được siết thêm ở `09c6551`: detail hiện bank size 6 nhưng CTA/badge/accessibility không claim session 6 câu.
 
 Phần còn mở của Request 009 là engine first-class selected 3-question session set/target từ pool mở rộng; sau khi AI2 publish contract, AI3 sẽ khóa E2E pool >=6 nhưng session/progress/result vẫn 3.
 
 ## 19. Next AI3 actions
 
-1. Theo dõi release lane đóng Request 008; không sửa `tools/build/*` khi đang có owner/WIP khác.
-2. Theo dõi AI2 Request 009; khi có first-class target/selected-set contract, thêm >=6-pool → 3-question E2E cho session/progress/result.
-3. Khi AI2 commit generator `draw_segment_given_length`, chạy adaptive interaction regression rồi cập nhật status.
-4. Khi các gate trên đóng, chạy full portable/installer/reinstall Math release regression và chốt strict DoD.
+1. No-wait: tiếp tục accessibility/no-stale-state/error-state/67-lesson sweeps trong khi AI2 làm Request 009/006.
+2. Khi AI2 publish `REQUEST_009_READY=<sha>`, thêm selected-set E2E pool >=6 → target/progress/result theo contract thật và exact resume giữ selected IDs; không reimplement selection ở UI.
+3. Khi Request 006 publish display-only unit contract, thêm presentation E2E cho integer answer unit.
+4. Sau khi owner upstream sửa `ContentRuntimeSmoke` expectation `1.8.0 → 1.9.0`, rerun Build-Setup + Portable/Installer/reinstall với Request 008 guards đã stable và xác nhận learner DB/lesson progress không mất.

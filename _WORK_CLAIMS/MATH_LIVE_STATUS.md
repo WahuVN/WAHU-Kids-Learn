@@ -5,10 +5,10 @@ Definition: % dưới đây đo theo Definition of Done strict của Math, khôn
 
 ## Overall
 
-- **Content: 98%** — 7 chương, 17 chủ đề, 67 lesson, 201 câu authored, prerequisite graph, difficulty progression, distractor rationale, worked-example separation, lesson-specific objectives và semantic validator đều có. `MathContentDataSmoke`: **36/36 PASS** tại clean HEAD `31e1991`.
-- **Engine: 97%** — answer validation/equivalence, mastery/review/reward, idempotency, exact suspend/resume, authored bank, schema V4 lesson progress, lesson-targeted session, prerequisite unlock, targeted score/best score, mastery delta, next lesson, corrupt authored cursor recovery, retry/first-try scoring, write-failure reconciliation và concurrent session/mastery guards đều có contract/gate first-class. Clean persistence gate tại `31e1991`: **194 assertions PASS**. Generator segment vẫn chờ commit ổn định riêng.
+- **Content: 98%** — 7 chương, 17 chủ đề, 67 lesson, 201 câu authored, prerequisite graph, difficulty progression, distractor rationale, worked-example separation, lesson-specific objectives và semantic validator đều có. `MathContentDataSmoke`: **49/49 PASS** ở clean UI gate gần nhất.
+- **Engine: 98%** — answer validation/equivalence, mastery/review/reward, idempotency, exact suspend/resume, authored bank, schema **V5** + runtime pack identity stable từ `ece2a0c`, lesson-targeted session, prerequisite unlock, targeted score/best score, mastery delta, next lesson, retry/write-failure/concurrency guards đều có contract first-class. Request 010 expression operator whitelist đã stable ở `7afbb7b`; adaptive `draw_segment_given_length` đã stable ở `d21a665` (LearningSession 800 PASS).
 - **UI: 99%** — Math Hub, toàn bộ 67 lesson detail, theory/example, adaptive mission, lesson-targeted practice, locked/unlocked, exact resume, choice/typed/interaction answers, retry cùng câu cho cả 3 answer surfaces, exact retry-resume, child-safe write-failure recovery và result first-try/retry counters + lesson score/best score + mastery delta + next lesson đều consume contract thật.
-- **Test: 99%** — Child UI **1596 assertions PASS**; 67/67 lesson-detail/access sweep PASS; 201/201 authored answer-surface sweep PASS; targeted Flow 5 + retry typed/choice/interaction + exact retry-resume + injected SQLite write-failure recovery trên choice/typed/interaction + expanded-pool neutral CTA + advanced-result UI E2E PASS; persistence **194 assertions PASS**; content **36/36 PASS**. Full production solution **Rebuild Release/x86 PASS** và **11/11 release-required runtime smokes PASS** trên clean `31e1991`.
+- **Test: 99%** — Child UI **1619 assertions PASS** trên generated-segment UI gate; 67/67 lesson-detail/access sweep PASS; 201/201 authored answer-surface sweep PASS; targeted Flow 5 + retry typed/choice/interaction + exact retry-resume + SQLite write-failure recovery + synthetic pool-6 neutral CTA/accessibility + advanced-result UI E2E PASS. Content data **49/49 PASS**. Historical full release runtime chain vẫn có clean **11/11 PASS** tại `31e1991`; latest artifact build hiện dừng ở một stable ContentRuntimeSmoke version assertion nêu bên dưới.
 - **E2E: 96%** — Home → Math Hub → lesson → targeted authored practice → retry cùng câu → suspend/relaunch → exact attempt-2 resume → recoverable DB-write failure → retry same question → result → mastery/next-lesson presentation → persisted lesson progress → Hub refresh → prerequisite unlock PASS; adaptive mission baseline PASS. Release runtime smoke chain đã **11/11 PASS**; strict distribution gate còn Request 008 packaging/installer và Request 009 pool-vs-target.
 - **Tổng Math: ~95%** theo strict production Definition of Done hiện tại.
 
@@ -18,9 +18,8 @@ Definition: % dưới đây đo theo Definition of Done strict của Math, khôn
 
 ## P1 còn mở
 
-1. **Adaptive segment generator:** UI interaction contract và authored interaction đều render được; case generator `draw_segment_given_length` đang thấy trong WIP Learning nhưng chưa nằm trong HEAD ổn định. Child UI smoke chỉ test UI contract; generator behavior thuộc engine smoke AI2.
-2. **Release packaging/E2E — Request 008:** staged/portable/installer guards chưa hard-require đủ `lesson_catalog_v1.json`, `question_bank_v1.json`, `verified_templates_v1.json`; artifact `0.1.41-dev` cũ không phải release evidence cho Math hiện tại.
-3. **Expanded authored pool — Request 009:** UI-side coupling đã CLOSED AI3-012 — lesson detail vẫn hiển thị pool count, nhưng Hub CTA không còn dùng `PracticeSets.TotalCount` làm session count/badge; synthetic pool 6 đã PASS. Phần còn mở là AI2 publish first-class selected 3-question session contract từ pool mở rộng để session/progress/result tiếp tục 3.
+1. **Release packaging/E2E — Request 008:** hard guards đã vào `main` — Portable/Installer required lists `109ee5d`, source + staged payload guards `490fd41`. Full artifact E2E vẫn OPEN vì `d21a665` nâng Math manifest lên `1.9.0` nhưng stable `ContentRuntimeSmoke` còn expect `1.8.0` (`bundled_versions_explicit`), nên build dừng trước staging. Artifact `0.1.41-dev` cũ đã được xác nhận thiếu catalog/bank/V5 và là negative evidence.
+2. **Expanded authored pool — Request 009:** UI-side coupling đã CLOSED AI3-012 — lesson detail vẫn hiển thị pool count, nhưng Hub CTA không còn dùng `PracticeSets.TotalCount` làm session count/badge; synthetic pool 6 đã PASS. Phần còn mở là AI2 publish first-class selected 3-question session contract từ pool mở rộng để session/progress/result tiếp tục 3.
 
 ## Blocker đã đóng
 
@@ -38,11 +37,14 @@ Definition: % dưới đây đo theo Definition of Done strict của Math, khôn
 - **Production Data/SQLite clean build:** CLOSED — clean detached `12cb5ee` dùng đúng `C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe`, `WAHUKidsLearn.sln /restore /t:Rebuild /p:Configuration=Release /p:Platform=x86` PASS; `WAHU.Data`, `WAHU.Session`, App và SQLite smoke project đều build production path thật.
 - **Release runtime-config schema:** CLOSED `0437122` — `RuntimeConfigBundle` expect `database_runtime_v1.json` schema 4; SetupPreflight **42 assertions PASS**, UpdateRuntime **33 assertions PASS**.
 - **Bundled English clean-checkout verification:** CLOSED `847be1b` — `.gitattributes` giữ exact LF bytes của manifest-hashed English core trên Windows `core.autocrlf=true`; `ContentRuntimeSmoke` **21 assertions PASS**.
-- **Hub pool-count/session-count coupling:** CLOSED AI3-012 — lesson detail vẫn hiển thị đúng bank size, CTA đổi thành `Luyện bài này` / `Luyện lại bài này` và bỏ numeric badge; synthetic pool 6 không bị trình bày thành session 6 câu.
+- **Hub pool-count/session-count coupling:** CLOSED AI3-012 + `09c6551` — lesson detail vẫn hiển thị đúng bank size, CTA/badge/accessibility không biến synthetic pool 6 thành session 6 câu.
+- **Adaptive mission target hard-code:** CLOSED `82629a8` — text, badge và accessibility cùng derive từ `MathSessionCoordinator.DefaultTargetQuestionCount`; reflection regression khóa contract.
+- **Adaptive segment generator/UI:** CLOSED `d21a665` + `ef3d35a` — engine generate `interaction_integer` không fake choices; Child UI dùng output generator thật qua ruler control + form, **1619 assertions PASS**.
+- **Request 008 guard implementation:** CLOSED `109ee5d` + `490fd41` — cả source/staged payload và Portable/Installer E2E đều bắt buộc đủ 3 Math runtime JSON + schema V5; phần còn mở chỉ là rerun full artifact sau khi upstream ContentRuntimeSmoke version regression được sửa.
 
 ## Current verified gates
 
-- Current workspace: ChildUiRuntimeSmoke **1596 assertions PASS**.
+- Current verified UI gate: ChildUiRuntimeSmoke **1619 assertions PASS** (`ef3d35a` trên clean `490fd41`).
 - 67/67 lesson-detail/access sweep: **PASS** — mỗi lesson select được, title/objective/example/practice render, CTA accessibility tồn tại và `Enabled` khớp `MathLessonAccessSnapshot.IsUnlocked`.
 - All-201 authored answer-surface sweep: **PASS — 201/201**.
 - Targeted lesson Flow 5 + advanced result presentation: **PASS**.
@@ -56,7 +58,7 @@ Definition: % dưới đây đo theo Definition of Done strict của Math, khôn
   - MathContentDataSmoke: **PASS — 36/36**.
   - Release-required runtime smokes: **11/11 PASS** — SetupPreflight 42, Behavior 15, LearningSession 794, Motion 25, Child UI 1596, Content 21, Security 19, Audio 14, Performance 13, Update 33, SQLite 166.
   - `git diff --check`: **PASS**.
-- Request 007 đã có regression chính thức trong `7f79367`; retry/first-try engine contract ở `7c9a9ea` và write-failure reconcile ở `400fd0c` đã được AI3 UI consume. Generated segment vẫn chỉ ở WIP AI2 nên chưa tính CLOSED.
+- Request 007 đã có regression chính thức trong `7f79367`; retry/first-try engine contract ở `7c9a9ea` và write-failure reconcile ở `400fd0c` đã được AI3 UI consume. Generated segment đã stable `d21a665` và được Child UI khóa trực tiếp ở `ef3d35a`.
 
 ## Integration waves
 
@@ -151,8 +153,8 @@ Source/test đã qua clean gate tại `31e1991`.
 - Existing Flow 5/prerequisite unlock vẫn route đúng targeted practice.
 - Clean detached `31e1991`: production rebuild **PASS**, Child UI **1596 assertions PASS**, persistence **194 assertions PASS**, content **36/36 PASS**, release-required smokes **11/11 PASS**.
 
-### AI3-013 — preflight tương thích schema V5 / pack identity — NOT STABLE
-Evidence này chạy trên detached `d241573` + đúng V5 Data/Session/schema/smoke WIP đang staged của AI2/release; **không thay thế stable gate V4 cho tới khi upstream commit**.
+### AI3-013 — schema V5 / pack identity — STABLE SINCE `ece2a0c`
+Preflight detached `d241573` ban đầu là compatibility evidence trước publish. V5 Data/Session/schema + runtime pack identity đã vào stable `main` tại `ece2a0c`; phần evidence dưới đây giờ là lịch sử migration/reconcile đã được upstream hóa, không còn trạng thái `NOT STABLE`.
 
 - Production solution Rebuild Release/x86: **PASS**; Child UI **1596 assertions PASS**.
 - V5 persistence: **205 assertions PASS**; MathData engine **99 assertions PASS**; SQLite **175 assertions PASS**.
@@ -163,7 +165,7 @@ Evidence này chạy trên detached `d241573` + đúng V5 Data/Session/schema/sm
 
 ## Next integration gates
 
-1. Release lane đóng Request 008: hard-guard 3 Math runtime JSON trong staged payload + portable/installer E2E, rồi rebuild artifact với **schema hiện hành** (V5 nếu wave staged hiện tại được commit), không được lùi manifest/bootstrap về V4.
-2. AI2 đóng phần engine của Request 009 bằng first-class selected 3-question session target; AI3 sau đó khóa E2E pool >=6 → session/progress/result vẫn 3.
-3. Theo dõi AI2 commit generator `draw_segment_given_length`, rồi khóa adaptive interaction regression.
-4. Khi có artifact mới, chạy portable/installer upgrade regression và xác nhận learner DB + lesson progress không mất.
+1. Owner upstream sửa `ContentRuntimeSmoke` version expectation để chấp nhận Math manifest `1.9.0`; sau đó AI3 rerun `Build-SetupArtifacts` + Portable/Installer/reinstall với Request 008 guards đã stable, xác nhận learner DB + lesson progress không mất.
+2. AI2 đóng Request 009 bằng first-class selected 3-question session set; AI3 khóa E2E pool >=6 → session/progress/result theo target thật và exact resume giữ selected IDs.
+3. Khi Request 006 expose display-only `answer_unit`, AI3 thêm presentation E2E nhưng không thay grading raw integer.
+4. Khi AI1 publish real expanded bank, chạy real-bank 6+ publish gate trên UI/session contract; synthetic UI gate đã có `09c6551`.

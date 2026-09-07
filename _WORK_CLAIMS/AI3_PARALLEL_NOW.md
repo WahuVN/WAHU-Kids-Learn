@@ -3,58 +3,50 @@
 LANE: AI3
 LANE_DONE=NO
 BASELINE=3d8674d
-BUILD_SETUP_LOCK=LOCKED_BUT_NO_WAIT
-REQUEST_009_READY=NOT_REQUIRED_FOR_SYNTHETIC_UI_WORK
-
+BUILD_SETUP_LOCK=AI3
+REQUEST_009_READY=NO
 
 ## NO-WAIT rule
-AI3 **không chờ AI2/AI1**. Mọi UI coupling được test bằng engine constant hoặc synthetic fixtures ngay. `Build-SetupArtifacts.ps1` lock chỉ chặn đúng file đó; trong lúc lock, AI3 tiếp tục UI + portable/installer + ChildUI + status/QA.
+AI3 **không chờ AI2/AI1**. Dependency chỉ là publish gate; khi một gate chưa mở hoặc upstream đang đỏ, AI3 chuyển ngay sang UI/ChildUI/release/status QA độc lập.
 
 ### Queue luôn có việc
-- NOW: bỏ hard-code adaptive `8/tám`, derive từ `DefaultTargetQuestionCount`, thêm ChildUI regression.
-- NOW song song: Request 008 required-file lists trong Portable/Installer E2E (2 file đang clean).
-- NEXT: synthetic pool-6 UI E2E (bank count 6, neutral CTA, không invent session target).
-- NEXT: V5 stable status cleanup (`ece2a0c`), accessibility/no-stale-state/error-state sweeps.
-- FALLBACK: 67-lesson render/access sweep, retry/resume/write-failure UI regression, reflection guard chống numeric hard-code.
-- Khi `Build-SetupArtifacts.ps1` lock mở: chèn staging hard guard ngay, nhưng không có thời gian idle trước đó.
+- DONE `82629a8`: adaptive mission text/badge/accessibility derive từ `MathSessionCoordinator.DefaultTargetQuestionCount`; Child UI reflection guard PASS.
+- DONE `109ee5d`: Portable/Installer E2E hard-require đủ 3 Math runtime JSON và vẫn expect schema V5.
+- DONE `09c6551`: synthetic pool-6 UI giữ bank count 6 nhưng CTA/badge/accessibility không invent session-size 6.
+- DONE `490fd41`: `Build-SetupArtifacts.ps1` source + staged payload hard-require `verified_templates_v1.json`, `lesson_catalog_v1.json`, `question_bank_v1.json` cùng migration V5.
+- DONE `ef3d35a`: Child UI dùng output thật của generated `draw_segment_given_length`; interaction kind/no-fake-choice/segment geometry/form routing PASS, Child UI 1619 assertions.
+- NOW: V5 stable status cleanup + accessibility/no-stale-state/error-state sweeps.
+- NEXT: Request 009 synthetic/real selected-set presentation khi AI2 publish `REQUEST_009_READY=<sha>`; không reimplement selection ở UI.
+- NEXT: Request 006 display-unit presentation khi engine model publish contract.
+- FALLBACK: 67-lesson render/access sweep, retry/resume/write-failure regression, no-hard-code reflection guards.
 
-## Mission now
+## Current release evidence
 
-Own UI, Child UI integration and release-E2E surfaces only. Never edit Learning/Session engine files or Math runtime content/manifest.
+Request 008 guard implementation đã vào `main`:
+- E2E required lists: `109ee5d`.
+- Build source/staged guards: `490fd41`.
 
-### A. Immediate UI work — no dependency
-Fix adaptive mission target coupling:
-- remove literal `Luyện 8 câu hôm nay`; derive display from `MathSessionCoordinator.DefaultTargetQuestionCount`;
-- remove/derive any literal badge `8`;
-- accessibility text must derive from the same constant and not hard-code `tám`;
-- add Child UI regression using reflection/current constant so a future engine target change cannot make UI lie.
+Artifact cũ `0.1.41-dev` là negative evidence: có `verified_templates_v1.json` nhưng thiếu `lesson_catalog_v1.json`, `question_bank_v1.json` và migration V5; test mới bắt đúng lỗ hổng này.
 
-Commit this as an isolated UI wave.
+Full artifact attempt `0.1.42-dev` trên detached `d21a665` + Request 008 producer guards dừng **trước staging** tại stable `ContentRuntimeSmoke` với `ASSERT_FAIL: bundled_versions_explicit`: Math manifest đã là `1.9.0` nhưng smoke vẫn hard-code `1.8.0`. Trước điểm đó SetupPreflight **42**, Behavior **15**, LearningSession **800**, Motion **25**, Child UI **1617** đều PASS. Đây là upstream release/content-version regression, không phải Request 008 guard failure; AI3 không sửa file ContentRuntimeSmoke ngoài ownership.
 
-### B. Request 008 release tests — start now
-In `Test-PortableE2E.ps1` and `Test-InstallerE2E.ps1`, require all three Math runtime files:
-- `content_packs\math_grade2_v1\verified_templates_v1.json`
-- `content_packs\math_grade2_v1\lesson_catalog_v1.json`
-- `content_packs\math_grade2_v1\question_bank_v1.json`
-Keep schema expectation at V5. Commit these two files independently if tests pass.
+## Current UI evidence
 
-Do not touch `Build-SetupArtifacts.ps1` while `BUILD_SETUP_LOCK=LOCKED_BUT_NO_WAIT`.
+- Adaptive mission count: clean production rebuild PASS; Child UI **1615**; content data **49/49** tại wave `82629a8`.
+- Synthetic pool-6 accessibility: Child UI **1617** tại `09c6551`.
+- Stable generated segment UI integration: Child UI **1619** tại `ef3d35a`.
+- V5/pack identity đã stable trên `main` từ `ece2a0c`; không còn trạng thái `NOT STABLE`.
 
-### C. Request 008 staging after handoff
-Publish/file handoff only — khi `AI2_PARALLEL_NOW.md` nói `BUILD_SETUP_LOCK=AI3`, add preflight/staged publish `Require-File` guards for the same three JSON in `Build-SetupArtifacts.ps1`. Then run staged payload + portable + installer E2E.
+## Pending publish gates
 
-### D. After Request 009
-Real-bank publish gate only — khi AI2 publish `REQUEST_009_READY=<sha>` và AI1 merge pool=6:
-- add real-bank E2E: Hub detail says 6-bank count, session target/progress/result remain 3;
-- different fresh selection identities may produce different selected sets;
-- exact resume/retry keeps the same selected set.
-Do not reimplement selection in UI.
+### Request 009
+AI2 vẫn `REQUEST_009_READY=NO`. AI3 đã khóa UI synthetic pool-6; khi selected-set contract publish, thêm E2E session/progress/result theo target thật và exact resume giữ selected IDs.
 
-### E. After Request 006
-Add presentation E2E for integer answers with display units if engine model exposes it. Raw child input remains number-only.
+### Request 006
+Khi engine expose display-only `answer_unit`, thêm presentation E2E; raw integer input vẫn number-only và UI không tự ghép unit để chấm.
 
-### F. Status cleanup
-Update stale V5 text: `ece2a0c` is stable main, so old `NOT STABLE` wording must be removed after active functional waves are committed.
+### Release rerun
+Sau khi owner upstream sửa `ContentRuntimeSmoke` version expectation cho Math pack `1.9.0`, chạy lại Build-Setup `0.1.42+`, Portable E2E, Installer E2E/reinstall và xác nhận learner DB + lesson progress không mất.
 
-### Commit discipline
-Use exact file commits only. Never stage engine/content files. Do not edit shared request/contract docs during the parallel run; publish progress in this file and AI3-owned status docs.
+## Commit discipline
+Use exact file commits only. Never stage engine/content files. Không sửa shared request/contract docs trong parallel run; progress chỉ ghi ở AI3-owned status docs.
