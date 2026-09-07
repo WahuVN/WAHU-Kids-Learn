@@ -37,6 +37,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 var templatePath = Path.Combine(repo, "content_packs", "math_grade2_v1", "verified_templates_v1.json");
                 var questionBankPath = Path.Combine(repo, "content_packs", "math_grade2_v1", "question_bank_v1.json");
                 var lessonCatalogPath = Path.Combine(repo, "content_packs", "math_grade2_v1", "lesson_catalog_v1.json");
+                var gameEventPath = Path.Combine(repo, "content_packs", "math_grade2_v1", "game_events_v1.json");
                 TestAuthoredQuestionBank(questionBankPath);
                 TestRealPoolSelectionBreadth(lessonCatalogPath);
                 TestAnswerUnitFeedbackSurvivesCoordinatorResume(root, schemaPath, templatePath, lessonCatalogPath);
@@ -74,6 +75,8 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestInteractiveIntegerFinalization();
                 TestGameEventBehaviorMapping();
                 TestGameEventRuntimeResumeRewardAndFallback(root, schemaPath, templatePath, lessonCatalogPath);
+                TestProductionFirstFiveGameEventsRuntime(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
+                TestProductionFirstEventResumeJourney(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventCommitFaultPreservesCheckpoint(root, schemaPath, templatePath, lessonCatalogPath);
                 TestGameEventConcurrentCoordinatorsStayIdempotent(root, schemaPath, templatePath, lessonCatalogPath);
                 Console.WriteLine("MATH_SESSION_PERSISTENCE_RUNTIME_SMOKE_PASS assertions=" + _assertions);
@@ -255,6 +258,147 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                   Count(fallbackDb, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + fallbackSessionId + "';") == 1 &&
                   Count(fallbackDb, "SELECT count(*) FROM reward_event WHERE child_id='" + fallbackChildId + "';") == 0,
                     "game_event_corrupt_metadata_fallback_loses_no_learning_and_grants_no_fake_reward");
+            }
+        }
+
+        private static void TestProductionFirstFiveGameEventsRuntime(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath,
+            string gameEventPath)
+        {
+            var lessonCatalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var events = new MathGameEventCatalogSource().Load(gameEventPath, lessonCatalogPath);
+            var firstFive = lessonCatalog.Lessons.Take(5).ToList();
+            A(events.Events.Count == 5 && events.Events.Select(x => x.TargetLessonId).SequenceEqual(firstFive.Select(x => x.Id)),
+                "production_game_events_cover_exact_first_five_lessons_in_order");
+            A(events.Events.Select(x => x.TargetSkillId).SequenceEqual(firstFive.Select(x => x.SkillId)) &&
+              events.Events.All(x => x.QuestionCount == 3 && x.CheckpointNounsVi.Count == 3),
+                "production_game_events_match_first_five_skills_and_three_checkpoints");
+
+            var database = NewDatabase(Path.Combine(root, "production-first-five-game-events.db"), schemaPath);
+            string childId = null;
+            for (var eventIndex = 0; eventIndex < events.Events.Count; eventIndex++)
+            {
+                var definition = events.Events[eventIndex];
+                using (var game = new MathGameEventCoordinator(database, templatePath, gameEventPath, "LOW",
+                    15000 + eventIndex, definition.Id, definition.TargetLessonId))
+                {
+                    var start = game.Start("Bé production 5 event");
+                    if (childId == null) childId = start.Session.ChildId;
+                    A(start.Session.ChildId == childId && start.Event != null && start.Event.Id == definition.Id &&
+                      start.EventState.EventPresentationAvailable && !start.EventState.FallbackToLessonPresentation,
+                        "production_game_event_starts_with_real_metadata_" + (eventIndex + 1));
+                    A(start.Session.TargetLessonId == definition.TargetLessonId && start.Session.TargetQuestionCount == 3 &&
+                      start.Session.SelectedContentQuestionIds.Count == 3 && start.EventState.CompletedCheckpointCount == 0 &&
+                      start.EventState.CurrentCheckpointNumber == 1 &&
+                      start.EventState.CurrentCheckpointNounVi == definition.CheckpointNounsVi[0],
+                        "production_game_event_starts_exact_target_and_checkpoint_" + (eventIndex + 1));
+
+                    for (var ordinal = 0; ordinal < 3; ordinal++)
+                    {
+                        var before = game.CurrentState;
+                        A(before.CompletedCheckpointCount == ordinal && before.CurrentCheckpointNounVi == definition.CheckpointNounsVi[ordinal],
+                            "production_game_event_checkpoint_noun_before_answer_" + eventIndex + "_" + ordinal);
+                        var question = game.NextQuestion();
+                        A(question != null && question.LessonId == definition.TargetLessonId &&
+                          question.SkillId == definition.TargetSkillId &&
+                          question.ContentQuestionId == start.Session.SelectedContentQuestionIds[ordinal],
+                            "production_game_event_serves_selected_authored_question_" + eventIndex + "_" + ordinal);
+                        var answer = game.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700 + ordinal * 100);
+                        A(answer.Learning.IsCorrect && answer.Learning.QuestionCompleted &&
+                          answer.EventState.CompletedCheckpointCount == ordinal + 1,
+                            "production_game_event_answer_advances_checkpoint_" + eventIndex + "_" + ordinal);
+                    }
+
+                    var completion = game.Complete();
+                    A(completion.LearningSummary.LessonCompleted && completion.LearningSummary.Attempts == 3 &&
+                      completion.LearningSummary.Correct == 3 && completion.EventState.IsComplete &&
+                      completion.EventState.CompletedCheckpointCount == 3,
+                        "production_game_event_completes_three_questions_" + (eventIndex + 1));
+                    A(completion.LearningSummary.GardenGrowthSteps == eventIndex + 1 &&
+                      Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + start.Session.SessionId + "';") == 1,
+                        "production_game_event_grants_one_predictable_garden_reward_" + (eventIndex + 1));
+                }
+            }
+
+            A(Count(database, "SELECT count(*) FROM session WHERE child_id='" + childId + "' AND state='completed';") == 5,
+                "production_first_five_events_complete_exactly_five_sessions");
+            A(Count(database, "SELECT count(*) FROM attempt WHERE child_id='" + childId + "';") == 15 &&
+              Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.child_id='" + childId + "';") == 15,
+                "production_first_five_events_commit_fifteen_attempts_and_mastery");
+            A(Count(database, "SELECT count(*) FROM reward_event WHERE child_id='" + childId + "' AND reward_type='garden_growth';") == 5,
+                "production_first_five_events_create_exactly_five_garden_rewards");
+            A(Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + childId + "' AND completed_count=1;") == 5,
+                "production_first_five_events_complete_five_lesson_progress_rows");
+            A(Count(database, "SELECT count(*) FROM session WHERE child_id='" + childId + "' AND state='active';") == 0,
+                "production_first_five_events_leave_no_active_session");
+        }
+
+        private static void TestProductionFirstEventResumeJourney(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath,
+            string gameEventPath)
+        {
+            var events = new MathGameEventCatalogSource().Load(gameEventPath, lessonCatalogPath);
+            var definition = events.Events[0];
+            var database = NewDatabase(Path.Combine(root, "production-first-event-resume.db"), schemaPath);
+            string sessionId;
+            string childId;
+            string openQuestionId;
+            IList<string> selected;
+
+            using (var first = new MathGameEventCoordinator(database, templatePath, gameEventPath, "LOW",
+                15101, definition.Id, definition.TargetLessonId))
+            {
+                var start = first.Start("Bé production resume event");
+                sessionId = start.Session.SessionId;
+                childId = start.Session.ChildId;
+                selected = start.Session.SelectedContentQuestionIds.ToList();
+                var q1 = first.NextQuestion();
+                first.SubmitAnswerAt(q1.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700);
+                var q2 = first.NextQuestion();
+                openQuestionId = q2.QuestionId;
+                var wrong = first.SubmitAnswerWithRetryAt(WrongAnswer(q2), 2, "smoke", DateTime.UtcNow, 800);
+                A(!wrong.Learning.IsCorrect && wrong.Learning.CanRetry && wrong.EventState.RetryPending &&
+                  wrong.EventState.CompletedCheckpointCount == 1 && wrong.EventState.CurrentCheckpointNumber == 2,
+                    "production_first_event_wrong_retry_preserves_second_checkpoint");
+                first.SuspendForBreak("production_event_break");
+                A(Count(database, "SELECT count(*) FROM reward_event WHERE child_id='" + childId + "';") == 0,
+                    "production_first_event_suspend_grants_no_reward");
+            }
+
+            using (var resumed = new MathGameEventCoordinator(database, templatePath, gameEventPath, "NORMAL",
+                999999, null, definition.TargetLessonId))
+            {
+                var start = resumed.Start("Bé production resume event");
+                A(start.Session.ResumedExistingSession && start.Session.SessionId == sessionId &&
+                  start.Event != null && start.Event.Id == definition.Id &&
+                  start.Session.SelectedContentQuestionIds.SequenceEqual(selected),
+                    "production_first_event_resume_derives_same_event_from_lesson");
+                A(start.Session.RetryPending && start.Session.CurrentAttemptIndex == 2 &&
+                  start.EventState.CompletedCheckpointCount == 1 && start.EventState.CurrentCheckpointNumber == 2,
+                    "production_first_event_resume_restores_retry_checkpoint_two");
+                var q2 = resumed.NextQuestion();
+                A(q2.QuestionId == openQuestionId && q2.ContentQuestionId == selected[1],
+                    "production_first_event_resume_restores_exact_open_medium");
+                var retry = resumed.SubmitRetryAnswerAt(q2.CorrectAnswerDisplay, 1, "smoke", DateTime.UtcNow, 850);
+                A(retry.Learning.IsCorrect && retry.Learning.IsRetry && !retry.Learning.IndependentSuccess &&
+                  retry.EventState.CompletedCheckpointCount == 2,
+                    "production_first_event_retry_correct_is_assisted_and_advances_checkpoint");
+                var q3 = resumed.NextQuestion();
+                resumed.SubmitAnswerAt(q3.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 900);
+                var completion = resumed.Complete();
+                A(completion.LearningSummary.LessonCompleted && completion.LearningSummary.AnswerAttempts == 4 &&
+                  completion.LearningSummary.Attempts == 3 && completion.LearningSummary.RetriedQuestions == 1 &&
+                  completion.EventState.IsComplete,
+                    "production_first_event_resume_journey_completes_three_from_four_answers");
+                A(Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + sessionId + "';") == 1 &&
+                  Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + sessionId + "';") == 3,
+                    "production_first_event_resume_journey_grants_one_reward_three_mastery");
             }
         }
 

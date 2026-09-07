@@ -20,7 +20,7 @@ Branch: `main`
 
 - `tests/MathEngineRuntimeSmoke`: PASS — **72 assertions** (baseline equivalence + adversarial Unicode/NFD, int overflow, answer-length, unit alias, expression depth/token-bomb, Unicode operators và invalid per-question whitelist fail-closed).
 - `tests/MathDataEngineRuntimeSmoke`: PASS — **104 assertions** (idempotency + terminal-session guard + optimistic skill-state guard + true cross-process mastery/session contention + atomic startup + subject/child-scoped dangling recovery).
-- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **7636 assertions** (toàn bộ gate cũ + real 402-bank selector breadth + targeted write-failure/corruption repair + deterministic authored runtime IDs + concurrent pending-retry semantics + generated/open-ordinal self-heal + late-review transaction rollback + operational DB failure fail-safe).
+- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **7718 assertions** (toàn bộ gate cũ + real 402-bank selector breadth + targeted write-failure/corruption repair + deterministic authored runtime IDs + concurrent pending-retry semantics + generated/open-ordinal self-heal + late-review transaction rollback + operational DB failure fail-safe).
 - `tests/SQLiteRuntimeSmoke`: PASS — **179 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
 - `tests/LearningSessionRuntimeSmoke`: PASS — **800 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
 - Request 009: CLOSED tại `05cdb2a` — authored pool >=6 dùng selected set đúng 3 câu (1 basic + 1 medium + 1 application), deterministic theo seed/lesson, persisted qua checkpoint JSON; retry/resume/corrupt-open recovery giữ nguyên selected set và complete sau 3 câu. Synthetic pool-6 regression + legacy path đạt **264 assertions PASS**.
@@ -45,7 +45,7 @@ Branch: `main`
 - FIRST-5 hint/mastery matrix: mỗi bài đầu có một câu đúng với `hint_level=2` và hai câu independent; outcome hinted không được tính independent, mastery reason chứa `hinted_correct_lower_weight`, review reason `hinted_success_short_recall`, DB persist đúng 1 max-hint + 2 no-hint attempts và child_skill đúng `independent_success_count=2`, `hinted_success_count=1`.
 - Pack-byte identity audit: production `Program.BootstrapRuntime()` bắt buộc `ContentPackValidator.ValidateDirectory(..., true)` cho bundled Math pack trước UI; manifest SHA-256 mismatch fail startup, nên V5 `pack_id+version` kết hợp verified manifest đủ contract hiện tại, chưa cần invent schema V6 chỉ để lưu hash lần hai.
 - Late-review transaction fault: injected failure tại `review_schedule` (sau attempt/mastery/child_skill trong cùng transaction) rollback sạch toàn chain + semantic key; retry sau khi gỡ trigger ghi đúng một attempt/mastery/child_skill/review duy nhất.
-- Expanded-bank integration: `373d9d1` bỏ test coupling `Single(...)`/`_01`, chạy được cả baseline 201 và pool 402; current real 402-bank persistence tổng **7636 assertions PASS**.
+- Expanded-bank integration: `373d9d1` bỏ test coupling `Single(...)`/`_01`, chạy được cả baseline 201 và pool 402; current real 402-bank persistence tổng **7718 assertions PASS**.
 - PowerShell release/build scripts: schema V5 payload/bootstrap expectations đã cập nhật; staged `Build-SetupArtifacts.ps1` PASS qua Release x86 + runtime smokes + staged payload/preflight + portable packaging.
 - `git diff --check` + staged `git diff --cached --check`: PASS cho wave V5.
 
@@ -60,7 +60,9 @@ Branch: `main`
 - Corrupt event metadata regression: malformed catalog falls back to ordinary targeted lesson presentation while preserving exact active session/open q2/attempt/mastery; no fake reward.
 - Fault regression: injected mastery write failure leaves checkpoint 0/open q1/zero attempts/mastery/reward; after fault removal same q1 commits once and event completes with exactly 3 learning events + 1 reward.
 - Concurrency regression: two event wrappers bind same durable session/question identity, replay all 3 checkpoints without duplicate attempt/mastery; stale second completion cannot duplicate reward.
-- Synthetic event P0 persistence total: **7636 assertions PASS**. Production AI1 catalog not yet committed at last audit; integration deferred only at catalog boundary, not blocking AI2 hardening.
+- Production 5-event integration (`bd1809e`): exactly first 5 lesson/skill mappings load from shipped `game_events_v1.json`; sequential same-child play completes 5 targeted sessions = 15 attempts + 15 mastery + 5 lesson-progress completions + exactly 5 Garden rewards, no active session left.
+- Production event-1 resume journey: q1 correct → q2 wrong/max-hint → suspend → restart with `event_id=null` and target lesson only; loader derives same production event, restores exact selected set/q2/attempt2/checkpoint2, retry-correct remains assisted, completion writes 3 mastery and one reward.
+- Synthetic event P0 persistence total: **7718 assertions PASS**. Production AI1 catalog not yet committed at last audit; integration deferred only at catalog boundary, not blocking AI2 hardening.
 
 ## Session
 
