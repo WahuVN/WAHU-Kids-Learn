@@ -86,6 +86,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - hint cấp 1/2 tiết lộ canonical answer chưa xuất hiện trong đề; true/false được loại khỏi detector để “Đúng/Sai” vẫn dùng được như ngôn ngữ hướng dẫn; mỗi hint child-facing tối đa 130 ký tự;
 - vocabulary kỹ thuật nội bộ lọt vào field child-facing (`baseline`, `runtime`, `template`, `validator`, ...);
 - child-facing text không NFC, có control/format character (kể cả zero-width), leading/trailing/repeated space hoặc spacing dấu câu bẩn; phép chia chuẩn `a : b` được miễn đúng mục đích toán học; audit hiện **6426 strings sạch**;
+- readability overflow trên core child surfaces: lesson title ≤60, lesson explanation ≤200, objective ≤130, concept name/definition ≤50/120, worked prompt/answer/step ≤130/80/100, question prompt/explanation ≤180/200, choice text ≤80; corpus hiện max lần lượt **38/165/110/31/99/107/44/86/151/173/62**;
 - mục tiêu học đầu tiên dùng placeholder `Nhận biết và thực hiện đúng nội dung:` hoặc bị tái dùng quá mức;
 - mục tiêu học thứ hai generic/placeholder hoặc bị tái dùng quá mức;
 - explanation câu hỏi quá ngắn, không đủ bước giải thích/kiểm tra cho feedback học tập;
@@ -140,7 +141,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract;
 - **166 phương trình số instructional** đang được kiểm bằng arithmetic parser, hiện **0 sai**; detector có regression cho cả phép cộng chuỗi và phép chia dùng dấu `:`.
 
-Latest result: **37 tests PASS**.
+Latest result: **38 tests PASS**.
 
 ## Commits / waves
 

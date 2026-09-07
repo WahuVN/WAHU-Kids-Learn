@@ -281,6 +281,26 @@ class MathContentDataSmoke(unittest.TestCase):
                 serialized = json.dumps(item, ensure_ascii=False)
                 self.assertEqual([], validator.grade2_operation_scope_violations(serialized))
 
+    def test_child_facing_core_surfaces_have_readability_bounds(self):
+        for lesson in self.lessons:
+            self.assertLessEqual(len(lesson["title_vi"]), validator.MAX_LESSON_TITLE_CHARS)
+            self.assertLessEqual(len(lesson["explanation_vi"]), validator.MAX_LESSON_EXPLANATION_CHARS)
+            for objective in lesson["objectives_vi"]:
+                self.assertLessEqual(len(objective.strip()), validator.MAX_OBJECTIVE_CHARS)
+            for concept in lesson["concepts"]:
+                self.assertLessEqual(len(concept["name_vi"]), validator.MAX_CONCEPT_NAME_CHARS)
+                self.assertLessEqual(len(concept["definition_vi"]), validator.MAX_CONCEPT_DEFINITION_CHARS)
+            for example in lesson["worked_examples"]:
+                self.assertLessEqual(len(example["prompt_vi"]), validator.MAX_WORKED_PROMPT_CHARS)
+                self.assertLessEqual(len(example["answer"]), validator.MAX_WORKED_ANSWER_CHARS)
+                for step in example["solution_steps_vi"]:
+                    self.assertLessEqual(len(step.strip()), validator.MAX_WORKED_STEP_CHARS)
+        for item in self.questions:
+            self.assertLessEqual(len(item["prompt_vi"]), validator.MAX_QUESTION_PROMPT_CHARS)
+            self.assertLessEqual(len(item["explanation_vi"]), validator.MAX_QUESTION_EXPLANATION_CHARS)
+            for choice in item.get("choices", []):
+                self.assertLessEqual(len(choice["text"]), validator.MAX_CHOICE_TEXT_CHARS)
+
     def test_hints_do_not_reveal_unseen_answers(self):
         for item in self.questions:
             for index, hint in enumerate(item["hints_vi"], 1):

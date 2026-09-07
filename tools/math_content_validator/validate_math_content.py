@@ -39,6 +39,17 @@ NUMERIC_EQUALITY_RES = (
 )
 MIN_QUESTION_EXPLANATION_CHARS = 32
 MIN_CONCEPT_DEFINITION_CHARS = 40
+MAX_LESSON_TITLE_CHARS = 60
+MAX_LESSON_EXPLANATION_CHARS = 200
+MAX_OBJECTIVE_CHARS = 130
+MAX_CONCEPT_NAME_CHARS = 50
+MAX_CONCEPT_DEFINITION_CHARS = 120
+MAX_WORKED_PROMPT_CHARS = 130
+MAX_WORKED_ANSWER_CHARS = 80
+MAX_WORKED_STEP_CHARS = 100
+MAX_QUESTION_PROMPT_CHARS = 180
+MAX_QUESTION_EXPLANATION_CHARS = 200
+MAX_CHOICE_TEXT_CHARS = 80
 MAX_HINT_CHARS = 130
 MAX_DISTRACTOR_RATIONALE_CHARS = 300
 MAX_APPLICATION_LOWER_SHAPE_SIMILARITY = 0.75
@@ -1145,8 +1156,12 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             expected_domain = next((d for d, skills in domains.items() if skill in skills), None)
             if chapter_domain[cid] != expected_domain:
                 errors.append(f"skill_domain_mismatch:{where}:{skill}:{chapter_domain[cid]}:{expected_domain}")
-        required_text(lesson, "title_vi", where, errors)
+        lesson_title = required_text(lesson, "title_vi", where, errors)
+        if lesson_title and len(lesson_title) > MAX_LESSON_TITLE_CHARS:
+            errors.append(f"lesson_title_too_long:{where}:{len(lesson_title)}")
         lesson_explanation = required_text(lesson, "explanation_vi", where, errors)
+        if lesson_explanation and len(lesson_explanation) > MAX_LESSON_EXPLANATION_CHARS:
+            errors.append(f"lesson_explanation_too_long:{where}:{len(lesson_explanation)}")
         validate_numeric_equalities(lesson_explanation, where + ".explanation_vi", errors)
         validate_numeric_relations(lesson_explanation, where + ".explanation_vi", errors)
         serialized_lesson = json.dumps(lesson, ensure_ascii=False)
@@ -1162,6 +1177,9 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
         elif not all(isinstance(objective, str) and objective.strip() for objective in objectives):
             errors.append(f"invalid_objective_text:{where}")
         else:
+            for objective_index, objective in enumerate(objectives):
+                if len(objective.strip()) > MAX_OBJECTIVE_CHARS:
+                    errors.append(f"objective_too_long:{where}:{objective_index}:{len(objective.strip())}")
             first_objective = " ".join(objectives[0].split())
             first_objective_counts[first_objective] += 1
             if first_objective.startswith(GENERIC_FIRST_OBJECTIVE_PREFIX):
@@ -1178,10 +1196,14 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             x = check_id(concept.get("id"), cwhere, errors)
             if x:
                 concept_ids.add(x); all_ids.append((x, cwhere))
-            required_text(concept, "name_vi", cwhere, errors)
+            concept_name = required_text(concept, "name_vi", cwhere, errors)
+            if concept_name and len(concept_name) > MAX_CONCEPT_NAME_CHARS:
+                errors.append(f"concept_name_too_long:{cwhere}:{len(concept_name)}")
             concept_definition = required_text(concept, "definition_vi", cwhere, errors)
             if concept_definition and len(concept_definition) < MIN_CONCEPT_DEFINITION_CHARS:
                 errors.append(f"concept_definition_too_short:{cwhere}:{len(concept_definition)}")
+            if concept_definition and len(concept_definition) > MAX_CONCEPT_DEFINITION_CHARS:
+                errors.append(f"concept_definition_too_long:{cwhere}:{len(concept_definition)}")
             validate_numeric_equalities(concept_definition, cwhere + ".definition_vi", errors)
             validate_numeric_relations(concept_definition, cwhere + ".definition_vi", errors)
         examples = required_list(lesson, "worked_examples", where, errors)
@@ -1192,14 +1214,20 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             x = check_id(example.get("id"), ewhere, errors)
             if x:
                 example_ids.add(x); all_ids.append((x, ewhere))
-            required_text(example, "prompt_vi", ewhere, errors)
+            example_prompt = required_text(example, "prompt_vi", ewhere, errors)
+            if example_prompt and len(example_prompt) > MAX_WORKED_PROMPT_CHARS:
+                errors.append(f"worked_prompt_too_long:{ewhere}:{len(example_prompt)}")
             answer = required_text(example, "answer", ewhere, errors)
+            if answer and len(answer) > MAX_WORKED_ANSWER_CHARS:
+                errors.append(f"worked_answer_too_long:{ewhere}:{len(answer)}")
             validate_numeric_equalities(answer, ewhere + ".answer", errors)
             validate_numeric_relations(answer, ewhere + ".answer", errors)
             solution_steps = required_list(example, "solution_steps_vi", ewhere, errors)
             if solution_steps:
                 for step_index, step in enumerate(solution_steps):
                     if isinstance(step, str):
+                        if len(step.strip()) > MAX_WORKED_STEP_CHARS:
+                            errors.append(f"worked_step_too_long:{ewhere}:{step_index}:{len(step.strip())}")
                         validate_numeric_equalities(step, f"{ewhere}.solution_steps_vi[{step_index}]", errors)
                         validate_numeric_relations(step, f"{ewhere}.solution_steps_vi[{step_index}]", errors)
             if answer and solution_steps and all(isinstance(step, str) for step in solution_steps):
@@ -1311,6 +1339,8 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
         else:
             question_counts_by_difficulty[difficulty] += 1
         prompt = required_text(q, "prompt_vi", where, errors)
+        if prompt and len(prompt) > MAX_QUESTION_PROMPT_CHARS:
+            errors.append(f"question_prompt_too_long:{where}:{len(prompt)}")
         if prompt:
             prompts_by_lesson[lid].append((qid, prompt))
             all_question_prompts.append((lid, qid, prompt))
@@ -1321,6 +1351,8 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             errors.append(f"shallow_numeric_explanation:{where}")
         if explanation and len(explanation) < MIN_QUESTION_EXPLANATION_CHARS:
             errors.append(f"question_explanation_too_short:{where}:{len(explanation)}")
+        if explanation and len(explanation) > MAX_QUESTION_EXPLANATION_CHARS:
+            errors.append(f"question_explanation_too_long:{where}:{len(explanation)}")
         if explanation and not explanation_states_answer(q, explanation):
             errors.append(f"question_explanation_missing_answer_evidence:{where}:{question_answer_display(q)[:80]}")
         correct_answer_text = q.get("correct_answer")
@@ -1522,6 +1554,8 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
                     errors.append(f"choice_not_object:{cwhere}"); continue
                 cid = required_text(choice, "id", cwhere, errors)
                 text = required_text(choice, "text", cwhere, errors)
+                if text and len(text) > MAX_CHOICE_TEXT_CHARS:
+                    errors.append(f"choice_text_too_long:{cwhere}:{len(text)}")
                 rationale = required_text(choice, "rationale_vi", cwhere, errors)
                 choice_ids.append(cid); choice_texts.append(text); choice_rationales.append(rationale)
             if len(choice_ids) != len(set(choice_ids)):
