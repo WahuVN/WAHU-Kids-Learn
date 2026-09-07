@@ -38,6 +38,7 @@ namespace WAHU.ChildUiRuntimeSmoke
             TestAllAuthoredAnswerSurfaces(appAssembly);
             TestTargetedLessonUiFlow(appAssembly);
             TestExpandedPoolTargetedUiFlow(appAssembly);
+            TestTargetedCursorSelfHealUiFlow(appAssembly);
             TestIntegerAnswerUnitUiFlow(appAssembly);
             TestChoiceRetryUiFlow(appAssembly);
             TestSubmitFailureRecoveryUiFlow(appAssembly);
@@ -1370,6 +1371,190 @@ namespace WAHU.ChildUiRuntimeSmoke
                     A(ContainsControlText(detail, "6 câu trong ngân hàng bài học") && practice != null && practice.Enabled &&
                         string.IsNullOrWhiteSpace(Get<string>(practice, "BadgeText")),
                         "pool6_ui_completed_hub_keeps_bank_six_session_neutral");
+                }
+            }
+            finally
+            {
+                foreach (var pair in runtimeFiles)
+                {
+                    if (pair.Value == null)
+                    {
+                        try { if (File.Exists(pair.Key)) File.Delete(pair.Key); } catch { }
+                    }
+                    else
+                    {
+                        try { File.WriteAllBytes(pair.Key, pair.Value); } catch { }
+                    }
+                }
+                try { Directory.Delete(tempRoot, true); } catch { }
+            }
+        }
+
+        private static void TestTargetedCursorSelfHealUiFlow(Assembly appAssembly)
+        {
+            var repo = Directory.GetCurrentDirectory();
+            var sourceContent = Path.Combine(repo, "content_packs", "math_grade2_v1");
+            var catalogPath = Path.Combine(sourceContent, "lesson_catalog_v1.json");
+            var catalog = new MathLessonCatalogSource().Load(catalogPath);
+            var lesson = catalog.FindLesson("m2_ls_num_count_read_write_0_1000");
+            A(lesson != null && lesson.PracticeSets != null && lesson.PracticeSets.TotalCount == 6,
+                "targeted_cursor_ui_fixture_uses_pool_six_root_lesson");
+
+            var runtimeContent = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "content_packs", "math_grade2_v1");
+            Directory.CreateDirectory(runtimeContent);
+            var runtimeFiles = new Dictionary<string, byte[]>(StringComparer.OrdinalIgnoreCase);
+            foreach (var name in new[] { "verified_templates_v1.json", "lesson_catalog_v1.json", "question_bank_v1.json" })
+            {
+                var runtimePath = Path.Combine(runtimeContent, name);
+                runtimeFiles[runtimePath] = File.Exists(runtimePath) ? File.ReadAllBytes(runtimePath) : null;
+                File.Copy(Path.Combine(sourceContent, name), runtimePath, true);
+            }
+
+            var lessonCtor = typeof(WAHUKidsLearn.MathLessonForm).GetConstructor(
+                BindingFlags.Instance | BindingFlags.NonPublic,
+                null,
+                new[] { typeof(LearningDatabase), typeof(RuntimePerformanceSettings), typeof(string) },
+                null);
+            A(lessonCtor != null, "targeted_cursor_ui_internal_lesson_route_available");
+
+            var tempRoot = Path.Combine(Path.GetTempPath(), "wahu-child-ui-targeted-cursor-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempRoot);
+            try
+            {
+                var schemaSource = Path.Combine(repo, "data", "schema");
+                var schemaDir = Path.Combine(tempRoot, "schema");
+                Directory.CreateDirectory(schemaDir);
+                foreach (var source in Directory.GetFiles(schemaSource, "*.sql"))
+                    File.Copy(source, Path.Combine(schemaDir, Path.GetFileName(source)), true);
+                var initialSchema = Path.Combine(schemaDir, "001_initial.sql");
+
+                var aheadDatabase = new LearningDatabase(Path.Combine(tempRoot, "cursor-ahead.db"), initialSchema);
+                var aheadInit = aheadDatabase.Initialize("DELETE");
+                A(aheadInit.SchemaVersion == 5 && aheadInit.Health.IsHealthy,
+                    "targeted_cursor_ui_ahead_database_v5_ready");
+                new LearnerSessionService(aheadDatabase).EnsurePrimaryChild("Bé UI cursor ahead");
+
+                IList<string> aheadSelected;
+                using (var first = (WAHUKidsLearn.MathLessonForm)lessonCtor.Invoke(new object[]
+                {
+                    aheadDatabase,
+                    new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW },
+                    lesson.Id
+                }))
+                {
+                    Invoke(first, "StartSession");
+                    var coordinator = GetField<object>(first, "_coordinator");
+                    aheadSelected = ((System.Collections.IEnumerable)GetField<object>(coordinator, "_selectedContentQuestionIds"))
+                        .Cast<object>().Select(Convert.ToString).ToList();
+                    A(aheadSelected.Count == 3 && lesson.PracticeSets.Basic.Contains(aheadSelected[0]) &&
+                        lesson.PracticeSets.Medium.Contains(aheadSelected[1]) && lesson.PracticeSets.Application.Contains(aheadSelected[2]),
+                        "targeted_cursor_ui_ahead_fixture_selects_basic_medium_application");
+                    var basic = GetField<MathQuestion>(first, "_question");
+                    A(basic != null && basic.ContentQuestionId == aheadSelected[0],
+                        "targeted_cursor_ui_ahead_fixture_opens_selected_basic");
+                    SubmitCurrentMathQuestionCorrectly(first, "targeted_cursor_ui_ahead_basic");
+                    var afterBasic = Get<object>(coordinator, "Summary");
+                    A(Get<int>(afterBasic, "Attempts") == 1 && !Get<bool>(coordinator, "HasOpenQuestion"),
+                        "targeted_cursor_ui_ahead_fixture_has_one_durable_attempt_without_open_question");
+                    Invoke(coordinator, "Suspend", "targeted_cursor_ui_ahead_suspend");
+                    SetField(first, "_finished", true);
+                }
+
+                ExecuteDatabaseSql(aheadDatabase,
+                    "UPDATE math_session_runtime SET generated_question_count=3,current_question_json=NULL,question_started_at_utc=NULL;");
+
+                using (var resumed = (WAHUKidsLearn.MathLessonForm)lessonCtor.Invoke(new object[]
+                {
+                    aheadDatabase,
+                    new RuntimePerformanceSettings { Profile = PerformanceProfileKind.NORMAL },
+                    lesson.Id
+                }))
+                {
+                    Invoke(resumed, "StartSession");
+                    var coordinator = GetField<object>(resumed, "_coordinator");
+                    var repairedSelected = ((System.Collections.IEnumerable)GetField<object>(coordinator, "_selectedContentQuestionIds"))
+                        .Cast<object>().Select(Convert.ToString).ToList();
+                    var medium = GetField<MathQuestion>(resumed, "_question");
+                    A(repairedSelected.SequenceEqual(aheadSelected),
+                        "targeted_cursor_ui_ahead_repair_preserves_ordered_selected_set");
+                    A(medium != null && medium.ContentQuestionId == aheadSelected[1] &&
+                        lesson.PracticeSets.Medium.Contains(medium.ContentQuestionId),
+                        "targeted_cursor_ui_ahead_repair_replays_selected_medium");
+                    A(GetField<int>(coordinator, "_generatedQuestionCount") == 2 &&
+                        GetField<Label>(resumed, "_progressText").Text.IndexOf("Câu 2 / 3", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "targeted_cursor_ui_ahead_repair_restores_second_of_three_progress");
+                    var support = GetField<Label>(resumed, "_support").Text;
+                    A(support.IndexOf("đang học dở", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                        support.IndexOf("cursor", StringComparison.OrdinalIgnoreCase) < 0 &&
+                        support.IndexOf("ordinal", StringComparison.OrdinalIgnoreCase) < 0 &&
+                        support.IndexOf("runtime", StringComparison.OrdinalIgnoreCase) < 0 &&
+                        support.IndexOf("cache", StringComparison.OrdinalIgnoreCase) < 0,
+                        "targeted_cursor_ui_ahead_repair_copy_is_child_safe");
+                    Invoke(coordinator, "Abort", "targeted_cursor_ui_ahead_cleanup");
+                    SetField(resumed, "_finished", true);
+                }
+
+                var cacheDatabase = new LearningDatabase(Path.Combine(tempRoot, "cache-ahead.db"), initialSchema);
+                var cacheInit = cacheDatabase.Initialize("DELETE");
+                A(cacheInit.SchemaVersion == 5 && cacheInit.Health.IsHealthy,
+                    "targeted_cursor_ui_cache_database_v5_ready");
+                new LearnerSessionService(cacheDatabase).EnsurePrimaryChild("Bé UI cache ahead");
+
+                IList<string> cacheSelected;
+                using (var first = (WAHUKidsLearn.MathLessonForm)lessonCtor.Invoke(new object[]
+                {
+                    cacheDatabase,
+                    new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW },
+                    lesson.Id
+                }))
+                {
+                    Invoke(first, "StartSession");
+                    var coordinator = GetField<object>(first, "_coordinator");
+                    cacheSelected = ((System.Collections.IEnumerable)GetField<object>(coordinator, "_selectedContentQuestionIds"))
+                        .Cast<object>().Select(Convert.ToString).ToList();
+                    SubmitCurrentMathQuestionCorrectly(first, "targeted_cursor_ui_cache_basic");
+                    Invoke(first, "HandleNextButton");
+                    var medium = GetField<MathQuestion>(first, "_question");
+                    A(medium != null && medium.ContentQuestionId == cacheSelected[1],
+                        "targeted_cursor_ui_cache_fixture_opens_selected_medium");
+                    A(GetField<int>(coordinator, "_generatedQuestionCount") == 2 && Get<bool>(coordinator, "HasOpenQuestion"),
+                        "targeted_cursor_ui_cache_fixture_has_medium_open_at_second_ordinal");
+                    Invoke(coordinator, "Suspend", "targeted_cursor_ui_cache_suspend");
+                    SetField(first, "_finished", true);
+                }
+
+                ExecuteDatabaseSql(cacheDatabase,
+                    "UPDATE math_session_runtime SET generated_question_count=3 WHERE current_question_json IS NOT NULL;");
+
+                using (var resumed = (WAHUKidsLearn.MathLessonForm)lessonCtor.Invoke(new object[]
+                {
+                    cacheDatabase,
+                    new RuntimePerformanceSettings { Profile = PerformanceProfileKind.NORMAL },
+                    lesson.Id
+                }))
+                {
+                    Invoke(resumed, "StartSession");
+                    var coordinator = GetField<object>(resumed, "_coordinator");
+                    var repairedSelected = ((System.Collections.IEnumerable)GetField<object>(coordinator, "_selectedContentQuestionIds"))
+                        .Cast<object>().Select(Convert.ToString).ToList();
+                    var medium = GetField<MathQuestion>(resumed, "_question");
+                    A(repairedSelected.SequenceEqual(cacheSelected),
+                        "targeted_cursor_ui_cache_repair_preserves_ordered_selected_set");
+                    A(medium != null && medium.ContentQuestionId == cacheSelected[1] &&
+                        lesson.PracticeSets.Medium.Contains(medium.ContentQuestionId),
+                        "targeted_cursor_ui_cache_repair_replays_medium_instead_of_skipping_to_application");
+                    A(GetField<int>(coordinator, "_generatedQuestionCount") == 2 &&
+                        GetField<Label>(resumed, "_progressText").Text.IndexOf("Câu 2 / 3", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "targeted_cursor_ui_cache_repair_keeps_second_of_three_progress");
+                    var support = GetField<Label>(resumed, "_support").Text;
+                    A(support.IndexOf("Phần con đã làm vẫn an toàn", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                        support.IndexOf("cursor", StringComparison.OrdinalIgnoreCase) < 0 &&
+                        support.IndexOf("ordinal", StringComparison.OrdinalIgnoreCase) < 0 &&
+                        support.IndexOf("runtime", StringComparison.OrdinalIgnoreCase) < 0 &&
+                        support.IndexOf("cache", StringComparison.OrdinalIgnoreCase) < 0,
+                        "targeted_cursor_ui_cache_repair_copy_hides_internal_jargon");
+                    Invoke(coordinator, "Abort", "targeted_cursor_ui_cache_cleanup");
+                    SetField(resumed, "_finished", true);
                 }
             }
             finally
