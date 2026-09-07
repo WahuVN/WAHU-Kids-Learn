@@ -83,6 +83,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestProductionFirstEventResumeJourney(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventResumeAfterThirdAnswerBeforeComplete(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventCompletedEventReopensAsFreshReplay(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
+                TestGameEventPublicLifecycleIsFailClosed(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventDisposeSuspendsAndResumesExactQuestion(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventResumeRestoresBehaviorAction(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventResumeRestoresExplicitRepairBeforeStateTransition(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
@@ -725,6 +726,64 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                     "game_event_fresh_replay_resume_keeps_exact_q1_and_existing_reward_count");
                 resumedReplay.SuspendForBreak("completed_replay_cleanup");
             }
+        }
+
+        private static void TestGameEventPublicLifecycleIsFailClosed(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath,
+            string gameEventPath)
+        {
+            var events = new MathGameEventCatalogSource().Load(gameEventPath, lessonCatalogPath);
+            var definition = events.Events[0];
+            var database = NewDatabase(Path.Combine(root, "game-event-public-lifecycle.db"), schemaPath);
+            var game = new MathGameEventCoordinator(database, templatePath, gameEventPath, "LOW", 15125,
+                definition.Id, definition.TargetLessonId);
+            var start = game.Start("Bé lifecycle cứu hộ");
+            var sessionId = start.Session.SessionId;
+            var childId = start.Session.ChildId;
+
+            var doubleStartRejected = false;
+            try { game.Start("Bé lifecycle cứu hộ"); }
+            catch (InvalidOperationException) { doubleStartRejected = true; }
+            A(doubleStartRejected && Count(database, "SELECT count(*) FROM session WHERE child_id='" + childId + "' AND state='active';") == 1 &&
+              Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + childId +
+              "' AND lesson_id='" + definition.TargetLessonId + "' AND started_count=1;") == 1,
+                "game_event_double_start_rejected_without_duplicate_session_or_started_count");
+
+            for (var ordinal = 0; ordinal < 3; ordinal++)
+            {
+                var question = game.NextQuestion();
+                game.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700 + ordinal * 100);
+            }
+            var completed = game.Complete();
+            var replay = game.Complete();
+            A(object.ReferenceEquals(completed, replay) && completed.EventState.IsComplete && completed.LearningSummary.LessonCompleted,
+                "game_event_terminal_complete_replay_returns_cached_result");
+
+            var nextRejected = false;
+            var submitRejected = false;
+            var restartRejected = false;
+            try { game.NextQuestion(); } catch (InvalidOperationException) { nextRejected = true; }
+            try { game.SubmitAnswerAt("0", 0, "smoke", DateTime.UtcNow, 999); } catch (InvalidOperationException) { submitRejected = true; }
+            var terminalSuspend = game.SuspendForBreak("after_terminal");
+            try { game.Start("Bé lifecycle cứu hộ"); } catch (InvalidOperationException) { restartRejected = true; }
+            A(nextRejected && submitRejected && restartRejected && terminalSuspend != null && terminalSuspend.Attempts == 3,
+                "game_event_terminal_mutations_fail_closed_while_suspend_is_idempotent_noop");
+            A(SessionState(database, sessionId) == "completed" &&
+              Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + sessionId + "';") == 3 &&
+              Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + sessionId + "';") == 3 &&
+              Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + sessionId + "';") == 1,
+                "game_event_terminal_rejected_calls_leave_learning_and_reward_exactly_once");
+            A(game.CurrentState.IsComplete && game.CurrentState.CompletedCheckpointCount == 3 &&
+              game.CurrentState.CurrentCheckpointNumber == 3 && !game.CurrentState.RetryPending,
+                "game_event_terminal_current_state_remains_stable_after_rejected_calls");
+            game.Dispose();
+            game.Dispose();
+            A(SessionState(database, sessionId) == "completed" &&
+              Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + sessionId + "';") == 1,
+                "game_event_terminal_dispose_is_idempotent_and_does_not_mutate_reward");
         }
 
         private static void TestGameEventDisposeSuspendsAndResumesExactQuestion(

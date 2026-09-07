@@ -21,7 +21,7 @@ Playable Event Engine P0: **GREEN**
 
 - `tests/MathEngineRuntimeSmoke`: PASS — **72 assertions** (baseline equivalence + adversarial Unicode/NFD, int overflow, answer-length, unit alias, expression depth/token-bomb, Unicode operators và invalid per-question whitelist fail-closed).
 - `tests/MathDataEngineRuntimeSmoke`: PASS — **104 assertions** (idempotency + terminal-session guard + optimistic skill-state guard + true cross-process mastery/session contention + atomic startup + subject/child-scoped dangling recovery).
-- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **7821 assertions** (toàn bộ gate cũ + real 402-bank selector breadth + targeted write-failure/corruption repair + deterministic authored runtime IDs + concurrent pending-retry semantics + generated/open-ordinal self-heal + late-review transaction rollback + operational DB failure fail-safe).
+- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **7828 assertions** (toàn bộ gate cũ + real 402-bank selector breadth + targeted write-failure/corruption repair + deterministic authored runtime IDs + concurrent pending-retry semantics + generated/open-ordinal self-heal + late-review transaction rollback + operational DB failure fail-safe).
 - Pending-retry early complete: q2 wrong/pending retry rồi gọi `Complete()` bị reject nhưng `RetryPending`, checkpoint=1, exact q2 và reward=0 đều giữ nguyên; suspend/resume tiếp tục flow cũ.
 - Corrupt-catalog completion: synthetic event q1 complete rồi catalog hỏng; fallback lesson giữ selected q2/q3, đạt 3/3 nhưng chưa terminal cho tới `Complete()`, sau đó đúng 3 attempts/3 mastery + 1 reward; khôi phục catalog mở cùng event tạo session mới 0/3 và không duplicate reward.
 - Mismatched event/lesson fail-closed: production event 1 ID ghép nhầm fallback lesson event 2 bị `ResolveEventFailSafe()` reject trước session start; regression xác nhận 0 active session, 0 `math_session_runtime`, 0 `math_lesson_progress`, 0 reward.
@@ -49,7 +49,7 @@ Playable Event Engine P0: **GREEN**
 - FIRST-5 hint/mastery matrix: mỗi bài đầu có một câu đúng với `hint_level=2` và hai câu independent; outcome hinted không được tính independent, mastery reason chứa `hinted_correct_lower_weight`, review reason `hinted_success_short_recall`, DB persist đúng 1 max-hint + 2 no-hint attempts và child_skill đúng `independent_success_count=2`, `hinted_success_count=1`.
 - Pack-byte identity audit: production `Program.BootstrapRuntime()` bắt buộc `ContentPackValidator.ValidateDirectory(..., true)` cho bundled Math pack trước UI; manifest SHA-256 mismatch fail startup, nên V5 `pack_id+version` kết hợp verified manifest đủ contract hiện tại, chưa cần invent schema V6 chỉ để lưu hash lần hai.
 - Late-review transaction fault: injected failure tại `review_schedule` (sau attempt/mastery/child_skill trong cùng transaction) rollback sạch toàn chain + semantic key; retry sau khi gỡ trigger ghi đúng một attempt/mastery/child_skill/review duy nhất.
-- Expanded-bank integration: `373d9d1` bỏ test coupling `Single(...)`/`_01`, chạy được cả baseline 201 và pool 402; current real 402-bank persistence tổng **7821 assertions PASS**.
+- Expanded-bank integration: `373d9d1` bỏ test coupling `Single(...)`/`_01`, chạy được cả baseline 201 và pool 402; current real 402-bank persistence tổng **7828 assertions PASS**.
 - PowerShell release/build scripts: schema V5 payload/bootstrap expectations đã cập nhật; staged `Build-SetupArtifacts.ps1` PASS qua Release x86 + runtime smokes + staged payload/preflight + portable packaging.
 - `git diff --check` + staged `git diff --cached --check`: PASS cho wave V5.
 
@@ -81,7 +81,8 @@ Playable Event Engine P0: **GREEN**
 - Corrupt-catalog pending retry: synthetic event q1 complete + q2 wrong pending, suspend rồi phá `game_events_v1.json`; wrapper fallback ordinary lesson vẫn restore selected set + retry state + exact q2, retry-correct assisted đưa checkpoint lên 2, DB giữ 3 answer attempts/2 mastery và 0 reward.
 - Metadata recovery: sau fallback q2 assisted + suspend, khôi phục catalog hợp lệ rồi reopen bằng `event_id=null`/lesson fallback; wrapper resume cùng session với completed=2, event presentation trở lại ở checkpoint 3, exact selected q3 và vẫn 0 reward trước terminal completion.
 - No-autoplay: trong production 5-event sequential regression, sau completion event 1→4 `NextLessonId` trỏ đúng event kế nhưng DB vẫn không có active session hay `math_lesson_progress` row cho lesson kế; chỉ iteration Start kế tiếp mới tạo session/progress.
-- Playable Event P0 persistence total: **7821 assertions PASS**. Production AI1 catalog `bd1809e` đã tích hợp thật 5/5 event; synthetic fixtures vẫn giữ để fault/corruption/race test độc lập.
+- Public lifecycle guard: cùng coordinator Start lần hai bị reject và giữ đúng một active session/started_count; sau 3/3 + terminal Complete, NextQuestion/Submit/Start bị reject, Suspend trả summary no-op, Complete trả cached object, Dispose hai lần vẫn giữ 3 attempts/3 mastery/1 reward.
+- Playable Event P0 persistence total: **7828 assertions PASS**. Production AI1 catalog `bd1809e` đã tích hợp thật 5/5 event; synthetic fixtures vẫn giữ để fault/corruption/race test độc lập.
 
 ## Session
 
