@@ -47,6 +47,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestRuntimePackIdentityResumePolicy(root, schemaPath, templatePath);
                 TestTargetedCorruptOpenQuestionReplaysAuthoredOrdinal(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedGeneratedOrdinalSelfHealsWithoutOpenQuestion(root, schemaPath, templatePath, lessonCatalogPath);
+                TestTargetedSemanticOpenQuestionOrdinalMismatchSelfHeals(root, schemaPath, templatePath, lessonCatalogPath, questionBankPath);
                 TestExpandedTargetedPoolSelectsDurableThree(root, schemaPath, templatePath, lessonCatalogPath, questionBankPath);
                 TestTargetedSelectedSetSurvivesCommitFailure(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedConcurrentCoordinatorsCannotDuplicateOrdinal(root, schemaPath, templatePath, lessonCatalogPath);
@@ -830,6 +831,64 @@ VALUES(@id,@session,@child,' ','','blank-pack-question','LEGACY_PACK_SKILL','mat
                   lesson.PracticeSets.Medium.Contains(medium.ContentQuestionId),
                     "targeted_ordinal_repair_serves_selected_medium_not_end_of_session");
                 resumed.Abort("targeted_ordinal_repair_cleanup");
+            }
+        }
+
+        private static void TestTargetedSemanticOpenQuestionOrdinalMismatchSelfHeals(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath,
+            string questionBankPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.Lessons.First(x =>
+                (x.PrerequisiteSkills == null || x.PrerequisiteSkills.Count == 0) &&
+                x.PracticeSets != null && x.PracticeSets.Basic.Count >= 1 &&
+                x.PracticeSets.Medium.Count >= 1 && x.PracticeSets.Application.Count >= 1);
+            var bank = new MathAuthoredQuestionSource().Load(questionBankPath);
+            var database = NewDatabase(Path.Combine(root, "targeted-semantic-ordinal-mismatch.db"), schemaPath);
+            string sessionId;
+            IList<string> selected;
+
+            using (var first = new MathSessionCoordinator(database, templatePath, "LOW", 8121, lesson.Id))
+            {
+                var start = first.Start("Bé targeted semantic ordinal");
+                sessionId = start.SessionId;
+                selected = start.SelectedContentQuestionIds.ToList();
+                var basic = first.NextQuestion();
+                first.SubmitAnswerAt(basic.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700);
+                var medium = first.NextQuestion();
+                A(medium.ContentQuestionId == selected[1],
+                    "targeted_semantic_ordinal_fixture_opens_selected_medium");
+                first.Suspend("targeted_semantic_ordinal_fixture");
+            }
+
+            var authoredApplication = bank.Questions.Single(x => x.ContentQuestionId == selected[2]);
+            var cachedApplication = MathAuthoredQuestionSource.CreateRuntimeInstance(authoredApplication);
+            Exec(database,
+                "UPDATE math_session_runtime SET generated_question_count=3,current_question_json=@question WHERE session_id=@session;",
+                "@question", Json.Serialize(cachedApplication), "@session", sessionId);
+            A(Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + sessionId +
+                "' AND generated_question_count=3 AND current_question_json IS NOT NULL;") == 1,
+                "targeted_semantic_ordinal_fixture_persists_valid_application_cache_ahead_of_progress");
+
+            using (var resumed = new MathSessionCoordinator(database, templatePath, "NORMAL", 999999, lesson.Id))
+            {
+                var start = resumed.Start("Bé targeted semantic ordinal");
+                A(start.ResumedExistingSession && start.CompletedQuestionCount == 1 &&
+                  start.DiscardedCorruptOpenQuestion && !start.RestoredOpenQuestion,
+                    "targeted_semantic_ordinal_resume_discards_semantically_valid_but_skipping_cache");
+                A(start.SelectedContentQuestionIds.SequenceEqual(selected),
+                    "targeted_semantic_ordinal_resume_preserves_selected_set");
+                A(Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + sessionId +
+                    "' AND generated_question_count=1 AND current_question_json IS NULL;") == 1,
+                    "targeted_semantic_ordinal_resume_rewrites_cursor_to_one_committed_question");
+                var medium = resumed.NextQuestion();
+                A(medium != null && medium.ContentQuestionId == selected[1] &&
+                  lesson.PracticeSets.Medium.Contains(medium.ContentQuestionId),
+                    "targeted_semantic_ordinal_resume_replays_medium_before_application");
+                resumed.Abort("targeted_semantic_ordinal_cleanup");
             }
         }
 

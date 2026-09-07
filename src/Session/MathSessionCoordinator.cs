@@ -971,6 +971,8 @@ namespace WAHU.Session
                 if (!IsUsableRestoredQuestion(question)) throw new InvalidOperationException("Invalid cached Math question.");
                 if (string.Equals(_sessionMode, "lesson", StringComparison.Ordinal))
                 {
+                    if (_generatedQuestionCount != _attempts + 1)
+                        throw new InvalidDataException("Cached targeted Math question ordinal is inconsistent with committed progress.");
                     if (_generatedQuestionCount < 1 || _generatedQuestionCount > _targetQuestions.Count ||
                         !string.Equals(question.ContentQuestionId, _targetQuestions[_generatedQuestionCount - 1].ContentQuestionId, StringComparison.Ordinal))
                         throw new InvalidDataException("Cached targeted Math question is outside the persisted selected set.");
