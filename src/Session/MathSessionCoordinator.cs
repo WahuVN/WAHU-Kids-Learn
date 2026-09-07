@@ -976,6 +976,8 @@ namespace WAHU.Session
                     if (_generatedQuestionCount < 1 || _generatedQuestionCount > _targetQuestions.Count ||
                         !string.Equals(question.ContentQuestionId, _targetQuestions[_generatedQuestionCount - 1].ContentQuestionId, StringComparison.Ordinal))
                         throw new InvalidDataException("Cached targeted Math question is outside the persisted selected set.");
+                    if (!MatchesAuthoredRuntimeContract(question, _targetQuestions[_generatedQuestionCount - 1]))
+                        throw new InvalidDataException("Cached targeted Math question does not match canonical authored content.");
                 }
 
                 if (string.Equals(_sessionMode, "lesson", StringComparison.Ordinal) &&
@@ -1374,6 +1376,45 @@ namespace WAHU.Session
                    !string.IsNullOrWhiteSpace(question.TemplateId) &&
                    !string.IsNullOrWhiteSpace(question.SkillId) &&
                    !string.IsNullOrWhiteSpace(question.PromptVi);
+        }
+
+        private static bool MatchesAuthoredRuntimeContract(MathQuestion actual, MathQuestion authored)
+        {
+            if (actual == null || authored == null) return false;
+            return string.Equals(actual.ContentQuestionId, authored.ContentQuestionId, StringComparison.Ordinal) &&
+                   string.Equals(actual.LessonId, authored.LessonId, StringComparison.Ordinal) &&
+                   string.Equals(actual.QuestionType, authored.QuestionType, StringComparison.Ordinal) &&
+                   string.Equals(actual.Difficulty, authored.Difficulty, StringComparison.Ordinal) &&
+                   string.Equals(actual.TemplateId, authored.TemplateId, StringComparison.Ordinal) &&
+                   string.Equals(actual.SkillId, authored.SkillId, StringComparison.Ordinal) &&
+                   string.Equals(actual.PromptVi, authored.PromptVi, StringComparison.Ordinal) &&
+                   string.Equals(actual.ExplanationVi, authored.ExplanationVi, StringComparison.Ordinal) &&
+                   actual.CorrectAnswer == authored.CorrectAnswer &&
+                   SequenceEqualNullable(actual.Choices, authored.Choices) &&
+                   string.Equals(actual.AnswerKind, authored.AnswerKind, StringComparison.Ordinal) &&
+                   string.Equals(actual.CorrectAnswerText, authored.CorrectAnswerText, StringComparison.Ordinal) &&
+                   SequenceEqualNullable(actual.AcceptedAnswers, authored.AcceptedAnswers) &&
+                   actual.NumericTolerance.Equals(authored.NumericTolerance) &&
+                   string.Equals(actual.ExpectedUnit, authored.ExpectedUnit, StringComparison.Ordinal) &&
+                   SequenceEqualNullable(actual.AcceptedUnits, authored.AcceptedUnits) &&
+                   string.Equals(actual.AnswerUnit, authored.AnswerUnit, StringComparison.Ordinal) &&
+                   SequenceEqualNullable(actual.AllowedExpressionOperators, authored.AllowedExpressionOperators) &&
+                   SequenceEqualNullable(actual.ChoiceTexts, authored.ChoiceTexts) &&
+                   string.Equals(actual.IllustrationData, authored.IllustrationData, StringComparison.Ordinal) &&
+                   string.Equals(actual.Representation, authored.Representation, StringComparison.Ordinal) &&
+                   string.Equals(actual.HintLevel1, authored.HintLevel1, StringComparison.Ordinal) &&
+                   string.Equals(actual.HintLevel2, authored.HintLevel2, StringComparison.Ordinal) &&
+                   actual.DifficultyFit.Equals(authored.DifficultyFit);
+        }
+
+        private static bool SequenceEqualNullable<T>(IList<T> left, IList<T> right)
+        {
+            if (ReferenceEquals(left, right)) return true;
+            if (left == null || right == null || left.Count != right.Count) return false;
+            var comparer = EqualityComparer<T>.Default;
+            for (var i = 0; i < left.Count; i++)
+                if (!comparer.Equals(left[i], right[i])) return false;
+            return true;
         }
 
         private static string DeterministicAuthoredRuntimeQuestionId(string sessionId, string contentQuestionId)

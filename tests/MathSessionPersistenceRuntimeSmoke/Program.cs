@@ -48,6 +48,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestTargetedCorruptOpenQuestionReplaysAuthoredOrdinal(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedGeneratedOrdinalSelfHealsWithoutOpenQuestion(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedSemanticOpenQuestionOrdinalMismatchSelfHeals(root, schemaPath, templatePath, lessonCatalogPath, questionBankPath);
+                TestTargetedTamperedAuthoredCacheIsDiscarded(root, schemaPath, templatePath, lessonCatalogPath);
                 TestExpandedTargetedPoolSelectsDurableThree(root, schemaPath, templatePath, lessonCatalogPath, questionBankPath);
                 TestTargetedSelectedSetSurvivesCommitFailure(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedConcurrentCoordinatorsCannotDuplicateOrdinal(root, schemaPath, templatePath, lessonCatalogPath);
@@ -889,6 +890,70 @@ VALUES(@id,@session,@child,' ','','blank-pack-question','LEGACY_PACK_SKILL','mat
                   lesson.PracticeSets.Medium.Contains(medium.ContentQuestionId),
                     "targeted_semantic_ordinal_resume_replays_medium_before_application");
                 resumed.Abort("targeted_semantic_ordinal_cleanup");
+            }
+        }
+
+        private static void TestTargetedTamperedAuthoredCacheIsDiscarded(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.Lessons.First(x =>
+                (x.PrerequisiteSkills == null || x.PrerequisiteSkills.Count == 0) &&
+                x.PracticeSets != null && x.PracticeSets.Basic.Count >= 1 &&
+                x.PracticeSets.Medium.Count >= 1 && x.PracticeSets.Application.Count >= 1);
+            var database = NewDatabase(Path.Combine(root, "targeted-tampered-authored-cache.db"), schemaPath);
+            string sessionId;
+            IList<string> selected;
+            string canonicalMediumQuestionId;
+            string canonicalMediumPrompt;
+            string canonicalMediumAnswer;
+
+            using (var first = new MathSessionCoordinator(database, templatePath, "LOW", 8125, lesson.Id))
+            {
+                var start = first.Start("Bé targeted tampered cache");
+                sessionId = start.SessionId;
+                selected = start.SelectedContentQuestionIds.ToList();
+                var basic = first.NextQuestion();
+                first.SubmitAnswerAt(basic.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700);
+                var medium = first.NextQuestion();
+                canonicalMediumQuestionId = medium.QuestionId;
+                canonicalMediumPrompt = medium.PromptVi;
+                canonicalMediumAnswer = medium.CorrectAnswerDisplay;
+                A(medium.ContentQuestionId == selected[1],
+                    "targeted_tampered_cache_fixture_opens_selected_medium");
+                first.Suspend("targeted_tampered_cache_fixture");
+            }
+
+            var cachedJson = ScalarText(database,
+                "SELECT current_question_json FROM math_session_runtime WHERE session_id='" + sessionId + "';");
+            var tampered = Json.Deserialize<MathQuestion>(cachedJson);
+            tampered.PromptVi = canonicalMediumPrompt + " [TAMPERED]";
+            tampered.CorrectAnswer = tampered.CorrectAnswer + 111;
+            tampered.CorrectAnswerText = "__tampered_answer__";
+            tampered.AcceptedAnswers = new[] { "__tampered_answer__" };
+            tampered.ExpectedUnit = "__tampered_unit__";
+            tampered.AcceptedUnits = new[] { "__tampered_unit__" };
+            Exec(database,
+                "UPDATE math_session_runtime SET current_question_json=@question WHERE session_id=@session;",
+                "@question", Json.Serialize(tampered), "@session", sessionId);
+
+            using (var resumed = new MathSessionCoordinator(database, templatePath, "NORMAL", 999999, lesson.Id))
+            {
+                var start = resumed.Start("Bé targeted tampered cache");
+                A(start.ResumedExistingSession && start.CompletedQuestionCount == 1 &&
+                  start.DiscardedCorruptOpenQuestion && !start.RestoredOpenQuestion,
+                    "targeted_tampered_cache_is_discarded_instead_of_trusted");
+                A(start.SelectedContentQuestionIds.SequenceEqual(selected),
+                    "targeted_tampered_cache_preserves_selected_set");
+                var medium = resumed.NextQuestion();
+                A(medium != null && medium.ContentQuestionId == selected[1] &&
+                  medium.QuestionId == canonicalMediumQuestionId && medium.PromptVi == canonicalMediumPrompt &&
+                  medium.CorrectAnswerDisplay == canonicalMediumAnswer,
+                    "targeted_tampered_cache_replays_canonical_medium_contract");
+                resumed.Abort("targeted_tampered_cache_cleanup");
             }
         }
 
