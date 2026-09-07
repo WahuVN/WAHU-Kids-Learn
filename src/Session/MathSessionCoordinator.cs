@@ -972,6 +972,17 @@ namespace WAHU.Session
                     if (string.Equals(runtime.PackId, PackId, StringComparison.Ordinal) &&
                         string.Equals(runtime.PackVersion, PackVersion, StringComparison.Ordinal))
                     {
+                        var invalidLessonCount = string.Equals(runtime.SessionMode, "lesson", StringComparison.Ordinal) &&
+                            runtime.TargetQuestionCount != TargetedLessonQuestionCount;
+                        var invalidAdaptiveTarget = string.Equals(runtime.SessionMode, "adaptive", StringComparison.Ordinal) &&
+                            !string.IsNullOrWhiteSpace(runtime.TargetLessonId);
+                        if (invalidLessonCount || invalidAdaptiveTarget)
+                        {
+                            if (!reconciledSessionIds.Add(runtime.SessionId))
+                                throw new InvalidOperationException("Không thể hòa giải phiên Toán đang lưu với contract bài học hiện tại.");
+                            if (_runtime.RecoverCorruptRuntimeSession(_profile.ChildId, runtime.SessionId)) recoveredCount++;
+                            continue;
+                        }
                         recoveredCount += _runtime.RecoverDuplicateActiveMathSessions(_profile.ChildId, runtime.SessionId);
                         return runtime;
                     }
