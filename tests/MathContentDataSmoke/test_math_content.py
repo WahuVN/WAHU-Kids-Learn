@@ -700,6 +700,25 @@ class MathContentDataSmoke(unittest.TestCase):
         self.assertEqual(402, len(normalized))
         self.assertEqual(402, len(set(normalized)))
 
+    def test_expanded_component_term_distractors_have_structured_diagnoses(self):
+        target_skills = {
+            "ADD_COMPONENTS_RECOGNIZE", "SUB_COMPONENTS_RECOGNIZE",
+            "MULTIPLICATION_COMPONENTS", "DIVISION_COMPONENTS",
+        }
+        checked = 0
+        for item in self.questions:
+            if item["skill_id"] not in target_skills or int(item["id"][-2:]) < 4:
+                continue
+            for choice in item.get("choices", []):
+                if choice["id"] == item["correct_choice_id"]:
+                    continue
+                reason = validator.structured_choice_reason(item["skill_id"], item["prompt_vi"], choice["text"])
+                with self.subTest(item=item["id"], choice=choice["text"]):
+                    self.assertIsNotNone(reason)
+                    self.assertIn(reason.casefold(), choice["rationale_vi"].casefold())
+                checked += 1
+        self.assertEqual(36, checked)
+
     def test_expanded_shape_reasoning_distractors_have_structured_diagnoses(self):
         target_skills = {"SPHERE_RECOGNIZE", "THREE_COLLINEAR_POINTS", "FOLD_CUT_COMPOSE_SHAPES"}
         checked = 0

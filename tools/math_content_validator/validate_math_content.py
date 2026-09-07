@@ -132,7 +132,66 @@ INTERNAL_CHILD_VOCAB_RE = re.compile(
 )
 
 
+def component_choice_reason(skill: str, prompt: str, choice_text: str) -> str | None:
+    specs = {
+        "ADD_COMPONENTS_RECOGNIZE": (r"(\d+)\s*\+\s*(\d+)\s*=\s*(\d+)", ("số hạng", "số hạng", "tổng")),
+        "SUB_COMPONENTS_RECOGNIZE": (r"(\d+)\s*-\s*(\d+)\s*=\s*(\d+)", ("số bị trừ", "số trừ", "hiệu")),
+        "MULTIPLICATION_COMPONENTS": (r"(\d+)\s*×\s*(\d+)\s*=\s*(\d+)", ("thừa số", "thừa số", "tích")),
+        "DIVISION_COMPONENTS": (r"(\d+)\s*:\s*(\d+)\s*=\s*(\d+)", ("số bị chia", "số chia", "thương")),
+    }
+    spec = specs.get(skill)
+    if spec is None:
+        return None
+    match = re.search(spec[0], prompt)
+    if not match:
+        return None
+    values = tuple(int(value) for value in match.groups())
+    roles = spec[1]
+    value_roles = {value: role for value, role in zip(values, roles)}
+    equation = match.group(0)
+    label = choice_text.strip().casefold().rstrip(".")
+
+    named_number = re.search(r"số\s+(\d+)\s+(?:mang tên gì|được gọi là gì)", prompt.casefold())
+    if named_number and not re.search(r"\d", label):
+        number = int(named_number.group(1))
+        expected = value_roles.get(number)
+        if expected and label != expected:
+            return f"Trong {equation}, số {number} là {expected}, không phải {choice_text.strip()}."
+
+    pair = re.fullmatch(r"(\d+)\s+là\s+([^,]+),\s*(\d+)\s+là\s+(.+)", label)
+    if pair:
+        for number_text, stated in ((pair.group(1), pair.group(2)), (pair.group(3), pair.group(4))):
+            number = int(number_text)
+            expected = value_roles.get(number)
+            stated = stated.strip()
+            if expected and stated != expected:
+                return f"Trong {equation}, {number} là {expected}, không phải {stated}."
+
+    target_pair = re.search(r"cho\s+(\d+)\s+và\s+(\d+)", prompt.casefold())
+    if target_pair and not re.search(r"\d", label) and " và " in label:
+        first_role, second_role = (part.strip() for part in label.split(" và ", 1))
+        for number, stated in ((int(target_pair.group(1)), first_role), (int(target_pair.group(2)), second_role)):
+            expected = value_roles.get(number)
+            if expected and stated != expected:
+                return f"Trong {equation}, {number} là {expected}, không phải {stated}."
+
+    if re.fullmatch(r"\d+", label):
+        chosen = int(label)
+        target_role = next((role for role in ("tổng", "hiệu", "tích", "thương") if role in prompt.casefold()), None)
+        if target_role:
+            expected_value = next((value for value, role in zip(values, roles) if role == target_role), None)
+            if expected_value is not None and chosen != expected_value:
+                chosen_role = value_roles.get(chosen)
+                if chosen_role:
+                    return f"Trong {equation}, {chosen} là {chosen_role}; {target_role} là {expected_value}."
+                return f"Trong {equation}, {target_role} là {expected_value}; {chosen} không phải kết quả của phép tính này."
+    return None
+
+
 def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str | None:
+    component_reason = component_choice_reason(skill, prompt, choice_text)
+    if component_reason:
+        return component_reason
     if skill == "NUM_EXPANDED_FORM_HTO":
         prompt_numbers = [int(x) for x in re.findall(r"\d+", prompt)]
         if not prompt_numbers:

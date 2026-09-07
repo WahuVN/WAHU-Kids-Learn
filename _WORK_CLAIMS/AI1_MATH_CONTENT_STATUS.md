@@ -149,7 +149,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - **24 câu cộng/trừ viết** khớp chính xác số lượt nhớ/mượn theo skill contract;
 - **166 phương trình số instructional** đang được kiểm bằng arithmetic parser, hiện **0 sai**; detector có regression cho cả phép cộng chuỗi và phép chia dùng dấu `:`.
 
-Latest runtime result: **49/49 PASS**; pool-6 regression **8/8 PASS**; full `MathContentDataSmoke` **64/64 PASS**; clean rebuild real 402-bank persistence/session smoke **289 assertions PASS**.
+Latest runtime result: **49/49 PASS**; pool-6 regression **8/8 PASS**; full `MathContentDataSmoke` **65/65 PASS**; clean rebuild real 402-bank persistence/session smoke **289 assertions PASS**.
 
 ## Commits / waves
 
@@ -250,13 +250,23 @@ Latest runtime result: **49/49 PASS**; pool-6 regression **8/8 PASS**; full `Mat
 - Kết quả: **64/64 content tests PASS**, validator 0 errors.
 - Question-bank SHA mới: `F3B6952594AF484EB2E33BEF50B186DAD474DDF0B03FE5C72B2899C36CC76858`.
 
+## P1 quality wave — semantic component-term distractor parser
+
+- Bốn skill `ADD_COMPONENTS_RECOGNIZE`, `SUB_COMPONENTS_RECOGNIZE`, `MULTIPLICATION_COMPONENTS`, `DIVISION_COMPONENTS` trước đây dựa nhiều vào wording-specific rule/fallback.
+- Generator + validator nay dùng chung parser phương trình để map số → vai trò (`số hạng/tổng`, `số bị trừ/số trừ/hiệu`, `thừa số/tích`, `số bị chia/số chia/thương`) và chẩn đoán lựa chọn sai theo chính phương trình.
+- Composer giữ đồng thời **structured diagnosis + định nghĩa thuật ngữ sai**, không bỏ contract giải thích term.
+- Regression khóa **36/36** distractor `_04/_05/_06`; parser còn cover thêm các câu component cũ có cùng semantics.
+- Structured distractors tăng **414 → 465**; whole-bank fallback classifier giảm **81 → 60**.
+- Kết quả: **65/65 content tests PASS**, validator 0 errors; max rationale vẫn **300 ký tự**.
+- Question-bank SHA mới: `83F5A8564EBDDCF02D2D97B24573BE8EF2D2EA0C29C3E077227D820FB6BE9030`.
+
 ## Pool-6 runtime publish — COMPLETE
 
 - 201 expansion questions `_04/_05/_06` đã được promote vào production; runtime bank hiện **402 questions**.
 - 67 lesson × 6 câu; mỗi lesson đúng **2 basic + 2 medium + 2 application**; IDs `_01..06` contiguous.
 - Production semantic validator: **402/402 valid, 0 errors**; pool-6 wrapper báo `draft_fallback_rationales=0`.
-- Full content tests hiện **64/64 PASS** sau P1 hardening thêm structured distractor diagnosis cho geometry + mass/time/measurement + shape-reasoning expansions; clean rebuild `MathSessionPersistenceRuntimeSmoke`: **289 assertions PASS** trên real bank.
-- Deterministic regenerate hiện giữ SHA catalog `82204B66...3F9D` và bank `F3B69525...76858`.
+- Full content tests hiện **65/65 PASS** sau P1 hardening thêm semantic parser cho thuật ngữ thành phần phép tính; clean rebuild `MathSessionPersistenceRuntimeSmoke`: **289 assertions PASS** trên real bank.
+- Deterministic regenerate hiện giữ SHA catalog `82204B66...3F9D` và bank `83F5A856...E9030`.
 - Manifest `1.9.0`: **PASS**, 3/3 listed files khớp SHA256 và không thiếu/thừa file pack.
 - Request 009 content handoff `05cdb2a` đã được tiêu thụ; AI1 không còn breadth/replay content blocker.
 

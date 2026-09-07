@@ -2482,17 +2482,17 @@
         {
           "id": "b",
           "text": "tổng",
-          "rationale_vi": "“tổng” chưa đúng. Tổng là kết quả của phép cộng. 23 là một trong hai số được cộng nên là số hạng."
+          "rationale_vi": "“tổng” chưa đúng. Trong 23 + 15 = 38, số 23 là số hạng, không phải tổng. Tổng là kết quả của phép cộng. 23 là một trong hai số được cộng nên là số hạng."
         },
         {
           "id": "c",
           "text": "hiệu",
-          "rationale_vi": "“hiệu” chưa đúng. Hiệu là kết quả của phép trừ. 23 là một trong hai số được cộng nên là số hạng."
+          "rationale_vi": "“hiệu” chưa đúng. Trong 23 + 15 = 38, số 23 là số hạng, không phải hiệu. Hiệu là kết quả của phép trừ. 23 là một trong hai số được cộng nên là số hạng."
         },
         {
           "id": "d",
           "text": "số bị trừ",
-          "rationale_vi": "“số bị trừ” chưa đúng. Số bị trừ là số đứng trước dấu trừ, tức lượng ban đầu bị bớt đi. 23 là một trong hai số được cộng nên là số hạng."
+          "rationale_vi": "“số bị trừ” chưa đúng. Trong 23 + 15 = 38, số 23 là số hạng, không phải số bị trừ. Số bị trừ là số đứng trước dấu trừ, tức lượng ban đầu bị bớt đi. 23 là một trong hai số được cộng nên là số hạng."
         }
       ],
       "correct_choice_id": "a"
@@ -2530,7 +2530,7 @@
         {
           "id": "a",
           "text": "số hạng",
-          "rationale_vi": "“số hạng” chưa đúng. Số hạng là số được đem cộng trong một phép cộng. Kết quả của phép cộng gọi là tổng."
+          "rationale_vi": "“số hạng” chưa đúng. Trong 41 + 8 = 49, số 49 là tổng, không phải số hạng. Số hạng là số được đem cộng trong một phép cộng. Kết quả của phép cộng gọi là tổng."
         },
         {
           "id": "b",
@@ -2540,12 +2540,12 @@
         {
           "id": "c",
           "text": "số trừ",
-          "rationale_vi": "“số trừ” chưa đúng. Số trừ là lượng được bớt khỏi số bị trừ. Kết quả của phép cộng gọi là tổng."
+          "rationale_vi": "“số trừ” chưa đúng. Trong 41 + 8 = 49, số 49 là tổng, không phải số trừ. Số trừ là lượng được bớt khỏi số bị trừ. Kết quả của phép cộng gọi là tổng."
         },
         {
           "id": "d",
           "text": "thương",
-          "rationale_vi": "“thương” chưa đúng. Thương là kết quả của phép chia. Kết quả của phép cộng gọi là tổng."
+          "rationale_vi": "“thương” chưa đúng. Trong 41 + 8 = 49, số 49 là tổng, không phải thương. Thương là kết quả của phép chia. Kết quả của phép cộng gọi là tổng."
         }
       ],
       "correct_choice_id": "b"
@@ -2636,17 +2636,17 @@
         {
           "id": "a",
           "text": "tổng",
-          "rationale_vi": "“tổng” chưa đúng. Tổng là kết quả của phép cộng. 34 và 22 là hai số được cộng nên đều là số hạng."
+          "rationale_vi": "“tổng” chưa đúng. Trong 34 + 22 = 56, số 22 là số hạng, không phải tổng. Tổng là kết quả của phép cộng. 34 và 22 là hai số được cộng nên đều là số hạng."
         },
         {
           "id": "b",
           "text": "hiệu",
-          "rationale_vi": "“hiệu” chưa đúng. Hiệu là kết quả của phép trừ. 34 và 22 là hai số được cộng nên đều là số hạng."
+          "rationale_vi": "“hiệu” chưa đúng. Trong 34 + 22 = 56, số 22 là số hạng, không phải hiệu. Hiệu là kết quả của phép trừ. 34 và 22 là hai số được cộng nên đều là số hạng."
         },
         {
           "id": "c",
           "text": "số trừ",
-          "rationale_vi": "“số trừ” chưa đúng. Số trừ là lượng được bớt khỏi số bị trừ. 34 và 22 là hai số được cộng nên đều là số hạng."
+          "rationale_vi": "“số trừ” chưa đúng. Trong 34 + 22 = 56, số 22 là số hạng, không phải số trừ. Số trừ là lượng được bớt khỏi số bị trừ. 34 và 22 là hai số được cộng nên đều là số hạng."
         },
         {
           "id": "d",
@@ -2694,17 +2694,17 @@
         {
           "id": "b",
           "text": "120",
-          "rationale_vi": "“120” chưa đúng. Dữ kiện dẫn tới “190”. Kết quả của phép cộng được gọi là tổng, nên tổng là 190."
+          "rationale_vi": "“120” chưa đúng. Trong 120 + 70 = 190, 120 là số hạng; tổng là 190. Kết quả của phép cộng được gọi là tổng, nên tổng là 190."
         },
         {
           "id": "c",
           "text": "70",
-          "rationale_vi": "“70” chưa đúng. Dữ kiện dẫn tới “190”. Kết quả của phép cộng được gọi là tổng, nên tổng là 190."
+          "rationale_vi": "“70” chưa đúng. Trong 120 + 70 = 190, 70 là số hạng; tổng là 190. Kết quả của phép cộng được gọi là tổng, nên tổng là 190."
         },
         {
           "id": "d",
           "text": "50",
-          "rationale_vi": "“50” chưa đúng. Dữ kiện dẫn tới “190”. Kết quả của phép cộng được gọi là tổng, nên tổng là 190."
+          "rationale_vi": "“50” chưa đúng. Trong 120 + 70 = 190, tổng là 190; 50 không phải kết quả của phép tính này. Kết quả của phép cộng được gọi là tổng, nên tổng là 190."
         }
       ],
       "correct_choice_id": "a"
@@ -2742,7 +2742,7 @@
         {
           "id": "a",
           "text": "45 là tổng, 30 là hiệu",
-          "rationale_vi": "“45 là tổng, 30 là hiệu” chưa đúng. Dữ kiện dẫn tới “45 là số hạng, 75 là tổng”. 45 là một số được cộng nên là số hạng; 75 là kết quả nên là tổng. Vậy đáp án là 45 là số hạng, 75 là tổng."
+          "rationale_vi": "“45 là tổng, 30 là hiệu” chưa đúng. Trong 45 + 30 = 75, 45 là số hạng, không phải tổng. 45 là một số được cộng nên là số hạng; 75 là kết quả nên là tổng. Vậy đáp án là 45 là số hạng, 75 là tổng."
         },
         {
           "id": "b",
@@ -2752,12 +2752,12 @@
         {
           "id": "c",
           "text": "30 là tổng, 75 là số hạng",
-          "rationale_vi": "“30 là tổng, 75 là số hạng” chưa đúng. Dữ kiện dẫn tới “45 là số hạng, 75 là tổng”. 45 là một số được cộng nên là số hạng; 75 là kết quả nên là tổng. Vậy đáp án là 45 là số hạng, 75 là tổng."
+          "rationale_vi": "“30 là tổng, 75 là số hạng” chưa đúng. Trong 45 + 30 = 75, 30 là số hạng, không phải tổng. 45 là một số được cộng nên là số hạng; 75 là kết quả nên là tổng. Vậy đáp án là 45 là số hạng, 75 là tổng."
         },
         {
           "id": "d",
           "text": "75 là số trừ, 45 là tổng",
-          "rationale_vi": "“75 là số trừ, 45 là tổng” chưa đúng. Dữ kiện dẫn tới “45 là số hạng, 75 là tổng”. 45 là một số được cộng nên là số hạng; 75 là kết quả nên là tổng. Vậy đáp án là 45 là số hạng, 75 là tổng."
+          "rationale_vi": "“75 là số trừ, 45 là tổng” chưa đúng. Trong 45 + 30 = 75, 75 là tổng, không phải số trừ. 45 là một số được cộng nên là số hạng; 75 là kết quả nên là tổng. Vậy đáp án là 45 là số hạng, 75 là tổng."
         }
       ],
       "correct_choice_id": "b"
@@ -2795,12 +2795,12 @@
         {
           "id": "a",
           "text": "số trừ",
-          "rationale_vi": "“số trừ” chưa đúng. Số trừ là lượng được bớt khỏi số bị trừ. 50 là số đứng trước dấu trừ nên là số bị trừ."
+          "rationale_vi": "“số trừ” chưa đúng. Trong 50 - 12 = 38, số 50 là số bị trừ, không phải số trừ. Số trừ là lượng được bớt khỏi số bị trừ. 50 là số đứng trước dấu trừ nên là số bị trừ."
         },
         {
           "id": "b",
           "text": "hiệu",
-          "rationale_vi": "“hiệu” chưa đúng. Hiệu là kết quả của phép trừ. 50 là số đứng trước dấu trừ nên là số bị trừ."
+          "rationale_vi": "“hiệu” chưa đúng. Trong 50 - 12 = 38, số 50 là số bị trừ, không phải hiệu. Hiệu là kết quả của phép trừ. 50 là số đứng trước dấu trừ nên là số bị trừ."
         },
         {
           "id": "c",
@@ -2810,7 +2810,7 @@
         {
           "id": "d",
           "text": "tổng",
-          "rationale_vi": "“tổng” chưa đúng. Tổng là kết quả của phép cộng. 50 là số đứng trước dấu trừ nên là số bị trừ."
+          "rationale_vi": "“tổng” chưa đúng. Trong 50 - 12 = 38, số 50 là số bị trừ, không phải tổng. Tổng là kết quả của phép cộng. 50 là số đứng trước dấu trừ nên là số bị trừ."
         }
       ],
       "correct_choice_id": "c"
@@ -2848,17 +2848,17 @@
         {
           "id": "a",
           "text": "số bị trừ",
-          "rationale_vi": "“số bị trừ” chưa đúng. Số bị trừ là số đứng trước dấu trừ, tức lượng ban đầu bị bớt đi. 20 là lượng được bớt khỏi số bị trừ nên là số trừ."
+          "rationale_vi": "“số bị trừ” chưa đúng. Trong 72 - 20 = 52, số 20 là số trừ, không phải số bị trừ. Số bị trừ là số đứng trước dấu trừ, tức lượng ban đầu bị bớt đi. 20 là lượng được bớt khỏi số bị trừ nên là số trừ."
         },
         {
           "id": "b",
           "text": "hiệu",
-          "rationale_vi": "“hiệu” chưa đúng. Hiệu là kết quả của phép trừ. 20 là lượng được bớt khỏi số bị trừ nên là số trừ."
+          "rationale_vi": "“hiệu” chưa đúng. Trong 72 - 20 = 52, số 20 là số trừ, không phải hiệu. Hiệu là kết quả của phép trừ. 20 là lượng được bớt khỏi số bị trừ nên là số trừ."
         },
         {
           "id": "c",
           "text": "số hạng",
-          "rationale_vi": "“số hạng” chưa đúng. Số hạng là số được đem cộng trong một phép cộng. 20 là lượng được bớt khỏi số bị trừ nên là số trừ."
+          "rationale_vi": "“số hạng” chưa đúng. Trong 72 - 20 = 52, số 20 là số trừ, không phải số hạng. Số hạng là số được đem cộng trong một phép cộng. 20 là lượng được bớt khỏi số bị trừ nên là số trừ."
         },
         {
           "id": "d",
@@ -2954,7 +2954,7 @@
         {
           "id": "a",
           "text": "số trừ",
-          "rationale_vi": "“số trừ” chưa đúng. Số trừ là lượng được bớt khỏi số bị trừ. Số đứng trước dấu trừ là số bị trừ."
+          "rationale_vi": "“số trừ” chưa đúng. Trong 83 - 21 = 62, số 83 là số bị trừ, không phải số trừ. Số trừ là lượng được bớt khỏi số bị trừ. Số đứng trước dấu trừ là số bị trừ."
         },
         {
           "id": "b",
@@ -2964,12 +2964,12 @@
         {
           "id": "c",
           "text": "hiệu",
-          "rationale_vi": "“hiệu” chưa đúng. Hiệu là kết quả của phép trừ. Số đứng trước dấu trừ là số bị trừ."
+          "rationale_vi": "“hiệu” chưa đúng. Trong 83 - 21 = 62, số 83 là số bị trừ, không phải hiệu. Hiệu là kết quả của phép trừ. Số đứng trước dấu trừ là số bị trừ."
         },
         {
           "id": "d",
           "text": "tổng",
-          "rationale_vi": "“tổng” chưa đúng. Tổng là kết quả của phép cộng. Số đứng trước dấu trừ là số bị trừ."
+          "rationale_vi": "“tổng” chưa đúng. Trong 83 - 21 = 62, số 83 là số bị trừ, không phải tổng. Tổng là kết quả của phép cộng. Số đứng trước dấu trừ là số bị trừ."
         }
       ],
       "correct_choice_id": "b"
@@ -3007,12 +3007,12 @@
         {
           "id": "a",
           "text": "số bị trừ",
-          "rationale_vi": "“số bị trừ” chưa đúng. Số bị trừ là số đứng trước dấu trừ, tức lượng ban đầu bị bớt đi. Kết quả của phép trừ được gọi là hiệu."
+          "rationale_vi": "“số bị trừ” chưa đúng. Trong 96 - 40 = 56, số 56 là hiệu, không phải số bị trừ. Số bị trừ là số đứng trước dấu trừ, tức lượng ban đầu bị bớt đi. Kết quả của phép trừ được gọi là hiệu."
         },
         {
           "id": "b",
           "text": "số trừ",
-          "rationale_vi": "“số trừ” chưa đúng. Số trừ là lượng được bớt khỏi số bị trừ. Kết quả của phép trừ được gọi là hiệu."
+          "rationale_vi": "“số trừ” chưa đúng. Trong 96 - 40 = 56, số 56 là hiệu, không phải số trừ. Số trừ là lượng được bớt khỏi số bị trừ. Kết quả của phép trừ được gọi là hiệu."
         },
         {
           "id": "c",
@@ -3022,7 +3022,7 @@
         {
           "id": "d",
           "text": "số hạng",
-          "rationale_vi": "“số hạng” chưa đúng. Số hạng là số được đem cộng trong một phép cộng. Kết quả của phép trừ được gọi là hiệu."
+          "rationale_vi": "“số hạng” chưa đúng. Trong 96 - 40 = 56, số 56 là hiệu, không phải số hạng. Số hạng là số được đem cộng trong một phép cộng. Kết quả của phép trừ được gọi là hiệu."
         }
       ],
       "correct_choice_id": "c"
@@ -3060,17 +3060,17 @@
         {
           "id": "a",
           "text": "số trừ và số bị trừ",
-          "rationale_vi": "“số trừ và số bị trừ” chưa đúng. Dữ kiện dẫn tới “số bị trừ và số trừ”. 150 là lượng ban đầu đứng trước dấu trừ; 20 là lượng được bớt đi. Vậy đáp án là số bị trừ và số trừ."
+          "rationale_vi": "“số trừ và số bị trừ” chưa đúng. Trong 150 - 20 = 130, 150 là số bị trừ, không phải số trừ. 150 là lượng ban đầu đứng trước dấu trừ; 20 là lượng được bớt đi. Vậy đáp án là số bị trừ và số trừ."
         },
         {
           "id": "b",
           "text": "hiệu và số trừ",
-          "rationale_vi": "“hiệu và số trừ” chưa đúng. Dữ kiện dẫn tới “số bị trừ và số trừ”. 150 là lượng ban đầu đứng trước dấu trừ; 20 là lượng được bớt đi. Vậy đáp án là số bị trừ và số trừ."
+          "rationale_vi": "“hiệu và số trừ” chưa đúng. Trong 150 - 20 = 130, 150 là số bị trừ, không phải hiệu. 150 là lượng ban đầu đứng trước dấu trừ; 20 là lượng được bớt đi. Vậy đáp án là số bị trừ và số trừ."
         },
         {
           "id": "c",
           "text": "số hạng và tổng",
-          "rationale_vi": "“số hạng và tổng” chưa đúng. Dữ kiện dẫn tới “số bị trừ và số trừ”. 150 là lượng ban đầu đứng trước dấu trừ; 20 là lượng được bớt đi. Vậy đáp án là số bị trừ và số trừ."
+          "rationale_vi": "“số hạng và tổng” chưa đúng. Trong 150 - 20 = 130, 150 là số bị trừ, không phải số hạng. 150 là lượng ban đầu đứng trước dấu trừ; 20 là lượng được bớt đi. Vậy đáp án là số bị trừ và số trừ."
         },
         {
           "id": "d",
@@ -4845,12 +4845,12 @@
         {
           "id": "a",
           "text": "tích",
-          "rationale_vi": "“tích” chưa đúng. Tích là kết quả của phép nhân. 2 là một số được nhân nên là thừa số."
+          "rationale_vi": "“tích” chưa đúng. Trong 2 × 5 = 10, số 2 là thừa số, không phải tích. Tích là kết quả của phép nhân. 2 là một số được nhân nên là thừa số."
         },
         {
           "id": "b",
           "text": "thương",
-          "rationale_vi": "“thương” chưa đúng. Thương là kết quả của phép chia. 2 là một số được nhân nên là thừa số."
+          "rationale_vi": "“thương” chưa đúng. Trong 2 × 5 = 10, số 2 là thừa số, không phải thương. Thương là kết quả của phép chia. 2 là một số được nhân nên là thừa số."
         },
         {
           "id": "c",
@@ -4860,7 +4860,7 @@
         {
           "id": "d",
           "text": "số bị chia",
-          "rationale_vi": "“số bị chia” chưa đúng. Số bị chia là lượng được đem chia. 2 là một số được nhân nên là thừa số."
+          "rationale_vi": "“số bị chia” chưa đúng. Trong 2 × 5 = 10, số 2 là thừa số, không phải số bị chia. Số bị chia là lượng được đem chia. 2 là một số được nhân nên là thừa số."
         }
       ],
       "correct_choice_id": "c"
@@ -5004,7 +5004,7 @@
         {
           "id": "a",
           "text": "tích",
-          "rationale_vi": "“tích” chưa đúng. Tích là kết quả của phép nhân. Hai số 5 và 4 được nhân với nhau nên đều là thừa số."
+          "rationale_vi": "“tích” chưa đúng. Trong 5 × 4 = 20, số 4 là thừa số, không phải tích. Tích là kết quả của phép nhân. Hai số 5 và 4 được nhân với nhau nên đều là thừa số."
         },
         {
           "id": "b",
@@ -5014,12 +5014,12 @@
         {
           "id": "c",
           "text": "thương",
-          "rationale_vi": "“thương” chưa đúng. Thương là kết quả của phép chia. Hai số 5 và 4 được nhân với nhau nên đều là thừa số."
+          "rationale_vi": "“thương” chưa đúng. Trong 5 × 4 = 20, số 4 là thừa số, không phải thương. Thương là kết quả của phép chia. Hai số 5 và 4 được nhân với nhau nên đều là thừa số."
         },
         {
           "id": "d",
           "text": "số chia",
-          "rationale_vi": "“số chia” chưa đúng. Số chia là số dùng để chia số bị chia. Hai số 5 và 4 được nhân với nhau nên đều là thừa số."
+          "rationale_vi": "“số chia” chưa đúng. Trong 5 × 4 = 20, số 4 là thừa số, không phải số chia. Số chia là số dùng để chia số bị chia. Hai số 5 và 4 được nhân với nhau nên đều là thừa số."
         }
       ],
       "correct_choice_id": "b"
@@ -5057,12 +5057,12 @@
         {
           "id": "a",
           "text": "2",
-          "rationale_vi": "“2” chưa đúng. Dữ kiện dẫn tới “18”. Kết quả của phép nhân được gọi là tích, nên 18 là tích."
+          "rationale_vi": "“2” chưa đúng. Trong 2 × 9 = 18, 2 là thừa số; tích là 18. Kết quả của phép nhân được gọi là tích, nên 18 là tích."
         },
         {
           "id": "b",
           "text": "9",
-          "rationale_vi": "“9” chưa đúng. Dữ kiện dẫn tới “18”. Kết quả của phép nhân được gọi là tích, nên 18 là tích."
+          "rationale_vi": "“9” chưa đúng. Trong 2 × 9 = 18, 9 là thừa số; tích là 18. Kết quả của phép nhân được gọi là tích, nên 18 là tích."
         },
         {
           "id": "c",
@@ -5072,7 +5072,7 @@
         {
           "id": "d",
           "text": "11",
-          "rationale_vi": "“11” chưa đúng. Dữ kiện dẫn tới “18”. Kết quả của phép nhân được gọi là tích, nên 18 là tích."
+          "rationale_vi": "“11” chưa đúng. Trong 2 × 9 = 18, tích là 18; 11 không phải kết quả của phép tính này. Kết quả của phép nhân được gọi là tích, nên 18 là tích."
         }
       ],
       "correct_choice_id": "c"
@@ -5110,17 +5110,17 @@
         {
           "id": "a",
           "text": "25 là thừa số, 5 là tổng",
-          "rationale_vi": "“25 là thừa số, 5 là tổng” chưa đúng. Dữ kiện dẫn tới “5 là thừa số, 25 là tích”. Hai số 5 là các thừa số; kết quả 25 là tích. Vậy đáp án là 5 là thừa số, 25 là tích."
+          "rationale_vi": "“25 là thừa số, 5 là tổng” chưa đúng. Trong 5 × 5 = 25, 25 là tích, không phải thừa số. Hai số 5 là các thừa số; kết quả 25 là tích. Vậy đáp án là 5 là thừa số, 25 là tích."
         },
         {
           "id": "b",
           "text": "5 là tích, 25 là thừa số",
-          "rationale_vi": "“5 là tích, 25 là thừa số” chưa đúng. Dữ kiện dẫn tới “5 là thừa số, 25 là tích”. Hai số 5 là các thừa số; kết quả 25 là tích. Vậy đáp án là 5 là thừa số, 25 là tích."
+          "rationale_vi": "“5 là tích, 25 là thừa số” chưa đúng. Trong 5 × 5 = 25, 5 là thừa số, không phải tích. Hai số 5 là các thừa số; kết quả 25 là tích. Vậy đáp án là 5 là thừa số, 25 là tích."
         },
         {
           "id": "c",
           "text": "25 là thương, 5 là số chia",
-          "rationale_vi": "“25 là thương, 5 là số chia” chưa đúng. Dữ kiện dẫn tới “5 là thừa số, 25 là tích”. Hai số 5 là các thừa số; kết quả 25 là tích. Vậy đáp án là 5 là thừa số, 25 là tích."
+          "rationale_vi": "“25 là thương, 5 là số chia” chưa đúng. Trong 5 × 5 = 25, 25 là tích, không phải thương. Hai số 5 là các thừa số; kết quả 25 là tích. Vậy đáp án là 5 là thừa số, 25 là tích."
         },
         {
           "id": "d",
@@ -5322,17 +5322,17 @@
         {
           "id": "a",
           "text": "số bị chia",
-          "rationale_vi": "“số bị chia” chưa đúng. Số bị chia là lượng được đem chia. 2 là số dùng để chia 18 nên là số chia."
+          "rationale_vi": "“số bị chia” chưa đúng. Trong 18 : 2 = 9, số 2 là số chia, không phải số bị chia. Số bị chia là lượng được đem chia. 2 là số dùng để chia 18 nên là số chia."
         },
         {
           "id": "b",
           "text": "thương",
-          "rationale_vi": "“thương” chưa đúng. Thương là kết quả của phép chia. 2 là số dùng để chia 18 nên là số chia."
+          "rationale_vi": "“thương” chưa đúng. Trong 18 : 2 = 9, số 2 là số chia, không phải thương. Thương là kết quả của phép chia. 2 là số dùng để chia 18 nên là số chia."
         },
         {
           "id": "c",
           "text": "tích",
-          "rationale_vi": "“tích” chưa đúng. Tích là kết quả của phép nhân. 2 là số dùng để chia 18 nên là số chia."
+          "rationale_vi": "“tích” chưa đúng. Trong 18 : 2 = 9, số 2 là số chia, không phải tích. Tích là kết quả của phép nhân. 2 là số dùng để chia 18 nên là số chia."
         },
         {
           "id": "d",
@@ -5380,17 +5380,17 @@
         {
           "id": "b",
           "text": "35",
-          "rationale_vi": "“35” chưa đúng. Dữ kiện dẫn tới “7”. Kết quả của phép chia được gọi là thương, nên thương là 7."
+          "rationale_vi": "“35” chưa đúng. Trong 35 : 5 = 7, 35 là số bị chia; thương là 7. Kết quả của phép chia được gọi là thương, nên thương là 7."
         },
         {
           "id": "c",
           "text": "5",
-          "rationale_vi": "“5” chưa đúng. Dữ kiện dẫn tới “7”. Kết quả của phép chia được gọi là thương, nên thương là 7."
+          "rationale_vi": "“5” chưa đúng. Trong 35 : 5 = 7, 5 là số chia; thương là 7. Kết quả của phép chia được gọi là thương, nên thương là 7."
         },
         {
           "id": "d",
           "text": "30",
-          "rationale_vi": "“30” chưa đúng. Dữ kiện dẫn tới “7”. Kết quả của phép chia được gọi là thương, nên thương là 7."
+          "rationale_vi": "“30” chưa đúng. Trong 35 : 5 = 7, thương là 7; 30 không phải kết quả của phép tính này. Kết quả của phép chia được gọi là thương, nên thương là 7."
         }
       ],
       "correct_choice_id": "a"
@@ -5428,7 +5428,7 @@
         {
           "id": "a",
           "text": "số chia và thương",
-          "rationale_vi": "“số chia và thương” chưa đúng. Dữ kiện dẫn tới “số bị chia và thương”. 40 là lượng được đem chia nên là số bị chia; 8 là kết quả nên là thương. Vậy đáp án là số bị chia và thương."
+          "rationale_vi": "“số chia và thương” chưa đúng. Trong 40 : 5 = 8, 40 là số bị chia, không phải số chia. 40 là lượng được đem chia nên là số bị chia; 8 là kết quả nên là thương. Vậy đáp án là số bị chia và thương."
         },
         {
           "id": "b",
@@ -5438,12 +5438,12 @@
         {
           "id": "c",
           "text": "thương và số bị chia",
-          "rationale_vi": "“thương và số bị chia” chưa đúng. Dữ kiện dẫn tới “số bị chia và thương”. 40 là lượng được đem chia nên là số bị chia; 8 là kết quả nên là thương. Vậy đáp án là số bị chia và thương."
+          "rationale_vi": "“thương và số bị chia” chưa đúng. Trong 40 : 5 = 8, 40 là số bị chia, không phải thương. 40 là lượng được đem chia nên là số bị chia; 8 là kết quả nên là thương. Vậy đáp án là số bị chia và thương."
         },
         {
           "id": "d",
           "text": "số hạng và tổng",
-          "rationale_vi": "“số hạng và tổng” chưa đúng. Dữ kiện dẫn tới “số bị chia và thương”. 40 là lượng được đem chia nên là số bị chia; 8 là kết quả nên là thương. Vậy đáp án là số bị chia và thương."
+          "rationale_vi": "“số hạng và tổng” chưa đúng. Trong 40 : 5 = 8, 40 là số bị chia, không phải số hạng. 40 là lượng được đem chia nên là số bị chia; 8 là kết quả nên là thương. Vậy đáp án là số bị chia và thương."
         }
       ],
       "correct_choice_id": "b"
