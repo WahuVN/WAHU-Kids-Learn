@@ -496,6 +496,38 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 resumed.Abort("legacy_zero_attempt_runtime_cleanup");
             }
 
+            var partialDatabase = NewDatabase(Path.Combine(root, "runtime-pack-partial.db"), schemaPath);
+            string partialSessionId;
+            using (var first = new MathSessionCoordinator(partialDatabase, templatePath, "LOW", 8086, 2))
+            {
+                var started = first.Start("Bé partial pack identity");
+                partialSessionId = started.SessionId;
+                first.Suspend("partial_pack_identity_fixture");
+            }
+            var partialRejected = false;
+            try
+            {
+                Exec(partialDatabase,
+                    "UPDATE math_session_runtime SET pack_version=NULL WHERE session_id=@session;",
+                    "@session", partialSessionId);
+            }
+            catch (System.Data.SQLite.SQLiteException)
+            {
+                partialRejected = true;
+            }
+            A(partialRejected, "partial_pack_identity_is_rejected_by_v5_database_guard");
+            A(Count(partialDatabase,
+                "SELECT count(*) FROM math_session_runtime WHERE session_id='" + partialSessionId +
+                "' AND pack_id='" + MathSessionCoordinator.PackId + "' AND pack_version='" + MathSessionCoordinator.PackVersion + "';") == 1,
+                "partial_pack_identity_rejected_write_leaves_complete_pair_intact");
+            using (var resumedPartial = new MathSessionCoordinator(partialDatabase, templatePath, "NORMAL", 8087, 2))
+            {
+                var started = resumedPartial.Start("Bé partial pack identity");
+                A(started.ResumedExistingSession && started.SessionId == partialSessionId && started.RecoveredDanglingSessions == 0,
+                    "partial_pack_identity_rejected_write_keeps_session_resumable");
+                resumedPartial.Abort("partial_pack_identity_cleanup");
+            }
+
             var mismatchDatabase = NewDatabase(Path.Combine(root, "runtime-pack-mismatch.db"), schemaPath);
             var sessions = new LearnerSessionService(mismatchDatabase);
             var profile = sessions.EnsurePrimaryChild("Bé legacy pack mismatch");
