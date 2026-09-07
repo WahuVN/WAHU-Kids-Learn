@@ -540,6 +540,54 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
             if nums and nums[0] != 2:
                 return f"Một đường cắt thẳng từ một góc đến góc đối diện chia hình vuông thành đúng 2 mảnh; chọn {nums[0]} là sai số mảnh."
 
+    if skill == "ADD_COMPONENTS_RECOGNIZE" and "hai số hạng" in prompt.casefold():
+        match = re.search(r"(\d+)\s*\+\s*(\d+)\s*=\s*(\d+)", prompt)
+        chosen = [int(x) for x in re.findall(r"\d+", choice_text)]
+        if match and len(chosen) >= 2:
+            left, right, total = map(int, match.groups())
+            expected = [left, right]
+            if chosen[:2] != expected:
+                notes = []
+                if total in chosen[:2]:
+                    notes.append(f"{total} là tổng, không phải số hạng")
+                missing = [str(x) for x in expected if x not in chosen[:2]]
+                if missing:
+                    notes.append("cặp này thiếu " + " và ".join(missing))
+                return f"Hai số hạng phải là {left} và {right}; “{choice_text}” chưa đúng vì " + "; ".join(notes) + "."
+
+    if skill == "MULTIPLICATION_COMPONENTS" and "hai thừa số" in prompt.casefold():
+        match = re.search(r"(\d+)\s*×\s*(\d+)\s*=\s*(\d+)", prompt)
+        chosen = [int(x) for x in re.findall(r"\d+", choice_text)]
+        if match and len(chosen) >= 2:
+            left, right, product = map(int, match.groups())
+            expected = [left, right]
+            if chosen[:2] != expected:
+                notes = []
+                if product in chosen[:2]:
+                    notes.append(f"{product} là tích, không phải thừa số")
+                missing = [str(x) for x in expected if x not in chosen[:2]]
+                if missing:
+                    notes.append("cặp này thiếu " + " và ".join(missing))
+                return f"Hai thừa số phải là {left} và {right}; “{choice_text}” chưa đúng vì " + "; ".join(notes) + "."
+
+    if skill == "SUB_COMPONENTS_RECOGNIZE" and "bạn bình gọi 90" in prompt.casefold():
+        label = choice_text.strip().casefold()
+        reasons = {
+            "số trừ và hiệu": "Trong 90 - 35 = 55, 90 đứng trước dấu trừ nên là số bị trừ chứ không phải số trừ; 55 là hiệu.",
+            "hiệu và số bị trừ": "Cặp này đã đảo vai trò: 90 không phải hiệu và 55 cũng không phải số bị trừ; 90 là số bị trừ, 55 là hiệu.",
+            "số bị trừ và số trừ": "Tên của 90 đã đúng là số bị trừ, nhưng 55 là kết quả của phép trừ nên phải gọi là hiệu, không phải số trừ.",
+        }
+        if label in reasons: return reasons[label]
+
+    if skill == "DIVISION_COMPONENTS" and "bạn lan nói trong 18" in prompt.casefold():
+        label = choice_text.strip().casefold()
+        reasons = {
+            "số chia và thương": "Trong 18 : 2 = 9, 18 là lượng được đem chia nên là số bị chia chứ không phải số chia; 9 là thương.",
+            "thương và số bị chia": "Cặp này đã đảo vai trò: 18 không phải thương và 9 không phải số bị chia; 18 là số bị chia, 9 là thương.",
+            "số bị chia và số chia": "Tên của 18 đã đúng là số bị chia, nhưng 9 là kết quả của phép chia nên phải gọi là thương, không phải số chia.",
+        }
+        if label in reasons: return reasons[label]
+
     return None
 
 

@@ -1377,12 +1377,12 @@
         {
           "id": "a",
           "text": "230 và 350",
-          "rationale_vi": "“230 và 350” chưa đúng. Hai số được cộng với nhau là 120 và 230 nên đó là hai số hạng; 350 là tổng."
+          "rationale_vi": "“230 và 350” chưa đúng. Hai số hạng phải là 120 và 230; “230 và 350” chưa đúng vì 350 là tổng, không phải số hạng; cặp này thiếu 120. Hai số được cộng với nhau là 120 và 230 nên đó là hai số hạng; 350 là tổng."
         },
         {
           "id": "b",
           "text": "120 và 350",
-          "rationale_vi": "“120 và 350” chưa đúng. Hai số được cộng với nhau là 120 và 230 nên đó là hai số hạng; 350 là tổng."
+          "rationale_vi": "“120 và 350” chưa đúng. Hai số hạng phải là 120 và 230; “120 và 350” chưa đúng vì 350 là tổng, không phải số hạng; cặp này thiếu 230. Hai số được cộng với nhau là 120 và 230 nên đó là hai số hạng; 350 là tổng."
         },
         {
           "id": "c",
@@ -1392,7 +1392,7 @@
         {
           "id": "d",
           "text": "350 và 350",
-          "rationale_vi": "“350 và 350” chưa đúng. Hai số được cộng với nhau là 120 và 230 nên đó là hai số hạng; 350 là tổng."
+          "rationale_vi": "“350 và 350” chưa đúng. Hai số hạng phải là 120 và 230; “350 và 350” chưa đúng vì 350 là tổng, không phải số hạng; cặp này thiếu 120 và 230. Hai số được cộng với nhau là 120 và 230 nên đó là hai số hạng; 350 là tổng."
         }
       ],
       "correct_choice_id": "c"
@@ -1536,7 +1536,7 @@
         {
           "id": "a",
           "text": "số trừ và hiệu",
-          "rationale_vi": "“số trừ và hiệu” chưa đúng. Trong phép trừ, 90 đứng trước dấu trừ nên là số bị trừ; kết quả 55 là hiệu. Vậy đáp án là số bị trừ và hiệu."
+          "rationale_vi": "“số trừ và hiệu” chưa đúng. Trong 90 - 35 = 55, 90 đứng trước dấu trừ nên là số bị trừ chứ không phải số trừ; 55 là hiệu. Trong phép trừ, 90 đứng trước dấu trừ nên là số bị trừ; kết quả 55 là hiệu. Vậy đáp án là số bị trừ và hiệu."
         },
         {
           "id": "b",
@@ -1546,12 +1546,12 @@
         {
           "id": "c",
           "text": "hiệu và số bị trừ",
-          "rationale_vi": "“hiệu và số bị trừ” chưa đúng. Trong phép trừ, 90 đứng trước dấu trừ nên là số bị trừ; kết quả 55 là hiệu. Vậy đáp án là số bị trừ và hiệu."
+          "rationale_vi": "“hiệu và số bị trừ” chưa đúng. Cặp này đã đảo vai trò: 90 không phải hiệu và 55 cũng không phải số bị trừ; 90 là số bị trừ, 55 là hiệu. Trong phép trừ, 90 đứng trước dấu trừ nên là số bị trừ; kết quả 55 là hiệu. Vậy đáp án là số bị trừ và hiệu."
         },
         {
           "id": "d",
           "text": "số bị trừ và số trừ",
-          "rationale_vi": "“số bị trừ và số trừ” chưa đúng. Trong phép trừ, 90 đứng trước dấu trừ nên là số bị trừ; kết quả 55 là hiệu. Vậy đáp án là số bị trừ và hiệu."
+          "rationale_vi": "“số bị trừ và số trừ” chưa đúng. Tên của 90 đã đúng là số bị trừ, nhưng 55 là kết quả của phép trừ nên phải gọi là hiệu, không phải số trừ. Trong phép trừ, 90 đứng trước dấu trừ nên là số bị trừ; kết quả 55 là hiệu. Vậy đáp án là số bị trừ và hiệu."
         }
       ],
       "correct_choice_id": "b"
@@ -2563,7 +2563,7 @@
         {
           "id": "a",
           "text": "8 và 16",
-          "rationale_vi": "“8 và 16” chưa đúng. Trong phép nhân, hai số được nhân với nhau là thừa số; 2 và 8 là hai thừa số, còn 16 là tích."
+          "rationale_vi": "“8 và 16” chưa đúng. Hai thừa số phải là 2 và 8; “8 và 16” chưa đúng vì 16 là tích, không phải thừa số; cặp này thiếu 2. Trong phép nhân, hai số được nhân với nhau là thừa số; 2 và 8 là hai thừa số, còn 16 là tích."
         },
         {
           "id": "b",
@@ -2573,12 +2573,12 @@
         {
           "id": "c",
           "text": "2 và 16",
-          "rationale_vi": "“2 và 16” chưa đúng. Trong phép nhân, hai số được nhân với nhau là thừa số; 2 và 8 là hai thừa số, còn 16 là tích."
+          "rationale_vi": "“2 và 16” chưa đúng. Hai thừa số phải là 2 và 8; “2 và 16” chưa đúng vì 16 là tích, không phải thừa số; cặp này thiếu 8. Trong phép nhân, hai số được nhân với nhau là thừa số; 2 và 8 là hai thừa số, còn 16 là tích."
         },
         {
           "id": "d",
           "text": "16 và 16",
-          "rationale_vi": "“16 và 16” chưa đúng. Trong phép nhân, hai số được nhân với nhau là thừa số; 2 và 8 là hai thừa số, còn 16 là tích."
+          "rationale_vi": "“16 và 16” chưa đúng. Hai thừa số phải là 2 và 8; “16 và 16” chưa đúng vì 16 là tích, không phải thừa số; cặp này thiếu 2 và 8. Trong phép nhân, hai số được nhân với nhau là thừa số; 2 và 8 là hai thừa số, còn 16 là tích."
         }
       ],
       "correct_choice_id": "b"
@@ -2727,17 +2727,17 @@
         {
           "id": "b",
           "text": "số chia và thương",
-          "rationale_vi": "“số chia và thương” chưa đúng. Trong phép chia, 18 là số bị chia, 2 là số chia và kết quả 9 là thương. Vậy đáp án là số bị chia và thương."
+          "rationale_vi": "“số chia và thương” chưa đúng. Trong 18 : 2 = 9, 18 là lượng được đem chia nên là số bị chia chứ không phải số chia; 9 là thương. Trong phép chia, 18 là số bị chia, 2 là số chia và kết quả 9 là thương. Vậy đáp án là số bị chia và thương."
         },
         {
           "id": "c",
           "text": "thương và số bị chia",
-          "rationale_vi": "“thương và số bị chia” chưa đúng. Trong phép chia, 18 là số bị chia, 2 là số chia và kết quả 9 là thương. Vậy đáp án là số bị chia và thương."
+          "rationale_vi": "“thương và số bị chia” chưa đúng. Cặp này đã đảo vai trò: 18 không phải thương và 9 không phải số bị chia; 18 là số bị chia, 9 là thương. Trong phép chia, 18 là số bị chia, 2 là số chia và kết quả 9 là thương. Vậy đáp án là số bị chia và thương."
         },
         {
           "id": "d",
           "text": "số bị chia và số chia",
-          "rationale_vi": "“số bị chia và số chia” chưa đúng. Trong phép chia, 18 là số bị chia, 2 là số chia và kết quả 9 là thương. Vậy đáp án là số bị chia và thương."
+          "rationale_vi": "“số bị chia và số chia” chưa đúng. Tên của 18 đã đúng là số bị chia, nhưng 9 là kết quả của phép chia nên phải gọi là thương, không phải số chia. Trong phép chia, 18 là số bị chia, 2 là số chia và kết quả 9 là thương. Vậy đáp án là số bị chia và thương."
         }
       ],
       "correct_choice_id": "a"
