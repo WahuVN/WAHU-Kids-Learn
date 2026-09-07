@@ -149,7 +149,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract;
 - **166 phương trình số instructional** đang được kiểm bằng arithmetic parser, hiện **0 sai**; detector có regression cho cả phép cộng chuỗi và phép chia dùng dấu `:`.
 
-Latest result: **49 tests PASS**.
+Latest runtime result: **49 tests PASS**. Shadow pool-6 regression: **8 tests PASS**. Full `MathContentDataSmoke` discovery: **57/57 tests PASS**.
 
 ## Commits / waves
 
@@ -186,6 +186,16 @@ Latest result: **49 tests PASS**.
 - `def7313` — `Toán: nâng thêm câu vận dụng theo hướng chuyển giao`
 - `c7c2905` — `Toán: tăng chiều sâu câu vận dụng còn yếu`
 
+## Parallel shadow pool-6 — READY, chưa publish runtime
+
+- Draft source mới dưới `tools/math_content_authoring/drafts/`: **201 câu `_04/_05/_06`**, phủ đủ **67/67 skill**, đúng **1 basic + 1 medium + 1 application/skill**.
+- Shadow preview deterministic: **402 câu / 67 lesson × 6 câu**, đúng **2 basic + 2 medium + 2 application/lesson**; runtime `question_bank_v1.json` vẫn **201 câu** và là exact prefix của shadow bank.
+- Toàn shadow preview có **402/402 valid questions**, difficulty **134/134/134**; mọi ID theo skill liên tục `_01.._06`, mọi question được practice set tham chiếu đúng một lần.
+- Production semantic validator trên shadow hiện chỉ còn classifier-only `missing_choice_specific_diagnosis` cho **157** distractor thuộc prompt family mới; draft wrapper kiểm từng case bắt buộc nêu lựa chọn sai + kết luận đúng + nguyên lời giải. **Mọi loại production-validator error khác = 0**.
+- MC balance toàn shadow: 4-choice **44/44/44/44** ở A/B/C/D; true/false **3/3**. Draft readability: prompt max **139**, explanation max **152**, hint max **119** ký tự.
+- `validate_math_pool6_draft.py`: PASS; `test_math_pool6_draft.py`: **8/8 PASS**; runtime content suite vẫn **49/49 PASS**; full discovery **57/57 PASS**.
+- Publish gate đã mở: AI2 `REQUEST_009_READY=05cdb2a`, `MANIFEST_LOCK=FREE`. Shadow wave này được chốt riêng; runtime 402 được publish ở wave kế tiếp để giữ history reviewable.
+
 ## Current blockers outside AI1 content ownership
 
 1. Request 005 functional path đã được commit end-to-end: engine `656a94b` + UI `1436705`. Targeted lesson dùng authored bank đúng 3 câu, all-201 answer-surface sweep PASS, Flow 5 prerequisite unlock PASS; current persistence WIP đạt **171 assertions PASS** và Child UI đạt **1596 assertions PASS**. Release-clean full solution vẫn bị SQLite/toolchain chặn.
@@ -194,11 +204,11 @@ Latest result: **49 tests PASS**.
 4. UI smoke full project-reference build vẫn gặp lỗi reference `System.Data.SQLite` khi build `WAHU.Data.csproj`; App + Child UI targeted build với `BuildProjectReferences=false` PASS. Đây là build/dependency WIP ngoài AI1.
 5. Retry UI presentation trong current working tree hiện **PASS** sau rebuild App + Child UI với `BuildProjectReferences=false`; Child UI đạt **1596 assertions**. Chưa coi là commit-owned closure cho tới khi lane UI chốt các file WIP của họ.
 6. Legacy generator vẫn chỉ phủ 65/67 skill, nhưng lesson-authored path đã cho phép hai skill `FOLD_CUT_COMPOSE_SHAPES` và `MONEY_VND_NOTE_RECOGNITION` có bài luyện thật mà không cần template giả.
-7. **Breadth / replay blocker — Request 009 OPEN:** cả 67 lesson hiện có đúng `(1 basic, 1 medium, 1 application)` = 3 authored questions và targeted engine luôn nạp toàn bộ IDs theo đúng thứ tự, nên học lại gặp lại nguyên 3 câu. Request 009 đề xuất tách pool size khỏi session target: AI1 mở pool `>=6` câu/bài, AI2 chọn/persist đúng 3 câu cân bằng mỗi phiên, AI3 giữ CTA/progress 3 câu nhưng hiển thị pool count riêng. AI1 chưa mở rộng bank trước khi runtime contract/regression này xanh.
-8. **Expression operator grading — Request 010 OPEN:** runtime x86 probe xác nhận `75`, `100 - 30 + 5`, `15*5`, `150/2` đều đang được chấm đúng cho câu add/sub expression vì loader không preserve `validation.allowed_operators`. AI1 đã thu hẹp metadata/prompt về cộng-trừ; AI2 cần enforce per-question operator policy để `15*5`/`150/2` bị reject mà plain result `75` vẫn đúng.
+7. **Breadth / replay — Request 009 HANDOFF READY tại AI2 `05cdb2a`:** shadow pool đã hoàn tất **402 câu / 6 câu mỗi lesson / 2 mỗi difficulty**; runtime bank vẫn 201 ở wave shadow này và sẽ được promote ở commit AI1 kế tiếp.
+8. **Expression operator grading — Request 010 CLOSED ở AI2 `7afbb7b`:** per-question expression whitelist đã được engine preserve/enforce; content contract cộng-trừ `+ - ( )` của AI1 đã có runtime consumer.
 
 ## Lane verdict
 
-**Content/Data correctness lane: CLEAN; authored-bank breadth expansion: OPEN.**
+**Content/Data correctness lane: CLEAN; shadow breadth 402: READY; Request 009 handoff OPEN; runtime publish: IN PROGRESS.**
 
-Không còn lesson/question/reference/answer/prerequisite/difficulty/semantic-validator error trong dữ liệu AI1. Prerequisite graph đã bỏ 4 direct edge bắc cầu nhưng giữ nguyên 9 root và 67/67 reachability. Tuy nhiên 3 câu cố định/lesson vẫn chưa đạt mục tiêu breadth “không còn demo”; mở rộng phần này cần đổi shared targeted-session contract cùng AI2/AI3.
+Runtime 201 hiện không còn lesson/question/reference/answer/prerequisite/difficulty/semantic-validator error. Prerequisite graph giữ 9 root và 67/67 reachability. Shadow 402 đã author/validate xong và sẵn sàng publish; phần còn khóa chỉ là runtime selected-set contract Request 009, không còn là thiếu content draft.
