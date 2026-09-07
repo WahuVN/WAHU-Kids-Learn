@@ -504,6 +504,39 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                     A(completion.LearningSummary.GardenGrowthSteps == eventIndex + 1 &&
                       Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + start.Session.SessionId + "';") == 1,
                         "production_game_event_grants_one_predictable_garden_reward_" + (eventIndex + 1));
+                    var unlocks = completion.LearningSummary.GardenUnlockedItemIds ?? new List<string>();
+                    if (eventIndex == 0)
+                    {
+                        A(unlocks.SequenceEqual(new[] { "garden_seedling" }) &&
+                          completion.LearningSummary.NextGardenMilestoneItemId == "garden_flower_patch" &&
+                          completion.LearningSummary.SessionsUntilNextGardenMilestone == 2,
+                            "production_game_event_one_unlocks_seedling_and_points_to_flower_patch");
+                    }
+                    else if (eventIndex == 1)
+                    {
+                        A(unlocks.Count == 0 && completion.LearningSummary.NextGardenMilestoneItemId == "garden_flower_patch" &&
+                          completion.LearningSummary.SessionsUntilNextGardenMilestone == 1,
+                            "production_game_event_two_does_not_unlock_early_flower_patch");
+                    }
+                    else if (eventIndex == 2)
+                    {
+                        A(unlocks.SequenceEqual(new[] { "garden_flower_patch" }) &&
+                          completion.LearningSummary.NextGardenMilestoneItemId == "garden_lantern" &&
+                          completion.LearningSummary.SessionsUntilNextGardenMilestone == 3,
+                            "production_game_event_three_unlocks_flower_patch_and_points_to_lantern");
+                    }
+                    else if (eventIndex == 3)
+                    {
+                        A(unlocks.Count == 0 && completion.LearningSummary.NextGardenMilestoneItemId == "garden_lantern" &&
+                          completion.LearningSummary.SessionsUntilNextGardenMilestone == 2,
+                            "production_game_event_four_keeps_lantern_locked");
+                    }
+                    else if (eventIndex == 4)
+                    {
+                        A(unlocks.Count == 0 && completion.LearningSummary.NextGardenMilestoneItemId == "garden_lantern" &&
+                          completion.LearningSummary.SessionsUntilNextGardenMilestone == 1,
+                            "production_game_event_five_keeps_lantern_locked_one_session_away");
+                    }
                     if (eventIndex + 1 < events.Events.Count)
                     {
                         var nextDefinition = events.Events[eventIndex + 1];
@@ -523,6 +556,17 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 "production_first_five_events_commit_fifteen_attempts_and_mastery");
             A(Count(database, "SELECT count(*) FROM reward_event WHERE child_id='" + childId + "' AND reward_type='garden_growth';") == 5,
                 "production_first_five_events_create_exactly_five_garden_rewards");
+            var finalGarden = new GameWorldRewardService(database).ReadProgress(childId);
+            A(finalGarden.GrowthSteps == 5 && finalGarden.CompletedMathSessions == 5 &&
+              finalGarden.UnlockedItems.SequenceEqual(new[] { "garden_seedling", "garden_flower_patch" }) &&
+              finalGarden.NextMilestoneItemId == "garden_lantern" && finalGarden.NextMilestoneSessionCount == 6 &&
+              finalGarden.SessionsUntilNextMilestone == 1,
+                "production_first_five_events_end_with_exact_garden_milestones_before_lantern");
+            A(Count(database, "SELECT count(*) FROM inventory WHERE child_id='" + childId +
+              "' AND item_id IN ('garden_seedling','garden_flower_patch');") == 2 &&
+              Count(database, "SELECT count(*) FROM inventory WHERE child_id='" + childId +
+              "' AND item_id='garden_lantern';") == 0,
+                "production_first_five_events_never_unlock_lantern_before_session_six");
             A(Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + childId + "' AND completed_count=1;") == 5,
                 "production_first_five_events_complete_five_lesson_progress_rows");
             A(Count(database, "SELECT count(*) FROM session WHERE child_id='" + childId + "' AND state='active';") == 0,
