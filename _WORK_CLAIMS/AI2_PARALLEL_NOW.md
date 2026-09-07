@@ -1,0 +1,53 @@
+# AI2 — PARALLEL NOW — ENGINE/SESSION
+
+LANE: AI2
+LANE_DONE=NO
+BASELINE=d1665dc
+MANIFEST_LOCK=AI2
+BUILD_SETUP_LOCK=AI2
+REQUEST_009_READY=NO
+
+## Mission now
+
+Keep all engine/session work inside AI2-owned files. Never stage AI1 question/catalog files or AI3 UI/release-E2E files.
+
+### A. Commit Request 010 first, isolated
+Current WIP already adds `AllowedExpressionOperators` to model/loader/validator. Finish mandatory regression before commit:
+- authored add/sub expression loads whitelist `+ - ( )`;
+- runtime instance preserves it;
+- `75`, `100 - 30 + 5`, `70 + 5` => correct;
+- `15*5`, `150/2` => incorrect;
+- suspend/resume/current-question JSON preserves whitelist;
+- global expression questions without a whitelist keep existing backward-compatible parser behavior.
+
+Commit only Request-010 files/tests; do not include adaptive generator/template WIP.
+
+### B. Commit adaptive segment generator second
+Land current `draw_segment_given_length` WIP:
+- selector supports template;
+- generator returns `interaction_integer`;
+- no fake choices;
+- correct numeric answer still validates;
+- fuzz/runtime smoke passes.
+Include only its `verified_templates_v1.json`/manifest changes and the LearningSession assertion-count update. The current one-line `Build-SetupArtifacts.ps1` assertion-count WIP may land in this wave if its release gate passes.
+
+After this commit:
+- set `MANIFEST_LOCK=FREE` unless another AI2 template wave still needs it;
+- set `BUILD_SETUP_LOCK=AI3` so AI3 can finish Request 008.
+
+### C. Request 009 — selected 3 from pool >=6
+Implement without changing AI1 runtime bank:
+1. Fresh targeted session selects exactly 3 authored IDs: 1 basic + 1 medium + 1 application.
+2. Selection is deterministic for fixed selection identity/seed; another fixed identity can produce a different valid set.
+3. Persist ordered selected IDs as first-class session state.
+4. Resume/retry/write-failure/corrupt-open recovery continues the selected set, never re-selects and never skips ordinal.
+5. `TargetQuestionCount=3` and completion/score are based on selected set, not `PracticeSets.TotalCount`.
+6. Synthetic lesson fixture with >=2 questions per difficulty must PASS all above semantics.
+
+When green and committed, write `REQUEST_009_READY=<sha>` here.
+
+### D. Request 006 after Request 009
+Preserve integer `answer_unit` as display-only metadata through model -> authored loader -> runtime instance -> suspend/resume. Raw integer grading must remain unchanged; correct-answer display may include unit. Add regression for `8` accepted/display `8 cm`.
+
+### Commit discipline
+Use exact file commits. Do not edit `MATH_SHARED_CONTRACT_REQUESTS.md` during the parallel run. Publish handoff markers only in this file.
