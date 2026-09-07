@@ -94,6 +94,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestGameEventConcurrentRewardReconcileIsIdempotent(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGardenProgressIgnoresZeroAttemptCompletedSessions(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGardenRewardUsesDurableEligibilityInsteadOfCallerOrForeignAttempts(root, schemaPath);
+                TestGardenRewardRepairsCanonicalKeyCollisionAndIgnoresOrphanGrowth(root, schemaPath);
                 TestDirectTargetedLessonRejectsEarlyComplete(root, schemaPath, templatePath, lessonCatalogPath);
                 TestGameEventTerminalRuntimeCleanupReconcilesOnNextStart(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventCommitFaultPreservesCheckpoint(root, schemaPath, templatePath, lessonCatalogPath);
@@ -1512,6 +1513,66 @@ VALUES(@id,@session,@child,'math-grade2-verified-core','1.0','valid-question','M
               underreported.NewlyUnlockedItems.SequenceEqual(new[] { "garden_seedling" }) &&
               Count(validDatabase, "SELECT count(*) FROM reward_event WHERE source_ref='" + validSession.SessionId + "';") == 1,
                 "garden_reward_uses_durable_attempt_even_when_caller_reports_zero");
+        }
+
+        private static void TestGardenRewardRepairsCanonicalKeyCollisionAndIgnoresOrphanGrowth(
+            string root,
+            string schemaPath)
+        {
+            var collisionDatabase = NewDatabase(Path.Combine(root, "garden-canonical-key-collision.db"), schemaPath);
+            var collisionSessions = new LearnerSessionService(collisionDatabase);
+            var owner = collisionSessions.EnsurePrimaryChild("Bé garden collision");
+            var session = collisionSessions.BeginSession(owner.ChildId, "math", "LOW");
+            Exec(collisionDatabase, @"INSERT INTO attempt(
+id,session_id,child_id,pack_id,pack_version,question_id,skill_id,subject,started_at_utc,answered_at_utc,answer_json,is_correct,response_ms,hint_level,representation,input_method,attempt_index,listen_count)
+VALUES(@id,@session,@child,'math-grade2-verified-core','1.0','collision-question','M2_COLLISION','math',@started,@answered,'{}',1,700,0,'symbolic','smoke',1,0);",
+                "@id", "attempt-garden-collision-" + Guid.NewGuid().ToString("N"),
+                "@session", session.SessionId,
+                "@child", owner.ChildId,
+                "@started", DateTime.UtcNow.AddSeconds(-1).ToString("o", CultureInfo.InvariantCulture),
+                "@answered", DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture));
+            collisionSessions.CompleteSession(session.SessionId, false, "{\"fixture\":\"source_key_collision\"}", "{}");
+            var canonicalKey = "garden_growth:session:" + session.SessionId;
+            Exec(collisionDatabase, @"INSERT INTO reward_event(
+id,child_id,reward_type,reward_id,source_event,source_ref,source_key,created_at_utc)
+VALUES(@id,@child,'cosmetic','stale_reward','legacy_import','wrong-session',@key,@utc);",
+                "@id", "reward-stale-garden-" + Guid.NewGuid().ToString("N"),
+                "@child", owner.ChildId,
+                "@key", canonicalKey,
+                "@utc", DateTime.UtcNow.AddMinutes(-5).ToString("o", CultureInfo.InvariantCulture));
+
+            var collisionReward = new GameWorldRewardService(collisionDatabase);
+            var beforeRepair = collisionReward.ReadProgress(owner.ChildId);
+            A(beforeRepair.GrowthSteps == 0 && beforeRepair.CompletedMathSessions == 1 &&
+              !beforeRepair.UnlockedItems.Contains("garden_seedling"),
+                "garden_canonical_collision_fixture_starts_missing_effective_reward");
+            var repaired = collisionReward.ReconcileMissingCompletedMathSessionRewards(owner.ChildId);
+            var afterRepair = collisionReward.ReadProgress(owner.ChildId);
+            A(repaired == 1 && afterRepair.GrowthSteps == 1 && afterRepair.CompletedMathSessions == 1 &&
+              afterRepair.UnlockedItems.Count(x => x == "garden_seedling") == 1,
+                "garden_canonical_source_key_collision_is_self_healed_once");
+            A(Count(collisionDatabase, "SELECT count(*) FROM reward_event WHERE child_id='" + owner.ChildId +
+              "' AND source_key='" + canonicalKey + "' AND reward_type='garden_growth' AND reward_id='growth_step'" +
+              " AND source_event='session_completed' AND source_ref='" + session.SessionId + "';") == 1 &&
+              Count(collisionDatabase, "SELECT count(*) FROM reward_event WHERE child_id='" + owner.ChildId +
+              "' AND source_key='" + canonicalKey + "';") == 1,
+                "garden_canonical_collision_repair_preserves_unique_source_key_and_canonical_fields");
+            A(collisionReward.ReconcileMissingCompletedMathSessionRewards(owner.ChildId) == 0 &&
+              collisionReward.ReadProgress(owner.ChildId).GrowthSteps == 1,
+                "garden_canonical_collision_repair_is_idempotent_on_replay");
+
+            var orphanDatabase = NewDatabase(Path.Combine(root, "garden-orphan-growth.db"), schemaPath);
+            var orphanOwner = new LearnerSessionService(orphanDatabase).EnsurePrimaryChild("Bé garden orphan");
+            Exec(orphanDatabase, @"INSERT INTO reward_event(
+id,child_id,reward_type,reward_id,source_event,source_ref,source_key,created_at_utc)
+VALUES(@id,@child,'garden_growth','growth_step','session_completed','missing-session','garden_growth:session:missing-session',@utc);",
+                "@id", "reward-orphan-garden-" + Guid.NewGuid().ToString("N"),
+                "@child", orphanOwner.ChildId,
+                "@utc", DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture));
+            var orphanProgress = new GameWorldRewardService(orphanDatabase).ReadProgress(orphanOwner.ChildId);
+            A(orphanProgress.GrowthSteps == 0 && orphanProgress.CompletedMathSessions == 0 &&
+              orphanProgress.UnlockedItems.Count == 0 && orphanProgress.NextMilestoneSessionCount == 1,
+                "garden_orphan_reward_event_does_not_inflate_growth_progress");
         }
 
         private static void TestDirectTargetedLessonRejectsEarlyComplete(

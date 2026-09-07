@@ -50,6 +50,7 @@ namespace WAHU.Data
             // Caller attempt count is advisory only. Durable SQLite evidence decides eligibility.
 
             var created = false;
+            var sourceKey = "garden_growth:session:" + sessionId;
             var unlocked = new List<string>();
             _database.Writes.Execute((connection, transaction) =>
             {
@@ -80,9 +81,25 @@ VALUES(@id,@child,@type,@reward,'session_completed',@session,@key,@utc);";
                     reward.Parameters.AddWithValue("@type", RewardType);
                     reward.Parameters.AddWithValue("@reward", "growth_step");
                     reward.Parameters.AddWithValue("@session", sessionId);
-                    reward.Parameters.AddWithValue("@key", "garden_growth:session:" + sessionId);
+                    reward.Parameters.AddWithValue("@key", sourceKey);
                     reward.Parameters.AddWithValue("@utc", DateTime.UtcNow.ToString("o"));
                     created = reward.ExecuteNonQuery() == 1;
+                }
+                if (!created)
+                {
+                    using (var repair = connection.CreateCommand())
+                    {
+                        repair.Transaction = transaction;
+                        repair.CommandText = @"UPDATE reward_event
+SET reward_type=@type,reward_id='growth_step',source_event='session_completed',source_ref=@session
+WHERE child_id=@child AND source_key=@key
+  AND (reward_type<>@type OR reward_id<>'growth_step' OR source_event<>'session_completed' OR source_ref<>@session);";
+                        repair.Parameters.AddWithValue("@type", RewardType);
+                        repair.Parameters.AddWithValue("@session", sessionId);
+                        repair.Parameters.AddWithValue("@child", childId);
+                        repair.Parameters.AddWithValue("@key", sourceKey);
+                        created = repair.ExecuteNonQuery() == 1;
+                    }
                 }
 
                 var completed = CountCompletedMathSessions(connection, transaction, childId);
@@ -117,8 +134,9 @@ JOIN attempt a ON a.session_id=s.id AND a.child_id=s.child_id AND a.subject='mat
 WHERE s.child_id=@child AND s.state='completed' AND s.planned_subject='math'
   AND NOT EXISTS (
       SELECT 1 FROM reward_event r
-      WHERE r.child_id=s.child_id AND r.reward_type=@type
-        AND r.source_event='session_completed' AND r.source_ref=s.id)
+      WHERE r.child_id=s.child_id AND r.reward_type=@type AND r.reward_id='growth_step'
+        AND r.source_event='session_completed' AND r.source_ref=s.id
+        AND r.source_key='garden_growth:session:' || s.id)
 GROUP BY s.id
 HAVING count(a.id)>0
 ORDER BY s.started_at_utc,s.id;";
@@ -152,7 +170,12 @@ ORDER BY s.started_at_utc,s.id;";
                 var progress = new GameWorldProgress
                 {
                     GrowthSteps = Count(connection,
-                        "SELECT count(*) FROM reward_event WHERE child_id=@child AND reward_type='garden_growth';", childId),
+                        @"SELECT count(*) FROM reward_event r
+JOIN session s ON s.id=r.source_ref AND s.child_id=r.child_id
+WHERE r.child_id=@child AND r.reward_type='garden_growth' AND r.reward_id='growth_step'
+  AND r.source_event='session_completed' AND r.source_key='garden_growth:session:' || s.id
+  AND s.state='completed' AND s.planned_subject='math'
+  AND EXISTS (SELECT 1 FROM attempt a WHERE a.session_id=s.id AND a.child_id=s.child_id AND a.subject='math');", childId),
                     CompletedMathSessions = Count(connection,
                         @"SELECT count(*) FROM session s
 WHERE s.child_id=@child AND s.state='completed' AND s.planned_subject='math'
