@@ -1684,6 +1684,10 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                 var homeCtor = typeof(WAHUKidsLearn.MainForm).GetConstructors(BindingFlags.Instance | BindingFlags.Public)
                     .FirstOrDefault(x => x.GetParameters().Length == 7);
                 A(homeCtor != null, "quick_rescue_home_constructor_available");
+                var homeSource = File.ReadAllText(Path.Combine(repo, "src", "App", "MainForm.cs"));
+                A(homeSource.IndexOf("MathSessionCoordinator.DefaultTargetQuestionCount + \" câu Toán vừa sức\"", StringComparison.Ordinal) >= 0 &&
+                  homeSource.IndexOf("Text = \"8 câu Toán vừa sức\"", StringComparison.Ordinal) < 0,
+                    "home_adaptive_mission_count_derives_from_engine_contract");
                 using (var home = (Form)homeCtor.Invoke(new object[] { config, database, null, init, null, false, settings }))
                 {
                     var quickButton = GetField<Button>(home, "_quickRescueButton");

@@ -6,6 +6,7 @@ using WAHU.Data;
 using WAHU.Performance;
 using WAHU.Platform;
 using WAHU.Security;
+using WAHU.Session;
 
 namespace WAHUKidsLearn
 {
@@ -217,7 +218,7 @@ namespace WAHUKidsLearn
             missionLayout.Controls.Add(new Label
             {
                 Dock = DockStyle.Fill,
-                Text = "8 câu Toán vừa sức",
+                Text = MathSessionCoordinator.DefaultTargetQuestionCount + " câu Toán vừa sức",
                 TextAlign = ContentAlignment.MiddleLeft,
                 ForeColor = ChildVisualTheme.Ink,
                 Font = ChildVisualTheme.Font(19f, FontStyle.Bold),
