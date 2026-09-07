@@ -34,6 +34,7 @@ namespace WAHU.ChildUiRuntimeSmoke
             TestResumePresentation(appAssembly);
             TestCompletionPresentation(appAssembly);
             TestFeedbackCardReadability(appAssembly);
+            TestLessonStartFailureUi(appAssembly);
             TestAnswerGridLayout(appAssembly);
             TestTypedAnswerInput(appAssembly);
             TestAllAuthoredAnswerSurfaces(appAssembly);
@@ -812,6 +813,84 @@ namespace WAHU.ChildUiRuntimeSmoke
             }
             finally
             {
+                try { Directory.Delete(tempRoot, true); } catch { }
+            }
+        }
+
+        private static void TestLessonStartFailureUi(Assembly appAssembly)
+        {
+            var runtimeTemplate = Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                "content_packs",
+                "math_grade2_v1",
+                "verified_templates_v1.json");
+            var sourceTemplate = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "content_packs",
+                "math_grade2_v1",
+                "verified_templates_v1.json");
+            var originalTemplate = File.Exists(runtimeTemplate) ? File.ReadAllBytes(runtimeTemplate) : null;
+            Directory.CreateDirectory(Path.GetDirectoryName(runtimeTemplate));
+            File.Copy(sourceTemplate, runtimeTemplate, true);
+            A(File.Exists(runtimeTemplate), "math_lesson_start_failure_runtime_template_fixture_available");
+            var tempRoot = Path.Combine(Path.GetTempPath(), "wahu-child-ui-start-failure-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempRoot);
+            try
+            {
+                File.Delete(runtimeTemplate);
+                var schema = Path.Combine(Directory.GetCurrentDirectory(), "data", "schema", "001_initial.sql");
+                var database = new LearningDatabase(Path.Combine(tempRoot, "learning.db"), schema);
+                var init = database.Initialize("DELETE");
+                A(init.SchemaVersion == 5 && init.Health.IsHealthy,
+                    "math_lesson_start_failure_database_v5_ready");
+
+                using (var form = new WAHUKidsLearn.MathLessonForm(database,
+                    new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW }))
+                {
+                    form.Show();
+                    Application.DoEvents();
+                    A(GetField<bool>(form, "_finished") && GetField<MathQuestion>(form, "_question") == null,
+                        "math_lesson_start_failure_finishes_without_stale_question");
+                    A(GetField<Label>(form, "_prompt").Text == "Mình dừng ở đây nhé" &&
+                        GetField<Label>(form, "_support").Text.IndexOf("Phụ huynh", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "math_lesson_start_failure_uses_child_safe_parent_guidance");
+                    A(GetField<Control>(form, "_feedbackCard").Visible &&
+                        GetField<Label>(form, "_feedback").Text.IndexOf("vẫn an toàn", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "math_lesson_start_failure_confirms_saved_data_safety");
+                    A(!GetField<Control>(form, "_answerGrid").Visible &&
+                        !GetField<Control>(form, "_typedAnswerLayout").Visible &&
+                        !GetField<Control>(form, "_interactiveAnswerLayout").Visible,
+                        "math_lesson_start_failure_hides_all_answer_surfaces");
+                    A(!GetField<Button>(form, "_hintButton").Visible && !GetField<Button>(form, "_stopButton").Visible,
+                        "math_lesson_start_failure_hides_inapplicable_actions");
+                    var next = GetField<Button>(form, "_nextButton");
+                    A(next.Visible && next.Enabled && next.Text == "Về thư viện Toán",
+                        "math_lesson_start_failure_offers_math_library_route");
+                    A(next.AccessibleName == "Về thư viện Toán" &&
+                        next.AccessibleDescription.IndexOf("danh sách bài Toán", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "math_lesson_start_failure_return_route_is_accessible");
+                    var coordinator = GetField<object>(form, "_coordinator");
+                    A(coordinator == null || !Get<bool>(coordinator, "IsActive"),
+                        "math_lesson_start_failure_leaves_no_active_coordinator");
+                    Invoke(form, "HandleNextButton");
+                    A(form.DialogResult == DialogResult.OK,
+                        "math_lesson_start_failure_returns_ok_to_math_hub");
+                }
+            }
+            finally
+            {
+                try
+                {
+                    if (originalTemplate == null)
+                    {
+                        if (File.Exists(runtimeTemplate)) File.Delete(runtimeTemplate);
+                    }
+                    else
+                    {
+                        File.WriteAllBytes(runtimeTemplate, originalTemplate);
+                    }
+                }
+                catch { }
                 try { Directory.Delete(tempRoot, true); } catch { }
             }
         }
