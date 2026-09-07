@@ -104,7 +104,7 @@ namespace WAHU.Platform
             }
 
             ValidateSchema(docs["runtime_defaults_v1.json"], 2, "runtime_defaults_v1.json");
-            ValidateSchema(docs["database_runtime_v1.json"], 3, "database_runtime_v1.json");
+            ValidateSchema(docs["database_runtime_v1.json"], 4, "database_runtime_v1.json");
             ValidateSchema(docs["paths_v1.json"], 1, "paths_v1.json");
             ValidateSchema(docs["feature_flags_v1.json"], 1, "feature_flags_v1.json");
             ValidateSchema(docs["accessibility_policy_v1.json"], 1, "accessibility_policy_v1.json");
