@@ -92,6 +92,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestGameEventRewardFaultReconcilesWhenSameEventReplayed(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventRewardRepairFailureDoesNotBlockReplay(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventConcurrentRewardReconcileIsIdempotent(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
+                TestGardenProgressIgnoresZeroAttemptCompletedSessions(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventTerminalRuntimeCleanupReconcilesOnNextStart(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventCommitFaultPreservesCheckpoint(root, schemaPath, templatePath, lessonCatalogPath);
                 TestGameEventConcurrentCoordinatorsStayIdempotent(root, schemaPath, templatePath, lessonCatalogPath);
@@ -1337,6 +1338,63 @@ BEGIN SELECT RAISE(ABORT,'game event injected concurrent reward seed failure'); 
                     "game_event_concurrent_reward_reconcile_next_event_starts_without_duplicate_repair");
                 next.SuspendForBreak("concurrent_reward_reconcile_cleanup");
             }
+        }
+
+        private static void TestGardenProgressIgnoresZeroAttemptCompletedSessions(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath,
+            string gameEventPath)
+        {
+            var database = NewDatabase(Path.Combine(root, "garden-zero-attempt-completed.db"), schemaPath);
+            string childId;
+            string emptySessionId;
+
+            using (var empty = new MathSessionCoordinator(database, templatePath, "LOW", 15301))
+            {
+                var start = empty.Start("Bé garden zero attempt");
+                childId = start.ChildId;
+                emptySessionId = start.SessionId;
+                var summary = empty.Complete();
+                A(summary.Attempts == 0 && SessionState(database, emptySessionId) == "completed" &&
+                  Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + emptySessionId + "';") == 0 &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + emptySessionId + "';") == 0,
+                    "garden_zero_attempt_completed_fixture_has_no_learning_or_reward");
+            }
+
+            var before = new GameWorldRewardService(database).ReadProgress(childId);
+            A(before.GrowthSteps == 0 && before.CompletedMathSessions == 0 &&
+              before.NextMilestoneSessionCount == 1 && before.SessionsUntilNextMilestone == 1,
+                "garden_progress_ignores_zero_attempt_completed_session");
+
+            var events = new MathGameEventCatalogSource().Load(gameEventPath, lessonCatalogPath);
+            var definition = events.Events[0];
+            string validSessionId;
+            using (var game = new MathGameEventCoordinator(database, templatePath, gameEventPath, "LOW", 15302,
+                definition.Id, definition.TargetLessonId))
+            {
+                var start = game.Start("Bé garden zero attempt");
+                validSessionId = start.Session.SessionId;
+                for (var ordinal = 0; ordinal < 3; ordinal++)
+                {
+                    var question = game.NextQuestion();
+                    game.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700 + ordinal * 100);
+                }
+                var completion = game.Complete();
+                A(completion.EventState.IsComplete && completion.LearningSummary.LessonCompleted &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + validSessionId + "';") == 1,
+                    "garden_zero_attempt_valid_rescue_completion_rewards_once");
+            }
+
+            var after = new GameWorldRewardService(database).ReadProgress(childId);
+            A(after.GrowthSteps == 1 && after.CompletedMathSessions == 1 &&
+              after.UnlockedItems.Count(x => x == "garden_seedling") == 1 &&
+              after.NextMilestoneSessionCount == 3 && after.SessionsUntilNextMilestone == 2,
+                "garden_zero_attempt_session_does_not_advance_milestone_or_completed_count");
+            A(new GameWorldRewardService(database).ReconcileMissingCompletedMathSessionRewards(childId) == 0 &&
+              Count(database, "SELECT count(*) FROM reward_event WHERE child_id='" + childId + "';") == 1,
+                "garden_zero_attempt_session_is_never_backfilled_as_rewardable");
         }
 
         private static void TestGameEventTerminalRuntimeCleanupReconcilesOnNextStart(

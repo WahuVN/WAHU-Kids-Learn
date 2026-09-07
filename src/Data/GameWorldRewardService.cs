@@ -149,7 +149,9 @@ ORDER BY s.started_at_utc,s.id;";
                     GrowthSteps = Count(connection,
                         "SELECT count(*) FROM reward_event WHERE child_id=@child AND reward_type='garden_growth';", childId),
                     CompletedMathSessions = Count(connection,
-                        "SELECT count(*) FROM session WHERE child_id=@child AND state='completed' AND planned_subject='math';", childId),
+                        @"SELECT count(*) FROM session s
+WHERE s.child_id=@child AND s.state='completed' AND s.planned_subject='math'
+  AND EXISTS (SELECT 1 FROM attempt a WHERE a.session_id=s.id);", childId),
                     UnlockedItems = new List<string>()
                 };
                 using (var command = connection.CreateCommand())
@@ -201,7 +203,9 @@ ORDER BY s.started_at_utc,s.id;";
             using (var command = connection.CreateCommand())
             {
                 command.Transaction = transaction;
-                command.CommandText = "SELECT count(*) FROM session WHERE child_id=@child AND state='completed' AND planned_subject='math';";
+                command.CommandText = @"SELECT count(*) FROM session s
+WHERE s.child_id=@child AND s.state='completed' AND s.planned_subject='math'
+  AND EXISTS (SELECT 1 FROM attempt a WHERE a.session_id=s.id);";
                 command.Parameters.AddWithValue("@child", childId);
                 return Convert.ToInt32(command.ExecuteScalar(), CultureInfo.InvariantCulture);
             }
