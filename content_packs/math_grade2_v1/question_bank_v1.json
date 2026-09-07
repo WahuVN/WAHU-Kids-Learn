@@ -5462,8 +5462,8 @@
       ],
       "explanation_vi": "Bảng nhân 2: 2 × 6 = 12. Đếm thêm theo đúng bước của bảng nhân để kiểm tra tích vừa tìm được.",
       "hints_vi": [
-        "Gạch dưới số hoặc vị trí liên quan đến “Nhân 2”, rồi xác định điều cần tìm trước khi tính.",
-        "Khoanh các số cần dùng, áp dụng “Nhân 2”, rồi viết phần số của kết quả."
+        "Với bảng nhân hai, đếm thêm theo từng cặp bằng nhau rồi xác định tích cần tìm.",
+        "Kiểm tra bảng nhân hai bằng cách cộng thêm một cặp hai ở mỗi bước cho tới phép tính cần tìm."
       ],
       "tags": [
         "times_table_2",
@@ -5493,8 +5493,8 @@
       ],
       "explanation_vi": "Bảng nhân 2: 2 × 9 = 18. Đếm thêm theo đúng bước của bảng nhân để kiểm tra tích vừa tìm được.",
       "hints_vi": [
-        "Tách dữ kiện của “Nhân 2” thành từng phần; chỉ tính sau khi biết rõ điều cần tìm.",
-        "Tách dữ kiện theo “Nhân 2”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
+        "Với bảng nhân hai, tách dữ kiện thành các cặp hai và theo dõi số cặp trước khi tính.",
+        "Dùng một tích đã biết của bảng nhân hai rồi tiến thêm hoặc lùi bớt đúng một cặp để kiểm tra."
       ],
       "tags": [
         "times_table_2",
@@ -5524,8 +5524,8 @@
       ],
       "explanation_vi": "7 nhóm 2 chiếc: 7 × 2 = 14. Đếm thêm theo đúng bước của bảng nhân để kiểm tra tích vừa tìm được.",
       "hints_vi": [
-        "Tìm chỗ dễ nhầm của “Nhân 2” trong tình huống và xác định bước đầu tiên cần làm.",
-        "Với “Nhân 2”, xác định số nhóm và số phần tử mỗi nhóm rồi viết phép nhân phù hợp."
+        "Trong tình huống bảng nhân hai, xác định số cặp và số phần tử trong mỗi cặp trước khi viết phép nhân.",
+        "Viết số cặp trước, số phần tử của mỗi cặp sau; phép nhân phải mô tả đúng các cặp hai trong đề."
       ],
       "tags": [
         "times_table_2",
@@ -5555,8 +5555,8 @@
       ],
       "explanation_vi": "Theo bảng nhân 2, 2 × 7 = 14. Đếm thêm theo đúng bước của bảng nhân để kiểm tra tích vừa tìm được.",
       "hints_vi": [
-        "Ở câu này, gạch dưới số hoặc vị trí liên quan đến “Nhân 2”, rồi xác định điều cần tìm trước khi tính.",
-        "Ở câu này, khoanh các số cần dùng, áp dụng “Nhân 2”, rồi viết phần số của kết quả."
+        "Ở câu này, với bảng nhân hai, đếm thêm theo từng cặp bằng nhau rồi xác định tích cần tìm.",
+        "Ở câu này, kiểm tra bảng nhân hai bằng cách cộng thêm một cặp hai ở mỗi bước cho tới phép tính cần tìm."
       ],
       "tags": [
         "times_table_2",
@@ -5586,8 +5586,8 @@
       ],
       "explanation_vi": "Hai nhóm 10 hoặc mười nhóm 2 đều cho tích 20.",
       "hints_vi": [
-        "Ở câu này, tách dữ kiện của “Nhân 2” thành từng phần; chỉ tính sau khi biết rõ điều cần tìm.",
-        "Ở câu này, tách dữ kiện theo “Nhân 2”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
+        "Ở câu này, với bảng nhân hai, tách dữ kiện thành các cặp hai và theo dõi số cặp trước khi tính.",
+        "Ở câu này, dùng một tích đã biết của bảng nhân hai rồi tiến thêm hoặc lùi bớt đúng một cặp để kiểm tra."
       ],
       "tags": [
         "times_table_2",
@@ -5617,8 +5617,8 @@
       ],
       "explanation_vi": "Tám nhóm 2 bánh là 8 × 2 = 16; phép cộng 8 + 2 không đếm đủ tám xe.",
       "hints_vi": [
-        "Ở câu này, tìm chỗ dễ nhầm của “Nhân 2” trong tình huống và xác định bước đầu tiên cần làm.",
-        "Ở câu này, với “Nhân 2”, xác định số nhóm và số phần tử mỗi nhóm rồi viết phép nhân phù hợp."
+        "Ở câu này, trong tình huống bảng nhân hai, xác định số cặp và số phần tử trong mỗi cặp trước khi viết phép nhân.",
+        "Ở câu này, viết số cặp trước, số phần tử của mỗi cặp sau; phép nhân phải mô tả đúng các cặp hai trong đề."
       ],
       "tags": [
         "times_table_2",
@@ -5648,8 +5648,8 @@
       ],
       "explanation_vi": "Bảng nhân 5: 5 × 4 = 20. Đếm thêm theo đúng bước của bảng nhân để kiểm tra tích vừa tìm được.",
       "hints_vi": [
-        "Gạch dưới số hoặc vị trí liên quan đến “Nhân 5”, rồi xác định điều cần tìm trước khi tính.",
-        "Khoanh các số cần dùng, áp dụng “Nhân 5”, rồi viết phần số của kết quả."
+        "Với bảng nhân năm, đếm thêm theo từng nhóm năm; các tích liên tiếp tăng đều theo bước năm.",
+        "Kiểm tra bảng nhân năm bằng cách đếm thêm từng nhóm năm; tích đúng phải đi đúng nhịp của bảng năm."
       ],
       "tags": [
         "times_table_5",
@@ -5679,8 +5679,8 @@
       ],
       "explanation_vi": "Bảng nhân 5: 5 × 8 = 40. Đếm thêm theo đúng bước của bảng nhân để kiểm tra tích vừa tìm được.",
       "hints_vi": [
-        "Tách dữ kiện của “Nhân 5” thành từng phần; chỉ tính sau khi biết rõ điều cần tìm.",
-        "Tách dữ kiện theo “Nhân 5”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
+        "Với bảng nhân năm, gom dữ kiện thành các nhóm năm bằng nhau rồi đếm số nhóm cần dùng.",
+        "Dùng một tích đã biết của bảng nhân năm rồi tăng hoặc giảm đúng một nhóm năm để tự kiểm tra."
       ],
       "tags": [
         "times_table_5",
@@ -5710,8 +5710,8 @@
       ],
       "explanation_vi": "6 nhóm 5 bút: 6 × 5 = 30. Đếm thêm theo đúng bước của bảng nhân để kiểm tra tích vừa tìm được.",
       "hints_vi": [
-        "Tìm chỗ dễ nhầm của “Nhân 5” trong tình huống và xác định bước đầu tiên cần làm.",
-        "Với “Nhân 5”, xác định số nhóm và số phần tử mỗi nhóm rồi viết phép nhân phù hợp."
+        "Trong tình huống bảng nhân năm, xác định số nhóm năm bằng nhau trước khi viết phép nhân phù hợp.",
+        "Viết số nhóm trước và năm phần tử mỗi nhóm sau; phép nhân phải khớp các nhóm năm trong đề."
       ],
       "tags": [
         "times_table_5",
@@ -5741,8 +5741,8 @@
       ],
       "explanation_vi": "Theo bảng nhân 5, 5 × 6 = 30. Đếm thêm theo đúng bước của bảng nhân để kiểm tra tích vừa tìm được.",
       "hints_vi": [
-        "Ở câu này, gạch dưới số hoặc vị trí liên quan đến “Nhân 5”, rồi xác định điều cần tìm trước khi tính.",
-        "Ở câu này, khoanh các số cần dùng, áp dụng “Nhân 5”, rồi viết phần số của kết quả."
+        "Ở câu này, với bảng nhân năm, đếm thêm theo từng nhóm năm; các tích liên tiếp tăng đều theo bước năm.",
+        "Ở câu này, kiểm tra bảng nhân năm bằng cách đếm thêm từng nhóm năm; tích đúng phải đi đúng nhịp của bảng năm."
       ],
       "tags": [
         "times_table_5",
@@ -5772,8 +5772,8 @@
       ],
       "explanation_vi": "Chín nhóm 5 cho 45. Đếm thêm theo đúng bước của bảng nhân để kiểm tra tích vừa tìm được.",
       "hints_vi": [
-        "Ở câu này, tách dữ kiện của “Nhân 5” thành từng phần; chỉ tính sau khi biết rõ điều cần tìm.",
-        "Ở câu này, tách dữ kiện theo “Nhân 5”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
+        "Ở câu này, với bảng nhân năm, gom dữ kiện thành các nhóm năm bằng nhau rồi đếm số nhóm cần dùng.",
+        "Ở câu này, dùng một tích đã biết của bảng nhân năm rồi tăng hoặc giảm đúng một nhóm năm để tự kiểm tra."
       ],
       "tags": [
         "times_table_5",
@@ -5803,8 +5803,8 @@
       ],
       "explanation_vi": "Bảy nhóm 5 bông là 7 × 5 = 35; 7 + 5 không biểu diễn đủ các nhóm.",
       "hints_vi": [
-        "Ở câu này, tìm chỗ dễ nhầm của “Nhân 5” trong tình huống và xác định bước đầu tiên cần làm.",
-        "Ở câu này, với “Nhân 5”, xác định số nhóm và số phần tử mỗi nhóm rồi viết phép nhân phù hợp."
+        "Ở câu này, trong tình huống bảng nhân năm, xác định số nhóm năm bằng nhau trước khi viết phép nhân phù hợp.",
+        "Ở câu này, viết số nhóm trước và năm phần tử mỗi nhóm sau; phép nhân phải khớp các nhóm năm trong đề."
       ],
       "tags": [
         "times_table_5",
@@ -5834,8 +5834,8 @@
       ],
       "explanation_vi": "Vì 2 × 8 = 16 nên 16 : 2 = 8. Dùng phép nhân ngược để kiểm tra thương nhân với số chia có trở lại số bị chia.",
       "hints_vi": [
-        "Gạch dưới số hoặc vị trí liên quan đến “Chia 2”, rồi xác định điều cần tìm trước khi tính.",
-        "Khoanh các số cần dùng, áp dụng “Chia 2”, rồi viết phần số của kết quả."
+        "Với bảng chia hai, nghĩ đến việc tách tổng thành các cặp hai bằng nhau rồi tìm số cặp.",
+        "Kiểm tra bảng chia hai bằng phép nhân ngược: thương nhân với hai phải trở lại đúng số bị chia."
       ],
       "tags": [
         "divide_table_2",
@@ -5865,8 +5865,8 @@
       ],
       "explanation_vi": "Vì 2 × 10 = 20 nên 20 : 2 = 10. Dùng phép nhân ngược để kiểm tra thương nhân với số chia có trở lại số bị chia.",
       "hints_vi": [
-        "Tách dữ kiện của “Chia 2” thành từng phần; chỉ tính sau khi biết rõ điều cần tìm.",
-        "Tách dữ kiện theo “Chia 2”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
+        "Với bảng chia hai, dùng bảng nhân hai làm phép ngược để tìm thương mà chưa cần đoán kết quả.",
+        "Tìm phép nhân trong bảng hai có tích bằng số bị chia; thừa số còn lại chính là thương cần kiểm tra."
       ],
       "tags": [
         "divide_table_2",
@@ -5896,8 +5896,8 @@
       ],
       "explanation_vi": "18 : 2 = 9. Dùng phép nhân ngược để kiểm tra thương nhân với số chia có trở lại số bị chia.",
       "hints_vi": [
-        "Tìm chỗ dễ nhầm của “Chia 2” trong tình huống và xác định bước đầu tiên cần làm.",
-        "Với “Chia 2”, xác định tổng và số phần cần chia đều rồi viết phép chia phù hợp."
+        "Trong tình huống bảng chia hai, xác định tổng đang được chia thành các cặp hai như thế nào.",
+        "Sau khi chia thành các cặp hai, đếm số cặp rồi nhân ngược với hai để kiểm tra tổng ban đầu."
       ],
       "tags": [
         "divide_table_2",
@@ -5927,8 +5927,8 @@
       ],
       "explanation_vi": "Vì 2 × 7 = 14 nên 14 : 2 = 7. Dùng phép nhân ngược để kiểm tra thương nhân với số chia có trở lại số bị chia.",
       "hints_vi": [
-        "Ở câu này, gạch dưới số hoặc vị trí liên quan đến “Chia 2”, rồi xác định điều cần tìm trước khi tính.",
-        "Ở câu này, khoanh các số cần dùng, áp dụng “Chia 2”, rồi viết phần số của kết quả."
+        "Ở câu này, với bảng chia hai, nghĩ đến việc tách tổng thành các cặp hai bằng nhau rồi tìm số cặp.",
+        "Ở câu này, kiểm tra bảng chia hai bằng phép nhân ngược: thương nhân với hai phải trở lại đúng số bị chia."
       ],
       "tags": [
         "divide_table_2",
@@ -5958,8 +5958,8 @@
       ],
       "explanation_vi": "Vì 2 × 9 = 18 nên thương là 9. Dùng phép nhân ngược để kiểm tra thương nhân với số chia có trở lại số bị chia.",
       "hints_vi": [
-        "Ở câu này, tách dữ kiện của “Chia 2” thành từng phần; chỉ tính sau khi biết rõ điều cần tìm.",
-        "Ở câu này, tách dữ kiện theo “Chia 2”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
+        "Ở câu này, với bảng chia hai, dùng bảng nhân hai làm phép ngược để tìm thương mà chưa cần đoán kết quả.",
+        "Ở câu này, tìm phép nhân trong bảng hai có tích bằng số bị chia; thừa số còn lại chính là thương cần kiểm tra."
       ],
       "tags": [
         "divide_table_2",
@@ -5989,8 +5989,8 @@
       ],
       "explanation_vi": "20 : 2 = 10 đôi; kiểm tra 10 × 2 = 20.",
       "hints_vi": [
-        "Ở câu này, tìm chỗ dễ nhầm của “Chia 2” trong tình huống và xác định bước đầu tiên cần làm.",
-        "Ở câu này, với “Chia 2”, xác định tổng và số phần cần chia đều rồi viết phép chia phù hợp."
+        "Ở câu này, trong tình huống bảng chia hai, xác định tổng đang được chia thành các cặp hai như thế nào.",
+        "Ở câu này, sau khi chia thành các cặp hai, đếm số cặp rồi nhân ngược với hai để kiểm tra tổng ban đầu."
       ],
       "tags": [
         "divide_table_2",
@@ -6020,8 +6020,8 @@
       ],
       "explanation_vi": "Vì 5 × 5 = 25 nên 25 : 5 = 5. Dùng phép nhân ngược để kiểm tra thương nhân với số chia có trở lại số bị chia.",
       "hints_vi": [
-        "Gạch dưới số hoặc vị trí liên quan đến “Chia 5”, rồi xác định điều cần tìm trước khi tính.",
-        "Khoanh các số cần dùng, áp dụng “Chia 5”, rồi viết phần số của kết quả."
+        "Với bảng chia năm, nghĩ đến việc tách tổng thành các nhóm năm bằng nhau rồi tìm số nhóm.",
+        "Kiểm tra bảng chia năm bằng phép nhân ngược: thương nhân với năm phải trở lại đúng số bị chia."
       ],
       "tags": [
         "divide_table_5",
@@ -6051,8 +6051,8 @@
       ],
       "explanation_vi": "Vì 5 × 8 = 40 nên 40 : 5 = 8. Dùng phép nhân ngược để kiểm tra thương nhân với số chia có trở lại số bị chia.",
       "hints_vi": [
-        "Tách dữ kiện của “Chia 5” thành từng phần; chỉ tính sau khi biết rõ điều cần tìm.",
-        "Tách dữ kiện theo “Chia 5”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
+        "Với bảng chia năm, dùng bảng nhân năm làm phép ngược để tìm thương mà chưa cần đoán kết quả.",
+        "Tìm phép nhân trong bảng năm có tích bằng số bị chia; thừa số còn lại chính là thương cần kiểm tra."
       ],
       "tags": [
         "divide_table_5",
@@ -6082,8 +6082,8 @@
       ],
       "explanation_vi": "50 : 5 = 10 túi. Dùng phép nhân ngược để kiểm tra thương nhân với số chia có trở lại số bị chia.",
       "hints_vi": [
-        "Tìm chỗ dễ nhầm của “Chia 5” trong tình huống và xác định bước đầu tiên cần làm.",
-        "Với “Chia 5”, xác định tổng và số phần cần chia đều rồi viết phép chia phù hợp."
+        "Trong tình huống bảng chia năm, xác định tổng đang được chia thành các nhóm năm như thế nào.",
+        "Sau khi chia thành các nhóm năm, đếm số nhóm rồi nhân ngược với năm để kiểm tra tổng ban đầu."
       ],
       "tags": [
         "divide_table_5",
@@ -6113,8 +6113,8 @@
       ],
       "explanation_vi": "Vì 5 × 2 = 10 nên 10 : 5 = 2. Dùng phép nhân ngược để kiểm tra thương nhân với số chia có trở lại số bị chia.",
       "hints_vi": [
-        "Ở câu này, gạch dưới số hoặc vị trí liên quan đến “Chia 5”, rồi xác định điều cần tìm trước khi tính.",
-        "Ở câu này, khoanh các số cần dùng, áp dụng “Chia 5”, rồi viết phần số của kết quả."
+        "Ở câu này, với bảng chia năm, nghĩ đến việc tách tổng thành các nhóm năm bằng nhau rồi tìm số nhóm.",
+        "Ở câu này, kiểm tra bảng chia năm bằng phép nhân ngược: thương nhân với năm phải trở lại đúng số bị chia."
       ],
       "tags": [
         "divide_table_5",
@@ -6144,8 +6144,8 @@
       ],
       "explanation_vi": "Vì 5 × 9 = 45 nên thương là 9. Dùng phép nhân ngược để kiểm tra thương nhân với số chia có trở lại số bị chia.",
       "hints_vi": [
-        "Ở câu này, tách dữ kiện của “Chia 5” thành từng phần; chỉ tính sau khi biết rõ điều cần tìm.",
-        "Ở câu này, tách dữ kiện theo “Chia 5”, tính từng phần cần thiết rồi kiểm tra ngược kết quả."
+        "Ở câu này, với bảng chia năm, dùng bảng nhân năm làm phép ngược để tìm thương mà chưa cần đoán kết quả.",
+        "Ở câu này, tìm phép nhân trong bảng năm có tích bằng số bị chia; thừa số còn lại chính là thương cần kiểm tra."
       ],
       "tags": [
         "divide_table_5",
@@ -6175,8 +6175,8 @@
       ],
       "explanation_vi": "20 : 5 = 4 hộp; bốn nhóm 5 bút ghép lại đúng 20.",
       "hints_vi": [
-        "Ở câu này, tìm chỗ dễ nhầm của “Chia 5” trong tình huống và xác định bước đầu tiên cần làm.",
-        "Ở câu này, với “Chia 5”, xác định tổng và số phần cần chia đều rồi viết phép chia phù hợp."
+        "Ở câu này, trong tình huống bảng chia năm, xác định tổng đang được chia thành các nhóm năm như thế nào.",
+        "Ở câu này, sau khi chia thành các nhóm năm, đếm số nhóm rồi nhân ngược với năm để kiểm tra tổng ban đầu."
       ],
       "tags": [
         "divide_table_5",

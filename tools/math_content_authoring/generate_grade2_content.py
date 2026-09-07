@@ -200,6 +200,56 @@ def pool_hint_variant(candidate: str, expansion_question: bool) -> str:
     return "Ở câu này, " + candidate[0].lower() + candidate[1:]
 
 
+def table_family_hint(skill: str, difficulty: str, level: int) -> str | None:
+    """Use distinct Grade-2 strategies for the 2/5 multiplication and division tables."""
+    first = {
+        "TIMES_TABLE_2": {
+            "basic": "Với bảng nhân hai, đếm thêm theo từng cặp bằng nhau rồi xác định tích cần tìm.",
+            "medium": "Với bảng nhân hai, tách dữ kiện thành các cặp hai và theo dõi số cặp trước khi tính.",
+            "application": "Trong tình huống bảng nhân hai, xác định số cặp và số phần tử trong mỗi cặp trước khi viết phép nhân.",
+        },
+        "TIMES_TABLE_5": {
+            "basic": "Với bảng nhân năm, đếm thêm theo từng nhóm năm; các tích liên tiếp tăng đều theo bước năm.",
+            "medium": "Với bảng nhân năm, gom dữ kiện thành các nhóm năm bằng nhau rồi đếm số nhóm cần dùng.",
+            "application": "Trong tình huống bảng nhân năm, xác định số nhóm năm bằng nhau trước khi viết phép nhân phù hợp.",
+        },
+        "DIVIDE_TABLE_2": {
+            "basic": "Với bảng chia hai, nghĩ đến việc tách tổng thành các cặp hai bằng nhau rồi tìm số cặp.",
+            "medium": "Với bảng chia hai, dùng bảng nhân hai làm phép ngược để tìm thương mà chưa cần đoán kết quả.",
+            "application": "Trong tình huống bảng chia hai, xác định tổng đang được chia thành các cặp hai như thế nào.",
+        },
+        "DIVIDE_TABLE_5": {
+            "basic": "Với bảng chia năm, nghĩ đến việc tách tổng thành các nhóm năm bằng nhau rồi tìm số nhóm.",
+            "medium": "Với bảng chia năm, dùng bảng nhân năm làm phép ngược để tìm thương mà chưa cần đoán kết quả.",
+            "application": "Trong tình huống bảng chia năm, xác định tổng đang được chia thành các nhóm năm như thế nào.",
+        },
+    }
+    second = {
+        "TIMES_TABLE_2": {
+            "basic": "Kiểm tra bảng nhân hai bằng cách cộng thêm một cặp hai ở mỗi bước cho tới phép tính cần tìm.",
+            "medium": "Dùng một tích đã biết của bảng nhân hai rồi tiến thêm hoặc lùi bớt đúng một cặp để kiểm tra.",
+            "application": "Viết số cặp trước, số phần tử của mỗi cặp sau; phép nhân phải mô tả đúng các cặp hai trong đề.",
+        },
+        "TIMES_TABLE_5": {
+            "basic": "Kiểm tra bảng nhân năm bằng cách đếm thêm từng nhóm năm; tích đúng phải đi đúng nhịp của bảng năm.",
+            "medium": "Dùng một tích đã biết của bảng nhân năm rồi tăng hoặc giảm đúng một nhóm năm để tự kiểm tra.",
+            "application": "Viết số nhóm trước và năm phần tử mỗi nhóm sau; phép nhân phải khớp các nhóm năm trong đề.",
+        },
+        "DIVIDE_TABLE_2": {
+            "basic": "Kiểm tra bảng chia hai bằng phép nhân ngược: thương nhân với hai phải trở lại đúng số bị chia.",
+            "medium": "Tìm phép nhân trong bảng hai có tích bằng số bị chia; thừa số còn lại chính là thương cần kiểm tra.",
+            "application": "Sau khi chia thành các cặp hai, đếm số cặp rồi nhân ngược với hai để kiểm tra tổng ban đầu.",
+        },
+        "DIVIDE_TABLE_5": {
+            "basic": "Kiểm tra bảng chia năm bằng phép nhân ngược: thương nhân với năm phải trở lại đúng số bị chia.",
+            "medium": "Tìm phép nhân trong bảng năm có tích bằng số bị chia; thừa số còn lại chính là thương cần kiểm tra.",
+            "application": "Sau khi chia thành các nhóm năm, đếm số nhóm rồi nhân ngược với năm để kiểm tra tổng ban đầu.",
+        },
+    }
+    table = first if level == 1 else second
+    return table.get(skill, {}).get(difficulty)
+
+
 def numeric_application_hint(concept_name: str) -> str:
     concept = concept_name.strip()
     key = concept.casefold()
@@ -1727,11 +1777,15 @@ def build() -> tuple[dict, dict]:
                     answer_display += " " + str(spec["answer_unit"])
                 question_explanation = explanation_with_answer(
                     deepen_explanation(spec["explanation_vi"], question_type, concept_name), answer_display)
+                first_hint_candidate = table_family_hint(skill, difficulty, 1) or first_hint(
+                    question_type, difficulty, concept_name)
+                second_hint_candidate = table_family_hint(skill, difficulty, 2) or second_hint(
+                    question_type, difficulty, concept_name)
                 first_hint_text = pool_hint_variant(answer_safe_hint(
-                    first_hint(question_type, difficulty, concept_name), spec["prompt_vi"], spec["correct_answer"],
+                    first_hint_candidate, spec["prompt_vi"], spec["correct_answer"],
                     spec["answer_kind"], question_type, 1), i > 3)
                 second_hint_text = pool_hint_variant(answer_safe_hint(
-                    second_hint(question_type, difficulty, concept_name), spec["prompt_vi"], spec["correct_answer"],
+                    second_hint_candidate, spec["prompt_vi"], spec["correct_answer"],
                     spec["answer_kind"], question_type, 2), i > 3)
                 q = {
                     "id": qid,

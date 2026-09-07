@@ -418,6 +418,30 @@ class MathContentDataSmoke(unittest.TestCase):
             with self.subTest(item=item["id"]):
                 self.assertGreaterEqual(len(item["hints_vi"][0].strip()), 40)
 
+    def test_table_2_and_5_hints_use_distinct_strategies(self):
+        expectations = {
+            "TIMES_TABLE_2": "hai",
+            "TIMES_TABLE_5": "năm",
+            "DIVIDE_TABLE_2": "hai",
+            "DIVIDE_TABLE_5": "năm",
+        }
+        by_skill = {
+            skill: sorted((item for item in self.questions if item["skill_id"] == skill), key=lambda item: item["id"])
+            for skill in expectations
+        }
+        for skill, phrase in expectations.items():
+            self.assertEqual(6, len(by_skill[skill]))
+            for item in by_skill[skill]:
+                for hint in item["hints_vi"]:
+                    self.assertIn(phrase, hint.casefold())
+
+        for left, right in (("TIMES_TABLE_2", "TIMES_TABLE_5"), ("DIVIDE_TABLE_2", "DIVIDE_TABLE_5")):
+            for left_item, right_item in zip(by_skill[left], by_skill[right]):
+                for level in (0, 1):
+                    left_shape = re.sub(r"\d+", "<n>", " ".join(left_item["hints_vi"][level].split()).casefold())
+                    right_shape = re.sub(r"\d+", "<n>", " ".join(right_item["hints_vi"][level].split()).casefold())
+                    self.assertNotEqual(left_shape, right_shape)
+
     def test_second_hints_are_actionable_not_placeholders(self):
         second_hints = [x["hints_vi"][1] for x in self.questions]
         self.assertNotIn(validator.GENERIC_SECOND_HINT, second_hints)

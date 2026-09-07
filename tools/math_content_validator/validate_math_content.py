@@ -1876,6 +1876,30 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
         if count > 3:
             errors.append(f"over_reused_distractor_rationale:{count}:{rationale_text[:80]}")
 
+    # Sibling 2/5 table lessons must teach distinct strategies, not the same hint template with only digits swapped.
+    for left_skill, right_skill in (("TIMES_TABLE_2", "TIMES_TABLE_5"), ("DIVIDE_TABLE_2", "DIVIDE_TABLE_5")):
+        left_items = sorted(
+            (q for q in questions if isinstance(q, dict) and q.get("skill_id") == left_skill and isinstance(q.get("id"), str)),
+            key=lambda q: q["id"],
+        )
+        right_items = sorted(
+            (q for q in questions if isinstance(q, dict) and q.get("skill_id") == right_skill and isinstance(q.get("id"), str)),
+            key=lambda q: q["id"],
+        )
+        for left_item, right_item in zip(left_items, right_items):
+            left_hints = left_item.get("hints_vi")
+            right_hints = right_item.get("hints_vi")
+            if not isinstance(left_hints, list) or not isinstance(right_hints, list):
+                continue
+            for level in range(min(2, len(left_hints), len(right_hints))):
+                left_hint = left_hints[level]
+                right_hint = right_hints[level]
+                if not isinstance(left_hint, str) or not isinstance(right_hint, str):
+                    continue
+                if normalize_prompt(left_hint) == normalize_prompt(right_hint):
+                    errors.append(
+                        f"table_family_hint_strategy_duplicate:{left_item['id']}:{right_item['id']}:level{level + 1}")
+
     for choice_count, positions in correct_choice_positions_by_count.items():
         counts = [positions[index] for index in range(choice_count)]
         total = sum(counts)
