@@ -1,6 +1,6 @@
 # Math Grade 2 — pool-6 shadow authoring
 
-Thư mục này là **draft/shadow only** cho Request 009. Không được load trực tiếp từ runtime.
+Thư mục này lưu **pool-6 authored expansion source** từng được phát triển ở shadow lane và nay đã được promote vào production authoring sau Request 009.
 
 ## Nội dung
 
@@ -11,7 +11,7 @@ Thư mục này là **draft/shadow only** cho Request 009. Không được load 
 
 ## Gate
 
-Runtime `content_packs/math_grade2_v1/question_bank_v1.json` phải giữ 201 câu cho tới khi AI2 publish `REQUEST_009_READY=<sha>` trong `_WORK_CLAIMS/AI2_PARALLEL_NOW.md`.
+Request 009 đã publish tại `05cdb2a`. Production `generate_grade2_content.py` nạp các spec `_04/_05/_06` ở đây và sinh runtime **402 câu**; preview sau publish phải là exact mirror của runtime 402.
 
 Kiểm tra:
 
@@ -21,4 +21,4 @@ python tools/math_content_validator/validate_math_pool6_draft.py
 python -m unittest discover tests/MathContentDataSmoke -p "test*.py" -v
 ```
 
-Draft validator chạy toàn bộ production semantic validator. Chỉ classifier `missing_choice_specific_diagnosis` cho prompt family mới được xử lý bằng fallback riêng; fallback bắt buộc nêu lựa chọn sai, kết luận đúng và giữ nguyên lời giải. Mọi lỗi production khác vẫn fail cứng.
+Production validator hiện hiểu cả structured diagnosis và explicit wrong→correct contrast; **402/402 runtime questions phải pass trực tiếp**. Pool-6 validator tiếp tục khóa deterministic rebuild, 67×6, `_01..06`, 2 câu/difficulty và preview/runtime parity.

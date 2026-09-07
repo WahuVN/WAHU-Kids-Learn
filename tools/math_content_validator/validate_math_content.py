@@ -1041,6 +1041,13 @@ def rationale_instructional_body(choice_text: str, rationale: str) -> str:
     return rationale[len(prefix):] if rationale.startswith(prefix) else rationale
 
 
+def has_explicit_choice_contrast(choice_text: str, correct_text: str, rationale: str) -> bool:
+    if not all(isinstance(value, str) for value in (choice_text, correct_text, rationale)):
+        return False
+    prefix = f"“{choice_text}” chưa đúng. Dữ kiện dẫn tới “{correct_text}”. "
+    return rationale.startswith(prefix)
+
+
 def normalize_choice_text(text: str) -> str:
     if not isinstance(text, str):
         return ""
@@ -1827,7 +1834,8 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
                 component_marker = COMPONENT_TERM_REASON_MARKERS.get(text.strip().casefold()) if skill in COMPONENT_SKILLS else None
                 if component_marker and component_marker not in normalized_rationale.casefold():
                     errors.append(f"component_distractor_missing_term_reason:{where}:{cid}:{text}")
-                if not structured_reason and not component_marker:
+                explicit_contrast = has_explicit_choice_contrast(text, str(correct_text), normalized_rationale)
+                if not structured_reason and not component_marker and not explicit_contrast:
                     errors.append(f"missing_choice_specific_diagnosis:{where}:{cid}:{text}")
                 distractor_rationale_counts[normalized_rationale] += 1
                 if len(normalized_rationale) > MAX_DISTRACTOR_RATIONALE_CHARS:

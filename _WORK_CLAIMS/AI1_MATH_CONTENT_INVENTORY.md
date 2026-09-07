@@ -105,21 +105,21 @@ Bảng ở mục 2 là ảnh chụp trạng thái **tại thời điểm audit b
 | Lesson objectives | DONE | Mỗi lesson có tối thiểu 2 mục tiêu |
 | Lesson explanation/concepts | DONE | 67/67 lesson có explanation + concept definition |
 | Worked examples + solutions | DONE | 67/67 lesson có worked example, solution steps, answer |
-| Static question bank | DONE về correctness / OPEN về breadth | 201 curated question, hiện 3 question/skill; Request 009 mở pool >=6 nhưng giữ session target 3 |
+| Static question bank | DONE | 402 curated question, 6 question/skill; mỗi difficulty có 2 câu, session target vẫn 3 theo Request 009 |
 | Stable static question ID | DONE | Deterministic `m2_q_<skill>_NN` |
 | Hint metadata | DONE | 2 hint/question |
-| Difficulty metadata | DONE | 67 basic + 67 medium + 67 application |
+| Difficulty metadata | DONE | 134 basic + 134 medium + 134 application |
 | Prerequisite graph | DONE | 9 root, 76 direct edge, 67/67 lesson reachable; no self-edge/cycle/redundant transitive edge |
-| Answer explanation | DONE | 201/201 có explanation |
-| Wrong-answer rationale | DONE | 267/267 distractor rationale unique, max repeat 1, chứa question-specific reason |
+| Answer explanation | DONE | 402/402 có explanation và semantic evidence |
+| Wrong-answer rationale | DONE | 534/534 rationale unique, max repeat 1; structured/component/explicit contrast diagnosis đều fail-closed |
 | Validation metadata | DONE | Numeric/text/unit/expression/interactive contract được kiểm semantic |
 | Semantic content validator | DONE | 0 error ở final run |
-| Content tests | DONE | 35/35 PASS ở current run |
+| Content tests | DONE | 57/57 PASS ở current run |
 | Duplicate IDs | DONE | 0 duplicate |
 | Orphan/reference checks | DONE | 0 orphan, mọi practice ref resolve đúng lesson/difficulty |
 | Manifest hash cho AI1 files | DONE | Catalog + question bank hash match manifest |
 | VERIFIED runtime generator templates | PARTIAL | 57 template, phủ 65/67 baseline skill; thiếu generator template cho `FOLD_CUT_COMPOSE_SHAPES`, `MONEY_VND_NOTE_RECOGNITION` |
-| Runtime/UI consumption của static catalog/bank | DONE normal path / OPEN breadth | Authored 201-question surface + targeted 3-question session + persistence/UI smoke PASS; Request 009 mở selection từ pool lớn hơn |
+| Runtime/UI consumption của static catalog/bank | DONE cho content/session integration | Runtime 402-question surface + selected 3 from pool 6 + persistence smoke PASS |
 
 ## 9. Question-type và answer-kind contract sau khi AI2 mở rộng engine
 
@@ -144,4 +144,4 @@ Matching/order không được tạo thành answer kind riêng vì engine chưa 
 
 ## 10. Final lane conclusion
 
-Content/Data correctness hiện sạch: **67/67 lesson complete, 201/201 question valid, 0 validator error, 35/35 content tests PASS**; normal authored runtime/UI path cũng đã integrate. Phần còn mở không phải lỗi correctness của bank: **Request 006** preserve `answer_unit` display metadata, **Request 009** mở rộng pool/replay nhưng giữ session 3 câu, và **Request 008/release-toolchain** thuộc lane build. Legacy generator vẫn phủ 65/67 skill nhưng authored lesson path đã phủ đủ 67/67.
+Content/Data lane hiện **COMPLETE: 67/67 lesson, 402/402 question valid, 0 validator error, 57/57 content tests PASS, manifest/hash PASS và real-bank persistence integration PASS**. Request 006 đã CLOSED tại AI2 `3cf7fc6`; Request 009 đã CLOSED cho AI1 với pool 6 câu/lesson; Request 008/release-toolchain thuộc lane AI3. Legacy adaptive generator vẫn phủ 65/67 skill nhưng authored lesson path phủ đủ 67/67.

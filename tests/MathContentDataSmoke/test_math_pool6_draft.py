@@ -42,7 +42,7 @@ class MathPool6DraftSmoke(unittest.TestCase):
     def test_strict_draft_validator_clean(self):
         errors, metrics = self.validator.validate()
         self.assertEqual([], errors)
-        self.assertEqual(201, metrics["runtime_questions"])
+        self.assertEqual(402, metrics["runtime_questions"])
         self.assertEqual(201, metrics["draft_questions"])
         self.assertEqual(402, metrics["preview_questions"])
         self.assertEqual(67, metrics["preview_lessons"])
@@ -51,9 +51,9 @@ class MathPool6DraftSmoke(unittest.TestCase):
         self.assertEqual(self.preview_catalog, self.built_catalog)
         self.assertEqual(self.preview_bank, self.built_bank)
 
-    def test_runtime_bank_remains_201_and_is_exact_preview_prefix(self):
-        self.assertEqual(201, len(self.runtime_bank["questions"]))
-        self.assertEqual(self.runtime_bank["questions"], self.preview_bank["questions"][:201])
+    def test_published_runtime_bank_is_exact_402_preview(self):
+        self.assertEqual(402, len(self.runtime_bank["questions"]))
+        self.assertEqual(self.runtime_bank, self.preview_bank)
 
     def test_exactly_201_future_questions_cover_all_67_skills(self):
         by_skill = defaultdict(list)

@@ -1,46 +1,46 @@
 # AI1 — PARALLEL NOW — CONTENT/DATA
 
 LANE: AI1
-LANE_DONE=NO
-BASELINE=18cb16f
+LANE_DONE=YES
+BASELINE=3c0cfaa
 REQUEST_009_READY=05cdb2a
 MANIFEST_LOCK=FREE
 SHADOW_POOL6_READY=YES
+RUNTIME_POOL6_READY=THIS_COMMIT
 
+## Final state
 
-## NO-WAIT rule
-AI1 **không chờ AI2**. Cho tới khi Request 009 ready, toàn bộ pool-6 được hoàn thiện dưới draft/shadow path riêng; nếu draft xong thì tiếp tục quality audit + preview regeneration + metrics. Chỉ runtime publish bị khóa.
+AI1 content/data lane is complete. Request 009 publish gate đã được tiêu thụ; runtime không còn ở shadow-only mode.
 
-### Queue luôn có việc
-- DONE: 201 câu draft `_04/_05/_06` phủ đủ 67 skill, đúng 1 basic + 1 medium + 1 application/skill.
-- DONE: shadow preview 402 câu / 67 lesson × 6 câu, đúng 2 câu mỗi difficulty, runtime bank vẫn 201.
-- DONE: strict draft validator + 8 draft regressions; full MathContentDataSmoke hiện 57/57 PASS.
-- DONE: shadow 402 đã qua audit/validator; không còn content-draft blocker.
-- NOW/PUBLISH: handoff đã mở tại `REQUEST_009_READY=05cdb2a`; merge shadow vào runtime 402, regenerate deterministic, full validator/tests, rồi cập nhật manifest hash khi candidate sạch.
-- FALLBACK: thêm fail-closed content guards chỉ trong AI1-owned files nếu audit phát hiện evidence cụ thể.
+### Completed
 
-## Mission now
+- 67/67 baseline skill có lesson đầy đủ.
+- 201 câu gốc + 201 câu expansion `_04/_05/_06` = **402 runtime questions**.
+- 67 lesson × 6 câu, đúng **2 basic + 2 medium + 2 application**; ID `_01..06` contiguous.
+- Production semantic validator: **402/402 valid, 0 errors**.
+- Full `MathContentDataSmoke`: **57/57 PASS**.
+- Hint: 402/402 unique ở mỗi cấp, max repeat 1; max length 124/130.
+- Distractor rationale: **534/534 unique**, max repeat 1; structured/component/explicit wrong→correct diagnosis đều fail-closed.
+- MC 4-choice balance: **44/44/44/44**; true/false **3/3**.
+- Deterministic regenerate giữ nguyên SHA catalog/bank.
+- Manifest `1.9.0`: 3/3 listed files khớp SHA256, không thiếu/thừa file pack.
+- Clean rebuild `MathSessionPersistenceRuntimeSmoke` trên real 402-bank: **289 assertions PASS**.
 
-Work only in AI1-owned content/data/authoring/validator files. Do not touch Learning/Session/UI/release files.
+## Handoff
 
-### A. Immediate independent work
-1. Create draft-only breadth source under `tools/math_content_authoring/drafts/` with exactly 201 extra authored questions: one new basic, medium and application question for each of 67 skills. Reserve IDs `_04`, `_05`, `_06`.
-2. Draft questions must not be imported into the runtime bank yet. Current runtime bank stays 201 until AI2 publishes Request 009.
-3. Add draft-only tests/validator proving:
-   - 67 skills covered;
-   - exactly 3 draft questions per skill and one per difficulty;
-   - no near-duplicate prompt against runtime 01..03 or within draft;
-   - Grade-2 max-number, tables 2/5, carry/borrow, time, unit, money and answer-surface rules remain valid;
-   - stable future IDs fit existing contiguous `01..N` contract after merge.
-4. Continue independent content quality audit if draft is complete; only fix content with concrete evidence.
+- AI3 có thể chạy real-bank pool-6 UI/E2E trên runtime 402.
+- AI2 tiếp tục Request 006/engine work độc lập; AI1 không stage hoặc nhận ownership các WIP Learning/Session/Data của AI2.
+- AI1 không còn content/data blocker.
 
-### B. Handoff after AI2 Request 009
-Runtime publish only — đây là publish gate, không phải wait gate. Khi `AI2_PARALLEL_NOW.md` chứa `REQUEST_009_READY=<sha>`:
-1. Merge draft questions into `generate_grade2_content.py`/runtime bank and lesson practice sets.
-2. Target final bank: 402 questions, 6 per lesson, 2 basic + 2 medium + 2 application.
-3. Keep every question referenced exactly once and no orphan IDs.
-4. Regenerate deterministically and run full content tests.
-5. Touch manifest only if `MANIFEST_LOCK=FREE`; use the safe HEAD-manifest candidate technique and change only AI1-owned file hashes.
+## Content contract after publish
 
-### Commit discipline
-Use `git commit --only` with AI1 file list. Never stage `manifest.json` while lock is held. Never stage `verified_templates_v1.json`. Push every passing wave.
+1. Runtime bank phải giữ **402 questions**, 6 câu/lesson và 2 câu/difficulty.
+2. Session target vẫn do AI2 engine chọn/persist đúng 3 câu từ pool 6; content không hard-code selection.
+3. Stable question IDs giữ `m2_q_<skill>_01..06`.
+4. Mọi question phải được practice set tham chiếu đúng một lần, không orphan/duplicate reference.
+5. Authoring phải deterministic; generated catalog/bank phải khớp committed JSON.
+6. Manifest chỉ được cập nhật bằng SHA của file production thực tế; pack version hiện khóa ở `1.9.0` để khớp runtime pack identity.
+
+## Commit discipline
+
+Commit/push chỉ AI1-owned content/data/authoring/validator/test/status files. Không stage `src/Learning`, `src/Session`, `src/Data` hoặc UI/release WIP của lane khác.

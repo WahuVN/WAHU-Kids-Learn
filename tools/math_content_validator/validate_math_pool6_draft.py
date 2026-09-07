@@ -93,8 +93,8 @@ def validate() -> tuple[list[str], dict]:
 
     if len(runtime_catalog.get("lessons") or []) != 67:
         fail(errors, f"runtime_lesson_count_changed:{len(runtime_catalog.get('lessons') or [])}")
-    if len(runtime_bank.get("questions") or []) != 201:
-        fail(errors, f"runtime_question_count_changed_before_request009:{len(runtime_bank.get('questions') or [])}")
+    if len(runtime_bank.get("questions") or []) != 402:
+        fail(errors, f"published_runtime_question_count:{len(runtime_bank.get('questions') or [])}")
     if len(committed_catalog.get("lessons") or []) != 67:
         fail(errors, f"preview_lesson_count:{len(committed_catalog.get('lessons') or [])}")
     if len(committed_bank.get("questions") or []) != 402:
@@ -102,8 +102,10 @@ def validate() -> tuple[list[str], dict]:
     if len(draft_questions) != 201:
         fail(errors, f"draft_question_count:{len(draft_questions)}")
 
-    if committed_bank.get("questions", [])[:201] != runtime_bank.get("questions", []):
-        fail(errors, "preview_runtime_prefix_changed")
+    if committed_bank != runtime_bank:
+        fail(errors, "published_preview_bank_not_exact_runtime")
+    if committed_catalog != runtime_catalog:
+        fail(errors, "published_preview_catalog_not_exact_runtime")
 
     draft_by_skill: dict[str, list[dict]] = defaultdict(list)
     for question in draft_questions:

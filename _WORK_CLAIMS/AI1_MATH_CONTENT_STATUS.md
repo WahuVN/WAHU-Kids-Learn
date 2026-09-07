@@ -10,15 +10,15 @@ Owner: AI1 — Math Content & Data
 - Topics: **17**
 - Machine-readable lessons: **67 / 67 complete**
 - Lessons incomplete/missing: **0**
-- Static question bank: **201 questions**
-- Valid static questions: **201 / 201**
-- Difficulty coverage: **67 basic + 67 medium + 67 application**
+- Static question bank: **402 questions**
+- Valid static questions: **402 / 402**
+- Difficulty coverage: **134 basic + 134 medium + 134 application**
 - Answer kinds used, aligned with AI2 engine contract:
-  - `integer`: 107
-  - `text`: 91
-  - `expression`: 1
-  - `unit`: 1
-  - `interaction_integer`: 1
+  - `integer`: 214
+  - `text`: 182
+  - `expression`: 2
+  - `unit`: 2
+  - `interaction_integer`: 2
 - Question types represented:
   - numeric input
   - multiple choice
@@ -28,9 +28,9 @@ Owner: AI1 — Math Content & Data
   - interactive measurement
   - word problem
 - Semantic validator errors: **0**
-- Math content unittest: **36 / 36 PASS**
+- Math content unittest: **57 / 57 PASS**
 - Pack manifest/hash/listing check on current working tree: **PASS** (`version=1.9.0`, 3 listed files)
-- Persistence runtime smoke: **171 assertions PASS**
+- Real 402-bank session/persistence integration: **289 assertions PASS** trên snapshot trước final engine stress; AI2 committed status ghi final persistence **374 PASS**. Current unstaged AI2 partial-pack-identity fixture đang được phát triển riêng và không thuộc AI1.
 - Child UI targeted build (`BuildProjectReferences=false`) + runtime smoke: **1593 assertions PASS**
 
 ## Curriculum/content completeness
@@ -130,26 +130,26 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - answer kinds/question types đúng contract;
 - accepted-answer contract fail-closed cho integer/interaction/text/unit/expression, không cho phép extra accepted value sai;
 - expression validator fail-closed, kể cả divide-by-zero và payload không phải arithmetic;
-- authored add/sub expression static contract chỉ khai báo `+`, `-`, `(`, `)`; prompt nói rõ “biểu thức cộng, trừ tương đương”, validator chặn operator metadata rộng hơn. Runtime x86 hiện vẫn bỏ qua metadata này nên Request 010 OPEN;
+- authored add/sub expression static contract chỉ khai báo `+`, `-`, `(`, `)`; Request 010 đã CLOSED tại AI2 `7afbb7b` và clean rebuild runtime smoke xác nhận whitelist được preserve/enforce;
 - nội dung tiền Việt Nam không hard-code mệnh giá khi chưa có source/book mapping;
 - skill quan hệ thời gian không mở rộng thành phép nhân/chia ngoài yêu cầu cần đạt;
 - mọi phép nhân/chia literal child-facing nằm trong bảng 2 hoặc 5, kể cả distractor;
 - mọi MCQ có choice khác nhau sau normalize text và không có hai biểu thức choice cùng giá trị số; câu equal-group `5 × 2` đã loại distractor `10 : 5` có thể mô tả cùng cấu trúc nhóm và khóa regression ambiguity; **26 câu nhận dạng/khái niệm** đã thay distractor giveaway khác miền bằng lỗi nhầm gần kiến thức và có regression chặn các mẫu vô lý cũ;
-- 201/201 hint cấp 1 và 201/201 hint cấp 2 hiện actionable, **mỗi cấp 201 unique / max repeat 1**; toàn bộ 402 hint slots đạt **0 unseen-answer leak** và **0 hint >130 ký tự**; readability hiện hint1 p90/max = **103/115**, hint2 = **108/119** (trước các wave max 168/167); **176 hint1** dùng khung `Nhớ kiến thức:` đã giảm **176 → 0** và chuyển thành bước quan sát theo question type/difficulty/concept; **28 application numeric hint2** dùng khung `Viết một phép tính hoặc quan hệ ngắn...` đã giảm **28 → 0**;
-- 267/267 distractor có **rationale unique / max repeat 1** và **choice-specific diagnosis**; 3 họ mẫu shallow cũ đã giảm **267 → 0**. Các wave structured reasoning bao phủ thuật ngữ phép tính (24), cấu trúc số (24), số tròn trăm/ý nghĩa/chọn phép tính (26), sự kiện (27), đơn vị-thời gian-lịch-đồng hồ-ước lượng (39), đọc số/cân/tiền/pictograph (24), hình học (87), và các case sửa vai trò thành phần phép tính; số câu MC/TF dùng chung thân rationale đã giảm **88 → 0**. Hard gate hiện bắt buộc **267/267 diagnosis coverage** (`missing_choice_specific_diagnosis` nếu thiếu), test xác nhận `covered=267, missing=0, shared=0`; readability rationale hiện **p90/p95/max = 245/267/300 ký tự, over300=0**, validator chặn mọi distractor rationale >300 ký tự;
-- vị trí đáp án đúng được cân bằng deterministic: 88 câu 4-choice = 22/22/22/22 cho A/B/C/D; 3 true/false = 2/1;
-- 23 câu integer có `answer_unit` giữ đúng contract display-only, không đổi sang unit-input; **23/23 prompt tự nêu đơn vị theo alias chuẩn** (`cm/xăng-ti-mét`, `l/lít`, `m/mét`, ...), validator fail nếu metadata unit tồn tại nhưng đề không nói rõ đơn vị;
+- 402/402 hint cấp 1 và 402/402 hint cấp 2 actionable, **mỗi cấp 402 unique / max repeat 1**; toàn bộ 804 hint slots đạt 0 unseen-answer leak, max length **124/130**.
+- **534/534 distractor rationale unique / max repeat 1**; diagnosis coverage gồm 338 structured, 39 component-term và 157 strict explicit wrong→correct contrast; `missing_choice_specific_diagnosis=0`, max 300 ký tự.
+- vị trí đáp án đúng cân bằng deterministic: **176 câu 4-choice = 44/44/44/44**, **6 true/false = 3/3**.
+- **48 câu integer có `answer_unit`** giữ display-only contract; prompt alias gate và real-bank runtime smoke đều PASS.
 - **39 application regression quan trọng** được khóa riêng: 38 regression trước đó + câu đọc/viết số đã đổi từ ghép hàng trực tiếp sang sửa lỗi bỏ quên hàng chục;
 - child-facing lesson/question text có **0 internal-engine vocabulary**, **0 Unicode/whitespace/control-character hygiene violation** và **0 phép tính dính operator** (`8+2=10` kiểu cũ đã giảm 9 → 0); metadata kỹ thuật như `application`, `numeric_input`, `deterministic` vẫn được phép;
-- **67/67 worked example unique**, mỗi ví dụ có ít nhất 2 bước giải, **0 exact/near overlap** với 201 câu practice và 67/67 solution chốt đáp án tường minh;
+- **67/67 worked example unique**, mỗi ví dụ có ít nhất 2 bước giải, **0 exact/near overlap** với 402 câu practice và 67/67 solution chốt đáp án tường minh;
 - cả hai mục tiêu học đạt **67/67 unique** và gắn concept; objective 1 đã loại **67/67** placeholder `Nhận biết và thực hiện đúng nội dung:` và đổi động từ theo answer surface, objective 2 placeholder chung = 0;
 - 67/67 concept definition hiện dài ít nhất **40 ký tự**; 3 definition quá mỏng (`Thêm vào`, `Ngày và giờ`, `Giờ và phút`) đã được nâng thành quan hệ có ý nghĩa, vẫn giữ Grade-2 scope;
-- 201/201 `explanation_vi` unique và dài ít nhất 32 ký tự; **57 lời giải quá ngắn đã được nâng lên 0**, MCQ giữ correct-rationale đồng bộ với explanation; **201/201 lời giải có evidence của đáp án**, 44 câu thiếu kết luận tường minh đã được nâng về 0; **33 numeric feedback tail máy móc** `Kết quả này theo đúng quy tắc...` đã giảm **33 → 0**; thêm wave mới loại **14** suffix chung `quan hệ nhân/chia tương ứng...` và **8** suffix `đại lượng mà đề đang hỏi` về **0**, thay bằng check-step theo đúng concept/tình huống; regression riêng khóa bug `vạch chia` bị phân loại nhầm thành phép chia;
+- **402/402 `explanation_vi`** đạt semantic/evidence/readability gate, 401 unique; MCQ correct-rationale đồng bộ explanation.
 - toàn ngân hàng đạt **0 exact duplicate + 0 cross-lesson near-duplicate ≥ 0.95**; 2 cặp near-duplicate đã được viết lại theo ngữ cảnh khác;
-- 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract;
+- **24 câu cộng/trừ viết** khớp chính xác số lượt nhớ/mượn theo skill contract;
 - **166 phương trình số instructional** đang được kiểm bằng arithmetic parser, hiện **0 sai**; detector có regression cho cả phép cộng chuỗi và phép chia dùng dấu `:`.
 
-Latest runtime result: **49 tests PASS**. Shadow pool-6 regression: **8 tests PASS**. Full `MathContentDataSmoke` discovery: **57/57 tests PASS**.
+Latest runtime result: **49/49 PASS**; pool-6 regression **8/8 PASS**; full `MathContentDataSmoke` **57/57 PASS**; clean rebuild real 402-bank persistence/session smoke **289 assertions PASS**.
 
 ## Commits / waves
 
@@ -186,29 +186,29 @@ Latest runtime result: **49 tests PASS**. Shadow pool-6 regression: **8 tests PA
 - `def7313` — `Toán: nâng thêm câu vận dụng theo hướng chuyển giao`
 - `c7c2905` — `Toán: tăng chiều sâu câu vận dụng còn yếu`
 
-## Parallel shadow pool-6 — READY, chưa publish runtime
+## Pool-6 runtime publish — COMPLETE
 
-- Draft source mới dưới `tools/math_content_authoring/drafts/`: **201 câu `_04/_05/_06`**, phủ đủ **67/67 skill**, đúng **1 basic + 1 medium + 1 application/skill**.
-- Shadow preview deterministic: **402 câu / 67 lesson × 6 câu**, đúng **2 basic + 2 medium + 2 application/lesson**; runtime `question_bank_v1.json` vẫn **201 câu** và là exact prefix của shadow bank.
-- Toàn shadow preview có **402/402 valid questions**, difficulty **134/134/134**; mọi ID theo skill liên tục `_01.._06`, mọi question được practice set tham chiếu đúng một lần.
-- Production semantic validator trên shadow hiện chỉ còn classifier-only `missing_choice_specific_diagnosis` cho **157** distractor thuộc prompt family mới; draft wrapper kiểm từng case bắt buộc nêu lựa chọn sai + kết luận đúng + nguyên lời giải. **Mọi loại production-validator error khác = 0**.
-- MC balance toàn shadow: 4-choice **44/44/44/44** ở A/B/C/D; true/false **3/3**. Draft readability: prompt max **139**, explanation max **152**, hint max **119** ký tự.
-- `validate_math_pool6_draft.py`: PASS; `test_math_pool6_draft.py`: **8/8 PASS**; runtime content suite vẫn **49/49 PASS**; full discovery **57/57 PASS**.
-- Publish gate đã mở: AI2 `REQUEST_009_READY=05cdb2a`, `MANIFEST_LOCK=FREE`. Shadow wave này được chốt riêng; runtime 402 được publish ở wave kế tiếp để giữ history reviewable.
+- 201 expansion questions `_04/_05/_06` đã được promote vào production; runtime bank hiện **402 questions**.
+- 67 lesson × 6 câu; mỗi lesson đúng **2 basic + 2 medium + 2 application**; IDs `_01..06` contiguous.
+- Production semantic validator: **402/402 valid, 0 errors**; pool-6 wrapper báo `draft_fallback_rationales=0`.
+- Full content tests: **57/57 PASS**; clean rebuild `MathSessionPersistenceRuntimeSmoke`: **289 assertions PASS** trên real bank.
+- Deterministic regenerate giữ nguyên SHA catalog `98AC39F0...8961E` và bank `1FDA50EA...0D775`.
+- Manifest `1.9.0`: **PASS**, 3/3 listed files khớp SHA256 và không thiếu/thừa file pack.
+- Request 009 content handoff `05cdb2a` đã được tiêu thụ; AI1 không còn breadth/replay content blocker.
 
 ## Current blockers outside AI1 content ownership
 
 1. Request 005 functional path đã được commit end-to-end: engine `656a94b` + UI `1436705`. Targeted lesson dùng authored bank đúng 3 câu, all-201 answer-surface sweep PASS, Flow 5 prerequisite unlock PASS; current persistence WIP đạt **171 assertions PASS** và Child UI đạt **1596 assertions PASS**. Release-clean full solution vẫn bị SQLite/toolchain chặn.
 2. Request 007 **CLOSED** tại `7f79367`: targeted corrupt regression xác nhận cursor rollback 2→1, phát lại đúng medium, sau đó application, đủ 3 attempts mới complete; current persistence smoke hiện **171 assertions PASS**.
-3. Request 006 vẫn mở: 23 câu integer có `answer_unit` được content giữ display-only, nhưng `MathAuthoredQuestionSource`/`MathQuestion` chưa preserve field để feedback hiện `8 cm`, `5 kg`, `60 phút` mà vẫn chấm raw integer.
+3. Request 006 **CLOSED tại AI2 `3cf7fc6`**: content hiện có 48 integer `answer_unit` display-only; loader/runtime/resume preserve metadata và raw integer grading không bị mở rộng sang unit text.
 4. UI smoke full project-reference build vẫn gặp lỗi reference `System.Data.SQLite` khi build `WAHU.Data.csproj`; App + Child UI targeted build với `BuildProjectReferences=false` PASS. Đây là build/dependency WIP ngoài AI1.
 5. Retry UI presentation trong current working tree hiện **PASS** sau rebuild App + Child UI với `BuildProjectReferences=false`; Child UI đạt **1596 assertions**. Chưa coi là commit-owned closure cho tới khi lane UI chốt các file WIP của họ.
 6. Legacy generator vẫn chỉ phủ 65/67 skill, nhưng lesson-authored path đã cho phép hai skill `FOLD_CUT_COMPOSE_SHAPES` và `MONEY_VND_NOTE_RECOGNITION` có bài luyện thật mà không cần template giả.
-7. **Breadth / replay — Request 009 HANDOFF READY tại AI2 `05cdb2a`:** shadow pool đã hoàn tất **402 câu / 6 câu mỗi lesson / 2 mỗi difficulty**; runtime bank vẫn 201 ở wave shadow này và sẽ được promote ở commit AI1 kế tiếp.
+7. **Breadth / replay — Request 009 CLOSED cho AI1:** runtime 402 + selected-set engine handoff đã integrate; pool 6/session target 3; AI2 final committed stress ghi persistence 374 PASS.
 8. **Expression operator grading — Request 010 CLOSED ở AI2 `7afbb7b`:** per-question expression whitelist đã được engine preserve/enforce; content contract cộng-trừ `+ - ( )` của AI1 đã có runtime consumer.
 
 ## Lane verdict
 
-**Content/Data correctness lane: CLEAN; shadow breadth 402: READY; Request 009 handoff OPEN; runtime publish: IN PROGRESS.**
+**Content/Data lane: COMPLETE — runtime 402, validator/tests/hash/integration đều GREEN.**
 
-Runtime 201 hiện không còn lesson/question/reference/answer/prerequisite/difficulty/semantic-validator error. Prerequisite graph giữ 9 root và 67/67 reachability. Shadow 402 đã author/validate xong và sẵn sàng publish; phần còn khóa chỉ là runtime selected-set contract Request 009, không còn là thiếu content draft.
+Runtime 402 hiện không còn lesson/question/reference/answer/prerequisite/difficulty/semantic-validator error. Prerequisite graph giữ 9 root và 67/67 reachability. AI1 không còn content/data blocker.

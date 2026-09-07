@@ -7,8 +7,10 @@ semantic validator passes. No network access or random generation is used.
 """
 from __future__ import annotations
 
+import importlib.util
 import json
 import re
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -189,6 +191,13 @@ def answer_safe_hint(candidate: str, prompt: str, answer: object, answer_kind: s
     }
     table = first if level == 1 else second
     return table.get(question_type, table["numeric_input"])
+
+
+def pool_hint_variant(candidate: str, expansion_question: bool) -> str:
+    """Keep the second question of each difficulty pedagogically distinct without changing its hint meaning."""
+    if not expansion_question or not candidate:
+        return candidate
+    return "Ở câu này, " + candidate[0].lower() + candidate[1:]
 
 
 def numeric_application_hint(concept_name: str) -> str:
@@ -854,8 +863,8 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
     return None
 
 
-def distractor_rationale(choice_text: str, explanation: str, skill: str, prompt: str) -> str:
-    """Explain a wrong choice; prefer a provable choice-specific diagnosis when available."""
+def distractor_rationale(choice_text: str, correct_text: str, explanation: str, skill: str, prompt: str) -> str:
+    """Explain a wrong choice; prefer a provable diagnosis, else contrast it with the exact answer."""
     reason = " ".join(explanation.strip().split())
     structured_reason = structured_choice_reason(skill, prompt, choice_text)
     if structured_reason:
@@ -863,7 +872,7 @@ def distractor_rationale(choice_text: str, explanation: str, skill: str, prompt:
     term_reason = COMPONENT_TERM_REASONS.get(choice_text.strip().casefold()) if skill in COMPONENT_SKILLS else None
     if term_reason:
         return f"“{choice_text}” chưa đúng. {term_reason} {reason}"
-    return f"“{choice_text}” chưa đúng. {reason}"
+    return f"“{choice_text}” chưa đúng. Dữ kiện dẫn tới “{correct_text}”. {reason}"
 
 
 def nq(prompt: str, answer: int, explanation: str, *, unit: str | None = None,
@@ -1624,6 +1633,25 @@ Q = {
 }
 
 DIFFICULTIES = ["basic", "medium", "application"]
+POOL6_SPEC_FILES = tuple(Path(__file__).resolve().parent / "drafts" / f"pool6_specs_{index:02d}.py" for index in range(1, 5))
+
+
+def load_pool6_expansion_specs() -> dict[str, list[dict]]:
+    """Load the promoted _04/_05/_06 authored specs without changing their stable source text."""
+    merged: dict[str, list[dict]] = {}
+    authoring_module = sys.modules[__name__]
+    for index, path in enumerate(POOL6_SPEC_FILES, 1):
+        spec = importlib.util.spec_from_file_location(f"math_pool6_runtime_specs_{index:02d}", str(path))
+        if spec is None or spec.loader is None:
+            raise SystemExit(f"Cannot load pool-6 authored specs: {path}")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        items = module.build(authoring_module)
+        overlap = set(merged) & set(items)
+        if overlap:
+            raise SystemExit(f"Duplicate pool-6 authored skill specs: {sorted(overlap)}")
+        merged.update(items)
+    return merged
 
 
 SKILL_NUMERIC_MAX = {
@@ -1662,6 +1690,14 @@ def build() -> tuple[dict, dict]:
         extra = sorted(set(WORKED_EXAMPLES) - set(baseline_skills))
         raise SystemExit(f"WORKED_EXAMPLES mismatch missing={missing} extra={extra}")
 
+    pool6_expansion = load_pool6_expansion_specs()
+    if set(pool6_expansion) != set(baseline_skills):
+        missing = sorted(set(baseline_skills) - set(pool6_expansion))
+        extra = sorted(set(pool6_expansion) - set(baseline_skills))
+        raise SystemExit(f"Pool-6 expansion mismatch missing={missing} extra={extra}")
+    if any(len(items) != 3 for items in pool6_expansion.values()):
+        raise SystemExit("Pool-6 expansion requires exactly 3 authored questions per skill")
+
     chapter_by_domain = {c["domain_key"]: c["id"] for c in CHAPTERS}
     topic_by_id = {t["id"]: t for t in TOPICS}
     questions = []
@@ -1674,12 +1710,13 @@ def build() -> tuple[dict, dict]:
             topic_id, title, explanation, concept_name, concept_def, prerequisites = LESSON_INFO[skill]
             if topic_by_id[topic_id]["chapter_id"] != chapter_id:
                 raise SystemExit(f"Topic/chapter mismatch for {skill}")
-            q_specs = Q[skill]
-            if len(q_specs) != 3:
-                raise SystemExit(f"Need exactly 3 questions for {skill}")
+            q_specs = list(Q[skill]) + list(pool6_expansion[skill])
+            question_difficulties = DIFFICULTIES + DIFFICULTIES
+            if len(q_specs) != 6:
+                raise SystemExit(f"Need exactly 6 questions for {skill}")
             lesson_id = "m2_ls_" + slug(skill)
             q_ids = []
-            for i, (difficulty, spec) in enumerate(zip(DIFFICULTIES, q_specs), 1):
+            for i, (difficulty, spec) in enumerate(zip(question_difficulties, q_specs), 1):
                 qid = f"m2_q_{slug(skill)}_{i:02d}"
                 q_ids.append(qid)
                 question_type = spec["question_type"]
@@ -1690,12 +1727,12 @@ def build() -> tuple[dict, dict]:
                     answer_display += " " + str(spec["answer_unit"])
                 question_explanation = explanation_with_answer(
                     deepen_explanation(spec["explanation_vi"], question_type, concept_name), answer_display)
-                first_hint_text = answer_safe_hint(
+                first_hint_text = pool_hint_variant(answer_safe_hint(
                     first_hint(question_type, difficulty, concept_name), spec["prompt_vi"], spec["correct_answer"],
-                    spec["answer_kind"], question_type, 1)
-                second_hint_text = answer_safe_hint(
+                    spec["answer_kind"], question_type, 1), i > 3)
+                second_hint_text = pool_hint_variant(answer_safe_hint(
                     second_hint(question_type, difficulty, concept_name), spec["prompt_vi"], spec["correct_answer"],
-                    spec["answer_kind"], question_type, 2)
+                    spec["answer_kind"], question_type, 2), i > 3)
                 q = {
                     "id": qid,
                     "lesson_id": lesson_id,
@@ -1733,7 +1770,7 @@ def build() -> tuple[dict, dict]:
                         choice["id"] = chr(ord("a") + index)
                         if choice is not correct:
                             choice["rationale_vi"] = distractor_rationale(
-                                choice["text"], q["explanation_vi"], skill, q["prompt_vi"])
+                                choice["text"], str(q["correct_answer"]), q["explanation_vi"], skill, q["prompt_vi"])
                     q["choices"] = ordered
                     q["correct_choice_id"] = ordered[target]["id"]
                 questions.append(q)
@@ -1747,7 +1784,7 @@ def build() -> tuple[dict, dict]:
                 raise SystemExit(f"Worked example answer missing for {skill}")
             if not isinstance(example["solution_steps_vi"], list) or len(example["solution_steps_vi"]) < 2 or not all(isinstance(x, str) and x.strip() for x in example["solution_steps_vi"]):
                 raise SystemExit(f"Worked example needs at least two solution steps for {skill}")
-            lesson_question_types = [question["question_type"] for question in questions[-3:]]
+            lesson_question_types = [question["question_type"] for question in questions[-6:]]
             lessons.append({
                 "id": lesson_id,
                 "chapter_id": chapter_id,
@@ -1772,9 +1809,9 @@ def build() -> tuple[dict, dict]:
                     "answer": example["answer"],
                 }],
                 "practice_sets": {
-                    "basic": [q_ids[0]],
-                    "medium": [q_ids[1]],
-                    "application": [q_ids[2]],
+                    "basic": [q_ids[0], q_ids[3]],
+                    "medium": [q_ids[1], q_ids[4]],
+                    "application": [q_ids[2], q_ids[5]],
                 },
                 "prerequisite_skills": prerequisites,
                 "difficulty_span": ["basic", "medium", "application"],

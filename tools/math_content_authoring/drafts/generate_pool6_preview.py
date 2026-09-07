@@ -135,7 +135,7 @@ def _build_question(skill: str, domain: str, difficulty: str, ordinal: int, spec
                              if skill in g.COMPONENT_SKILLS else None)
                 if structured or component:
                     choice["rationale_vi"] = g.distractor_rationale(
-                        choice["text"], explanation, skill, question["prompt_vi"])
+                        choice["text"], str(spec["correct_answer"]), explanation, skill, question["prompt_vi"])
                 else:
                     choice["rationale_vi"] = _draft_fallback_rationale(
                         choice["text"], str(spec["correct_answer"]), explanation)
@@ -152,6 +152,17 @@ def build_preview() -> tuple[dict, dict, list[dict]]:
     specs = load_draft_specs()
     domains = _skill_domain(baseline)
     baseline_skills = set(domains)
+    runtime_questions = bank.get("questions") or []
+    if len(runtime_questions) == 402:
+        draft_questions = [
+            copy.deepcopy(question) for question in runtime_questions
+            if int(str(question["id"]).rsplit("_", 1)[1]) >= 4
+        ]
+        if len(draft_questions) != 201:
+            raise ValueError(f"Published pool-6 runtime must expose 201 _04/_05/_06 questions, got {len(draft_questions)}")
+        return copy.deepcopy(catalog), copy.deepcopy(bank), draft_questions
+    if len(runtime_questions) != 201:
+        raise ValueError(f"Unexpected runtime question count before/after pool-6 publish: {len(runtime_questions)}")
     if set(specs) != baseline_skills:
         raise ValueError(f"Draft skill mismatch missing={sorted(baseline_skills-set(specs))} extra={sorted(set(specs)-baseline_skills)}")
     if any(len(items) != 3 for items in specs.values()):

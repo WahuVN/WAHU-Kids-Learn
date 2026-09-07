@@ -48,8 +48,8 @@ class MathContentDataSmoke(unittest.TestCase):
         errors, metrics = validator.validate(BASELINE, LESSONS, QUESTIONS)
         self.assertEqual([], errors)
         self.assertEqual(67, metrics["lessons"])
-        self.assertEqual(201, metrics["questions"])
-        self.assertEqual(201, metrics["valid_questions"])
+        self.assertEqual(402, metrics["questions"])
+        self.assertEqual(402, metrics["valid_questions"])
 
     def test_baseline_source_traceability_is_locked(self):
         self.assertEqual([], validator.baseline_traceability_violations(self.baseline))
@@ -114,7 +114,7 @@ class MathContentDataSmoke(unittest.TestCase):
                 self.assertEqual({"basic", "medium", "application"}, set(lesson["practice_sets"]))
                 for difficulty in ("basic", "medium", "application"):
                     refs = lesson["practice_sets"][difficulty]
-                    self.assertGreaterEqual(len(refs), 1)
+                    self.assertEqual(2, len(refs))
                     for qid in refs:
                         self.assertIn(qid, self.question_by_id)
                         q = self.question_by_id[qid]
@@ -122,8 +122,8 @@ class MathContentDataSmoke(unittest.TestCase):
                         self.assertEqual(difficulty, q["difficulty"])
 
     def test_every_question_has_stable_source_and_valid_answer(self):
-        self.assertEqual(201, len(self.questions))
-        self.assertEqual(201, len({q["id"] for q in self.questions}))
+        self.assertEqual(402, len(self.questions))
+        self.assertEqual(402, len({q["id"] for q in self.questions}))
         for q in self.questions:
             with self.subTest(question=q["id"]):
                 self.assertTrue(q["id"].startswith("m2_q_"))
@@ -229,9 +229,9 @@ class MathContentDataSmoke(unittest.TestCase):
 
     def test_balanced_difficulty_coverage(self):
         counts = Counter(q["difficulty"] for q in self.questions)
-        self.assertEqual({"basic": 67, "medium": 67, "application": 67}, dict(counts))
+        self.assertEqual({"basic": 134, "medium": 134, "application": 134}, dict(counts))
         by_skill = Counter(q["skill_id"] for q in self.questions)
-        self.assertTrue(all(by_skill[s] == 3 for s in self.skills))
+        self.assertTrue(all(by_skill[s] == 6 for s in self.skills))
 
     def test_authoring_is_deterministic_and_matches_committed_json(self):
         catalog, bank = authoring.build()
@@ -339,7 +339,7 @@ class MathContentDataSmoke(unittest.TestCase):
         money_lessons = [x for x in self.lessons if x["skill_id"] == "MONEY_VND_NOTE_RECOGNITION"]
         money_questions = [x for x in self.questions if x["skill_id"] == "MONEY_VND_NOTE_RECOGNITION"]
         self.assertEqual(1, len(money_lessons))
-        self.assertEqual(3, len(money_questions))
+        self.assertEqual(6, len(money_questions))
         for item in money_lessons + money_questions:
             with self.subTest(item=item["id"]):
                 serialized = json.dumps(item, ensure_ascii=False)
@@ -347,7 +347,7 @@ class MathContentDataSmoke(unittest.TestCase):
 
     def test_time_relation_skills_do_not_expand_into_extra_arithmetic(self):
         time_questions = [x for x in self.questions if x["skill_id"] in validator.TIME_RELATION_SKILLS]
-        self.assertEqual(6, len(time_questions))
+        self.assertEqual(12, len(time_questions))
         for item in time_questions:
             with self.subTest(item=item["id"]):
                 serialized = json.dumps(item, ensure_ascii=False)
@@ -669,9 +669,11 @@ class MathContentDataSmoke(unittest.TestCase):
                                         if item["skill_id"] in validator.COMPONENT_SKILLS else None)
                     if component_marker:
                         self.assertIn(component_marker, rationale.casefold())
-                    self.assertTrue(structured_reason or component_marker,
+                    explicit_contrast = validator.has_explicit_choice_contrast(
+                        choice["text"], str(item["correct_answer"]), rationale)
+                    self.assertTrue(structured_reason or component_marker or explicit_contrast,
                                     f"missing choice-specific diagnosis: {item['id']} / {choice['text']}")
-        self.assertEqual(267, len(rationales))
+        self.assertEqual(534, len(rationales))
         self.assertNotIn(validator.GENERIC_DISTRACTOR_RATIONALE, rationales)
         counts = Counter(rationales)
         self.assertLessEqual(max(counts.values()), 3)
@@ -690,7 +692,7 @@ class MathContentDataSmoke(unittest.TestCase):
                 self.assertEqual(expected_max, item["validation"]["numeric_max"])
                 self.assertLessEqual(item["correct_answer"], expected_max)
             checked += 1
-        self.assertEqual(26, checked)
+        self.assertEqual(52, checked)
 
     def test_measurement_scale_feedback_is_not_misclassified_as_division(self):
         item = self.question_by_id["m2_q_measure_with_common_scale_03"]
@@ -701,7 +703,7 @@ class MathContentDataSmoke(unittest.TestCase):
 
     def test_integer_answer_unit_is_display_only_metadata(self):
         unit_questions = [x for x in self.questions if "answer_unit" in x]
-        self.assertEqual(23, len(unit_questions))
+        self.assertEqual(48, len(unit_questions))
         self.assertEqual({"cm", "kg", "l", "dm", "m", "ngày", "giờ", "phút"}, {x["answer_unit"] for x in unit_questions})
         for item in unit_questions:
             with self.subTest(item=item["id"]):
@@ -729,15 +731,15 @@ class MathContentDataSmoke(unittest.TestCase):
         for item in choice_questions:
             by_count.setdefault(len(item["choices"]), []).append(item)
         self.assertEqual({2, 4}, set(by_count))
-        self.assertEqual(3, len(by_count[2]))
-        self.assertEqual(88, len(by_count[4]))
+        self.assertEqual(6, len(by_count[2]))
+        self.assertEqual(176, len(by_count[4]))
         for choice_count, items in by_count.items():
             with self.subTest(choice_count=choice_count):
                 positions = Counter(ord(item["correct_choice_id"]) - ord("a") for item in items)
                 counts = [positions[index] for index in range(choice_count)]
                 self.assertTrue(all(value > 0 for value in counts))
                 self.assertLessEqual(max(counts) - min(counts), 1)
-        self.assertEqual([22, 22, 22, 22], [Counter(x["correct_choice_id"] for x in by_count[4])[key] for key in "abcd"])
+        self.assertEqual([44, 44, 44, 44], [Counter(x["correct_choice_id"] for x in by_count[4])[key] for key in "abcd"])
 
     def test_recognition_distractors_do_not_regress_to_unrelated_giveaways(self):
         forbidden = {
@@ -784,7 +786,7 @@ class MathContentDataSmoke(unittest.TestCase):
             x for x in self.questions
             if x["skill_id"] in validator.ADD_CARRY_RULES or x["skill_id"] in validator.SUB_BORROW_RULES
         ]
-        self.assertEqual(12, len(constrained))
+        self.assertEqual(24, len(constrained))
         for item in constrained:
             with self.subTest(item=item["id"]):
                 operands = [int(x) for x in re.findall(r"\d+", item["prompt_vi"])]
