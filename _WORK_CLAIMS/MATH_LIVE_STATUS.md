@@ -2,7 +2,7 @@
 
 Updated: 2026-09-08
 LAST_FULLY_VERIFIED_HEAD=`1c4ce9e`
-LATEST_UI_VERIFIED_HEAD=`cadd70d`
+LATEST_UI_VERIFIED_HEAD=`86332de`
 MATH_3AI_DONE=YES
 AI3_LANE_DONE=YES
 PLAYABLE_FIRST_FIVE_P0=GREEN
@@ -12,8 +12,8 @@ Definition: trạng thái dưới đây dùng strict three-lane Math Definition 
 
 ## Playable Event V1 — current
 
-- **Visual/motion integration `cadd70d`: GREEN** — Home/Hub/lesson/rescue có visual polish mới; `af48f89` nối game-art motion vào performance contract để LOW tĩnh, NORMAL có FPS cap, learning-focus feedback tĩnh và hidden controls dừng timer. Không đổi grading/session semantics. Child UI **3722 assertions PASS**, persistence **8002 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, `git diff --check` PASS.
-- Release-full artifact vẫn là `0.1.68-dev` tại `1c4ce9e`; `cadd70d` là common-head UI/persistence/performance verification, chưa được gọi là một release artifact mới cho tới khi full Build-Setup/Installer gate chạy lại.
+- **Visual/motion integration `86332de`: GREEN** — Home/Hub/lesson/rescue có visual polish mới; `af48f89` nối game-art motion vào performance contract để LOW tĩnh, NORMAL có FPS cap và learning-focus feedback tĩnh; `a0344f4` theo dõi cả hierarchy cha để container ẩn/offscreen dừng timer con và hiện lại thì resume an toàn. Không đổi grading/session semantics. Child UI **3725 assertions PASS**, persistence **8018 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, `git diff --check` PASS.
+- Release-full artifact vẫn là `0.1.68-dev` tại `1c4ce9e`; `86332de` là common-head UI/persistence/performance verification, chưa được gọi là một release artifact mới cho tới khi full Build-Setup/Installer gate chạy lại.
 
 - **First-five playable P0: GREEN** — Home/Hub → 5 nhiệm vụ cứu hộ production → intro → 3 checkpoint → wrong/retry/hint/repair → suspend/resume exact event/session/question → completion → Garden reward idempotent.
 - P1 hardening đã khóa keyboard/prerequisite, exact resume-shell routing, valid→corrupt→valid recovery và dynamic accessibility theo state.
@@ -32,7 +32,7 @@ Definition: trạng thái dưới đây dùng strict three-lane Math Definition 
 - Post-installer provenance `f5e5202`: thêm `15b/15`, HEAD/tree phải vẫn sạch sau installer + update-manifest trước khi được in `BUILD_SETUP_ARTIFACTS_PASS`; manifest ghi `source_provenance_after_installer=PASS`.
 - Canonical milestone consistency `1c4ce9e`: milestone/next milestone/UI Garden derive từ canonical `GrowthSteps`, không từ số completed session; `ReadProgress()` không tin inventory stale/missing và reconcile tự chuẩn hóa materialized Garden inventory.
 - DPI hardening: rescue intro + active gameplay đều được scale 125%; active prompt/checkpoint/break target vẫn đọc và thao tác được, flow retry/suspend tiếp tục bình thường.
-- Latest common-head UI/persistence/performance: Child UI **3722 assertions PASS**; persistence **8002 assertions PASS**; Performance **13 assertions PASS**; Motion **25 assertions PASS**. Most recent full Math content/event/pool suite remains **90/90 PASS**; visual/motion integration did not change authored content.
+- Latest common-head UI/persistence/performance: Child UI **3725 assertions PASS**; persistence **8018 assertions PASS**; Performance **13 assertions PASS**; Motion **25 assertions PASS**. Most recent full Math content/event/pool suite remains **90/90 PASS**; visual/motion integration did not change authored content.
 - `0.1.68-dev`: Build-Setup **15/15 PASS** + provenance/content/persistence/Portable first-class gates + post-installer provenance, Portable E2E **PASS**, installer compile **PASS**.
 - Portable SHA256 `1F351A2206B913E49B37FD1F054E77CCAE9BE93E7E72BAFDA6291FC4A262308E`; Installer SHA256 `26ECC47FCB14C37C255EEF8D26655631595DBCC53E590F4DE7BCE8F4124985BB`.
 - Release payload hard-requires `game_events_v1.json`; fresh checkout SHA của cả 4 Math runtime JSON khớp manifest. Event SHA `F9F25EA94DA7FCD20E360509EE53E6E758039CCF788FAFEC729A35F80D39A8B1`.
@@ -42,8 +42,8 @@ Definition: trạng thái dưới đây dùng strict three-lane Math Definition 
 ## Overall
 
 - **Content: 100% theo Math lane** — 7 chương, 17 chủ đề, 67 lesson, **402 authored questions**, đúng 6 câu/lesson = 2 basic + 2 medium + 2 application. Production semantic validator: **402/402 valid, 0 errors**; full Math content/event/pool suite **90/90 PASS**.
-- **Engine: 100% theo Math lane** — schema V5 + pack identity, targeted session 3 câu từ pool 6, durable ordered selected-set, exact resume/retry/corrupt recovery, rescue runtime/checkpoint/repair/terminal/reward idempotency. Latest common-head `MathSessionPersistenceRuntimeSmoke`: **8002 assertions PASS**.
-- **UI/QA: playable P0 GREEN cho 5 bài đầu** — Home/Hub rescue entry, 5 mission cards, 3 checkpoint cards, behavior-aware repair/break, exact rescue resume, fail-safe event fallback, Garden completion, accessibility/keyboard/responsive, plus post-closure visual polish. Latest common-head `ChildUiRuntimeSmoke`: **3722 assertions PASS**; Performance **13 assertions PASS**; Motion **25 assertions PASS**.
+- **Engine: 100% theo Math lane** — schema V5 + pack identity, targeted session 3 câu từ pool 6, durable ordered selected-set, exact resume/retry/corrupt recovery, rescue runtime/checkpoint/repair/terminal/reward idempotency. Latest common-head `MathSessionPersistenceRuntimeSmoke`: **8018 assertions PASS**.
+- **UI/QA: playable P0 GREEN cho 5 bài đầu** — Home/Hub rescue entry, 5 mission cards, 3 checkpoint cards, behavior-aware repair/break, exact rescue resume, fail-safe event fallback, Garden completion, accessibility/keyboard/responsive, plus post-closure visual polish. Latest common-head `ChildUiRuntimeSmoke`: **3725 assertions PASS**; Performance **13 assertions PASS**; Motion **25 assertions PASS**.
 - **Distribution playable dev artifact** — Build-Setup 15/15 + Portable E2E PASS + installer compile PASS trên clean `1c4ce9e`, artifact `0.1.68-dev`; full Installer E2E safety-blocked trên máy hiện tại.
 - **Three-AI Math DoD: DONE** — AI1, AI2 và AI3 đã hoàn tất baseline; AI3 playable first-five lane đã đạt STOP RULE và chuyển `LANE_DONE=YES`.
 
