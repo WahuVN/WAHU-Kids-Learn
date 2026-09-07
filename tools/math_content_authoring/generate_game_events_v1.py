@@ -23,7 +23,7 @@ EVENT_SPECS = [
         "checkpoint_nouns_vi": ["biển số đầu tiên", "biển số thứ hai", "biển số cuối cùng"],
         "theme": "forest_path",
         "repair_copy_vi": "Mình xem từng hàng của số rồi sửa một bước nhỏ nhé.",
-        "break_copy_vi": "Phần con đã làm được lưu rồi. Khi nào muốn, mình quay lại đặt nốt các biển nhé.",
+        "break_copy_vi": "Con có thể dừng ở đây. Những biển đã đặt đúng đã được lưu để lần sau mình tiếp tục.",
         "reward_presentation": "garden_progress",
     },
     {
@@ -38,7 +38,7 @@ EVENT_SPECS = [
         "checkpoint_nouns_vi": ["trạm Mầm", "trạm Lá", "trạm Hoa"],
         "theme": "hundred_station",
         "repair_copy_vi": "Mình nhìn hai chữ số cuối trước rồi chọn lại nhé.",
-        "break_copy_vi": "Các trạm đã sửa vẫn được giữ nguyên. Khi nào muốn, mình quay lại làm tiếp nhé.",
+        "break_copy_vi": "Con nghỉ cũng được. Nhãn của các trạm đã sửa vẫn được giữ nguyên để lần sau mình tiếp tục.",
         "reward_presentation": "garden_progress",
     },
     {
@@ -53,7 +53,7 @@ EVENT_SPECS = [
         "checkpoint_nouns_vi": ["đoạn đầu", "đoạn giữa", "đoạn cuối"],
         "theme": "number_path",
         "repair_copy_vi": "Mình thử bớt 1 hoặc thêm 1 rồi kiểm tra lại nhé.",
-        "break_copy_vi": "Đoạn con đã nối vẫn được lưu. Khi nào muốn, mình quay lại nối tiếp nhé.",
+        "break_copy_vi": "Mình có thể dừng tại đoạn này. Các đoạn đã nối đúng đã được lưu để lần sau mình nối tiếp.",
         "reward_presentation": "garden_progress",
     },
     {
@@ -68,7 +68,7 @@ EVENT_SPECS = [
         "checkpoint_nouns_vi": ["ngăn hàng trăm", "ngăn hàng chục", "ngăn hàng đơn vị"],
         "theme": "place_value_workshop",
         "repair_copy_vi": "Mình nhìn vị trí của chữ số rồi xác định hàng trước nhé.",
-        "break_copy_vi": "Những ngăn con đã sắp vẫn được giữ nguyên. Khi nào muốn, mình quay lại làm tiếp nhé.",
+        "break_copy_vi": "Nếu muốn nghỉ, con cứ dừng ở đây. Các ngăn đã sắp đúng sẽ được giữ nguyên cho lần sau.",
         "reward_presentation": "garden_progress",
     },
     {
@@ -83,7 +83,7 @@ EVENT_SPECS = [
         "checkpoint_nouns_vi": ["bộ phận trăm", "bộ phận chục", "bộ phận đơn vị"],
         "theme": "number_machine",
         "repair_copy_vi": "Mình tách số thành giá trị của từng hàng rồi kiểm tra lại nhé.",
-        "break_copy_vi": "Các bộ phận đã sửa vẫn được lưu. Khi nào muốn, mình quay lại ghép tiếp nhé.",
+        "break_copy_vi": "Con có thể nghỉ sau bộ phận này. Những phần đã ghép đúng đã được lưu để lần sau mình làm tiếp.",
         "reward_presentation": "garden_progress",
     },
 ]

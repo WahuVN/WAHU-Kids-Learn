@@ -36,6 +36,9 @@ BANNED_PATTERNS = [
 ]
 SAFE_ID = re.compile(r"^[a-z0-9][a-z0-9_]{2,79}$")
 SAFE_THEME = re.compile(r"^[a-z0-9][a-z0-9_]{2,47}$")
+BREAK_PROGRESS_PATTERNS = (r"\blưu\b", r"giữ\s+nguyên")
+BREAK_PROMISE_PATTERNS = (r"hoàn\s+thành", r"nhận\s+(?:quà|thưởng)", r"mở\s+khóa", r"được\s+thưởng")
+MAX_BREAK_TOKEN_JACCARD = 0.60
 
 
 def load_json(path: Path):
@@ -93,6 +96,7 @@ def validate(events_path: Path = DEFAULT_EVENTS, lessons_path: Path = DEFAULT_LE
 
     seen_ids = set()
     seen_lessons = []
+    break_texts = []
     for index, event in enumerate(events):
         where = f"event[{index}]"
         if not isinstance(event, dict):
@@ -122,6 +126,15 @@ def validate(events_path: Path = DEFAULT_EVENTS, lessons_path: Path = DEFAULT_LE
             if reason:
                 errors.append(f"{where}:{key}:{reason}")
 
+        break_text = event.get("break_copy_vi")
+        if isinstance(break_text, str):
+            lowered_break = break_text.casefold()
+            if not any(re.search(pattern, lowered_break, re.IGNORECASE) for pattern in BREAK_PROGRESS_PATTERNS):
+                errors.append(f"{where}:break_copy_vi:progress_not_preserved")
+            if any(re.search(pattern, lowered_break, re.IGNORECASE) for pattern in BREAK_PROMISE_PATTERNS):
+                errors.append(f"{where}:break_copy_vi:completion_or_reward_promise")
+            break_texts.append((where, break_text))
+
         checkpoints = event.get("checkpoint_nouns_vi")
         if not isinstance(checkpoints, list) or len(checkpoints) != 3:
             errors.append(f"{where}:checkpoints_count")
@@ -144,6 +157,16 @@ def validate(events_path: Path = DEFAULT_EVENTS, lessons_path: Path = DEFAULT_LE
             errors.append(f"{where}:unknown_lesson:{lesson_id}")
         elif lesson.get("skill_id") != skill_id:
             errors.append(f"{where}:skill_mismatch:{skill_id}:{lesson.get('skill_id')}")
+
+    for a in range(len(break_texts)):
+        where_a, text_a = break_texts[a]
+        tokens_a = set(re.findall(r"\w+", text_a.casefold(), re.UNICODE))
+        for b in range(a + 1, len(break_texts)):
+            where_b, text_b = break_texts[b]
+            tokens_b = set(re.findall(r"\w+", text_b.casefold(), re.UNICODE))
+            similarity = len(tokens_a & tokens_b) / max(1, len(tokens_a | tokens_b))
+            if similarity > MAX_BREAK_TOKEN_JACCARD:
+                errors.append(f"break_copy_template_reuse:{where_a}:{where_b}:{similarity:.3f}")
 
     if seen_lessons != EXPECTED_FIRST_FIVE:
         errors.append("game_events_first_five_order_or_coverage:" + "|".join(str(x) for x in seen_lessons))

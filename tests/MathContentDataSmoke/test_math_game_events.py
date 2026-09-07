@@ -81,6 +81,33 @@ class MathGameEventsSmoke(unittest.TestCase):
             errors, _ = self.validator.validate(path, LESSON_PATH)
         self.assertTrue(any("dark_pattern" in x for x in errors), errors)
 
+    def test_break_copy_preserves_progress_without_reward_pressure(self):
+        for event in self.events_root["events"]:
+            text = event["break_copy_vi"].casefold()
+            with self.subTest(event=event["id"]):
+                self.assertTrue(("lưu" in text) or ("giữ nguyên" in text))
+                self.assertNotIn("hoàn thành", text)
+                self.assertNotIn("nhận thưởng", text)
+                self.assertNotIn("mở khóa", text)
+
+    def test_event_validator_rejects_break_copy_without_saved_progress(self):
+        broken = json.loads(EVENT_PATH.read_text(encoding="utf-8"))
+        broken["events"][0]["break_copy_vi"] = "Con nghỉ một chút nhé. Khi nào muốn mình quay lại tiếp tục."
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "events.json"
+            path.write_text(json.dumps(broken, ensure_ascii=False), encoding="utf-8")
+            errors, _ = self.validator.validate(path, LESSON_PATH)
+        self.assertTrue(any("progress_not_preserved" in x for x in errors), errors)
+
+    def test_event_validator_rejects_template_cloned_break_copy(self):
+        broken = json.loads(EVENT_PATH.read_text(encoding="utf-8"))
+        broken["events"][1]["break_copy_vi"] = broken["events"][0]["break_copy_vi"]
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "events.json"
+            path.write_text(json.dumps(broken, ensure_ascii=False), encoding="utf-8")
+            errors, _ = self.validator.validate(path, LESSON_PATH)
+        self.assertTrue(any("break_copy_template_reuse" in x for x in errors), errors)
+
     def test_event_validator_rejects_wrong_lesson_skill_and_question_count(self):
         broken = json.loads(EVENT_PATH.read_text(encoding="utf-8"))
         broken["events"][1]["target_skill_id"] = "NUM_COUNT_READ_WRITE_0_1000"

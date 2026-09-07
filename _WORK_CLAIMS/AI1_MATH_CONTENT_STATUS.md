@@ -28,7 +28,7 @@ Owner: AI1 — Math Content & Data
   - interactive measurement
   - word problem
 - Semantic validator errors: **0**
-- Math content unittest: **79 / 79 PASS**
+- Math content unittest: **82 / 82 PASS**
 - Pack manifest/hash/listing check on current working tree: **PASS** (`version=1.9.0`, 4 listed files, gồm `game_events_v1.json`)
 - Real 402-bank session/persistence integration: **289 assertions PASS** trên snapshot trước final engine stress; AI2 committed status ghi final persistence **374 PASS**. Current unstaged AI2 partial-pack-identity fixture đang được phát triển riêng và không thuộc AI1.
 - Child UI targeted build (`BuildProjectReferences=false`) + runtime smoke: **1593 assertions PASS**
@@ -187,10 +187,11 @@ Theo phase hiện tại, AI1 **không tiếp tục polish đồng đều 67 bài
 - **5/5 first lessons** có exactly one `quick_rescue` event, mỗi event `question_count=3`, 3 checkpoint labels, `garden_progress` reward presentation.
 - Event themes: `forest_path`, `hundred_station`, `number_path`, `place_value_workshop`, `number_machine`.
 - Copy được thiết kế theo restoration/safe-rescue: không countdown, speed pressure, streak-loss, mất quà, shame, fake danger, companion distress hoặc random reward.
-- Validator fail-closed kiểm schema exact, unique ID, lesson/skill reference, first-five order/coverage, 3 checkpoints, length/NFC/control chars và dark-pattern phrases.
-- Event generator deterministic qua 2 lượt; event SHA256: `4E6DCD1DC319EE1971214A389D10403856021165E148F47A20D037879260C727`.
+- Validator fail-closed kiểm schema exact, unique ID, lesson/skill reference, first-five order/coverage, 3 checkpoints, length/NFC/control chars, dark-pattern phrases, break-copy progress preservation/reward promises và template reuse.
+- Event generator deterministic qua 2 lượt; event SHA256: `D765B03584B3012784E793DA7A85F657487B6B4E3F3D0B40947E22640C4C19A0`.
 - Manifest `1.9.0` đã list **4 files**, SHA event khớp bytes production; generic ContentPack runtime **21 assertions PASS**.
-- Full `MathContentDataSmoke`: **79/79 PASS**.
+- Break copy của 5 event đều nói rõ tiến độ được lưu/giữ nguyên, không hứa reward/completion; max pairwise token-Jaccard giảm **0.667 → 0.500** và validator khóa ngưỡng `<= 0.60`.
+- Full `MathContentDataSmoke`: **82/82 PASS**.
 - Handoff: AI2 consume schema/runtime; AI3 thêm file event vào build/portable/installer payload. AI1 **không sửa** Session/App/release scripts.
 
 ## Commits / waves
