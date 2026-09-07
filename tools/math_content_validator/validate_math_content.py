@@ -370,6 +370,20 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
                 return "30 phút ngắn hơn 60 phút; 60 phút đầy đủ mới bằng một giờ."
             if label == "không thể biết":
                 return "Quan hệ 1 giờ = 60 phút đã biết nên có thể gọi tên khoảng thời gian này trực tiếp."
+        if "30 phút so với 1 giờ" in prompt_cf:
+            if label == "dài hơn":
+                return "30 phút chỉ bằng nửa của 60 phút, nên ngắn hơn 1 giờ chứ không dài hơn."
+            if label == "bằng nhau":
+                return "1 giờ có 60 phút; 30 phút mới bằng nửa giờ nên hai khoảng thời gian không bằng nhau."
+            if label == "không thể so sánh":
+                return "Đổi 1 giờ thành 60 phút thì so sánh trực tiếp được: 30 phút ngắn hơn 60 phút."
+        if "từ 10 giờ đến 11 giờ cùng buổi" in prompt_cf:
+            if label == "24 giờ":
+                return "Từ 10 giờ đến 11 giờ cùng buổi chỉ kéo dài 1 giờ, không phải trọn 24 giờ."
+            if label == "30 phút":
+                return "Từ 10 giờ đến 11 giờ là đủ 60 phút; 30 phút chỉ bằng nửa khoảng đó."
+            if label == "2 ngày":
+                return "Hai ngày dài hơn rất nhiều; khoảng từ 10 giờ đến 11 giờ cùng buổi chỉ là 1 giờ = 60 phút."
 
     if skill == "CALENDAR_DAYS_IN_MONTH_DATE" and "ngày sau ngày 14 tháng 9" in prompt.casefold():
         label = choice_text.strip().casefold()
@@ -518,6 +532,11 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
             "chỉ so sánh màu sắc của hai tờ": "Màu sắc không cho biết chắc tờ nào có giá trị lớn hơn; phải so sánh hai con số mệnh giá.",
             "chỉ so sánh kích thước của hai tờ": "Kích thước không phải giá trị tiền; cần đọc và so sánh con số mệnh giá trên hai tờ.",
             "chọn tờ có nhiều chữ hơn": "Số lượng chữ trên tờ không quyết định giá trị; con số mệnh giá mới là thông tin cần so sánh.",
+            "màu nền của tờ tiền": "Màu nền có thể hỗ trợ nhận biết nhưng không quyết định chắc chắn giá trị; phải đọc con số mệnh giá và đơn vị đồng.",
+            "kích thước hình trang trí": "Kích thước hình trang trí không phải thông tin xác định giá trị; cần đọc con số mệnh giá.",
+            "vị trí của hình vẽ": "Vị trí hình vẽ không quyết định giá trị tờ tiền; con số mệnh giá đi cùng đơn vị đồng mới đáng tin cậy.",
+            "chỉ nhìn màu để đoán": "Màu sắc một mình không đủ để xếp giá trị; phải đọc con số mệnh giá trên từng tờ.",
+            "chỉ so kích thước hình vẽ": "Kích thước hình vẽ không biểu thị trực tiếp giá trị; cần so con số mệnh giá.",
         }
         if label in reasons:
             return reasons[label]
@@ -605,6 +624,9 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
         prompt_cf = prompt.casefold()
         reasons = {
             "nét thẳng kéo dài không đổi hướng": "Nét không đổi hướng là nét thẳng, trong khi đường cong phải có sự uốn hoặc đổi hướng liên tục.",
+            "nét thẳng không đổi hướng": "Nét không đổi hướng là nét thẳng; đường cong phải uốn hoặc đổi hướng.",
+            "một điểm đơn": "Một điểm chỉ là một vị trí, không tạo thành một đường cong có chiều dài.",
+            "đoạn thẳng nối hai điểm": "Đoạn nối hai điểm mà không uốn là đoạn thẳng, không phải đường cong.",
             "phần thẳng có hai đầu mút": "Phần thẳng có hai đầu mút là đoạn thẳng, không phải đường cong.",
             "một vị trí được đánh dấu": "Một vị trí được đánh dấu là điểm, không tạo thành một đường cong.",
             "đường thẳng": "Vòng cung có sự uốn cong nên không thể là đường thẳng.",
@@ -613,6 +635,9 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
             "nét đó vẫn là đường thẳng vì có đoạn đi thẳng": "Nét đã uốn thì có phần đường cong; một đoạn đi thẳng không làm cả nét trở thành đường thẳng.",
             "nét đó phải khép kín mới là đường cong": "Đường cong không bắt buộc khép kín; một nét uốn mở vẫn là đường cong.",
             "nét đó là một điểm vì không có cạnh": "Điểm chỉ là một vị trí; nét đã kéo dài và uốn sang bên nên không thể là một điểm.",
+            "toàn bộ vẫn là đường thẳng": "Nét đã uốn đổi hướng nên toàn bộ không còn là một đường thẳng.",
+            "phải khép kín mới được gọi là cong": "Đường cong không bắt buộc khép kín; chỉ cần nét uốn hoặc đổi hướng.",
+            "nét chỉ là một điểm": "Nét kéo dài từ A rồi uốn sang bên nên không thể chỉ là một điểm đơn lẻ.",
         }
         if label in reasons: return reasons[label]
 
@@ -697,13 +722,19 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
         reasons = {
             "quả bóng": "Quả bóng gần dạng khối cầu, không có hai đáy tròn phẳng như khối trụ.",
             "hộp chữ nhật": "Hộp chữ nhật có các mặt phẳng hình chữ nhật, không có mặt cong bao quanh như khối trụ.",
+            "quyển sách": "Quyển sách gần dạng khối hộp với các mặt phẳng, không có hai đáy tròn và mặt cong như khối trụ.",
             "tấm bìa phẳng": "Tấm bìa là vật gần dạng phẳng, không phải một khối có hai đáy và mặt cong.",
+            "tấm giấy phẳng": "Tấm giấy gần dạng phẳng, không phải một khối có hai đáy tròn và mặt cong xung quanh.",
             "hai đáy vuông và các mặt phẳng xung quanh": "Khối trụ có hai đáy tròn và mặt cong xung quanh, không phải hai đáy vuông cùng các mặt phẳng.",
             "chỉ có một mặt tròn, không có mặt cong": "Khối trụ có hai đáy tròn và một mặt cong bao quanh, nên mô tả chỉ một mặt tròn là thiếu đặc trưng.",
             "có một đáy tròn và một đỉnh nhọn": "Đỉnh nhọn là đặc điểm của dạng nón, không phải khối trụ có hai đáy tròn song song.",
+            "có một đỉnh nhọn": "Khối trụ không có đỉnh nhọn; nó có hai đáy tròn và mặt cong xung quanh.",
+            "có sáu mặt vuông": "Sáu mặt vuông thuộc dạng khối lập phương; khối trụ có hai đáy tròn và một mặt cong.",
+            "không có đáy": "Khối trụ có hai đáy tròn phẳng, nên nói không có đáy là sai đặc trưng.",
             "hình vuông": "Mặt trên và dưới của ống hình trụ là hai đáy tròn, không phải hình vuông.",
             "hình tam giác": "Khối trụ có đáy tròn, không có đáy hình tam giác.",
             "hình chữ nhật": "Mặt bên khi nhìn trải có thể liên hệ hình chữ nhật, nhưng mặt trên và mặt dưới của khối trụ là hình tròn.",
+            "một điểm": "Mỗi đầu của lon hình trụ là một mặt phẳng hình tròn, không thể chỉ là một điểm.",
         }
         if label in reasons: return reasons[label]
 
@@ -814,6 +845,9 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
 
     if skill == "MONEY_VND_NOTE_RECOGNITION" and "chỉ nhìn màu sắc" in prompt.casefold() and choice_text.strip().casefold() == "đúng":
         return "Màu sắc một mình không xác định chắc chắn giá trị tờ tiền; vẫn phải đọc con số mệnh giá và đơn vị đồng, nên chọn Đúng là sai."
+
+    if skill == "MONEY_VND_NOTE_RECOGNITION" and "màu gần giống nhau" in prompt.casefold() and choice_text.strip().casefold() == "đúng":
+        return "Hai tờ có màu gần giống nhau vẫn có thể khác mệnh giá; phải đọc con số và đơn vị đồng, nên khẳng định cùng giá trị là sai."
 
     return None
 

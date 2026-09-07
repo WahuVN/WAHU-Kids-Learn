@@ -8776,7 +8776,7 @@
         {
           "id": "a",
           "text": "Nét thẳng không đổi hướng",
-          "rationale_vi": "“Nét thẳng không đổi hướng” chưa đúng. Dữ kiện dẫn tới “Nét uốn thành một cung”. Nét uốn đổi hướng liên tục là một đường cong. Vậy đáp án là Nét uốn thành một cung."
+          "rationale_vi": "“Nét thẳng không đổi hướng” chưa đúng. Nét không đổi hướng là nét thẳng; đường cong phải uốn hoặc đổi hướng. Nét uốn đổi hướng liên tục là một đường cong. Vậy đáp án là Nét uốn thành một cung."
         },
         {
           "id": "b",
@@ -8786,12 +8786,12 @@
         {
           "id": "c",
           "text": "Một điểm đơn",
-          "rationale_vi": "“Một điểm đơn” chưa đúng. Dữ kiện dẫn tới “Nét uốn thành một cung”. Nét uốn đổi hướng liên tục là một đường cong. Vậy đáp án là Nét uốn thành một cung."
+          "rationale_vi": "“Một điểm đơn” chưa đúng. Một điểm chỉ là một vị trí, không tạo thành một đường cong có chiều dài. Nét uốn đổi hướng liên tục là một đường cong. Vậy đáp án là Nét uốn thành một cung."
         },
         {
           "id": "d",
           "text": "Đoạn thẳng nối hai điểm",
-          "rationale_vi": "“Đoạn thẳng nối hai điểm” chưa đúng. Dữ kiện dẫn tới “Nét uốn thành một cung”. Nét uốn đổi hướng liên tục là một đường cong. Vậy đáp án là Nét uốn thành một cung."
+          "rationale_vi": "“Đoạn thẳng nối hai điểm” chưa đúng. Đoạn nối hai điểm mà không uốn là đoạn thẳng, không phải đường cong. Nét uốn đổi hướng liên tục là một đường cong. Vậy đáp án là Nét uốn thành một cung."
         }
       ],
       "correct_choice_id": "b"
@@ -8882,17 +8882,17 @@
         {
           "id": "a",
           "text": "Toàn bộ vẫn là đường thẳng",
-          "rationale_vi": "“Toàn bộ vẫn là đường thẳng” chưa đúng. Dữ kiện dẫn tới “Nét có phần cong vì đã uốn đổi hướng”. Chỉ cần nét uốn và đổi hướng thì đã có phần đường cong; không cần khép kín. Vậy đáp án là Nét có phần cong vì đã uốn đổi hướng."
+          "rationale_vi": "“Toàn bộ vẫn là đường thẳng” chưa đúng. Nét đã uốn đổi hướng nên toàn bộ không còn là một đường thẳng. Chỉ cần nét uốn và đổi hướng thì đã có phần đường cong; không cần khép kín. Vậy đáp án là Nét có phần cong vì đã uốn đổi hướng."
         },
         {
           "id": "b",
           "text": "Phải khép kín mới được gọi là cong",
-          "rationale_vi": "“Phải khép kín mới được gọi là cong” chưa đúng. Dữ kiện dẫn tới “Nét có phần cong vì đã uốn đổi hướng”. Chỉ cần nét uốn và đổi hướng thì đã có phần đường cong; không cần khép kín. Vậy đáp án là Nét có phần cong vì đã uốn đổi hướng."
+          "rationale_vi": "“Phải khép kín mới được gọi là cong” chưa đúng. Đường cong không bắt buộc khép kín; chỉ cần nét uốn hoặc đổi hướng. Chỉ cần nét uốn và đổi hướng thì đã có phần đường cong; không cần khép kín. Vậy đáp án là Nét có phần cong vì đã uốn đổi hướng."
         },
         {
           "id": "c",
           "text": "Nét chỉ là một điểm",
-          "rationale_vi": "“Nét chỉ là một điểm” chưa đúng. Dữ kiện dẫn tới “Nét có phần cong vì đã uốn đổi hướng”. Chỉ cần nét uốn và đổi hướng thì đã có phần đường cong; không cần khép kín. Vậy đáp án là Nét có phần cong vì đã uốn đổi hướng."
+          "rationale_vi": "“Nét chỉ là một điểm” chưa đúng. Nét kéo dài từ A rồi uốn sang bên nên không thể chỉ là một điểm đơn lẻ. Chỉ cần nét uốn và đổi hướng thì đã có phần đường cong; không cần khép kín. Vậy đáp án là Nét có phần cong vì đã uốn đổi hướng."
         },
         {
           "id": "d",
@@ -10332,12 +10332,12 @@
         {
           "id": "c",
           "text": "quyển sách",
-          "rationale_vi": "“quyển sách” chưa đúng. Dữ kiện dẫn tới “ống đựng bút tròn”. Ống tròn có hai đáy gần hình tròn và mặt cong xung quanh, phù hợp dạng khối trụ. Vậy đáp án là ống đựng bút tròn."
+          "rationale_vi": "“quyển sách” chưa đúng. Quyển sách gần dạng khối hộp với các mặt phẳng, không có hai đáy tròn và mặt cong như khối trụ. Ống tròn có hai đáy gần hình tròn và mặt cong xung quanh, phù hợp dạng khối trụ. Vậy đáp án là ống đựng bút tròn."
         },
         {
           "id": "d",
           "text": "tấm giấy phẳng",
-          "rationale_vi": "“tấm giấy phẳng” chưa đúng. Dữ kiện dẫn tới “ống đựng bút tròn”. Ống tròn có hai đáy gần hình tròn và mặt cong xung quanh, phù hợp dạng khối trụ. Vậy đáp án là ống đựng bút tròn."
+          "rationale_vi": "“tấm giấy phẳng” chưa đúng. Tấm giấy gần dạng phẳng, không phải một khối có hai đáy tròn và mặt cong xung quanh. Ống tròn có hai đáy gần hình tròn và mặt cong xung quanh, phù hợp dạng khối trụ. Vậy đáp án là ống đựng bút tròn."
         }
       ],
       "correct_choice_id": "b"
@@ -10375,12 +10375,12 @@
         {
           "id": "a",
           "text": "Có một đỉnh nhọn",
-          "rationale_vi": "“Có một đỉnh nhọn” chưa đúng. Dữ kiện dẫn tới “Có hai đáy tròn và mặt cong xung quanh”. Khối trụ có hai đáy tròn song song và một mặt cong bao quanh. Vậy đáp án là Có hai đáy tròn và mặt cong xung quanh."
+          "rationale_vi": "“Có một đỉnh nhọn” chưa đúng. Khối trụ không có đỉnh nhọn; nó có hai đáy tròn và mặt cong xung quanh. Khối trụ có hai đáy tròn song song và một mặt cong bao quanh. Vậy đáp án là Có hai đáy tròn và mặt cong xung quanh."
         },
         {
           "id": "b",
           "text": "Có sáu mặt vuông",
-          "rationale_vi": "“Có sáu mặt vuông” chưa đúng. Dữ kiện dẫn tới “Có hai đáy tròn và mặt cong xung quanh”. Khối trụ có hai đáy tròn song song và một mặt cong bao quanh. Vậy đáp án là Có hai đáy tròn và mặt cong xung quanh."
+          "rationale_vi": "“Có sáu mặt vuông” chưa đúng. Sáu mặt vuông thuộc dạng khối lập phương; khối trụ có hai đáy tròn và một mặt cong. Khối trụ có hai đáy tròn song song và một mặt cong bao quanh. Vậy đáp án là Có hai đáy tròn và mặt cong xung quanh."
         },
         {
           "id": "c",
@@ -10390,7 +10390,7 @@
         {
           "id": "d",
           "text": "Không có đáy",
-          "rationale_vi": "“Không có đáy” chưa đúng. Dữ kiện dẫn tới “Có hai đáy tròn và mặt cong xung quanh”. Khối trụ có hai đáy tròn song song và một mặt cong bao quanh. Vậy đáp án là Có hai đáy tròn và mặt cong xung quanh."
+          "rationale_vi": "“Không có đáy” chưa đúng. Khối trụ có hai đáy tròn phẳng, nên nói không có đáy là sai đặc trưng. Khối trụ có hai đáy tròn song song và một mặt cong bao quanh. Vậy đáp án là Có hai đáy tròn và mặt cong xung quanh."
         }
       ],
       "correct_choice_id": "c"
@@ -10438,7 +10438,7 @@
         {
           "id": "c",
           "text": "một điểm",
-          "rationale_vi": "“một điểm” chưa đúng. Dữ kiện dẫn tới “hình tròn”. Hai đáy của khối trụ vẫn là hình tròn dù vật được xoay theo hướng nào."
+          "rationale_vi": "“một điểm” chưa đúng. Mỗi đầu của lon hình trụ là một mặt phẳng hình tròn, không thể chỉ là một điểm. Hai đáy của khối trụ vẫn là hình tròn dù vật được xoay theo hướng nào."
         },
         {
           "id": "d",
@@ -12764,17 +12764,17 @@
         {
           "id": "b",
           "text": "dài hơn",
-          "rationale_vi": "“dài hơn” chưa đúng. Dữ kiện dẫn tới “ngắn hơn”. Một giờ có 60 phút; 30 nhỏ hơn 60 nên 30 phút ngắn hơn 1 giờ."
+          "rationale_vi": "“dài hơn” chưa đúng. 30 phút chỉ bằng nửa của 60 phút, nên ngắn hơn 1 giờ chứ không dài hơn. Một giờ có 60 phút; 30 nhỏ hơn 60 nên 30 phút ngắn hơn 1 giờ."
         },
         {
           "id": "c",
           "text": "bằng nhau",
-          "rationale_vi": "“bằng nhau” chưa đúng. Dữ kiện dẫn tới “ngắn hơn”. Một giờ có 60 phút; 30 nhỏ hơn 60 nên 30 phút ngắn hơn 1 giờ."
+          "rationale_vi": "“bằng nhau” chưa đúng. 1 giờ có 60 phút; 30 phút mới bằng nửa giờ nên hai khoảng thời gian không bằng nhau. Một giờ có 60 phút; 30 nhỏ hơn 60 nên 30 phút ngắn hơn 1 giờ."
         },
         {
           "id": "d",
           "text": "không thể so sánh",
-          "rationale_vi": "“không thể so sánh” chưa đúng. Dữ kiện dẫn tới “ngắn hơn”. Một giờ có 60 phút; 30 nhỏ hơn 60 nên 30 phút ngắn hơn 1 giờ."
+          "rationale_vi": "“không thể so sánh” chưa đúng. Đổi 1 giờ thành 60 phút thì so sánh trực tiếp được: 30 phút ngắn hơn 60 phút. Một giờ có 60 phút; 30 nhỏ hơn 60 nên 30 phút ngắn hơn 1 giờ."
         }
       ],
       "correct_choice_id": "a"
@@ -12812,7 +12812,7 @@
         {
           "id": "a",
           "text": "24 giờ",
-          "rationale_vi": "“24 giờ” chưa đúng. Dữ kiện dẫn tới “60 phút”. Từ 10 giờ đến 11 giờ là đúng một giờ, tương đương 60 phút."
+          "rationale_vi": "“24 giờ” chưa đúng. Từ 10 giờ đến 11 giờ cùng buổi chỉ kéo dài 1 giờ, không phải trọn 24 giờ. Từ 10 giờ đến 11 giờ là đúng một giờ, tương đương 60 phút."
         },
         {
           "id": "b",
@@ -12822,12 +12822,12 @@
         {
           "id": "c",
           "text": "30 phút",
-          "rationale_vi": "“30 phút” chưa đúng. Dữ kiện dẫn tới “60 phút”. Từ 10 giờ đến 11 giờ là đúng một giờ, tương đương 60 phút."
+          "rationale_vi": "“30 phút” chưa đúng. Từ 10 giờ đến 11 giờ là đủ 60 phút; 30 phút chỉ bằng nửa khoảng đó. Từ 10 giờ đến 11 giờ là đúng một giờ, tương đương 60 phút."
         },
         {
           "id": "d",
           "text": "2 ngày",
-          "rationale_vi": "“2 ngày” chưa đúng. Dữ kiện dẫn tới “60 phút”. Từ 10 giờ đến 11 giờ là đúng một giờ, tương đương 60 phút."
+          "rationale_vi": "“2 ngày” chưa đúng. Hai ngày dài hơn rất nhiều; khoảng từ 10 giờ đến 11 giờ cùng buổi chỉ là 1 giờ = 60 phút. Từ 10 giờ đến 11 giờ là đúng một giờ, tương đương 60 phút."
         }
       ],
       "correct_choice_id": "b"
@@ -13248,12 +13248,12 @@
         {
           "id": "a",
           "text": "Màu nền của tờ tiền",
-          "rationale_vi": "“Màu nền của tờ tiền” chưa đúng. Dữ kiện dẫn tới “Con số mệnh giá đi cùng đơn vị đồng”. Giá trị cần được nhận biết từ con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền. Vậy đáp án là Con số mệnh giá đi cùng đơn vị đồng."
+          "rationale_vi": "“Màu nền của tờ tiền” chưa đúng. Màu nền có thể hỗ trợ nhận biết nhưng không quyết định chắc chắn giá trị; phải đọc con số mệnh giá và đơn vị đồng. Giá trị cần được nhận biết từ con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền. Vậy đáp án là Con số mệnh giá đi cùng đơn vị đồng."
         },
         {
           "id": "b",
           "text": "Kích thước hình trang trí",
-          "rationale_vi": "“Kích thước hình trang trí” chưa đúng. Dữ kiện dẫn tới “Con số mệnh giá đi cùng đơn vị đồng”. Giá trị cần được nhận biết từ con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền. Vậy đáp án là Con số mệnh giá đi cùng đơn vị đồng."
+          "rationale_vi": "“Kích thước hình trang trí” chưa đúng. Kích thước hình trang trí không phải thông tin xác định giá trị; cần đọc con số mệnh giá. Giá trị cần được nhận biết từ con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền. Vậy đáp án là Con số mệnh giá đi cùng đơn vị đồng."
         },
         {
           "id": "c",
@@ -13263,7 +13263,7 @@
         {
           "id": "d",
           "text": "Vị trí của hình vẽ",
-          "rationale_vi": "“Vị trí của hình vẽ” chưa đúng. Dữ kiện dẫn tới “Con số mệnh giá đi cùng đơn vị đồng”. Giá trị cần được nhận biết từ con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền. Vậy đáp án là Con số mệnh giá đi cùng đơn vị đồng."
+          "rationale_vi": "“Vị trí của hình vẽ” chưa đúng. Vị trí hình vẽ không quyết định giá trị tờ tiền; con số mệnh giá đi cùng đơn vị đồng mới đáng tin cậy. Giá trị cần được nhận biết từ con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền. Vậy đáp án là Con số mệnh giá đi cùng đơn vị đồng."
         }
       ],
       "correct_choice_id": "c"
@@ -13301,7 +13301,7 @@
         {
           "id": "a",
           "text": "Đúng",
-          "rationale_vi": "“Đúng” chưa đúng. Dữ kiện dẫn tới “Sai”. Màu sắc không đủ để kết luận giá trị; cần đọc con số mệnh giá và đơn vị đồng. Vậy đáp án là Sai."
+          "rationale_vi": "“Đúng” chưa đúng. Hai tờ có màu gần giống nhau vẫn có thể khác mệnh giá; phải đọc con số và đơn vị đồng, nên khẳng định cùng giá trị là sai. Màu sắc không đủ để kết luận giá trị; cần đọc con số mệnh giá và đơn vị đồng. Vậy đáp án là Sai."
         },
         {
           "id": "b",
@@ -13344,12 +13344,12 @@
         {
           "id": "a",
           "text": "Chỉ nhìn màu để đoán",
-          "rationale_vi": "“Chỉ nhìn màu để đoán” chưa đúng. Dữ kiện dẫn tới “Đọc con số mệnh giá trên từng tờ rồi so sánh”. Phải đọc giá trị được in trên từng tờ rồi mới so sánh, không dựa vào màu hay hình trang trí. Vậy đáp án là Đọc con số mệnh giá trên từng tờ rồi so sánh."
+          "rationale_vi": "“Chỉ nhìn màu để đoán” chưa đúng. Màu sắc một mình không đủ để xếp giá trị; phải đọc con số mệnh giá trên từng tờ. Phải đọc giá trị được in trên từng tờ rồi mới so sánh, không dựa vào màu hay hình trang trí. Vậy đáp án là Đọc con số mệnh giá trên từng tờ rồi so sánh."
         },
         {
           "id": "b",
           "text": "Chỉ so kích thước hình vẽ",
-          "rationale_vi": "“Chỉ so kích thước hình vẽ” chưa đúng. Dữ kiện dẫn tới “Đọc con số mệnh giá trên từng tờ rồi so sánh”. Phải đọc giá trị được in trên từng tờ rồi mới so sánh, không dựa vào màu hay hình trang trí. Vậy đáp án là Đọc con số mệnh giá trên từng tờ rồi so sánh."
+          "rationale_vi": "“Chỉ so kích thước hình vẽ” chưa đúng. Kích thước hình vẽ không biểu thị trực tiếp giá trị; cần so con số mệnh giá. Phải đọc giá trị được in trên từng tờ rồi mới so sánh, không dựa vào màu hay hình trang trí. Vậy đáp án là Đọc con số mệnh giá trên từng tờ rồi so sánh."
         },
         {
           "id": "c",
