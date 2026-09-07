@@ -113,6 +113,7 @@ namespace WAHU.Session
 
         public bool IsActive { get { return _active; } }
         public bool HasOpenQuestion { get { return _currentQuestion != null; } }
+        internal BehaviorDecision LastBehaviorDecision { get { return _lastBehavior; } }
         public MathSessionSummary Summary { get { return BuildSummary(null); } }
 
         public MathSessionStartResult Start(string displayName)

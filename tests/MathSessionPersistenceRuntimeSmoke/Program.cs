@@ -80,6 +80,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestProductionFirstEventResumeJourney(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventResumeAfterThirdAnswerBeforeComplete(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventResumeRestoresBehaviorAction(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
+                TestGameEventResumeRestoresExplicitRepairBeforeStateTransition(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventDifferentSelectionResumesDurableActiveEvent(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventRewardFaultReconcilesOnNextStart(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventTerminalRuntimeCleanupReconcilesOnNextStart(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
@@ -119,6 +120,14 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
             var fatigued = MathGameEventBehaviorMapper.Map(new BehaviorDecision { State = BehaviorState.FATIGUED_LIKELY });
             A(fatigued.Action == "offer_break" && fatigued.OfferBreak && fatigued.SuggestPositiveClose && fatigued.PreserveCheckpoint,
                 "game_event_behavior_fatigued_offers_safe_break_and_positive_close");
+            var explicitRepair = MathGameEventBehaviorMapper.Map(new BehaviorDecision
+            {
+                State = BehaviorState.STRAINED,
+                TriggerPrerequisiteRepair = true,
+                Actions = new List<string> { "small_cue", "prerequisite_repair" }
+            });
+            A(explicitRepair.Action == "repair" && explicitRepair.UseRepair && explicitRepair.PreserveCheckpoint,
+                "game_event_behavior_explicit_prerequisite_repair_overrides_state_only_small_cue");
         }
 
         private static void TestGameEventRuntimeResumeRewardAndFallback(
@@ -522,6 +531,13 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                     var wrong2 = first.SubmitRetryAnswerAt(WrongAnswer(question), 2, "smoke", DateTime.UtcNow, 5000);
                     A(!wrong2.Learning.IsCorrect && wrong2.Learning.QuestionCompleted,
                         "game_event_behavior_resume_retry_wrong_finalizes_" + ordinal);
+                    if (ordinal == 0)
+                    {
+                        A(wrong2.Learning.Behavior != null && wrong2.Learning.Behavior.State == BehaviorState.READY &&
+                          wrong2.Learning.Behavior.TriggerPrerequisiteRepair && wrong2.EventState.Action.UseRepair &&
+                          wrong2.EventState.Action.Action == "repair",
+                            "game_event_runtime_explicit_repair_works_before_behavior_state_transition");
+                    }
                 }
 
                 var q3 = first.NextQuestion();
@@ -550,6 +566,54 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 A(resumed.NextQuestion().QuestionId == openQ3Id,
                     "game_event_behavior_resume_keeps_exact_open_third_question");
                 resumed.SuspendForBreak("behavior_resume_cleanup");
+            }
+        }
+
+        private static void TestGameEventResumeRestoresExplicitRepairBeforeStateTransition(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath,
+            string gameEventPath)
+        {
+            var events = new MathGameEventCatalogSource().Load(gameEventPath, lessonCatalogPath);
+            var definition = events.Events[0];
+            var database = NewDatabase(Path.Combine(root, "game-event-explicit-repair-resume.db"), schemaPath);
+            string sessionId;
+            string q2Id;
+
+            using (var first = new MathGameEventCoordinator(database, templatePath, gameEventPath, "LOW", 15141,
+                definition.Id, definition.TargetLessonId))
+            {
+                var start = first.Start("Bé explicit repair resume");
+                sessionId = start.Session.SessionId;
+                var q1 = first.NextQuestion();
+                var wrong1 = first.SubmitAnswerWithRetryAt(WrongAnswer(q1), 2, "smoke", DateTime.UtcNow, 5000);
+                A(!wrong1.Learning.IsCorrect && wrong1.Learning.CanRetry,
+                    "game_event_explicit_repair_resume_first_wrong_pending");
+                var wrong2 = first.SubmitRetryAnswerAt(WrongAnswer(q1), 2, "smoke", DateTime.UtcNow, 5000);
+                A(wrong2.Learning.Behavior != null && wrong2.Learning.Behavior.State == BehaviorState.READY &&
+                  wrong2.Learning.Behavior.TriggerPrerequisiteRepair && wrong2.EventState.Action.UseRepair &&
+                  wrong2.EventState.Action.Action == "repair",
+                    "game_event_explicit_repair_resume_signal_exists_before_state_transition");
+                var q2 = first.NextQuestion();
+                q2Id = q2.QuestionId;
+                first.SuspendForBreak("explicit_repair_before_state_transition");
+            }
+
+            using (var resumed = new MathGameEventCoordinator(database, templatePath, gameEventPath, "NORMAL", 999999,
+                null, definition.TargetLessonId))
+            {
+                var start = resumed.Start("Bé explicit repair resume");
+                A(start.Session.ResumedExistingSession && start.Session.SessionId == sessionId &&
+                  start.EventState.CompletedCheckpointCount == 1 && start.EventState.CurrentCheckpointNumber == 2,
+                    "game_event_explicit_repair_resume_restores_checkpoint_two");
+                A(start.EventState.Action.BehaviorState == BehaviorState.READY &&
+                  start.EventState.Action.UseRepair && start.EventState.Action.Action == "repair",
+                    "game_event_explicit_repair_resume_preserves_repair_signal_before_state_transition");
+                A(resumed.NextQuestion().QuestionId == q2Id,
+                    "game_event_explicit_repair_resume_keeps_exact_q2");
+                resumed.SuspendForBreak("explicit_repair_resume_cleanup");
             }
         }
 

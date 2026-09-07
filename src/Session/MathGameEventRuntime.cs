@@ -257,6 +257,20 @@ namespace WAHU.Session
                     result.SuggestPositiveClose = true;
                     break;
             }
+
+            var explicitRepair = decision != null &&
+                (decision.TriggerPrerequisiteRepair ||
+                 (decision.Actions != null && decision.Actions.Any(x => string.Equals(x, "prerequisite_repair", StringComparison.Ordinal))));
+            if (explicitRepair)
+            {
+                result.UseRepair = true;
+                if (state != BehaviorState.FATIGUED_LIKELY)
+                {
+                    result.Action = "repair";
+                    result.UseSmallCue = false;
+                    result.MinimizeInterruptions = false;
+                }
+            }
             return result;
         }
     }
@@ -352,10 +366,7 @@ namespace WAHU.Session
             _started = true;
             if (_start.ResumedExistingSession)
             {
-                _lastAction = MathGameEventBehaviorMapper.Map(new BehaviorDecision
-                {
-                    State = _session.Summary.FinalBehaviorState
-                });
+                _lastAction = MathGameEventBehaviorMapper.Map(_session.LastBehaviorDecision);
                 if (!string.Equals(_start.TargetLessonId, lessonId, StringComparison.Ordinal))
                     ResolveEventForLessonFailSafe(_start.TargetLessonId);
             }
