@@ -43,7 +43,7 @@ def build(g):
         "NUM_MIN_MAX_UP_TO_4": [
             nq("Trong 612, 621, 216, 261, số nhỏ nhất là số nào?", 216, "Hai số bắt đầu bằng 2 nhỏ hơn các số bắt đầu bằng 6; giữa 216 và 261 thì 216 nhỏ hơn."),
             nq("Trong 808, 880, 800, 818, số lớn nhất là số nào?", 880, "Cùng 8 trăm; 880 có hàng chục 8 lớn nhất nên là số lớn nhất."),
-            nq("Lan chọn 675 là số bé nhất trong 657, 675, 756, 765. Số nào cho thấy Lan đã chọn sai?", 657, "657 và 675 cùng 6 trăm; 5 chục nhỏ hơn 7 chục nên 657 nhỏ hơn 675."),
+            nq("Một trò chơi yêu cầu đặt thẻ nhỏ nhất vào ô đầu. Các thẻ là 657, 675, 756, 765. Sau khi loại hai thẻ 7 trăm, em nên đặt thẻ nào vào ô đầu?", 657, "Hai thẻ 756 và 765 có 7 trăm nên lớn hơn hai thẻ 6 trăm. Giữa 657 và 675, 5 chục nhỏ hơn 7 chục nên thẻ nhỏ nhất là 657."),
         ],
         "NUM_SORT_UP_TO_4": [
             mc("Xếp 410, 401, 140, 104 theo thứ tự từ bé đến lớn.", "104, 140, 401, 410", ["410, 401, 140, 104", "104, 401, 140, 410", "140, 104, 410, 401"], "So hàng trăm trước rồi hàng chục, đơn vị: 104 < 140 < 401 < 410."),
@@ -53,7 +53,7 @@ def build(g):
         "ESTIMATE_OBJECTS_BY_TENS": [
             nq("Có khoảng 4 nhóm chục que tính. Ước lượng số que là khoảng bao nhiêu?", 40, "Bốn nhóm 10 tương ứng khoảng 40 que."),
             nq("Một rổ nhìn có khoảng 9 chục hạt. Nói số lượng gần đúng theo chục.", 90, "9 chục là khoảng 90 hạt."),
-            mc("Một khay có chừng 46 nút áo. Nếu ước lượng theo chục gần nhất, chọn mốc nào?", "khoảng 50", ["khoảng 5", "khoảng 500", "khoảng 20"], "46 gần 50 hơn 40 nên ước lượng hợp lý là khoảng 50."),
+            mc("Một hộp có 4 nhóm đủ 10 nút áo và thêm khoảng 6 nút rời. Nếu chỉ báo số lượng gần đúng theo chục, em nên nói khoảng bao nhiêu nút?", "khoảng 50", ["khoảng 40", "khoảng 60", "khoảng 46"], "4 nhóm đủ 10 là 40; thêm khoảng 6 thành khoảng 46. Vì 46 gần 50 hơn 40 nên nói khoảng 50."),
         ],
         "ADD_COMPONENTS_RECOGNIZE": [
             mc("Trong phép cộng 34 + 22 = 56, số 22 mang tên gì?", "số hạng", ["tổng", "hiệu", "số trừ"], "34 và 22 là hai số được cộng nên đều là số hạng."),

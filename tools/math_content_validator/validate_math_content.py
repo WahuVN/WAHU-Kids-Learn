@@ -231,7 +231,8 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
         numbers = [int(x) for x in re.findall(r"\d+", choice_text)]
         if len(numbers) < 2:
             return None
-        descending = "giảm dần" in prompt.casefold()
+        prompt_cf = prompt.casefold()
+        descending = "giảm dần" in prompt_cf or "từ lớn đến bé" in prompt_cf or "lớn đến bé" in prompt_cf
         direction = "giảm dần" if descending else "tăng dần"
         for left, right in zip(numbers, numbers[1:]):
             violates = left < right if descending else left > right
@@ -247,6 +248,16 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
             if tens != 0 or ones != 0:
                 return (f"Số {value} còn hàng chục hoặc hàng đơn vị khác 0 "
                         f"({tens} chục, {ones} đơn vị), nên chưa phải một số trăm đầy đủ.")
+        if choice_text.strip().casefold() == "sai":
+            prompt_numbers = [int(x) for x in re.findall(r"\d+", prompt)]
+            if prompt_numbers:
+                value = prompt_numbers[0]
+                tens = (value // 10) % 10
+                ones = value % 10
+                prompt_cf = prompt.casefold()
+                if tens == 0 and ones == 0 and ("tròn trăm" in prompt_cf or "không có thêm chục" in prompt_cf):
+                    return (f"{value} có hàng chục và hàng đơn vị đều bằng 0, nên mô tả về số trăm đầy đủ là đúng; "
+                            "chọn Sai đã phủ nhận dữ kiện này.")
 
     if skill == "MULTIPLICATION_MEANING" and "+" in choice_text:
         match = re.search(r"Có\s+(\d+)\s+nhóm, mỗi nhóm\s+(\d+)", prompt, re.IGNORECASE)
@@ -466,15 +477,29 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
         if label in reasons:
             return reasons[label]
 
+    if skill == "NUM_COUNT_READ_WRITE_0_1000" and "603" in prompt:
+        label = choice_text.strip().casefold()
+        reasons = {
+            "sáu trăm ba mươi": "“sáu trăm ba mươi” là 630: chữ số 3 đã bị đặt ở hàng chục thay vì hàng đơn vị của 603.",
+            "sáu mươi ba": "“sáu mươi ba” là 63, đã bỏ mất 6 trăm của số 603.",
+            "ba trăm linh sáu": "“ba trăm linh sáu” là 306, đã đổi vị trí hàng trăm và hàng đơn vị so với 603.",
+        }
+        if label in reasons:
+            return reasons[label]
+
     if skill == "ESTIMATE_OBJECTS_BY_TENS":
         prompt_numbers = [int(x) for x in re.findall(r"\d+", prompt)]
         choice_numbers = [int(x) for x in re.findall(r"\d+", choice_text)]
         if prompt_numbers and choice_numbers:
-            value, chosen = prompt_numbers[0], choice_numbers[0]
+            value = prompt_numbers[0]
+            grouped = re.search(r"(\d+)\s+nhóm đủ 10.*?thêm khoảng\s+(\d+)", prompt, re.IGNORECASE)
+            if grouped:
+                value = int(grouped.group(1)) * 10 + int(grouped.group(2))
+            chosen = choice_numbers[0]
             nearest = ((value + 5) // 10) * 10
             if chosen != nearest:
                 return (f"Ước lượng {value} theo chục gần nhất phải chọn {nearest}; “{choice_text}” "
-                        f"cách xa giá trị cần ước lượng hơn.")
+                        f"chưa phải mốc chục gần nhất với số lượng quan sát.")
 
     if skill == "HEAVIER_LIGHTER":
         prompt_cf = prompt.casefold()

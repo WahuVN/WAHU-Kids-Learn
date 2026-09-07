@@ -4,6 +4,9 @@ LANE=AI1
 ROLE=MATH_CONTENT_DATA_OWNER
 LANE_DONE=YES
 EXECUTION_MODE=VERIFY_THEN_IMPROVE_NO_WAIT
+PRIORITY_POLICY=FIRST_LESSONS_FIRST
+ACTIVE_FOCUS=CH01_LESSONS_01_10
+LATER_LESSON_POLISH=DEFERRED_UNTIL_FIRST_BLOCK_LOCKED
 
 > Khi được người dùng bảo “đọc file và làm”: đọc **toàn bộ file này**, tự inspect repo/current HEAD, rồi làm từ START PROCEDURE xuống BACKLOG. Không dừng chỉ vì `LANE_DONE=YES`; dòng đó chỉ nói strict Math DoD trước đây đã đạt.
 
@@ -12,6 +15,12 @@ EXECUTION_MODE=VERIFY_THEN_IMPROVE_NO_WAIT
 AI1 chịu trách nhiệm duy nhất cho **curriculum/content/data/authoring/validator** của Math Grade 2. Mục tiêu là giữ content production đúng chuẩn, deterministic, child-safe, không duplicate, có difficulty progression thật, và không làm hỏng contract engine/UI khi content thay đổi.
 
 Không sửa engine/session/UI để “cho test qua”. Nếu consumer có bug, ghi evidence + SHA/status handoff và chuyển sang task AI1 khác.
+
+## 0.1. Priority override — làm kỹ bài đầu trước
+
+Theo chỉ đạo hiện tại, sau START PROCEDURE AI1 phải ưu tiên **10 lesson đầu của Chương 1** trước mọi P1 polish ở lesson phía sau. Thứ tự trong block: lesson 01 → 10 theo thứ tự catalog, không sort `order_in_domain` xuyên chapter.
+
+Trong first block, ưu tiên theo thứ tự: correctness/fail-closed → prompt/application diversity → distractor diagnosis → hint/explanation/worked-example readability → language/typography. Chỉ khi first block không còn issue P0/P1 có evidence mới chuyển sang lesson 11+; các lesson sau hiện vẫn production-valid và có thể update sau.
 
 ## 1. Stable state phải bảo vệ
 

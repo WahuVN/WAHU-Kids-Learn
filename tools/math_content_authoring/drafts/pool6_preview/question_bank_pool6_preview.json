@@ -211,7 +211,7 @@
         {
           "id": "a",
           "text": "sáu trăm ba mươi",
-          "rationale_vi": "“sáu trăm ba mươi” chưa đúng. Dữ kiện dẫn tới “sáu trăm linh ba”. 603 có 6 trăm, 0 chục và 3 đơn vị nên phải giữ hàng chục bằng 0 khi đọc. Vậy đáp án là sáu trăm linh ba."
+          "rationale_vi": "“sáu trăm ba mươi” chưa đúng. “sáu trăm ba mươi” là 630: chữ số 3 đã bị đặt ở hàng chục thay vì hàng đơn vị của 603. 603 có 6 trăm, 0 chục và 3 đơn vị nên phải giữ hàng chục bằng 0 khi đọc. Vậy đáp án là sáu trăm linh ba."
         },
         {
           "id": "b",
@@ -221,12 +221,12 @@
         {
           "id": "c",
           "text": "sáu mươi ba",
-          "rationale_vi": "“sáu mươi ba” chưa đúng. Dữ kiện dẫn tới “sáu trăm linh ba”. 603 có 6 trăm, 0 chục và 3 đơn vị nên phải giữ hàng chục bằng 0 khi đọc. Vậy đáp án là sáu trăm linh ba."
+          "rationale_vi": "“sáu mươi ba” chưa đúng. “sáu mươi ba” là 63, đã bỏ mất 6 trăm của số 603. 603 có 6 trăm, 0 chục và 3 đơn vị nên phải giữ hàng chục bằng 0 khi đọc. Vậy đáp án là sáu trăm linh ba."
         },
         {
           "id": "d",
           "text": "ba trăm linh sáu",
-          "rationale_vi": "“ba trăm linh sáu” chưa đúng. Dữ kiện dẫn tới “sáu trăm linh ba”. 603 có 6 trăm, 0 chục và 3 đơn vị nên phải giữ hàng chục bằng 0 khi đọc. Vậy đáp án là sáu trăm linh ba."
+          "rationale_vi": "“ba trăm linh sáu” chưa đúng. “ba trăm linh sáu” là 306, đã đổi vị trí hàng trăm và hàng đơn vị so với 603. 603 có 6 trăm, 0 chục và 3 đơn vị nên phải giữ hàng chục bằng 0 khi đọc. Vậy đáp án là sáu trăm linh ba."
         }
       ],
       "correct_choice_id": "b"
@@ -353,7 +353,7 @@
         {
           "id": "b",
           "text": "Sai",
-          "rationale_vi": "“Sai” chưa đúng. 700 có hàng chục và hàng đơn vị đều bằng 0 nên đúng là một số tròn trăm; chọn Sai phủ nhận một tính chất đúng. 700 có hàng chục và hàng đơn vị đều bằng 0 nên đây là số tròn trăm. Vậy đáp án là Đúng."
+          "rationale_vi": "“Sai” chưa đúng. 700 có hàng chục và hàng đơn vị đều bằng 0, nên mô tả về số trăm đầy đủ là đúng; chọn Sai đã phủ nhận dữ kiện này. 700 có hàng chục và hàng đơn vị đều bằng 0 nên đây là số tròn trăm. Vậy đáp án là Đúng."
         }
       ],
       "correct_choice_id": "a"
@@ -497,7 +497,7 @@
         {
           "id": "a",
           "text": "Sai",
-          "rationale_vi": "“Sai” chưa đúng. Dữ kiện dẫn tới “Đúng”. 900 = 9 trăm, 0 chục, 0 đơn vị nên mệnh đề đúng."
+          "rationale_vi": "“Sai” chưa đúng. 900 có hàng chục và hàng đơn vị đều bằng 0, nên mô tả về số trăm đầy đủ là đúng; chọn Sai đã phủ nhận dữ kiện này. 900 = 9 trăm, 0 chục, 0 đơn vị nên mệnh đề đúng."
         },
         {
           "id": "b",
@@ -1871,13 +1871,13 @@
       "skill_id": "NUM_MIN_MAX_UP_TO_4",
       "difficulty": "application",
       "question_type": "numeric_input",
-      "prompt_vi": "Lan chọn 675 là số bé nhất trong 657, 675, 756, 765. Số nào cho thấy Lan đã chọn sai?",
+      "prompt_vi": "Một trò chơi yêu cầu đặt thẻ nhỏ nhất vào ô đầu. Các thẻ là 657, 675, 756, 765. Sau khi loại hai thẻ 7 trăm, em nên đặt thẻ nào vào ô đầu?",
       "answer_kind": "integer",
       "correct_answer": 657,
       "accepted_answers": [
         "657"
       ],
-      "explanation_vi": "657 và 675 cùng 6 trăm; 5 chục nhỏ hơn 7 chục nên 657 nhỏ hơn 675.",
+      "explanation_vi": "Hai thẻ 756 và 765 có 7 trăm nên lớn hơn hai thẻ 6 trăm. Giữa 657 và 675, 5 chục nhỏ hơn 7 chục nên thẻ nhỏ nhất là 657.",
       "hints_vi": [
         "Ở câu này, tìm chỗ dễ nhầm của “Lớn nhất và bé nhất” trong tình huống và xác định bước đầu tiên cần làm.",
         "Ở câu này, với “Lớn nhất và bé nhất”, so từ hàng trăm đến hàng chục, đơn vị trước khi chọn kết quả."
@@ -2146,17 +2146,17 @@
         {
           "id": "b",
           "text": "306, 360, 603, 630",
-          "rationale_vi": "“306, 360, 603, 630” chưa đúng. Dữ kiện dẫn tới “630, 603, 360, 306”. Các số 6 trăm đứng trước các số 3 trăm; trong từng cặp tiếp tục so hàng chục. Vậy đáp án là 630, 603, 360, 306."
+          "rationale_vi": "“306, 360, 603, 630” chưa đúng. Trong “306, 360, 603, 630”, 306 đứng trước 360 dù 306 < 360, nên thứ tự chưa giảm dần. Các số 6 trăm đứng trước các số 3 trăm; trong từng cặp tiếp tục so hàng chục. Vậy đáp án là 630, 603, 360, 306."
         },
         {
           "id": "c",
           "text": "630, 360, 603, 306",
-          "rationale_vi": "“630, 360, 603, 306” chưa đúng. Trong “630, 360, 603, 306”, 630 đứng trước 360 dù 630 > 360, nên thứ tự chưa tăng dần. Các số 6 trăm đứng trước các số 3 trăm; trong từng cặp tiếp tục so hàng chục. Vậy đáp án là 630, 603, 360, 306."
+          "rationale_vi": "“630, 360, 603, 306” chưa đúng. Trong “630, 360, 603, 306”, 360 đứng trước 603 dù 360 < 603, nên thứ tự chưa giảm dần. Các số 6 trăm đứng trước các số 3 trăm; trong từng cặp tiếp tục so hàng chục. Vậy đáp án là 630, 603, 360, 306."
         },
         {
           "id": "d",
           "text": "603, 630, 306, 360",
-          "rationale_vi": "“603, 630, 306, 360” chưa đúng. Trong “603, 630, 306, 360”, 630 đứng trước 306 dù 630 > 306, nên thứ tự chưa tăng dần. Các số 6 trăm đứng trước các số 3 trăm; trong từng cặp tiếp tục so hàng chục. Vậy đáp án là 630, 603, 360, 306."
+          "rationale_vi": "“603, 630, 306, 360” chưa đúng. Trong “603, 630, 306, 360”, 603 đứng trước 630 dù 603 < 630, nên thứ tự chưa giảm dần. Các số 6 trăm đứng trước các số 3 trăm; trong từng cặp tiếp tục so hàng chục. Vậy đáp án là 630, 603, 360, 306."
         }
       ],
       "correct_choice_id": "a"
@@ -2309,12 +2309,12 @@
         {
           "id": "a",
           "text": "khoảng 7",
-          "rationale_vi": "“khoảng 7” chưa đúng. Ước lượng 73 theo chục gần nhất phải chọn 70; “khoảng 7” cách xa giá trị cần ước lượng hơn. 73 gần 70 hơn 80 khi ước lượng theo chục gần nhất. Vậy đáp án là khoảng 70."
+          "rationale_vi": "“khoảng 7” chưa đúng. Ước lượng 73 theo chục gần nhất phải chọn 70; “khoảng 7” chưa phải mốc chục gần nhất với số lượng quan sát. 73 gần 70 hơn 80 khi ước lượng theo chục gần nhất. Vậy đáp án là khoảng 70."
         },
         {
           "id": "b",
           "text": "khoảng 700",
-          "rationale_vi": "“khoảng 700” chưa đúng. Ước lượng 73 theo chục gần nhất phải chọn 70; “khoảng 700” cách xa giá trị cần ước lượng hơn. 73 gần 70 hơn 80 khi ước lượng theo chục gần nhất. Vậy đáp án là khoảng 70."
+          "rationale_vi": "“khoảng 700” chưa đúng. Ước lượng 73 theo chục gần nhất phải chọn 70; “khoảng 700” chưa phải mốc chục gần nhất với số lượng quan sát. 73 gần 70 hơn 80 khi ước lượng theo chục gần nhất. Vậy đáp án là khoảng 70."
         },
         {
           "id": "c",
@@ -2324,7 +2324,7 @@
         {
           "id": "d",
           "text": "khoảng 20",
-          "rationale_vi": "“khoảng 20” chưa đúng. Ước lượng 73 theo chục gần nhất phải chọn 70; “khoảng 20” cách xa giá trị cần ước lượng hơn. 73 gần 70 hơn 80 khi ước lượng theo chục gần nhất. Vậy đáp án là khoảng 70."
+          "rationale_vi": "“khoảng 20” chưa đúng. Ước lượng 73 theo chục gần nhất phải chọn 70; “khoảng 20” chưa phải mốc chục gần nhất với số lượng quan sát. 73 gần 70 hơn 80 khi ước lượng theo chục gần nhất. Vậy đáp án là khoảng 70."
         }
       ],
       "correct_choice_id": "c"
@@ -2397,13 +2397,13 @@
       "skill_id": "ESTIMATE_OBJECTS_BY_TENS",
       "difficulty": "application",
       "question_type": "multiple_choice",
-      "prompt_vi": "Một khay có chừng 46 nút áo. Nếu ước lượng theo chục gần nhất, chọn mốc nào?",
+      "prompt_vi": "Một hộp có 4 nhóm đủ 10 nút áo và thêm khoảng 6 nút rời. Nếu chỉ báo số lượng gần đúng theo chục, em nên nói khoảng bao nhiêu nút?",
       "answer_kind": "text",
       "correct_answer": "khoảng 50",
       "accepted_answers": [
         "khoảng 50"
       ],
-      "explanation_vi": "46 gần 50 hơn 40 nên ước lượng hợp lý là khoảng 50.",
+      "explanation_vi": "4 nhóm đủ 10 là 40; thêm khoảng 6 thành khoảng 46. Vì 46 gần 50 hơn 40 nên nói khoảng 50.",
       "hints_vi": [
         "Ở câu này, xác định lỗi hoặc dữ kiện quyết định của “Ước lượng theo chục” trong tình huống trước khi chọn.",
         "Ở câu này, đừng đoán theo vị trí đáp án. Tự giải theo “Ước lượng theo chục” trước rồi mới chọn phương án khớp kết quả."
@@ -2423,23 +2423,23 @@
       "choices": [
         {
           "id": "a",
-          "text": "khoảng 5",
-          "rationale_vi": "“khoảng 5” chưa đúng. Ước lượng 46 theo chục gần nhất phải chọn 50; “khoảng 5” cách xa giá trị cần ước lượng hơn. 46 gần 50 hơn 40 nên ước lượng hợp lý là khoảng 50."
+          "text": "khoảng 40",
+          "rationale_vi": "“khoảng 40” chưa đúng. Ước lượng 46 theo chục gần nhất phải chọn 50; “khoảng 40” chưa phải mốc chục gần nhất với số lượng quan sát. 4 nhóm đủ 10 là 40; thêm khoảng 6 thành khoảng 46. Vì 46 gần 50 hơn 40 nên nói khoảng 50."
         },
         {
           "id": "b",
-          "text": "khoảng 500",
-          "rationale_vi": "“khoảng 500” chưa đúng. Ước lượng 46 theo chục gần nhất phải chọn 50; “khoảng 500” cách xa giá trị cần ước lượng hơn. 46 gần 50 hơn 40 nên ước lượng hợp lý là khoảng 50."
+          "text": "khoảng 60",
+          "rationale_vi": "“khoảng 60” chưa đúng. Ước lượng 46 theo chục gần nhất phải chọn 50; “khoảng 60” chưa phải mốc chục gần nhất với số lượng quan sát. 4 nhóm đủ 10 là 40; thêm khoảng 6 thành khoảng 46. Vì 46 gần 50 hơn 40 nên nói khoảng 50."
         },
         {
           "id": "c",
-          "text": "khoảng 20",
-          "rationale_vi": "“khoảng 20” chưa đúng. Ước lượng 46 theo chục gần nhất phải chọn 50; “khoảng 20” cách xa giá trị cần ước lượng hơn. 46 gần 50 hơn 40 nên ước lượng hợp lý là khoảng 50."
+          "text": "khoảng 46",
+          "rationale_vi": "“khoảng 46” chưa đúng. Ước lượng 46 theo chục gần nhất phải chọn 50; “khoảng 46” chưa phải mốc chục gần nhất với số lượng quan sát. 4 nhóm đủ 10 là 40; thêm khoảng 6 thành khoảng 46. Vì 46 gần 50 hơn 40 nên nói khoảng 50."
         },
         {
           "id": "d",
           "text": "khoảng 50",
-          "rationale_vi": "46 gần 50 hơn 40 nên ước lượng hợp lý là khoảng 50."
+          "rationale_vi": "4 nhóm đủ 10 là 40; thêm khoảng 6 thành khoảng 46. Vì 46 gần 50 hơn 40 nên nói khoảng 50."
         }
       ],
       "correct_choice_id": "d"

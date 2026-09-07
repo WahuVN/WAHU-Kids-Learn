@@ -700,6 +700,32 @@ class MathContentDataSmoke(unittest.TestCase):
         self.assertEqual(402, len(normalized))
         self.assertEqual(402, len(set(normalized)))
 
+    def test_first_ten_lessons_have_no_generic_fallback_distractors(self):
+        first_ten = self.lessons[:10]
+        fallback = []
+        for lesson in first_ten:
+            refs = sum(lesson["practice_sets"].values(), [])
+            for qid in refs:
+                item = self.question_by_id[qid]
+                for choice in item.get("choices", []):
+                    if choice["id"] == item.get("correct_choice_id"):
+                        continue
+                    reason = validator.structured_choice_reason(item["skill_id"], item["prompt_vi"], choice["text"])
+                    marker = validator.COMPONENT_TERM_REASON_MARKERS.get(choice["text"].strip().casefold()) if item["skill_id"] in validator.COMPONENT_SKILLS else None
+                    explicit = validator.has_explicit_choice_contrast(choice["text"], str(item["correct_answer"]), " ".join(choice["rationale_vi"].split()))
+                    if explicit and not reason and not marker:
+                        fallback.append((qid, choice["text"]))
+        self.assertEqual([], fallback)
+
+    def test_first_ten_application_pairs_are_structurally_distinct(self):
+        for lesson in self.lessons[:10]:
+            refs = lesson["practice_sets"]["application"]
+            first = self.question_by_id[refs[0]]["prompt_vi"]
+            second = self.question_by_id[refs[1]]["prompt_vi"]
+            similarity = validator.application_prompt_shape_similarity(first, second)
+            with self.subTest(skill=lesson["skill_id"], similarity=similarity):
+                self.assertLess(similarity, 0.70)
+
     def test_expanded_curve_cylinder_time_money_distractors_have_structured_diagnoses(self):
         target_skills = {
             "CURVE_RECOGNIZE", "CYLINDER_RECOGNIZE",
