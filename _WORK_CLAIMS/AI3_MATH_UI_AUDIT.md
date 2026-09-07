@@ -244,31 +244,60 @@ Current clean HEAD `2da39b5` + đúng 2 file AI3-010:
 - Recoverable first-attempt/retry-attempt SQLite write-failure E2E: **PASS**.
 - Request 007 corrupt-medium ordinal recovery có regression chính thức tại `7f79367`.
 - Retry/first-try engine contract `7c9a9ea` và write-failure reconcile `400fd0c` đã được AI3 UI consume; clean persistence suite hiện 171 assertions.
-- Generated `draw_segment_given_length` vẫn chỉ ở WIP AI2; chưa coi P1-02 CLOSED trước upstream commit.
+- Generated `draw_segment_given_length` vẫn chỉ ở WIP AI2; chưa coi adaptive-generator blocker CLOSED trước upstream commit.
 
-## 14. Remaining blockers
+## 14. Production release build audit
 
-### P1-01 — production Data/SQLite clean build
+Clean detached `12cb5ee` dùng đúng toolchain mà `Build-SetupArtifacts.ps1` chọn:
 
-Old-style `WAHU.Data.csproj` / SQLite reference vẫn chặn full clean production solution gate trên toolchain hiện tại. SDK source-equivalent harness pass nhưng không được coi là release-clean replacement.
+`C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe WAHUKidsLearn.sln /restore /m /t:Rebuild /p:Configuration=Release /p:Platform=x86`
 
-### P1-02 — adaptive interaction generator ownership
+Kết quả: **PASS — exit 0**. `WAHU.Data`, `WAHU.Session`, App, `SQLiteRuntimeSmoke`, `LearningSessionRuntimeSmoke` và toàn solution production path đều build được. Vì vậy blocker cũ “Data/SQLite clean build” là **CLOSED**; lỗi trước thuộc `dotnet msbuild`, không phải release toolchain thực tế.
 
-Authored `interaction_integer` + UI control pass. Child UI không test `MathQuestionGenerator` để tránh ownership coupling; generator case `draw_segment_given_length` phải được engine smoke AI2 khóa khi commit ổn định.
+Release-required smoke executables trên cùng clean tree:
 
-### P1-03 — release packaging/E2E
+- PASS: Behavior **15**, LearningSession **794**, Motion **25**, Child UI **1558**, Security **19**, Audio **14**, Performance **13**, SQLite **166**.
+- FAIL: SetupPreflight — `database_runtime_v1.json schema_version=4, expected=3`.
+- FAIL: UpdateRuntime — cùng runtime-config schema mismatch `4 vs 3`.
+- FAIL: ContentRuntime — `ASSERT_FAIL: bundled_english_verified`.
 
-Static audit tại HEAD:
+Do đó full distribution gate vẫn chưa xanh, nhưng blocker hiện nằm ở Platform/runtime config + English bundled content + packaging, không nằm ở Math Data compile.
 
-- `Build-SetupArtifacts.ps1` copy đệ quy toàn bộ `content_packs\\*` và `data\\schema\\*.sql`; hard deployment guard đã có schema `004_math_lesson_progress.sql`.
-- Inno Setup dùng `recursesubdirs/createallsubdirs` trên toàn staged publish tree; portable cũng copy toàn publish tree trước khi zip.
-- Nhưng `Test-PortableE2E.ps1` và `Test-InstallerE2E.ps1` mới guard Math `manifest.json`, chưa guard `lesson_catalog_v1.json`, `question_bank_v1.json`, `verified_templates_v1.json`.
-- Artifact mới nhất hiện có `0.1.41-dev` là build từ `e299c41`, database schema 2. Publish tree + portable ZIP có verified templates nhưng thiếu lesson catalog, question bank và schema V4; artifact này là **STALE**, không phải release evidence cho Math hiện tại.
-- Request 008 đã mở cho release lane: hard-guard đủ ba Math runtime JSON và rebuild artifact schema V4; sau đó chạy portable/installer upgrade E2E giữ learner DB/lesson progress.
+## 15. Remaining blockers
 
-## 15. Next AI3 actions
+### P1-01 — release runtime-config schema mismatch
 
-1. Theo dõi release lane đóng Request 008 và production SQLite build blocker; không sửa `tools/build/*` khi đang có owner/WIP khác.
-2. Khi có artifact schema V4 mới, chạy portable/installer Math payload + relaunch/reinstall regression.
-3. Khi AI2 commit generator `draw_segment_given_length`, chạy engine-owned adaptive interaction regression rồi cập nhật status.
-4. Sau các gate trên, chạy full Math release regression và chốt strict DoD.
+`SetupPreflightSmoke` và `UpdateRuntimeSmoke` cùng fail vì `RuntimeConfigBundle` vẫn expect database runtime config schema 3 trong khi bundled `database_runtime_v1.json` là schema 4. Đây là Platform/release ownership; AI3 chỉ giữ evidence, không sửa chéo lane.
+
+### P1-02 — bundled English content verification
+
+`ContentRuntimeSmoke` fail `bundled_english_verified`. Không phải lỗi Math UI nhưng chặn release-required smoke chain và do đó chặn strict Math distribution DoD.
+
+### P1-03 — adaptive interaction generator ownership
+
+Authored `interaction_integer` + UI control pass. Shared WIP AI2 đã có `draw_segment_given_length` + LearningSession smoke cho interactive no-fake-choice, nhưng chưa nằm trong stable HEAD. AI3 không stage/edit generator-owned WIP.
+
+### P1-04 — release packaging/E2E — Request 008
+
+- Staging logic copy toàn `content_packs` + `data/schema`; schema V4 đã có guard.
+- `Build-SetupArtifacts.ps1`, `Test-PortableE2E.ps1`, `Test-InstallerE2E.ps1` vẫn chưa hard-require đủ `lesson_catalog_v1.json`, `question_bank_v1.json`, `verified_templates_v1.json`.
+- Artifact `0.1.41-dev` cũ không phải release evidence cho Math hiện tại.
+- Chờ release lane đóng Request 008 rồi AI3 chạy portable/installer Math load + relaunch/reinstall regression.
+
+### P1-05 — expanded authored pool vs 3-question session — Request 009
+
+UI audit hiện tại:
+
+- lesson detail **đúng**: dùng `PracticeSets.TotalCount` để hiển thị `N câu trong ngân hàng bài học`;
+- lesson form/progress/result **đúng**: dùng `StartResult.TargetQuestionCount` / outcome `TargetQuestionCount` thật;
+- Hub CTA **còn coupling**: `CreateLessonPracticeButton()` lấy `PracticeSets.TotalCount` cho text/badge session, nên pool 6 sẽ thành `Luyện 6 câu bài này`.
+
+AI3 chưa hard-code `3` vì `MathLessonAccessSnapshot` chưa publish target/session preview count. Chờ AI2 first-class contract cho selected 3-question session set/target, sau đó khóa regression pool >=6 nhưng CTA/progress/result vẫn 3.
+
+## 16. Next AI3 actions
+
+1. Theo dõi Platform/release fix runtime-config schema 4 và English bundled-content smoke; rerun exact release smoke chain khi upstream ổn định.
+2. Theo dõi release lane đóng Request 008; không sửa `tools/build/*` khi đang có owner/WIP khác.
+3. Theo dõi AI2 Request 009; khi có first-class target/selected-set contract, sửa Hub CTA khỏi pool count và thêm >=6-pool → 3-question E2E.
+4. Khi AI2 commit generator `draw_segment_given_length`, chạy adaptive interaction regression rồi cập nhật status.
+5. Khi các gate trên đóng, chạy full portable/installer/reinstall Math release regression và chốt strict DoD.
