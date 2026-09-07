@@ -312,13 +312,40 @@ namespace WAHU.ChildUiRuntimeSmoke
                             "math_hub_sweep_renders_detail_" + lessonDescriptor.Id);
                         A(ContainsControlText(detailFlow, lessonDescriptor.PracticeSets.TotalCount + " câu trong ngân hàng bài học"),
                             "math_hub_sweep_renders_practice_count_" + lessonDescriptor.Id);
+                        var navigationMap = GetField<object>(form, "_lessonButtons") as System.Collections.IDictionary;
+                        var lessonNavigation = navigationMap == null ? null : navigationMap[lessonDescriptor.Id] as Button;
+                        A(lessonNavigation != null &&
+                            string.Equals(lessonNavigation.AccessibleName, "Bài " + lessonDescriptor.TitleVi, StringComparison.Ordinal) &&
+                            !string.IsNullOrWhiteSpace(lessonNavigation.AccessibleDescription),
+                            "math_hub_sweep_navigation_accessible_" + lessonDescriptor.Id);
+                        A(lessonNavigation.AccessibleDescription.IndexOf("Enter", StringComparison.OrdinalIgnoreCase) >= 0,
+                            "math_hub_sweep_navigation_explains_keyboard_open_" + lessonDescriptor.Id);
                         var lessonPractice = detailFlow.Controls.OfType<Button>()
                             .FirstOrDefault(x => string.Equals(x.AccessibleName, "Luyện tập bài " + lessonDescriptor.TitleVi, StringComparison.Ordinal));
                         A(lessonPractice != null && !string.IsNullOrWhiteSpace(lessonPractice.AccessibleDescription),
                             "math_hub_sweep_practice_accessible_" + lessonDescriptor.Id);
                         var access = accessMap[lessonDescriptor.Id];
-                        A(access != null && lessonPractice.Enabled == Get<bool>(access, "IsUnlocked"),
+                        var unlocked = access != null && Get<bool>(access, "IsUnlocked");
+                        A(access != null && lessonPractice.Enabled == unlocked,
                             "math_hub_sweep_practice_matches_unlock_" + lessonDescriptor.Id);
+                        if (!unlocked)
+                        {
+                            var missing = Get<object>(access, "UnsatisfiedPrerequisiteLessonIds") as System.Collections.IEnumerable;
+                            var missingCount = 0;
+                            var namesAllMissing = true;
+                            if (missing != null)
+                            {
+                                foreach (var rawId in missing)
+                                {
+                                    var missingLesson = catalog.FindLesson(Convert.ToString(rawId));
+                                    if (missingLesson == null || lessonPractice.AccessibleDescription.IndexOf(missingLesson.TitleVi, StringComparison.OrdinalIgnoreCase) < 0)
+                                        namesAllMissing = false;
+                                    missingCount++;
+                                }
+                            }
+                            A(missingCount > 0 && namesAllMissing,
+                                "math_hub_sweep_locked_practice_names_all_missing_prerequisites_" + lessonDescriptor.Id);
+                        }
                         sweptLessons++;
                     }
                     A(sweptLessons == 67, "math_hub_sweeps_all_sixty_seven_lessons");
