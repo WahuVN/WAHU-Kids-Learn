@@ -4,9 +4,9 @@ Audit: 2026-09-07
 Owner: AI1 — Math Content & Data
 Scope: `D:\APP HOC TAP`
 
-## 1. Cấu trúc dữ liệu Toán thực tế đang có
+## 1. Cấu trúc dữ liệu Toán tại thời điểm audit ban đầu
 
-Runtime hiện tại không có hierarchy lesson đầy đủ. Cấu trúc đang chạy thực tế là:
+Tại thời điểm audit ban đầu, runtime chưa có hierarchy lesson đầy đủ. Cấu trúc khi đó là:
 
 `subject(math) -> grade(2) -> curriculum skill -> VERIFIED generator template -> generated MathQuestion`
 
@@ -88,8 +88,60 @@ ID chỉ dùng ASCII lowercase + `_`, deterministic theo curriculum skill. Khôn
 
 ## 7. Kế hoạch đóng gap
 
-1. Tạo machine-readable curriculum/lesson catalog cho đủ 67 skill.
-2. Tạo static curated question bank có stable ID và metadata.
-3. Bổ sung semantic validator riêng cho Math content.
-4. Bổ sung smoke test tự động cho lesson/question/reference/answer/prerequisite/difficulty.
-5. Chỉ sau khi data pass validator mới cập nhật manifest/hash và version nếu không xung đột work song song.
+1. Tạo machine-readable curriculum/lesson catalog cho đủ 67 skill. — **DONE**
+2. Tạo static curated question bank có stable ID và metadata. — **DONE**
+3. Bổ sung semantic validator riêng cho Math content. — **DONE**
+4. Bổ sung smoke test tự động cho lesson/question/reference/answer/prerequisite/difficulty. — **DONE**
+5. Chỉ sau khi data pass validator mới cập nhật manifest/hash và version nếu không xung đột work song song. — **DONE cho file AI1; version/template hash của lane khác không bị stage**
+
+## 8. Post-completion reclassification
+
+Bảng ở mục 2 là ảnh chụp trạng thái **tại thời điểm audit ban đầu**. Sau các wave AI1, trạng thái Content/Data được phân loại lại như sau:
+
+| Hạng mục | Trạng thái sau hoàn thiện | Kết quả |
+|---|---|---|
+| Baseline skill list | DONE | 67/67 skill |
+| Curriculum hierarchy | DONE | 7 chapter, 17 topic, 67 lesson |
+| Lesson objectives | DONE | Mỗi lesson có tối thiểu 2 mục tiêu |
+| Lesson explanation/concepts | DONE | 67/67 lesson có explanation + concept definition |
+| Worked examples + solutions | DONE | 67/67 lesson có worked example, solution steps, answer |
+| Static question bank | DONE về correctness / OPEN về breadth | 201 curated question, hiện 3 question/skill; Request 009 mở pool >=6 nhưng giữ session target 3 |
+| Stable static question ID | DONE | Deterministic `m2_q_<skill>_NN` |
+| Hint metadata | DONE | 2 hint/question |
+| Difficulty metadata | DONE | 67 basic + 67 medium + 67 application |
+| Prerequisite graph | DONE | 9 root, 76 direct edge, 67/67 lesson reachable; no self-edge/cycle/redundant transitive edge |
+| Answer explanation | DONE | 201/201 có explanation |
+| Wrong-answer rationale | DONE | 267/267 distractor rationale unique, max repeat 1, chứa question-specific reason |
+| Validation metadata | DONE | Numeric/text/unit/expression/interactive contract được kiểm semantic |
+| Semantic content validator | DONE | 0 error ở final run |
+| Content tests | DONE | 35/35 PASS ở current run |
+| Duplicate IDs | DONE | 0 duplicate |
+| Orphan/reference checks | DONE | 0 orphan, mọi practice ref resolve đúng lesson/difficulty |
+| Manifest hash cho AI1 files | DONE | Catalog + question bank hash match manifest |
+| VERIFIED runtime generator templates | PARTIAL | 57 template, phủ 65/67 baseline skill; thiếu generator template cho `FOLD_CUT_COMPOSE_SHAPES`, `MONEY_VND_NOTE_RECOGNITION` |
+| Runtime/UI consumption của static catalog/bank | DONE normal path / OPEN breadth | Authored 201-question surface + targeted 3-question session + persistence/UI smoke PASS; Request 009 mở selection từ pool lớn hơn |
+
+## 9. Question-type và answer-kind contract sau khi AI2 mở rộng engine
+
+AI1 tách rõ hai khái niệm:
+
+- `question_type`: cách biểu diễn/tương tác của câu hỏi;
+- `answer_kind`: cách engine kiểm tra đáp án.
+
+Question bank Grade 2 hiện có đủ các dạng phù hợp curriculum và engine hiện hành:
+
+- `numeric_input`;
+- `multiple_choice`;
+- `true_false`;
+- `word_problem`;
+- `expression_input`;
+- `unit_input`;
+- `interactive_measurement`.
+
+Engine hiện hiểu `integer`, `interaction_integer`, `number`, `decimal`, `fraction`, `text`, `unit`, `expression`. Grade 2 content chỉ sử dụng `integer`, `interaction_integer`, `text`, `unit`, `expression`; `number`, `decimal`, `fraction` được khai báo là engine-supported nhưng cố ý không đưa vào bank lớp 2 vì không thuộc baseline hiện tại.
+
+Matching/order không được tạo thành answer kind riêng vì engine chưa publish contract riêng cho hai dạng đó. Bài sắp xếp số vẫn có trong curriculum nhưng được biểu diễn bằng lựa chọn text theo contract đang chạy.
+
+## 10. Final lane conclusion
+
+Content/Data correctness hiện sạch: **67/67 lesson complete, 201/201 question valid, 0 validator error, 35/35 content tests PASS**; normal authored runtime/UI path cũng đã integrate. Phần còn mở không phải lỗi correctness của bank: **Request 006** preserve `answer_unit` display metadata, **Request 009** mở rộng pool/replay nhưng giữ session 3 câu, và **Request 008/release-toolchain** thuộc lane build. Legacy generator vẫn phủ 65/67 skill nhưng authored lesson path đã phủ đủ 67/67.
