@@ -347,9 +347,11 @@ namespace WAHU.Session
             if (string.IsNullOrWhiteSpace(lessonId))
                 throw new InvalidOperationException("Math game event metadata is unavailable and no fallback lesson was supplied.");
 
-            _session = new MathSessionCoordinator(_database, _templatePath, _performanceProfile, _seed, lessonId);
+            _session = new MathSessionCoordinator(_database, _templatePath, _performanceProfile, _seed, lessonId, true);
             _start = _session.Start(displayName);
             _started = true;
+            if (_start.ResumedExistingSession && !string.Equals(_start.TargetLessonId, lessonId, StringComparison.Ordinal))
+                ResolveEventForLessonFailSafe(_start.TargetLessonId);
             try
             {
                 // A prior completed Math session may have become durable just before a transient
@@ -362,11 +364,10 @@ namespace WAHU.Session
                 // Game-world repair is downstream of learning and must not make the event unplayable.
             }
             if (!string.Equals(_start.SessionMode, "lesson", StringComparison.Ordinal) ||
-                !string.Equals(_start.TargetLessonId, lessonId, StringComparison.Ordinal) ||
                 _start.TargetQuestionCount != MathSessionCoordinator.TargetedLessonQuestionCount)
                 throw new InvalidOperationException("Math game event must bind to one targeted three-question Math session.");
             if (_event != null && !string.Equals(_event.TargetLessonId, _start.TargetLessonId, StringComparison.Ordinal))
-                throw new InvalidOperationException("Math game event target lesson changed during start/resume.");
+                throw new InvalidOperationException("Math game event metadata does not match the durable targeted lesson.");
 
             return new MathGameEventStartResult
             {
@@ -446,6 +447,16 @@ namespace WAHU.Session
             if (_event != null && _fallbackLessonId != null &&
                 !string.Equals(_event.TargetLessonId, _fallbackLessonId, StringComparison.Ordinal))
                 throw new InvalidOperationException("Math game event does not match requested fallback lesson.");
+        }
+
+        private void ResolveEventForLessonFailSafe(string lessonId)
+        {
+            _event = null;
+            if (string.IsNullOrWhiteSpace(lessonId) || string.IsNullOrWhiteSpace(_eventCatalogPath)) return;
+            var lessonCatalogPath = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(_templatePath)), "lesson_catalog_v1.json");
+            MathGameEventCatalog catalog;
+            if (!new MathGameEventCatalogSource().TryLoad(_eventCatalogPath, lessonCatalogPath, out catalog)) return;
+            _event = catalog.FindByLesson(lessonId);
         }
 
         private MathGameEventState BuildState()

@@ -25,6 +25,7 @@ namespace WAHU.Session
         private readonly int _requestedSeed;
         private readonly int _requestedTargetQuestionCount;
         private readonly string _requestedLessonId;
+        private readonly bool _allowResumeDifferentTargetedLesson;
         private readonly LearnerSessionService _sessionService;
         private readonly MathLessonProgressStore _lessonProgressStore;
         private readonly MathSessionRuntimeService _runtime;
@@ -77,15 +78,18 @@ namespace WAHU.Session
         private int _currentAttemptIndex = 1;
 
         public MathSessionCoordinator(LearningDatabase database, string templatePath, string performanceProfile, int seed)
-            : this(database, templatePath, performanceProfile, seed, DefaultTargetQuestionCount, null) { }
+            : this(database, templatePath, performanceProfile, seed, DefaultTargetQuestionCount, null, false) { }
 
         public MathSessionCoordinator(LearningDatabase database, string templatePath, string performanceProfile, int seed, int targetQuestionCount)
-            : this(database, templatePath, performanceProfile, seed, targetQuestionCount, null) { }
+            : this(database, templatePath, performanceProfile, seed, targetQuestionCount, null, false) { }
 
         public MathSessionCoordinator(LearningDatabase database, string templatePath, string performanceProfile, int seed, string lessonId)
-            : this(database, templatePath, performanceProfile, seed, DefaultTargetQuestionCount, lessonId) { }
+            : this(database, templatePath, performanceProfile, seed, DefaultTargetQuestionCount, lessonId, false) { }
 
-        private MathSessionCoordinator(LearningDatabase database, string templatePath, string performanceProfile, int seed, int targetQuestionCount, string lessonId)
+        internal MathSessionCoordinator(LearningDatabase database, string templatePath, string performanceProfile, int seed, string lessonId, bool allowResumeDifferentTargetedLesson)
+            : this(database, templatePath, performanceProfile, seed, DefaultTargetQuestionCount, lessonId, allowResumeDifferentTargetedLesson) { }
+
+        private MathSessionCoordinator(LearningDatabase database, string templatePath, string performanceProfile, int seed, int targetQuestionCount, string lessonId, bool allowResumeDifferentTargetedLesson)
         {
             _database = database ?? throw new ArgumentNullException("database");
             if (string.IsNullOrWhiteSpace(templatePath)) throw new ArgumentException("templatePath");
@@ -95,6 +99,7 @@ namespace WAHU.Session
             _requestedSeed = seed;
             _requestedTargetQuestionCount = targetQuestionCount;
             _requestedLessonId = string.IsNullOrWhiteSpace(lessonId) ? null : lessonId.Trim();
+            _allowResumeDifferentTargetedLesson = allowResumeDifferentTargetedLesson;
             _seed = seed;
             _targetQuestionCount = targetQuestionCount;
             _sessionService = new LearnerSessionService(database);
@@ -124,9 +129,7 @@ namespace WAHU.Session
             var resumable = LoadLatestResumableRecoveringCorrupt(ref recovered);
             if (resumable != null)
             {
-                if (!string.IsNullOrWhiteSpace(_requestedLessonId) &&
-                    (!string.Equals(resumable.SessionMode, "lesson", StringComparison.Ordinal) ||
-                     !string.Equals(resumable.TargetLessonId, _requestedLessonId, StringComparison.Ordinal)))
+                if (!CanResumeRequestedOrActiveTargetedLesson(resumable))
                     throw new InvalidOperationException("Một phiên Toán khác đang học dở. Hãy tiếp tục hoặc kết thúc phiên đó trước khi mở bài này.");
                 RestoreSession(resumable, out restoredOpenQuestion, out discardedCorruptOpenQuestion);
                 resumed = true;
@@ -156,9 +159,7 @@ namespace WAHU.Session
                         var raced = LoadLatestResumableRecoveringCorrupt(ref recovered);
                         if (raced == null)
                             throw new InvalidOperationException("Một phiên Toán khác vừa được mở. Hãy thử tiếp tục lại phiên đang học.");
-                        if (!string.IsNullOrWhiteSpace(_requestedLessonId) &&
-                            (!string.Equals(raced.SessionMode, "lesson", StringComparison.Ordinal) ||
-                             !string.Equals(raced.TargetLessonId, _requestedLessonId, StringComparison.Ordinal)))
+                        if (!CanResumeRequestedOrActiveTargetedLesson(raced))
                             throw new InvalidOperationException("Một phiên Toán khác đang học dở. Hãy tiếp tục hoặc kết thúc phiên đó trước khi mở bài này.");
                         RestoreSession(raced, out restoredOpenQuestion, out discardedCorruptOpenQuestion);
                         resumed = true;
@@ -201,6 +202,15 @@ namespace WAHU.Session
                 RetryPending = _currentQuestion != null && _currentAttemptIndex > 1,
                 CurrentAttemptIndex = _currentQuestion == null ? 1 : _currentAttemptIndex
             };
+        }
+
+        private bool CanResumeRequestedOrActiveTargetedLesson(MathSessionRuntimeSnapshot runtime)
+        {
+            if (runtime == null) return false;
+            if (string.IsNullOrWhiteSpace(_requestedLessonId)) return true;
+            if (!string.Equals(runtime.SessionMode, "lesson", StringComparison.Ordinal)) return false;
+            if (string.Equals(runtime.TargetLessonId, _requestedLessonId, StringComparison.Ordinal)) return true;
+            return _allowResumeDifferentTargetedLesson && !string.IsNullOrWhiteSpace(runtime.TargetLessonId);
         }
 
         public MathQuestion NextQuestion()

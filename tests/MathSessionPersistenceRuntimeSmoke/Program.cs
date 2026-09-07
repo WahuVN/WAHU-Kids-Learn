@@ -77,6 +77,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestGameEventRuntimeResumeRewardAndFallback(root, schemaPath, templatePath, lessonCatalogPath);
                 TestProductionFirstFiveGameEventsRuntime(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestProductionFirstEventResumeJourney(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
+                TestGameEventDifferentSelectionResumesDurableActiveEvent(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventRewardFaultReconcilesOnNextStart(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventCommitFaultPreservesCheckpoint(root, schemaPath, templatePath, lessonCatalogPath);
                 TestGameEventConcurrentCoordinatorsStayIdempotent(root, schemaPath, templatePath, lessonCatalogPath);
@@ -400,6 +401,91 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 A(Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + sessionId + "';") == 1 &&
                   Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + sessionId + "';") == 3,
                     "production_first_event_resume_journey_grants_one_reward_three_mastery");
+            }
+        }
+
+        private static void TestGameEventDifferentSelectionResumesDurableActiveEvent(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath,
+            string gameEventPath)
+        {
+            var events = new MathGameEventCatalogSource().Load(gameEventPath, lessonCatalogPath);
+            var firstEvent = events.Events[0];
+            var secondEvent = events.Events[1];
+            var database = NewDatabase(Path.Combine(root, "game-event-durable-active-wins.db"), schemaPath);
+            string firstSessionId;
+            string childId;
+            string openQ2Id;
+            IList<string> selected;
+
+            using (var first = new MathGameEventCoordinator(database, templatePath, gameEventPath, "LOW", 15151,
+                firstEvent.Id, firstEvent.TargetLessonId))
+            {
+                var start = first.Start("Bé durable event thắng");
+                firstSessionId = start.Session.SessionId;
+                childId = start.Session.ChildId;
+                selected = start.Session.SelectedContentQuestionIds.ToList();
+                var q1 = first.NextQuestion();
+                first.SubmitAnswerAt(q1.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700);
+                var q2 = first.NextQuestion();
+                openQ2Id = q2.QuestionId;
+                first.SuspendForBreak("switch_event_screen");
+            }
+
+            var ordinaryLessonRejected = false;
+            try
+            {
+                using (var ordinary = new MathSessionCoordinator(database, templatePath, "LOW", 888888, secondEvent.TargetLessonId))
+                    ordinary.Start("Bé durable event thắng");
+            }
+            catch (InvalidOperationException)
+            {
+                ordinaryLessonRejected = true;
+            }
+            A(ordinaryLessonRejected,
+                "ordinary_targeted_lesson_still_rejects_different_active_lesson");
+
+            using (var requestedSecond = new MathGameEventCoordinator(database, templatePath, gameEventPath, "NORMAL", 999999,
+                secondEvent.Id, secondEvent.TargetLessonId))
+            {
+                var resumed = requestedSecond.Start("Bé durable event thắng");
+                A(resumed.Session.ResumedExistingSession && resumed.Session.SessionId == firstSessionId &&
+                  resumed.Session.TargetLessonId == firstEvent.TargetLessonId &&
+                  resumed.Session.SelectedContentQuestionIds.SequenceEqual(selected),
+                    "game_event_requested_different_event_resumes_durable_active_session");
+                A(resumed.Event != null && resumed.Event.Id == firstEvent.Id &&
+                  resumed.EventState.EventId == firstEvent.Id && resumed.EventState.TargetLessonId == firstEvent.TargetLessonId &&
+                  resumed.EventState.CompletedCheckpointCount == 1 && resumed.EventState.CurrentCheckpointNumber == 2,
+                    "game_event_requested_different_event_rebinds_presentation_to_durable_event");
+                var q2 = requestedSecond.NextQuestion();
+                A(q2.QuestionId == openQ2Id && q2.ContentQuestionId == selected[1],
+                    "game_event_requested_different_event_keeps_exact_open_question");
+                A(Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + childId +
+                  "' AND lesson_id='" + secondEvent.TargetLessonId + "';") == 0,
+                    "game_event_requested_different_event_does_not_start_new_lesson_progress");
+
+                requestedSecond.SubmitAnswerAt(q2.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 800);
+                var q3 = requestedSecond.NextQuestion();
+                requestedSecond.SubmitAnswerAt(q3.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 900);
+                var completed = requestedSecond.Complete();
+                A(completed.LearningSummary.LessonCompleted && completed.LearningSummary.TargetLessonId == firstEvent.TargetLessonId &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + firstSessionId + "';") == 1,
+                    "game_event_durable_active_event_completes_original_lesson_and_rewards_once");
+            }
+
+            using (var second = new MathGameEventCoordinator(database, templatePath, gameEventPath, "LOW", 15152,
+                secondEvent.Id, secondEvent.TargetLessonId))
+            {
+                var started = second.Start("Bé durable event thắng");
+                A(!started.Session.ResumedExistingSession && started.Session.SessionId != firstSessionId &&
+                  started.Session.TargetLessonId == secondEvent.TargetLessonId && started.Event != null && started.Event.Id == secondEvent.Id,
+                    "game_event_requested_second_event_starts_only_after_durable_first_event_completed");
+                A(Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + childId +
+                  "' AND lesson_id='" + secondEvent.TargetLessonId + "' AND started_count=1;") == 1,
+                    "game_event_second_lesson_started_count_increments_only_when_really_started");
+                second.SuspendForBreak("cleanup_second_event");
             }
         }
 
