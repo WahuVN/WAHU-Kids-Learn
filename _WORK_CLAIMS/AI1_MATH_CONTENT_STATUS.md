@@ -28,7 +28,7 @@ Owner: AI1 — Math Content & Data
   - interactive measurement
   - word problem
 - Semantic validator errors: **0**
-- Math content unittest: **89 / 89 PASS**
+- Math content unittest: **90 / 90 PASS**
 - Pack manifest/hash/listing check on current working tree: **PASS** (`version=1.9.0`, 4 listed files, gồm `game_events_v1.json`)
 - Real 402-bank session/persistence integration: **289 assertions PASS** trên snapshot trước final engine stress; AI2 committed status ghi final persistence **374 PASS**. Current unstaged AI2 partial-pack-identity fixture đang được phát triển riêng và không thuộc AI1.
 - Child UI targeted build (`BuildProjectReferences=false`) + runtime smoke: **1593 assertions PASS**
@@ -195,7 +195,8 @@ Theo phase hiện tại, AI1 **không tiếp tục polish đồng đều 67 bài
 - Event 5 dùng đúng thuật ngữ `hàng trăm`, không dùng cụm mơ hồ `phần trăm`; validator chặn lại ambiguity `percent_vs_hundreds`.
 - Intro copy bị chặn nếu dùng nghĩa vụ/áp lực kiểu `con phải`, `phải làm đủ/hết`, `chỉ còn <n>`, `cố lên để nhận`; completion copy phải mô tả restoration state đúng theme thay vì praise/reward-only.
 - Theme/checkpoint coherence được khóa: mỗi first-five lesson giữ đúng theme frozen và mọi checkpoint label phải cùng vật thể của theme (`biển số`, `trạm`, `đoạn`, `ngăn hàng`, `bộ phận`).
-- Full `MathContentDataSmoke`: **89/89 PASS**.
+- Event copy toàn V1 bị chặn nếu dùng extrinsic reward bait (`nhận quà`, `nhận thưởng`, `phần thưởng`, `được thưởng`, `quà tặng`).
+- Full `MathContentDataSmoke`: **90/90 PASS**.
 - Handoff: AI2 consume schema/runtime; AI3 thêm file event vào build/portable/installer payload. AI1 **không sửa** Session/App/release scripts.
 
 ## Commits / waves

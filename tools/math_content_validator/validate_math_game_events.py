@@ -55,6 +55,7 @@ AMBIGUOUS_MATH_PATTERNS = ((r"\bphần\s+trăm\b", "percent_vs_hundreds"),)
 PRESSURE_PATTERNS = (
     r"\bcon\s+phải\b", r"phải\s+làm\s+(?:đủ|hết)", r"chỉ\s+còn\s+\d+", r"cố\s+lên\s+để\s+nhận",
 )
+INCENTIVE_PATTERNS = (r"nhận\s+(?:quà|thưởng)", r"phần\s+thưởng", r"được\s+thưởng", r"quà\s+tặng")
 COMPLETION_REQUIRED_PATTERNS_BY_THEME = {
     "forest_path": (r"đúng\s+chỗ", r"rõ\s+ràng"),
     "hundred_station": (r"nhãn", r"rõ\s+ràng"),
@@ -170,6 +171,8 @@ def validate(events_path: Path = DEFAULT_EVENTS, lessons_path: Path = DEFAULT_LE
                         errors.append(f"{where}:{key}:ambiguous_math_copy:{label}")
                 if any(re.search(pattern, lowered_value, re.IGNORECASE) for pattern in PRESSURE_PATTERNS):
                     errors.append(f"{where}:{key}:pressure_copy")
+                if any(re.search(pattern, lowered_value, re.IGNORECASE) for pattern in INCENTIVE_PATTERNS):
+                    errors.append(f"{where}:{key}:extrinsic_incentive_copy")
 
         completion_text = event.get("completion_vi")
         theme_for_completion = event.get("theme")
