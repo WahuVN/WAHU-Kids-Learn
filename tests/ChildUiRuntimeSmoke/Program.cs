@@ -38,6 +38,7 @@ namespace WAHU.ChildUiRuntimeSmoke
             TestAllAuthoredAnswerSurfaces(appAssembly);
             TestTargetedLessonUiFlow(appAssembly);
             TestExpandedPoolTargetedUiFlow(appAssembly);
+            TestIntegerAnswerUnitUiFlow(appAssembly);
             TestChoiceRetryUiFlow(appAssembly);
             TestSubmitFailureRecoveryUiFlow(appAssembly);
             TestTypedAndInteractionSubmitFailureRecoveryUiFlow(appAssembly);
@@ -1336,6 +1337,115 @@ namespace WAHU.ChildUiRuntimeSmoke
                         try { File.WriteAllBytes(pair.Key, pair.Value); } catch { }
                     }
                 }
+                try { Directory.Delete(tempRoot, true); } catch { }
+            }
+        }
+
+        private static void TestIntegerAnswerUnitUiFlow(Assembly appAssembly)
+        {
+            var repo = Directory.GetCurrentDirectory();
+            var sourceContent = Path.Combine(repo, "content_packs", "math_grade2_v1");
+            var runtimeContent = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "content_packs", "math_grade2_v1");
+            Directory.CreateDirectory(runtimeContent);
+            foreach (var name in new[] { "verified_templates_v1.json", "lesson_catalog_v1.json", "question_bank_v1.json" })
+                File.Copy(Path.Combine(sourceContent, name), Path.Combine(runtimeContent, name), true);
+
+            var lessonId = "m2_ls_time_day_24_hours";
+            var catalog = new MathLessonCatalogSource().Load(Path.Combine(sourceContent, "lesson_catalog_v1.json"));
+            var lesson = catalog.FindLesson(lessonId);
+            A(lesson != null && (lesson.PrerequisiteSkills == null || lesson.PrerequisiteSkills.Count == 0),
+                "answer_unit_ui_fixture_lesson_is_directly_startable");
+
+            var tempRoot = Path.Combine(Path.GetTempPath(), "wahu-child-ui-answer-unit-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempRoot);
+            try
+            {
+                var schemaSource = Path.Combine(repo, "data", "schema");
+                var schemaDir = Path.Combine(tempRoot, "schema");
+                Directory.CreateDirectory(schemaDir);
+                foreach (var source in Directory.GetFiles(schemaSource, "*.sql"))
+                    File.Copy(source, Path.Combine(schemaDir, Path.GetFileName(source)), true);
+                var database = new LearningDatabase(Path.Combine(tempRoot, "learning.db"), Path.Combine(schemaDir, "001_initial.sql"));
+                var init = database.Initialize("DELETE");
+                A(init.SchemaVersion == 5 && init.Health.IsHealthy, "answer_unit_ui_database_v5_ready");
+                new LearnerSessionService(database).EnsurePrimaryChild("Bé UI answer unit");
+
+                var ctor = typeof(WAHUKidsLearn.MathLessonForm).GetConstructor(
+                    BindingFlags.Instance | BindingFlags.NonPublic,
+                    null,
+                    new[] { typeof(LearningDatabase), typeof(RuntimePerformanceSettings), typeof(string) },
+                    null);
+                A(ctor != null, "answer_unit_ui_lesson_constructor_available");
+
+                string questionId;
+                string contentQuestionId;
+                using (var first = (WAHUKidsLearn.MathLessonForm)ctor.Invoke(new object[]
+                {
+                    database,
+                    new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW },
+                    lessonId
+                }))
+                {
+                    Invoke(first, "StartSession");
+                    var question = GetField<MathQuestion>(first, "_question");
+                    A(question != null && question.AnswerKind == "integer" && question.AnswerUnit == "giờ",
+                        "answer_unit_ui_opens_integer_question_with_display_unit");
+                    A(question.CorrectAnswerDisplay == "24" && question.CorrectAnswerFeedbackDisplay == "24 giờ",
+                        "answer_unit_ui_separates_raw_answer_from_feedback_display");
+                    A(question.IsCorrectAnswer("24") && !question.IsCorrectAnswer("24 giờ"),
+                        "answer_unit_ui_keeps_integer_grading_raw");
+                    var input = GetField<TextBox>(first, "_typedAnswerBox");
+                    var support = GetField<Label>(first, "_support");
+                    A(input.Enabled && support.Text.IndexOf("kèm đơn vị", StringComparison.OrdinalIgnoreCase) < 0 &&
+                        input.AccessibleDescription.IndexOf("kèm đơn vị", StringComparison.OrdinalIgnoreCase) < 0,
+                        "answer_unit_ui_does_not_require_unit_in_typed_input");
+                    questionId = question.QuestionId;
+                    contentQuestionId = question.ContentQuestionId;
+                    var coordinator = GetField<object>(first, "_coordinator");
+                    Invoke(coordinator, "Suspend", "answer_unit_ui_suspend_open_question");
+                    SetField(first, "_finished", true);
+                }
+
+                using (var resumed = (WAHUKidsLearn.MathLessonForm)ctor.Invoke(new object[]
+                {
+                    database,
+                    new RuntimePerformanceSettings { Profile = PerformanceProfileKind.NORMAL },
+                    lessonId
+                }))
+                {
+                    Invoke(resumed, "StartSession");
+                    var question = GetField<MathQuestion>(resumed, "_question");
+                    A(question != null && question.QuestionId == questionId && question.ContentQuestionId == contentQuestionId,
+                        "answer_unit_ui_resume_restores_exact_open_question");
+                    A(question.AnswerUnit == "giờ" && question.CorrectAnswerDisplay == "24" &&
+                        question.CorrectAnswerFeedbackDisplay == "24 giờ",
+                        "answer_unit_ui_resume_preserves_display_unit_metadata");
+
+                    var input = GetField<TextBox>(resumed, "_typedAnswerBox");
+                    input.Text = "24 giờ";
+                    A(GetField<Button>(resumed, "_typedSubmitButton").Enabled,
+                        "answer_unit_ui_unit_text_can_be_submitted_for_validation");
+                    Invoke(resumed, "SubmitTypedAnswer", "answer_unit_ui_wrong_unit_text");
+                    A(GetField<bool>(resumed, "_retryPending") && input.Enabled &&
+                        GetField<Label>(resumed, "_progressText").Text.IndexOf("thử lại", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "answer_unit_ui_unit_text_is_wrong_without_advancing_progress");
+
+                    input.Text = "23";
+                    Invoke(resumed, "SubmitTypedAnswer", "answer_unit_ui_final_wrong");
+                    var finalSupport = GetField<Label>(resumed, "_support").Text;
+                    A(!GetField<bool>(resumed, "_retryPending") &&
+                        finalSupport.IndexOf("Đáp án đúng: 24 giờ", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "answer_unit_ui_final_feedback_displays_value_with_unit");
+                    A(GetField<Label>(resumed, "_progressText").Text.IndexOf("1 / 3", StringComparison.Ordinal) >= 0,
+                        "answer_unit_ui_final_wrong_counts_one_completed_question");
+
+                    var coordinator = GetField<object>(resumed, "_coordinator");
+                    Invoke(coordinator, "Abort", "answer_unit_ui_cleanup");
+                    SetField(resumed, "_finished", true);
+                }
+            }
+            finally
+            {
                 try { Directory.Delete(tempRoot, true); } catch { }
             }
         }
