@@ -78,6 +78,12 @@ VALUES(@id,'{}',@utc);";
 
         public int RecoverDanglingSessions()
         {
+            return RecoverDanglingSessions(null);
+        }
+
+        public int RecoverDanglingSessions(string childId)
+        {
+            if (childId != null && string.IsNullOrWhiteSpace(childId)) throw new ArgumentException("childId");
             return _database.Writes.Execute((connection, transaction) =>
             {
                 using (var command = connection.CreateCommand())
@@ -87,9 +93,11 @@ VALUES(@id,'{}',@utc);";
 SET state='recovered', ended_at_utc=@utc,
     summary_json=COALESCE(summary_json,'{""reason"":""unclean_previous_runtime""}')
 WHERE planned_subject='math'
+  AND (@child IS NULL OR child_id=@child)
   AND state IN ('started','active') AND ended_at_utc IS NULL
   AND NOT EXISTS (SELECT 1 FROM math_session_runtime r WHERE r.session_id=session.id);";
                     command.Parameters.AddWithValue("@utc", DateTime.UtcNow.ToString("o"));
+                    command.Parameters.AddWithValue("@child", childId == null ? (object)DBNull.Value : childId);
                     return command.ExecuteNonQuery();
                 }
             });

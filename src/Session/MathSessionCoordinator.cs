@@ -128,7 +128,7 @@ namespace WAHU.Session
             }
             else
             {
-                recovered = _sessionService.RecoverDanglingSessions();
+                recovered = _sessionService.RecoverDanglingSessions(_profile.ChildId);
                 try
                 {
                     _seed = _requestedSeed;

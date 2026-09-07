@@ -36,6 +36,7 @@ namespace WAHU.MathDataEngineRuntimeSmoke
                 TestCrossProcessAtomicMathRuntimeStart(root, sourceSchema);
                 TestTargetedAtomicStartRollsBackOnProgressFailure(root, sourceSchema);
                 TestDanglingRecoveryIsScopedToMath(root, sourceSchema);
+                TestDanglingRecoveryIsScopedToChild(root, sourceSchema);
                 TestExistingV1UpgradesToV3WithBackup(root, sourceSchema);
                 TestV3BackfillPreservesLegacyDuplicates(root, sourceSchema);
                 Console.WriteLine("MATH_DATA_ENGINE_RUNTIME_SMOKE_PASS assertions=" + _assertions);
@@ -672,6 +673,45 @@ END;");
             {
                 A(Count(c, "SELECT count(*) FROM session WHERE id IN ('" + english.SessionId + "','" + mixed.SessionId + "') AND state='aborted';") == 2,
                     "dangling_recovery_non_math_sessions_remain_completable");
+            }
+        }
+
+        private static void TestDanglingRecoveryIsScopedToChild(string root, string sourceSchema)
+        {
+            var schemaDir = Path.Combine(root, "schema-recovery-child-scope");
+            CopySchemas(sourceSchema, schemaDir);
+            var schemaPath = Path.Combine(schemaDir, "001_initial.sql");
+            var database = new LearningDatabase(Path.Combine(root, "recovery-child-scope.db"), schemaPath);
+            database.Initialize("DELETE");
+            var sessions = new LearnerSessionService(database);
+            var primary = sessions.EnsurePrimaryChild("Bé primary recovery");
+            var otherChildId = "child-recovery-other";
+            using (var c = database.OpenConnection())
+            {
+                var now = DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture);
+                Exec(c, "INSERT INTO child(id,display_name,grade_level,created_at_utc,updated_at_utc) VALUES(@id,@name,2,@utc,@utc);",
+                    "@id", otherChildId, "@name", "Bé khác", "@utc", now);
+            }
+
+            var primaryMath = sessions.BeginSession(primary.ChildId, "math", "LOW");
+            var otherMath = sessions.BeginSession(otherChildId, "math", "LOW");
+
+            A(sessions.RecoverDanglingSessions(primary.ChildId) == 1,
+                "dangling_recovery_child_scope_recovers_only_requested_child");
+            using (var c = database.OpenConnection())
+            {
+                A(Count(c, "SELECT count(*) FROM session WHERE id='" + primaryMath.SessionId + "' AND state='recovered' AND ended_at_utc IS NOT NULL;") == 1,
+                    "dangling_recovery_child_scope_marks_requested_child_recovered");
+                A(Count(c, "SELECT count(*) FROM session WHERE id='" + otherMath.SessionId + "' AND state='active' AND ended_at_utc IS NULL;") == 1,
+                    "dangling_recovery_child_scope_preserves_other_child_math_session");
+            }
+
+            A(sessions.RecoverDanglingSessions() == 1,
+                "dangling_recovery_global_overload_still_recovers_remaining_math_session");
+            using (var c = database.OpenConnection())
+            {
+                A(Count(c, "SELECT count(*) FROM session WHERE id='" + otherMath.SessionId + "' AND state='recovered' AND ended_at_utc IS NOT NULL;") == 1,
+                    "dangling_recovery_global_overload_keeps_maintenance_behavior");
             }
         }
 

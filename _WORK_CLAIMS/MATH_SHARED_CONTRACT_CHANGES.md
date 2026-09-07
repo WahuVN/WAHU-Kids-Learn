@@ -220,6 +220,15 @@ Math cold-start không được lộ một `session` active chưa có `math_sess
 - Math session `started/active`, chưa ended và không có `math_session_runtime` vẫn được recovery như crash/legacy partial state.
 - Regression tạo đồng thời một dangling Math session + active English + active mixed; invariant là chỉ Math bị recovered, hai session non-Math vẫn active và vẫn terminalize bình thường sau đó.
 
+## 2026-09-07 — Child-scoped dangling recovery (AI2)
+
+Math startup chỉ được recovery dangling Math session của đúng child đang khởi động:
+
+- `RecoverDanglingSessions(childId)` giới hạn query bằng `child_id`; coordinator gọi overload này với `_profile.ChildId`.
+- Dangling Math session của child khác phải giữ nguyên active, không bị startup hiện tại thu hồi.
+- Overload `RecoverDanglingSessions()` không tham số vẫn giữ semantics global cho maintenance/backward compatibility, nhưng không được dùng trong normal Math startup.
+- Regression tạo hai child, mỗi child có một dangling Math session; scoped recovery chỉ thu hồi child được chỉ định, sau đó global overload mới thu hồi session còn lại.
+
 ## Contract còn chưa chốt
 
 Các mục sau chưa được UI/content tự invent cho tới khi AI2 publish contract:
