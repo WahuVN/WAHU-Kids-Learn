@@ -108,6 +108,8 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestGameEventCommitFaultPreservesCheckpoint(root, schemaPath, templatePath, lessonCatalogPath);
                 TestGameEventConcurrentCoordinatorsStayIdempotent(root, schemaPath, templatePath, lessonCatalogPath);
                 TestGameEventConcurrentCompletionRejectsAbortedTerminal(root, schemaPath, templatePath, lessonCatalogPath);
+                TestTerminalLoserCoordinatorsBecomeInactive(root, schemaPath, templatePath, lessonCatalogPath);
+                TestCompleteVsAbortRaceHasSingleDurableWinner(root, schemaPath, templatePath, lessonCatalogPath);
                 TestGameEventCompleteVsSuspendRaceStaysTerminal(root, schemaPath, templatePath, lessonCatalogPath);
                 Console.WriteLine("MATH_SESSION_PERSISTENCE_RUNTIME_SMOKE_PASS assertions=" + _assertions);
                 return 0;
@@ -2024,6 +2026,142 @@ BEGIN SELECT RAISE(ABORT,'game event injected mastery failure'); END;");
                   Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + firstStart.Session.ChildId +
                   "' AND lesson_id='" + lesson.Id + "' AND started_count=1 AND completed_count=0;") == 1,
                     "game_event_concurrent_completion_never_accepts_aborted_terminal_as_success");
+            }
+        }
+
+        private static void TestTerminalLoserCoordinatorsBecomeInactive(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.Lessons[0];
+
+            var abortedDb = NewDatabase(Path.Combine(root, "terminal-loser-after-abort.db"), schemaPath);
+            using (var aborting = new MathSessionCoordinator(abortedDb, templatePath, "LOW", 14224, lesson.Id))
+            using (var staleCompleting = new MathSessionCoordinator(abortedDb, templatePath, "NORMAL", 999999, lesson.Id))
+            {
+                var firstStart = aborting.Start("Bé terminal loser abort");
+                var secondStart = staleCompleting.Start("Bé terminal loser abort");
+                A(secondStart.ResumedExistingSession && secondStart.SessionId == firstStart.SessionId,
+                    "terminal_loser_after_abort_wrappers_share_session");
+                for (var ordinal = 0; ordinal < 3; ordinal++)
+                {
+                    var qA = aborting.NextQuestion();
+                    var qB = staleCompleting.NextQuestion();
+                    aborting.SubmitAnswerAt(qA.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700 + ordinal * 100);
+                    staleCompleting.SubmitAnswerAt(qB.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 720 + ordinal * 100);
+                }
+                aborting.Abort("terminal_loser_abort_wins");
+                var rejected = false;
+                try { staleCompleting.Complete(); }
+                catch (InvalidOperationException) { rejected = true; }
+                A(rejected && !staleCompleting.IsActive && SessionState(abortedDb, firstStart.SessionId) == "aborted" &&
+                  Count(abortedDb, "SELECT count(*) FROM reward_event WHERE source_ref='" + firstStart.SessionId + "';") == 0,
+                    "terminal_loser_complete_after_abort_rejects_but_converges_inactive");
+            }
+
+            var completedDb = NewDatabase(Path.Combine(root, "terminal-loser-after-complete.db"), schemaPath);
+            using (var completing = new MathSessionCoordinator(completedDb, templatePath, "LOW", 14225, lesson.Id))
+            using (var staleAborting = new MathSessionCoordinator(completedDb, templatePath, "NORMAL", 999999, lesson.Id))
+            {
+                var firstStart = completing.Start("Bé terminal loser complete");
+                var secondStart = staleAborting.Start("Bé terminal loser complete");
+                A(secondStart.ResumedExistingSession && secondStart.SessionId == firstStart.SessionId,
+                    "terminal_loser_after_complete_wrappers_share_session");
+                for (var ordinal = 0; ordinal < 3; ordinal++)
+                {
+                    var qA = completing.NextQuestion();
+                    var qB = staleAborting.NextQuestion();
+                    completing.SubmitAnswerAt(qA.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700 + ordinal * 100);
+                    staleAborting.SubmitAnswerAt(qB.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 720 + ordinal * 100);
+                }
+                var completed = completing.Complete();
+                A(completed.LessonCompleted && SessionState(completedDb, firstStart.SessionId) == "completed",
+                    "terminal_loser_complete_winner_terminalizes_session");
+                var rejected = false;
+                try { staleAborting.Abort("terminal_loser_abort_after_complete"); }
+                catch (InvalidOperationException) { rejected = true; }
+                A(rejected && !staleAborting.IsActive && SessionState(completedDb, firstStart.SessionId) == "completed" &&
+                  Count(completedDb, "SELECT count(*) FROM reward_event WHERE source_ref='" + firstStart.SessionId + "';") == 1 &&
+                  Count(completedDb, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + firstStart.ChildId +
+                  "' AND lesson_id='" + lesson.Id + "' AND started_count=1 AND completed_count=1;") == 1,
+                    "terminal_loser_abort_after_complete_rejects_but_converges_inactive");
+            }
+        }
+
+        private static void TestCompleteVsAbortRaceHasSingleDurableWinner(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.Lessons[0];
+            var database = NewDatabase(Path.Combine(root, "complete-vs-abort-race.db"), schemaPath);
+
+            using (var completing = new MathSessionCoordinator(database, templatePath, "LOW", 14226, lesson.Id))
+            using (var aborting = new MathSessionCoordinator(database, templatePath, "NORMAL", 999999, lesson.Id))
+            {
+                var firstStart = completing.Start("Bé complete abort race");
+                var secondStart = aborting.Start("Bé complete abort race");
+                A(secondStart.ResumedExistingSession && secondStart.SessionId == firstStart.SessionId,
+                    "complete_abort_race_wrappers_share_durable_session");
+                for (var ordinal = 0; ordinal < 3; ordinal++)
+                {
+                    var qA = completing.NextQuestion();
+                    var qB = aborting.NextQuestion();
+                    completing.SubmitAnswerAt(qA.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700 + ordinal * 100);
+                    aborting.SubmitAnswerAt(qB.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 720 + ordinal * 100);
+                }
+
+                MathSessionSummary completedSummary = null;
+                MathSessionSummary abortedSummary = null;
+                Exception completionError = null;
+                Exception abortError = null;
+                var gate = new ManualResetEvent(false);
+                var readyComplete = new ManualResetEvent(false);
+                var readyAbort = new ManualResetEvent(false);
+                var completeThread = new Thread(() =>
+                {
+                    readyComplete.Set();
+                    gate.WaitOne();
+                    try { completedSummary = completing.Complete(); } catch (Exception ex) { completionError = ex; }
+                });
+                var abortThread = new Thread(() =>
+                {
+                    readyAbort.Set();
+                    gate.WaitOne();
+                    try { abortedSummary = aborting.Abort("complete_abort_race"); } catch (Exception ex) { abortError = ex; }
+                });
+                completeThread.Start();
+                abortThread.Start();
+                A(readyComplete.WaitOne(5000) && readyAbort.WaitOne(5000),
+                    "complete_abort_race_workers_ready");
+                gate.Set();
+                A(completeThread.Join(10000) && abortThread.Join(10000),
+                    "complete_abort_race_workers_finish");
+                gate.Dispose();
+                readyComplete.Dispose();
+                readyAbort.Dispose();
+
+                var state = SessionState(database, firstStart.SessionId);
+                A((state == "completed" || state == "aborted") && !completing.IsActive && !aborting.IsActive,
+                    "complete_abort_race_has_one_terminal_state_and_both_coordinators_converge_inactive");
+                A((completionError == null) != (abortError == null) &&
+                  ((state == "completed" && completedSummary != null && abortError is InvalidOperationException) ||
+                   (state == "aborted" && abortedSummary != null && completionError is InvalidOperationException)),
+                    "complete_abort_race_only_durable_winner_reports_terminal_success");
+                var expectedCompleted = state == "completed" ? 1 : 0;
+                A(Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + firstStart.ChildId +
+                  "' AND lesson_id='" + lesson.Id + "' AND started_count=1 AND completed_count=" + expectedCompleted + ";") == 1 &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + firstStart.SessionId + "';") == expectedCompleted,
+                    "complete_abort_race_progress_and_reward_match_terminal_winner");
+                A(Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + firstStart.SessionId + "';") == 3 &&
+                  Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + firstStart.SessionId + "';") == 3 &&
+                  Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + firstStart.SessionId + "';") == 0,
+                    "complete_abort_race_preserves_learning_and_removes_terminal_runtime_once");
             }
         }
 

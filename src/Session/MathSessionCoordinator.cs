@@ -695,7 +695,12 @@ namespace WAHU.Session
                 {
                     // Another coordinator may have terminalized this exact durable session first.
                     // Accept only that proven completed state; aborted/recovered/missing or DB failures still surface.
-                    if (!_sessionService.IsCompletedMathSession(_profile.ChildId, _session.SessionId)) throw;
+                    if (!_sessionService.IsCompletedMathSession(_profile.ChildId, _session.SessionId))
+                    {
+                        MarkInactiveIfDurableSessionClosed();
+                        throw;
+                    }
+                    _active = false;
                     var durableProgress = _lessonProgressStore.LoadOne(_profile.ChildId, _targetLesson.Id);
                     if (durableProgress == null || durableProgress.CompletedCount <= 0 ||
                         !durableProgress.LastCompletedAtUtc.HasValue ||
@@ -713,7 +718,12 @@ namespace WAHU.Session
                 }
                 catch (InvalidOperationException)
                 {
-                    if (!_sessionService.IsCompletedMathSession(_profile.ChildId, _session.SessionId)) throw;
+                    if (!_sessionService.IsCompletedMathSession(_profile.ChildId, _session.SessionId))
+                    {
+                        MarkInactiveIfDurableSessionClosed();
+                        throw;
+                    }
+                    _active = false;
                 }
             }
 
@@ -753,16 +763,36 @@ namespace WAHU.Session
             if (!_active) return BuildSummary(DateTime.UtcNow);
             var ended = DateTime.UtcNow;
             var summary = BuildSummary(ended);
-            _sessionService.CompleteSession(_session.SessionId, true,
-                _json.Serialize(new Dictionary<string, object>
-                {
-                    { "attempts", summary.Attempts }, { "correct", summary.Correct }, { "wrong", summary.Wrong },
-                    { "reason", string.IsNullOrWhiteSpace(reason) ? "user_exit" : reason }
-                }),
-                _json.Serialize(new Dictionary<string, object> { { "final_state", summary.FinalBehaviorState.ToString() } }));
+            try
+            {
+                _sessionService.CompleteSession(_session.SessionId, true,
+                    _json.Serialize(new Dictionary<string, object>
+                    {
+                        { "attempts", summary.Attempts }, { "correct", summary.Correct }, { "wrong", summary.Wrong },
+                        { "reason", string.IsNullOrWhiteSpace(reason) ? "user_exit" : reason }
+                    }),
+                    _json.Serialize(new Dictionary<string, object> { { "final_state", summary.FinalBehaviorState.ToString() } }));
+            }
+            catch (InvalidOperationException)
+            {
+                MarkInactiveIfDurableSessionClosed();
+                throw;
+            }
             try { _runtime.Delete(_session.SessionId); } catch { }
             _active = false;
             return summary;
+        }
+
+        private void MarkInactiveIfDurableSessionClosed()
+        {
+            try
+            {
+                if (!_sessionService.IsActiveMathSession(_profile.ChildId, _session.SessionId)) _active = false;
+            }
+            catch
+            {
+                // Preserve the original terminal-operation error if the convergence read itself fails.
+            }
         }
 
         public MathSessionSummary Suspend(string reason)
