@@ -1,7 +1,7 @@
 # MATH LIVE STATUS
 
 Updated: 2026-09-07
-LAST_FULLY_VERIFIED_HEAD=`88ecf34`
+LAST_FULLY_VERIFIED_HEAD=`e3bc9e0`
 MATH_3AI_DONE=YES
 AI3_LANE_DONE=YES
 PLAYABLE_FIRST_FIVE_P0=GREEN
@@ -16,10 +16,13 @@ Definition: trạng thái dưới đây dùng strict three-lane Math Definition 
 - Start-failure accessibility cũng fail-safe: status nhìn thấy và screen-reader cùng giữ thông điệp tiến bộ đã lưu an toàn.
 - Lifecycle post-DONE hardening: 3/3 answered → suspend trước kết quả không grant reward; reopen complete đúng 3 checkpoint, không có câu 4, Garden +1 đúng lúc completion.
 - Garden milestone hardening `88ecf34`: session `completed` nhưng **0 attempt** không được tính `CompletedMathSessions`, không tiến milestone và không bị backfill reward; rescue completion có attempt vẫn +1 idempotent.
+- Durable reward hardening `9736443`: `GrantCompletedMathSession` tự đếm **attempt đã persist trong DB**; caller không thể giả `attempts>0` để tạo Garden reward cho session rỗng.
+- Completion boundary `478e89b`: `Complete()` từ chối session 0-attempt; targeted lesson còn thiếu câu đã chọn cũng không được terminal hóa, giữ active/open question và reward=0.
+- Release gate `e3bc9e0`: Build-Setup chạy `MathSessionPersistenceRuntimeSmoke` ở `10b/15` trước staging và ghi status + assertion count vào `release_manifest_dev.json`; artifact không còn có thể PASS nếu persistence/rescue lifecycle đỏ.
 - DPI hardening: rescue intro + active gameplay đều được scale 125%; active prompt/checkpoint/break target vẫn đọc và thao tác được, flow retry/suspend tiếp tục bình thường.
-- Child UI **3696 assertions PASS**; persistence **7858 assertions PASS**; full Math content/event/pool suite **90/90 PASS**.
-- `0.1.61-dev`: Build-Setup **15/15 PASS**, Portable E2E **PASS**, installer compile **PASS**.
-- Portable SHA256 `6BB07A2D9E5CF47C9DC6C55E5BAD1F3B5D14EEE7EC4297C1D3DCB95FDD61E8A1`; Installer SHA256 `FC8E83B848D95F8D8F3C1DFB6F90AEE03F254F9AB2F1CD95C63D96100460F308`.
+- Child UI **3696 assertions PASS**; persistence **7864 assertions PASS**; full Math content/event/pool suite **90/90 PASS**.
+- `0.1.63-dev`: Build-Setup **15/15 PASS**, Portable E2E **PASS**, installer compile **PASS**.
+- Portable SHA256 `4B3BE0A588F8EDE7BE1F4F0ED52E6BEFAD462AB20CB3025BEB1A1D060183C197`; Installer SHA256 `CA3C5577DD2690EA22303D4FA218FA2C0026C1E04BE257E2CEBEA620FDC03453`.
 - Release payload hard-requires `game_events_v1.json`; fresh checkout SHA của cả 4 Math runtime JSON khớp manifest. Event SHA `F9F25EA94DA7FCD20E360509EE53E6E758039CCF788FAFEC729A35F80D39A8B1`.
 - Full Installer E2E **BLOCKED_SAFETY** vì learner DB hiện hữu không có `.wahu-e2e-owned`; Portable E2E xác nhận DB hash trước/sau không đổi.
 - Production signing và real Windows 7 validation vẫn `UNAVAILABLE/PENDING`.
@@ -27,9 +30,9 @@ Definition: trạng thái dưới đây dùng strict three-lane Math Definition 
 ## Overall
 
 - **Content: 100% theo Math lane** — 7 chương, 17 chủ đề, 67 lesson, **402 authored questions**, đúng 6 câu/lesson = 2 basic + 2 medium + 2 application. Production semantic validator: **402/402 valid, 0 errors**; full Math content/event/pool suite **90/90 PASS**.
-- **Engine: 100% theo Math lane** — schema V5 + pack identity, targeted session 3 câu từ pool 6, durable ordered selected-set, exact resume/retry/corrupt recovery, rescue runtime/checkpoint/repair/terminal/reward idempotency. `MathSessionPersistenceRuntimeSmoke`: **7858 assertions PASS**.
+- **Engine: 100% theo Math lane** — schema V5 + pack identity, targeted session 3 câu từ pool 6, durable ordered selected-set, exact resume/retry/corrupt recovery, rescue runtime/checkpoint/repair/terminal/reward idempotency. `MathSessionPersistenceRuntimeSmoke`: **7864 assertions PASS**.
 - **UI/QA: playable P0 GREEN cho 5 bài đầu** — Home/Hub rescue entry, 5 mission cards, 3 checkpoint cards, behavior-aware repair/break, exact rescue resume, fail-safe event fallback, Garden completion, accessibility/keyboard/responsive. `ChildUiRuntimeSmoke`: **3696 assertions PASS**.
-- **Distribution playable dev artifact** — Build-Setup 15/15 + Portable E2E PASS + installer compile PASS trên clean `88ecf34`, artifact `0.1.61-dev`; full Installer E2E safety-blocked trên máy hiện tại.
+- **Distribution playable dev artifact** — Build-Setup 15/15 + Portable E2E PASS + installer compile PASS trên clean `e3bc9e0`, artifact `0.1.63-dev`; full Installer E2E safety-blocked trên máy hiện tại.
 - **Three-AI Math DoD: DONE** — AI1, AI2 và AI3 đã hoàn tất baseline; AI3 playable first-five lane đã đạt STOP RULE và chuyển `LANE_DONE=YES`.
 
 ## Contract hiện hành
@@ -90,20 +93,21 @@ Artifact hashes:
 - Portable: `E644E73F49E28156E065DDDD944F8C46A154A7AE8E01D05381BE762C10CBE2CE`.
 - Installer: `6D79CDD3B43B4E9CCF1DCCB42C521DDA08D680B4070C525DDB7F280E1AD322E8`.
 
-## Latest fully verified gates — `88ecf34`
+## Latest fully verified gates — `e3bc9e0`
 
 - `WAHUKidsLearn.sln` Release/x86 rebuild inside Build-Setup: **PASS**.
 - Child UI: **3696 assertions PASS**.
 - Production Math validator: **402/402 valid, 0 errors**.
 - Full Math content/event/pool suite: **90/90 PASS**.
-- Persistence: `dotnet build` **0 warnings / 0 errors**; **7858 assertions PASS**.
+- Persistence: Build-Setup `10b/15` tự build **0 warnings / 0 errors** và chạy **7864 assertions PASS**.
+- Release manifest: `math_session_persistence_runtime_smoke=PASS`, `math_session_persistence_runtime_smoke_assertions=7864`.
 - Content runtime: **21 assertions PASS**.
 - SQLite/Data runtime: **179 assertions PASS**.
-- Build-Setup `0.1.61-dev`: **15/15 PASS**.
+- Build-Setup `0.1.63-dev`: **15/15 PASS**.
 - Portable E2E: **PASS**; bootstrap hai lần exit 0; installed learner DB SHA256 trước/sau đều `0C970952435DAC03FE56C8400D003E87C37CED5D91B79C8A7D459A8EC30868C1`.
 - Installer compile: **PASS**; Full Installer E2E: **BLOCKED_SAFETY** vì dữ liệu learner hiện hữu không có `.wahu-e2e-owned`.
 - Payload `game_events_v1.json` SHA256 `F9F25EA94DA7FCD20E360509EE53E6E758039CCF788FAFEC729A35F80D39A8B1`, khớp manifest.
-- Artifact `0.1.61-dev`: Portable `6BB07A2D9E5CF47C9DC6C55E5BAD1F3B5D14EEE7EC4297C1D3DCB95FDD61E8A1`; Installer `FC8E83B848D95F8D8F3C1DFB6F90AEE03F254F9AB2F1CD95C63D96100460F308`.
+- Artifact `0.1.63-dev`: Portable `4B3BE0A588F8EDE7BE1F4F0ED52E6BEFAD462AB20CB3025BEB1A1D060183C197`; Installer `CA3C5577DD2690EA22303D4FA218FA2C0026C1E04BE257E2CEBEA620FDC03453`.
 
 ## Blocker cũ đã đóng trong AI3 no-wait wave
 
