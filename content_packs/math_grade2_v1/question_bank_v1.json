@@ -1350,13 +1350,13 @@
       "skill_id": "ADD_COMPONENTS_RECOGNIZE",
       "difficulty": "application",
       "question_type": "multiple_choice",
-      "prompt_vi": "Phép cộng 120 + 230 = 350 có hai số hạng là cặp nào?",
+      "prompt_vi": "Bạn An nói trong 120 + 230 = 350 thì 230 và 350 là hai số hạng. Cặp nào sửa lời bạn An?",
       "answer_kind": "text",
       "correct_answer": "120 và 230",
       "accepted_answers": [
         "120 và 230"
       ],
-      "explanation_vi": "Hai số đứng trước dấu bằng và được nối bằng dấu + là hai số hạng. Vậy đáp án là 120 và 230.",
+      "explanation_vi": "Hai số được cộng với nhau là 120 và 230 nên đó là hai số hạng; 350 là tổng.",
       "hints_vi": [
         "Nhớ kiến thức: Hai số được cộng là số hạng; kết quả của phép cộng là tổng.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Số hạng và tổng” trước rồi mới chọn phương án khớp kết quả."
@@ -1377,22 +1377,22 @@
         {
           "id": "a",
           "text": "230 và 350",
-          "rationale_vi": "“230 và 350” chưa đúng. Hai số đứng trước dấu bằng và được nối bằng dấu + là hai số hạng. Vậy đáp án là 120 và 230."
+          "rationale_vi": "“230 và 350” chưa đúng. Hai số được cộng với nhau là 120 và 230 nên đó là hai số hạng; 350 là tổng."
         },
         {
           "id": "b",
           "text": "120 và 350",
-          "rationale_vi": "“120 và 350” chưa đúng. Hai số đứng trước dấu bằng và được nối bằng dấu + là hai số hạng. Vậy đáp án là 120 và 230."
+          "rationale_vi": "“120 và 350” chưa đúng. Hai số được cộng với nhau là 120 và 230 nên đó là hai số hạng; 350 là tổng."
         },
         {
           "id": "c",
           "text": "120 và 230",
-          "rationale_vi": "Hai số đứng trước dấu bằng và được nối bằng dấu + là hai số hạng. Vậy đáp án là 120 và 230."
+          "rationale_vi": "Hai số được cộng với nhau là 120 và 230 nên đó là hai số hạng; 350 là tổng."
         },
         {
           "id": "d",
           "text": "350 và 350",
-          "rationale_vi": "“350 và 350” chưa đúng. Hai số đứng trước dấu bằng và được nối bằng dấu + là hai số hạng. Vậy đáp án là 120 và 230."
+          "rationale_vi": "“350 và 350” chưa đúng. Hai số được cộng với nhau là 120 và 230 nên đó là hai số hạng; 350 là tổng."
         }
       ],
       "correct_choice_id": "c"
@@ -1509,13 +1509,13 @@
       "skill_id": "SUB_COMPONENTS_RECOGNIZE",
       "difficulty": "application",
       "question_type": "multiple_choice",
-      "prompt_vi": "Trong 90 - 35 = 55, cặp 90 và 55 lần lượt được gọi là gì?",
+      "prompt_vi": "Bạn Bình gọi 90 là số trừ và 55 là hiệu trong 90 - 35 = 55. Cặp tên nào sửa đúng lời bạn Bình?",
       "answer_kind": "text",
       "correct_answer": "số bị trừ và hiệu",
       "accepted_answers": [
         "số bị trừ và hiệu"
       ],
-      "explanation_vi": "Trong phép trừ, 90 là số bị trừ còn kết quả 55 là hiệu. Vậy đáp án là số bị trừ và hiệu.",
+      "explanation_vi": "Trong phép trừ, 90 đứng trước dấu trừ nên là số bị trừ; kết quả 55 là hiệu. Vậy đáp án là số bị trừ và hiệu.",
       "hints_vi": [
         "Nhớ kiến thức: Phép trừ gồm số bị trừ, số trừ và kết quả gọi là hiệu.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Số bị trừ, số trừ, hiệu” trước rồi mới chọn phương án khớp kết quả."
@@ -1536,22 +1536,22 @@
         {
           "id": "a",
           "text": "số trừ và hiệu",
-          "rationale_vi": "“số trừ và hiệu” chưa đúng. Trong phép trừ, 90 là số bị trừ còn kết quả 55 là hiệu. Vậy đáp án là số bị trừ và hiệu."
+          "rationale_vi": "“số trừ và hiệu” chưa đúng. Trong phép trừ, 90 đứng trước dấu trừ nên là số bị trừ; kết quả 55 là hiệu. Vậy đáp án là số bị trừ và hiệu."
         },
         {
           "id": "b",
           "text": "số bị trừ và hiệu",
-          "rationale_vi": "Trong phép trừ, 90 là số bị trừ còn kết quả 55 là hiệu. Vậy đáp án là số bị trừ và hiệu."
+          "rationale_vi": "Trong phép trừ, 90 đứng trước dấu trừ nên là số bị trừ; kết quả 55 là hiệu. Vậy đáp án là số bị trừ và hiệu."
         },
         {
           "id": "c",
           "text": "hiệu và số bị trừ",
-          "rationale_vi": "“hiệu và số bị trừ” chưa đúng. Trong phép trừ, 90 là số bị trừ còn kết quả 55 là hiệu. Vậy đáp án là số bị trừ và hiệu."
+          "rationale_vi": "“hiệu và số bị trừ” chưa đúng. Trong phép trừ, 90 đứng trước dấu trừ nên là số bị trừ; kết quả 55 là hiệu. Vậy đáp án là số bị trừ và hiệu."
         },
         {
           "id": "d",
           "text": "số bị trừ và số trừ",
-          "rationale_vi": "“số bị trừ và số trừ” chưa đúng. Trong phép trừ, 90 là số bị trừ còn kết quả 55 là hiệu. Vậy đáp án là số bị trừ và hiệu."
+          "rationale_vi": "“số bị trừ và số trừ” chưa đúng. Trong phép trừ, 90 đứng trước dấu trừ nên là số bị trừ; kết quả 55 là hiệu. Vậy đáp án là số bị trừ và hiệu."
         }
       ],
       "correct_choice_id": "b"
@@ -2306,13 +2306,13 @@
       "skill_id": "MULTIPLICATION_MEANING",
       "difficulty": "application",
       "question_type": "numeric_input",
-      "prompt_vi": "Có 4 túi, mỗi túi 5 viên bi. Có tất cả bao nhiêu viên?",
+      "prompt_vi": "Có 4 túi, mỗi túi 5 viên bi. Nam tính 4 + 5 = 9. Tổng số viên bi đúng là bao nhiêu?",
       "answer_kind": "integer",
       "correct_answer": 20,
       "accepted_answers": [
         "20"
       ],
-      "explanation_vi": "Bốn nhóm bằng nhau, mỗi nhóm 5: 4 × 5 = 20.",
+      "explanation_vi": "Có 4 nhóm bằng nhau, mỗi nhóm 5 viên nên phải nhân: 4 × 5 = 20; phép cộng 4 + 5 không biểu diễn đủ bốn nhóm.",
       "hints_vi": [
         "Nhớ kiến thức: Phép nhân là cách viết gọn của phép cộng lặp lại các nhóm có cùng số lượng.",
         "Viết một phép tính hoặc quan hệ ngắn cho “Nhóm bằng nhau”, tính xong đối chiếu lại điều đề đang hỏi."
@@ -2695,13 +2695,13 @@
       "skill_id": "DIVISION_COMPONENTS",
       "difficulty": "application",
       "question_type": "multiple_choice",
-      "prompt_vi": "Trong 18 : 2 = 9, cặp 18 và 9 lần lượt được gọi là gì?",
+      "prompt_vi": "Bạn Lan nói trong 18 : 2 = 9 thì 18 là số chia và 9 là thương. Cặp tên nào sửa đúng lời bạn Lan?",
       "answer_kind": "text",
       "correct_answer": "số bị chia và thương",
       "accepted_answers": [
         "số bị chia và thương"
       ],
-      "explanation_vi": "Trong phép chia, 18 là số bị chia còn kết quả 9 là thương. Vậy đáp án là số bị chia và thương.",
+      "explanation_vi": "Trong phép chia, 18 là số bị chia, 2 là số chia và kết quả 9 là thương. Vậy đáp án là số bị chia và thương.",
       "hints_vi": [
         "Nhớ kiến thức: Phép chia gồm số bị chia, số chia và kết quả gọi là thương.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Số bị chia, số chia, thương” trước rồi mới chọn phương án khớp kết quả."
@@ -2722,22 +2722,22 @@
         {
           "id": "a",
           "text": "số bị chia và thương",
-          "rationale_vi": "Trong phép chia, 18 là số bị chia còn kết quả 9 là thương. Vậy đáp án là số bị chia và thương."
+          "rationale_vi": "Trong phép chia, 18 là số bị chia, 2 là số chia và kết quả 9 là thương. Vậy đáp án là số bị chia và thương."
         },
         {
           "id": "b",
           "text": "số chia và thương",
-          "rationale_vi": "“số chia và thương” chưa đúng. Trong phép chia, 18 là số bị chia còn kết quả 9 là thương. Vậy đáp án là số bị chia và thương."
+          "rationale_vi": "“số chia và thương” chưa đúng. Trong phép chia, 18 là số bị chia, 2 là số chia và kết quả 9 là thương. Vậy đáp án là số bị chia và thương."
         },
         {
           "id": "c",
           "text": "thương và số bị chia",
-          "rationale_vi": "“thương và số bị chia” chưa đúng. Trong phép chia, 18 là số bị chia còn kết quả 9 là thương. Vậy đáp án là số bị chia và thương."
+          "rationale_vi": "“thương và số bị chia” chưa đúng. Trong phép chia, 18 là số bị chia, 2 là số chia và kết quả 9 là thương. Vậy đáp án là số bị chia và thương."
         },
         {
           "id": "d",
           "text": "số bị chia và số chia",
-          "rationale_vi": "“số bị chia và số chia” chưa đúng. Trong phép chia, 18 là số bị chia còn kết quả 9 là thương. Vậy đáp án là số bị chia và thương."
+          "rationale_vi": "“số bị chia và số chia” chưa đúng. Trong phép chia, 18 là số bị chia, 2 là số chia và kết quả 9 là thương. Vậy đáp án là số bị chia và thương."
         }
       ],
       "correct_choice_id": "a"
@@ -3226,13 +3226,13 @@
       "skill_id": "OPERATION_MEANING_FROM_VISUAL",
       "difficulty": "application",
       "question_type": "multiple_choice",
-      "prompt_vi": "Có 5 nhóm bằng nhau, mỗi nhóm 2 chấm. Phép tính nào phù hợp nhất?",
+      "prompt_vi": "Có 5 nhóm bằng nhau, mỗi nhóm 2 chấm. Minh chọn 5 + 2 để tìm tất cả. Phép tính nào sửa đúng lựa chọn của Minh?",
       "answer_kind": "text",
       "correct_answer": "5 × 2",
       "accepted_answers": [
         "5 × 2"
       ],
-      "explanation_vi": "Nhiều nhóm bằng nhau được mô tả bằng phép nhân. Vậy đáp án là 5 × 2.",
+      "explanation_vi": "Năm nhóm bằng nhau, mỗi nhóm có 2 chấm nên phép nhân 5 × 2 mới biểu diễn đủ các nhóm.",
       "hints_vi": [
         "Nhớ kiến thức: Cộng gộp/thêm, trừ bớt/so sánh chênh lệch, nhân tạo nhóm bằng nhau, chia đều hoặc đếm số nhóm.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Quan hệ của phép tính” trước rồi mới chọn phương án khớp kết quả."
@@ -3253,22 +3253,22 @@
         {
           "id": "a",
           "text": "5 + 2",
-          "rationale_vi": "“5 + 2” chưa đúng. Nhiều nhóm bằng nhau được mô tả bằng phép nhân. Vậy đáp án là 5 × 2."
+          "rationale_vi": "“5 + 2” chưa đúng. Năm nhóm bằng nhau, mỗi nhóm có 2 chấm nên phép nhân 5 × 2 mới biểu diễn đủ các nhóm."
         },
         {
           "id": "b",
           "text": "5 - 2",
-          "rationale_vi": "“5 - 2” chưa đúng. Nhiều nhóm bằng nhau được mô tả bằng phép nhân. Vậy đáp án là 5 × 2."
+          "rationale_vi": "“5 - 2” chưa đúng. Năm nhóm bằng nhau, mỗi nhóm có 2 chấm nên phép nhân 5 × 2 mới biểu diễn đủ các nhóm."
         },
         {
           "id": "c",
           "text": "2 × 2",
-          "rationale_vi": "“2 × 2” chưa đúng. Nhiều nhóm bằng nhau được mô tả bằng phép nhân. Vậy đáp án là 5 × 2."
+          "rationale_vi": "“2 × 2” chưa đúng. Năm nhóm bằng nhau, mỗi nhóm có 2 chấm nên phép nhân 5 × 2 mới biểu diễn đủ các nhóm."
         },
         {
           "id": "d",
           "text": "5 × 2",
-          "rationale_vi": "Nhiều nhóm bằng nhau được mô tả bằng phép nhân. Vậy đáp án là 5 × 2."
+          "rationale_vi": "Năm nhóm bằng nhau, mỗi nhóm có 2 chấm nên phép nhân 5 × 2 mới biểu diễn đủ các nhóm."
         }
       ],
       "correct_choice_id": "d"
@@ -3715,13 +3715,13 @@
       "skill_id": "WP_ONE_STEP_MULTIPLICATION_CONTEXT",
       "difficulty": "application",
       "question_type": "word_problem",
-      "prompt_vi": "Một tuần học có 5 ngày, mỗi ngày làm 2 bài luyện. Cả tuần làm bao nhiêu bài?",
+      "prompt_vi": "Một tuần học có 5 ngày, mỗi ngày làm 2 bài luyện. Mai tính 5 + 2 = 7. Cả tuần thực sự làm bao nhiêu bài?",
       "answer_kind": "integer",
       "correct_answer": 10,
       "accepted_answers": [
         "10"
       ],
-      "explanation_vi": "5 nhóm 2 bài nên 5 × 2 = 10. Đây là cách dùng nhân trong tình huống để trả lời đúng đại lượng mà đề đang hỏi.",
+      "explanation_vi": "Mỗi ngày là một nhóm 2 bài và có 5 ngày, nên 5 × 2 = 10; phép cộng 5 + 2 không đếm đủ năm nhóm.",
       "hints_vi": [
         "Nhớ kiến thức: Tổng số phần tử = số nhóm × số phần tử mỗi nhóm.",
         "Có thể vẽ sơ đồ hoặc chia tình huống thành nhóm; dùng “Nhân trong tình huống” để kiểm tra phép tính trước khi tính."
@@ -3945,13 +3945,13 @@
       "skill_id": "WP_SELECT_OPERATION_ONE_STEP",
       "difficulty": "application",
       "question_type": "multiple_choice",
-      "prompt_vi": "Có 30 bút chia đều cho 5 bạn, hỏi mỗi bạn được bao nhiêu. Chọn phép tính đúng.",
+      "prompt_vi": "Có 30 bút chia đều cho 5 bạn. An chọn 30 - 5. Phép tính nào sửa đúng để tìm số bút mỗi bạn?",
       "answer_kind": "text",
       "correct_answer": "30 : 5",
       "accepted_answers": [
         "30 : 5"
       ],
-      "explanation_vi": "Chia đều tổng số bút thành 5 phần nên dùng phép chia. Vậy đáp án là 30 : 5.",
+      "explanation_vi": "Cần chia đều 30 bút thành 5 phần bằng nhau nên phép tính đúng là 30 : 5.",
       "hints_vi": [
         "Nhớ kiến thức: Phép tính phải mô tả đúng quan hệ giữa dữ kiện và đại lượng cần tìm.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Chọn phép tính” trước rồi mới chọn phương án khớp kết quả."
@@ -3972,22 +3972,22 @@
         {
           "id": "a",
           "text": "30 + 5",
-          "rationale_vi": "“30 + 5” chưa đúng. Chia đều tổng số bút thành 5 phần nên dùng phép chia. Vậy đáp án là 30 : 5."
+          "rationale_vi": "“30 + 5” chưa đúng. Cần chia đều 30 bút thành 5 phần bằng nhau nên phép tính đúng là 30 : 5."
         },
         {
           "id": "b",
           "text": "30 - 5",
-          "rationale_vi": "“30 - 5” chưa đúng. Chia đều tổng số bút thành 5 phần nên dùng phép chia. Vậy đáp án là 30 : 5."
+          "rationale_vi": "“30 - 5” chưa đúng. Cần chia đều 30 bút thành 5 phần bằng nhau nên phép tính đúng là 30 : 5."
         },
         {
           "id": "c",
           "text": "30 : 5",
-          "rationale_vi": "Chia đều tổng số bút thành 5 phần nên dùng phép chia. Vậy đáp án là 30 : 5."
+          "rationale_vi": "Cần chia đều 30 bút thành 5 phần bằng nhau nên phép tính đúng là 30 : 5."
         },
         {
           "id": "d",
           "text": "5 + 5",
-          "rationale_vi": "“5 + 5” chưa đúng. Chia đều tổng số bút thành 5 phần nên dùng phép chia. Vậy đáp án là 30 : 5."
+          "rationale_vi": "“5 + 5” chưa đúng. Cần chia đều 30 bút thành 5 phần bằng nhau nên phép tính đúng là 30 : 5."
         }
       ],
       "correct_choice_id": "c"
@@ -5036,15 +5036,15 @@
       "skill_id": "QUADRILATERAL_RECOGNIZE",
       "difficulty": "application",
       "question_type": "multiple_choice",
-      "prompt_vi": "Một hình kín có đúng 4 cạnh được gọi chung là gì?",
+      "prompt_vi": "Bạn Hà gọi một hình kín có đúng 4 cạnh là đường gấp khúc mở. Tên đúng của hình đó là gì?",
       "answer_kind": "text",
       "correct_answer": "hình tứ giác",
       "accepted_answers": [
         "hình tứ giác"
       ],
-      "explanation_vi": "Hình kín có bốn cạnh là tứ giác. Vậy đáp án là hình tứ giác.",
+      "explanation_vi": "Một hình kín có đúng bốn cạnh là hình tứ giác; đường gấp khúc mở chưa tạo thành hình kín.",
       "hints_vi": [
-        "Nhìn lại “Một hình kín có đúng 4 cạnh được gọi chung là gì?”. Xác định điều đề hỏi rồi đối chiếu từng dữ kiện.",
+        "Nhìn lại “Bạn Hà gọi một hình kín có đúng 4 cạnh là đường gấp…”. Xác định điều đề hỏi rồi đối chiếu từng dữ kiện.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Tứ giác” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
@@ -5063,22 +5063,22 @@
         {
           "id": "a",
           "text": "hình tam giác",
-          "rationale_vi": "“hình tam giác” chưa đúng. Hình kín có bốn cạnh là tứ giác. Vậy đáp án là hình tứ giác."
+          "rationale_vi": "“hình tam giác” chưa đúng. Một hình kín có đúng bốn cạnh là hình tứ giác; đường gấp khúc mở chưa tạo thành hình kín."
         },
         {
           "id": "b",
           "text": "hình kín có 5 cạnh",
-          "rationale_vi": "“hình kín có 5 cạnh” chưa đúng. Hình kín có bốn cạnh là tứ giác. Vậy đáp án là hình tứ giác."
+          "rationale_vi": "“hình kín có 5 cạnh” chưa đúng. Một hình kín có đúng bốn cạnh là hình tứ giác; đường gấp khúc mở chưa tạo thành hình kín."
         },
         {
           "id": "c",
           "text": "hình tứ giác",
-          "rationale_vi": "Hình kín có bốn cạnh là tứ giác. Vậy đáp án là hình tứ giác."
+          "rationale_vi": "Một hình kín có đúng bốn cạnh là hình tứ giác; đường gấp khúc mở chưa tạo thành hình kín."
         },
         {
           "id": "d",
           "text": "đường gấp khúc mở",
-          "rationale_vi": "“đường gấp khúc mở” chưa đúng. Hình kín có bốn cạnh là tứ giác. Vậy đáp án là hình tứ giác."
+          "rationale_vi": "“đường gấp khúc mở” chưa đúng. Một hình kín có đúng bốn cạnh là hình tứ giác; đường gấp khúc mở chưa tạo thành hình kín."
         }
       ],
       "correct_choice_id": "c"
@@ -6024,13 +6024,13 @@
       "skill_id": "CAPACITY_LITER_READ_WRITE",
       "difficulty": "application",
       "question_type": "numeric_input",
-      "prompt_vi": "Bình có 7 l nước, rót thêm 2 l. Có tất cả bao nhiêu lít?",
+      "prompt_vi": "Bình có 7 l nước, rót thêm 2 l. Lan nói còn 5 l vì đã lấy 7 - 2. Có tất cả đúng bao nhiêu lít?",
       "answer_kind": "integer",
       "correct_answer": 9,
       "accepted_answers": [
         "9"
       ],
-      "explanation_vi": "7 l + 2 l = 9 l. Kết quả này theo đúng quy tắc lít; hãy đối chiếu lại với các số đã cho.",
+      "explanation_vi": "Đề cho rót thêm nên lượng nước tăng: 7 l + 2 l = 9 l, không phải lấy 7 - 2.",
       "hints_vi": [
         "Nhớ kiến thức: l là kí hiệu của lít, đơn vị đo dung tích.",
         "Viết một phép tính hoặc quan hệ ngắn cho “Lít”, tính xong đối chiếu lại điều đề đang hỏi."
@@ -6386,15 +6386,15 @@
       "skill_id": "TIME_HOUR_60_MINUTES",
       "difficulty": "application",
       "question_type": "multiple_choice",
-      "prompt_vi": "Một hoạt động kéo dài đúng 60 phút. Khoảng thời gian đó bằng gì?",
+      "prompt_vi": "Một hoạt động bắt đầu lúc 8 giờ và kết thúc lúc 9 giờ cùng buổi. Khoảng thời gian đó là 60 phút. Cách gọi nào tương đương?",
       "answer_kind": "text",
       "correct_answer": "1 giờ",
       "accepted_answers": [
         "1 giờ"
       ],
-      "explanation_vi": "Theo quan hệ đã học, 60 phút bằng 1 giờ.",
+      "explanation_vi": "Từ 8 giờ đến 9 giờ là 60 phút, mà 60 phút bằng đúng 1 giờ.",
       "hints_vi": [
-        "Nhìn lại “Một hoạt động kéo dài đúng 60 phút. Khoảng thời gia…”. Xác định điều đề hỏi rồi đối chiếu từng dữ kiện.",
+        "Nhìn lại “Một hoạt động bắt đầu lúc 8 giờ và kết thúc lúc 9 g…”. Xác định điều đề hỏi rồi đối chiếu từng dữ kiện.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Giờ và phút” trước rồi mới chọn phương án khớp kết quả."
       ],
       "tags": [
@@ -6413,22 +6413,22 @@
         {
           "id": "a",
           "text": "1 giờ",
-          "rationale_vi": "Theo quan hệ đã học, 60 phút bằng 1 giờ."
+          "rationale_vi": "Từ 8 giờ đến 9 giờ là 60 phút, mà 60 phút bằng đúng 1 giờ."
         },
         {
           "id": "b",
           "text": "1 ngày",
-          "rationale_vi": "“1 ngày” chưa đúng. Theo quan hệ đã học, 60 phút bằng 1 giờ."
+          "rationale_vi": "“1 ngày” chưa đúng. Từ 8 giờ đến 9 giờ là 60 phút, mà 60 phút bằng đúng 1 giờ."
         },
         {
           "id": "c",
           "text": "30 phút",
-          "rationale_vi": "“30 phút” chưa đúng. Theo quan hệ đã học, 60 phút bằng 1 giờ."
+          "rationale_vi": "“30 phút” chưa đúng. Từ 8 giờ đến 9 giờ là 60 phút, mà 60 phút bằng đúng 1 giờ."
         },
         {
           "id": "d",
           "text": "không thể biết",
-          "rationale_vi": "“không thể biết” chưa đúng. Theo quan hệ đã học, 60 phút bằng 1 giờ."
+          "rationale_vi": "“không thể biết” chưa đúng. Từ 8 giờ đến 9 giờ là 60 phút, mà 60 phút bằng đúng 1 giờ."
         }
       ],
       "correct_choice_id": "a"
@@ -7907,16 +7907,16 @@
       "skill_id": "EVENT_POSSIBLE",
       "difficulty": "application",
       "question_type": "multiple_choice",
-      "prompt_vi": "Quay vòng có các số 1, 2, 3. Kim dừng ở số 2 là sự kiện gì?",
+      "prompt_vi": "Vòng quay có các số 1, 2, 3. Bạn Nam nói kim chắc chắn dừng ở số 2. Phân loại đúng sự kiện kim dừng ở số 2 là gì?",
       "answer_kind": "text",
       "correct_answer": "có thể",
       "accepted_answers": [
         "có thể"
       ],
-      "explanation_vi": "Số 2 có trên vòng quay nên có thể xảy ra, nhưng không phải kết quả duy nhất.",
+      "explanation_vi": "Số 2 có trên vòng quay nên có thể xuất hiện, nhưng còn số 1 và 3 nên không chắc chắn.",
       "hints_vi": [
         "Nhớ kiến thức: Có ít nhất một kết quả làm sự kiện xảy ra và cũng có kết quả làm nó không xảy ra.",
-        "Từ “Quay vòng có các số 1, 2, 3. Kim dừng ở số 2 là sự…”, loại phương án trái dữ kiện rồi kiểm tra lựa chọn còn lại."
+        "Từ “Vòng quay có các số 1, 2, 3. Bạn Nam nói kim chắc c…”, loại phương án trái dữ kiện rồi kiểm tra lựa chọn còn lại."
       ],
       "tags": [
         "event_possible",
@@ -7934,22 +7934,22 @@
         {
           "id": "a",
           "text": "chắc chắn",
-          "rationale_vi": "“chắc chắn” chưa đúng. Số 2 có trên vòng quay nên có thể xảy ra, nhưng không phải kết quả duy nhất."
+          "rationale_vi": "“chắc chắn” chưa đúng. Số 2 có trên vòng quay nên có thể xuất hiện, nhưng còn số 1 và 3 nên không chắc chắn."
         },
         {
           "id": "b",
           "text": "có thể",
-          "rationale_vi": "Số 2 có trên vòng quay nên có thể xảy ra, nhưng không phải kết quả duy nhất."
+          "rationale_vi": "Số 2 có trên vòng quay nên có thể xuất hiện, nhưng còn số 1 và 3 nên không chắc chắn."
         },
         {
           "id": "c",
           "text": "không thể",
-          "rationale_vi": "“không thể” chưa đúng. Số 2 có trên vòng quay nên có thể xảy ra, nhưng không phải kết quả duy nhất."
+          "rationale_vi": "“không thể” chưa đúng. Số 2 có trên vòng quay nên có thể xuất hiện, nhưng còn số 1 và 3 nên không chắc chắn."
         },
         {
           "id": "d",
           "text": "không có kết quả",
-          "rationale_vi": "“không có kết quả” chưa đúng. Số 2 có trên vòng quay nên có thể xảy ra, nhưng không phải kết quả duy nhất."
+          "rationale_vi": "“không có kết quả” chưa đúng. Số 2 có trên vòng quay nên có thể xuất hiện, nhưng còn số 1 và 3 nên không chắc chắn."
         }
       ],
       "correct_choice_id": "b"
@@ -8066,16 +8066,16 @@
       "skill_id": "EVENT_CERTAIN",
       "difficulty": "application",
       "question_type": "multiple_choice",
-      "prompt_vi": "Một hộp chỉ chứa thẻ số 2 và 5. Rút một thẻ, số rút được là 2 hoặc 5. Sự kiện gì?",
+      "prompt_vi": "Một hộp chỉ chứa thẻ số 2 và 5. Mai cho rằng rút được số 2 hoặc 5 chỉ là sự kiện có thể. Phân loại đúng là gì?",
       "answer_kind": "text",
       "correct_answer": "chắc chắn",
       "accepted_answers": [
         "chắc chắn"
       ],
-      "explanation_vi": "Tất cả thẻ đều là 2 hoặc 5 nên sự kiện luôn xảy ra. Vậy đáp án là chắc chắn.",
+      "explanation_vi": "Mọi thẻ trong hộp đều mang số 2 hoặc 5 nên khi rút một thẻ, sự kiện này chắc chắn xảy ra.",
       "hints_vi": [
         "Nhớ kiến thức: Sự kiện xảy ra trong tất cả các kết quả có thể của tình huống.",
-        "Từ “Một hộp chỉ chứa thẻ số 2 và 5. Rút một thẻ, số rút…”, loại phương án trái dữ kiện rồi kiểm tra lựa chọn còn lại."
+        "Từ “Một hộp chỉ chứa thẻ số 2 và 5. Mai cho rằng rút đư…”, loại phương án trái dữ kiện rồi kiểm tra lựa chọn còn lại."
       ],
       "tags": [
         "event_certain",
@@ -8093,22 +8093,22 @@
         {
           "id": "a",
           "text": "chắc chắn",
-          "rationale_vi": "Tất cả thẻ đều là 2 hoặc 5 nên sự kiện luôn xảy ra. Vậy đáp án là chắc chắn."
+          "rationale_vi": "Mọi thẻ trong hộp đều mang số 2 hoặc 5 nên khi rút một thẻ, sự kiện này chắc chắn xảy ra."
         },
         {
           "id": "b",
           "text": "không thể",
-          "rationale_vi": "“không thể” chưa đúng. Tất cả thẻ đều là 2 hoặc 5 nên sự kiện luôn xảy ra. Vậy đáp án là chắc chắn."
+          "rationale_vi": "“không thể” chưa đúng. Mọi thẻ trong hộp đều mang số 2 hoặc 5 nên khi rút một thẻ, sự kiện này chắc chắn xảy ra."
         },
         {
           "id": "c",
           "text": "chỉ có thể",
-          "rationale_vi": "“chỉ có thể” chưa đúng. Tất cả thẻ đều là 2 hoặc 5 nên sự kiện luôn xảy ra. Vậy đáp án là chắc chắn."
+          "rationale_vi": "“chỉ có thể” chưa đúng. Mọi thẻ trong hộp đều mang số 2 hoặc 5 nên khi rút một thẻ, sự kiện này chắc chắn xảy ra."
         },
         {
           "id": "d",
           "text": "không xác định",
-          "rationale_vi": "“không xác định” chưa đúng. Tất cả thẻ đều là 2 hoặc 5 nên sự kiện luôn xảy ra. Vậy đáp án là chắc chắn."
+          "rationale_vi": "“không xác định” chưa đúng. Mọi thẻ trong hộp đều mang số 2 hoặc 5 nên khi rút một thẻ, sự kiện này chắc chắn xảy ra."
         }
       ],
       "correct_choice_id": "a"
@@ -8225,16 +8225,16 @@
       "skill_id": "EVENT_IMPOSSIBLE",
       "difficulty": "application",
       "question_type": "multiple_choice",
-      "prompt_vi": "Vòng quay chỉ có các số 1, 2, 3. Kim dừng ở số 5 là sự kiện gì?",
+      "prompt_vi": "Vòng quay chỉ có các số 1, 2, 3. An nói kim vẫn có thể dừng ở số 5. Phân loại đúng sự kiện dừng ở số 5 là gì?",
       "answer_kind": "text",
       "correct_answer": "không thể",
       "accepted_answers": [
         "không thể"
       ],
-      "explanation_vi": "Số 5 không có trên vòng quay nên sự kiện không thể xảy ra.",
+      "explanation_vi": "Số 5 không xuất hiện trên vòng quay nên không có kết quả hợp lệ nào làm sự kiện xảy ra; đó là sự kiện không thể.",
       "hints_vi": [
         "Nhớ kiến thức: Không có kết quả hợp lệ nào làm sự kiện xảy ra.",
-        "Từ “Vòng quay chỉ có các số 1, 2, 3. Kim dừng ở số 5 là…”, loại phương án trái dữ kiện rồi kiểm tra lựa chọn còn lại."
+        "Từ “Vòng quay chỉ có các số 1, 2, 3. An nói kim vẫn có…”, loại phương án trái dữ kiện rồi kiểm tra lựa chọn còn lại."
       ],
       "tags": [
         "event_impossible",
@@ -8252,22 +8252,22 @@
         {
           "id": "a",
           "text": "có thể",
-          "rationale_vi": "“có thể” chưa đúng. Số 5 không có trên vòng quay nên sự kiện không thể xảy ra."
+          "rationale_vi": "“có thể” chưa đúng. Số 5 không xuất hiện trên vòng quay nên không có kết quả hợp lệ nào làm sự kiện xảy ra; đó là sự kiện không thể."
         },
         {
           "id": "b",
           "text": "chắc chắn",
-          "rationale_vi": "“chắc chắn” chưa đúng. Số 5 không có trên vòng quay nên sự kiện không thể xảy ra."
+          "rationale_vi": "“chắc chắn” chưa đúng. Số 5 không xuất hiện trên vòng quay nên không có kết quả hợp lệ nào làm sự kiện xảy ra; đó là sự kiện không thể."
         },
         {
           "id": "c",
           "text": "luôn xảy ra",
-          "rationale_vi": "“luôn xảy ra” chưa đúng. Số 5 không có trên vòng quay nên sự kiện không thể xảy ra."
+          "rationale_vi": "“luôn xảy ra” chưa đúng. Số 5 không xuất hiện trên vòng quay nên không có kết quả hợp lệ nào làm sự kiện xảy ra; đó là sự kiện không thể."
         },
         {
           "id": "d",
           "text": "không thể",
-          "rationale_vi": "Số 5 không có trên vòng quay nên sự kiện không thể xảy ra."
+          "rationale_vi": "Số 5 không xuất hiện trên vòng quay nên không có kết quả hợp lệ nào làm sự kiện xảy ra; đó là sự kiện không thể."
         }
       ],
       "correct_choice_id": "d"

@@ -665,12 +665,12 @@ Q = {
     "ADD_COMPONENTS_RECOGNIZE": [
         mc("Trong 23 + 15 = 38, số 23 được gọi là gì?", "số hạng", ["tổng", "hiệu", "số bị trừ"], "23 là một trong hai số được cộng nên là số hạng."),
         mc("Trong 41 + 8 = 49, số 49 được gọi là gì?", "tổng", ["số hạng", "số trừ", "thương"], "Kết quả của phép cộng gọi là tổng."),
-        mc("Phép cộng 120 + 230 = 350 có hai số hạng là cặp nào?", "120 và 230", ["230 và 350", "120 và 350", "350 và 350"], "Hai số đứng trước dấu bằng và được nối bằng dấu + là hai số hạng."),
+        mc("Bạn An nói trong 120 + 230 = 350 thì 230 và 350 là hai số hạng. Cặp nào sửa lời bạn An?", "120 và 230", ["230 và 350", "120 và 350", "350 và 350"], "Hai số được cộng với nhau là 120 và 230 nên đó là hai số hạng; 350 là tổng."),
     ],
     "SUB_COMPONENTS_RECOGNIZE": [
         mc("Trong 50 - 12 = 38, số 50 được gọi là gì?", "số bị trừ", ["số trừ", "hiệu", "tổng"], "50 là số đứng trước dấu trừ nên là số bị trừ."),
         mc("Trong 72 - 20 = 52, số 20 được gọi là gì?", "số trừ", ["số bị trừ", "hiệu", "số hạng"], "20 là lượng được bớt khỏi số bị trừ nên là số trừ."),
-        mc("Trong 90 - 35 = 55, cặp 90 và 55 lần lượt được gọi là gì?", "số bị trừ và hiệu", ["số trừ và hiệu", "hiệu và số bị trừ", "số bị trừ và số trừ"], "Trong phép trừ, 90 là số bị trừ còn kết quả 55 là hiệu."),
+        mc("Bạn Bình gọi 90 là số trừ và 55 là hiệu trong 90 - 35 = 55. Cặp tên nào sửa đúng lời bạn Bình?", "số bị trừ và hiệu", ["số trừ và hiệu", "hiệu và số bị trừ", "số bị trừ và số trừ"], "Trong phép trừ, 90 đứng trước dấu trừ nên là số bị trừ; kết quả 55 là hiệu."),
     ],
     "ADD_WITHIN_1000_NO_CARRY": [
         nq("Tính 243 + 125.", 368, "Cộng từng hàng: 3+5=8, 4+2=6, 2+1=3; được 368."),
@@ -711,7 +711,7 @@ Q = {
     "MULTIPLICATION_MEANING": [
         mc("Có 3 nhóm, mỗi nhóm 2 chấm. Phép cộng lặp lại nào đúng?", "2 + 2 + 2", ["2 + 2 + 2 + 2", "2 + 3", "3 + 2 + 2"], "Ba nhóm, mỗi nhóm 2 tương ứng cộng số 2 ba lần."),
         nq("5 nhóm, mỗi nhóm 2 vật có tất cả bao nhiêu vật?", 10, "2 + 2 + 2 + 2 + 2 = 10, cũng là 5 × 2."),
-        nq("Có 4 túi, mỗi túi 5 viên bi. Có tất cả bao nhiêu viên?", 20, "Bốn nhóm bằng nhau, mỗi nhóm 5: 4 × 5 = 20."),
+        nq("Có 4 túi, mỗi túi 5 viên bi. Nam tính 4 + 5 = 9. Tổng số viên bi đúng là bao nhiêu?", 20, "Có 4 nhóm bằng nhau, mỗi nhóm 5 viên nên phải nhân: 4 × 5 = 20; phép cộng 4 + 5 không biểu diễn đủ bốn nhóm."),
     ],
     "DIVISION_MEANING": [
         nq("Có 10 chiếc bánh chia đều cho 2 bạn. Mỗi bạn được bao nhiêu chiếc?", 5, "10 chia đều thành 2 phần bằng nhau thì mỗi phần có 5."),
@@ -726,7 +726,7 @@ Q = {
     "DIVISION_COMPONENTS": [
         mc("Trong 10 : 2 = 5, số 10 là gì?", "số bị chia", ["số chia", "thương", "tích"], "10 là lượng được đem chia nên là số bị chia."),
         mc("Trong 20 : 5 = 4, số 5 là gì?", "số chia", ["số bị chia", "thương", "số hạng"], "5 là số dùng để chia nên là số chia."),
-        mc("Trong 18 : 2 = 9, cặp 18 và 9 lần lượt được gọi là gì?", "số bị chia và thương", ["số chia và thương", "thương và số bị chia", "số bị chia và số chia"], "Trong phép chia, 18 là số bị chia còn kết quả 9 là thương."),
+        mc("Bạn Lan nói trong 18 : 2 = 9 thì 18 là số chia và 9 là thương. Cặp tên nào sửa đúng lời bạn Lan?", "số bị chia và thương", ["số chia và thương", "thương và số bị chia", "số bị chia và số chia"], "Trong phép chia, 18 là số bị chia, 2 là số chia và kết quả 9 là thương."),
     ],
     "TIMES_TABLE_2": [
         nq("Tính 2 × 6.", 12, "Bảng nhân 2: 2 × 6 = 12."),
@@ -752,7 +752,7 @@ Q = {
     "OPERATION_MEANING_FROM_VISUAL": [
         mc("Hai nhóm 4 chấm được gộp lại. Phép tính nào mô tả việc gộp?", "4 + 4", ["4 - 4", "4 : 2", "4 + 2"], "Gộp hai lượng lại là quan hệ cộng; hai nhóm 4 là 4 + 4."),
         mc("Có 10 chấm, gạch bỏ 3 chấm. Phép tính nào mô tả tình huống?", "10 - 3", ["10 + 3", "10 : 2", "3 - 10"], "Bỏ bớt một phần khỏi lượng ban đầu là phép trừ."),
-        mc("Có 5 nhóm bằng nhau, mỗi nhóm 2 chấm. Phép tính nào phù hợp nhất?", "5 × 2", ["5 + 2", "5 - 2", "2 × 2"], "Nhiều nhóm bằng nhau được mô tả bằng phép nhân."),
+        mc("Có 5 nhóm bằng nhau, mỗi nhóm 2 chấm. Minh chọn 5 + 2 để tìm tất cả. Phép tính nào sửa đúng lựa chọn của Minh?", "5 × 2", ["5 + 2", "5 - 2", "2 × 2"], "Năm nhóm bằng nhau, mỗi nhóm có 2 chấm nên phép nhân 5 × 2 mới biểu diễn đủ các nhóm."),
     ],
     "WP_ONE_STEP_ADD_MORE": [
         nq("Lan có 24 bút chì, được cho thêm 13 bút. Lan có tất cả bao nhiêu bút?", 37, "24 + 13 = 37 vì số bút được thêm vào lượng ban đầu."),
@@ -777,7 +777,7 @@ Q = {
     "WP_ONE_STEP_MULTIPLICATION_CONTEXT": [
         nq("Có 6 bàn, mỗi bàn 2 bạn. Có tất cả bao nhiêu bạn?", 12, "6 nhóm 2 bạn nên 6 × 2 = 12."),
         nq("Có 4 hộp, mỗi hộp 5 bút. Có bao nhiêu bút?", 20, "4 × 5 = 20."),
-        nq("Một tuần học có 5 ngày, mỗi ngày làm 2 bài luyện. Cả tuần làm bao nhiêu bài?", 10, "5 nhóm 2 bài nên 5 × 2 = 10."),
+        nq("Một tuần học có 5 ngày, mỗi ngày làm 2 bài luyện. Mai tính 5 + 2 = 7. Cả tuần thực sự làm bao nhiêu bài?", 10, "Mỗi ngày là một nhóm 2 bài và có 5 ngày, nên 5 × 2 = 10; phép cộng 5 + 2 không đếm đủ năm nhóm."),
     ],
     "WP_ONE_STEP_DIVISION_CONTEXT": [
         nq("Có 14 chiếc bánh chia đều cho 2 đĩa. Mỗi đĩa có bao nhiêu chiếc?", 7, "14 : 2 = 7."),
@@ -787,7 +787,7 @@ Q = {
     "WP_SELECT_OPERATION_ONE_STEP": [
         mc("Có 10 quả, ăn 2 quả, hỏi còn lại. Chọn phép tính đúng.", "10 - 2", ["10 + 2", "10 × 2", "10 : 2"], "Tình huống lấy bớt và hỏi còn lại nên dùng phép trừ."),
         mc("Có 5 giỏ, mỗi giỏ 2 quả, hỏi tất cả. Chọn phép tính đúng.", "5 × 2", ["5 + 2", "5 - 2", "10 : 5"], "Nhiều nhóm bằng nhau và hỏi tổng nên dùng phép nhân."),
-        mc("Có 30 bút chia đều cho 5 bạn, hỏi mỗi bạn được bao nhiêu. Chọn phép tính đúng.", "30 : 5", ["30 + 5", "30 - 5", "5 + 5"], "Chia đều tổng số bút thành 5 phần nên dùng phép chia."),
+        mc("Có 30 bút chia đều cho 5 bạn. An chọn 30 - 5. Phép tính nào sửa đúng để tìm số bút mỗi bạn?", "30 : 5", ["30 + 5", "30 - 5", "5 + 5"], "Cần chia đều 30 bút thành 5 phần bằng nhau nên phép tính đúng là 30 : 5."),
     ],
 
     "POINT_RECOGNIZE": [
@@ -823,7 +823,7 @@ Q = {
     "QUADRILATERAL_RECOGNIZE": [
         nq("Một hình tứ giác có bao nhiêu cạnh?", 4, "Theo định nghĩa, hình tứ giác là hình kín có 4 cạnh."),
         mc("Hình nào chắc chắn là một tứ giác?", "hình chữ nhật", ["hình tam giác", "hình có 5 cạnh", "đường gấp khúc mở 4 đoạn"], "Hình chữ nhật có bốn cạnh và bốn đỉnh nên là tứ giác."),
-        mc("Một hình kín có đúng 4 cạnh được gọi chung là gì?", "hình tứ giác", ["hình tam giác", "hình kín có 5 cạnh", "đường gấp khúc mở"], "Hình kín có bốn cạnh là tứ giác."),
+        mc("Bạn Hà gọi một hình kín có đúng 4 cạnh là đường gấp khúc mở. Tên đúng của hình đó là gì?", "hình tứ giác", ["hình tam giác", "hình kín có 5 cạnh", "đường gấp khúc mở"], "Một hình kín có đúng bốn cạnh là hình tứ giác; đường gấp khúc mở chưa tạo thành hình kín."),
     ],
     "CYLINDER_RECOGNIZE": [
         mc("Vật nào gần dạng khối trụ nhất?", "lon nước", ["quả bóng", "hộp chữ nhật", "tấm bìa phẳng"], "Lon nước có hai đáy tròn và mặt cong xung quanh, gần dạng khối trụ."),
@@ -859,7 +859,7 @@ Q = {
     "CAPACITY_LITER_READ_WRITE": [
         nq("Một bình ghi 4 l. Dung tích được ghi là bao nhiêu lít?", 4, "Con số đi trước kí hiệu l là 4.", unit="l"),
         mc("Kí hiệu nào là đơn vị lít?", "l", ["kg", "km", "dm"], "Lít được kí hiệu là l."),
-        nq("Bình có 7 l nước, rót thêm 2 l. Có tất cả bao nhiêu lít?", 9, "7 l + 2 l = 9 l.", unit="l"),
+        nq("Bình có 7 l nước, rót thêm 2 l. Lan nói còn 5 l vì đã lấy 7 - 2. Có tất cả đúng bao nhiêu lít?", 9, "Đề cho rót thêm nên lượng nước tăng: 7 l + 2 l = 9 l, không phải lấy 7 - 2.", unit="l"),
     ],
     "LENGTH_DM_M_KM_RECOGNIZE_RELATION": [
         nq("1 m bằng bao nhiêu dm?", 10, "Theo quan hệ đơn vị, 1 m = 10 dm.", unit="dm"),
@@ -874,7 +874,7 @@ Q = {
     "TIME_HOUR_60_MINUTES": [
         nq("1 giờ bằng bao nhiêu phút?", 60, "Theo quan hệ thời gian, 1 giờ = 60 phút.", unit="phút"),
         mc("45 phút so với 1 giờ là khoảng thời gian thế nào?", "ngắn hơn", ["dài hơn", "bằng nhau", "không so sánh được"], "1 giờ = 60 phút; 45 phút ít hơn 60 phút nên ngắn hơn 1 giờ."),
-        mc("Một hoạt động kéo dài đúng 60 phút. Khoảng thời gian đó bằng gì?", "1 giờ", ["1 ngày", "30 phút", "không thể biết"], "Theo quan hệ đã học, 60 phút bằng 1 giờ."),
+        mc("Một hoạt động bắt đầu lúc 8 giờ và kết thúc lúc 9 giờ cùng buổi. Khoảng thời gian đó là 60 phút. Cách gọi nào tương đương?", "1 giờ", ["1 ngày", "30 phút", "không thể biết"], "Từ 8 giờ đến 9 giờ là 60 phút, mà 60 phút bằng đúng 1 giờ."),
     ],
     "CALENDAR_DAYS_IN_MONTH_DATE": [
         nq("Tháng 4 có bao nhiêu ngày?", 30, "Tháng 4 có 30 ngày.", unit="ngày"),
@@ -940,17 +940,17 @@ Q = {
     "EVENT_POSSIBLE": [
         mc("Gieo xúc xắc có các mặt 1 đến 6. Xuất hiện số 4 là sự kiện gì?", "có thể", ["chắc chắn", "không thể", "bằng nhau"], "Số 4 là một mặt có thể xuất hiện nhưng không phải lần nào cũng ra 4."),
         mc("Trong túi có bóng đỏ và xanh. Lấy ngẫu nhiên một bóng, lấy được bóng đỏ là gì?", "có thể", ["chắc chắn", "không thể", "luôn sai"], "Có bóng đỏ trong túi nên có thể lấy được, nhưng còn bóng xanh nên không chắc chắn."),
-        mc("Quay vòng có các số 1, 2, 3. Kim dừng ở số 2 là sự kiện gì?", "có thể", ["chắc chắn", "không thể", "không có kết quả"], "Số 2 có trên vòng quay nên có thể xảy ra, nhưng không phải kết quả duy nhất."),
+        mc("Vòng quay có các số 1, 2, 3. Bạn Nam nói kim chắc chắn dừng ở số 2. Phân loại đúng sự kiện kim dừng ở số 2 là gì?", "có thể", ["chắc chắn", "không thể", "không có kết quả"], "Số 2 có trên vòng quay nên có thể xuất hiện, nhưng còn số 1 và 3 nên không chắc chắn."),
     ],
     "EVENT_CERTAIN": [
         mc("Gieo xúc xắc chuẩn 1 đến 6. Kết quả là một số từ 1 đến 6. Sự kiện này là gì?", "chắc chắn", ["có thể nhưng không chắc", "không thể", "sai"], "Mọi mặt của xúc xắc đều là một số từ 1 đến 6."),
         mc("Trong túi chỉ có bóng xanh. Lấy một bóng, bóng lấy ra màu xanh là gì?", "chắc chắn", ["không thể", "có thể nhưng không chắc", "không có màu"], "Mọi bóng trong túi đều xanh nên lấy bóng nào cũng xanh."),
-        mc("Một hộp chỉ chứa thẻ số 2 và 5. Rút một thẻ, số rút được là 2 hoặc 5. Sự kiện gì?", "chắc chắn", ["không thể", "chỉ có thể", "không xác định"], "Tất cả thẻ đều là 2 hoặc 5 nên sự kiện luôn xảy ra."),
+        mc("Một hộp chỉ chứa thẻ số 2 và 5. Mai cho rằng rút được số 2 hoặc 5 chỉ là sự kiện có thể. Phân loại đúng là gì?", "chắc chắn", ["không thể", "chỉ có thể", "không xác định"], "Mọi thẻ trong hộp đều mang số 2 hoặc 5 nên khi rút một thẻ, sự kiện này chắc chắn xảy ra."),
     ],
     "EVENT_IMPOSSIBLE": [
         mc("Gieo xúc xắc chuẩn 1 đến 6. Xuất hiện số 8 là sự kiện gì?", "không thể", ["có thể", "chắc chắn", "luôn đúng"], "Không có mặt số 8 nên sự kiện không thể xảy ra."),
         mc("Trong túi chỉ có bóng đỏ. Lấy một bóng màu xanh là gì?", "không thể", ["chắc chắn", "có thể", "bằng nhau"], "Không có bóng xanh trong túi nên không thể lấy bóng xanh."),
-        mc("Vòng quay chỉ có các số 1, 2, 3. Kim dừng ở số 5 là sự kiện gì?", "không thể", ["có thể", "chắc chắn", "luôn xảy ra"], "Số 5 không có trên vòng quay nên sự kiện không thể xảy ra."),
+        mc("Vòng quay chỉ có các số 1, 2, 3. An nói kim vẫn có thể dừng ở số 5. Phân loại đúng sự kiện dừng ở số 5 là gì?", "không thể", ["có thể", "chắc chắn", "luôn xảy ra"], "Số 5 không xuất hiện trên vòng quay nên không có kết quả hợp lệ nào làm sự kiện xảy ra; đó là sự kiện không thể."),
     ],
 }
 

@@ -377,6 +377,28 @@ class MathContentDataSmoke(unittest.TestCase):
                 self.assertEqual("application", item["difficulty"])
                 self.assertIn(marker, item["prompt_vi"].casefold())
 
+    def test_more_application_questions_use_error_analysis_or_context(self):
+        expected_markers = {
+            "m2_q_add_components_recognize_03": "sửa lời",
+            "m2_q_sub_components_recognize_03": "sửa đúng lời",
+            "m2_q_multiplication_meaning_03": "nam tính",
+            "m2_q_division_components_03": "sửa đúng lời",
+            "m2_q_operation_meaning_from_visual_03": "minh chọn",
+            "m2_q_wp_one_step_multiplication_context_03": "mai tính",
+            "m2_q_wp_select_operation_one_step_03": "an chọn",
+            "m2_q_capacity_liter_read_write_03": "lan nói",
+            "m2_q_time_hour_60_minutes_03": "bắt đầu lúc 8 giờ",
+            "m2_q_event_possible_03": "nam nói",
+            "m2_q_event_certain_03": "mai cho rằng",
+            "m2_q_event_impossible_03": "an nói",
+            "m2_q_quadrilateral_recognize_03": "bạn hà gọi",
+        }
+        for question_id, marker in expected_markers.items():
+            item = self.question_by_id[question_id]
+            with self.subTest(item=question_id):
+                self.assertEqual("application", item["difficulty"])
+                self.assertIn(marker, item["prompt_vi"].casefold())
+
     def test_application_questions_do_not_regress_to_single_fact_recall(self):
         subtraction = self.question_by_id["m2_q_sub_components_recognize_03"]
         division = self.question_by_id["m2_q_division_components_03"]
