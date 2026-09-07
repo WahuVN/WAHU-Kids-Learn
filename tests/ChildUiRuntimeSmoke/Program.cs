@@ -957,10 +957,12 @@ namespace WAHU.ChildUiRuntimeSmoke
                         }
                         count++;
                     }
-                    A(count == 201, "authored_ui_sweep_all_201_questions");
-                    A(typedCount == 109, "authored_ui_sweep_109_typed_questions");
-                    A(choiceCount == 91, "authored_ui_sweep_91_choice_questions");
-                    A(interactionCount == 1, "authored_ui_sweep_one_interaction_question");
+                    A(count == 402, "authored_ui_sweep_all_402_questions");
+                    A(typedCount == 218, "authored_ui_sweep_218_typed_questions");
+                    A(choiceCount == 182, "authored_ui_sweep_182_choice_questions");
+                    A(interactionCount == 2, "authored_ui_sweep_two_interaction_questions");
+                    A(typedCount + choiceCount + interactionCount == count,
+                        "authored_ui_sweep_answer_surfaces_partition_full_bank");
                 }
             }
             finally
@@ -1778,7 +1780,7 @@ END;");
                     Invoke(typedForm, "StartSession");
                     var question = GetField<MathQuestion>(typedForm, "_question");
                     var input = GetField<TextBox>(typedForm, "_typedAnswerBox");
-                    A(question != null && question.ContentQuestionId == "m2_q_num_count_read_write_0_1000_01" &&
+                    A(question != null && typedLesson.PracticeSets.Basic.Contains(question.ContentQuestionId) &&
                         question.DisplayChoices.Count == 0 && input.Enabled,
                         "submit_failure_typed_fixture_uses_real_typed_surface");
                     input.Text = question.CorrectAnswerDisplay;
@@ -1830,15 +1832,16 @@ END;");
                     Invoke(interactionForm, "StartSession");
                     var basic = GetField<MathQuestion>(interactionForm, "_question");
                     var basicInput = GetField<TextBox>(interactionForm, "_typedAnswerBox");
-                    A(basic != null && basic.ContentQuestionId == "m2_q_draw_segment_given_length_01",
-                        "submit_failure_interaction_starts_with_basic");
+                    A(basic != null && segmentLesson.PracticeSets.Basic.Contains(basic.ContentQuestionId) &&
+                        basic.DisplayChoices.Count == 0,
+                        "submit_failure_interaction_starts_with_selected_basic");
                     basicInput.Text = basic.CorrectAnswerDisplay;
                     Invoke(interactionForm, "SubmitTypedAnswer", "submit_failure_interaction_basic");
                     Invoke(interactionForm, "HandleNextButton");
 
                     var medium = GetField<MathQuestion>(interactionForm, "_question");
                     var interactive = GetField<Control>(interactionForm, "_interactiveAnswer");
-                    A(medium != null && medium.ContentQuestionId == "m2_q_draw_segment_given_length_02" &&
+                    A(medium != null && segmentLesson.PracticeSets.Medium.Contains(medium.ContentQuestionId) &&
                         string.Equals(medium.AnswerKind, "interaction_integer", StringComparison.Ordinal),
                         "submit_failure_interaction_fixture_uses_real_segment_surface");
                     Invoke(interactive, "SelectCursor");
@@ -2100,15 +2103,16 @@ END;");
                 {
                     Invoke(form, "StartSession");
                     var basic = GetField<MathQuestion>(form, "_question");
-                    A(basic != null && basic.ContentQuestionId == "m2_q_draw_segment_given_length_01",
-                        "interaction_retry_segment_starts_with_basic");
+                    A(basic != null && segmentLesson.PracticeSets.Basic.Contains(basic.ContentQuestionId) &&
+                        basic.DisplayChoices.Count == 0,
+                        "interaction_retry_segment_starts_with_selected_basic");
                     var basicInput = GetField<TextBox>(form, "_typedAnswerBox");
                     basicInput.Text = basic.CorrectAnswerDisplay;
                     Invoke(form, "SubmitTypedAnswer", "interaction_retry_basic");
                     Invoke(form, "HandleNextButton");
 
                     var medium = GetField<MathQuestion>(form, "_question");
-                    A(medium != null && medium.ContentQuestionId == "m2_q_draw_segment_given_length_02" &&
+                    A(medium != null && segmentLesson.PracticeSets.Medium.Contains(medium.ContentQuestionId) &&
                         string.Equals(medium.AnswerKind, "interaction_integer", StringComparison.Ordinal) &&
                         medium.IllustrationData.StartsWith("segmentdraw|", StringComparison.Ordinal),
                         "interaction_retry_medium_is_authored_segment");
