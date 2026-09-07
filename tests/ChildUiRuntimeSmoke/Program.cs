@@ -37,6 +37,7 @@ namespace WAHU.ChildUiRuntimeSmoke
             TestTypedAnswerInput(appAssembly);
             TestAllAuthoredAnswerSurfaces(appAssembly);
             TestTargetedLessonUiFlow(appAssembly);
+            TestExpandedPoolTargetedUiFlow(appAssembly);
             TestChoiceRetryUiFlow(appAssembly);
             TestSubmitFailureRecoveryUiFlow(appAssembly);
             TestTypedAndInteractionSubmitFailureRecoveryUiFlow(appAssembly);
@@ -1137,6 +1138,237 @@ namespace WAHU.ChildUiRuntimeSmoke
                 try { Directory.Delete(tempRoot, true); } catch { }
             }
         }
+        private static void TestExpandedPoolTargetedUiFlow(Assembly appAssembly)
+        {
+            var repo = Directory.GetCurrentDirectory();
+            var sourceContent = Path.Combine(repo, "content_packs", "math_grade2_v1");
+            var previewRoot = Path.Combine(repo, "tools", "math_content_authoring", "drafts", "pool6_preview");
+            var previewCatalogPath = Path.Combine(previewRoot, "lesson_catalog_pool6_preview.json");
+            var previewBankPath = Path.Combine(previewRoot, "question_bank_pool6_preview.json");
+            A(File.Exists(previewCatalogPath) && File.Exists(previewBankPath),
+                "pool6_ui_preview_pack_available");
+
+            var previewCatalog = new MathLessonCatalogSource().Load(previewCatalogPath);
+            var lesson = previewCatalog.FindLesson("m2_ls_num_count_read_write_0_1000");
+            A(previewCatalog.Lessons.Count == 67 && lesson != null,
+                "pool6_ui_preview_covers_sixty_seven_lessons");
+            A(lesson.PracticeSets != null && lesson.PracticeSets.TotalCount == 6 &&
+                lesson.PracticeSets.Basic.Count == 2 && lesson.PracticeSets.Medium.Count == 2 &&
+                lesson.PracticeSets.Application.Count == 2,
+                "pool6_ui_fixture_has_two_questions_per_difficulty");
+
+            var runtimeContent = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "content_packs", "math_grade2_v1");
+            Directory.CreateDirectory(runtimeContent);
+            var runtimeFiles = new Dictionary<string, byte[]>(StringComparer.OrdinalIgnoreCase);
+            var runtimeTemplate = Path.Combine(runtimeContent, "verified_templates_v1.json");
+            var runtimeCatalog = Path.Combine(runtimeContent, "lesson_catalog_v1.json");
+            var runtimeBank = Path.Combine(runtimeContent, "question_bank_v1.json");
+            foreach (var path in new[] { runtimeTemplate, runtimeCatalog, runtimeBank })
+                runtimeFiles[path] = File.Exists(path) ? File.ReadAllBytes(path) : null;
+
+            var tempRoot = Path.Combine(Path.GetTempPath(), "wahu-child-ui-pool6-targeted-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempRoot);
+            try
+            {
+                File.Copy(Path.Combine(sourceContent, "verified_templates_v1.json"), runtimeTemplate, true);
+                File.Copy(previewCatalogPath, runtimeCatalog, true);
+                File.Copy(previewBankPath, runtimeBank, true);
+
+                var schemaSource = Path.Combine(repo, "data", "schema");
+                var schemaDir = Path.Combine(tempRoot, "schema");
+                Directory.CreateDirectory(schemaDir);
+                foreach (var source in Directory.GetFiles(schemaSource, "*.sql"))
+                    File.Copy(source, Path.Combine(schemaDir, Path.GetFileName(source)), true);
+                var database = new LearningDatabase(Path.Combine(tempRoot, "learning.db"), Path.Combine(schemaDir, "001_initial.sql"));
+                var init = database.Initialize("DELETE");
+                A(init.SchemaVersion == 5 && init.Health.IsHealthy, "pool6_ui_database_v5_ready");
+                new LearnerSessionService(database).EnsurePrimaryChild("Bé UI pool sáu");
+
+                var hubCtor = typeof(WAHUKidsLearn.MathHubForm).GetConstructor(
+                    BindingFlags.Instance | BindingFlags.NonPublic,
+                    null,
+                    new[] { typeof(LearningDatabase), typeof(RuntimePerformanceSettings), typeof(string) },
+                    null);
+                var lessonCtor = typeof(WAHUKidsLearn.MathLessonForm).GetConstructor(
+                    BindingFlags.Instance | BindingFlags.NonPublic,
+                    null,
+                    new[] { typeof(LearningDatabase), typeof(RuntimePerformanceSettings), typeof(string) },
+                    null);
+                A(hubCtor != null && lessonCtor != null, "pool6_ui_internal_routes_available");
+
+                using (var hub = (WAHUKidsLearn.MathHubForm)hubCtor.Invoke(new object[]
+                {
+                    database,
+                    new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW },
+                    previewCatalogPath
+                }))
+                {
+                    Invoke(hub, "LoadCatalogAndProgress");
+                    Invoke(hub, "SelectLessonInCatalog", lesson);
+                    var detail = GetField<FlowLayoutPanel>(hub, "_detailFlow");
+                    var practice = FindButtonContaining(detail, "Luyện bài này");
+                    A(ContainsControlText(detail, "6 câu trong ngân hàng bài học"),
+                        "pool6_ui_hub_reports_six_question_bank");
+                    A(practice != null && practice.Enabled && string.IsNullOrWhiteSpace(Get<string>(practice, "BadgeText")) &&
+                        practice.AccessibleDescription.IndexOf("6 câu", StringComparison.OrdinalIgnoreCase) < 0,
+                        "pool6_ui_hub_does_not_present_bank_size_as_session_size");
+                }
+
+                IList<string> selected;
+                string openQuestionId;
+                using (var first = (WAHUKidsLearn.MathLessonForm)lessonCtor.Invoke(new object[]
+                {
+                    database,
+                    new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW },
+                    lesson.Id
+                }))
+                {
+                    Invoke(first, "StartSession");
+                    var coordinator = GetField<object>(first, "_coordinator");
+                    selected = ((System.Collections.IEnumerable)GetField<object>(coordinator, "_selectedContentQuestionIds"))
+                        .Cast<object>().Select(Convert.ToString).ToList();
+                    A(selected.Count == 3 && selected.Distinct(StringComparer.Ordinal).Count() == 3,
+                        "pool6_ui_session_selects_exactly_three_unique_questions");
+                    A(lesson.PracticeSets.Basic.Contains(selected[0]) && lesson.PracticeSets.Medium.Contains(selected[1]) &&
+                        lesson.PracticeSets.Application.Contains(selected[2]),
+                        "pool6_ui_selected_set_uses_one_question_per_difficulty");
+                    A(GetField<int>(first, "_targetQuestionCount") == 3 &&
+                        GetField<Label>(first, "_progressText").Text.IndexOf("/ 3", StringComparison.Ordinal) >= 0,
+                        "pool6_ui_lesson_form_uses_three_question_target");
+                    A(GetField<Label>(first, "_support").Text.IndexOf("3 câu", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                        GetField<Label>(first, "_support").Text.IndexOf("6 câu", StringComparison.OrdinalIgnoreCase) < 0,
+                        "pool6_ui_start_notice_uses_session_target_not_pool_size");
+
+                    var q1 = GetField<MathQuestion>(first, "_question");
+                    A(q1 != null && q1.ContentQuestionId == selected[0],
+                        "pool6_ui_first_question_matches_selected_basic");
+                    SubmitCurrentMathQuestionCorrectly(first, "pool6_ui_basic");
+                    A(GetField<Label>(first, "_progressText").Text.IndexOf("1 / 3", StringComparison.Ordinal) >= 0,
+                        "pool6_ui_progress_after_first_answer_is_one_of_three");
+                    Invoke(first, "HandleNextButton");
+                    var q2 = GetField<MathQuestion>(first, "_question");
+                    A(q2 != null && q2.ContentQuestionId == selected[1],
+                        "pool6_ui_second_question_matches_selected_medium");
+                    openQuestionId = q2.QuestionId;
+                    Invoke(coordinator, "Suspend", "pool6_ui_suspend_on_second_question");
+                    SetField(first, "_finished", true);
+                }
+
+                using (var resumed = (WAHUKidsLearn.MathLessonForm)lessonCtor.Invoke(new object[]
+                {
+                    database,
+                    new RuntimePerformanceSettings { Profile = PerformanceProfileKind.NORMAL },
+                    lesson.Id
+                }))
+                {
+                    Invoke(resumed, "StartSession");
+                    var coordinator = GetField<object>(resumed, "_coordinator");
+                    var resumedSelected = ((System.Collections.IEnumerable)GetField<object>(coordinator, "_selectedContentQuestionIds"))
+                        .Cast<object>().Select(Convert.ToString).ToList();
+                    A(resumedSelected.SequenceEqual(selected),
+                        "pool6_ui_resume_preserves_ordered_selected_set");
+                    var q2 = GetField<MathQuestion>(resumed, "_question");
+                    A(q2 != null && q2.QuestionId == openQuestionId && q2.ContentQuestionId == selected[1],
+                        "pool6_ui_resume_restores_exact_open_medium_question");
+                    A(GetField<int>(resumed, "_targetQuestionCount") == 3 &&
+                        GetField<Label>(resumed, "_progressText").Text.IndexOf("Câu 2 / 3", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "pool6_ui_resume_keeps_three_question_progress_target");
+                    A(GetField<Label>(resumed, "_support").Text.IndexOf("đang làm dở", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                        GetField<Label>(resumed, "_support").Text.IndexOf("6 câu", StringComparison.OrdinalIgnoreCase) < 0,
+                        "pool6_ui_resume_copy_does_not_leak_pool_size");
+
+                    SubmitCurrentMathQuestionCorrectly(resumed, "pool6_ui_medium");
+                    A(GetField<Label>(resumed, "_progressText").Text.IndexOf("2 / 3", StringComparison.Ordinal) >= 0,
+                        "pool6_ui_progress_after_medium_is_two_of_three");
+                    Invoke(resumed, "HandleNextButton");
+                    var q3 = GetField<MathQuestion>(resumed, "_question");
+                    A(q3 != null && q3.ContentQuestionId == selected[2],
+                        "pool6_ui_third_question_matches_selected_application");
+                    SubmitCurrentMathQuestionCorrectly(resumed, "pool6_ui_application");
+                    A(GetField<bool>(resumed, "_completeOnNext") &&
+                        GetField<Label>(resumed, "_progressText").Text.IndexOf("3 / 3", StringComparison.Ordinal) >= 0,
+                        "pool6_ui_three_answers_route_to_result_not_fourth_question");
+                    var readySummary = Get<object>(coordinator, "Summary");
+                    A(Get<int>(readySummary, "Attempts") == 3,
+                        "pool6_ui_summary_counts_three_selected_questions_before_completion");
+                    Invoke(resumed, "HandleNextButton");
+
+                    A(GetField<bool>(resumed, "_finished") &&
+                        GetField<Label>(resumed, "_prompt").Text == "Hoàn thành bài học" &&
+                        GetField<Label>(resumed, "_progressText").Text == "Hoàn thành",
+                        "pool6_ui_result_finishes_after_selected_three");
+                    A(GetField<Label>(resumed, "_feedback").Text.IndexOf("Điểm bài 100%", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "pool6_ui_result_uses_three_question_score");
+                }
+
+                var progress = new MathLessonProgressStore(database)
+                    .LoadOne(LearnerSessionService.PrimaryChildId, lesson.Id);
+                A(progress != null && progress.CompletedCount == 1 && progress.LastScorePercent.HasValue &&
+                    Math.Abs(progress.LastScorePercent.Value - 100.0) < 0.001,
+                    "pool6_ui_progress_persists_completion_from_three_selected_questions");
+
+                using (var hub = (WAHUKidsLearn.MathHubForm)hubCtor.Invoke(new object[]
+                {
+                    database,
+                    new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW },
+                    previewCatalogPath
+                }))
+                {
+                    Invoke(hub, "LoadCatalogAndProgress");
+                    Invoke(hub, "SelectLessonInCatalog", lesson);
+                    var detail = GetField<FlowLayoutPanel>(hub, "_detailFlow");
+                    var practice = FindButtonContaining(detail, "Luyện lại bài này");
+                    A(ContainsControlText(detail, "6 câu trong ngân hàng bài học") && practice != null && practice.Enabled &&
+                        string.IsNullOrWhiteSpace(Get<string>(practice, "BadgeText")),
+                        "pool6_ui_completed_hub_keeps_bank_six_session_neutral");
+                }
+            }
+            finally
+            {
+                foreach (var pair in runtimeFiles)
+                {
+                    if (pair.Value == null)
+                    {
+                        try { if (File.Exists(pair.Key)) File.Delete(pair.Key); } catch { }
+                    }
+                    else
+                    {
+                        try { File.WriteAllBytes(pair.Key, pair.Value); } catch { }
+                    }
+                }
+                try { Directory.Delete(tempRoot, true); } catch { }
+            }
+        }
+
+        private static void SubmitCurrentMathQuestionCorrectly(WAHUKidsLearn.MathLessonForm form, string assertionPrefix)
+        {
+            var question = GetField<MathQuestion>(form, "_question");
+            A(question != null, assertionPrefix + "_question_available");
+            if (string.Equals(question.AnswerKind, "interaction_integer", StringComparison.Ordinal))
+            {
+                var interactive = GetField<Control>(form, "_interactiveAnswer");
+                Invoke(interactive, "SelectCursor");
+                Invoke(interactive, "MoveCursor", question.CorrectAnswer);
+                Invoke(interactive, "SelectCursor");
+                Invoke(form, "SubmitInteractiveAnswer", assertionPrefix);
+                return;
+            }
+            if (question.DisplayChoices == null || question.DisplayChoices.Count == 0)
+            {
+                var input = GetField<TextBox>(form, "_typedAnswerBox");
+                input.Text = question.CorrectAnswerDisplay;
+                A(GetField<Button>(form, "_typedSubmitButton").Enabled, assertionPrefix + "_typed_submit_ready");
+                Invoke(form, "SubmitTypedAnswer", assertionPrefix);
+                return;
+            }
+
+            var correctIndex = -1;
+            for (var i = 0; i < question.DisplayChoices.Count; i++)
+                if (string.Equals(question.DisplayChoices[i], question.CorrectAnswerDisplay, StringComparison.Ordinal)) correctIndex = i;
+            A(correctIndex >= 0, assertionPrefix + "_choice_correct_index");
+            Invoke(form, "SubmitChoice", correctIndex, assertionPrefix);
+        }
+
         private static void TestChoiceRetryUiFlow(Assembly appAssembly)
         {
             var repo = Directory.GetCurrentDirectory();
