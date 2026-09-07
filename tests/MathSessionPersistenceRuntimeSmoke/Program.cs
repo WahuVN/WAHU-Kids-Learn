@@ -921,6 +921,66 @@ VALUES(@id,@session,@child,' ','','blank-pack-question','LEGACY_PACK_SKILL','mat
                     "pool6_corrupt_selection_metadata_continues_selected_medium_ordinal");
                 resumed.Abort("pool6_selection_corrupt_cleanup");
             }
+
+            AssertTargetSelectionRepairVariant(root, schemaPath, pack, "missing-key", selected => "{}");
+            AssertTargetSelectionRepairVariant(root, schemaPath, pack, "duplicate-ids", selected => Json.Serialize(new Dictionary<string, object>
+            {
+                { "selected_content_question_ids", new[] { selected[0], selected[0], selected[2] } }
+            }));
+            AssertTargetSelectionRepairVariant(root, schemaPath, pack, "wrong-bucket", selected => Json.Serialize(new Dictionary<string, object>
+            {
+                { "selected_content_question_ids", new[] { selected[1], selected[0], selected[2] } }
+            }));
+            AssertTargetSelectionRepairVariant(root, schemaPath, pack, "unknown-id", selected => Json.Serialize(new Dictionary<string, object>
+            {
+                { "selected_content_question_ids", new[] { selected[0], selected[1], "m2_q_missing_selected_application_99" } }
+            }));
+        }
+
+        private static void AssertTargetSelectionRepairVariant(
+            string root,
+            string schemaPath,
+            SyntheticPoolPack pack,
+            string caseName,
+            Func<IList<string>, string> corruptSelectionJson)
+        {
+            var safeName = caseName.Replace("-", "_");
+            var database = NewDatabase(Path.Combine(root, "pool6-selection-repair-" + safeName + ".db"), schemaPath);
+            IList<string> expectedSelected;
+            string sessionId;
+            using (var first = new MathSessionCoordinator(database, pack.TemplatePath, "LOW", 9511, pack.LessonId))
+            {
+                var start = first.Start("Bé selected repair " + caseName);
+                sessionId = start.SessionId;
+                expectedSelected = start.SelectedContentQuestionIds.ToList();
+                var basic = first.NextQuestion();
+                A(basic.ContentQuestionId == expectedSelected[0],
+                    "selection_repair_" + safeName + "_starts_selected_basic");
+                var basicOutcome = first.SubmitAnswerAt(basic.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700);
+                A(basicOutcome.QuestionCompleted && basicOutcome.IsCorrect && first.Summary.Attempts == 1,
+                    "selection_repair_" + safeName + "_commits_one_basic_before_corruption");
+                Exec(database,
+                    "UPDATE math_session_runtime SET current_selection_json=@selection WHERE session_id=@session;",
+                    "@selection", corruptSelectionJson(expectedSelected), "@session", sessionId);
+                first.Suspend("selection_repair_" + safeName + "_suspend");
+            }
+
+            using (var resumed = new MathSessionCoordinator(database, pack.TemplatePath, "NORMAL", 1234567, pack.LessonId))
+            {
+                var start = resumed.Start("Bé selected repair " + caseName);
+                A(start.ResumedExistingSession && start.CompletedQuestionCount == 1,
+                    "selection_repair_" + safeName + "_resumes_committed_progress");
+                A(start.SelectedContentQuestionIds.SequenceEqual(expectedSelected),
+                    "selection_repair_" + safeName + "_restores_deterministic_selected_set");
+                var repairedJson = ScalarText(database,
+                    "SELECT current_selection_json FROM math_session_runtime WHERE session_id='" + sessionId + "';");
+                A(expectedSelected.All(repairedJson.Contains),
+                    "selection_repair_" + safeName + "_rewrites_repaired_checkpoint");
+                var medium = resumed.NextQuestion();
+                A(medium.ContentQuestionId == expectedSelected[1],
+                    "selection_repair_" + safeName + "_continues_selected_medium");
+                resumed.Abort("selection_repair_" + safeName + "_cleanup");
+            }
         }
 
         private static void TestTargetedSelectedSetSurvivesCommitFailure(
