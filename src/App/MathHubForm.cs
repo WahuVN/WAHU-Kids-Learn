@@ -85,6 +85,10 @@ namespace WAHUKidsLearn
                 _catalog = null;
                 _selectedChapter = null;
                 _selectedLesson = null;
+                _chapterButtons.Clear();
+                _lessonButtons.Clear();
+                _skills.Clear();
+                _lessonAccess.Clear();
                 _chapterFlow.Controls.Clear();
                 _lessonFlow.Controls.Clear();
                 _detailFlow.Controls.Clear();
