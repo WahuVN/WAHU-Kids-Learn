@@ -212,6 +212,14 @@ Math cold-start không được lộ một `session` active chưa có `math_sess
 - True cross-process regression xác nhận đúng 1 active session + đúng 1 runtime, không có active session thiếu runtime, winner không bị recovery nhầm và lập tức resumable; terminal state vẫn giải phóng slot cho session sau.
 - Targeted fault-injection dùng trigger `RAISE(ABORT)` ở `math_lesson_progress`: failure phải rollback cả `session` + `math_session_runtime` + lesson progress; bỏ trigger rồi retry chỉ tạo một startup chain và `started_count=1`.
 
+## 2026-09-07 — Subject-scoped dangling recovery (AI2)
+
+`RecoverDanglingSessions()` chỉ được recovery session Math vì tiêu chí dangling của nó dựa trên việc thiếu `math_session_runtime`:
+
+- Query recovery phải có `planned_subject='math'`; session `english`/`mixed` không có Math runtime là bình thường và không được chuyển sang `recovered`.
+- Math session `started/active`, chưa ended và không có `math_session_runtime` vẫn được recovery như crash/legacy partial state.
+- Regression tạo đồng thời một dangling Math session + active English + active mixed; invariant là chỉ Math bị recovered, hai session non-Math vẫn active và vẫn terminalize bình thường sau đó.
+
 ## Contract còn chưa chốt
 
 Các mục sau chưa được UI/content tự invent cho tới khi AI2 publish contract:

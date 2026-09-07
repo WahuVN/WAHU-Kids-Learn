@@ -19,7 +19,7 @@ Branch: `main`
 ## Tests
 
 - `tests/MathEngineRuntimeSmoke`: PASS — **47 assertions**.
-- `tests/MathDataEngineRuntimeSmoke`: PASS — **88 assertions** (idempotency + terminal-session guard + optimistic skill-state guard + true cross-process mastery/session contention + atomic session/runtime/lesson-progress startup smoke).
+- `tests/MathDataEngineRuntimeSmoke`: PASS — **93 assertions** (idempotency + terminal-session guard + optimistic skill-state guard + true cross-process mastery/session contention + atomic startup + subject-scoped dangling recovery).
 - `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **171 assertions** (authored bank + targeted lesson + prerequisite unlock + exact resume + mastery delta + next lesson + corrupt authored cursor recovery + retry/resume/anti-double-submit + stale coordinator/skill guards + injected write-failure rollback/retry).
 - `tests/SQLiteRuntimeSmoke`: PASS — **166 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
 - `tests/LearningSessionRuntimeSmoke`: PASS — **794 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
@@ -53,6 +53,7 @@ Branch: `main`
 - injected write-failure rollback: PASS — failure tại `mastery_event` rollback toàn attempt/key/mastery/child_skill/review chain; coordinator giữ câu mở và retry sạch.
 - single-active child+subject session guard: PASS — `BeginSession` atomic guard chặn duplicate active session khi hai process cold-start đồng thời; terminal state giải phóng slot.
 - atomic Math session/runtime startup: PASS — `TryCreateSession` commit session + runtime + targeted lesson `started_count` cùng transaction; race loser restore durable winner, không recovery/abort nhầm session process khác; fault ở lesson-progress rollback toàn chain.
+- dangling recovery subject scope: PASS — chỉ Math session thiếu `math_session_runtime` bị recovery; active `english`/`mixed` session không bị Math startup thu hồi nhầm.
 - schema V4: PASS — thêm `session_mode`, `target_lesson_id`, `math_lesson_progress`; checksum/tamper guard và deployment payload gate đã có.
 - V1 → V4: PASS với pre-migration verified backup; migration history giữ đủ V1/V2/V3/V4.
 - V2 → V3 historical duplicate semantic attempt: PASS, không xóa lịch sử; key pin vào earliest committed attempt; sau đó V4 apply bình thường.
@@ -106,7 +107,8 @@ Còn phải làm: skip policy nếu product cho phép, numeric XP/daily streak n
 - `400fd0c` — `fix(toán): phục hồi state sau lỗi ghi đáp án` — pushed.
 - `b8fd18b` — `fix(toán): chặn tạo trùng phiên học đồng thời` — pushed.
 - `2da39b5` — `fix(toán): tạo phiên và runtime nguyên tử` — pushed.
-- targeted lesson-start atomicity — đang chốt selective commit hiện tại.
+- `c4ff314` — `fix(toán): khóa nguyên tử tiến độ khi mở bài` — pushed.
+- subject-scoped dangling recovery — đang chốt selective commit hiện tại.
 
 ## Blocker / coordination
 

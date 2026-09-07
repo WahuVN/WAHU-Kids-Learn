@@ -35,6 +35,7 @@ namespace WAHU.MathDataEngineRuntimeSmoke
                 TestCrossProcessSingleActiveSessionGuard(root, sourceSchema);
                 TestCrossProcessAtomicMathRuntimeStart(root, sourceSchema);
                 TestTargetedAtomicStartRollsBackOnProgressFailure(root, sourceSchema);
+                TestDanglingRecoveryIsScopedToMath(root, sourceSchema);
                 TestExistingV1UpgradesToV3WithBackup(root, sourceSchema);
                 TestV3BackfillPreservesLegacyDuplicates(root, sourceSchema);
                 Console.WriteLine("MATH_DATA_ENGINE_RUNTIME_SMOKE_PASS assertions=" + _assertions);
@@ -637,6 +638,41 @@ END;");
                 "targeted_atomic_start_retry_is_immediately_resumable_not_dangling");
             sessions.CompleteSession(started.SessionId, true, "{}", "{}");
             runtime.Delete(started.SessionId);
+        }
+
+        private static void TestDanglingRecoveryIsScopedToMath(string root, string sourceSchema)
+        {
+            var schemaDir = Path.Combine(root, "schema-recovery-subject-scope");
+            CopySchemas(sourceSchema, schemaDir);
+            var schemaPath = Path.Combine(schemaDir, "001_initial.sql");
+            var database = new LearningDatabase(Path.Combine(root, "recovery-subject-scope.db"), schemaPath);
+            database.Initialize("DELETE");
+            var sessions = new LearnerSessionService(database);
+            var profile = sessions.EnsurePrimaryChild("Bé recovery scope");
+
+            var math = sessions.BeginSession(profile.ChildId, "math", "LOW");
+            var english = sessions.BeginSession(profile.ChildId, "english", "LOW");
+            var mixed = sessions.BeginSession(profile.ChildId, "mixed", "LOW");
+
+            A(sessions.RecoverDanglingSessions() == 1,
+                "dangling_recovery_only_recovers_math_session_without_runtime");
+            using (var c = database.OpenConnection())
+            {
+                A(Count(c, "SELECT count(*) FROM session WHERE id='" + math.SessionId + "' AND state='recovered' AND ended_at_utc IS NOT NULL;") == 1,
+                    "dangling_recovery_marks_math_session_recovered");
+                A(Count(c, "SELECT count(*) FROM session WHERE id='" + english.SessionId + "' AND state='active' AND ended_at_utc IS NULL;") == 1,
+                    "dangling_recovery_preserves_active_english_session");
+                A(Count(c, "SELECT count(*) FROM session WHERE id='" + mixed.SessionId + "' AND state='active' AND ended_at_utc IS NULL;") == 1,
+                    "dangling_recovery_preserves_active_mixed_session");
+            }
+
+            sessions.CompleteSession(english.SessionId, true, "{}", "{}");
+            sessions.CompleteSession(mixed.SessionId, true, "{}", "{}");
+            using (var c = database.OpenConnection())
+            {
+                A(Count(c, "SELECT count(*) FROM session WHERE id IN ('" + english.SessionId + "','" + mixed.SessionId + "') AND state='aborted';") == 2,
+                    "dangling_recovery_non_math_sessions_remain_completable");
+            }
         }
 
         private static void TestExistingV1UpgradesToV3WithBackup(string root, string sourceSchema)

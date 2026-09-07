@@ -86,7 +86,8 @@ VALUES(@id,'{}',@utc);";
                     command.CommandText = @"UPDATE session
 SET state='recovered', ended_at_utc=@utc,
     summary_json=COALESCE(summary_json,'{""reason"":""unclean_previous_runtime""}')
-WHERE state IN ('started','active') AND ended_at_utc IS NULL
+WHERE planned_subject='math'
+  AND state IN ('started','active') AND ended_at_utc IS NULL
   AND NOT EXISTS (SELECT 1 FROM math_session_runtime r WHERE r.session_id=session.id);";
                     command.Parameters.AddWithValue("@utc", DateTime.UtcNow.ToString("o"));
                     return command.ExecuteNonQuery();
