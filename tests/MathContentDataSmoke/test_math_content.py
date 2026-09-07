@@ -468,6 +468,24 @@ class MathContentDataSmoke(unittest.TestCase):
                 self.assertLessEqual(max(counts) - min(counts), 1)
         self.assertEqual([22, 22, 22, 22], [Counter(x["correct_choice_id"] for x in by_count[4])[key] for key in "abcd"])
 
+    def test_recognition_distractors_do_not_regress_to_unrelated_giveaways(self):
+        forbidden = {
+            "m2_q_point_recognize_01": {"2 kg", "10 l"},
+            "m2_q_line_segment_recognize_02": {"Khối tròn"},
+            "m2_q_line_segment_recognize_03": {"khối cầu"},
+            "m2_q_straight_line_recognize_01": {"Có đúng bốn cạnh", "Là một khối"},
+            "m2_q_straight_line_recognize_03": {"d là khối cầu"},
+            "m2_q_polyline_recognize_01": {"Một khối cầu"},
+            "m2_q_quadrilateral_recognize_02": {"khối cầu"},
+            "m2_q_cylinder_recognize_02": {"Chỉ có một điểm"},
+            "m2_q_money_vnd_note_recognition_01": {"Số trang của sách bên cạnh", "Chiều dài của bàn học"},
+        }
+        for question_id, banned in forbidden.items():
+            item = self.question_by_id[question_id]
+            distractors = {choice["text"] for choice in item["choices"] if choice["id"] != item["correct_choice_id"]}
+            with self.subTest(item=question_id):
+                self.assertTrue(distractors.isdisjoint(banned))
+
     def test_equal_group_operation_choice_is_unambiguous(self):
         item = self.question_by_id["m2_q_operation_meaning_from_visual_03"]
         texts = {choice["text"] for choice in item["choices"]}

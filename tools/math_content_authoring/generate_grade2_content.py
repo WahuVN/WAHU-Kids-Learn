@@ -791,49 +791,49 @@ Q = {
     ],
 
     "POINT_RECOGNIZE": [
-        mc("Kí hiệu nào phù hợp để đặt tên một điểm?", "A", ["5 cm", "2 kg", "10 l"], "Điểm thường được đặt tên bằng chữ cái in hoa như A."),
-        mc("Phát biểu nào đúng về một điểm?", "Điểm biểu diễn một vị trí", ["Điểm có độ dài 5 cm", "Điểm luôn là một hình tròn lớn", "Điểm có hai đầu mút"], "Điểm dùng để chỉ vị trí và không có độ dài."),
+        mc("Kí hiệu nào phù hợp để đặt tên một điểm?", "A", ["AB", "1", "5 cm"], "Điểm thường được đặt tên bằng chữ cái in hoa như A."),
+        mc("Phát biểu nào đúng về một điểm?", "Điểm biểu diễn một vị trí", ["Điểm có một độ dài xác định", "Điểm có hai đầu mút", "Điểm có thể kéo dài về hai phía"], "Điểm dùng để chỉ vị trí và không có độ dài."),
         mc("Trên hình có ba vị trí được đánh dấu A, B, C. Có bao nhiêu điểm được đặt tên?", "3", ["1", "2", "4"], "Mỗi tên A, B, C chỉ một điểm, nên có 3 điểm."),
     ],
     "LINE_SEGMENT_RECOGNIZE": [
         mc("Đoạn thẳng AB có bao nhiêu đầu mút?", "2", ["0", "1", "3"], "Đoạn thẳng AB có hai đầu mút A và B."),
-        mc("Mô tả nào đúng về đoạn thẳng?", "Phần thẳng nối hai đầu mút", ["Đường uốn cong không có đầu", "Khối tròn", "Một điểm duy nhất"], "Đoạn thẳng là phần thẳng nối hai điểm đầu mút."),
-        mc("Nếu nối thẳng điểm M với điểm N, hình nhận được gọi là gì?", "đoạn thẳng MN", ["khối cầu", "đường cong", "điểm MN"], "Phần thẳng nối hai điểm M và N là đoạn thẳng MN."),
+        mc("Mô tả nào đúng về đoạn thẳng?", "Phần thẳng nối hai đầu mút", ["Phần thẳng kéo dài mãi về hai phía", "Nét uốn cong nối hai vị trí", "Chỉ một vị trí không có độ dài"], "Đoạn thẳng là phần thẳng nối hai điểm đầu mút."),
+        mc("Nếu nối thẳng điểm M với điểm N, hình nhận được gọi là gì?", "đoạn thẳng MN", ["đường thẳng MN", "đường cong MN", "chỉ điểm M"], "Phần thẳng nối hai điểm M và N là đoạn thẳng MN."),
     ],
     "CURVE_RECOGNIZE": [
-        mc("Đường nào được gọi là đường cong?", "Đường uốn lượn", ["Đường đi thẳng không đổi hướng", "Một điểm", "Một đoạn chỉ có hai đầu mút nhưng luôn thẳng"], "Đường cong có hình dạng uốn lượn, không giữ hướng thẳng trên toàn bộ đường."),
+        mc("Đường nào được gọi là đường cong?", "Đường uốn lượn", ["Nét thẳng kéo dài không đổi hướng", "Phần thẳng có hai đầu mút", "Một vị trí được đánh dấu"], "Đường cong có hình dạng uốn lượn, không giữ hướng thẳng trên toàn bộ đường."),
         mc("Một nét vẽ hình vòng cung là ví dụ gần nhất của loại đường nào?", "đường cong", ["đường thẳng", "đoạn thẳng", "điểm"], "Vòng cung là một đường cong."),
-        mc("Phát biểu nào đúng?", "Đường cong có thể đổi hướng mềm mại", ["Đường cong luôn có bốn cạnh", "Đường cong là khối cầu", "Đường cong luôn kéo thẳng về hai phía"], "Đặc điểm nhận biết là đường bị uốn và thay đổi hướng."),
+        mc("Phát biểu nào đúng?", "Đường cong có thể đổi hướng mềm mại", ["Đường cong luôn đi thẳng một hướng", "Đường cong phải có hai đầu mút cố định", "Đường cong luôn là đường khép kín"], "Đặc điểm nhận biết là đường bị uốn và thay đổi hướng."),
     ],
     "STRAIGHT_LINE_RECOGNIZE": [
-        mc("Đường thẳng khác đoạn thẳng ở điểm nào?", "Có thể kéo dài về hai phía", ["Luôn cong", "Có đúng bốn cạnh", "Là một khối"], "Đường thẳng không bị giới hạn bởi hai đầu mút như đoạn thẳng."),
-        mc("Một nét không uốn cong và có thể kéo dài mãi theo hai hướng là gì?", "đường thẳng", ["đường cong", "khối trụ", "điểm"], "Đó là mô tả của đường thẳng."),
-        mc("Hai điểm A và B cùng nằm trên một đường thẳng d. Phát biểu nào đúng?", "A và B nằm trên d", ["d là khối cầu", "A là một đoạn thẳng", "B có độ dài"], "Dữ kiện đã cho xác định cả hai điểm cùng thuộc đường thẳng d."),
+        mc("Đường thẳng khác đoạn thẳng ở điểm nào?", "Có thể kéo dài về hai phía", ["Có đúng hai đầu mút", "Chỉ kéo dài về một phía", "Luôn uốn cong"], "Đường thẳng không bị giới hạn bởi hai đầu mút như đoạn thẳng."),
+        mc("Một nét không uốn cong và có thể kéo dài mãi theo hai hướng là gì?", "đường thẳng", ["đoạn thẳng", "đường cong", "đường gấp khúc"], "Đó là mô tả của đường thẳng."),
+        mc("Hai điểm A và B cùng nằm trên một đường thẳng d. Phát biểu nào đúng?", "A và B nằm trên d", ["A và B là hai đầu mút của d", "d chỉ gồm đoạn giữa A và B", "A hoặc B không thuộc d"], "Dữ kiện đã cho xác định cả hai điểm cùng thuộc đường thẳng d."),
     ],
     "POLYLINE_RECOGNIZE": [
-        mc("Đường gấp khúc được tạo bởi gì?", "Nhiều đoạn thẳng nối tiếp", ["Chỉ một điểm", "Chỉ một đường cong", "Một khối cầu"], "Đường gấp khúc là chuỗi các đoạn thẳng nối nhau."),
-        mc("Một đường gồm ba đoạn AB, BC, CD nối tiếp nhau được gọi là gì?", "đường gấp khúc ABCD", ["khối trụ", "đường cong tròn", "một điểm"], "Ba đoạn thẳng nối tiếp tại B và C tạo một đường gấp khúc."),
+        mc("Đường gấp khúc được tạo bởi gì?", "Nhiều đoạn thẳng nối tiếp", ["Nhiều đoạn thẳng rời nhau", "Một đoạn thẳng duy nhất", "Một nét cong liên tục"], "Đường gấp khúc là chuỗi các đoạn thẳng nối nhau."),
+        mc("Một đường gồm ba đoạn AB, BC, CD nối tiếp nhau được gọi là gì?", "đường gấp khúc ABCD", ["đoạn thẳng AD", "đường thẳng AD", "đường cong ABCD"], "Ba đoạn thẳng nối tiếp tại B và C tạo một đường gấp khúc."),
         mc("Đường gấp khúc có 4 đoạn thẳng thì ít nhất có bao nhiêu điểm nối/đầu được nêu theo chuỗi mở?", "5", ["2", "3", "4"], "Một chuỗi mở 4 đoạn cần 5 điểm liên tiếp để tạo 4 đoạn."),
     ],
     "THREE_COLLINEAR_POINTS": [
-        mc("Ba điểm A, B, C cùng nằm trên một đường thẳng. Ta nói ba điểm thế nào?", "thẳng hàng", ["vuông góc", "cong", "tạo khối cầu"], "Ba điểm cùng nằm trên một đường thẳng là ba điểm thẳng hàng."),
-        mc("A và B nằm trên đường d, C nằm lệch khỏi d. Ba điểm A, B, C có thẳng hàng không?", "không", ["có", "luôn luôn", "không đủ vì điểm không có tên"], "C không nằm trên đường qua A và B nên ba điểm không thẳng hàng."),
-        mc("Muốn kiểm tra ba điểm thẳng hàng, ta cần xem điều gì?", "Cả ba có cùng nằm trên một đường thẳng", ["Cả ba có cùng tên", "Có hai điểm trùng nhau", "Có một hình tròn bên cạnh"], "Điều kiện trực quan là ba điểm cùng thuộc một đường thẳng."),
+        mc("Ba điểm A, B, C cùng nằm trên một đường thẳng. Ta nói ba điểm thế nào?", "thẳng hàng", ["không thẳng hàng", "tạo thành tam giác", "chỉ A và B thẳng hàng"], "Ba điểm cùng nằm trên một đường thẳng là ba điểm thẳng hàng."),
+        mc("A và B nằm trên đường d, C nằm lệch khỏi d. Ba điểm A, B, C có thẳng hàng không?", "không", ["có", "luôn luôn", "không thể biết từ vị trí của C"], "C không nằm trên đường qua A và B nên ba điểm không thẳng hàng."),
+        mc("Muốn kiểm tra ba điểm thẳng hàng, ta cần xem điều gì?", "Cả ba có cùng nằm trên một đường thẳng", ["Chỉ hai điểm có cùng nằm trên một đường thẳng", "Ba điểm có cách đều nhau", "Tên ba điểm có theo thứ tự bảng chữ cái"], "Điều kiện trực quan là ba điểm cùng thuộc một đường thẳng."),
     ],
     "QUADRILATERAL_RECOGNIZE": [
         nq("Một hình tứ giác có bao nhiêu cạnh?", 4, "Theo định nghĩa, hình tứ giác là hình kín có 4 cạnh."),
-        mc("Hình nào chắc chắn là một tứ giác?", "hình chữ nhật", ["hình tam giác", "khối cầu", "đường cong"], "Hình chữ nhật có bốn cạnh và bốn đỉnh nên là tứ giác."),
-        mc("Một hình kín có đúng 4 cạnh được gọi chung là gì?", "hình tứ giác", ["hình tam giác", "đường gấp khúc mở", "khối trụ"], "Hình kín có bốn cạnh là tứ giác."),
+        mc("Hình nào chắc chắn là một tứ giác?", "hình chữ nhật", ["hình tam giác", "hình có 5 cạnh", "đường gấp khúc mở 4 đoạn"], "Hình chữ nhật có bốn cạnh và bốn đỉnh nên là tứ giác."),
+        mc("Một hình kín có đúng 4 cạnh được gọi chung là gì?", "hình tứ giác", ["hình tam giác", "hình kín có 5 cạnh", "đường gấp khúc mở"], "Hình kín có bốn cạnh là tứ giác."),
     ],
     "CYLINDER_RECOGNIZE": [
-        mc("Vật nào gần dạng khối trụ nhất?", "lon nước", ["quả bóng", "tờ giấy phẳng", "điểm A"], "Lon nước có hai đáy tròn và mặt cong xung quanh, gần dạng khối trụ."),
-        mc("Khối trụ có đặc điểm nào?", "Hai đáy tròn và một mặt cong xung quanh", ["Không có mặt nào", "Chỉ có một điểm", "Bốn cạnh phẳng"], "Đặc trưng trực quan của khối trụ là hai đáy tròn cùng mặt cong bao quanh."),
-        mc("Một ống hình trụ đứng thẳng, mặt trên và mặt dưới gần hình gì?", "hình tròn", ["tam giác", "đường thẳng", "điểm"], "Hai đáy của khối trụ là các hình tròn."),
+        mc("Vật nào gần dạng khối trụ nhất?", "lon nước", ["quả bóng", "hộp chữ nhật", "tấm bìa phẳng"], "Lon nước có hai đáy tròn và mặt cong xung quanh, gần dạng khối trụ."),
+        mc("Khối trụ có đặc điểm nào?", "Hai đáy tròn và một mặt cong xung quanh", ["Hai đáy vuông và các mặt phẳng xung quanh", "Chỉ có một mặt tròn, không có mặt cong", "Có một đáy tròn và một đỉnh nhọn"], "Đặc trưng trực quan của khối trụ là hai đáy tròn cùng mặt cong bao quanh."),
+        mc("Một ống hình trụ đứng thẳng, mặt trên và mặt dưới gần hình gì?", "hình tròn", ["hình vuông", "hình tam giác", "hình chữ nhật"], "Hai đáy của khối trụ là các hình tròn."),
     ],
     "SPHERE_RECOGNIZE": [
         mc("Vật nào gần dạng khối cầu nhất?", "quả bóng", ["lon nước", "hộp chữ nhật", "thước thẳng"], "Quả bóng tròn đều theo mọi hướng, gần dạng khối cầu."),
-        mc("Khối cầu có cạnh hay đỉnh không?", "không", ["có 1 cạnh", "có 2 đỉnh", "có 4 cạnh"], "Khối cầu không có cạnh và không có đỉnh."),
-        mc("Mô tả nào phù hợp với khối cầu?", "Tròn đều và không có đáy phẳng", ["Có hai đáy tròn", "Có bốn cạnh", "Là một đoạn thẳng"], "Khối cầu tròn đều theo mọi hướng và không có mặt đáy phẳng."),
+        mc("Khối cầu có cạnh hay đỉnh không?", "không", ["có cạnh nhưng không có đỉnh", "không có cạnh nhưng có hai đỉnh", "có cả cạnh và đỉnh"], "Khối cầu không có cạnh và không có đỉnh."),
+        mc("Mô tả nào phù hợp với khối cầu?", "Tròn đều và không có đáy phẳng", ["Có hai đáy tròn song song", "Có một mặt đáy phẳng và một đỉnh", "Có các mặt phẳng và cạnh"], "Khối cầu tròn đều theo mọi hướng và không có mặt đáy phẳng."),
     ],
     "DRAW_SEGMENT_GIVEN_LENGTH": [
         nq("Trên thước, đặt đầu A ở vạch 2 cm. Muốn AB dài 5 cm và B ở bên phải A, B ở vạch bao nhiêu?", 7, "Vị trí B = 2 + 5 = 7 cm."),
@@ -847,9 +847,9 @@ Q = {
     ],
 
     "HEAVIER_LIGHTER": [
-        mc("Trên cân thăng bằng, đĩa bên trái hạ thấp hơn. Vật bên trái thường thế nào?", "nặng hơn", ["nhẹ hơn", "bằng 0 kg", "không có khối lượng"], "Với cân hoạt động đúng, phía hạ thấp hơn là phía nặng hơn."),
-        mc("Nếu vật A nặng hơn vật B thì vật B thế nào so với A?", "nhẹ hơn", ["nặng hơn", "bằng nhau chắc chắn", "không đo được"], "Quan hệ nặng hơn - nhẹ hơn là hai chiều đối lập."),
-        mc("Cân cho hai đĩa ngang bằng. Kết luận phù hợp nhất là gì?", "Hai bên có khối lượng bằng nhau trong phép cân đó", ["Bên trái nặng hơn", "Bên phải nặng hơn", "Không bên nào có khối lượng"], "Hai đĩa cân bằng cho thấy khối lượng hai bên bằng nhau trong điều kiện cân."),
+        mc("Trên cân thăng bằng, đĩa bên trái hạ thấp hơn. Vật bên trái thường thế nào?", "nặng hơn", ["nhẹ hơn", "bằng nhau", "không thể so sánh"], "Với cân hoạt động đúng, phía hạ thấp hơn là phía nặng hơn."),
+        mc("Nếu vật A nặng hơn vật B thì vật B thế nào so với A?", "nhẹ hơn", ["nặng hơn", "bằng nhau", "không thể kết luận"], "Quan hệ nặng hơn - nhẹ hơn là hai chiều đối lập."),
+        mc("Cân cho hai đĩa ngang bằng. Kết luận phù hợp nhất là gì?", "Hai bên có khối lượng bằng nhau trong phép cân đó", ["Bên trái nặng hơn", "Bên phải nặng hơn", "Không thể so sánh khối lượng hai bên"], "Hai đĩa cân bằng cho thấy khối lượng hai bên bằng nhau trong điều kiện cân."),
     ],
     "MASS_KG_READ_WRITE": [
         nq("Một bao gạo ghi 5 kg. Số đo khối lượng là bao nhiêu kg?", 5, "Con số đi trước đơn vị kg là 5.", unit="kg"),
@@ -882,9 +882,9 @@ Q = {
         mc("Ngày sau ngày 14 tháng 9 là ngày nào?", "15 tháng 9", ["13 tháng 9", "14 tháng 10", "16 tháng 9"], "Ngày kế tiếp tăng số ngày thêm 1 trong cùng tháng, nên là 15 tháng 9."),
     ],
     "MONEY_VND_NOTE_RECOGNITION": [
-        mc("Khi xem hình một tờ tiền Việt Nam, thông tin nào cần đọc để nhận biết giá trị?", "Con số mệnh giá và chữ đồng trên tờ", ["Màu yêu thích của người xem", "Số trang của sách bên cạnh", "Chiều dài của bàn học"], "Để nhận biết giá trị, cần đọc con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền."),
+        mc("Khi xem hình một tờ tiền Việt Nam, thông tin nào cần đọc để nhận biết giá trị?", "Con số mệnh giá và chữ đồng trên tờ", ["Chỉ màu sắc của tờ tiền", "Chỉ kích thước của tờ tiền", "Chỉ hình trang trí nổi bật trên tờ"], "Để nhận biết giá trị, cần đọc con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền."),
         tf("Chỉ nhìn màu sắc là đủ để xác định chắc chắn giá trị của một tờ tiền Việt Nam.", False, "Màu sắc có thể hỗ trợ quan sát nhưng cần đọc con số mệnh giá và đơn vị đồng để nhận biết giá trị."),
-        mc("Có hai hình tờ tiền A và B với con số mệnh giá khác nhau. Muốn biết tờ nào có giá trị lớn hơn, bước nào phù hợp nhất?", "Đọc và so sánh con số mệnh giá trên hai tờ", ["Chọn tờ có màu mình thích hơn", "Chọn tờ nằm bên trái", "Đếm số chữ xuất hiện trên mỗi tờ"], "Đọc đúng con số mệnh giá trên từng tờ rồi so sánh hai giá trị; không đoán chỉ từ màu sắc hoặc vị trí."),
+        mc("Có hai hình tờ tiền A và B với con số mệnh giá khác nhau. Muốn biết tờ nào có giá trị lớn hơn, bước nào phù hợp nhất?", "Đọc và so sánh con số mệnh giá trên hai tờ", ["Chỉ so sánh màu sắc của hai tờ", "Chỉ so sánh kích thước của hai tờ", "Chọn tờ có nhiều chữ hơn"], "Đọc đúng con số mệnh giá trên từng tờ rồi so sánh hai giá trị; không đoán chỉ từ màu sắc hoặc vị trí."),
     ],
     "MEASURE_WITH_RULER_CM": [
         nq("Một đoạn thẳng bắt đầu ở vạch 0 cm và kết thúc ở vạch 8 cm. Dài bao nhiêu cm?", 8, "8 - 0 = 8 cm.", unit="cm"),

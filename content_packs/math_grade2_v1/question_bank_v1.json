@@ -4024,18 +4024,18 @@
       "choices": [
         {
           "id": "a",
-          "text": "5 cm",
-          "rationale_vi": "“5 cm” chưa đúng. Điểm thường được đặt tên bằng chữ cái in hoa như A."
+          "text": "AB",
+          "rationale_vi": "“AB” chưa đúng. Điểm thường được đặt tên bằng chữ cái in hoa như A."
         },
         {
           "id": "b",
-          "text": "2 kg",
-          "rationale_vi": "“2 kg” chưa đúng. Điểm thường được đặt tên bằng chữ cái in hoa như A."
+          "text": "1",
+          "rationale_vi": "“1” chưa đúng. Điểm thường được đặt tên bằng chữ cái in hoa như A."
         },
         {
           "id": "c",
-          "text": "10 l",
-          "rationale_vi": "“10 l” chưa đúng. Điểm thường được đặt tên bằng chữ cái in hoa như A."
+          "text": "5 cm",
+          "rationale_vi": "“5 cm” chưa đúng. Điểm thường được đặt tên bằng chữ cái in hoa như A."
         },
         {
           "id": "d",
@@ -4082,18 +4082,18 @@
         },
         {
           "id": "b",
-          "text": "Điểm có độ dài 5 cm",
-          "rationale_vi": "“Điểm có độ dài 5 cm” chưa đúng. Điểm dùng để chỉ vị trí và không có độ dài. Vậy đáp án là Điểm biểu diễn một vị trí."
+          "text": "Điểm có một độ dài xác định",
+          "rationale_vi": "“Điểm có một độ dài xác định” chưa đúng. Điểm dùng để chỉ vị trí và không có độ dài. Vậy đáp án là Điểm biểu diễn một vị trí."
         },
         {
           "id": "c",
-          "text": "Điểm luôn là một hình tròn lớn",
-          "rationale_vi": "“Điểm luôn là một hình tròn lớn” chưa đúng. Điểm dùng để chỉ vị trí và không có độ dài. Vậy đáp án là Điểm biểu diễn một vị trí."
+          "text": "Điểm có hai đầu mút",
+          "rationale_vi": "“Điểm có hai đầu mút” chưa đúng. Điểm dùng để chỉ vị trí và không có độ dài. Vậy đáp án là Điểm biểu diễn một vị trí."
         },
         {
           "id": "d",
-          "text": "Điểm có hai đầu mút",
-          "rationale_vi": "“Điểm có hai đầu mút” chưa đúng. Điểm dùng để chỉ vị trí và không có độ dài. Vậy đáp án là Điểm biểu diễn một vị trí."
+          "text": "Điểm có thể kéo dài về hai phía",
+          "rationale_vi": "“Điểm có thể kéo dài về hai phía” chưa đúng. Điểm dùng để chỉ vị trí và không có độ dài. Vậy đáp án là Điểm biểu diễn một vị trí."
         }
       ],
       "correct_choice_id": "a"
@@ -4236,18 +4236,18 @@
       "choices": [
         {
           "id": "a",
-          "text": "Đường uốn cong không có đầu",
-          "rationale_vi": "“Đường uốn cong không có đầu” chưa đúng. Đoạn thẳng là phần thẳng nối hai điểm đầu mút. Vậy đáp án là Phần thẳng nối hai đầu mút."
+          "text": "Phần thẳng kéo dài mãi về hai phía",
+          "rationale_vi": "“Phần thẳng kéo dài mãi về hai phía” chưa đúng. Đoạn thẳng là phần thẳng nối hai điểm đầu mút. Vậy đáp án là Phần thẳng nối hai đầu mút."
         },
         {
           "id": "b",
-          "text": "Khối tròn",
-          "rationale_vi": "“Khối tròn” chưa đúng. Đoạn thẳng là phần thẳng nối hai điểm đầu mút. Vậy đáp án là Phần thẳng nối hai đầu mút."
+          "text": "Nét uốn cong nối hai vị trí",
+          "rationale_vi": "“Nét uốn cong nối hai vị trí” chưa đúng. Đoạn thẳng là phần thẳng nối hai điểm đầu mút. Vậy đáp án là Phần thẳng nối hai đầu mút."
         },
         {
           "id": "c",
-          "text": "Một điểm duy nhất",
-          "rationale_vi": "“Một điểm duy nhất” chưa đúng. Đoạn thẳng là phần thẳng nối hai điểm đầu mút. Vậy đáp án là Phần thẳng nối hai đầu mút."
+          "text": "Chỉ một vị trí không có độ dài",
+          "rationale_vi": "“Chỉ một vị trí không có độ dài” chưa đúng. Đoạn thẳng là phần thẳng nối hai điểm đầu mút. Vậy đáp án là Phần thẳng nối hai đầu mút."
         },
         {
           "id": "d",
@@ -4294,18 +4294,18 @@
         },
         {
           "id": "b",
-          "text": "khối cầu",
-          "rationale_vi": "“khối cầu” chưa đúng. Phần thẳng nối hai điểm M và N là đoạn thẳng MN."
+          "text": "đường thẳng MN",
+          "rationale_vi": "“đường thẳng MN” chưa đúng. Phần thẳng nối hai điểm M và N là đoạn thẳng MN."
         },
         {
           "id": "c",
-          "text": "đường cong",
-          "rationale_vi": "“đường cong” chưa đúng. Phần thẳng nối hai điểm M và N là đoạn thẳng MN."
+          "text": "đường cong MN",
+          "rationale_vi": "“đường cong MN” chưa đúng. Phần thẳng nối hai điểm M và N là đoạn thẳng MN."
         },
         {
           "id": "d",
-          "text": "điểm MN",
-          "rationale_vi": "“điểm MN” chưa đúng. Phần thẳng nối hai điểm M và N là đoạn thẳng MN."
+          "text": "chỉ điểm M",
+          "rationale_vi": "“chỉ điểm M” chưa đúng. Phần thẳng nối hai điểm M và N là đoạn thẳng MN."
         }
       ],
       "correct_choice_id": "a"
@@ -4342,8 +4342,8 @@
       "choices": [
         {
           "id": "a",
-          "text": "Đường đi thẳng không đổi hướng",
-          "rationale_vi": "“Đường đi thẳng không đổi hướng” chưa đúng. Đường cong có hình dạng uốn lượn, không giữ hướng thẳng trên toàn bộ đường. Vậy đáp án là Đường uốn lượn."
+          "text": "Nét thẳng kéo dài không đổi hướng",
+          "rationale_vi": "“Nét thẳng kéo dài không đổi hướng” chưa đúng. Đường cong có hình dạng uốn lượn, không giữ hướng thẳng trên toàn bộ đường. Vậy đáp án là Đường uốn lượn."
         },
         {
           "id": "b",
@@ -4352,13 +4352,13 @@
         },
         {
           "id": "c",
-          "text": "Một điểm",
-          "rationale_vi": "“Một điểm” chưa đúng. Đường cong có hình dạng uốn lượn, không giữ hướng thẳng trên toàn bộ đường. Vậy đáp án là Đường uốn lượn."
+          "text": "Phần thẳng có hai đầu mút",
+          "rationale_vi": "“Phần thẳng có hai đầu mút” chưa đúng. Đường cong có hình dạng uốn lượn, không giữ hướng thẳng trên toàn bộ đường. Vậy đáp án là Đường uốn lượn."
         },
         {
           "id": "d",
-          "text": "Một đoạn chỉ có hai đầu mút nhưng luôn thẳng",
-          "rationale_vi": "“Một đoạn chỉ có hai đầu mút nhưng luôn thẳng” chưa đúng. Đường cong có hình dạng uốn lượn, không giữ hướng thẳng trên toàn bộ đường. Vậy đáp án là Đường uốn lượn."
+          "text": "Một vị trí được đánh dấu",
+          "rationale_vi": "“Một vị trí được đánh dấu” chưa đúng. Đường cong có hình dạng uốn lượn, không giữ hướng thẳng trên toàn bộ đường. Vậy đáp án là Đường uốn lượn."
         }
       ],
       "correct_choice_id": "b"
@@ -4448,18 +4448,18 @@
       "choices": [
         {
           "id": "a",
-          "text": "Đường cong luôn có bốn cạnh",
-          "rationale_vi": "“Đường cong luôn có bốn cạnh” chưa đúng. Đặc điểm nhận biết là đường bị uốn và thay đổi hướng. Vậy đáp án là Đường cong có thể đổi hướng mềm mại."
+          "text": "Đường cong luôn đi thẳng một hướng",
+          "rationale_vi": "“Đường cong luôn đi thẳng một hướng” chưa đúng. Đặc điểm nhận biết là đường bị uốn và thay đổi hướng. Vậy đáp án là Đường cong có thể đổi hướng mềm mại."
         },
         {
           "id": "b",
-          "text": "Đường cong là khối cầu",
-          "rationale_vi": "“Đường cong là khối cầu” chưa đúng. Đặc điểm nhận biết là đường bị uốn và thay đổi hướng. Vậy đáp án là Đường cong có thể đổi hướng mềm mại."
+          "text": "Đường cong phải có hai đầu mút cố định",
+          "rationale_vi": "“Đường cong phải có hai đầu mút cố định” chưa đúng. Đặc điểm nhận biết là đường bị uốn và thay đổi hướng. Vậy đáp án là Đường cong có thể đổi hướng mềm mại."
         },
         {
           "id": "c",
-          "text": "Đường cong luôn kéo thẳng về hai phía",
-          "rationale_vi": "“Đường cong luôn kéo thẳng về hai phía” chưa đúng. Đặc điểm nhận biết là đường bị uốn và thay đổi hướng. Vậy đáp án là Đường cong có thể đổi hướng mềm mại."
+          "text": "Đường cong luôn là đường khép kín",
+          "rationale_vi": "“Đường cong luôn là đường khép kín” chưa đúng. Đặc điểm nhận biết là đường bị uốn và thay đổi hướng. Vậy đáp án là Đường cong có thể đổi hướng mềm mại."
         },
         {
           "id": "d",
@@ -4506,18 +4506,18 @@
         },
         {
           "id": "b",
-          "text": "Luôn cong",
-          "rationale_vi": "“Luôn cong” chưa đúng. Đường thẳng không bị giới hạn bởi hai đầu mút như đoạn thẳng. Vậy đáp án là Có thể kéo dài về hai phía."
+          "text": "Có đúng hai đầu mút",
+          "rationale_vi": "“Có đúng hai đầu mút” chưa đúng. Đường thẳng không bị giới hạn bởi hai đầu mút như đoạn thẳng. Vậy đáp án là Có thể kéo dài về hai phía."
         },
         {
           "id": "c",
-          "text": "Có đúng bốn cạnh",
-          "rationale_vi": "“Có đúng bốn cạnh” chưa đúng. Đường thẳng không bị giới hạn bởi hai đầu mút như đoạn thẳng. Vậy đáp án là Có thể kéo dài về hai phía."
+          "text": "Chỉ kéo dài về một phía",
+          "rationale_vi": "“Chỉ kéo dài về một phía” chưa đúng. Đường thẳng không bị giới hạn bởi hai đầu mút như đoạn thẳng. Vậy đáp án là Có thể kéo dài về hai phía."
         },
         {
           "id": "d",
-          "text": "Là một khối",
-          "rationale_vi": "“Là một khối” chưa đúng. Đường thẳng không bị giới hạn bởi hai đầu mút như đoạn thẳng. Vậy đáp án là Có thể kéo dài về hai phía."
+          "text": "Luôn uốn cong",
+          "rationale_vi": "“Luôn uốn cong” chưa đúng. Đường thẳng không bị giới hạn bởi hai đầu mút như đoạn thẳng. Vậy đáp án là Có thể kéo dài về hai phía."
         }
       ],
       "correct_choice_id": "a"
@@ -4554,8 +4554,8 @@
       "choices": [
         {
           "id": "a",
-          "text": "đường cong",
-          "rationale_vi": "“đường cong” chưa đúng. Đó là mô tả của đường thẳng. Lựa chọn này khớp với đường thẳng; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng."
+          "text": "đoạn thẳng",
+          "rationale_vi": "“đoạn thẳng” chưa đúng. Đó là mô tả của đường thẳng. Lựa chọn này khớp với đường thẳng; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng."
         },
         {
           "id": "b",
@@ -4564,13 +4564,13 @@
         },
         {
           "id": "c",
-          "text": "khối trụ",
-          "rationale_vi": "“khối trụ” chưa đúng. Đó là mô tả của đường thẳng. Lựa chọn này khớp với đường thẳng; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng."
+          "text": "đường cong",
+          "rationale_vi": "“đường cong” chưa đúng. Đó là mô tả của đường thẳng. Lựa chọn này khớp với đường thẳng; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng."
         },
         {
           "id": "d",
-          "text": "điểm",
-          "rationale_vi": "“điểm” chưa đúng. Đó là mô tả của đường thẳng. Lựa chọn này khớp với đường thẳng; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng."
+          "text": "đường gấp khúc",
+          "rationale_vi": "“đường gấp khúc” chưa đúng. Đó là mô tả của đường thẳng. Lựa chọn này khớp với đường thẳng; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng."
         }
       ],
       "correct_choice_id": "b"
@@ -4607,13 +4607,13 @@
       "choices": [
         {
           "id": "a",
-          "text": "d là khối cầu",
-          "rationale_vi": "“d là khối cầu” chưa đúng. Dữ kiện đã cho xác định cả hai điểm cùng thuộc đường thẳng d. Vậy đáp án là A và B nằm trên d."
+          "text": "A và B là hai đầu mút của d",
+          "rationale_vi": "“A và B là hai đầu mút của d” chưa đúng. Dữ kiện đã cho xác định cả hai điểm cùng thuộc đường thẳng d. Vậy đáp án là A và B nằm trên d."
         },
         {
           "id": "b",
-          "text": "A là một đoạn thẳng",
-          "rationale_vi": "“A là một đoạn thẳng” chưa đúng. Dữ kiện đã cho xác định cả hai điểm cùng thuộc đường thẳng d. Vậy đáp án là A và B nằm trên d."
+          "text": "d chỉ gồm đoạn giữa A và B",
+          "rationale_vi": "“d chỉ gồm đoạn giữa A và B” chưa đúng. Dữ kiện đã cho xác định cả hai điểm cùng thuộc đường thẳng d. Vậy đáp án là A và B nằm trên d."
         },
         {
           "id": "c",
@@ -4622,8 +4622,8 @@
         },
         {
           "id": "d",
-          "text": "B có độ dài",
-          "rationale_vi": "“B có độ dài” chưa đúng. Dữ kiện đã cho xác định cả hai điểm cùng thuộc đường thẳng d. Vậy đáp án là A và B nằm trên d."
+          "text": "A hoặc B không thuộc d",
+          "rationale_vi": "“A hoặc B không thuộc d” chưa đúng. Dữ kiện đã cho xác định cả hai điểm cùng thuộc đường thẳng d. Vậy đáp án là A và B nằm trên d."
         }
       ],
       "correct_choice_id": "c"
@@ -4660,18 +4660,18 @@
       "choices": [
         {
           "id": "a",
-          "text": "Chỉ một điểm",
-          "rationale_vi": "“Chỉ một điểm” chưa đúng. Đường gấp khúc là chuỗi các đoạn thẳng nối nhau. Vậy đáp án là Nhiều đoạn thẳng nối tiếp."
+          "text": "Nhiều đoạn thẳng rời nhau",
+          "rationale_vi": "“Nhiều đoạn thẳng rời nhau” chưa đúng. Đường gấp khúc là chuỗi các đoạn thẳng nối nhau. Vậy đáp án là Nhiều đoạn thẳng nối tiếp."
         },
         {
           "id": "b",
-          "text": "Chỉ một đường cong",
-          "rationale_vi": "“Chỉ một đường cong” chưa đúng. Đường gấp khúc là chuỗi các đoạn thẳng nối nhau. Vậy đáp án là Nhiều đoạn thẳng nối tiếp."
+          "text": "Một đoạn thẳng duy nhất",
+          "rationale_vi": "“Một đoạn thẳng duy nhất” chưa đúng. Đường gấp khúc là chuỗi các đoạn thẳng nối nhau. Vậy đáp án là Nhiều đoạn thẳng nối tiếp."
         },
         {
           "id": "c",
-          "text": "Một khối cầu",
-          "rationale_vi": "“Một khối cầu” chưa đúng. Đường gấp khúc là chuỗi các đoạn thẳng nối nhau. Vậy đáp án là Nhiều đoạn thẳng nối tiếp."
+          "text": "Một nét cong liên tục",
+          "rationale_vi": "“Một nét cong liên tục” chưa đúng. Đường gấp khúc là chuỗi các đoạn thẳng nối nhau. Vậy đáp án là Nhiều đoạn thẳng nối tiếp."
         },
         {
           "id": "d",
@@ -4718,18 +4718,18 @@
         },
         {
           "id": "b",
-          "text": "khối trụ",
-          "rationale_vi": "“khối trụ” chưa đúng. Ba đoạn thẳng nối tiếp tại B và C tạo một đường gấp khúc. Vậy đáp án là đường gấp khúc ABCD."
+          "text": "đoạn thẳng AD",
+          "rationale_vi": "“đoạn thẳng AD” chưa đúng. Ba đoạn thẳng nối tiếp tại B và C tạo một đường gấp khúc. Vậy đáp án là đường gấp khúc ABCD."
         },
         {
           "id": "c",
-          "text": "đường cong tròn",
-          "rationale_vi": "“đường cong tròn” chưa đúng. Ba đoạn thẳng nối tiếp tại B và C tạo một đường gấp khúc. Vậy đáp án là đường gấp khúc ABCD."
+          "text": "đường thẳng AD",
+          "rationale_vi": "“đường thẳng AD” chưa đúng. Ba đoạn thẳng nối tiếp tại B và C tạo một đường gấp khúc. Vậy đáp án là đường gấp khúc ABCD."
         },
         {
           "id": "d",
-          "text": "một điểm",
-          "rationale_vi": "“một điểm” chưa đúng. Ba đoạn thẳng nối tiếp tại B và C tạo một đường gấp khúc. Vậy đáp án là đường gấp khúc ABCD."
+          "text": "đường cong ABCD",
+          "rationale_vi": "“đường cong ABCD” chưa đúng. Ba đoạn thẳng nối tiếp tại B và C tạo một đường gấp khúc. Vậy đáp án là đường gấp khúc ABCD."
         }
       ],
       "correct_choice_id": "a"
@@ -4819,13 +4819,13 @@
       "choices": [
         {
           "id": "a",
-          "text": "vuông góc",
-          "rationale_vi": "“vuông góc” chưa đúng. Ba điểm cùng nằm trên một đường thẳng là ba điểm thẳng hàng."
+          "text": "không thẳng hàng",
+          "rationale_vi": "“không thẳng hàng” chưa đúng. Ba điểm cùng nằm trên một đường thẳng là ba điểm thẳng hàng."
         },
         {
           "id": "b",
-          "text": "cong",
-          "rationale_vi": "“cong” chưa đúng. Ba điểm cùng nằm trên một đường thẳng là ba điểm thẳng hàng."
+          "text": "tạo thành tam giác",
+          "rationale_vi": "“tạo thành tam giác” chưa đúng. Ba điểm cùng nằm trên một đường thẳng là ba điểm thẳng hàng."
         },
         {
           "id": "c",
@@ -4834,8 +4834,8 @@
         },
         {
           "id": "d",
-          "text": "tạo khối cầu",
-          "rationale_vi": "“tạo khối cầu” chưa đúng. Ba điểm cùng nằm trên một đường thẳng là ba điểm thẳng hàng."
+          "text": "chỉ A và B thẳng hàng",
+          "rationale_vi": "“chỉ A và B thẳng hàng” chưa đúng. Ba điểm cùng nằm trên một đường thẳng là ba điểm thẳng hàng."
         }
       ],
       "correct_choice_id": "c"
@@ -4882,8 +4882,8 @@
         },
         {
           "id": "c",
-          "text": "không đủ vì điểm không có tên",
-          "rationale_vi": "“không đủ vì điểm không có tên” chưa đúng. C không nằm trên đường qua A và B nên ba điểm không thẳng hàng."
+          "text": "không thể biết từ vị trí của C",
+          "rationale_vi": "“không thể biết từ vị trí của C” chưa đúng. C không nằm trên đường qua A và B nên ba điểm không thẳng hàng."
         },
         {
           "id": "d",
@@ -4930,18 +4930,18 @@
         },
         {
           "id": "b",
-          "text": "Cả ba có cùng tên",
-          "rationale_vi": "“Cả ba có cùng tên” chưa đúng. Điều kiện trực quan là ba điểm cùng thuộc một đường thẳng. Vậy đáp án là Cả ba có cùng nằm trên một đường thẳng."
+          "text": "Chỉ hai điểm có cùng nằm trên một đường thẳng",
+          "rationale_vi": "“Chỉ hai điểm có cùng nằm trên một đường thẳng” chưa đúng. Điều kiện trực quan là ba điểm cùng thuộc một đường thẳng. Vậy đáp án là Cả ba có cùng nằm trên một đường thẳng."
         },
         {
           "id": "c",
-          "text": "Có hai điểm trùng nhau",
-          "rationale_vi": "“Có hai điểm trùng nhau” chưa đúng. Điều kiện trực quan là ba điểm cùng thuộc một đường thẳng. Vậy đáp án là Cả ba có cùng nằm trên một đường thẳng."
+          "text": "Ba điểm có cách đều nhau",
+          "rationale_vi": "“Ba điểm có cách đều nhau” chưa đúng. Điều kiện trực quan là ba điểm cùng thuộc một đường thẳng. Vậy đáp án là Cả ba có cùng nằm trên một đường thẳng."
         },
         {
           "id": "d",
-          "text": "Có một hình tròn bên cạnh",
-          "rationale_vi": "“Có một hình tròn bên cạnh” chưa đúng. Điều kiện trực quan là ba điểm cùng thuộc một đường thẳng. Vậy đáp án là Cả ba có cùng nằm trên một đường thẳng."
+          "text": "Tên ba điểm có theo thứ tự bảng chữ cái",
+          "rationale_vi": "“Tên ba điểm có theo thứ tự bảng chữ cái” chưa đúng. Điều kiện trực quan là ba điểm cùng thuộc một đường thẳng. Vậy đáp án là Cả ba có cùng nằm trên một đường thẳng."
         }
       ],
       "correct_choice_id": "a"
@@ -5019,13 +5019,13 @@
         },
         {
           "id": "c",
-          "text": "khối cầu",
-          "rationale_vi": "“khối cầu” chưa đúng. Hình chữ nhật có bốn cạnh và bốn đỉnh nên là tứ giác."
+          "text": "hình có 5 cạnh",
+          "rationale_vi": "“hình có 5 cạnh” chưa đúng. Hình chữ nhật có bốn cạnh và bốn đỉnh nên là tứ giác."
         },
         {
           "id": "d",
-          "text": "đường cong",
-          "rationale_vi": "“đường cong” chưa đúng. Hình chữ nhật có bốn cạnh và bốn đỉnh nên là tứ giác."
+          "text": "đường gấp khúc mở 4 đoạn",
+          "rationale_vi": "“đường gấp khúc mở 4 đoạn” chưa đúng. Hình chữ nhật có bốn cạnh và bốn đỉnh nên là tứ giác."
         }
       ],
       "correct_choice_id": "b"
@@ -5067,8 +5067,8 @@
         },
         {
           "id": "b",
-          "text": "đường gấp khúc mở",
-          "rationale_vi": "“đường gấp khúc mở” chưa đúng. Hình kín có bốn cạnh là tứ giác. Vậy đáp án là hình tứ giác."
+          "text": "hình kín có 5 cạnh",
+          "rationale_vi": "“hình kín có 5 cạnh” chưa đúng. Hình kín có bốn cạnh là tứ giác. Vậy đáp án là hình tứ giác."
         },
         {
           "id": "c",
@@ -5077,8 +5077,8 @@
         },
         {
           "id": "d",
-          "text": "khối trụ",
-          "rationale_vi": "“khối trụ” chưa đúng. Hình kín có bốn cạnh là tứ giác. Vậy đáp án là hình tứ giác."
+          "text": "đường gấp khúc mở",
+          "rationale_vi": "“đường gấp khúc mở” chưa đúng. Hình kín có bốn cạnh là tứ giác. Vậy đáp án là hình tứ giác."
         }
       ],
       "correct_choice_id": "c"
@@ -5120,13 +5120,13 @@
         },
         {
           "id": "b",
-          "text": "tờ giấy phẳng",
-          "rationale_vi": "“tờ giấy phẳng” chưa đúng. Lon nước có hai đáy tròn và mặt cong xung quanh, gần dạng khối trụ."
+          "text": "hộp chữ nhật",
+          "rationale_vi": "“hộp chữ nhật” chưa đúng. Lon nước có hai đáy tròn và mặt cong xung quanh, gần dạng khối trụ."
         },
         {
           "id": "c",
-          "text": "điểm A",
-          "rationale_vi": "“điểm A” chưa đúng. Lon nước có hai đáy tròn và mặt cong xung quanh, gần dạng khối trụ."
+          "text": "tấm bìa phẳng",
+          "rationale_vi": "“tấm bìa phẳng” chưa đúng. Lon nước có hai đáy tròn và mặt cong xung quanh, gần dạng khối trụ."
         },
         {
           "id": "d",
@@ -5173,18 +5173,18 @@
         },
         {
           "id": "b",
-          "text": "Không có mặt nào",
-          "rationale_vi": "“Không có mặt nào” chưa đúng. Đặc trưng trực quan của khối trụ là hai đáy tròn cùng mặt cong bao quanh. Vậy đáp án là Hai đáy tròn và một mặt cong xung quanh."
+          "text": "Hai đáy vuông và các mặt phẳng xung quanh",
+          "rationale_vi": "“Hai đáy vuông và các mặt phẳng xung quanh” chưa đúng. Đặc trưng trực quan của khối trụ là hai đáy tròn cùng mặt cong bao quanh. Vậy đáp án là Hai đáy tròn và một mặt cong xung quanh."
         },
         {
           "id": "c",
-          "text": "Chỉ có một điểm",
-          "rationale_vi": "“Chỉ có một điểm” chưa đúng. Đặc trưng trực quan của khối trụ là hai đáy tròn cùng mặt cong bao quanh. Vậy đáp án là Hai đáy tròn và một mặt cong xung quanh."
+          "text": "Chỉ có một mặt tròn, không có mặt cong",
+          "rationale_vi": "“Chỉ có một mặt tròn, không có mặt cong” chưa đúng. Đặc trưng trực quan của khối trụ là hai đáy tròn cùng mặt cong bao quanh. Vậy đáp án là Hai đáy tròn và một mặt cong xung quanh."
         },
         {
           "id": "d",
-          "text": "Bốn cạnh phẳng",
-          "rationale_vi": "“Bốn cạnh phẳng” chưa đúng. Đặc trưng trực quan của khối trụ là hai đáy tròn cùng mặt cong bao quanh. Vậy đáp án là Hai đáy tròn và một mặt cong xung quanh."
+          "text": "Có một đáy tròn và một đỉnh nhọn",
+          "rationale_vi": "“Có một đáy tròn và một đỉnh nhọn” chưa đúng. Đặc trưng trực quan của khối trụ là hai đáy tròn cùng mặt cong bao quanh. Vậy đáp án là Hai đáy tròn và một mặt cong xung quanh."
         }
       ],
       "correct_choice_id": "a"
@@ -5221,8 +5221,8 @@
       "choices": [
         {
           "id": "a",
-          "text": "tam giác",
-          "rationale_vi": "“tam giác” chưa đúng. Hai đáy của khối trụ là các hình tròn."
+          "text": "hình vuông",
+          "rationale_vi": "“hình vuông” chưa đúng. Hai đáy của khối trụ là các hình tròn."
         },
         {
           "id": "b",
@@ -5231,13 +5231,13 @@
         },
         {
           "id": "c",
-          "text": "đường thẳng",
-          "rationale_vi": "“đường thẳng” chưa đúng. Hai đáy của khối trụ là các hình tròn."
+          "text": "hình tam giác",
+          "rationale_vi": "“hình tam giác” chưa đúng. Hai đáy của khối trụ là các hình tròn."
         },
         {
           "id": "d",
-          "text": "điểm",
-          "rationale_vi": "“điểm” chưa đúng. Hai đáy của khối trụ là các hình tròn."
+          "text": "hình chữ nhật",
+          "rationale_vi": "“hình chữ nhật” chưa đúng. Hai đáy của khối trụ là các hình tròn."
         }
       ],
       "correct_choice_id": "b"
@@ -5327,18 +5327,18 @@
       "choices": [
         {
           "id": "a",
-          "text": "có 1 cạnh",
-          "rationale_vi": "“có 1 cạnh” chưa đúng. Khối cầu không có cạnh và không có đỉnh."
+          "text": "có cạnh nhưng không có đỉnh",
+          "rationale_vi": "“có cạnh nhưng không có đỉnh” chưa đúng. Khối cầu không có cạnh và không có đỉnh."
         },
         {
           "id": "b",
-          "text": "có 2 đỉnh",
-          "rationale_vi": "“có 2 đỉnh” chưa đúng. Khối cầu không có cạnh và không có đỉnh."
+          "text": "không có cạnh nhưng có hai đỉnh",
+          "rationale_vi": "“không có cạnh nhưng có hai đỉnh” chưa đúng. Khối cầu không có cạnh và không có đỉnh."
         },
         {
           "id": "c",
-          "text": "có 4 cạnh",
-          "rationale_vi": "“có 4 cạnh” chưa đúng. Khối cầu không có cạnh và không có đỉnh."
+          "text": "có cả cạnh và đỉnh",
+          "rationale_vi": "“có cả cạnh và đỉnh” chưa đúng. Khối cầu không có cạnh và không có đỉnh."
         },
         {
           "id": "d",
@@ -5385,18 +5385,18 @@
         },
         {
           "id": "b",
-          "text": "Có hai đáy tròn",
-          "rationale_vi": "“Có hai đáy tròn” chưa đúng. Khối cầu tròn đều theo mọi hướng và không có mặt đáy phẳng. Vậy đáp án là Tròn đều và không có đáy phẳng."
+          "text": "Có hai đáy tròn song song",
+          "rationale_vi": "“Có hai đáy tròn song song” chưa đúng. Khối cầu tròn đều theo mọi hướng và không có mặt đáy phẳng. Vậy đáp án là Tròn đều và không có đáy phẳng."
         },
         {
           "id": "c",
-          "text": "Có bốn cạnh",
-          "rationale_vi": "“Có bốn cạnh” chưa đúng. Khối cầu tròn đều theo mọi hướng và không có mặt đáy phẳng. Vậy đáp án là Tròn đều và không có đáy phẳng."
+          "text": "Có một mặt đáy phẳng và một đỉnh",
+          "rationale_vi": "“Có một mặt đáy phẳng và một đỉnh” chưa đúng. Khối cầu tròn đều theo mọi hướng và không có mặt đáy phẳng. Vậy đáp án là Tròn đều và không có đáy phẳng."
         },
         {
           "id": "d",
-          "text": "Là một đoạn thẳng",
-          "rationale_vi": "“Là một đoạn thẳng” chưa đúng. Khối cầu tròn đều theo mọi hướng và không có mặt đáy phẳng. Vậy đáp án là Tròn đều và không có đáy phẳng."
+          "text": "Có các mặt phẳng và cạnh",
+          "rationale_vi": "“Có các mặt phẳng và cạnh” chưa đúng. Khối cầu tròn đều theo mọi hướng và không có mặt đáy phẳng. Vậy đáp án là Tròn đều và không có đáy phẳng."
         }
       ],
       "correct_choice_id": "a"
@@ -5695,13 +5695,13 @@
         },
         {
           "id": "c",
-          "text": "bằng 0 kg",
-          "rationale_vi": "“bằng 0 kg” chưa đúng. Với cân hoạt động đúng, phía hạ thấp hơn là phía nặng hơn."
+          "text": "bằng nhau",
+          "rationale_vi": "“bằng nhau” chưa đúng. Với cân hoạt động đúng, phía hạ thấp hơn là phía nặng hơn."
         },
         {
           "id": "d",
-          "text": "không có khối lượng",
-          "rationale_vi": "“không có khối lượng” chưa đúng. Với cân hoạt động đúng, phía hạ thấp hơn là phía nặng hơn."
+          "text": "không thể so sánh",
+          "rationale_vi": "“không thể so sánh” chưa đúng. Với cân hoạt động đúng, phía hạ thấp hơn là phía nặng hơn."
         }
       ],
       "correct_choice_id": "a"
@@ -5748,13 +5748,13 @@
         },
         {
           "id": "c",
-          "text": "bằng nhau chắc chắn",
-          "rationale_vi": "“bằng nhau chắc chắn” chưa đúng. Quan hệ nặng hơn - nhẹ hơn là hai chiều đối lập."
+          "text": "bằng nhau",
+          "rationale_vi": "“bằng nhau” chưa đúng. Quan hệ nặng hơn - nhẹ hơn là hai chiều đối lập."
         },
         {
           "id": "d",
-          "text": "không đo được",
-          "rationale_vi": "“không đo được” chưa đúng. Quan hệ nặng hơn - nhẹ hơn là hai chiều đối lập."
+          "text": "không thể kết luận",
+          "rationale_vi": "“không thể kết luận” chưa đúng. Quan hệ nặng hơn - nhẹ hơn là hai chiều đối lập."
         }
       ],
       "correct_choice_id": "b"
@@ -5806,8 +5806,8 @@
         },
         {
           "id": "d",
-          "text": "Không bên nào có khối lượng",
-          "rationale_vi": "“Không bên nào có khối lượng” chưa đúng. Hai đĩa cân bằng cho thấy khối lượng hai bên bằng nhau trong điều kiện cân. Vậy đáp án là Hai bên có khối lượng bằng nhau trong phép cân đó."
+          "text": "Không thể so sánh khối lượng hai bên",
+          "rationale_vi": "“Không thể so sánh khối lượng hai bên” chưa đúng. Hai đĩa cân bằng cho thấy khối lượng hai bên bằng nhau trong điều kiện cân. Vậy đáp án là Hai bên có khối lượng bằng nhau trong phép cân đó."
         }
       ],
       "correct_choice_id": "c"
@@ -6582,13 +6582,13 @@
       "choices": [
         {
           "id": "a",
-          "text": "Màu yêu thích của người xem",
-          "rationale_vi": "“Màu yêu thích của người xem” chưa đúng. Để nhận biết giá trị, cần đọc con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền. Vậy đáp án là Con số mệnh giá và chữ đồng trên tờ."
+          "text": "Chỉ màu sắc của tờ tiền",
+          "rationale_vi": "“Chỉ màu sắc của tờ tiền” chưa đúng. Để nhận biết giá trị, cần đọc con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền. Vậy đáp án là Con số mệnh giá và chữ đồng trên tờ."
         },
         {
           "id": "b",
-          "text": "Số trang của sách bên cạnh",
-          "rationale_vi": "“Số trang của sách bên cạnh” chưa đúng. Để nhận biết giá trị, cần đọc con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền. Vậy đáp án là Con số mệnh giá và chữ đồng trên tờ."
+          "text": "Chỉ kích thước của tờ tiền",
+          "rationale_vi": "“Chỉ kích thước của tờ tiền” chưa đúng. Để nhận biết giá trị, cần đọc con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền. Vậy đáp án là Con số mệnh giá và chữ đồng trên tờ."
         },
         {
           "id": "c",
@@ -6597,8 +6597,8 @@
         },
         {
           "id": "d",
-          "text": "Chiều dài của bàn học",
-          "rationale_vi": "“Chiều dài của bàn học” chưa đúng. Để nhận biết giá trị, cần đọc con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền. Vậy đáp án là Con số mệnh giá và chữ đồng trên tờ."
+          "text": "Chỉ hình trang trí nổi bật trên tờ",
+          "rationale_vi": "“Chỉ hình trang trí nổi bật trên tờ” chưa đúng. Để nhận biết giá trị, cần đọc con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền. Vậy đáp án là Con số mệnh giá và chữ đồng trên tờ."
         }
       ],
       "correct_choice_id": "c"
@@ -6678,18 +6678,18 @@
       "choices": [
         {
           "id": "a",
-          "text": "Chọn tờ có màu mình thích hơn",
-          "rationale_vi": "“Chọn tờ có màu mình thích hơn” chưa đúng. Đọc đúng con số mệnh giá trên từng tờ rồi so sánh hai giá trị; không đoán chỉ từ màu sắc hoặc vị trí. Vậy đáp án là Đọc và so sánh con số mệnh giá trên hai tờ."
+          "text": "Chỉ so sánh màu sắc của hai tờ",
+          "rationale_vi": "“Chỉ so sánh màu sắc của hai tờ” chưa đúng. Đọc đúng con số mệnh giá trên từng tờ rồi so sánh hai giá trị; không đoán chỉ từ màu sắc hoặc vị trí. Vậy đáp án là Đọc và so sánh con số mệnh giá trên hai tờ."
         },
         {
           "id": "b",
-          "text": "Chọn tờ nằm bên trái",
-          "rationale_vi": "“Chọn tờ nằm bên trái” chưa đúng. Đọc đúng con số mệnh giá trên từng tờ rồi so sánh hai giá trị; không đoán chỉ từ màu sắc hoặc vị trí. Vậy đáp án là Đọc và so sánh con số mệnh giá trên hai tờ."
+          "text": "Chỉ so sánh kích thước của hai tờ",
+          "rationale_vi": "“Chỉ so sánh kích thước của hai tờ” chưa đúng. Đọc đúng con số mệnh giá trên từng tờ rồi so sánh hai giá trị; không đoán chỉ từ màu sắc hoặc vị trí. Vậy đáp án là Đọc và so sánh con số mệnh giá trên hai tờ."
         },
         {
           "id": "c",
-          "text": "Đếm số chữ xuất hiện trên mỗi tờ",
-          "rationale_vi": "“Đếm số chữ xuất hiện trên mỗi tờ” chưa đúng. Đọc đúng con số mệnh giá trên từng tờ rồi so sánh hai giá trị; không đoán chỉ từ màu sắc hoặc vị trí. Vậy đáp án là Đọc và so sánh con số mệnh giá trên hai tờ."
+          "text": "Chọn tờ có nhiều chữ hơn",
+          "rationale_vi": "“Chọn tờ có nhiều chữ hơn” chưa đúng. Đọc đúng con số mệnh giá trên từng tờ rồi so sánh hai giá trị; không đoán chỉ từ màu sắc hoặc vị trí. Vậy đáp án là Đọc và so sánh con số mệnh giá trên hai tờ."
         },
         {
           "id": "d",
