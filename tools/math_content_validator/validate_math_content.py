@@ -38,6 +38,7 @@ NUMERIC_EQUALITY_RES = (
 )
 MIN_QUESTION_EXPLANATION_CHARS = 32
 MAX_HINT_CHARS = 130
+MAX_APPLICATION_LOWER_SHAPE_SIMILARITY = 0.75
 GENERIC_SECOND_HINT = "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
 GENERIC_FIRST_OBJECTIVE_PREFIX = "Nhận biết và thực hiện đúng nội dung:"
 GENERIC_SECOND_OBJECTIVE = "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
@@ -141,6 +142,15 @@ def normalize_prompt(text: str) -> str:
     text = re.sub(r"\d+", "#", text)
     text = re.sub(r"[^\w#]+", " ", text, flags=re.UNICODE)
     return re.sub(r"\s+", " ", text).strip()
+
+
+def application_prompt_shape_similarity(prompt_a: str, prompt_b: str) -> float:
+    """Compare prompt structure while ignoring numeric value swaps."""
+    a = normalize_prompt(prompt_a)
+    b = normalize_prompt(prompt_b)
+    if not a or not b:
+        return 0.0
+    return difflib.SequenceMatcher(None, a, b).ratio()
 
 
 def normalize_prompt_identity(text: str) -> str:
@@ -970,6 +980,28 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
                     errors.append(f"cross_lesson_question_ref:{lid}:{qid}:{q.get('lesson_id')}")
                 if q.get("difficulty") != diff:
                     errors.append(f"practice_difficulty_mismatch:{lid}:{qid}:{diff}:{q.get('difficulty')}")
+
+        application_refs = practice.get("application", [])
+        lower_refs = []
+        for lower_diff in ("basic", "medium"):
+            refs = practice.get(lower_diff, [])
+            if isinstance(refs, list):
+                lower_refs.extend(qid for qid in refs if isinstance(qid, str))
+        if isinstance(application_refs, list):
+            for application_qid in application_refs:
+                application_q = question_by_id.get(application_qid)
+                if not isinstance(application_q, dict) or not isinstance(application_q.get("prompt_vi"), str):
+                    continue
+                for lower_qid in lower_refs:
+                    lower_q = question_by_id.get(lower_qid)
+                    if not isinstance(lower_q, dict) or not isinstance(lower_q.get("prompt_vi"), str):
+                        continue
+                    similarity = application_prompt_shape_similarity(
+                        application_q["prompt_vi"], lower_q["prompt_vi"])
+                    if similarity >= MAX_APPLICATION_LOWER_SHAPE_SIMILARITY:
+                        errors.append(
+                            f"application_prompt_too_similar_to_lower_difficulty:{lid}:"
+                            f"{application_qid}:{lower_qid}:{similarity:.3f}")
 
         practice_qids = []
         for refs in practice.values():

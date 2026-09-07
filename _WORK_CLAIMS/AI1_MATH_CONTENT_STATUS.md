@@ -90,6 +90,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - explanation câu hỏi quá ngắn, không đủ bước giải thích/kiểm tra cho feedback học tập;
 - phương trình số trong lesson explanation / concept definition / worked answer+solution / question explanation bị sai giá trị;
 - prompt trùng/gần trùng giữa hai lesson khác nhau, tránh lãng phí ngân hàng câu hỏi;
+- application có cùng khung câu với basic/medium chỉ bằng cách đổi số (`shape similarity >= 0.75`); gate so toàn bộ application bucket với toàn bộ lower-difficulty bucket nên tương thích Request 009 nhiều câu/bucket;
 - MCQ trùng nghĩa sau normalize Unicode/case/whitespace hoặc hai biểu thức choice cho cùng giá trị số;
 - vị trí đáp án đúng bị lệch pattern; bank phải phân bố cân bằng theo số lượng choices;
 - invalid true/false shape;
@@ -115,6 +116,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - mọi question được reference đúng một lần;
 - prerequisite resolve, acyclic, luôn trỏ về bài đã xuất hiện trước và không có direct edge bắc cầu dư thừa; graph hiện 9 root, 76 direct edges, 67/67 lesson reachable;
 - difficulty cân bằng;
+- application không được là bản đổi số của basic/medium cùng lesson; regression synthetic number-swap = 1.0 và toàn bank hiện dưới ngưỡng 0.75;
 - authoring deterministic;
 - answer kinds/question types đúng contract;
 - accepted-answer contract fail-closed cho integer/interaction/text/unit/expression, không cho phép extra accepted value sai;
@@ -136,7 +138,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract;
 - **166 phương trình số instructional** đang được kiểm bằng arithmetic parser, hiện **0 sai**; detector có regression cho cả phép cộng chuỗi và phép chia dùng dấu `:`.
 
-Latest result: **34 tests PASS**.
+Latest result: **35 tests PASS**.
 
 ## Commits / waves
 

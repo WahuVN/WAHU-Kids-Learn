@@ -400,6 +400,26 @@ class MathContentDataSmoke(unittest.TestCase):
                 self.assertEqual("application", item["difficulty"])
                 self.assertIn(marker, item["prompt_vi"].casefold())
 
+    def test_application_prompts_are_not_lower_difficulty_number_swaps(self):
+        self.assertEqual(1.0, validator.application_prompt_shape_similarity(
+            "Có 4 túi, mỗi túi 5 viên. Có tất cả bao nhiêu viên?",
+            "Có 8 túi, mỗi túi 2 viên. Có tất cả bao nhiêu viên?"))
+        self.assertLess(validator.application_prompt_shape_similarity(
+            "Nam tính 4 + 5 = 9. Tổng đúng là bao nhiêu?",
+            "Có 4 túi, mỗi túi 5 viên. Có tất cả bao nhiêu viên?"),
+            validator.MAX_APPLICATION_LOWER_SHAPE_SIMILARITY)
+
+        for lesson in self.lessons:
+            practice = lesson["practice_sets"]
+            lower_ids = list(practice["basic"]) + list(practice["medium"])
+            for application_id in practice["application"]:
+                application_prompt = self.question_by_id[application_id]["prompt_vi"]
+                for lower_id in lower_ids:
+                    similarity = validator.application_prompt_shape_similarity(
+                        application_prompt, self.question_by_id[lower_id]["prompt_vi"])
+                    with self.subTest(lesson=lesson["id"], application=application_id, lower=lower_id):
+                        self.assertLess(similarity, validator.MAX_APPLICATION_LOWER_SHAPE_SIMILARITY)
+
     def test_application_questions_do_not_regress_to_single_fact_recall(self):
         subtraction = self.question_by_id["m2_q_sub_components_recognize_03"]
         division = self.question_by_id["m2_q_division_components_03"]
