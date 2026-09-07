@@ -1749,19 +1749,19 @@ END;");
 
         private static void TestInteractiveSegmentAnswer(Assembly appAssembly)
         {
-            var question = new MathQuestion
+            var question = new MathQuestionGenerator(20260907).Generate(new MathSelectionDecision
             {
-                QuestionId = "segment_ui_smoke",
-                TemplateId = "draw_segment_given_length",
-                SkillId = "DRAW_SEGMENT_GIVEN_LENGTH",
-                PromptVi = "Vẽ đoạn thẳng AB dài 7 cm bằng cách chọn hai đầu mút trên thước.",
-                CorrectAnswer = 7,
-                AnswerKind = "interaction_integer",
-                CorrectAnswerText = "7",
-                Choices = new List<int>(),
-                ChoiceTexts = new List<string>(),
-                IllustrationData = "segmentdraw|7|15"
-            };
+                Template = new MathTemplateRef
+                {
+                    TemplateId = "draw_segment_given_length",
+                    SkillId = "DRAW_SEGMENT_GIVEN_LENGTH"
+                },
+                DifficultyFit = 0.7
+            });
+            A(question != null && question.CorrectAnswer >= 2 && question.CorrectAnswer <= 12,
+                "segment_generator_returns_grade2_length");
+            A(question.IsCorrectAnswer(question.CorrectAnswerDisplay),
+                "segment_generator_correct_answer_roundtrips");
             A(string.Equals(question.AnswerKind, "interaction_integer", StringComparison.Ordinal),
                 "segment_ui_question_preserves_interaction_kind");
             A(question.DisplayChoices.Count == 0, "segment_ui_question_has_no_fake_choices");
