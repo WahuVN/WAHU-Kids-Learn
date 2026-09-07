@@ -80,6 +80,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestProductionFirstFiveGameEventsRuntime(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestProductionFirstEventResumeJourney(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventResumeAfterThirdAnswerBeforeComplete(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
+                TestGameEventCompletedEventReopensAsFreshReplay(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventDisposeSuspendsAndResumesExactQuestion(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventResumeRestoresBehaviorAction(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventResumeRestoresExplicitRepairBeforeStateTransition(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
@@ -259,6 +260,10 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 first.SubmitAnswerAt(q1.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700);
                 var q2 = first.NextQuestion();
                 fallbackQ2Id = q2.QuestionId;
+                var wrong = first.SubmitAnswerWithRetryAt(WrongAnswer(q2), 2, "smoke", DateTime.UtcNow, 800);
+                A(!wrong.Learning.IsCorrect && wrong.Learning.CanRetry && !wrong.Learning.QuestionCompleted &&
+                  wrong.EventState.RetryPending && wrong.EventState.CompletedCheckpointCount == 1,
+                    "game_event_corrupt_metadata_fixture_suspends_with_pending_retry");
                 first.SuspendForBreak("event_before_metadata_corruption");
             }
             File.WriteAllText(eventPath, "{ definitely-not-valid-event-json ");
@@ -266,17 +271,22 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
             {
                 var start = fallback.Start("Bé event fallback");
                 A(start.Session.ResumedExistingSession && start.Session.SessionId == fallbackSessionId &&
-                  start.Session.SelectedContentQuestionIds.SequenceEqual(fallbackSelected) && start.Session.CompletedQuestionCount == 1,
-                    "game_event_corrupt_metadata_fallback_preserves_math_session_progress");
+                  start.Session.SelectedContentQuestionIds.SequenceEqual(fallbackSelected) && start.Session.CompletedQuestionCount == 1 &&
+                  start.Session.RetryPending && start.EventState.RetryPending,
+                    "game_event_corrupt_metadata_fallback_preserves_math_session_progress_and_retry_state");
                 A(start.Event == null && !start.EventState.EventPresentationAvailable && start.EventState.FallbackToLessonPresentation &&
                   start.EventState.EventId == null && start.EventState.TargetLessonId == lesson.Id,
                     "game_event_corrupt_metadata_falls_back_to_ordinary_lesson_presentation");
                 var q2 = fallback.NextQuestion();
                 A(q2.QuestionId == fallbackQ2Id && q2.ContentQuestionId == fallbackSelected[1],
                     "game_event_corrupt_metadata_fallback_keeps_exact_open_question");
+                var retry = fallback.SubmitRetryAnswerAt(q2.CorrectAnswerDisplay, 2, "smoke", DateTime.UtcNow, 850);
+                A(retry.Learning.IsCorrect && retry.Learning.IsRetry && !retry.Learning.IndependentSuccess &&
+                  retry.Learning.QuestionCompleted && retry.EventState.CompletedCheckpointCount == 2 && !retry.EventState.RetryPending,
+                    "game_event_corrupt_metadata_fallback_allows_exact_assisted_retry_without_event_presentation");
                 fallback.SuspendForBreak("fallback_cleanup_suspend");
-                A(Count(fallbackDb, "SELECT count(*) FROM attempt WHERE session_id='" + fallbackSessionId + "';") == 1 &&
-                  Count(fallbackDb, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + fallbackSessionId + "';") == 1 &&
+                A(Count(fallbackDb, "SELECT count(*) FROM attempt WHERE session_id='" + fallbackSessionId + "';") == 3 &&
+                  Count(fallbackDb, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + fallbackSessionId + "';") == 2 &&
                   Count(fallbackDb, "SELECT count(*) FROM reward_event WHERE child_id='" + fallbackChildId + "';") == 0,
                     "game_event_corrupt_metadata_fallback_loses_no_learning_and_grants_no_fake_reward");
             }
@@ -501,6 +511,75 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 A(Count(database, "SELECT count(*) FROM reward_event WHERE child_id='" + childId +
                   "' AND source_ref='" + sessionId + "' AND reward_type='garden_growth';") == 1,
                     "game_event_resume_after_q3_grants_exactly_one_reward");
+            }
+        }
+
+        private static void TestGameEventCompletedEventReopensAsFreshReplay(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath,
+            string gameEventPath)
+        {
+            var events = new MathGameEventCatalogSource().Load(gameEventPath, lessonCatalogPath);
+            var definition = events.Events[0];
+            var database = NewDatabase(Path.Combine(root, "game-event-completed-replay.db"), schemaPath);
+            string completedSessionId;
+            string childId;
+
+            using (var first = new MathGameEventCoordinator(database, templatePath, gameEventPath, "LOW", 15123,
+                definition.Id, definition.TargetLessonId))
+            {
+                var start = first.Start("Bé replay event đã xong");
+                completedSessionId = start.Session.SessionId;
+                childId = start.Session.ChildId;
+                for (var ordinal = 0; ordinal < 3; ordinal++)
+                {
+                    var question = first.NextQuestion();
+                    first.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700 + ordinal * 100);
+                }
+                var completed = first.Complete();
+                A(completed.EventState.IsComplete && completed.LearningSummary.LessonCompleted &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + completedSessionId + "';") == 1,
+                    "game_event_completed_replay_fixture_terminal_and_rewarded_once");
+            }
+
+            string replaySessionId;
+            string replayQ1Id;
+            IList<string> replaySelected;
+            using (var replay = new MathGameEventCoordinator(database, templatePath, gameEventPath, "NORMAL", 15124,
+                definition.Id, definition.TargetLessonId))
+            {
+                var start = replay.Start("Bé replay event đã xong");
+                replaySessionId = start.Session.SessionId;
+                replaySelected = start.Session.SelectedContentQuestionIds.ToList();
+                A(!start.Session.ResumedExistingSession && replaySessionId != completedSessionId &&
+                  start.Session.CompletedQuestionCount == 0 && !start.Session.RetryPending &&
+                  start.EventState.CompletedCheckpointCount == 0 && start.EventState.CurrentCheckpointNumber == 1 &&
+                  !start.EventState.IsComplete,
+                    "game_event_completed_event_reopens_as_fresh_zero_checkpoint_session");
+                A(Count(database, "SELECT count(*) FROM reward_event WHERE child_id='" + childId + "';") == 1 &&
+                  Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + childId +
+                  "' AND lesson_id='" + definition.TargetLessonId + "' AND started_count=2 AND completed_count=1;") == 1,
+                    "game_event_fresh_replay_does_not_grant_reward_or_fake_completion_before_play");
+                var q1 = replay.NextQuestion();
+                replayQ1Id = q1.QuestionId;
+                A(q1.ContentQuestionId == replaySelected[0],
+                    "game_event_fresh_replay_starts_from_selected_basic_checkpoint_one");
+            }
+
+            using (var resumedReplay = new MathGameEventCoordinator(database, templatePath, gameEventPath, "LOW", 999999,
+                null, definition.TargetLessonId))
+            {
+                var start = resumedReplay.Start("Bé replay event đã xong");
+                A(start.Session.ResumedExistingSession && start.Session.SessionId == replaySessionId &&
+                  start.Session.SelectedContentQuestionIds.SequenceEqual(replaySelected) &&
+                  start.Session.CompletedQuestionCount == 0 && start.EventState.CompletedCheckpointCount == 0,
+                    "game_event_fresh_replay_close_reopens_same_new_session_not_old_completed_session");
+                A(resumedReplay.NextQuestion().QuestionId == replayQ1Id &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE child_id='" + childId + "';") == 1,
+                    "game_event_fresh_replay_resume_keeps_exact_q1_and_existing_reward_count");
+                resumedReplay.SuspendForBreak("completed_replay_cleanup");
             }
         }
 
