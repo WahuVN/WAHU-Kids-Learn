@@ -1851,22 +1851,35 @@ namespace WAHU.ChildUiRuntimeSmoke
                     SubmitCurrentMathQuestionCorrectly(resumed, "quick_rescue_checkpoint_three_correct");
                     A(GetField<bool>(resumed, "_completeOnNext"),
                         "quick_rescue_third_checkpoint_routes_to_completion");
-                    Invoke(resumed, "HandleNextButton");
                     state = GetField<object>(resumed, "_eventState");
-                    A(GetField<bool>(resumed, "_finished") && Get<bool>(state, "IsComplete") &&
-                      Get<int>(state, "CompletedCheckpointCount") == 3,
-                        "quick_rescue_completion_marks_all_three_checkpoints");
-                    A(GetField<Label>(resumed, "_prompt").Text == "Nhiệm vụ cứu hộ hoàn thành",
+                    A(Get<int>(state, "CompletedCheckpointCount") == 3 && !Get<bool>(state, "IsComplete"),
+                        "quick_rescue_third_answer_is_terminal_ready_before_completion");
+                    var terminalCoordinator = GetField<object>(resumed, "_gameEventCoordinator");
+                    Invoke(terminalCoordinator, "SuspendForBreak", "ui_quick_rescue_after_third_before_complete");
+                    SetField(resumed, "_finished", true);
+                }
+
+                using (var terminalResume = (WAHUKidsLearn.MathLessonForm)eventLessonCtor.Invoke(new object[]
+                {
+                    database, settings, lessonId, presentation
+                }))
+                {
+                    Invoke(terminalResume, "StartSession");
+                    var state = GetField<object>(terminalResume, "_eventState");
+                    A(GetField<bool>(terminalResume, "_finished") && Get<bool>(state, "IsComplete") &&
+                      Get<int>(state, "CompletedCheckpointCount") == 3 && GetField<MathQuestion>(terminalResume, "_question") == null,
+                        "quick_rescue_resume_after_third_answer_completes_without_fourth_question");
+                    A(GetField<Label>(terminalResume, "_prompt").Text == "Nhiệm vụ cứu hộ hoàn thành",
                         "quick_rescue_completion_uses_restoration_title");
-                    var completionSupport = GetField<Label>(resumed, "_support").Text;
+                    var completionSupport = GetField<Label>(terminalResume, "_support").Text;
                     A(completionSupport.IndexOf(completionCopy, StringComparison.OrdinalIgnoreCase) >= 0 &&
                       completionSupport.IndexOf("Khu vườn", StringComparison.OrdinalIgnoreCase) >= 0,
                         "quick_rescue_completion_shows_production_restoration_and_garden");
-                    var resultButton = GetField<Button>(resumed, "_nextButton");
+                    var resultButton = GetField<Button>(terminalResume, "_nextButton");
                     A(resultButton.Text == "Về nhiệm vụ cứu hộ" &&
                       resultButton.AccessibleDescription.IndexOf("danh sách nhiệm vụ cứu hộ", StringComparison.OrdinalIgnoreCase) >= 0,
                         "quick_rescue_completion_returns_to_rescue_list_without_autoplay");
-                    Invoke(resumed, "HandleNextButton");
+                    Invoke(terminalResume, "HandleNextButton");
                 }
 
                 var completedGarden = garden.ReadProgress(learner.ChildId);
