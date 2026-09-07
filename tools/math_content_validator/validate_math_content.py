@@ -49,6 +49,7 @@ DIFFICULTIES = {"basic", "medium", "application"}
 ENGINE_ANSWER_KINDS = {"integer", "interaction_integer", "number", "decimal", "fraction", "text", "unit", "expression"}
 GRADE2_USED_ANSWER_KINDS = {"integer", "interaction_integer", "text", "unit", "expression"}
 QUESTION_TYPES = {"numeric_input", "multiple_choice", "true_false", "expression_input", "unit_input", "interactive_measurement", "word_problem"}
+ADD_SUB_EXPRESSION_ALLOWED_OPERATORS = {"+", "-", "(", ")"}
 ADD_CARRY_RULES = {"ADD_WITHIN_1000_NO_CARRY": 0, "ADD_WITHIN_1000_ONE_CARRY_MAX": 1}
 SUB_BORROW_RULES = {"SUB_WITHIN_1000_NO_BORROW": 0, "SUB_WITHIN_1000_ONE_BORROW_MAX": 1}
 MONEY_DENOMINATION_RE = re.compile(r"\b\d[\d\s.,]*\s*đồng\b", re.IGNORECASE)
@@ -1681,6 +1682,17 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             expression = q.get("correct_answer")
             if validation.get("expression_syntax") != "restricted_numeric_arithmetic":
                 errors.append(f"expression_syntax_metadata_invalid:{where}")
+            allowed_operators = validation.get("allowed_operators")
+            if (skill == "ADD_SUB_TWO_OPERATORS_LEFT_TO_RIGHT" and
+                    (not isinstance(allowed_operators, list) or
+                     set(allowed_operators) != ADD_SUB_EXPRESSION_ALLOWED_OPERATORS or
+                     len(allowed_operators) != len(ADD_SUB_EXPRESSION_ALLOWED_OPERATORS))):
+                errors.append(f"add_sub_expression_allowed_operators_mismatch:{where}:{allowed_operators!r}")
+            if isinstance(expression, str):
+                used_operators = set(re.findall(r"[+\-*/()]", expression))
+                declared = set(allowed_operators) if isinstance(allowed_operators, list) else set()
+                if not used_operators.issubset(declared):
+                    errors.append(f"expression_uses_undeclared_operator:{where}:{sorted(used_operators - declared)}")
             expected = validation.get("expected_numeric")
             if type(expected) is not int:
                 errors.append(f"expression_expected_numeric_invalid:{where}:{expected!r}")

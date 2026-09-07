@@ -130,6 +130,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - answer kinds/question types đúng contract;
 - accepted-answer contract fail-closed cho integer/interaction/text/unit/expression, không cho phép extra accepted value sai;
 - expression validator fail-closed, kể cả divide-by-zero và payload không phải arithmetic;
+- authored add/sub expression static contract chỉ khai báo `+`, `-`, `(`, `)`; prompt nói rõ “biểu thức cộng, trừ tương đương”, validator chặn operator metadata rộng hơn. Runtime x86 hiện vẫn bỏ qua metadata này nên Request 010 OPEN;
 - nội dung tiền Việt Nam không hard-code mệnh giá khi chưa có source/book mapping;
 - skill quan hệ thời gian không mở rộng thành phép nhân/chia ngoài yêu cầu cần đạt;
 - mọi phép nhân/chia literal child-facing nằm trong bảng 2 hoặc 5, kể cả distractor;
@@ -148,7 +149,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract;
 - **166 phương trình số instructional** đang được kiểm bằng arithmetic parser, hiện **0 sai**; detector có regression cho cả phép cộng chuỗi và phép chia dùng dấu `:`.
 
-Latest result: **48 tests PASS**.
+Latest result: **49 tests PASS**.
 
 ## Commits / waves
 
@@ -187,13 +188,14 @@ Latest result: **48 tests PASS**.
 
 ## Current blockers outside AI1 content ownership
 
-1. Request 005 functional path đã được commit end-to-end: engine `656a94b` + UI `1436705`. Targeted lesson dùng authored bank đúng 3 câu, all-201 answer-surface sweep PASS, Flow 5 prerequisite unlock PASS; current persistence WIP đạt **171 assertions PASS** và Child UI đạt **1593 assertions PASS**. Release-clean full solution vẫn bị SQLite/toolchain chặn.
+1. Request 005 functional path đã được commit end-to-end: engine `656a94b` + UI `1436705`. Targeted lesson dùng authored bank đúng 3 câu, all-201 answer-surface sweep PASS, Flow 5 prerequisite unlock PASS; current persistence WIP đạt **171 assertions PASS** và Child UI đạt **1596 assertions PASS**. Release-clean full solution vẫn bị SQLite/toolchain chặn.
 2. Request 007 **CLOSED** tại `7f79367`: targeted corrupt regression xác nhận cursor rollback 2→1, phát lại đúng medium, sau đó application, đủ 3 attempts mới complete; current persistence smoke hiện **171 assertions PASS**.
 3. Request 006 vẫn mở: 23 câu integer có `answer_unit` được content giữ display-only, nhưng `MathAuthoredQuestionSource`/`MathQuestion` chưa preserve field để feedback hiện `8 cm`, `5 kg`, `60 phút` mà vẫn chấm raw integer.
 4. UI smoke full project-reference build vẫn gặp lỗi reference `System.Data.SQLite` khi build `WAHU.Data.csproj`; App + Child UI targeted build với `BuildProjectReferences=false` PASS. Đây là build/dependency WIP ngoài AI1.
-5. Retry UI presentation trong current working tree hiện **PASS** sau rebuild App + Child UI với `BuildProjectReferences=false`; Child UI đạt **1593 assertions**. Chưa coi là commit-owned closure cho tới khi lane UI chốt các file WIP của họ.
+5. Retry UI presentation trong current working tree hiện **PASS** sau rebuild App + Child UI với `BuildProjectReferences=false`; Child UI đạt **1596 assertions**. Chưa coi là commit-owned closure cho tới khi lane UI chốt các file WIP của họ.
 6. Legacy generator vẫn chỉ phủ 65/67 skill, nhưng lesson-authored path đã cho phép hai skill `FOLD_CUT_COMPOSE_SHAPES` và `MONEY_VND_NOTE_RECOGNITION` có bài luyện thật mà không cần template giả.
 7. **Breadth / replay blocker — Request 009 OPEN:** cả 67 lesson hiện có đúng `(1 basic, 1 medium, 1 application)` = 3 authored questions và targeted engine luôn nạp toàn bộ IDs theo đúng thứ tự, nên học lại gặp lại nguyên 3 câu. Request 009 đề xuất tách pool size khỏi session target: AI1 mở pool `>=6` câu/bài, AI2 chọn/persist đúng 3 câu cân bằng mỗi phiên, AI3 giữ CTA/progress 3 câu nhưng hiển thị pool count riêng. AI1 chưa mở rộng bank trước khi runtime contract/regression này xanh.
+8. **Expression operator grading — Request 010 OPEN:** runtime x86 probe xác nhận `75`, `100 - 30 + 5`, `15*5`, `150/2` đều đang được chấm đúng cho câu add/sub expression vì loader không preserve `validation.allowed_operators`. AI1 đã thu hẹp metadata/prompt về cộng-trừ; AI2 cần enforce per-question operator policy để `15*5`/`150/2` bị reject mà plain result `75` vẫn đúng.
 
 ## Lane verdict
 

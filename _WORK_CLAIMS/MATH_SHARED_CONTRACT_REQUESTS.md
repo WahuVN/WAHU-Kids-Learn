@@ -84,3 +84,12 @@
 - Regression AI2 cần: lesson fixture có >=2 câu mỗi difficulty; hai fresh session với hai selection identity cố định phải tạo set hợp lệ và ít nhất một ID khác nhau; resume cùng session phải giữ nguyên ordered selected set; retry/corrupt recovery không đổi set; completion vẫn đúng sau 3 committed attempts.
 - Regression AI3 cần: Hub phân biệt pool count với session target; neutral CTA + no numeric badge đã PASS ở AI3-012 với synthetic pool 6. Sau khi AI2 publish selected-set contract, targeted lesson phải render đúng selected 3 câu bất kể pool có 6+; result/progress vẫn `3/3`, resume/retry không đổi selected set.
 - Owner: AI2 session/persistence + AI3 UI/integration. AI1 chỉ mở rộng bank sau khi contract này có runtime regression xanh để tránh phá end-to-end hiện tại.
+
+## Request 010 — Enforce per-question expression operator contract
+
+- Runtime x86 probe on current `WAHU.Learning.dll` reproduces a grading loophole for the authored `ADD_SUB_TWO_OPERATORS_LEFT_TO_RIGHT` expression question: `75=True`, `100 - 30 + 5=True`, but **`15*5=True` and `150/2=True`** because `MathAnswerValidator` treats `answer_kind=expression` as unrestricted numeric equivalence across its global `+ - * / ( )` parser.
+- AI1 content intent is narrower: this lesson teaches two **addition/subtraction** operators from left to right. Static `validation.allowed_operators` is now restricted to `+`, `-`, `(`, `)` and the child prompt says “biểu thức cộng, trừ tương đương”. Numeric result `75` must remain accepted.
+- Current loader `MathAuthoredQuestionSource` does not preserve `validation.allowed_operators` into `MathQuestion`, so content metadata alone cannot enforce the intended grading boundary.
+- Contract needed: preserve a per-question allowed-operator set (or an equivalent fail-closed expression policy) through authored load -> runtime instance -> suspend/resume JSON, and have `MathAnswerValidator` reject expression syntax using operators outside that set while still allowing a plain numeric result.
+- Required regression: for this authored question, accept `75`, `100 - 30 + 5`, and an allowed equivalent such as `70 + 5`; reject `15*5` and `150/2`. Existing global expression safety (no variables/functions, divide-by-zero rejection, complexity limits) must remain intact.
+- Owner: AI2 model/loader/answer-validator/session persistence. AI1 owns only the static metadata/prompt and does not modify the engine path.

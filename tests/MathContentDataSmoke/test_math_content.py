@@ -316,6 +316,15 @@ class MathContentDataSmoke(unittest.TestCase):
                 self.assertEqual([], validator.invalid_numeric_equalities(relation_body))
                 self.assertEqual([], validator.invalid_numeric_relations(relation_body))
 
+    def test_add_sub_expression_declares_only_add_sub_operators(self):
+        item = self.question_by_id["m2_q_add_sub_two_operators_left_to_right_02"]
+        self.assertEqual("expression", item["answer_kind"])
+        self.assertEqual(validator.ADD_SUB_EXPRESSION_ALLOWED_OPERATORS, set(item["validation"]["allowed_operators"]))
+        self.assertEqual(len(validator.ADD_SUB_EXPRESSION_ALLOWED_OPERATORS), len(item["validation"]["allowed_operators"]))
+        self.assertNotIn("*", item["validation"]["allowed_operators"])
+        self.assertNotIn("/", item["validation"]["allowed_operators"])
+        self.assertIn("biểu thức cộng, trừ tương đương", item["prompt_vi"].casefold())
+
     def test_expression_validator_fails_closed(self):
         self.assertEqual(validator.Fraction(75, 1), validator.eval_restricted_expression("100 - 30 + 5"))
         with self.assertRaises(ZeroDivisionError):

@@ -932,7 +932,7 @@ def eq(prompt: str, expression: str, answer: int, explanation: str,
         "explanation_vi": explanation,
         "validation": {
             "expression_syntax": "restricted_numeric_arithmetic",
-            "allowed_operators": ["+", "-", "*", "/", "(", ")"],
+            "allowed_operators": ["+", "-", "(", ")"],
             "expected_numeric": answer,
             "numeric_min": numeric_min,
             "numeric_max": numeric_max,
@@ -1363,7 +1363,7 @@ Q = {
     ],
     "ADD_SUB_TWO_OPERATORS_LEFT_TO_RIGHT": [
         nq("Tính từ trái sang phải: 50 + 20 - 10.", 60, "50 + 20 = 70, rồi 70 - 10 = 60."),
-        eq("Tính 100 - 30 + 5. Có thể nhập kết quả hoặc một biểu thức số tương đương.", "100 - 30 + 5", 75, "100 - 30 = 70, rồi 70 + 5 = 75."),
+        eq("Tính 100 - 30 + 5. Có thể nhập kết quả hoặc một biểu thức cộng, trừ tương đương.", "100 - 30 + 5", 75, "100 - 30 = 70, rồi 70 + 5 = 75."),
         nq("Một hộp có 200 thẻ, thêm 150 thẻ rồi lấy ra 100 thẻ. Còn bao nhiêu thẻ?", 250, "Từ trái sang phải theo tình huống: 200 + 150 = 350, 350 - 100 = 250."),
     ],
     "MENTAL_ADD_SUB_WITHIN_20": [

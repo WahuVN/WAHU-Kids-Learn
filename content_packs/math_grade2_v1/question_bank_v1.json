@@ -1965,7 +1965,7 @@
       "skill_id": "ADD_SUB_TWO_OPERATORS_LEFT_TO_RIGHT",
       "difficulty": "medium",
       "question_type": "expression_input",
-      "prompt_vi": "Tính 100 - 30 + 5. Có thể nhập kết quả hoặc một biểu thức số tương đương.",
+      "prompt_vi": "Tính 100 - 30 + 5. Có thể nhập kết quả hoặc một biểu thức cộng, trừ tương đương.",
       "answer_kind": "expression",
       "correct_answer": "100 - 30 + 5",
       "accepted_answers": [
@@ -1988,8 +1988,6 @@
         "allowed_operators": [
           "+",
           "-",
-          "*",
-          "/",
           "(",
           ")"
         ],
