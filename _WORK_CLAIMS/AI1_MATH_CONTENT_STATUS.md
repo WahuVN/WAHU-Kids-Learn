@@ -28,7 +28,7 @@ Owner: AI1 — Math Content & Data
   - interactive measurement
   - word problem
 - Semantic validator errors: **0**
-- Math content unittest: **32 / 32 PASS**
+- Math content unittest: **33 / 33 PASS**
 - Pack manifest/hash/listing check on current working tree: **PASS** (`version=1.9.0`, 3 listed files)
 - Persistence runtime smoke: **171 assertions PASS**
 - Child UI targeted build (`BuildProjectReferences=false`) + runtime smoke: **1558 assertions PASS**
@@ -127,7 +127,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - 267/267 distractor có **rationale unique / max repeat 1**, mỗi rationale sai chứa lời giải riêng của chính câu; 3 họ mẫu shallow cũ đã giảm **267 → 0**;
 - vị trí đáp án đúng được cân bằng deterministic: 88 câu 4-choice = 22/22/22/22 cho A/B/C/D; 3 true/false = 2/1;
 - 23 câu integer có `answer_unit` giữ đúng contract display-only, không đổi sang unit-input;
-- **17 application regression quan trọng** được khóa riêng: 4 câu kết hợp dữ kiện/khái niệm trước đó + 13 câu transfer/error-analysis mới (dạng khai triển, ý nghĩa chia, tia số, đo thước, đổi+tính số đo, đường gấp khúc, biểu đồ tranh và các bài toán một bước);
+- **25 application regression quan trọng** được khóa riêng: 17 regression trước đó + 8 câu vừa nâng từ recall sang transfer/error-correction (liền trước/sau, giá trị theo hàng, thành phần phép nhân, lịch, đường cong, khối cầu, quan hệ 24 giờ, tìm số lớn nhất);
 - child-facing lesson/question text có **0 internal-engine vocabulary**; metadata kỹ thuật như `application`, `numeric_input`, `deterministic` vẫn được phép;
 - **67/67 worked example unique**, mỗi ví dụ có ít nhất 2 bước giải, **0 exact/near overlap** với 201 câu practice và 67/67 solution chốt đáp án tường minh;
 - cả hai mục tiêu học đạt **67/67 unique** và gắn concept; objective 1 đã loại **67/67** placeholder `Nhận biết và thực hiện đúng nội dung:` và đổi động từ theo answer surface, objective 2 placeholder chung = 0;
@@ -136,7 +136,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract;
 - **166 phương trình số instructional** đang được kiểm bằng arithmetic parser, hiện **0 sai**; detector có regression cho cả phép cộng chuỗi và phép chia dùng dấu `:`.
 
-Latest result: **32 tests PASS**.
+Latest result: **33 tests PASS**.
 
 ## Commits / waves
 
@@ -169,6 +169,7 @@ Latest result: **32 tests PASS**.
 - `c08c7cf` — `Toán: khóa tính đúng của phép tính trong lời giải`
 - `a0fa436` — `Toán: đặc thù hóa mục tiêu đầu tiên của bài học`
 - `732a2d2` — `Toán: đặc thù hóa rationale cho đáp án nhiễu`
+- `602bec7` — `Toán: nâng chất lượng đáp án nhiễu nhận dạng`
 
 ## Current blockers outside AI1 content ownership
 

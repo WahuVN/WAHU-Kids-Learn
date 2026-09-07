@@ -360,6 +360,23 @@ class MathContentDataSmoke(unittest.TestCase):
         self.assertEqual(67, len(example_prompts))
         self.assertEqual(67, len(set(example_prompts)))
 
+    def test_additional_application_questions_require_transfer_or_error_correction(self):
+        expected_markers = {
+            "m2_q_num_predecessor_successor_03": "bạn an viết",
+            "m2_q_place_value_hundreds_tens_ones_03": "bạn bình viết",
+            "m2_q_multiplication_components_03": "sửa lời",
+            "m2_q_calendar_days_in_month_date_03": "cách sửa",
+            "m2_q_curve_recognize_03": "uốn sang bên",
+            "m2_q_sphere_recognize_03": "phân biệt",
+            "m2_q_time_day_24_hours_03": "hôm sau",
+            "m2_q_num_min_max_up_to_4_03": "chứng minh",
+        }
+        for question_id, marker in expected_markers.items():
+            item = self.question_by_id[question_id]
+            with self.subTest(item=question_id):
+                self.assertEqual("application", item["difficulty"])
+                self.assertIn(marker, item["prompt_vi"].casefold())
+
     def test_application_questions_do_not_regress_to_single_fact_recall(self):
         subtraction = self.question_by_id["m2_q_sub_components_recognize_03"]
         division = self.question_by_id["m2_q_division_components_03"]

@@ -364,13 +364,13 @@
       "skill_id": "NUM_PREDECESSOR_SUCCESSOR",
       "difficulty": "application",
       "question_type": "numeric_input",
-      "prompt_vi": "Điền số còn thiếu: 398, 399, __, 401.",
+      "prompt_vi": "Bạn An viết số liền sau của 399 là 401. Số nào cần thay vào 401 để câu trả lời đúng?",
       "answer_kind": "integer",
       "correct_answer": 400,
       "accepted_answers": [
         "400"
       ],
-      "explanation_vi": "Dãy tăng mỗi lần 1 đơn vị: sau 399 là 400 rồi đến 401.",
+      "explanation_vi": "Số liền sau hơn số đã cho đúng 1 đơn vị; 399 + 1 = 400 nên cần thay 401 bằng 400.",
       "hints_vi": [
         "Nhớ kiến thức: Với số n, số liền trước là n - 1 và số liền sau là n + 1 khi còn trong phạm vi học.",
         "Viết một phép tính hoặc quan hệ ngắn cho “Liền trước và liền sau”, tính xong đối chiếu lại điều đề đang hỏi."
@@ -457,13 +457,13 @@
       "skill_id": "PLACE_VALUE_HUNDREDS_TENS_ONES",
       "difficulty": "application",
       "question_type": "numeric_input",
-      "prompt_vi": "Số có 4 trăm, 0 chục và 9 đơn vị là số nào?",
+      "prompt_vi": "Bạn Bình viết 4 trăm, 0 chục và 9 đơn vị thành 490. Số đúng phải là bao nhiêu?",
       "answer_kind": "integer",
       "correct_answer": 409,
       "accepted_answers": [
         "409"
       ],
-      "explanation_vi": "Giữ đúng vị trí hàng chục bằng 0: 400 + 0 + 9 = 409.",
+      "explanation_vi": "Hàng trăm là 4, hàng chục phải giữ 0 và hàng đơn vị là 9: 400 + 0 + 9 = 409, không phải 490.",
       "hints_vi": [
         "Nhớ kiến thức: Trong số có ba chữ số, chữ số thứ nhất là hàng trăm, thứ hai là hàng chục, thứ ba là hàng đơn vị.",
         "Viết một phép tính hoặc quan hệ ngắn cho “Giá trị theo hàng”, tính xong đối chiếu lại điều đề đang hỏi."
@@ -939,13 +939,13 @@
       "skill_id": "NUM_MIN_MAX_UP_TO_4",
       "difficulty": "application",
       "question_type": "numeric_input",
-      "prompt_vi": "Bốn thẻ ghi 999, 909, 990, 900. Thẻ lớn nhất ghi số nào?",
+      "prompt_vi": "Bạn An chọn 990 là số lớn nhất trong 999, 909, 990, 900. Số nào chứng minh lựa chọn đó chưa đúng?",
       "answer_kind": "integer",
       "correct_answer": 999,
       "accepted_answers": [
         "999"
       ],
-      "explanation_vi": "Cùng 9 trăm; 999 có 9 chục và 9 đơn vị nên lớn nhất.",
+      "explanation_vi": "Cả 999 và 990 đều có 9 trăm, nhưng 999 có 9 chục bằng 990 rồi 9 đơn vị lớn hơn 0 đơn vị, nên 999 lớn hơn 990.",
       "hints_vi": [
         "Nhớ kiến thức: Số lớn nhất không nhỏ hơn số nào trong nhóm; số bé nhất không lớn hơn số nào trong nhóm.",
         "Viết một phép tính hoặc quan hệ ngắn cho “Lớn nhất và bé nhất”, tính xong đối chiếu lại điều đề đang hỏi."
@@ -2536,13 +2536,13 @@
       "skill_id": "MULTIPLICATION_COMPONENTS",
       "difficulty": "application",
       "question_type": "multiple_choice",
-      "prompt_vi": "Trong 2 × 8 = 16, hai thừa số là cặp nào?",
+      "prompt_vi": "Bạn Mai nói trong 2 × 8 = 16 thì 8 và 16 là hai thừa số. Cặp nào sửa lời bạn Mai?",
       "answer_kind": "text",
       "correct_answer": "2 và 8",
       "accepted_answers": [
         "2 và 8"
       ],
-      "explanation_vi": "Hai số đứng hai bên dấu nhân là hai thừa số. Vậy đáp án là 2 và 8.",
+      "explanation_vi": "Trong phép nhân, hai số được nhân với nhau là thừa số; 2 và 8 là hai thừa số, còn 16 là tích.",
       "hints_vi": [
         "Nhớ kiến thức: Các số được nhân là thừa số; kết quả là tích.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Thừa số và tích” trước rồi mới chọn phương án khớp kết quả."
@@ -2563,22 +2563,22 @@
         {
           "id": "a",
           "text": "8 và 16",
-          "rationale_vi": "“8 và 16” chưa đúng. Hai số đứng hai bên dấu nhân là hai thừa số. Vậy đáp án là 2 và 8."
+          "rationale_vi": "“8 và 16” chưa đúng. Trong phép nhân, hai số được nhân với nhau là thừa số; 2 và 8 là hai thừa số, còn 16 là tích."
         },
         {
           "id": "b",
           "text": "2 và 8",
-          "rationale_vi": "Hai số đứng hai bên dấu nhân là hai thừa số. Vậy đáp án là 2 và 8."
+          "rationale_vi": "Trong phép nhân, hai số được nhân với nhau là thừa số; 2 và 8 là hai thừa số, còn 16 là tích."
         },
         {
           "id": "c",
           "text": "2 và 16",
-          "rationale_vi": "“2 và 16” chưa đúng. Hai số đứng hai bên dấu nhân là hai thừa số. Vậy đáp án là 2 và 8."
+          "rationale_vi": "“2 và 16” chưa đúng. Trong phép nhân, hai số được nhân với nhau là thừa số; 2 và 8 là hai thừa số, còn 16 là tích."
         },
         {
           "id": "d",
           "text": "16 và 16",
-          "rationale_vi": "“16 và 16” chưa đúng. Hai số đứng hai bên dấu nhân là hai thừa số. Vậy đáp án là 2 và 8."
+          "rationale_vi": "“16 và 16” chưa đúng. Trong phép nhân, hai số được nhân với nhau là thừa số; 2 và 8 là hai thừa số, còn 16 là tích."
         }
       ],
       "correct_choice_id": "b"
@@ -4422,13 +4422,13 @@
       "skill_id": "CURVE_RECOGNIZE",
       "difficulty": "application",
       "question_type": "multiple_choice",
-      "prompt_vi": "Phát biểu nào đúng?",
+      "prompt_vi": "Một nét đang đi thẳng rồi uốn sang bên và không khép kín. Kết luận nào phù hợp nhất?",
       "answer_kind": "text",
-      "correct_answer": "Đường cong có thể đổi hướng mềm mại",
+      "correct_answer": "Nét đó có phần đường cong vì đã đổi hướng",
       "accepted_answers": [
-        "Đường cong có thể đổi hướng mềm mại"
+        "Nét đó có phần đường cong vì đã đổi hướng"
       ],
-      "explanation_vi": "Đặc điểm nhận biết là đường bị uốn và thay đổi hướng. Vậy đáp án là Đường cong có thể đổi hướng mềm mại.",
+      "explanation_vi": "Nét đã uốn và đổi hướng nên có phần đường cong; đường cong không bắt buộc phải khép kín. Vậy đáp án là Nét đó có phần đường cong vì đã đổi hướng.",
       "hints_vi": [
         "Nhớ kiến thức: Đường cong không giữ một hướng thẳng cố định trên toàn bộ đường.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Đường cong” trước rồi mới chọn phương án khớp kết quả."
@@ -4448,23 +4448,23 @@
       "choices": [
         {
           "id": "a",
-          "text": "Đường cong luôn đi thẳng một hướng",
-          "rationale_vi": "“Đường cong luôn đi thẳng một hướng” chưa đúng. Đặc điểm nhận biết là đường bị uốn và thay đổi hướng. Vậy đáp án là Đường cong có thể đổi hướng mềm mại."
+          "text": "Nét đó vẫn là đường thẳng vì có đoạn đi thẳng",
+          "rationale_vi": "“Nét đó vẫn là đường thẳng vì có đoạn đi thẳng” chưa đúng. Nét đã uốn và đổi hướng nên có phần đường cong; đường cong không bắt buộc phải khép kín. Vậy đáp án là Nét đó có phần đường cong vì đã đổi hướng."
         },
         {
           "id": "b",
-          "text": "Đường cong phải có hai đầu mút cố định",
-          "rationale_vi": "“Đường cong phải có hai đầu mút cố định” chưa đúng. Đặc điểm nhận biết là đường bị uốn và thay đổi hướng. Vậy đáp án là Đường cong có thể đổi hướng mềm mại."
+          "text": "Nét đó phải khép kín mới là đường cong",
+          "rationale_vi": "“Nét đó phải khép kín mới là đường cong” chưa đúng. Nét đã uốn và đổi hướng nên có phần đường cong; đường cong không bắt buộc phải khép kín. Vậy đáp án là Nét đó có phần đường cong vì đã đổi hướng."
         },
         {
           "id": "c",
-          "text": "Đường cong luôn là đường khép kín",
-          "rationale_vi": "“Đường cong luôn là đường khép kín” chưa đúng. Đặc điểm nhận biết là đường bị uốn và thay đổi hướng. Vậy đáp án là Đường cong có thể đổi hướng mềm mại."
+          "text": "Nét đó là một điểm vì không có cạnh",
+          "rationale_vi": "“Nét đó là một điểm vì không có cạnh” chưa đúng. Nét đã uốn và đổi hướng nên có phần đường cong; đường cong không bắt buộc phải khép kín. Vậy đáp án là Nét đó có phần đường cong vì đã đổi hướng."
         },
         {
           "id": "d",
-          "text": "Đường cong có thể đổi hướng mềm mại",
-          "rationale_vi": "Đặc điểm nhận biết là đường bị uốn và thay đổi hướng. Vậy đáp án là Đường cong có thể đổi hướng mềm mại."
+          "text": "Nét đó có phần đường cong vì đã đổi hướng",
+          "rationale_vi": "Nét đã uốn và đổi hướng nên có phần đường cong; đường cong không bắt buộc phải khép kín. Vậy đáp án là Nét đó có phần đường cong vì đã đổi hướng."
         }
       ],
       "correct_choice_id": "d"
@@ -5354,13 +5354,13 @@
       "skill_id": "SPHERE_RECOGNIZE",
       "difficulty": "application",
       "question_type": "multiple_choice",
-      "prompt_vi": "Mô tả nào phù hợp với khối cầu?",
+      "prompt_vi": "Bạn Minh nói quả bóng giống khối trụ vì cả hai đều có dạng tròn. Mô tả nào giúp phân biệt khối cầu với khối trụ?",
       "answer_kind": "text",
-      "correct_answer": "Tròn đều và không có đáy phẳng",
+      "correct_answer": "Khối cầu tròn đều và không có hai đáy phẳng",
       "accepted_answers": [
-        "Tròn đều và không có đáy phẳng"
+        "Khối cầu tròn đều và không có hai đáy phẳng"
       ],
-      "explanation_vi": "Khối cầu tròn đều theo mọi hướng và không có mặt đáy phẳng. Vậy đáp án là Tròn đều và không có đáy phẳng.",
+      "explanation_vi": "Khối cầu tròn đều theo mọi hướng và không có hai đáy phẳng như khối trụ. Vậy đáp án là Khối cầu tròn đều và không có hai đáy phẳng.",
       "hints_vi": [
         "Nhớ kiến thức: Khối tròn không có cạnh, đỉnh hay mặt phẳng đáy.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Khối cầu” trước rồi mới chọn phương án khớp kết quả."
@@ -5380,23 +5380,23 @@
       "choices": [
         {
           "id": "a",
-          "text": "Tròn đều và không có đáy phẳng",
-          "rationale_vi": "Khối cầu tròn đều theo mọi hướng và không có mặt đáy phẳng. Vậy đáp án là Tròn đều và không có đáy phẳng."
+          "text": "Khối cầu tròn đều và không có hai đáy phẳng",
+          "rationale_vi": "Khối cầu tròn đều theo mọi hướng và không có hai đáy phẳng như khối trụ. Vậy đáp án là Khối cầu tròn đều và không có hai đáy phẳng."
         },
         {
           "id": "b",
-          "text": "Có hai đáy tròn song song",
-          "rationale_vi": "“Có hai đáy tròn song song” chưa đúng. Khối cầu tròn đều theo mọi hướng và không có mặt đáy phẳng. Vậy đáp án là Tròn đều và không có đáy phẳng."
+          "text": "Khối cầu có hai đáy tròn song song",
+          "rationale_vi": "“Khối cầu có hai đáy tròn song song” chưa đúng. Khối cầu tròn đều theo mọi hướng và không có hai đáy phẳng như khối trụ. Vậy đáp án là Khối cầu tròn đều và không có hai đáy phẳng."
         },
         {
           "id": "c",
-          "text": "Có một mặt đáy phẳng và một đỉnh",
-          "rationale_vi": "“Có một mặt đáy phẳng và một đỉnh” chưa đúng. Khối cầu tròn đều theo mọi hướng và không có mặt đáy phẳng. Vậy đáp án là Tròn đều và không có đáy phẳng."
+          "text": "Khối cầu có một đáy phẳng và một đỉnh",
+          "rationale_vi": "“Khối cầu có một đáy phẳng và một đỉnh” chưa đúng. Khối cầu tròn đều theo mọi hướng và không có hai đáy phẳng như khối trụ. Vậy đáp án là Khối cầu tròn đều và không có hai đáy phẳng."
         },
         {
           "id": "d",
-          "text": "Có các mặt phẳng và cạnh",
-          "rationale_vi": "“Có các mặt phẳng và cạnh” chưa đúng. Khối cầu tròn đều theo mọi hướng và không có mặt đáy phẳng. Vậy đáp án là Tròn đều và không có đáy phẳng."
+          "text": "Khối cầu có các mặt phẳng và cạnh",
+          "rationale_vi": "“Khối cầu có các mặt phẳng và cạnh” chưa đúng. Khối cầu tròn đều theo mọi hướng và không có hai đáy phẳng như khối trụ. Vậy đáp án là Khối cầu tròn đều và không có hai đáy phẳng."
         }
       ],
       "correct_choice_id": "a"
@@ -6258,13 +6258,13 @@
       "skill_id": "TIME_DAY_24_HOURS",
       "difficulty": "application",
       "question_type": "true_false",
-      "prompt_vi": "Một ngày đầy đủ có ít hơn 24 giờ.",
+      "prompt_vi": "Một hoạt động bắt đầu lúc 6 giờ sáng và kết thúc đúng 6 giờ sáng hôm sau kéo dài một ngày đầy đủ.",
       "answer_kind": "text",
-      "correct_answer": "Sai",
+      "correct_answer": "Đúng",
       "accepted_answers": [
-        "Sai"
+        "Đúng"
       ],
-      "explanation_vi": "Một ngày đầy đủ có đúng 24 giờ nên phát biểu 'ít hơn 24 giờ' là sai.",
+      "explanation_vi": "Từ 6 giờ sáng hôm nay đến 6 giờ sáng hôm sau là 24 giờ, đúng bằng một ngày đầy đủ.",
       "hints_vi": [
         "Nhớ kiến thức: 1 ngày = 24 giờ.",
         "Thử giải hoặc kiểm chứng mệnh đề độc lập bằng “Ngày và giờ”, không dựa vào cảm giác khi đọc câu."
@@ -6284,13 +6284,13 @@
       "choices": [
         {
           "id": "a",
-          "text": "Đúng",
-          "rationale_vi": "“Đúng” chưa đúng. Một ngày đầy đủ có đúng 24 giờ nên phát biểu 'ít hơn 24 giờ' là sai."
+          "text": "Sai",
+          "rationale_vi": "“Sai” chưa đúng. Từ 6 giờ sáng hôm nay đến 6 giờ sáng hôm sau là 24 giờ, đúng bằng một ngày đầy đủ."
         },
         {
           "id": "b",
-          "text": "Sai",
-          "rationale_vi": "Một ngày đầy đủ có đúng 24 giờ nên phát biểu 'ít hơn 24 giờ' là sai."
+          "text": "Đúng",
+          "rationale_vi": "Từ 6 giờ sáng hôm nay đến 6 giờ sáng hôm sau là 24 giờ, đúng bằng một ngày đầy đủ."
         }
       ],
       "correct_choice_id": "b"
@@ -6503,13 +6503,13 @@
       "skill_id": "CALENDAR_DAYS_IN_MONTH_DATE",
       "difficulty": "application",
       "question_type": "multiple_choice",
-      "prompt_vi": "Ngày sau ngày 14 tháng 9 là ngày nào?",
+      "prompt_vi": "Lan ghi ngày sau ngày 14 tháng 9 là ngày 14 tháng 10. Cách sửa nào đúng?",
       "answer_kind": "text",
       "correct_answer": "15 tháng 9",
       "accepted_answers": [
         "15 tháng 9"
       ],
-      "explanation_vi": "Ngày kế tiếp tăng số ngày thêm 1 trong cùng tháng, nên là 15 tháng 9.",
+      "explanation_vi": "Ngày kế tiếp chỉ tăng số ngày thêm 1 và vẫn ở tháng 9, nên phải sửa thành 15 tháng 9.",
       "hints_vi": [
         "Nhớ kiến thức: Dùng số ngày và vị trí ngày trên lịch để xác định ngày trước, ngày sau và số ngày trong tháng.",
         "Đừng đoán theo vị trí đáp án. Tự giải theo “Đọc lịch” trước rồi mới chọn phương án khớp kết quả."
@@ -6530,22 +6530,22 @@
         {
           "id": "a",
           "text": "13 tháng 9",
-          "rationale_vi": "“13 tháng 9” chưa đúng. Ngày kế tiếp tăng số ngày thêm 1 trong cùng tháng, nên là 15 tháng 9."
+          "rationale_vi": "“13 tháng 9” chưa đúng. Ngày kế tiếp chỉ tăng số ngày thêm 1 và vẫn ở tháng 9, nên phải sửa thành 15 tháng 9."
         },
         {
           "id": "b",
           "text": "15 tháng 9",
-          "rationale_vi": "Ngày kế tiếp tăng số ngày thêm 1 trong cùng tháng, nên là 15 tháng 9."
+          "rationale_vi": "Ngày kế tiếp chỉ tăng số ngày thêm 1 và vẫn ở tháng 9, nên phải sửa thành 15 tháng 9."
         },
         {
           "id": "c",
           "text": "14 tháng 10",
-          "rationale_vi": "“14 tháng 10” chưa đúng. Ngày kế tiếp tăng số ngày thêm 1 trong cùng tháng, nên là 15 tháng 9."
+          "rationale_vi": "“14 tháng 10” chưa đúng. Ngày kế tiếp chỉ tăng số ngày thêm 1 và vẫn ở tháng 9, nên phải sửa thành 15 tháng 9."
         },
         {
           "id": "d",
           "text": "16 tháng 9",
-          "rationale_vi": "“16 tháng 9” chưa đúng. Ngày kế tiếp tăng số ngày thêm 1 trong cùng tháng, nên là 15 tháng 9."
+          "rationale_vi": "“16 tháng 9” chưa đúng. Ngày kế tiếp chỉ tăng số ngày thêm 1 và vẫn ở tháng 9, nên phải sửa thành 15 tháng 9."
         }
       ],
       "correct_choice_id": "b"

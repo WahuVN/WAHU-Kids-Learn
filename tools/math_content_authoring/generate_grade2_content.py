@@ -624,12 +624,12 @@ Q = {
     "NUM_PREDECESSOR_SUCCESSOR": [
         nq("Số liền trước của 500 là số nào?", 499, "Số liền trước nhỏ hơn 500 đúng 1 nên là 499."),
         nq("Số liền sau của 999 là số nào?", 1000, "Số liền sau lớn hơn 999 đúng 1 nên là 1000."),
-        nq("Điền số còn thiếu: 398, 399, __, 401.", 400, "Dãy tăng mỗi lần 1 đơn vị: sau 399 là 400 rồi đến 401."),
+        nq("Bạn An viết số liền sau của 399 là 401. Số nào cần thay vào 401 để câu trả lời đúng?", 400, "Số liền sau hơn số đã cho đúng 1 đơn vị; 399 + 1 = 400 nên cần thay 401 bằng 400."),
     ],
     "PLACE_VALUE_HUNDREDS_TENS_ONES": [
         nq("Trong số 684, chữ số 6 có giá trị là bao nhiêu?", 600, "Chữ số 6 đứng ở hàng trăm nên có giá trị 600."),
         nq("Trong số 572, chữ số hàng chục là chữ số nào?", 7, "Số 572 có 5 trăm, 7 chục và 2 đơn vị."),
-        nq("Số có 4 trăm, 0 chục và 9 đơn vị là số nào?", 409, "Giữ đúng vị trí hàng chục bằng 0: 400 + 0 + 9 = 409."),
+        nq("Bạn Bình viết 4 trăm, 0 chục và 9 đơn vị thành 490. Số đúng phải là bao nhiêu?", 409, "Hàng trăm là 4, hàng chục phải giữ 0 và hàng đơn vị là 9: 400 + 0 + 9 = 409, không phải 490."),
     ],
     "NUM_EXPANDED_FORM_HTO": [
         mc("Dạng khai triển đúng của 352 là gì?", "300 + 50 + 2", ["300 + 5 + 2", "30 + 50 + 2", "300 + 50 + 20"], "352 có 3 trăm, 5 chục và 2 đơn vị nên bằng 300 + 50 + 2."),
@@ -649,7 +649,7 @@ Q = {
     "NUM_MIN_MAX_UP_TO_4": [
         nq("Số bé nhất trong nhóm 407, 470, 704, 740 là số nào?", 407, "Cả bốn số đều khác nhau; so sánh hàng trăm cho thấy 407 và 470 nhỏ hơn các số 7 trăm, rồi 407 < 470."),
         nq("Số lớn nhất trong nhóm 125, 512, 251, 215 là số nào?", 512, "512 có 5 trăm, lớn hơn các số chỉ có 1 hoặc 2 trăm."),
-        nq("Bốn thẻ ghi 999, 909, 990, 900. Thẻ lớn nhất ghi số nào?", 999, "Cùng 9 trăm; 999 có 9 chục và 9 đơn vị nên lớn nhất."),
+        nq("Bạn An chọn 990 là số lớn nhất trong 999, 909, 990, 900. Số nào chứng minh lựa chọn đó chưa đúng?", 999, "Cả 999 và 990 đều có 9 trăm, nhưng 999 có 9 chục bằng 990 rồi 9 đơn vị lớn hơn 0 đơn vị, nên 999 lớn hơn 990."),
     ],
     "NUM_SORT_UP_TO_4": [
         mc("Sắp xếp tăng dần 320, 302, 230, 203.", "203, 230, 302, 320", ["320, 302, 230, 203", "203, 302, 230, 320", "230, 203, 320, 302"], "Tăng dần là từ bé đến lớn: 203 < 230 < 302 < 320."),
@@ -721,7 +721,7 @@ Q = {
     "MULTIPLICATION_COMPONENTS": [
         mc("Trong 2 × 5 = 10, số 2 được gọi là gì?", "thừa số", ["tích", "thương", "số bị chia"], "2 là một số được nhân nên là thừa số."),
         mc("Trong 5 × 6 = 30, số 30 là gì?", "tích", ["thừa số", "hiệu", "số chia"], "Kết quả của phép nhân gọi là tích."),
-        mc("Trong 2 × 8 = 16, hai thừa số là cặp nào?", "2 và 8", ["8 và 16", "2 và 16", "16 và 16"], "Hai số đứng hai bên dấu nhân là hai thừa số."),
+        mc("Bạn Mai nói trong 2 × 8 = 16 thì 8 và 16 là hai thừa số. Cặp nào sửa lời bạn Mai?", "2 và 8", ["8 và 16", "2 và 16", "16 và 16"], "Trong phép nhân, hai số được nhân với nhau là thừa số; 2 và 8 là hai thừa số, còn 16 là tích."),
     ],
     "DIVISION_COMPONENTS": [
         mc("Trong 10 : 2 = 5, số 10 là gì?", "số bị chia", ["số chia", "thương", "tích"], "10 là lượng được đem chia nên là số bị chia."),
@@ -803,7 +803,7 @@ Q = {
     "CURVE_RECOGNIZE": [
         mc("Đường nào được gọi là đường cong?", "Đường uốn lượn", ["Nét thẳng kéo dài không đổi hướng", "Phần thẳng có hai đầu mút", "Một vị trí được đánh dấu"], "Đường cong có hình dạng uốn lượn, không giữ hướng thẳng trên toàn bộ đường."),
         mc("Một nét vẽ hình vòng cung là ví dụ gần nhất của loại đường nào?", "đường cong", ["đường thẳng", "đoạn thẳng", "điểm"], "Vòng cung là một đường cong."),
-        mc("Phát biểu nào đúng?", "Đường cong có thể đổi hướng mềm mại", ["Đường cong luôn đi thẳng một hướng", "Đường cong phải có hai đầu mút cố định", "Đường cong luôn là đường khép kín"], "Đặc điểm nhận biết là đường bị uốn và thay đổi hướng."),
+        mc("Một nét đang đi thẳng rồi uốn sang bên và không khép kín. Kết luận nào phù hợp nhất?", "Nét đó có phần đường cong vì đã đổi hướng", ["Nét đó vẫn là đường thẳng vì có đoạn đi thẳng", "Nét đó phải khép kín mới là đường cong", "Nét đó là một điểm vì không có cạnh"], "Nét đã uốn và đổi hướng nên có phần đường cong; đường cong không bắt buộc phải khép kín."),
     ],
     "STRAIGHT_LINE_RECOGNIZE": [
         mc("Đường thẳng khác đoạn thẳng ở điểm nào?", "Có thể kéo dài về hai phía", ["Có đúng hai đầu mút", "Chỉ kéo dài về một phía", "Luôn uốn cong"], "Đường thẳng không bị giới hạn bởi hai đầu mút như đoạn thẳng."),
@@ -833,7 +833,7 @@ Q = {
     "SPHERE_RECOGNIZE": [
         mc("Vật nào gần dạng khối cầu nhất?", "quả bóng", ["lon nước", "hộp chữ nhật", "thước thẳng"], "Quả bóng tròn đều theo mọi hướng, gần dạng khối cầu."),
         mc("Khối cầu có cạnh hay đỉnh không?", "không", ["có cạnh nhưng không có đỉnh", "không có cạnh nhưng có hai đỉnh", "có cả cạnh và đỉnh"], "Khối cầu không có cạnh và không có đỉnh."),
-        mc("Mô tả nào phù hợp với khối cầu?", "Tròn đều và không có đáy phẳng", ["Có hai đáy tròn song song", "Có một mặt đáy phẳng và một đỉnh", "Có các mặt phẳng và cạnh"], "Khối cầu tròn đều theo mọi hướng và không có mặt đáy phẳng."),
+        mc("Bạn Minh nói quả bóng giống khối trụ vì cả hai đều có dạng tròn. Mô tả nào giúp phân biệt khối cầu với khối trụ?", "Khối cầu tròn đều và không có hai đáy phẳng", ["Khối cầu có hai đáy tròn song song", "Khối cầu có một đáy phẳng và một đỉnh", "Khối cầu có các mặt phẳng và cạnh"], "Khối cầu tròn đều theo mọi hướng và không có hai đáy phẳng như khối trụ."),
     ],
     "DRAW_SEGMENT_GIVEN_LENGTH": [
         nq("Trên thước, đặt đầu A ở vạch 2 cm. Muốn AB dài 5 cm và B ở bên phải A, B ở vạch bao nhiêu?", 7, "Vị trí B = 2 + 5 = 7 cm."),
@@ -869,7 +869,7 @@ Q = {
     "TIME_DAY_24_HOURS": [
         nq("Một ngày đầy đủ có bao nhiêu giờ?", 24, "Theo quan hệ thời gian, 1 ngày = 24 giờ.", unit="giờ"),
         mc("Khi đã đủ 24 giờ liên tiếp, khoảng thời gian đó bằng bao nhiêu ngày đầy đủ?", "1 ngày", ["2 ngày", "10 ngày", "không thể biết"], "Theo quan hệ đã học, 24 giờ liên tiếp bằng 1 ngày đầy đủ."),
-        tf("Một ngày đầy đủ có ít hơn 24 giờ.", False, "Một ngày đầy đủ có đúng 24 giờ nên phát biểu 'ít hơn 24 giờ' là sai."),
+        tf("Một hoạt động bắt đầu lúc 6 giờ sáng và kết thúc đúng 6 giờ sáng hôm sau kéo dài một ngày đầy đủ.", True, "Từ 6 giờ sáng hôm nay đến 6 giờ sáng hôm sau là 24 giờ, đúng bằng một ngày đầy đủ."),
     ],
     "TIME_HOUR_60_MINUTES": [
         nq("1 giờ bằng bao nhiêu phút?", 60, "Theo quan hệ thời gian, 1 giờ = 60 phút.", unit="phút"),
@@ -879,7 +879,7 @@ Q = {
     "CALENDAR_DAYS_IN_MONTH_DATE": [
         nq("Tháng 4 có bao nhiêu ngày?", 30, "Tháng 4 có 30 ngày.", unit="ngày"),
         nq("Tháng 5 có bao nhiêu ngày?", 31, "Tháng 5 có 31 ngày.", unit="ngày"),
-        mc("Ngày sau ngày 14 tháng 9 là ngày nào?", "15 tháng 9", ["13 tháng 9", "14 tháng 10", "16 tháng 9"], "Ngày kế tiếp tăng số ngày thêm 1 trong cùng tháng, nên là 15 tháng 9."),
+        mc("Lan ghi ngày sau ngày 14 tháng 9 là ngày 14 tháng 10. Cách sửa nào đúng?", "15 tháng 9", ["13 tháng 9", "14 tháng 10", "16 tháng 9"], "Ngày kế tiếp chỉ tăng số ngày thêm 1 và vẫn ở tháng 9, nên phải sửa thành 15 tháng 9."),
     ],
     "MONEY_VND_NOTE_RECOGNITION": [
         mc("Khi xem hình một tờ tiền Việt Nam, thông tin nào cần đọc để nhận biết giá trị?", "Con số mệnh giá và chữ đồng trên tờ", ["Chỉ màu sắc của tờ tiền", "Chỉ kích thước của tờ tiền", "Chỉ hình trang trí nổi bật trên tờ"], "Để nhận biết giá trị, cần đọc con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền."),
