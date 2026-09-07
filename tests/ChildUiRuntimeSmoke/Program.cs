@@ -1777,6 +1777,23 @@ namespace WAHU.ChildUiRuntimeSmoke
                 A(suspendedGarden.GrowthSteps == 0 && suspendedGarden.CompletedMathSessions == 0,
                     "quick_rescue_suspend_does_not_grant_fake_reward");
 
+                using (var resumeShell = (Form)rescueCtor.Invoke(new object[] { database, settings }))
+                {
+                    Invoke(resumeShell, "LoadEvents");
+                    A(Get<string>(resumeShell, "SelectedEventId") == eventId,
+                        "quick_rescue_shell_prioritizes_exact_resumable_event");
+                    var resumeShellStart = GetField<Button>(resumeShell, "_startButton");
+                    A(resumeShellStart.Enabled && resumeShellStart.Text.IndexOf("Tiếp tục", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                      resumeShellStart.AccessibleDescription.IndexOf("đang dở", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "quick_rescue_shell_marks_saved_session_as_continue");
+                    A(GetField<Label>(resumeShell, "_status").Text.IndexOf("đã được lưu", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "quick_rescue_shell_explains_resume_without_restart_pressure");
+                    var resumeButtons = GetField<System.Collections.IDictionary>(resumeShell, "_eventButtons");
+                    var resumableCard = resumeButtons == null ? null : resumeButtons[eventId] as Button;
+                    A(resumableCard != null && resumableCard.Text.IndexOf("Đang dở", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "quick_rescue_shell_resumable_card_is_visibly_distinct");
+                }
+
                 using (var resumed = (WAHUKidsLearn.MathLessonForm)eventLessonCtor.Invoke(new object[]
                 {
                     database, settings, lessonId, presentation

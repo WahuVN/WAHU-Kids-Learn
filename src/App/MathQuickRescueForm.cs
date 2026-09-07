@@ -292,6 +292,8 @@ namespace WAHUKidsLearn
         private MathLessonCatalogSnapshot _catalog;
         private IDictionary<string, MathLessonAccessSnapshot> _access = new Dictionary<string, MathLessonAccessSnapshot>(StringComparer.Ordinal);
         private MathQuickRescueEventPresentation _selectedEvent;
+        private string _resumableLessonId;
+        private string _resumableSessionId;
         private FlowLayoutPanel _eventFlow;
         private Label _eventTitle;
         private Label _intro;
@@ -536,9 +538,11 @@ namespace WAHUKidsLearn
                 _access = new MathLessonProgressService(_database, _catalogPath)
                     .GetAllAccess(LearnerSessionService.PrimaryChildId)
                     .ToDictionary(x => x.LessonId, StringComparer.Ordinal);
+                RefreshResumableSessionHint();
                 PopulateEventButtons();
+                var resumable = _events.FirstOrDefault(x => IsResumableEvent(x) && IsUnlocked(x));
                 var preferred = _events.FirstOrDefault(x => string.Equals(x.TargetLessonId, _preferredLessonId, StringComparison.Ordinal) && IsUnlocked(x));
-                var recommended = preferred ?? _events.FirstOrDefault(x => IsUnlocked(x) && !IsLessonCompleted(x)) ?? _events.FirstOrDefault(IsUnlocked);
+                var recommended = resumable ?? preferred ?? _events.FirstOrDefault(x => IsUnlocked(x) && !IsLessonCompleted(x)) ?? _events.FirstOrDefault(IsUnlocked);
                 if (recommended != null) SelectEvent(recommended);
                 else ShowUnavailable("Các nhiệm vụ đầu đang chờ bài nền được mở. Con vẫn có thể học trong thư viện Toán.");
             }
@@ -561,8 +565,10 @@ namespace WAHUKidsLearn
                     var access = AccessFor(item);
                     var unlocked = access != null && access.IsUnlocked;
                     var completed = access != null && access.IsCompleted;
+                    var resumable = IsResumableEvent(item);
                     var lockReason = unlocked ? string.Empty : BuildLockReason(access);
-                    var state = completed ? "Bài nền đã xong • có thể chơi" : (unlocked ? "Sẵn sàng • 3 chặng" : "Xem bài cần học trước");
+                    var state = resumable ? "Đang dở • tiếp tục chặng đã lưu" :
+                        (completed ? "Bài nền đã xong • có thể chơi" : (unlocked ? "Sẵn sàng • 3 chặng" : "Xem bài cần học trước"));
                     var captured = item;
                     var button = new RescueMissionButton
                     {
@@ -618,15 +624,18 @@ namespace WAHUKidsLearn
             var access = AccessFor(item);
             var unlocked = access != null && access.IsUnlocked;
             var completed = access != null && access.IsCompleted;
+            var resumable = IsResumableEvent(item);
             var lockReason = unlocked ? string.Empty : BuildLockReason(access);
-            _status.Text = completed
-                ? "Bài nền của nhiệm vụ này đã hoàn thành. Con có thể bắt đầu ba chặng mà tiến bộ cũ vẫn được giữ nguyên."
-                : (unlocked ? "Ba chặng, mỗi chặng một câu. Làm chắc từng bước là được." : lockReason);
+            _status.Text = resumable
+                ? "Chặng đang dở đã được lưu. Con có thể tiếp tục đúng chỗ, không cần làm lại từ đầu."
+                : (completed
+                    ? "Bài nền của nhiệm vụ này đã hoàn thành. Con có thể bắt đầu ba chặng mà tiến bộ cũ vẫn được giữ nguyên."
+                    : (unlocked ? "Ba chặng, mỗi chặng một câu. Làm chắc từng bước là được." : lockReason));
             _startButton.Enabled = unlocked;
-            _startButton.Text = unlocked ? "Bắt đầu 3 chặng" : "Học bài nền trước";
-            _startButton.AccessibleDescription = unlocked
-                ? "Mở ba câu Toán của bài đã chọn. Không có giới hạn thời gian."
-                : lockReason;
+            _startButton.Text = resumable ? "Tiếp tục chặng đang dở" : (unlocked ? "Bắt đầu 3 chặng" : "Học bài nền trước");
+            _startButton.AccessibleDescription = resumable
+                ? "Tiếp tục đúng chặng Toán đang dở đã được lưu. Không có giới hạn thời gian."
+                : (unlocked ? "Mở ba câu Toán của bài đã chọn. Không có giới hạn thời gian." : lockReason);
             foreach (var pair in _eventButtons)
             {
                 var missionButton = pair.Value as RescueMissionButton;
@@ -647,6 +656,37 @@ namespace WAHUKidsLearn
             {
                 _status.Text = "Chưa thể mở nhiệm vụ lúc này. Phần học đã lưu vẫn an toàn; con có thể quay lại thư viện Toán.";
             }
+        }
+
+        private void RefreshResumableSessionHint()
+        {
+            _resumableLessonId = null;
+            _resumableSessionId = null;
+            try
+            {
+                var runtime = new MathSessionRuntimeService(_database)
+                    .LoadLatestResumable(LearnerSessionService.PrimaryChildId);
+                if (runtime == null || !string.Equals(runtime.SessionMode, "lesson", StringComparison.Ordinal) ||
+                    string.IsNullOrWhiteSpace(runtime.TargetLessonId) ||
+                    !string.Equals(runtime.PackId, MathSessionCoordinator.PackId, StringComparison.Ordinal) ||
+                    !string.Equals(runtime.PackVersion, MathSessionCoordinator.PackVersion, StringComparison.Ordinal) ||
+                    !_events.Any(x => string.Equals(x.TargetLessonId, runtime.TargetLessonId, StringComparison.Ordinal)))
+                    return;
+                _resumableLessonId = runtime.TargetLessonId;
+                _resumableSessionId = runtime.SessionId;
+            }
+            catch (MathSessionRuntimeCorruptException)
+            {
+            }
+            catch
+            {
+            }
+        }
+
+        private bool IsResumableEvent(MathQuickRescueEventPresentation item)
+        {
+            return item != null && !string.IsNullOrWhiteSpace(_resumableSessionId) &&
+                string.Equals(item.TargetLessonId, _resumableLessonId, StringComparison.Ordinal);
         }
 
         private MathLessonAccessSnapshot AccessFor(MathQuickRescueEventPresentation item)
