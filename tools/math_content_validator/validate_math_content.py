@@ -374,6 +374,172 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
         if label == "cả ba bằng nhau":
             return "Ba nhóm có số biểu tượng 5, 7 và 3 nên không bằng nhau; nhóm có 7 biểu tượng mới nhiều nhất."
 
+    if skill == "POINT_RECOGNIZE":
+        label = choice_text.strip().casefold()
+        prompt_cf = prompt.casefold()
+        if "kí hiệu nào phù hợp" in prompt_cf:
+            reasons = {
+                "ab": "AB gồm hai chữ cái nên thường dùng để chỉ đối tượng gắn với hai điểm A và B, không phải tên của một điểm duy nhất.",
+                "1": "Tên điểm trong hình học thường dùng một chữ cái in hoa; số 1 không phải kí hiệu tên điểm trong quy ước này.",
+                "5 cm": "5 cm là một số đo độ dài, không phải kí hiệu dùng để đặt tên một vị trí hình học.",
+            }
+            if label in reasons: return reasons[label]
+        if "phát biểu nào đúng về một điểm" in prompt_cf:
+            reasons = {
+                "điểm có một độ dài xác định": "Điểm chỉ biểu diễn một vị trí nên không có độ dài riêng để đo.",
+                "điểm có hai đầu mút": "Hai đầu mút là đặc điểm của đoạn thẳng, không phải của một điểm.",
+                "điểm có thể kéo dài về hai phía": "Khả năng kéo dài về hai phía là đặc điểm của đường thẳng; một điểm chỉ là một vị trí.",
+            }
+            if label in reasons: return reasons[label]
+        if "ba vị trí được đánh dấu a, b, c" in prompt_cf:
+            nums = [int(x) for x in re.findall(r"\d+", choice_text)]
+            if nums and nums[0] != 3:
+                return f"Hình đã nêu ba vị trí A, B, C nên có đúng 3 điểm được đặt tên; chọn {nums[0]} là đếm thiếu hoặc thừa."
+
+    if skill == "LINE_SEGMENT_RECOGNIZE":
+        label = choice_text.strip().casefold()
+        prompt_cf = prompt.casefold()
+        if "bao nhiêu đầu mút" in prompt_cf:
+            nums = [int(x) for x in re.findall(r"\d+", choice_text)]
+            if nums and nums[0] != 2:
+                return f"Một đoạn thẳng luôn có đúng 2 đầu mút; lựa chọn {nums[0]} không đúng số đầu mút của đoạn AB."
+        if "mô tả nào đúng về đoạn thẳng" in prompt_cf:
+            reasons = {
+                "phần thẳng kéo dài mãi về hai phía": "Nét thẳng kéo dài mãi về hai phía là đường thẳng; đoạn thẳng bị giới hạn bởi hai đầu mút.",
+                "nét uốn cong nối hai vị trí": "Đoạn thẳng phải là phần thẳng giữa hai đầu mút, không phải một nét uốn cong.",
+                "chỉ một vị trí không có độ dài": "Một vị trí đơn lẻ là điểm; đoạn thẳng phải nối hai đầu mút và có độ dài.",
+            }
+            if label in reasons: return reasons[label]
+        if "nối thẳng điểm m với điểm n" in prompt_cf:
+            reasons = {
+                "đường thẳng mn": "Nối hai điểm M và N bằng phần thẳng chỉ giữa hai điểm tạo đoạn thẳng MN; đường thẳng còn kéo dài qua hai phía.",
+                "đường cong mn": "Đề yêu cầu nối thẳng M với N nên kết quả không thể là đường cong.",
+                "chỉ điểm m": "Hình mới phải liên hệ cả M và N; chỉ giữ điểm M thì chưa thực hiện việc nối hai điểm.",
+            }
+            if label in reasons: return reasons[label]
+
+    if skill == "CURVE_RECOGNIZE":
+        label = choice_text.strip().casefold()
+        prompt_cf = prompt.casefold()
+        reasons = {
+            "nét thẳng kéo dài không đổi hướng": "Nét không đổi hướng là nét thẳng, trong khi đường cong phải có sự uốn hoặc đổi hướng liên tục.",
+            "phần thẳng có hai đầu mút": "Phần thẳng có hai đầu mút là đoạn thẳng, không phải đường cong.",
+            "một vị trí được đánh dấu": "Một vị trí được đánh dấu là điểm, không tạo thành một đường cong.",
+            "đường thẳng": "Vòng cung có sự uốn cong nên không thể là đường thẳng.",
+            "đoạn thẳng": "Vòng cung không phải phần thẳng giữa hai đầu mút nên không phải đoạn thẳng.",
+            "điểm": "Vòng cung là một nét có chiều dài và đổi hướng, không phải một điểm đơn lẻ.",
+            "nét đó vẫn là đường thẳng vì có đoạn đi thẳng": "Chỉ cần nét đã uốn và đổi hướng thì nó có phần đường cong; một đoạn đi thẳng không làm toàn nét trở thành đường thẳng.",
+            "nét đó phải khép kín mới là đường cong": "Đường cong không bắt buộc khép kín; một nét uốn mở vẫn là đường cong.",
+            "nét đó là một điểm vì không có cạnh": "Điểm chỉ là một vị trí; nét đã kéo dài và uốn sang bên nên không thể là một điểm.",
+        }
+        if label in reasons: return reasons[label]
+
+    if skill == "STRAIGHT_LINE_RECOGNIZE":
+        label = choice_text.strip().casefold()
+        prompt_cf = prompt.casefold()
+        reasons = {
+            "có đúng hai đầu mút": "Đúng hai đầu mút là đặc điểm của đoạn thẳng; đường thẳng có thể kéo dài về cả hai phía.",
+            "chỉ kéo dài về một phía": "Đường thẳng có thể kéo dài về cả hai phía, không chỉ một phía.",
+            "luôn uốn cong": "Đường thẳng không uốn cong; các điểm của nó nằm theo cùng một hướng thẳng.",
+            "đoạn thẳng": "Nét có thể kéo dài mãi theo hai hướng là đường thẳng, còn đoạn thẳng bị giới hạn bởi hai đầu mút.",
+            "đường cong": "Đề mô tả nét không uốn cong nên không thể là đường cong.",
+            "đường gấp khúc": "Đường gấp khúc gồm nhiều đoạn thẳng đổi hướng tại điểm nối; đề chỉ mô tả một đường thẳng kéo dài.",
+            "a và b là hai đầu mút của d": "Đường thẳng d không bị giới hạn tại A và B, nên A và B không phải hai đầu mút của d.",
+            "d chỉ gồm đoạn giữa a và b": "Đường thẳng d còn kéo dài ra ngoài A và B, không chỉ gồm phần nằm giữa hai điểm.",
+            "a hoặc b không thuộc d": "Đề đã cho cả A và B cùng nằm trên d nên nói một trong hai điểm không thuộc d là trái dữ kiện.",
+        }
+        if label in reasons: return reasons[label]
+
+    if skill == "POLYLINE_RECOGNIZE":
+        label = choice_text.strip().casefold()
+        prompt_cf = prompt.casefold()
+        reasons = {
+            "nhiều đoạn thẳng rời nhau": "Đường gấp khúc cần các đoạn thẳng nối tiếp nhau tại đầu mút; các đoạn rời nhau chưa tạo thành một đường gấp khúc.",
+            "một đoạn thẳng duy nhất": "Đường gấp khúc phải gồm nhiều đoạn thẳng nối tiếp, không chỉ một đoạn duy nhất.",
+            "một nét cong liên tục": "Đường gấp khúc được tạo bởi các đoạn thẳng, không phải một nét cong liên tục.",
+            "đoạn thẳng ad": "Ba đoạn AB, BC, CD có các chỗ đổi hướng tại B và C nên không thể gộp thành một đoạn thẳng AD.",
+            "đường thẳng ad": "Chuỗi AB, BC, CD gồm nhiều đoạn nối tiếp và có thể đổi hướng, không phải một đường thẳng duy nhất AD.",
+            "đường cong abcd": "Các phần AB, BC, CD đều là đoạn thẳng nên toàn hình là đường gấp khúc, không phải đường cong.",
+        }
+        if label in reasons: return reasons[label]
+        if "có 4 đoạn thẳng" in prompt_cf:
+            nums = [int(x) for x in re.findall(r"\d+", choice_text)]
+            if nums and nums[0] != 5:
+                return f"Chuỗi mở có 4 đoạn thẳng cần 5 điểm theo thứ tự để tạo 4 khoảng nối; chọn {nums[0]} là thiếu điểm."
+
+    if skill == "THREE_COLLINEAR_POINTS":
+        label = choice_text.strip().casefold()
+        reasons = {
+            "không thẳng hàng": "Cả A, B, C đã cùng nằm trên một đường thẳng nên theo định nghĩa ba điểm là thẳng hàng.",
+            "tạo thành tam giác": "Ba điểm cùng trên một đường thẳng không tạo được một tam giác có diện tích.",
+            "chỉ a và b thẳng hàng": "Không chỉ A và B; đề đã cho cả C cũng nằm trên cùng đường thẳng đó.",
+            "có": "C nằm lệch khỏi đường d trong khi A và B nằm trên d, nên cả ba không cùng một đường thẳng.",
+            "luôn luôn": "Không thể nói luôn thẳng hàng khi dữ kiện cụ thể cho C nằm lệch khỏi đường chứa A và B.",
+            "không thể biết từ vị trí của c": "Vị trí C lệch khỏi d chính là dữ kiện đủ để kết luận ba điểm không thẳng hàng.",
+            "chỉ hai điểm có cùng nằm trên một đường thẳng": "Bất kỳ hai điểm đều xác định được một đường thẳng; để kiểm tra ba điểm thẳng hàng phải kiểm tra cả điểm thứ ba.",
+            "ba điểm có cách đều nhau": "Khoảng cách bằng nhau không phải điều kiện định nghĩa thẳng hàng; điều cần kiểm tra là cùng nằm trên một đường thẳng.",
+            "tên ba điểm có theo thứ tự bảng chữ cái": "Tên A, B, C không quyết định vị trí hình học; thứ tự chữ cái không chứng minh thẳng hàng.",
+        }
+        if label in reasons: return reasons[label]
+
+    if skill == "QUADRILATERAL_RECOGNIZE":
+        label = choice_text.strip().casefold()
+        reasons = {
+            "hình tam giác": "Tam giác có 3 cạnh, còn tứ giác phải là hình kín có đúng 4 cạnh.",
+            "hình có 5 cạnh": "Hình có 5 cạnh không phải tứ giác vì tứ giác có đúng 4 cạnh.",
+            "đường gấp khúc mở 4 đoạn": "Có 4 đoạn nhưng còn mở thì chưa tạo thành hình kín, nên chưa phải tứ giác.",
+            "hình kín có 5 cạnh": "Hình đã kín nhưng có 5 cạnh, vượt quá đúng 4 cạnh của một tứ giác.",
+            "đường gấp khúc mở": "Đường gấp khúc mở chưa khép kín, trong khi tứ giác là hình kín có 4 cạnh.",
+        }
+        if label in reasons: return reasons[label]
+
+    if skill == "CYLINDER_RECOGNIZE":
+        label = choice_text.strip().casefold()
+        reasons = {
+            "quả bóng": "Quả bóng gần dạng khối cầu, không có hai đáy tròn phẳng như khối trụ.",
+            "hộp chữ nhật": "Hộp chữ nhật có các mặt phẳng hình chữ nhật, không có mặt cong bao quanh như khối trụ.",
+            "tấm bìa phẳng": "Tấm bìa là vật gần dạng phẳng, không phải một khối có hai đáy và mặt cong.",
+            "hai đáy vuông và các mặt phẳng xung quanh": "Khối trụ có hai đáy tròn và mặt cong xung quanh, không phải hai đáy vuông cùng các mặt phẳng.",
+            "chỉ có một mặt tròn, không có mặt cong": "Khối trụ có hai đáy tròn và một mặt cong bao quanh, nên mô tả chỉ một mặt tròn là thiếu đặc trưng.",
+            "có một đáy tròn và một đỉnh nhọn": "Đỉnh nhọn là đặc điểm của dạng nón, không phải khối trụ có hai đáy tròn song song.",
+            "hình vuông": "Mặt trên và dưới của ống hình trụ là hai đáy tròn, không phải hình vuông.",
+            "hình tam giác": "Khối trụ có đáy tròn, không có đáy hình tam giác.",
+            "hình chữ nhật": "Mặt bên khi nhìn trải có thể liên hệ hình chữ nhật, nhưng mặt trên và mặt dưới của khối trụ là hình tròn.",
+        }
+        if label in reasons: return reasons[label]
+
+    if skill == "SPHERE_RECOGNIZE":
+        label = choice_text.strip().casefold()
+        reasons = {
+            "lon nước": "Lon nước gần dạng khối trụ với hai đáy tròn, không phải khối cầu tròn đều mọi phía.",
+            "hộp chữ nhật": "Hộp chữ nhật có các mặt phẳng và cạnh, khác khối cầu không có cạnh hay đỉnh.",
+            "thước thẳng": "Thước thẳng là vật dài và gần dạng phẳng, không gần dạng khối cầu.",
+            "có cạnh nhưng không có đỉnh": "Khối cầu không có cạnh lẫn đỉnh, nên nói có cạnh là sai đặc trưng.",
+            "không có cạnh nhưng có hai đỉnh": "Khối cầu không có cạnh và cũng không có đỉnh; hai đỉnh không thuộc đặc trưng của khối cầu.",
+            "có cả cạnh và đỉnh": "Bề mặt khối cầu trơn liên tục nên không có cạnh hoặc đỉnh.",
+            "khối cầu có hai đáy tròn song song": "Hai đáy tròn song song là đặc điểm của khối trụ, không phải khối cầu.",
+            "khối cầu có một đáy phẳng và một đỉnh": "Khối cầu không có đáy phẳng hay đỉnh; bề mặt của nó tròn đều.",
+            "khối cầu có các mặt phẳng và cạnh": "Khối cầu không được tạo bởi các mặt phẳng và không có cạnh.",
+        }
+        if label in reasons: return reasons[label]
+
+    if skill == "FOLD_CUT_COMPOSE_SHAPES":
+        label = choice_text.strip().casefold()
+        prompt_cf = prompt.casefold()
+        reasons = {
+            "một điểm": "Ghép hai tam giác theo cạnh tạo một hình có diện tích, không thể thu lại thành một điểm đơn lẻ.",
+            "một khối cầu": "Hai tam giác phẳng ghép theo cạnh vẫn tạo hình phẳng, không tự biến thành một khối cầu ba chiều.",
+            "một đường thẳng vô hạn": "Hai tam giác là các hình hữu hạn; ghép chúng không thể tạo một đường thẳng kéo dài vô hạn.",
+            "chỉ đặt hai đỉnh chạm nhau rồi để hở cạnh": "Chỉ chạm tại một đỉnh vẫn để biên hình hở; muốn tạo tứ giác kín cần ghép các cạnh phù hợp sát nhau.",
+            "chồng khít hai tam giác lên cùng một vị trí": "Chồng hai mảnh lên nhau không ghép diện tích thành một tứ giác mới; cần đặt hai mảnh kề nhau theo cạnh.",
+            "để hai tam giác cách xa nhau": "Hai mảnh cách xa nhau không tạo thành một hình kín chung.",
+        }
+        if label in reasons: return reasons[label]
+        if "cắt một tờ giấy hình vuông" in prompt_cf:
+            nums = [int(x) for x in re.findall(r"\d+", choice_text)]
+            if nums and nums[0] != 2:
+                return f"Một đường cắt thẳng từ một góc đến góc đối diện chia hình vuông thành đúng 2 mảnh; chọn {nums[0]} là sai số mảnh."
+
     return None
 
 
