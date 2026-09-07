@@ -43,6 +43,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestTargetedLessonUnlockAndResume(root, schemaPath, templatePath, lessonCatalogPath);
                 TestFirstFiveLessonsGoldenPath(root, schemaPath, templatePath, lessonCatalogPath);
                 TestFirstFiveAllAuthoredVariantsEndToEnd(root, schemaPath, templatePath, lessonCatalogPath);
+                TestFirstFiveRetryErrorMatrix(root, schemaPath, templatePath, lessonCatalogPath);
                 TestFirstLessonAllSixVariantsWithRetryResume(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedCompletionSurvivesNextLessonReadFailure(root, schemaPath, templatePath, lessonCatalogPath);
                 TestCorruptRuntimeMetadataIsQuarantined(root, schemaPath, templatePath);
@@ -656,6 +657,90 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 "first_five_all_variants_leave_five_completed_progress_rows");
             A(Count(database, "SELECT count(*) FROM session WHERE child_id='" + profile.ChildId + "' AND state='active';") == 0,
                 "first_five_all_variants_leave_no_active_session");
+        }
+
+        private static void TestFirstFiveRetryErrorMatrix(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var firstFive = catalog.Lessons.Take(5).ToList();
+            var failOrdinals = new[] { 1, 1, 2, 0, 0 };
+            var expectedKinds = new[] { "text", "text", "integer", "integer", "text" };
+            var expectedTypes = new[] { "multiple_choice", "true_false", "numeric_input", "numeric_input", "multiple_choice" };
+            var database = NewDatabase(Path.Combine(root, "first-five-retry-matrix.db"), schemaPath);
+            var profile = new LearnerSessionService(database).EnsurePrimaryChild("Bé 5 bài lỗi thử");
+            var accessService = new MathLessonProgressService(database, lessonCatalogPath);
+
+            for (var lessonIndex = 0; lessonIndex < firstFive.Count; lessonIndex++)
+            {
+                var lesson = firstFive[lessonIndex];
+                A(accessService.GetAccess(profile.ChildId, lesson.Id).IsUnlocked,
+                    "first_five_retry_lesson_unlocked_" + (lessonIndex + 1));
+                using (var coordinator = new MathSessionCoordinator(database, templatePath, "LOW", 12000 + lessonIndex, lesson.Id))
+                {
+                    var start = coordinator.Start("Bé 5 bài lỗi thử");
+                    var selected = start.SelectedContentQuestionIds.ToList();
+                    var failedQuestionId = string.Empty;
+                    for (var ordinal = 0; ordinal < 3; ordinal++)
+                    {
+                        var question = coordinator.NextQuestion();
+                        A(question != null && question.ContentQuestionId == selected[ordinal],
+                            "first_five_retry_serves_selected_" + lessonIndex + "_" + ordinal);
+                        if (ordinal == failOrdinals[lessonIndex])
+                        {
+                            failedQuestionId = question.QuestionId;
+                            A(string.Equals(question.AnswerKind, expectedKinds[lessonIndex], StringComparison.Ordinal) &&
+                              string.Equals(question.QuestionType, expectedTypes[lessonIndex], StringComparison.Ordinal),
+                                "first_five_retry_hits_expected_answer_surface_" + (lessonIndex + 1));
+                            var wrongText = WrongAnswer(question);
+                            A(!question.IsCorrectAnswer(wrongText),
+                                "first_five_retry_wrong_answer_is_really_wrong_" + (lessonIndex + 1));
+                            var wrong = coordinator.SubmitAnswerWithRetryAt(wrongText, 0, "smoke", DateTime.UtcNow,
+                                700 + ordinal * 100);
+                            A(!wrong.IsCorrect && !wrong.QuestionCompleted && wrong.CanRetry && wrong.AttemptIndex == 1 &&
+                              coordinator.Summary.Attempts == ordinal && coordinator.Summary.AnswerAttempts == ordinal + 1,
+                                "first_five_retry_wrong_stays_open_" + (lessonIndex + 1));
+                            A(coordinator.NextQuestion().QuestionId == question.QuestionId,
+                                "first_five_retry_wrong_keeps_same_question_" + (lessonIndex + 1));
+                            var retry = coordinator.SubmitRetryAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow,
+                                760 + ordinal * 100);
+                            A(retry.IsCorrect && retry.QuestionCompleted && retry.IsRetry && retry.AttemptIndex == 2 &&
+                              !retry.IndependentSuccess && retry.Mastery != null && retry.Review != null,
+                                "first_five_retry_correct_is_assisted_" + (lessonIndex + 1));
+                        }
+                        else
+                        {
+                            var outcome = coordinator.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow,
+                                700 + ordinal * 100);
+                            A(outcome.IsCorrect && outcome.QuestionCompleted && outcome.IndependentSuccess,
+                                "first_five_retry_other_question_is_independent_" + lessonIndex + "_" + ordinal);
+                        }
+                    }
+
+                    var summary = coordinator.Complete();
+                    A(summary.LessonCompleted && summary.Attempts == 3 && summary.AnswerAttempts == 4 && summary.Correct == 3 &&
+                      summary.IndependentCorrect == 2 && summary.RetriedQuestions == 1 && summary.RetriedCorrect == 1,
+                        "first_five_retry_summary_separates_retry_" + (lessonIndex + 1));
+                    A(Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + start.SessionId + "';") == 4 &&
+                      Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + start.SessionId + "';") == 3,
+                        "first_five_retry_session_has_four_answers_three_mastery_" + (lessonIndex + 1));
+                    A(Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + start.SessionId +
+                      "' AND question_id='" + failedQuestionId + "' AND attempt_index IN (1,2);") == 2,
+                        "first_five_retry_failed_question_has_exact_two_attempts_" + (lessonIndex + 1));
+                }
+            }
+
+            A(Count(database, "SELECT count(*) FROM session WHERE child_id='" + profile.ChildId + "' AND state='completed';") == 5,
+                "first_five_retry_matrix_completes_five_sessions");
+            A(Count(database, "SELECT count(*) FROM attempt;") == 20 && Count(database, "SELECT count(*) FROM mastery_event;") == 15,
+                "first_five_retry_matrix_totals_twenty_answers_fifteen_mastery");
+            A(Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + profile.ChildId + "' AND completed_count=1;") == 5,
+                "first_five_retry_matrix_persists_five_completed_lessons");
+            A(Count(database, "SELECT count(*) FROM session WHERE child_id='" + profile.ChildId + "' AND state='active';") == 0,
+                "first_five_retry_matrix_leaves_no_active_session");
         }
 
         private static void TestFirstLessonAllSixVariantsWithRetryResume(
