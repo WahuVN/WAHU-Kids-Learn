@@ -1203,10 +1203,24 @@ BEGIN SELECT RAISE(ABORT,'game event injected same replay reward failure'); END;
                     var question = first.NextQuestion();
                     first.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700 + ordinal * 100);
                 }
-                var completion = first.Complete();
-                A(completion.LearningSummary.LessonCompleted && completion.LearningSummary.GardenGrowthSteps == 0 &&
-                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + completedSessionId + "';") == 0,
-                    "game_event_same_replay_reward_fault_fixture_completed_without_reward");
+                using (var staleAbort = new MathGameEventCoordinator(database, templatePath, gameEventPath, "NORMAL", 999998,
+                    definition.Id, definition.TargetLessonId))
+                {
+                    var staleStart = staleAbort.Start("Bé reward fault replay cùng event");
+                    A(staleStart.Session.ResumedExistingSession && staleStart.Session.SessionId == completedSessionId &&
+                      staleStart.Session.CompletedQuestionCount == 3,
+                        "game_event_reward_fault_stale_abort_wrapper_observes_same_three_checkpoint_session");
+                    var completion = first.Complete();
+                    A(completion.LearningSummary.LessonCompleted && completion.LearningSummary.GardenGrowthSteps == 0 &&
+                      Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + completedSessionId + "';") == 0,
+                        "game_event_same_replay_reward_fault_fixture_completed_without_reward");
+                    var staleAbortRejected = false;
+                    try { staleAbort.LearningSession.Abort("reward_fault_after_complete"); }
+                    catch (InvalidOperationException) { staleAbortRejected = true; }
+                    A(staleAbortRejected && !staleAbort.LearningSession.IsActive && SessionState(database, completedSessionId) == "completed" &&
+                      Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + completedSessionId + "';") == 0,
+                        "game_event_reward_fault_stale_abort_rejects_and_converges_inactive_without_faking_reward");
+                }
             }
             Exec(database, "DROP TRIGGER fail_same_event_replay_reward;");
 
