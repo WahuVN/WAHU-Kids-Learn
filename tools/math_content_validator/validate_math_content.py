@@ -1489,7 +1489,6 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
                 cid = required_text(choice, "id", cwhere, errors)
                 text = required_text(choice, "text", cwhere, errors)
                 rationale = required_text(choice, "rationale_vi", cwhere, errors)
-                validate_numeric_equalities(rationale, cwhere + ".rationale_vi", errors)
                 choice_ids.append(cid); choice_texts.append(text); choice_rationales.append(rationale)
             if len(choice_ids) != len(set(choice_ids)):
                 errors.append(f"duplicate_choice_id:{where}")
@@ -1517,6 +1516,7 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
                     errors.append(f"correct_choice_text_mismatch:{where}:{correct_id}:{correct_text!r}")
             for cid, text, rationale in zip(choice_ids, choice_texts, choice_rationales):
                 relation_body = rationale if cid == correct_id else rationale_instructional_body(text, rationale)
+                validate_numeric_equalities(relation_body, where + f".choice[{cid}].rationale_vi", errors)
                 validate_numeric_relations(relation_body, where + f".choice[{cid}].rationale_vi", errors)
                 if cid == correct_id:
                     continue

@@ -232,9 +232,9 @@ class MathContentDataSmoke(unittest.TestCase):
                 self.assertEqual([], validator.invalid_numeric_equalities(hint))
                 self.assertEqual([], validator.invalid_numeric_relations(hint))
             for choice in item.get("choices", []):
-                self.assertEqual([], validator.invalid_numeric_equalities(choice["rationale_vi"]))
                 relation_body = (choice["rationale_vi"] if choice["id"] == item.get("correct_choice_id")
                                  else validator.rationale_instructional_body(choice["text"], choice["rationale_vi"]))
+                self.assertEqual([], validator.invalid_numeric_equalities(relation_body))
                 self.assertEqual([], validator.invalid_numeric_relations(relation_body))
 
     def test_expression_validator_fails_closed(self):
