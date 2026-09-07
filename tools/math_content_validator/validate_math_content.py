@@ -204,6 +204,110 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
             if label == "bằng nhau":
                 return "“bằng nhau” không phải cách phân loại mức độ có thể xảy ra của sự kiện."
 
+    if skill == "MASS_KG_READ_WRITE":
+        unit = choice_text.strip().casefold()
+        reasons = {
+            "km": "km là đơn vị độ dài quãng đường, không phải đơn vị khối lượng.",
+            "l": "l là kí hiệu lít dùng cho dung tích, không phải kilôgam.",
+            "cm": "cm là đơn vị độ dài, không phải đơn vị khối lượng.",
+        }
+        if unit in reasons:
+            return reasons[unit]
+
+    if skill == "CAPACITY_LITER_READ_WRITE":
+        unit = choice_text.strip().casefold()
+        reasons = {
+            "kg": "kg là đơn vị khối lượng, không phải đơn vị dung tích.",
+            "km": "km là đơn vị độ dài quãng đường, không phải đơn vị dung tích.",
+            "dm": "dm là đơn vị độ dài, không phải đơn vị dung tích.",
+        }
+        if unit in reasons:
+            return reasons[unit]
+
+    if skill == "LENGTH_DM_M_KM_RECOGNIZE_RELATION" and "giữa hai làng" in prompt.casefold():
+        unit = choice_text.strip().casefold()
+        if unit == "kg":
+            return "kg đo khối lượng chứ không đo quãng đường, nên không phù hợp giữa hai làng."
+        if unit == "cm":
+            return "cm phù hợp với độ dài vật nhỏ; quãng đường giữa hai làng cần đơn vị lớn hơn nhiều."
+        if unit == "dm":
+            return "dm phù hợp với độ dài ngắn; quãng đường giữa hai làng thường dùng km."
+
+    if skill == "TIME_DAY_24_HOURS":
+        label = choice_text.strip().casefold()
+        if label == "2 ngày":
+            return "24 giờ liên tiếp mới đủ đúng một ngày; 2 ngày là khoảng thời gian dài hơn một ngày."
+        if label == "10 ngày":
+            return "24 giờ liên tiếp mới đủ đúng một ngày; 10 ngày dài hơn rất nhiều so với một ngày."
+        if label == "không thể biết":
+            return "Quan hệ 1 ngày = 24 giờ đã biết nên có thể xác định trực tiếp, không phải thiếu dữ kiện."
+
+    if skill == "TIME_HOUR_60_MINUTES":
+        label = choice_text.strip().casefold()
+        prompt_cf = prompt.casefold()
+        if "45 phút" in prompt_cf:
+            if label == "dài hơn":
+                return "1 giờ có 60 phút, mà 45 phút ít hơn 60 phút nên không thể dài hơn 1 giờ."
+            if label == "bằng nhau":
+                return "45 phút chưa đủ 60 phút của một giờ nên hai khoảng thời gian không bằng nhau."
+            if label == "không so sánh được":
+                return "Đổi 1 giờ thành 60 phút thì có thể so sánh trực tiếp với 45 phút."
+        if "60 phút" in prompt_cf:
+            if label == "1 ngày":
+                return "60 phút chỉ bằng một giờ, còn một ngày gồm 24 giờ nên không thể gọi là 1 ngày."
+            if label == "30 phút":
+                return "30 phút ngắn hơn 60 phút; 60 phút đầy đủ mới bằng một giờ."
+            if label == "không thể biết":
+                return "Quan hệ 1 giờ = 60 phút đã biết nên có thể gọi tên khoảng thời gian này trực tiếp."
+
+    if skill == "CALENDAR_DAYS_IN_MONTH_DATE" and "ngày sau ngày 14 tháng 9" in prompt.casefold():
+        label = choice_text.strip().casefold()
+        if label == "13 tháng 9":
+            return "Ngày 13 tháng 9 đứng trước ngày 14, nên đó không phải ngày kế tiếp."
+        if label == "14 tháng 10":
+            return "Ngày kế tiếp vẫn ở tháng 9; chuyển sang tháng 10 đã thay đổi cả tháng thay vì tăng một ngày."
+        if label == "16 tháng 9":
+            return "Sau ngày 14 phải đi qua ngày 15 trước; chọn ngày 16 đã bỏ qua một ngày."
+
+    if skill == "CLOCK_MINUTE_HAND_AT_3_OR_6":
+        prompt_cf = prompt.casefold()
+        expected_hour = expected_minute = None
+        minute_basis = None
+        if "kim phút chỉ số 3" in prompt_cf and "vừa qua số 4" in prompt_cf:
+            expected_hour, expected_minute, minute_basis = 4, 15, "Kim phút ở số 3 tương ứng 15 phút"
+        elif "kim phút chỉ số 6" in prompt_cf and "giữa 7 và 8" in prompt_cf:
+            expected_hour, expected_minute, minute_basis = 7, 30, "Kim phút ở số 6 tương ứng 30 phút"
+        elif "từ số 3 đến số 6" in prompt_cf and "giữa 5 và 6" in prompt_cf:
+            expected_hour, expected_minute, minute_basis = 5, 30, "Kim phút đi đến số 6 nên chuyển thành 30 phút"
+        match = re.fullmatch(r"(\d+)\s+giờ\s+(\d+)\s+phút", choice_text.strip().casefold())
+        if expected_hour is not None and match:
+            hour, minute = int(match.group(1)), int(match.group(2))
+            if minute != expected_minute:
+                return f"{minute_basis}; “{choice_text}” ghi {minute} phút nên sai vị trí kim phút."
+            if hour != expected_hour:
+                return f"Kim giờ vẫn thuộc giờ {expected_hour}; “{choice_text}” đổi sang giờ {hour} quá sớm."
+
+    if skill == "MEASUREMENT_ESTIMATE_BASIC":
+        label = choice_text.strip().casefold()
+        prompt_cf = prompt.casefold()
+        if "bút chì" in prompt_cf:
+            if label.endswith("km"):
+                return "km dùng cho quãng đường rất dài, không phù hợp chiều dài một chiếc bút chì."
+            if label.endswith("m"):
+                return f"“{choice_text}” tính theo mét là quá lớn đối với một chiếc bút chì; cỡ xăng-ti-mét hợp lý hơn."
+        if "cánh cửa" in prompt_cf:
+            if label.endswith("cm"):
+                return "2 cm quá nhỏ cho chiều cao một cánh cửa; kích thước này hợp lý hơn khi tính bằng mét."
+            if label.endswith("km"):
+                return f"“{choice_text}” dùng ki-lô-mét, đơn vị dành cho quãng đường rất dài chứ không phải chiều cao cửa."
+        if "gấp đôi" in prompt_cf and "10 cm" in prompt_cf:
+            if label == "5 cm":
+                return "5 cm còn ngắn hơn thanh tham chiếu 10 cm nên không thể là độ dài gấp đôi."
+            if label == "100 cm":
+                return "100 cm lớn hơn nhiều so với hai lần thanh 10 cm nên không phải ước lượng gấp đôi."
+            if label == "2 km":
+                return "2 km là quãng đường rất dài, hoàn toàn khác thang đo xăng-ti-mét của thanh tham chiếu."
+
     return None
 
 

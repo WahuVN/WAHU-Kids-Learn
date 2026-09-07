@@ -5877,17 +5877,17 @@
         {
           "id": "a",
           "text": "km",
-          "rationale_vi": "“km” chưa đúng. Kilôgam được kí hiệu là kg. Lựa chọn này khớp với kilôgam; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng."
+          "rationale_vi": "“km” chưa đúng. km là đơn vị độ dài quãng đường, không phải đơn vị khối lượng. Kilôgam được kí hiệu là kg. Lựa chọn này khớp với kilôgam; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng."
         },
         {
           "id": "b",
           "text": "l",
-          "rationale_vi": "“l” chưa đúng. Kilôgam được kí hiệu là kg. Lựa chọn này khớp với kilôgam; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng."
+          "rationale_vi": "“l” chưa đúng. l là kí hiệu lít dùng cho dung tích, không phải kilôgam. Kilôgam được kí hiệu là kg. Lựa chọn này khớp với kilôgam; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng."
         },
         {
           "id": "c",
           "text": "cm",
-          "rationale_vi": "“cm” chưa đúng. Kilôgam được kí hiệu là kg. Lựa chọn này khớp với kilôgam; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng."
+          "rationale_vi": "“cm” chưa đúng. cm là đơn vị độ dài, không phải đơn vị khối lượng. Kilôgam được kí hiệu là kg. Lựa chọn này khớp với kilôgam; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng."
         },
         {
           "id": "d",
@@ -6003,17 +6003,17 @@
         {
           "id": "b",
           "text": "kg",
-          "rationale_vi": "“kg” chưa đúng. Lít được kí hiệu là l. Lựa chọn này khớp với lít; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng."
+          "rationale_vi": "“kg” chưa đúng. kg là đơn vị khối lượng, không phải đơn vị dung tích. Lít được kí hiệu là l. Lựa chọn này khớp với lít; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng."
         },
         {
           "id": "c",
           "text": "km",
-          "rationale_vi": "“km” chưa đúng. Lít được kí hiệu là l. Lựa chọn này khớp với lít; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng."
+          "rationale_vi": "“km” chưa đúng. km là đơn vị độ dài quãng đường, không phải đơn vị dung tích. Lít được kí hiệu là l. Lựa chọn này khớp với lít; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng."
         },
         {
           "id": "d",
           "text": "dm",
-          "rationale_vi": "“dm” chưa đúng. Lít được kí hiệu là l. Lựa chọn này khớp với lít; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng."
+          "rationale_vi": "“dm” chưa đúng. dm là đơn vị độ dài, không phải đơn vị dung tích. Lít được kí hiệu là l. Lựa chọn này khớp với lít; các phương án khác lệch đặc điểm hoặc dữ kiện cần dùng."
         }
       ],
       "correct_choice_id": "a"
@@ -6147,7 +6147,7 @@
         {
           "id": "a",
           "text": "dm",
-          "rationale_vi": "“dm” chưa đúng. Quãng đường dài thường được đo bằng ki-lô-mét. Vậy đáp án là km."
+          "rationale_vi": "“dm” chưa đúng. dm phù hợp với độ dài ngắn; quãng đường giữa hai làng thường dùng km. Quãng đường dài thường được đo bằng ki-lô-mét. Vậy đáp án là km."
         },
         {
           "id": "b",
@@ -6157,12 +6157,12 @@
         {
           "id": "c",
           "text": "cm",
-          "rationale_vi": "“cm” chưa đúng. Quãng đường dài thường được đo bằng ki-lô-mét. Vậy đáp án là km."
+          "rationale_vi": "“cm” chưa đúng. cm phù hợp với độ dài vật nhỏ; quãng đường giữa hai làng cần đơn vị lớn hơn nhiều. Quãng đường dài thường được đo bằng ki-lô-mét. Vậy đáp án là km."
         },
         {
           "id": "d",
           "text": "kg",
-          "rationale_vi": "“kg” chưa đúng. Quãng đường dài thường được đo bằng ki-lô-mét. Vậy đáp án là km."
+          "rationale_vi": "“kg” chưa đúng. kg đo khối lượng chứ không đo quãng đường, nên không phù hợp giữa hai làng. Quãng đường dài thường được đo bằng ki-lô-mét. Vậy đáp án là km."
         }
       ],
       "correct_choice_id": "b"
@@ -6232,12 +6232,12 @@
         {
           "id": "a",
           "text": "2 ngày",
-          "rationale_vi": "“2 ngày” chưa đúng. Theo quan hệ đã học, 24 giờ liên tiếp bằng 1 ngày đầy đủ."
+          "rationale_vi": "“2 ngày” chưa đúng. 24 giờ liên tiếp mới đủ đúng một ngày; 2 ngày là khoảng thời gian dài hơn một ngày. Theo quan hệ đã học, 24 giờ liên tiếp bằng 1 ngày đầy đủ."
         },
         {
           "id": "b",
           "text": "10 ngày",
-          "rationale_vi": "“10 ngày” chưa đúng. Theo quan hệ đã học, 24 giờ liên tiếp bằng 1 ngày đầy đủ."
+          "rationale_vi": "“10 ngày” chưa đúng. 24 giờ liên tiếp mới đủ đúng một ngày; 10 ngày dài hơn rất nhiều so với một ngày. Theo quan hệ đã học, 24 giờ liên tiếp bằng 1 ngày đầy đủ."
         },
         {
           "id": "c",
@@ -6247,7 +6247,7 @@
         {
           "id": "d",
           "text": "không thể biết",
-          "rationale_vi": "“không thể biết” chưa đúng. Theo quan hệ đã học, 24 giờ liên tiếp bằng 1 ngày đầy đủ."
+          "rationale_vi": "“không thể biết” chưa đúng. Quan hệ 1 ngày = 24 giờ đã biết nên có thể xác định trực tiếp, không phải thiếu dữ kiện. Theo quan hệ đã học, 24 giờ liên tiếp bằng 1 ngày đầy đủ."
         }
       ],
       "correct_choice_id": "c"
@@ -6360,17 +6360,17 @@
         {
           "id": "a",
           "text": "dài hơn",
-          "rationale_vi": "“dài hơn” chưa đúng. 1 giờ = 60 phút; 45 phút ít hơn 60 phút nên ngắn hơn 1 giờ."
+          "rationale_vi": "“dài hơn” chưa đúng. 1 giờ có 60 phút, mà 45 phút ít hơn 60 phút nên không thể dài hơn 1 giờ. 1 giờ = 60 phút; 45 phút ít hơn 60 phút nên ngắn hơn 1 giờ."
         },
         {
           "id": "b",
           "text": "bằng nhau",
-          "rationale_vi": "“bằng nhau” chưa đúng. 1 giờ = 60 phút; 45 phút ít hơn 60 phút nên ngắn hơn 1 giờ."
+          "rationale_vi": "“bằng nhau” chưa đúng. 45 phút chưa đủ 60 phút của một giờ nên hai khoảng thời gian không bằng nhau. 1 giờ = 60 phút; 45 phút ít hơn 60 phút nên ngắn hơn 1 giờ."
         },
         {
           "id": "c",
           "text": "không so sánh được",
-          "rationale_vi": "“không so sánh được” chưa đúng. 1 giờ = 60 phút; 45 phút ít hơn 60 phút nên ngắn hơn 1 giờ."
+          "rationale_vi": "“không so sánh được” chưa đúng. Đổi 1 giờ thành 60 phút thì có thể so sánh trực tiếp với 45 phút. 1 giờ = 60 phút; 45 phút ít hơn 60 phút nên ngắn hơn 1 giờ."
         },
         {
           "id": "d",
@@ -6418,17 +6418,17 @@
         {
           "id": "b",
           "text": "1 ngày",
-          "rationale_vi": "“1 ngày” chưa đúng. Từ 8 giờ đến 9 giờ là 60 phút, mà 60 phút bằng đúng 1 giờ."
+          "rationale_vi": "“1 ngày” chưa đúng. 60 phút chỉ bằng một giờ, còn một ngày gồm 24 giờ nên không thể gọi là 1 ngày. Từ 8 giờ đến 9 giờ là 60 phút, mà 60 phút bằng đúng 1 giờ."
         },
         {
           "id": "c",
           "text": "30 phút",
-          "rationale_vi": "“30 phút” chưa đúng. Từ 8 giờ đến 9 giờ là 60 phút, mà 60 phút bằng đúng 1 giờ."
+          "rationale_vi": "“30 phút” chưa đúng. 30 phút ngắn hơn 60 phút; 60 phút đầy đủ mới bằng một giờ. Từ 8 giờ đến 9 giờ là 60 phút, mà 60 phút bằng đúng 1 giờ."
         },
         {
           "id": "d",
           "text": "không thể biết",
-          "rationale_vi": "“không thể biết” chưa đúng. Từ 8 giờ đến 9 giờ là 60 phút, mà 60 phút bằng đúng 1 giờ."
+          "rationale_vi": "“không thể biết” chưa đúng. Quan hệ 1 giờ = 60 phút đã biết nên có thể gọi tên khoảng thời gian này trực tiếp. Từ 8 giờ đến 9 giờ là 60 phút, mà 60 phút bằng đúng 1 giờ."
         }
       ],
       "correct_choice_id": "a"
@@ -6530,7 +6530,7 @@
         {
           "id": "a",
           "text": "13 tháng 9",
-          "rationale_vi": "“13 tháng 9” chưa đúng. Ngày kế tiếp chỉ tăng số ngày thêm 1 và vẫn ở tháng 9, nên phải sửa thành 15 tháng 9."
+          "rationale_vi": "“13 tháng 9” chưa đúng. Ngày 13 tháng 9 đứng trước ngày 14, nên đó không phải ngày kế tiếp. Ngày kế tiếp chỉ tăng số ngày thêm 1 và vẫn ở tháng 9, nên phải sửa thành 15 tháng 9."
         },
         {
           "id": "b",
@@ -6540,12 +6540,12 @@
         {
           "id": "c",
           "text": "14 tháng 10",
-          "rationale_vi": "“14 tháng 10” chưa đúng. Ngày kế tiếp chỉ tăng số ngày thêm 1 và vẫn ở tháng 9, nên phải sửa thành 15 tháng 9."
+          "rationale_vi": "“14 tháng 10” chưa đúng. Ngày kế tiếp vẫn ở tháng 9; chuyển sang tháng 10 đã thay đổi cả tháng thay vì tăng một ngày. Ngày kế tiếp chỉ tăng số ngày thêm 1 và vẫn ở tháng 9, nên phải sửa thành 15 tháng 9."
         },
         {
           "id": "d",
           "text": "16 tháng 9",
-          "rationale_vi": "“16 tháng 9” chưa đúng. Ngày kế tiếp chỉ tăng số ngày thêm 1 và vẫn ở tháng 9, nên phải sửa thành 15 tháng 9."
+          "rationale_vi": "“16 tháng 9” chưa đúng. Sau ngày 14 phải đi qua ngày 15 trước; chọn ngày 16 đã bỏ qua một ngày. Ngày kế tiếp chỉ tăng số ngày thêm 1 và vẫn ở tháng 9, nên phải sửa thành 15 tháng 9."
         }
       ],
       "correct_choice_id": "b"
@@ -6926,17 +6926,17 @@
         {
           "id": "b",
           "text": "4 giờ 30 phút",
-          "rationale_vi": "“4 giờ 30 phút” chưa đúng. Kim phút ở số 3 tương ứng 15 phút; kim giờ ở khoảng sau 4 nên là 4 giờ 15 phút."
+          "rationale_vi": "“4 giờ 30 phút” chưa đúng. Kim phút ở số 3 tương ứng 15 phút; “4 giờ 30 phút” ghi 30 phút nên sai vị trí kim phút. Kim phút ở số 3 tương ứng 15 phút; kim giờ ở khoảng sau 4 nên là 4 giờ 15 phút."
         },
         {
           "id": "c",
           "text": "3 giờ 4 phút",
-          "rationale_vi": "“3 giờ 4 phút” chưa đúng. Kim phút ở số 3 tương ứng 15 phút; kim giờ ở khoảng sau 4 nên là 4 giờ 15 phút."
+          "rationale_vi": "“3 giờ 4 phút” chưa đúng. Kim phút ở số 3 tương ứng 15 phút; “3 giờ 4 phút” ghi 4 phút nên sai vị trí kim phút. Kim phút ở số 3 tương ứng 15 phút; kim giờ ở khoảng sau 4 nên là 4 giờ 15 phút."
         },
         {
           "id": "d",
           "text": "4 giờ 3 phút",
-          "rationale_vi": "“4 giờ 3 phút” chưa đúng. Kim phút ở số 3 tương ứng 15 phút; kim giờ ở khoảng sau 4 nên là 4 giờ 15 phút."
+          "rationale_vi": "“4 giờ 3 phút” chưa đúng. Kim phút ở số 3 tương ứng 15 phút; “4 giờ 3 phút” ghi 3 phút nên sai vị trí kim phút. Kim phút ở số 3 tương ứng 15 phút; kim giờ ở khoảng sau 4 nên là 4 giờ 15 phút."
         }
       ],
       "correct_choice_id": "a"
@@ -6974,7 +6974,7 @@
         {
           "id": "a",
           "text": "7 giờ 15 phút",
-          "rationale_vi": "“7 giờ 15 phút” chưa đúng. Kim phút ở số 6 là 30 phút; kim giờ giữa 7 và 8 là 7 giờ 30 phút."
+          "rationale_vi": "“7 giờ 15 phút” chưa đúng. Kim phút ở số 6 tương ứng 30 phút; “7 giờ 15 phút” ghi 15 phút nên sai vị trí kim phút. Kim phút ở số 6 là 30 phút; kim giờ giữa 7 và 8 là 7 giờ 30 phút."
         },
         {
           "id": "b",
@@ -6984,12 +6984,12 @@
         {
           "id": "c",
           "text": "6 giờ 7 phút",
-          "rationale_vi": "“6 giờ 7 phút” chưa đúng. Kim phút ở số 6 là 30 phút; kim giờ giữa 7 và 8 là 7 giờ 30 phút."
+          "rationale_vi": "“6 giờ 7 phút” chưa đúng. Kim phút ở số 6 tương ứng 30 phút; “6 giờ 7 phút” ghi 7 phút nên sai vị trí kim phút. Kim phút ở số 6 là 30 phút; kim giờ giữa 7 và 8 là 7 giờ 30 phút."
         },
         {
           "id": "d",
           "text": "8 giờ 30 phút",
-          "rationale_vi": "“8 giờ 30 phút” chưa đúng. Kim phút ở số 6 là 30 phút; kim giờ giữa 7 và 8 là 7 giờ 30 phút."
+          "rationale_vi": "“8 giờ 30 phút” chưa đúng. Kim giờ vẫn thuộc giờ 7; “8 giờ 30 phút” đổi sang giờ 8 quá sớm. Kim phút ở số 6 là 30 phút; kim giờ giữa 7 và 8 là 7 giờ 30 phút."
         }
       ],
       "correct_choice_id": "b"
@@ -7027,12 +7027,12 @@
         {
           "id": "a",
           "text": "5 giờ 15 phút",
-          "rationale_vi": "“5 giờ 15 phút” chưa đúng. Kim phút từ số 3 đến số 6 chuyển từ 15 phút sang 30 phút; kim giờ vẫn trong khoảng sau 5 nên là 5 giờ 30 phút."
+          "rationale_vi": "“5 giờ 15 phút” chưa đúng. Kim phút đi đến số 6 nên chuyển thành 30 phút; “5 giờ 15 phút” ghi 15 phút nên sai vị trí kim phút. Kim phút từ số 3 đến số 6 chuyển từ 15 phút sang 30 phút; kim giờ vẫn trong khoảng sau 5 nên là 5 giờ 30 phút."
         },
         {
           "id": "b",
           "text": "6 giờ 30 phút",
-          "rationale_vi": "“6 giờ 30 phút” chưa đúng. Kim phút từ số 3 đến số 6 chuyển từ 15 phút sang 30 phút; kim giờ vẫn trong khoảng sau 5 nên là 5 giờ 30 phút."
+          "rationale_vi": "“6 giờ 30 phút” chưa đúng. Kim giờ vẫn thuộc giờ 5; “6 giờ 30 phút” đổi sang giờ 6 quá sớm. Kim phút từ số 3 đến số 6 chuyển từ 15 phút sang 30 phút; kim giờ vẫn trong khoảng sau 5 nên là 5 giờ 30 phút."
         },
         {
           "id": "c",
@@ -7042,7 +7042,7 @@
         {
           "id": "d",
           "text": "5 giờ 45 phút",
-          "rationale_vi": "“5 giờ 45 phút” chưa đúng. Kim phút từ số 3 đến số 6 chuyển từ 15 phút sang 30 phút; kim giờ vẫn trong khoảng sau 5 nên là 5 giờ 30 phút."
+          "rationale_vi": "“5 giờ 45 phút” chưa đúng. Kim phút đi đến số 6 nên chuyển thành 30 phút; “5 giờ 45 phút” ghi 45 phút nên sai vị trí kim phút. Kim phút từ số 3 đến số 6 chuyển từ 15 phút sang 30 phút; kim giờ vẫn trong khoảng sau 5 nên là 5 giờ 30 phút."
         }
       ],
       "correct_choice_id": "c"
@@ -7176,17 +7176,17 @@
         {
           "id": "a",
           "text": "15 km",
-          "rationale_vi": "“15 km” chưa đúng. Bút chì là vật nhỏ, đơn vị cm và độ dài khoảng vài chục cm là hợp lý. Vậy đáp án là 15 cm."
+          "rationale_vi": "“15 km” chưa đúng. km dùng cho quãng đường rất dài, không phù hợp chiều dài một chiếc bút chì. Bút chì là vật nhỏ, đơn vị cm và độ dài khoảng vài chục cm là hợp lý. Vậy đáp án là 15 cm."
         },
         {
           "id": "b",
           "text": "15 m",
-          "rationale_vi": "“15 m” chưa đúng. Bút chì là vật nhỏ, đơn vị cm và độ dài khoảng vài chục cm là hợp lý. Vậy đáp án là 15 cm."
+          "rationale_vi": "“15 m” chưa đúng. “15 m” tính theo mét là quá lớn đối với một chiếc bút chì; cỡ xăng-ti-mét hợp lý hơn. Bút chì là vật nhỏ, đơn vị cm và độ dài khoảng vài chục cm là hợp lý. Vậy đáp án là 15 cm."
         },
         {
           "id": "c",
           "text": "150 m",
-          "rationale_vi": "“150 m” chưa đúng. Bút chì là vật nhỏ, đơn vị cm và độ dài khoảng vài chục cm là hợp lý. Vậy đáp án là 15 cm."
+          "rationale_vi": "“150 m” chưa đúng. “150 m” tính theo mét là quá lớn đối với một chiếc bút chì; cỡ xăng-ti-mét hợp lý hơn. Bút chì là vật nhỏ, đơn vị cm và độ dài khoảng vài chục cm là hợp lý. Vậy đáp án là 15 cm."
         },
         {
           "id": "d",
@@ -7234,17 +7234,17 @@
         {
           "id": "b",
           "text": "2 cm",
-          "rationale_vi": "“2 cm” chưa đúng. Cửa cao khoảng vài mét, nên 2 m là hợp lý."
+          "rationale_vi": "“2 cm” chưa đúng. 2 cm quá nhỏ cho chiều cao một cánh cửa; kích thước này hợp lý hơn khi tính bằng mét. Cửa cao khoảng vài mét, nên 2 m là hợp lý."
         },
         {
           "id": "c",
           "text": "2 km",
-          "rationale_vi": "“2 km” chưa đúng. Cửa cao khoảng vài mét, nên 2 m là hợp lý."
+          "rationale_vi": "“2 km” chưa đúng. “2 km” dùng ki-lô-mét, đơn vị dành cho quãng đường rất dài chứ không phải chiều cao cửa. Cửa cao khoảng vài mét, nên 2 m là hợp lý."
         },
         {
           "id": "d",
           "text": "20 km",
-          "rationale_vi": "“20 km” chưa đúng. Cửa cao khoảng vài mét, nên 2 m là hợp lý."
+          "rationale_vi": "“20 km” chưa đúng. “20 km” dùng ki-lô-mét, đơn vị dành cho quãng đường rất dài chứ không phải chiều cao cửa. Cửa cao khoảng vài mét, nên 2 m là hợp lý."
         }
       ],
       "correct_choice_id": "a"
@@ -7282,7 +7282,7 @@
         {
           "id": "a",
           "text": "5 cm",
-          "rationale_vi": "“5 cm” chưa đúng. Gấp đôi mốc 10 cm là khoảng 20 cm."
+          "rationale_vi": "“5 cm” chưa đúng. 5 cm còn ngắn hơn thanh tham chiếu 10 cm nên không thể là độ dài gấp đôi. Gấp đôi mốc 10 cm là khoảng 20 cm."
         },
         {
           "id": "b",
@@ -7292,12 +7292,12 @@
         {
           "id": "c",
           "text": "100 cm",
-          "rationale_vi": "“100 cm” chưa đúng. Gấp đôi mốc 10 cm là khoảng 20 cm."
+          "rationale_vi": "“100 cm” chưa đúng. 100 cm lớn hơn nhiều so với hai lần thanh 10 cm nên không phải ước lượng gấp đôi. Gấp đôi mốc 10 cm là khoảng 20 cm."
         },
         {
           "id": "d",
           "text": "2 km",
-          "rationale_vi": "“2 km” chưa đúng. Gấp đôi mốc 10 cm là khoảng 20 cm."
+          "rationale_vi": "“2 km” chưa đúng. 2 km là quãng đường rất dài, hoàn toàn khác thang đo xăng-ti-mét của thanh tham chiếu. Gấp đôi mốc 10 cm là khoảng 20 cm."
         }
       ],
       "correct_choice_id": "b"
