@@ -329,6 +329,18 @@ namespace WAHU.ChildUiRuntimeSmoke
                     var mission = GetField<Button>(form, "_missionButton");
                     A(!string.IsNullOrWhiteSpace(mission.AccessibleName), "math_hub_mission_button_accessible_name");
                     A(mission.TabStop, "math_hub_mission_button_keyboard_focusable");
+                    var sessionAssembly = Assembly.LoadFrom(Path.Combine(Path.GetDirectoryName(appAssembly.Location), "WAHU.Session.dll"));
+                    var coordinatorType = sessionAssembly.GetType("WAHU.Session.MathSessionCoordinator", true);
+                    var targetField = coordinatorType.GetField("DefaultTargetQuestionCount", BindingFlags.Public | BindingFlags.Static);
+                    A(targetField != null && targetField.IsLiteral, "math_hub_mission_target_contract_available");
+                    var adaptiveTarget = Convert.ToInt32(targetField.GetRawConstantValue());
+                    var adaptiveTargetText = adaptiveTarget.ToString();
+                    A(mission.Text == "Luyện " + adaptiveTargetText + " câu hôm nay",
+                        "math_hub_mission_text_tracks_engine_target");
+                    A(Get<string>(mission, "BadgeText") == adaptiveTargetText,
+                        "math_hub_mission_badge_tracks_engine_target");
+                    A(mission.AccessibleDescription.IndexOf(adaptiveTargetText + " câu", StringComparison.Ordinal) >= 0,
+                        "math_hub_mission_accessibility_tracks_engine_target");
                     var continueButton = GetField<Button>(form, "_continueLessonButton");
                     A(!continueButton.Enabled, "math_hub_continue_disabled_without_progress");
 

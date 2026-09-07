@@ -273,19 +273,21 @@ namespace WAHUKidsLearn
             _continueLessonButton.Click += delegate { ContinueCurrentLesson(); };
             footer.Controls.Add(_continueLessonButton, 1, 0);
 
+            var adaptiveQuestionCount = MathSessionCoordinator.DefaultTargetQuestionCount;
+            var adaptiveQuestionCountText = adaptiveQuestionCount.ToString();
             _missionButton = new ChildActionButton
             {
                 Dock = DockStyle.Fill,
                 Margin = new Padding(8, 2, 0, 2),
-                Text = "Luyện 8 câu hôm nay",
-                BadgeText = "8",
+                Text = "Luyện " + adaptiveQuestionCountText + " câu hôm nay",
+                BadgeText = adaptiveQuestionCountText,
                 FillColor = ChildVisualTheme.MintStrong,
                 HoverColor = Color.FromArgb(90, 156, 103),
                 PressedColor = Color.FromArgb(75, 139, 88),
                 Font = ChildVisualTheme.Font(12f, FontStyle.Bold),
                 Radius = 18,
                 AccessibleName = "Bắt đầu nhiệm vụ Toán hôm nay",
-                AccessibleDescription = "Mở nhiệm vụ Toán thích ứng gồm khoảng tám câu."
+                AccessibleDescription = "Mở nhiệm vụ Toán thích ứng gồm khoảng " + adaptiveQuestionCountText + " câu."
             };
             _missionButton.Click += delegate { OpenAdaptiveMission(); };
             footer.Controls.Add(_missionButton, 2, 0);
