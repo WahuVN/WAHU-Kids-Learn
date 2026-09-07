@@ -80,6 +80,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestProductionFirstFiveGameEventsRuntime(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestProductionFirstEventResumeJourney(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventResumeAfterThirdAnswerBeforeComplete(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
+                TestGameEventDisposeSuspendsAndResumesExactQuestion(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventResumeRestoresBehaviorAction(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventResumeRestoresExplicitRepairBeforeStateTransition(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventDifferentSelectionResumesDurableActiveEvent(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
@@ -501,6 +502,60 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                   "' AND source_ref='" + sessionId + "' AND reward_type='garden_growth';") == 1,
                     "game_event_resume_after_q3_grants_exactly_one_reward");
             }
+        }
+
+        private static void TestGameEventDisposeSuspendsAndResumesExactQuestion(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath,
+            string gameEventPath)
+        {
+            var events = new MathGameEventCatalogSource().Load(gameEventPath, lessonCatalogPath);
+            var definition = events.Events[0];
+            var database = NewDatabase(Path.Combine(root, "game-event-dispose-resume.db"), schemaPath);
+            string sessionId;
+            string childId;
+            string q2Id;
+            IList<string> selected;
+
+            var first = new MathGameEventCoordinator(database, templatePath, gameEventPath, "LOW", 15126,
+                definition.Id, definition.TargetLessonId);
+            var start = first.Start("Bé đóng cửa sổ cứu hộ");
+            sessionId = start.Session.SessionId;
+            childId = start.Session.ChildId;
+            selected = start.Session.SelectedContentQuestionIds.ToList();
+            var q1 = first.NextQuestion();
+            first.SubmitAnswerAt(q1.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700);
+            var q2 = first.NextQuestion();
+            q2Id = q2.QuestionId;
+            first.Dispose();
+
+            A(SessionState(database, sessionId) == "active" &&
+              Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + sessionId + "';") == 1 &&
+              Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + sessionId + "';") == 0,
+                "game_event_dispose_keeps_session_active_and_grants_no_reward");
+            A(Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + sessionId + "';") == 1,
+                "game_event_dispose_keeps_runtime_checkpoint_for_resume");
+
+            using (var resumed = new MathGameEventCoordinator(database, templatePath, gameEventPath, "NORMAL", 999999,
+                null, definition.TargetLessonId))
+            {
+                var resumedStart = resumed.Start("Bé đóng cửa sổ cứu hộ");
+                A(resumedStart.Session.ResumedExistingSession && resumedStart.Session.SessionId == sessionId &&
+                  resumedStart.Session.CompletedQuestionCount == 1 && resumedStart.Session.SelectedContentQuestionIds.SequenceEqual(selected),
+                    "game_event_dispose_resume_restores_same_session_and_selected_set");
+                A(resumedStart.EventState.CompletedCheckpointCount == 1 && resumedStart.EventState.CurrentCheckpointNumber == 2 &&
+                  !resumedStart.EventState.IsComplete,
+                    "game_event_dispose_resume_restores_checkpoint_two_not_terminal");
+                var restoredQ2 = resumed.NextQuestion();
+                A(restoredQ2.QuestionId == q2Id && restoredQ2.ContentQuestionId == selected[1],
+                    "game_event_dispose_resume_restores_exact_open_q2");
+                resumed.SuspendForBreak("dispose_resume_cleanup");
+            }
+
+            A(Count(database, "SELECT count(*) FROM reward_event WHERE child_id='" + childId + "';") == 0,
+                "game_event_dispose_resume_never_creates_completion_reward");
         }
 
         private static void TestGameEventResumeRestoresBehaviorAction(
