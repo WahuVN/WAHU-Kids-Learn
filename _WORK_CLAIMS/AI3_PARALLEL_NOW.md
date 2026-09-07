@@ -12,8 +12,9 @@ EXECUTION_MODE=PLAYABLE_EVENT_UI_NO_WAIT
 ACTIVE_PHASE=PLAYABLE_EVENT_GAME_V1
 ACTIVE_FOCUS=FIRST_FIVE_QUICK_RESCUE_UI_E2E_RELEASE
 LAST_FULLY_VERIFIED_HEAD=`1c4ce9e`
-LAST_VERIFIED_CHILD_UI=3696_ASSERTIONS_PASS
-LAST_VERIFIED_PERSISTENCE=7933_ASSERTIONS_PASS
+LATEST_UI_VERIFIED_HEAD=`1ace135`
+LAST_VERIFIED_CHILD_UI=3706_ASSERTIONS_PASS
+LAST_VERIFIED_PERSISTENCE=7997_ASSERTIONS_PASS
 LAST_VERIFIED_CONTENT=90_OF_90_PASS
 LAST_VERIFIED_RELEASE=`0.1.68-dev`_POST_INSTALLER_PROVENANCE_CONTENT_90_PERSISTENCE_7933_PORTABLE_E2E_INSTALLER_PASS
 EARLY_LESSON_DEEP_HEAD=`e34136d`
@@ -25,6 +26,14 @@ EARLY_LESSON_DEEP_VALIDATOR=402_OF_402_VALID
 > Khi người dùng bảo “đọc file và làm”: đọc toàn bộ file này, inspect current HEAD, verify UI/release trên contract hiện hành rồi tiếp tục QA/hardening. Không dừng chỉ vì `LANE_DONE=YES`.
 
 ## PLAYABLE EVENT V1 OVERRIDE
+
+### Post-closure visual integration — 2026-09-08
+
+- `468dd55` landed the visual polish; merged with current Math engine head at `1ace135`.
+- Home/Hub/lesson/rescue now use richer child cards, raised action states, mission/checkpoint styling, procedural rescue hero art, feedback FX and Garden completion art without changing grading/session semantics.
+- New visual integration preserves focusable locked missions, exact prerequisite narration, Enter/Esc actions, 900×640 and 125% DPI regressions, resume/retry/failure safety and terminal completion behavior.
+- Current common-head verification: Child UI **3706 assertions PASS**, Math persistence **7997 assertions PASS**, `git diff --check` PASS.
+- Release-full evidence remains pinned to `1c4ce9e` / `0.1.68-dev` until the full Build-Setup/Installer distribution gate is rerun; do not relabel the visual-only head as a new release artifact.
 
 Đọc và tuân thủ `_WORK_CLAIMS/MATH_PLAYABLE_EVENT_GAME_V1.md`. P0 mới là đưa first-five thành flow chơi được: Home/Hub entry → intro → 3 checkpoints dùng lại MathLessonForm → behavior-aware repair/break → completion restoration/Garden → resume E2E. Dùng internal fixture/view-model trước khi AI1/AI2 land; final adapter mỏng sau. Không chờ và không đổi engine/content semantics.
 

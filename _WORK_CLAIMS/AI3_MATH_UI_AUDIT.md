@@ -1,11 +1,16 @@
 # AI3 — MATH UI / QA / INTEGRATION AUDIT
 
-Updated: 2026-09-07
+Updated: 2026-09-08
 Owner: AI3
-Last fully verified HEAD: `1c4ce9e`
+Last fully verified release HEAD: `1c4ce9e`
+Latest UI/persistence verified HEAD: `1ace135`
 Status: `LANE_DONE=YES`; `PLAYABLE_UI_P0=GREEN`; `INSTALLER_E2E=BLOCKED_SAFETY_UNOWNED_LOCAL_DATA`
 
 ## PLAYABLE EVENT V1 — current evidence
+
+- Post-closure visual wave `468dd55`, integrated on `main` at `1ace135`: richer Home/Hub/lesson/rescue cards and button depth, procedural rescue hero/feedback/Garden art, improved typed-answer surface and child-facing completion feedback. Runtime/session/content semantics were not changed.
+- Integration intentionally retained the newer remote accessibility/lifecycle guards: locked rescue missions stay keyboard-focusable for prerequisite explanation, Enter/Esc remain wired, exact resume and failure-safe status remain intact, and 900×640 plus 125% DPI regressions still pass.
+- Latest UI/persistence common-head gate on `1ace135`: Child UI **3706 assertions PASS**, Math persistence **7997 assertions PASS**, `git diff --check` PASS.
 
 - Home/Math Hub có entry **Toán nhanh — Nhiệm vụ cứu hộ**; 5 event production cho 5 bài đầu.
 - Flow UI E2E khóa: intro → 3 checkpoint → cố tình sai → repair/hint → suspend khi retry pending → resume exact event/session/open question → hoàn thành → Garden tăng đúng 1 lần.
@@ -29,7 +34,7 @@ Status: `LANE_DONE=YES`; `PLAYABLE_UI_P0=GREEN`; `INSTALLER_E2E=BLOCKED_SAFETY_U
 - Post-installer provenance `f5e5202` kiểm HEAD/tree thêm lần cuối sau installer + update-manifest trước `BUILD_SETUP_ARTIFACTS_PASS`.
 - Garden consistency `1c4ce9e` derive milestone/visual từ canonical reward count, bỏ raw inventory trust và reconcile stale/missing milestone inventory; partial reward outage không thể mở mốc tương lai sớm.
 - Gameplay rescue đã được scale 125% trong chính active session: prompt vẫn fit từ 12pt trở lên, checkpoint/break target giữ kích thước thao tác và wrong→retry→hint→suspend vẫn chạy sau scale.
-- Child UI: **3696 assertions PASS**; persistence: **7933 assertions PASS**; Math content/event/pool suite: **90/90 PASS**.
+- Latest common-head UI/persistence: Child UI **3706 assertions PASS**; persistence **7997 assertions PASS**. Most recent Math content/event/pool suite remains **90/90 PASS** with no content files changed by the visual wave.
 - `0.1.68-dev`: Build-Setup **15/15 PASS** + provenance/content/persistence/Portable/post-installer gates, installer compile **PASS**; publish payload chứa `game_events_v1.json` SHA `F9F25EA94DA7FCD20E360509EE53E6E758039CCF788FAFEC729A35F80D39A8B1`.
 - Full Installer E2E hiện **BLOCKED_SAFETY** vì `%LOCALAPPDATA%\WAHU Kids Learn\data\learning.db` tồn tại nhưng không có `.wahu-e2e-owned`; không được xóa/ghi đè dữ liệu này để ép test qua.
 - Production signing và real Windows 7 validation vẫn `UNAVAILABLE/PENDING`.
@@ -41,11 +46,11 @@ AI3 Math UI/QA/integration lane đã hoàn tất playable P0/P1 cho 5 bài đầ
 Current evidence:
 
 - runtime Math bank: **402 questions / 67 lessons / 6 per lesson / 2 per difficulty**;
-- Child UI: **3696 assertions PASS**;
+- Child UI latest common-head: **3706 assertions PASS**;
 - production Math validator: **402/402 valid**;
 - full Math content/event/pool suite: **90/90 PASS**;
 - difficulty distribution: **134 basic / 134 medium / 134 application**;
-- Math persistence: **7933 assertions PASS**; Build-Setup `10b/15` build **0 warning / 0 error**;
+- Math persistence latest common-head: **7997 assertions PASS**; release Build-Setup `10b/15` remains recorded at **7933 assertions PASS** with build **0 warning / 0 error**;
 - full Build-Setup `0.1.68-dev`: **15/15 PASS**, provenance + validator + 90-suite + persistence + Portable E2E + post-installer provenance recorded in release manifest;
 - Portable E2E: **PASS**;
 - Installer compile: **PASS**; full installer E2E **BLOCKED_SAFETY** trên máy hiện tại.
