@@ -742,6 +742,43 @@ def child_facing_text_hygiene(value: object) -> list[tuple[str, str, str]]:
     return violations
 
 
+def child_facing_numeric_literal_violations(value: object, max_value: int = 1000) -> list[tuple[str, int, str]]:
+    violations: list[tuple[str, int, str]] = []
+
+    def scan(node: object, path: str, child_facing: bool = False) -> None:
+        if isinstance(node, dict):
+            for key, item in node.items():
+                scan(item, f"{path}.{key}" if path else key, key in CHILD_FACING_KEYS)
+            return
+        if isinstance(node, list):
+            for index, item in enumerate(node):
+                scan(item, f"{path}[{index}]", child_facing)
+            return
+        if not child_facing:
+            return
+        if type(node) is int:
+            if abs(node) > max_value:
+                violations.append((path, node, str(node)))
+            return
+        if not isinstance(node, str):
+            return
+        # Plain integers and common thousands-group formatting (e.g. 1.200 / 1,200).
+        for match in re.finditer(r"(?<![\w])([+-]?\d{1,3}(?:[.,]\d{3})+|[+-]?\d+)(?![\w])", node):
+            token = match.group(1)
+            compact = token
+            if re.fullmatch(r"[+-]?\d{1,3}(?:[.,]\d{3})+", token):
+                compact = token.replace(".", "").replace(",", "")
+            try:
+                number = int(compact)
+            except ValueError:
+                continue
+            if abs(number) > max_value:
+                violations.append((path, number, node))
+
+    scan(value, "")
+    return violations
+
+
 def check_id(value: object, where: str, errors: list[str]) -> str:
     if not isinstance(value, str) or not ID_RE.fullmatch(value):
         errors.append(f"invalid_id:{where}:{value!r}")
@@ -1135,6 +1172,9 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             errors.append(f"internal_vocabulary_child_facing:{name}:{path}:{term}")
         for path, issue, _text in child_facing_text_hygiene(root):
             errors.append(f"child_facing_text_hygiene:{name}:{path}:{issue}")
+        max_number = baseline.get("hard_guards", {}).get("max_number_baseline", 1000) if isinstance(baseline.get("hard_guards"), dict) else 1000
+        for path, number, _text in child_facing_numeric_literal_violations(root, max_number):
+            errors.append(f"child_facing_number_above_baseline:{name}:{path}:{number}:{max_number}")
 
     baseline_skills = []
     domains = baseline.get("domains")

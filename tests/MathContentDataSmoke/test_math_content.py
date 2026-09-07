@@ -621,6 +621,14 @@ class MathContentDataSmoke(unittest.TestCase):
         self.assertFalse(validator.prompt_mentions_answer_unit("Đáp án là bao nhiêu?", "cm"))
         self.assertFalse(validator.prompt_mentions_answer_unit("Một cm dài bao nhiêu?", "m"))
 
+    def test_child_facing_numbers_stay_within_baseline_1000(self):
+        self.assertEqual([], validator.child_facing_numeric_literal_violations(self.catalog, 1000))
+        self.assertEqual([], validator.child_facing_numeric_literal_violations(self.bank, 1000))
+        self.assertNotEqual([], validator.child_facing_numeric_literal_violations({"prompt_vi": "Có 1.200 viên bi."}, 1000))
+        self.assertNotEqual([], validator.child_facing_numeric_literal_violations({"correct_answer": 1001}, 1000))
+        self.assertEqual([], validator.child_facing_numeric_literal_violations({"prompt_vi": "Có 1.000 viên bi."}, 1000))
+        self.assertEqual([], validator.child_facing_numeric_literal_violations({"curriculum_id": "math_2018"}, 1000))
+
     def test_correct_choice_positions_are_balanced(self):
         choice_questions = [x for x in self.questions if x.get("choices")]
         by_count = {}
