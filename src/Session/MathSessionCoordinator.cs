@@ -646,6 +646,11 @@ namespace WAHU.Session
         public MathSessionSummary Complete()
         {
             EnsureActive();
+            if (_attempts <= 0)
+                throw new InvalidOperationException("Math session cannot complete before at least one question is finalized. Use Suspend or Abort instead.");
+            if (string.Equals(_sessionMode, "lesson", StringComparison.Ordinal) &&
+                _targetQuestionCount > 0 && _attempts < _targetQuestionCount)
+                throw new InvalidOperationException("Targeted Math lesson cannot complete before its selected questions are finalized. Use Suspend or Abort instead.");
             var ended = DateTime.UtcNow;
             var summary = BuildSummary(ended);
             var summaryData = new Dictionary<string, object>

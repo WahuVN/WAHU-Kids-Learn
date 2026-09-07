@@ -21,7 +21,7 @@ Playable Event Engine P0: **GREEN**
 
 - `tests/MathEngineRuntimeSmoke`: PASS — **72 assertions** (baseline equivalence + adversarial Unicode/NFD, int overflow, answer-length, unit alias, expression depth/token-bomb, Unicode operators và invalid per-question whitelist fail-closed).
 - `tests/MathDataEngineRuntimeSmoke`: PASS — **104 assertions** (idempotency + terminal-session guard + optimistic skill-state guard + true cross-process mastery/session contention + atomic startup + subject/child-scoped dangling recovery).
-- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **7859 assertions** (toàn bộ gate cũ + real 402-bank selector breadth + targeted write-failure/corruption repair + deterministic authored runtime IDs + concurrent pending-retry semantics + generated/open-ordinal self-heal + late-review transaction rollback + operational DB failure fail-safe).
+- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **7864 assertions** (toàn bộ gate cũ + real 402-bank selector breadth + targeted write-failure/corruption repair + deterministic authored runtime IDs + concurrent pending-retry semantics + generated/open-ordinal self-heal + late-review transaction rollback + operational DB failure fail-safe).
 - Pending-retry early complete: q2 wrong/pending retry rồi gọi `Complete()` bị reject nhưng `RetryPending`, checkpoint=1, exact q2 và reward=0 đều giữ nguyên; suspend/resume tiếp tục flow cũ.
 - Corrupt-catalog completion: synthetic event q1 complete rồi catalog hỏng; fallback lesson giữ selected q2/q3, đạt 3/3 nhưng chưa terminal cho tới `Complete()`, sau đó đúng 3 attempts/3 mastery + 1 reward; khôi phục catalog mở cùng event tạo session mới 0/3 và không duplicate reward.
 - Mismatched event/lesson fail-closed: production event 1 ID ghép nhầm fallback lesson event 2 bị `ResolveEventFailSafe()` reject trước session start; regression xác nhận 0 active session, 0 `math_session_runtime`, 0 `math_lesson_progress`, 0 reward.
@@ -49,7 +49,7 @@ Playable Event Engine P0: **GREEN**
 - FIRST-5 hint/mastery matrix: mỗi bài đầu có một câu đúng với `hint_level=2` và hai câu independent; outcome hinted không được tính independent, mastery reason chứa `hinted_correct_lower_weight`, review reason `hinted_success_short_recall`, DB persist đúng 1 max-hint + 2 no-hint attempts và child_skill đúng `independent_success_count=2`, `hinted_success_count=1`.
 - Pack-byte identity audit: production `Program.BootstrapRuntime()` bắt buộc `ContentPackValidator.ValidateDirectory(..., true)` cho bundled Math pack trước UI; manifest SHA-256 mismatch fail startup, nên V5 `pack_id+version` kết hợp verified manifest đủ contract hiện tại, chưa cần invent schema V6 chỉ để lưu hash lần hai.
 - Late-review transaction fault: injected failure tại `review_schedule` (sau attempt/mastery/child_skill trong cùng transaction) rollback sạch toàn chain + semantic key; retry sau khi gỡ trigger ghi đúng một attempt/mastery/child_skill/review duy nhất.
-- Expanded-bank integration: `373d9d1` bỏ test coupling `Single(...)`/`_01`, chạy được cả baseline 201 và pool 402; current real 402-bank persistence tổng **7859 assertions PASS**.
+- Expanded-bank integration: `373d9d1` bỏ test coupling `Single(...)`/`_01`, chạy được cả baseline 201 và pool 402; current real 402-bank persistence tổng **7864 assertions PASS**.
 - PowerShell release/build scripts: schema V5 payload/bootstrap expectations đã cập nhật; staged `Build-SetupArtifacts.ps1` PASS qua Release x86 + runtime smokes + staged payload/preflight + portable packaging.
 - `git diff --check` + staged `git diff --cached --check`: PASS cho wave V5.
 
@@ -88,7 +88,8 @@ Playable Event Engine P0: **GREEN**
 - Repeated reward-repair fault: giữ trigger reward failure cả lúc mở replay; `Start()` vẫn thành công với replay session 0/3, old/new reward đều 0 và progress `started=2/completed=1`. Sau khi bỏ trigger, reopen bằng lesson fallback resume đúng replay session + exact q1, repair old reward=1, replay reward=0 và không tăng started_count lần ba.
 - Zero-attempt Garden eligibility: `GameWorldRewardService` giờ thống nhất reward/progress/milestone trên completed Math sessions có `EXISTS(attempt)`. Regression tạo adaptive session complete 0 câu rồi một Rescue 3/3: phiên rỗng có 0 reward và không tăng Garden completed count/milestone; Rescue hợp lệ tạo đúng 1 growth + seedling, `CompletedMathSessions=1`, còn 2 phiên tới mốc 3; reconcile không backfill phiên rỗng.
 - Durable-attempt reward guard: reward transaction query actual durable attempts của completed Math session trước insert. Regression gọi trực tiếp `GrantCompletedMathSession(child, emptyCompletedSession, 999)` vẫn `RewardCreated=false`/0 row; normal Rescue 3/3 reward vẫn đúng 1.
-- Playable Event P0 persistence total: **7859 assertions PASS**. Production AI1 catalog `bd1809e` đã tích hợp thật 5/5 event; synthetic fixtures vẫn giữ để fault/corruption/race test độc lập.
+- Root completion evidence guard: `MathSessionCoordinator.Complete()` fail-closed nếu adaptive `_attempts==0` hoặc lesson-mode `_attempts < _targetQuestionCount`. Regression zero-attempt giữ session active/0 reward rồi Abort cleanup; direct targeted lesson sau q1 reject Complete, `started=1/completed=0`, reward=0 và exact q2 vẫn mở. Legacy zero-attempt completed fixture vẫn được tạo qua persistence thấp để kiểm backward-compatible Garden filtering.
+- Playable Event P0 persistence total: **7864 assertions PASS**. Production AI1 catalog `bd1809e` đã tích hợp thật 5/5 event; synthetic fixtures vẫn giữ để fault/corruption/race test độc lập.
 
 ## Session
 

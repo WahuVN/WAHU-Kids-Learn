@@ -93,6 +93,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestGameEventRewardRepairFailureDoesNotBlockReplay(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventConcurrentRewardReconcileIsIdempotent(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGardenProgressIgnoresZeroAttemptCompletedSessions(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
+                TestDirectTargetedLessonRejectsEarlyComplete(root, schemaPath, templatePath, lessonCatalogPath);
                 TestGameEventTerminalRuntimeCleanupReconcilesOnNextStart(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventCommitFaultPreservesCheckpoint(root, schemaPath, templatePath, lessonCatalogPath);
                 TestGameEventConcurrentCoordinatorsStayIdempotent(root, schemaPath, templatePath, lessonCatalogPath);
@@ -1355,13 +1356,24 @@ BEGIN SELECT RAISE(ABORT,'game event injected concurrent reward seed failure'); 
             {
                 var start = empty.Start("Bé garden zero attempt");
                 childId = start.ChildId;
-                emptySessionId = start.SessionId;
-                var summary = empty.Complete();
-                A(summary.Attempts == 0 && SessionState(database, emptySessionId) == "completed" &&
-                  Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + emptySessionId + "';") == 0 &&
-                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + emptySessionId + "';") == 0,
-                    "garden_zero_attempt_completed_fixture_has_no_learning_or_reward");
+                var rejected = false;
+                try { empty.Complete(); }
+                catch (InvalidOperationException) { rejected = true; }
+                A(rejected && empty.IsActive && SessionState(database, start.SessionId) == "active" &&
+                  Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + start.SessionId + "';") == 0 &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + start.SessionId + "';") == 0,
+                    "math_zero_attempt_complete_is_rejected_without_terminal_or_reward");
+                empty.Abort("zero_attempt_complete_guard_cleanup");
             }
+
+            var legacySessionService = new LearnerSessionService(database);
+            var legacy = legacySessionService.BeginSession(childId, "math", "LOW");
+            emptySessionId = legacy.SessionId;
+            legacySessionService.CompleteSession(emptySessionId, false, "{\"legacy_zero_attempt\":true}", "{}");
+            A(SessionState(database, emptySessionId) == "completed" &&
+              Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + emptySessionId + "';") == 0 &&
+              Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + emptySessionId + "';") == 0,
+                "garden_legacy_zero_attempt_completed_fixture_has_no_learning_or_reward");
 
             var rewardService = new GameWorldRewardService(database);
             var spoofed = rewardService.GrantCompletedMathSession(childId, emptySessionId, 999);
@@ -1400,6 +1412,48 @@ BEGIN SELECT RAISE(ABORT,'game event injected concurrent reward seed failure'); 
             A(new GameWorldRewardService(database).ReconcileMissingCompletedMathSessionRewards(childId) == 0 &&
               Count(database, "SELECT count(*) FROM reward_event WHERE child_id='" + childId + "';") == 1,
                 "garden_zero_attempt_session_is_never_backfilled_as_rewardable");
+        }
+
+        private static void TestDirectTargetedLessonRejectsEarlyComplete(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.Lessons.First(x => x.PrerequisiteSkills == null || x.PrerequisiteSkills.Count == 0);
+            var database = NewDatabase(Path.Combine(root, "targeted-direct-early-complete.db"), schemaPath);
+            string sessionId;
+            string childId;
+            IList<string> selected;
+            string q2Id;
+
+            using (var coordinator = new MathSessionCoordinator(database, templatePath, "LOW", 15311, lesson.Id))
+            {
+                var start = coordinator.Start("Bé targeted early complete");
+                sessionId = start.SessionId;
+                childId = start.ChildId;
+                selected = start.SelectedContentQuestionIds.ToList();
+                var q1 = coordinator.NextQuestion();
+                coordinator.SubmitAnswerAt(q1.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700);
+                var q2 = coordinator.NextQuestion();
+                q2Id = q2.QuestionId;
+
+                var rejected = false;
+                try { coordinator.Complete(); }
+                catch (InvalidOperationException) { rejected = true; }
+                A(rejected && coordinator.IsActive && SessionState(database, sessionId) == "active" &&
+                  coordinator.Summary.Attempts == 1 && coordinator.Summary.LessonCompleted == false,
+                    "targeted_direct_early_complete_is_rejected_and_session_stays_active");
+                A(Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + childId +
+                  "' AND lesson_id='" + lesson.Id + "' AND started_count=1 AND completed_count=0;") == 1 &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + sessionId + "';") == 0,
+                    "targeted_direct_early_complete_keeps_progress_incomplete_and_reward_zero");
+                A(coordinator.NextQuestion().QuestionId == q2Id &&
+                  coordinator.NextQuestion().ContentQuestionId == selected[1],
+                    "targeted_direct_early_complete_keeps_exact_q2_open");
+                coordinator.Suspend("targeted_early_complete_cleanup");
+            }
         }
 
         private static void TestGameEventTerminalRuntimeCleanupReconcilesOnNextStart(
