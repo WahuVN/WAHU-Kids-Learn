@@ -927,6 +927,11 @@ namespace WAHU.ChildUiRuntimeSmoke
                     var interactionCount = 0;
                     var answerUnitCount = 0;
                     var answerUnits = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    form.ClientSize = new Size(900, 640);
+                    CreateAndLayoutTree(form);
+                    var promptLabel = GetField<Label>(form, "_prompt");
+                    A(promptLabel.ClientSize.Width > 0 && promptLabel.ClientSize.Height > 0,
+                        "authored_ui_prompt_region_available_at_min_window");
                     foreach (var raw in questions)
                     {
                         var question = raw as MathQuestion;
@@ -939,6 +944,17 @@ namespace WAHU.ChildUiRuntimeSmoke
                         {
                             throw new Exception("Authored UI cannot render " + question.ContentQuestionId + " (" + question.QuestionType + "/" + question.AnswerKind + ")", ex.InnerException ?? ex);
                         }
+
+                        Invoke(form, "ApplyPromptTypography", question.PromptVi);
+                        var measuredPrompt = TextRenderer.MeasureText(
+                            question.PromptVi,
+                            promptLabel.Font,
+                            new Size(Math.Max(120, promptLabel.ClientSize.Width - 4), 4096),
+                            TextFormatFlags.WordBreak);
+                        A(measuredPrompt.Height <= Math.Max(20, promptLabel.ClientSize.Height - 4),
+                            "authored_ui_prompt_fits_min_window_" + question.ContentQuestionId);
+                        A(promptLabel.Font.Size >= 12f,
+                            "authored_ui_prompt_keeps_readable_min_font_" + question.ContentQuestionId);
 
                         if (!string.IsNullOrWhiteSpace(question.AnswerUnit))
                         {

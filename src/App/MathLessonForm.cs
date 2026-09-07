@@ -65,6 +65,10 @@ namespace WAHUKidsLearn
             DoubleBuffered = true;
             BuildUi();
             Shown += delegate { StartSession(); };
+            Resize += delegate
+            {
+                if (!_finished && _question != null && _prompt != null) ApplyPromptTypography(_question.PromptVi);
+            };
             FormClosing += OnFormClosing;
         }
 
@@ -389,6 +393,39 @@ namespace WAHUKidsLearn
             }
         }
 
+        private void ApplyPromptTypography(string promptVi)
+        {
+            if (_prompt == null) return;
+
+            var text = promptVi ?? string.Empty;
+            _prompt.Text = text;
+            var width = _prompt.ClientSize.Width > 0
+                ? _prompt.ClientSize.Width
+                : Math.Max(320, ClientSize.Width - 216);
+            var height = _prompt.ClientSize.Height > 0 ? _prompt.ClientSize.Height : 68;
+            var candidateSizes = new[] { 30f, 26f, 22f, 18f, 16f, 14f, 12f };
+            var chosenSize = 12f;
+
+            foreach (var candidateSize in candidateSizes)
+            {
+                using (var candidateFont = ChildVisualTheme.Font(candidateSize, FontStyle.Bold))
+                {
+                    var measured = TextRenderer.MeasureText(
+                        text,
+                        candidateFont,
+                        new Size(Math.Max(120, width - 4), 4096),
+                        TextFormatFlags.WordBreak);
+                    if (measured.Height <= Math.Max(20, height - 4))
+                    {
+                        chosenSize = candidateSize;
+                        break;
+                    }
+                }
+            }
+
+            _prompt.Font = ChildVisualTheme.Font(chosenSize, FontStyle.Bold);
+        }
+
         private void ShowNextQuestion()
         {
             if (_finished || _coordinator == null || !_coordinator.IsActive) return;
@@ -398,9 +435,7 @@ namespace WAHUKidsLearn
                 if (_question == null) { CompleteSession(); return; }
                 _hintLevel = 0;
                 _submitting = false;
-                _prompt.Text = _question.PromptVi;
-                var promptLength = string.IsNullOrWhiteSpace(_question.PromptVi) ? 0 : _question.PromptVi.Length;
-                _prompt.Font = ChildVisualTheme.Font(promptLength > 82 ? 14.5f : (promptLength > 48 ? 18f : 30f), FontStyle.Bold);
+                ApplyPromptTypography(_question.PromptVi);
                 _completionVisual.Visible = false;
                 _instructionVisual.Visible = true;
                 _instructionVisual.SetQuestion(_question, 0);
