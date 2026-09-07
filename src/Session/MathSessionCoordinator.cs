@@ -589,7 +589,7 @@ namespace WAHU.Session
             {
                 IsCorrect = isCorrect,
                 CorrectAnswer = question.CorrectAnswer,
-                CorrectAnswerDisplay = question.CorrectAnswerDisplay,
+                CorrectAnswerDisplay = question.CorrectAnswerFeedbackDisplay,
                 HintLevel = hintLevel,
                 FeedbackVi = canRetry ? BuildRetryFeedback(error) : BuildFeedback(isCorrect, masteryHintLevel, error),
                 Behavior = behaviorDecision,

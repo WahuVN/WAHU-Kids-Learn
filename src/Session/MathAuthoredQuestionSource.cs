@@ -116,6 +116,7 @@ namespace WAHU.Session
                 NumericTolerance = authored.NumericTolerance,
                 ExpectedUnit = authored.ExpectedUnit,
                 AcceptedUnits = Copy(authored.AcceptedUnits),
+                AnswerUnit = authored.AnswerUnit,
                 AllowedExpressionOperators = Copy(authored.AllowedExpressionOperators),
                 ChoiceTexts = Copy(authored.ChoiceTexts),
                 IllustrationData = authored.IllustrationData,
@@ -175,6 +176,9 @@ namespace WAHU.Session
 
             var expectedUnit = OptionalString(item, "expected_unit");
             var acceptedUnits = ReadStringArray(item, "accepted_units", false);
+            var answerUnit = OptionalString(item, "answer_unit");
+            if (!string.IsNullOrWhiteSpace(answerUnit) && !string.Equals(answerKind, "integer", StringComparison.Ordinal))
+                throw new InvalidDataException("answer_unit is display-only metadata for integer authored Math questions: " + id);
             var allowedExpressionOperators = ReadExpressionOperators(item, answerKind, id);
             var question = new MathQuestion
             {
@@ -192,6 +196,7 @@ namespace WAHU.Session
                 AcceptedAnswers = accepted,
                 ExpectedUnit = expectedUnit,
                 AcceptedUnits = acceptedUnits,
+                AnswerUnit = answerUnit,
                 AllowedExpressionOperators = allowedExpressionOperators,
                 HintLevel1 = hints[0],
                 HintLevel2 = hints[1],

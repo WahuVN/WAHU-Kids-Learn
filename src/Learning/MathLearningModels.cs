@@ -47,6 +47,7 @@ namespace WAHU.Learning
         public double NumericTolerance { get; set; }
         public string ExpectedUnit { get; set; }
         public IList<string> AcceptedUnits { get; set; }
+        public string AnswerUnit { get; set; }
         public IList<string> AllowedExpressionOperators { get; set; }
         public IList<string> ChoiceTexts { get; set; }
         public string IllustrationData { get; set; }
@@ -68,6 +69,16 @@ namespace WAHU.Learning
             }
         }
 
+        public string CorrectAnswerFeedbackDisplay
+        {
+            get
+            {
+                var display = CorrectAnswerDisplay;
+                if (string.Equals(AnswerKind, "integer", StringComparison.Ordinal) && !string.IsNullOrWhiteSpace(AnswerUnit))
+                    return display + " " + AnswerUnit.Trim();
+                return display;
+            }
+        }
         public IList<string> DisplayChoices
         {
             get

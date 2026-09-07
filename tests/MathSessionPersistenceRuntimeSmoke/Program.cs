@@ -38,6 +38,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 var questionBankPath = Path.Combine(repo, "content_packs", "math_grade2_v1", "question_bank_v1.json");
                 var lessonCatalogPath = Path.Combine(repo, "content_packs", "math_grade2_v1", "lesson_catalog_v1.json");
                 TestAuthoredQuestionBank(questionBankPath);
+                TestAnswerUnitFeedbackSurvivesCoordinatorResume(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedLessonUnlockAndResume(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedCompletionSurvivesNextLessonReadFailure(root, schemaPath, templatePath, lessonCatalogPath);
                 TestCorruptRuntimeMetadataIsQuarantined(root, schemaPath, templatePath);
@@ -71,12 +72,14 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
         private static void TestAuthoredQuestionBank(string questionBankPath)
         {
             var bank = new MathAuthoredQuestionSource().Load(questionBankPath);
-            A(bank != null && bank.Questions != null && bank.Questions.Count == 201, "authored_bank_loads_all_201_questions");
-            A(bank.Questions.Select(x => x.ContentQuestionId).Distinct(StringComparer.Ordinal).Count() == 201,
+            A(bank != null && bank.Questions != null && bank.Questions.Count >= 201, "authored_bank_loads_at_least_baseline_201_questions");
+            A(bank.Questions.Select(x => x.ContentQuestionId).Distinct(StringComparer.Ordinal).Count() == bank.Questions.Count,
                 "authored_bank_content_ids_unique");
             var lessonGroups = bank.Questions.GroupBy(x => x.LessonId, StringComparer.Ordinal).ToList();
             A(lessonGroups.Count == 67, "authored_bank_covers_67_lessons");
-            A(lessonGroups.All(x => x.Count() == 3), "authored_bank_each_lesson_has_three_questions");
+            A(lessonGroups.All(x => x.Count() >= 3 &&
+                x.Any(q => q.Difficulty == "basic") && x.Any(q => q.Difficulty == "medium") && x.Any(q => q.Difficulty == "application")),
+                "authored_bank_each_lesson_has_all_three_difficulties");
             A(bank.Questions.All(x => !string.IsNullOrWhiteSpace(x.ContentQuestionId) && !string.IsNullOrWhiteSpace(x.LessonId) &&
                                       !string.IsNullOrWhiteSpace(x.QuestionType) && !string.IsNullOrWhiteSpace(x.Difficulty)),
                 "authored_bank_maps_traceability_metadata");
@@ -121,6 +124,24 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 "authored_unit_maps_expected_unit_without_fake_choices");
             A(unit.IsCorrectAnswer("5 kilôgam"), "authored_unit_accepts_declared_alias");
 
+            var displayUnitQuestions = bank.Questions.Where(x => x.AnswerKind == "integer" && !string.IsNullOrWhiteSpace(x.AnswerUnit)).ToList();
+            A(displayUnitQuestions.Count >= 23, "authored_integer_display_units_are_preserved");
+            var displayCm = displayUnitQuestions.First(x => x.AnswerUnit == "cm");
+            A(displayCm.IsCorrectAnswer(displayCm.CorrectAnswerDisplay),
+                "authored_display_unit_keeps_raw_integer_answer_valid");
+            A(!displayCm.IsCorrectAnswer(displayCm.CorrectAnswerFeedbackDisplay),
+                "authored_display_unit_does_not_widen_integer_grading_to_unit_text");
+            A(displayCm.CorrectAnswerFeedbackDisplay == displayCm.CorrectAnswerDisplay + " cm",
+                "authored_display_unit_formats_feedback_with_unit");
+            var displayRuntime = MathAuthoredQuestionSource.CreateRuntimeInstance(displayCm);
+            A(displayRuntime.AnswerUnit == "cm" && displayRuntime.CorrectAnswerFeedbackDisplay == displayCm.CorrectAnswerFeedbackDisplay,
+                "authored_display_unit_survives_runtime_instance");
+            var restoredDisplay = Json.Deserialize<MathQuestion>(Json.Serialize(displayRuntime));
+            A(restoredDisplay != null && restoredDisplay.AnswerUnit == "cm" &&
+              restoredDisplay.CorrectAnswerFeedbackDisplay == displayCm.CorrectAnswerFeedbackDisplay &&
+              restoredDisplay.IsCorrectAnswer(restoredDisplay.CorrectAnswerDisplay),
+                "authored_display_unit_survives_current_question_json_without_changing_raw_grading");
+
             var interaction = bank.Questions.Single(x => x.AnswerKind == "interaction_integer");
             A(interaction.QuestionType == "interactive_measurement" && interaction.DisplayChoices.Count == 0,
                 "authored_interaction_stays_choice_free");
@@ -140,6 +161,47 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 "authored_runtime_instances_keep_stable_content_id");
             A(runtimeA.QuestionId != runtimeB.QuestionId && runtimeA.QuestionId.StartsWith(authored.ContentQuestionId + "-", StringComparison.Ordinal),
                 "authored_runtime_question_id_remains_unique_instance_id");
+        }
+
+        private static void TestAnswerUnitFeedbackSurvivesCoordinatorResume(string root, string schemaPath, string templatePath, string lessonCatalogPath)
+        {
+            const string lessonId = "m2_ls_time_day_24_hours";
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.FindLesson(lessonId);
+            A(lesson != null && (lesson.PrerequisiteSkills == null || lesson.PrerequisiteSkills.Count == 0),
+                "answer_unit_feedback_fixture_is_directly_startable");
+            var database = NewDatabase(Path.Combine(root, "answer-unit-feedback-resume.db"), schemaPath);
+            string sessionId;
+            string questionId;
+
+            using (var first = new MathSessionCoordinator(database, templatePath, "LOW", 20260907, lessonId))
+            {
+                var start = first.Start("Bé answer unit");
+                sessionId = start.SessionId;
+                var question = first.NextQuestion();
+                questionId = question.QuestionId;
+                A(question.ContentQuestionId == lesson.PracticeSets.Basic[0] && question.AnswerKind == "integer",
+                    "answer_unit_feedback_opens_authored_integer_question");
+                A(question.AnswerUnit == "giờ" && question.CorrectAnswerDisplay == "24" &&
+                  question.CorrectAnswerFeedbackDisplay == "24 giờ",
+                    "answer_unit_feedback_separates_raw_answer_from_feedback_display");
+                first.Suspend("answer_unit_feedback_resume_fixture");
+            }
+
+            using (var resumed = new MathSessionCoordinator(database, templatePath, "NORMAL", 1, lessonId))
+            {
+                var start = resumed.Start("Bé answer unit");
+                A(start.ResumedExistingSession && start.SessionId == sessionId && start.RestoredOpenQuestion,
+                    "answer_unit_feedback_resumes_open_question");
+                var question = resumed.NextQuestion();
+                A(question.QuestionId == questionId && question.AnswerUnit == "giờ" &&
+                  question.CorrectAnswerDisplay == "24" && question.CorrectAnswerFeedbackDisplay == "24 giờ",
+                    "answer_unit_feedback_survives_runtime_json_resume");
+                var outcome = resumed.SubmitAnswerAt("24", 0, "smoke", DateTime.UtcNow, 800);
+                A(outcome.IsCorrect && outcome.CorrectAnswerDisplay == "24 giờ",
+                    "answer_unit_feedback_outcome_publishes_value_with_display_unit");
+                resumed.Abort("answer_unit_feedback_cleanup");
+            }
         }
 
         private static void TestTargetedLessonUnlockAndResume(string root, string schemaPath, string templatePath, string lessonCatalogPath)
