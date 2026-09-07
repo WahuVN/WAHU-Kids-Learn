@@ -96,6 +96,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestGardenRewardUsesDurableEligibilityInsteadOfCallerOrForeignAttempts(root, schemaPath);
                 TestGardenRewardRepairsCanonicalKeyCollisionAndIgnoresOrphanGrowth(root, schemaPath);
                 TestGardenMilestonesOneThreeSixTenAreExactAndReplaySafe(root, schemaPath);
+                TestGardenPartialRewardRepairKeepsCanonicalMilestonesAndInventory(root, schemaPath);
                 TestDirectTargetedLessonRejectsEarlyComplete(root, schemaPath, templatePath, lessonCatalogPath);
                 TestGameEventTerminalRuntimeCleanupReconcilesOnNextStart(root, schemaPath, templatePath, lessonCatalogPath, gameEventPath);
                 TestGameEventCommitFaultPreservesCheckpoint(root, schemaPath, templatePath, lessonCatalogPath);
@@ -1655,6 +1656,87 @@ VALUES(@id,@session,@child,'math-grade2-verified-core','1.0',@question,@skill,'m
             A(rewards.ReconcileMissingCompletedMathSessionRewards(owner.ChildId) == 0,
                 "garden_milestones_complete_table_needs_no_reconcile_after_exact_rewards");
         }
+        private static void TestGardenPartialRewardRepairKeepsCanonicalMilestonesAndInventory(
+            string root,
+            string schemaPath)
+        {
+            var database = NewDatabase(Path.Combine(root, "garden-partial-reward-inventory-repair.db"), schemaPath);
+            var sessions = new LearnerSessionService(database);
+            var owner = sessions.EnsurePrimaryChild("Bé garden partial repair");
+            var sessionIds = new List<string>();
+
+            for (var ordinal = 1; ordinal <= 3; ordinal++)
+            {
+                var session = sessions.BeginSession(owner.ChildId, "math", "LOW");
+                sessionIds.Add(session.SessionId);
+                Exec(database, @"INSERT INTO attempt(
+id,session_id,child_id,pack_id,pack_version,question_id,skill_id,subject,started_at_utc,answered_at_utc,answer_json,is_correct,response_ms,hint_level,representation,input_method,attempt_index,listen_count)
+VALUES(@id,@session,@child,'math-grade2-verified-core','1.0',@question,@skill,'math',@started,@answered,'{}',1,700,0,'symbolic','smoke',1,0);",
+                    "@id", "attempt-garden-partial-" + ordinal + "-" + Guid.NewGuid().ToString("N"),
+                    "@session", session.SessionId,
+                    "@child", owner.ChildId,
+                    "@question", "garden-partial-question-" + ordinal,
+                    "@skill", "M2_GARDEN_PARTIAL_" + ordinal,
+                    "@started", DateTime.UtcNow.AddSeconds(-1).ToString("o", CultureInfo.InvariantCulture),
+                    "@answered", DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture));
+                sessions.CompleteSession(session.SessionId, false, "{\"fixture\":\"garden_partial_reward\"}", "{}");
+            }
+
+            var rewards = new GameWorldRewardService(database);
+            var before = rewards.ReadProgress(owner.ChildId);
+            A(before.GrowthSteps == 0 && before.CompletedMathSessions == 3 && before.UnlockedItems.Count == 0 &&
+              before.NextMilestoneSessionCount == 1 && before.NextMilestoneItemId == "garden_seedling" &&
+              before.SessionsUntilNextMilestone == 1,
+                "garden_completed_sessions_without_rewards_do_not_skip_canonical_milestone");
+
+            var first = rewards.GrantCompletedMathSession(owner.ChildId, sessionIds[0], 999);
+            A(first.RewardCreated && first.GrowthSteps == 1 && first.CompletedMathSessions == 3 &&
+              first.NewlyUnlockedItems.SequenceEqual(new[] { "garden_seedling" }) &&
+              first.NextMilestoneSessionCount == 3 && first.NextMilestoneItemId == "garden_flower_patch" &&
+              first.SessionsUntilNextMilestone == 2 &&
+              Count(database, "SELECT count(*) FROM inventory WHERE child_id='" + owner.ChildId +
+                "' AND item_id='garden_flower_patch';") == 0,
+                "garden_partial_reward_repair_unlocks_only_canonical_growth_milestone");
+
+            Exec(database, @"INSERT OR IGNORE INTO inventory(child_id,item_id,unlocked_at_utc,equipped)
+VALUES(@child,'garden_flower_patch',@utc,0),(@child,'garden_lantern',@utc,0),(@child,'garden_bench',@utc,0);",
+                "@child", owner.ChildId,
+                "@utc", DateTime.UtcNow.AddMinutes(-10).ToString("o", CultureInfo.InvariantCulture));
+            var staleView = rewards.ReadProgress(owner.ChildId);
+            A(staleView.GrowthSteps == 1 && staleView.CompletedMathSessions == 3 &&
+              staleView.UnlockedItems.SequenceEqual(new[] { "garden_seedling" }) &&
+              staleView.NextMilestoneItemId == "garden_flower_patch" && staleView.SessionsUntilNextMilestone == 2,
+                "garden_read_progress_ignores_stale_future_inventory");
+
+            var repaired = rewards.ReconcileMissingCompletedMathSessionRewards(owner.ChildId);
+            var afterRepair = rewards.ReadProgress(owner.ChildId);
+            A(repaired == 2 && afterRepair.GrowthSteps == 3 && afterRepair.CompletedMathSessions == 3 &&
+              afterRepair.UnlockedItems.SequenceEqual(new[] { "garden_seedling", "garden_flower_patch" }) &&
+              afterRepair.NextMilestoneSessionCount == 6 && afterRepair.NextMilestoneItemId == "garden_lantern" &&
+              afterRepair.SessionsUntilNextMilestone == 3 &&
+              Count(database, "SELECT count(*) FROM inventory WHERE child_id='" + owner.ChildId +
+                "' AND item_id IN ('garden_seedling','garden_flower_patch');") == 2 &&
+              Count(database, "SELECT count(*) FROM inventory WHERE child_id='" + owner.ChildId +
+                "' AND item_id IN ('garden_lantern','garden_bench');") == 0,
+                "garden_reward_reconcile_normalizes_canonical_milestone_inventory");
+
+            Exec(database, "DELETE FROM inventory WHERE child_id=@child AND item_id='garden_flower_patch';",
+                "@child", owner.ChildId);
+            var missingInventoryView = rewards.ReadProgress(owner.ChildId);
+            A(missingInventoryView.GrowthSteps == 3 &&
+              missingInventoryView.UnlockedItems.SequenceEqual(new[] { "garden_seedling", "garden_flower_patch" }) &&
+              Count(database, "SELECT count(*) FROM inventory WHERE child_id='" + owner.ChildId +
+                "' AND item_id='garden_flower_patch';") == 0,
+                "garden_read_progress_survives_missing_materialized_inventory");
+
+            A(rewards.ReconcileMissingCompletedMathSessionRewards(owner.ChildId) == 0 &&
+              Count(database, "SELECT count(*) FROM inventory WHERE child_id='" + owner.ChildId +
+                "' AND item_id='garden_flower_patch';") == 1 &&
+              Count(database, "SELECT count(*) FROM inventory WHERE child_id='" + owner.ChildId +
+                "' AND item_id IN ('garden_lantern','garden_bench');") == 0,
+                "garden_reconcile_repairs_inventory_without_creating_new_reward");
+        }
+
         private static void TestDirectTargetedLessonRejectsEarlyComplete(
             string root,
             string schemaPath,

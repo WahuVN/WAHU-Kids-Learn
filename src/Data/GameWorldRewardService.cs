@@ -102,10 +102,13 @@ WHERE child_id=@child AND source_key=@key
                     }
                 }
 
-                var completed = CountCompletedMathSessions(connection, transaction, childId);
+                // Milestones follow canonical Garden rewards, not merely completed sessions.
+                // This prevents an outage with several missing reward rows from unlocking future
+                // milestones when only the first missing reward is repaired.
+                var growthSteps = CountCanonicalGrowthSteps(connection, transaction, childId);
                 foreach (var milestone in Milestones)
                 {
-                    if (completed < milestone.Key) continue;
+                    if (growthSteps < milestone.Key) continue;
                     using (var item = connection.CreateCommand())
                     {
                         item.Transaction = transaction;
@@ -159,6 +162,7 @@ ORDER BY s.started_at_utc,s.id;";
                 var result = GrantCompletedMathSession(childId, item.Key, item.Value);
                 if (result.RewardCreated) repaired++;
             }
+            ReconcileMilestoneInventory(childId);
             return repaired;
         }
 
@@ -169,26 +173,17 @@ ORDER BY s.started_at_utc,s.id;";
             {
                 var progress = new GameWorldProgress
                 {
-                    GrowthSteps = Count(connection,
-                        @"SELECT count(*) FROM reward_event r
-JOIN session s ON s.id=r.source_ref AND s.child_id=r.child_id
-WHERE r.child_id=@child AND r.reward_type='garden_growth' AND r.reward_id='growth_step'
-  AND r.source_event='session_completed' AND r.source_key='garden_growth:session:' || s.id
-  AND s.state='completed' AND s.planned_subject='math'
-  AND EXISTS (SELECT 1 FROM attempt a WHERE a.session_id=s.id AND a.child_id=s.child_id AND a.subject='math');", childId),
+                    GrowthSteps = CountCanonicalGrowthSteps(connection, null, childId),
                     CompletedMathSessions = Count(connection,
                         @"SELECT count(*) FROM session s
 WHERE s.child_id=@child AND s.state='completed' AND s.planned_subject='math'
   AND EXISTS (SELECT 1 FROM attempt a WHERE a.session_id=s.id AND a.child_id=s.child_id AND a.subject='math');", childId),
                     UnlockedItems = new List<string>()
                 };
-                using (var command = connection.CreateCommand())
-                {
-                    command.CommandText = "SELECT item_id FROM inventory WHERE child_id=@child ORDER BY unlocked_at_utc,item_id;";
-                    command.Parameters.AddWithValue("@child", childId);
-                    using (var reader = command.ExecuteReader())
-                        while (reader.Read()) progress.UnlockedItems.Add(Convert.ToString(reader[0], CultureInfo.InvariantCulture));
-                }
+                // Garden visual state is derived from canonical Garden rewards. Inventory is a
+                // materialized cache and may be stale/missing after old builds or interrupted repair.
+                foreach (var milestone in Milestones)
+                    if (progress.GrowthSteps >= milestone.Key) progress.UnlockedItems.Add(milestone.Value);
                 PopulateNextMilestone(progress);
                 return progress;
             }
@@ -214,10 +209,10 @@ WHERE s.child_id=@child AND s.state='completed' AND s.planned_subject='math'
             if (progress == null) return;
             foreach (var milestone in Milestones)
             {
-                if (milestone.Key <= progress.CompletedMathSessions) continue;
+                if (milestone.Key <= progress.GrowthSteps) continue;
                 progress.NextMilestoneSessionCount = milestone.Key;
                 progress.NextMilestoneItemId = milestone.Value;
-                progress.SessionsUntilNextMilestone = milestone.Key - progress.CompletedMathSessions;
+                progress.SessionsUntilNextMilestone = milestone.Key - progress.GrowthSteps;
                 return;
             }
             progress.NextMilestoneSessionCount = 0;
@@ -225,14 +220,46 @@ WHERE s.child_id=@child AND s.state='completed' AND s.planned_subject='math'
             progress.SessionsUntilNextMilestone = 0;
         }
 
-        private static int CountCompletedMathSessions(System.Data.SQLite.SQLiteConnection connection,
+        private void ReconcileMilestoneInventory(string childId)
+        {
+            _database.Writes.Execute((connection, transaction) =>
+            {
+                var growthSteps = CountCanonicalGrowthSteps(connection, transaction, childId);
+                foreach (var milestone in Milestones)
+                {
+                    using (var command = connection.CreateCommand())
+                    {
+                        command.Transaction = transaction;
+                        if (growthSteps >= milestone.Key)
+                        {
+                            command.CommandText = @"INSERT OR IGNORE INTO inventory(child_id,item_id,unlocked_at_utc,equipped)
+VALUES(@child,@item,@utc,0);";
+                            command.Parameters.AddWithValue("@utc", DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture));
+                        }
+                        else
+                        {
+                            // These IDs are owned exclusively by this Garden milestone service.
+                            command.CommandText = "DELETE FROM inventory WHERE child_id=@child AND item_id=@item;";
+                        }
+                        command.Parameters.AddWithValue("@child", childId);
+                        command.Parameters.AddWithValue("@item", milestone.Value);
+                        command.ExecuteNonQuery();
+                    }
+                }
+            });
+        }
+
+        private static int CountCanonicalGrowthSteps(System.Data.SQLite.SQLiteConnection connection,
             System.Data.SQLite.SQLiteTransaction transaction, string childId)
         {
             using (var command = connection.CreateCommand())
             {
-                command.Transaction = transaction;
-                command.CommandText = @"SELECT count(*) FROM session s
-WHERE s.child_id=@child AND s.state='completed' AND s.planned_subject='math'
+                if (transaction != null) command.Transaction = transaction;
+                command.CommandText = @"SELECT count(*) FROM reward_event r
+JOIN session s ON s.id=r.source_ref AND s.child_id=r.child_id
+WHERE r.child_id=@child AND r.reward_type='garden_growth' AND r.reward_id='growth_step'
+  AND r.source_event='session_completed' AND r.source_key='garden_growth:session:' || s.id
+  AND s.state='completed' AND s.planned_subject='math'
   AND EXISTS (SELECT 1 FROM attempt a WHERE a.session_id=s.id AND a.child_id=s.child_id AND a.subject='math');";
                 command.Parameters.AddWithValue("@child", childId);
                 return Convert.ToInt32(command.ExecuteScalar(), CultureInfo.InvariantCulture);
