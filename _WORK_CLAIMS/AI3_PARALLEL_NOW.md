@@ -2,15 +2,42 @@
 
 LANE=AI3
 ROLE=MATH_UI_QA_RELEASE_INTEGRATION_OWNER
-LANE_DONE=YES
-EXECUTION_MODE=VERIFY_THEN_HARDEN_NO_WAIT
+LANE_DONE=NO
+EXECUTION_MODE=EARLY_LESSON_DEEP_HARDEN_NO_WAIT
 LAST_FULLY_VERIFIED_HEAD=`3a53af7`
 LAST_VERIFIED_CHILD_UI=3267_ASSERTIONS_PASS
 LAST_VERIFIED_PERSISTENCE=7159_ASSERTIONS_PASS
 LAST_VERIFIED_CONTENT=53_OF_53_PASS
 LAST_VERIFIED_RELEASE=`0.1.45-dev`_PORTABLE_INSTALLER_PASS
+EARLY_LESSON_DEEP_HEAD=`e34136d`
+EARLY_LESSON_DEEP_CHILD_UI=3564_ASSERTIONS_PASS
+EARLY_LESSON_DEEP_PERSISTENCE=7592_ASSERTIONS_PASS
+EARLY_LESSON_DEEP_CONTENT=62_OF_62_PASS
+EARLY_LESSON_DEEP_VALIDATOR=402_OF_402_VALID
 
 > Khi người dùng bảo “đọc file và làm”: đọc toàn bộ file này, inspect current HEAD, verify UI/release trên contract hiện hành rồi tiếp tục QA/hardening. Không dừng chỉ vì `LANE_DONE=YES`.
+
+## PRIORITY OVERRIDE — làm kỹ bài đầu trước
+
+Theo chỉ đạo hiện tại, AI3 **không dàn thêm hardening mới ra toàn bộ 67 bài**. Ưu tiên sâu trước cho 5 bài nền đầu của Chương 1:
+
+1. `m2_ls_num_count_read_write_0_1000` — Đếm, đọc và viết số đến 1000.
+2. `m2_ls_num_full_hundreds_recognize` — Nhận biết số tròn trăm.
+3. `m2_ls_num_predecessor_successor` — Số liền trước và số liền sau.
+4. `m2_ls_place_value_hundreds_tens_ones` — Giá trị hàng trăm, chục, đơn vị.
+5. `m2_ls_num_expanded_form_hto` — Viết số thành tổng trăm, chục, đơn vị.
+
+Deep gate cho cụm này trước khi mở rộng bài 6+:
+- pool đúng 6 câu/bài, session chọn đúng 3 câu = 1 basic + 1 medium + 1 application;
+- surface đúng typed/choice theo authored question;
+- hint 1/hint 2 hiển thị đúng, không rò đáp án/jargon nội bộ;
+- correct/wrong/retry feedback và progress 1/3 → 3/3 đúng contract;
+- suspend/resume giữ exact câu/selected-set ở flow nền;
+- completion/result/persisted progress đúng và CTA thành luyện lại;
+- prerequisite/unlock từ bài 1 sang bài 2–4, bài 4 mở bài 5 và flow bài 5 hoàn tất đúng snapshot engine;
+- render/readability/accessibility ở cửa sổ tối thiểu 900×640.
+
+Bài 6+ hiện chỉ giữ regression chung đã có; **không đầu tư thêm hardening mới** cho tới khi 5 bài đầu qua deep gate sạch.
 
 ## 0. Mission
 

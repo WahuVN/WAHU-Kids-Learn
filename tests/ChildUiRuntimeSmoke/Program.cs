@@ -39,6 +39,7 @@ namespace WAHU.ChildUiRuntimeSmoke
             TestTypedAnswerInput(appAssembly);
             TestAllAuthoredAnswerSurfaces(appAssembly);
             TestTargetedLessonUiFlow(appAssembly);
+            TestFirstFiveLessonsDeepUiFlow(appAssembly);
             TestExpandedPoolTargetedUiFlow(appAssembly);
             TestTargetedCursorSelfHealUiFlow(appAssembly);
             TestIntegerAnswerUnitUiFlow(appAssembly);
@@ -1305,6 +1306,262 @@ namespace WAHU.ChildUiRuntimeSmoke
                 try { Directory.Delete(tempRoot, true); } catch { }
             }
         }
+        private static void TestFirstFiveLessonsDeepUiFlow(Assembly appAssembly)
+        {
+            var repo = Directory.GetCurrentDirectory();
+            var sourceContent = Path.Combine(repo, "content_packs", "math_grade2_v1");
+            var catalogPath = Path.Combine(sourceContent, "lesson_catalog_v1.json");
+            var catalog = new MathLessonCatalogSource().Load(catalogPath);
+            var firstFive = catalog.Lessons.Take(5).ToList();
+            var expectedIds = new[]
+            {
+                "m2_ls_num_count_read_write_0_1000",
+                "m2_ls_num_full_hundreds_recognize",
+                "m2_ls_num_predecessor_successor",
+                "m2_ls_place_value_hundreds_tens_ones",
+                "m2_ls_num_expanded_form_hto"
+            };
+            A(firstFive.Count == 5 && firstFive.Select(x => x.Id).SequenceEqual(expectedIds),
+                "first_five_ui_exact_curriculum_front");
+            A(firstFive.All(x => x.PracticeSets != null && x.PracticeSets.TotalCount == 6 &&
+                x.PracticeSets.Basic.Count == 2 && x.PracticeSets.Medium.Count == 2 && x.PracticeSets.Application.Count == 2),
+                "first_five_ui_each_lesson_has_two_questions_per_difficulty");
+
+            var runtimeContent = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "content_packs", "math_grade2_v1");
+            Directory.CreateDirectory(runtimeContent);
+            var runtimeFiles = new Dictionary<string, byte[]>(StringComparer.OrdinalIgnoreCase);
+            foreach (var name in new[] { "verified_templates_v1.json", "lesson_catalog_v1.json", "question_bank_v1.json" })
+            {
+                var runtimePath = Path.Combine(runtimeContent, name);
+                runtimeFiles[runtimePath] = File.Exists(runtimePath) ? File.ReadAllBytes(runtimePath) : null;
+                File.Copy(Path.Combine(sourceContent, name), runtimePath, true);
+            }
+
+            var tempRoot = Path.Combine(Path.GetTempPath(), "wahu-child-ui-first-four-deep-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempRoot);
+            try
+            {
+                var schemaSource = Path.Combine(repo, "data", "schema");
+                var schemaDir = Path.Combine(tempRoot, "schema");
+                Directory.CreateDirectory(schemaDir);
+                foreach (var source in Directory.GetFiles(schemaSource, "*.sql"))
+                    File.Copy(source, Path.Combine(schemaDir, Path.GetFileName(source)), true);
+                var database = new LearningDatabase(Path.Combine(tempRoot, "learning.db"), Path.Combine(schemaDir, "001_initial.sql"));
+                var init = database.Initialize("DELETE");
+                A(init.SchemaVersion == 5 && init.Health.IsHealthy, "first_five_ui_database_v5_ready");
+                var profile = new LearnerSessionService(database).EnsurePrimaryChild("Bé UI năm bài đầu");
+                var progressStore = new MathLessonProgressStore(database);
+                var sessionPath = Path.Combine(Path.GetDirectoryName(appAssembly.Location), "WAHU.Session.dll");
+                var sessionAssembly = Assembly.LoadFrom(sessionPath);
+                var accessServiceType = sessionAssembly.GetType("WAHU.Session.MathLessonProgressService", true);
+                var accessService = Activator.CreateInstance(accessServiceType, new object[] { database, catalogPath });
+                var getAccess = accessServiceType.GetMethod("GetAccess", BindingFlags.Instance | BindingFlags.Public);
+                A(getAccess != null, "first_five_ui_access_contract_available");
+
+                A(Get<bool>(getAccess.Invoke(accessService, new object[] { profile.ChildId, firstFive[0].Id }), "IsUnlocked"),
+                    "first_five_ui_lesson1_initially_unlocked");
+                A(!Get<bool>(getAccess.Invoke(accessService, new object[] { profile.ChildId, firstFive[1].Id }), "IsUnlocked") &&
+                    !Get<bool>(getAccess.Invoke(accessService, new object[] { profile.ChildId, firstFive[2].Id }), "IsUnlocked") &&
+                    !Get<bool>(getAccess.Invoke(accessService, new object[] { profile.ChildId, firstFive[3].Id }), "IsUnlocked") &&
+                    !Get<bool>(getAccess.Invoke(accessService, new object[] { profile.ChildId, firstFive[4].Id }), "IsUnlocked"),
+                    "first_five_ui_lessons2_3_4_5_initially_locked");
+
+                var lessonCtor = typeof(WAHUKidsLearn.MathLessonForm).GetConstructor(
+                    BindingFlags.Instance | BindingFlags.NonPublic,
+                    null,
+                    new[] { typeof(LearningDatabase), typeof(RuntimePerformanceSettings), typeof(string) },
+                    null);
+                A(lessonCtor != null, "first_five_ui_lesson_route_available");
+
+                for (var lessonIndex = 0; lessonIndex < firstFive.Count; lessonIndex++)
+                {
+                    var lesson = firstFive[lessonIndex];
+                    var access = getAccess.Invoke(accessService, new object[] { profile.ChildId, lesson.Id });
+                    var unsatisfied = Get<object>(access, "UnsatisfiedPrerequisiteLessonIds") as System.Collections.IList;
+                    A(Get<bool>(access, "IsUnlocked") && unsatisfied != null && unsatisfied.Count == 0,
+                        "first_five_ui_reached_lesson_unlocked_" + (lessonIndex + 1));
+
+                    using (var form = (WAHUKidsLearn.MathLessonForm)lessonCtor.Invoke(new object[]
+                    {
+                        database,
+                        new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW },
+                        lesson.Id
+                    }))
+                    {
+                        form.ClientSize = new Size(900, 640);
+                        form.Show();
+                        Application.DoEvents();
+                        var coordinator = GetField<object>(form, "_coordinator");
+                        var selected = ((System.Collections.IEnumerable)GetField<object>(coordinator, "_selectedContentQuestionIds"))
+                            .Cast<object>().Select(Convert.ToString).ToList();
+                        A(Get<bool>(coordinator, "IsActive") && GetField<int>(form, "_targetQuestionCount") == 3 && selected.Count == 3,
+                            "first_five_ui_session_targets_exact_three_" + (lessonIndex + 1));
+                        A(lesson.PracticeSets.Basic.Contains(selected[0]) && lesson.PracticeSets.Medium.Contains(selected[1]) &&
+                            lesson.PracticeSets.Application.Contains(selected[2]),
+                            "first_five_ui_selected_set_basic_medium_application_" + (lessonIndex + 1));
+                        A(form.Text.IndexOf(lesson.TitleVi, StringComparison.OrdinalIgnoreCase) >= 0,
+                            "first_five_ui_window_names_lesson_" + (lessonIndex + 1));
+
+                        for (var ordinal = 0; ordinal < 3; ordinal++)
+                        {
+                            var question = GetField<MathQuestion>(form, "_question");
+                            A(question != null && question.LessonId == lesson.Id && question.ContentQuestionId == selected[ordinal],
+                                "first_five_ui_question_traceability_" + (lessonIndex + 1) + "_" + (ordinal + 1));
+                            A((ordinal == 0 && lesson.PracticeSets.Basic.Contains(question.ContentQuestionId)) ||
+                                (ordinal == 1 && lesson.PracticeSets.Medium.Contains(question.ContentQuestionId)) ||
+                                (ordinal == 2 && lesson.PracticeSets.Application.Contains(question.ContentQuestionId)),
+                                "first_five_ui_question_difficulty_order_" + (lessonIndex + 1) + "_" + (ordinal + 1));
+
+                            var prompt = GetField<Label>(form, "_prompt");
+                            var measuredPrompt = TextRenderer.MeasureText(
+                                question.PromptVi,
+                                prompt.Font,
+                                new Size(Math.Max(120, prompt.ClientSize.Width - 4), 4096),
+                                TextFormatFlags.WordBreak);
+                            A(measuredPrompt.Height <= Math.Max(20, prompt.ClientSize.Height - 4) && prompt.Font.Size >= 12f,
+                                "first_five_ui_prompt_fits_min_window_" + (lessonIndex + 1) + "_" + (ordinal + 1));
+
+                            var isChoice = question.DisplayChoices != null && question.DisplayChoices.Count > 0;
+                            var expectedChoice = lessonIndex == 1 || (lessonIndex == 0 && ordinal == 1) ||
+                                (lessonIndex == 4 && ordinal != 1);
+                            A(isChoice == expectedChoice,
+                                "first_five_ui_expected_answer_surface_" + (lessonIndex + 1) + "_" + (ordinal + 1));
+                            if (isChoice)
+                            {
+                                var buttons = GetField<Array>(form, "_answerButtons");
+                                var visibleEnabled = 0;
+                                for (var choiceIndex = 0; choiceIndex < question.DisplayChoices.Count; choiceIndex++)
+                                {
+                                    var button = (Control)buttons.GetValue(choiceIndex);
+                                    if (button.Visible && button.Enabled) visibleEnabled++;
+                                }
+                                A(GetField<Control>(form, "_answerGrid").Visible && visibleEnabled == question.DisplayChoices.Count &&
+                                    !GetField<Control>(form, "_typedAnswerLayout").Visible,
+                                    "first_five_ui_choice_surface_ready_" + (lessonIndex + 1) + "_" + (ordinal + 1));
+                            }
+                            else
+                            {
+                                var input = GetField<TextBox>(form, "_typedAnswerBox");
+                                A(GetField<Control>(form, "_typedAnswerLayout").Visible && input.Visible && input.Enabled &&
+                                    input.AccessibleName.IndexOf("đáp án", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                                    !GetField<Control>(form, "_answerGrid").Visible,
+                                    "first_five_ui_typed_surface_ready_" + (lessonIndex + 1) + "_" + (ordinal + 1));
+                            }
+
+                            A(!string.IsNullOrWhiteSpace(question.HintLevel1) && !string.IsNullOrWhiteSpace(question.HintLevel2),
+                                "first_five_ui_two_hints_available_" + (lessonIndex + 1) + "_" + (ordinal + 1));
+                            Invoke(form, "ShowHint");
+                            A(GetField<int>(form, "_hintLevel") == 1 &&
+                                string.Equals(GetField<Label>(form, "_support").Text, question.HintLevel1, StringComparison.Ordinal) &&
+                                GetField<Button>(form, "_hintButton").Enabled,
+                                "first_five_ui_hint1_presented_" + (lessonIndex + 1) + "_" + (ordinal + 1));
+                            Invoke(form, "ShowHint");
+                            A(GetField<int>(form, "_hintLevel") == 2 &&
+                                string.Equals(GetField<Label>(form, "_support").Text, question.HintLevel2, StringComparison.Ordinal) &&
+                                !GetField<Button>(form, "_hintButton").Enabled,
+                                "first_five_ui_hint2_presented_" + (lessonIndex + 1) + "_" + (ordinal + 1));
+                            A(!string.Equals(question.HintLevel1.Trim(), question.CorrectAnswerDisplay.Trim(), StringComparison.OrdinalIgnoreCase) &&
+                                !string.Equals(question.HintLevel2.Trim(), question.CorrectAnswerDisplay.Trim(), StringComparison.OrdinalIgnoreCase),
+                                "first_five_ui_hints_do_not_equal_answer_" + (lessonIndex + 1) + "_" + (ordinal + 1));
+
+                            SubmitCurrentMathQuestionCorrectly(form,
+                                "first_five_ui_correct_" + (lessonIndex + 1) + "_" + (ordinal + 1));
+                            A(GetField<Label>(form, "_feedback").Text.IndexOf("Đúng rồi", StringComparison.OrdinalIgnoreCase) >= 0,
+                                "first_five_ui_correct_feedback_" + (lessonIndex + 1) + "_" + (ordinal + 1));
+                            A(GetField<Label>(form, "_progressText").Text.IndexOf((ordinal + 1) + " / 3", StringComparison.Ordinal) >= 0,
+                                "first_five_ui_progress_" + (lessonIndex + 1) + "_" + (ordinal + 1));
+
+                            if (ordinal < 2)
+                            {
+                                Invoke(form, "HandleNextButton");
+                                Application.DoEvents();
+                            }
+                            else
+                            {
+                                A(GetField<bool>(form, "_completeOnNext"),
+                                    "first_five_ui_last_answer_routes_to_result_" + (lessonIndex + 1));
+                                Invoke(form, "HandleNextButton");
+                                Application.DoEvents();
+                            }
+                        }
+
+                        A(GetField<bool>(form, "_finished") && GetField<Label>(form, "_prompt").Text == "Hoàn thành bài học",
+                            "first_five_ui_completion_screen_" + (lessonIndex + 1));
+                        A(GetField<Label>(form, "_feedback").Text.IndexOf("Điểm bài 100%", StringComparison.OrdinalIgnoreCase) >= 0,
+                            "first_five_ui_completion_score_100_" + (lessonIndex + 1));
+                        var nextLesson = catalog.Lessons[lessonIndex + 1];
+                        A(GetField<Label>(form, "_support").Text.IndexOf(nextLesson.TitleVi, StringComparison.OrdinalIgnoreCase) >= 0,
+                            "first_five_ui_completion_names_next_lesson_" + (lessonIndex + 1));
+                    }
+
+                    var stored = progressStore.LoadOne(profile.ChildId, lesson.Id);
+                    A(stored != null && stored.StartedCount == 1 && stored.CompletedCount == 1 &&
+                        stored.LastScorePercent.HasValue && stored.BestScorePercent.HasValue &&
+                        Math.Abs(stored.LastScorePercent.Value - 100.0) < 0.001 && Math.Abs(stored.BestScorePercent.Value - 100.0) < 0.001,
+                        "first_five_ui_progress_persists_100_" + (lessonIndex + 1));
+
+                    if (lessonIndex == 0)
+                    {
+                        A(Get<bool>(getAccess.Invoke(accessService, new object[] { profile.ChildId, firstFive[1].Id }), "IsUnlocked") &&
+                            Get<bool>(getAccess.Invoke(accessService, new object[] { profile.ChildId, firstFive[2].Id }), "IsUnlocked") &&
+                            Get<bool>(getAccess.Invoke(accessService, new object[] { profile.ChildId, firstFive[3].Id }), "IsUnlocked"),
+                            "first_five_ui_lesson1_unlocks_lessons2_3_4");
+                        A(!Get<bool>(getAccess.Invoke(accessService, new object[] { profile.ChildId, catalog.Lessons[4].Id }), "IsUnlocked"),
+                            "first_five_ui_lesson5_stays_locked_after_lesson1");
+                    }
+                    if (lessonIndex == 3)
+                        A(Get<bool>(getAccess.Invoke(accessService, new object[] { profile.ChildId, catalog.Lessons[4].Id }), "IsUnlocked"),
+                            "first_five_ui_lesson4_unlocks_lesson5_boundary");
+                }
+
+                var hubCtor = typeof(WAHUKidsLearn.MathHubForm).GetConstructor(
+                    BindingFlags.Instance | BindingFlags.NonPublic,
+                    null,
+                    new[] { typeof(LearningDatabase), typeof(RuntimePerformanceSettings), typeof(string) },
+                    null);
+                A(hubCtor != null, "first_five_ui_hub_route_available");
+                using (var hub = (WAHUKidsLearn.MathHubForm)hubCtor.Invoke(new object[]
+                {
+                    database,
+                    new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW },
+                    catalogPath
+                }))
+                {
+                    Invoke(hub, "LoadCatalogAndProgress");
+                    var detail = GetField<FlowLayoutPanel>(hub, "_detailFlow");
+                    foreach (var lesson in firstFive)
+                    {
+                        Invoke(hub, "SelectLessonInCatalog", lesson);
+                        var replay = FindButtonContaining(detail, "Luyện lại bài này");
+                        A(ContainsControlText(detail, "Đã hoàn thành") && ContainsControlText(detail, "Tốt nhất: 100%") &&
+                            ContainsControlText(detail, "6 câu trong ngân hàng bài học"),
+                            "first_five_ui_hub_completed_detail_" + lesson.Id);
+                        A(replay != null && replay.Enabled && replay.AccessibleName.IndexOf(lesson.TitleVi, StringComparison.OrdinalIgnoreCase) >= 0,
+                            "first_five_ui_hub_replay_accessible_" + lesson.Id);
+                    }
+                }
+            }
+            finally
+            {
+                foreach (var pair in runtimeFiles)
+                {
+                    try
+                    {
+                        if (pair.Value == null)
+                        {
+                            if (File.Exists(pair.Key)) File.Delete(pair.Key);
+                        }
+                        else
+                        {
+                            File.WriteAllBytes(pair.Key, pair.Value);
+                        }
+                    }
+                    catch { }
+                }
+                try { Directory.Delete(tempRoot, true); } catch { }
+            }
+        }
+
         private static void TestExpandedPoolTargetedUiFlow(Assembly appAssembly)
         {
             var repo = Directory.GetCurrentDirectory();
