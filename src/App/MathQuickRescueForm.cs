@@ -340,27 +340,40 @@ namespace WAHUKidsLearn
 
             var header = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1 };
             header.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-            header.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 150));
+            header.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 142));
+            var headerCopy = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 2, Margin = new Padding(0) };
+            headerCopy.RowStyles.Add(new RowStyle(SizeType.Absolute, 24));
+            headerCopy.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+            headerCopy.Controls.Add(new Label
+            {
+                Dock = DockStyle.Fill,
+                Text = "3 CHẶNG • KHÔNG ĐẾM NGƯỢC",
+                TextAlign = ContentAlignment.BottomLeft,
+                Font = ChildVisualTheme.Font(8.8f, FontStyle.Bold),
+                ForeColor = ChildVisualTheme.MintStrong
+            }, 0, 0);
             var title = new Label
             {
                 Dock = DockStyle.Fill,
                 Text = "Toán nhanh — Nhiệm vụ cứu hộ",
-                TextAlign = ContentAlignment.MiddleLeft,
-                Font = ChildVisualTheme.Font(22f, FontStyle.Bold),
+                TextAlign = ContentAlignment.TopLeft,
+                Font = ChildVisualTheme.Font(23f, FontStyle.Bold),
                 ForeColor = ChildVisualTheme.Ink,
                 AccessibleName = "Toán nhanh — Nhiệm vụ cứu hộ"
             };
-            header.Controls.Add(title, 0, 0);
+            headerCopy.Controls.Add(title, 0, 1);
+            header.Controls.Add(headerCopy, 0, 0);
             var exit = new ChildActionButton
             {
                 Dock = DockStyle.Fill,
-                Margin = new Padding(10, 8, 0, 8),
+                Margin = new Padding(10, 16, 0, 16),
                 Text = "Để sau",
-                FillColor = Color.FromArgb(232, 230, 220),
-                HoverColor = Color.FromArgb(220, 218, 207),
-                PressedColor = Color.FromArgb(208, 205, 194),
+                FillColor = Color.FromArgb(236, 233, 223),
+                HoverColor = Color.FromArgb(224, 220, 208),
+                PressedColor = Color.FromArgb(211, 207, 194),
                 TextColor = ChildVisualTheme.Ink,
-                Radius = 16,
+                Font = ChildVisualTheme.Font(9.8f, FontStyle.Bold),
+                Radius = 18,
                 AccessibleName = "Đóng nhiệm vụ cứu hộ",
                 AccessibleDescription = "Đóng màn hình này. Không mất phần học đã lưu."
             };
@@ -389,30 +402,53 @@ namespace WAHUKidsLearn
                 BorderColor = Color.FromArgb(226, 223, 210),
                 Radius = 22
             };
-            listCard.Controls.Add(_eventFlow);
+            var listLayout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 3, Margin = new Padding(0) };
+            listLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
+            listLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
+            listLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+            listLayout.Controls.Add(new Label
+            {
+                Dock = DockStyle.Fill,
+                Text = "CHỌN NHIỆM VỤ",
+                TextAlign = ContentAlignment.BottomLeft,
+                Font = ChildVisualTheme.Font(8.8f, FontStyle.Bold),
+                ForeColor = ChildVisualTheme.MintStrong,
+                Padding = new Padding(6, 0, 0, 0)
+            }, 0, 0);
+            listLayout.Controls.Add(new Label
+            {
+                Dock = DockStyle.Fill,
+                Text = "Mỗi nhiệm vụ là một câu chuyện 3 chặng.",
+                TextAlign = ContentAlignment.TopLeft,
+                Font = ChildVisualTheme.Font(8.8f),
+                ForeColor = ChildVisualTheme.MutedInk,
+                Padding = new Padding(6, 2, 4, 0)
+            }, 0, 1);
+            listLayout.Controls.Add(_eventFlow, 0, 2);
+            listCard.Controls.Add(listLayout);
             body.Controls.Add(listCard, 0, 0);
 
             var introCard = new ChildCard
             {
                 Dock = DockStyle.Fill,
                 Margin = new Padding(4, 4, 0, 4),
-                Padding = new Padding(24, 20, 24, 20),
+                Padding = new Padding(26, 20, 26, 20),
                 CardColor = Color.FromArgb(255, 253, 246),
                 BorderColor = Color.FromArgb(226, 221, 204),
                 Radius = 24
             };
             var introLayout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 5 };
-            introLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 68));
-            introLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 92));
+            introLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 58));
+            introLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 78));
             introLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            introLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 56));
+            introLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 48));
             introLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 68));
             _eventTitle = new Label
             {
                 Dock = DockStyle.Fill,
                 Text = "Chọn một nhiệm vụ",
                 TextAlign = ContentAlignment.MiddleLeft,
-                Font = ChildVisualTheme.Font(18f, FontStyle.Bold),
+                Font = ChildVisualTheme.Font(19.5f, FontStyle.Bold),
                 ForeColor = ChildVisualTheme.Ink,
                 AccessibleName = "Tên nhiệm vụ cứu hộ"
             };
@@ -516,26 +552,22 @@ namespace WAHUKidsLearn
                     var lesson = _catalog == null ? null : _catalog.FindLesson(item.TargetLessonId);
                     var unlocked = IsUnlocked(item);
                     var completed = IsCompleted(item);
-                    var state = completed ? "Đã hoàn thành • có thể chơi lại" : (unlocked ? "Sẵn sàng" : "Học bài nền trước để mở");
+                    var state = completed ? "Đã xong • có thể chơi lại" : (unlocked ? "Sẵn sàng • 3 chặng" : "Mở sau khi học bài nền");
                     var captured = item;
-                    var button = new Button
+                    var button = new RescueMissionButton
                     {
                         AutoSize = false,
                         Width = 300,
                         Height = 78,
                         Margin = new Padding(4, 5, 4, 5),
-                        Text = item.TitleVi + "\r\n" + state,
-                        TextAlign = ContentAlignment.MiddleLeft,
-                        Padding = new Padding(12, 5, 8, 5),
-                        FlatStyle = FlatStyle.Flat,
-                        BackColor = unlocked ? Color.FromArgb(239, 247, 235) : Color.FromArgb(239, 238, 231),
-                        ForeColor = unlocked ? ChildVisualTheme.Ink : ChildVisualTheme.MutedInk,
-                        Font = ChildVisualTheme.Font(9.5f, FontStyle.Bold),
+                        Text = item.TitleVi + "\r\n" + (completed ? "Đã hoàn thành • có thể chơi lại" : state),
+                        TitleText = item.TitleVi,
+                        StateText = state,
+                        AccentColor = AccentForTheme(item.Theme),
                         Enabled = unlocked,
                         AccessibleName = "Nhiệm vụ " + item.TitleVi,
                         AccessibleDescription = state + (lesson == null ? "." : ". Bài Toán: " + lesson.TitleVi + ".")
                     };
-                    button.FlatAppearance.BorderColor = Color.FromArgb(217, 217, 204);
                     button.Click += delegate { SelectEvent(captured); };
                     _eventButtons[item.Id] = button;
                     _eventFlow.Controls.Add(button);
@@ -559,18 +591,15 @@ namespace WAHUKidsLearn
             for (var i = 0; i < 3; i++)
             {
                 var name = item.CheckpointName(i);
-                _checkpoints.Controls.Add(new Label
+                _checkpoints.Controls.Add(new RescueCheckpointCard
                 {
                     AutoSize = false,
-                    Width = 470,
-                    Height = 54,
-                    Margin = new Padding(4, 5, 4, 5),
-                    Padding = new Padding(14, 0, 10, 0),
-                    BackColor = Color.FromArgb(239, 247, 235),
-                    ForeColor = ChildVisualTheme.Ink,
-                    Font = ChildVisualTheme.Font(10.5f, FontStyle.Bold),
-                    TextAlign = ContentAlignment.MiddleLeft,
-                    Text = (i + 1) + ". " + name,
+                    Width = 500,
+                    Height = 64,
+                    Margin = new Padding(4, 4, 4, 4),
+                    StepNumber = i + 1,
+                    StepTitle = name,
+                    AccentColor = AccentForTheme(item.Theme),
                     AccessibleName = "Chặng " + (i + 1) + ": " + name,
                     AccessibleDescription = "Một câu Toán. Không có giới hạn thời gian."
                 });
@@ -582,9 +611,8 @@ namespace WAHUKidsLearn
             _startButton.Text = IsCompleted(item) ? "Chơi lại 3 chặng" : "Bắt đầu 3 chặng";
             foreach (var pair in _eventButtons)
             {
-                pair.Value.FlatAppearance.BorderSize = string.Equals(pair.Key, item.Id, StringComparison.Ordinal) ? 2 : 1;
-                pair.Value.FlatAppearance.BorderColor = string.Equals(pair.Key, item.Id, StringComparison.Ordinal)
-                    ? ChildVisualTheme.MintStrong : Color.FromArgb(217, 217, 204);
+                var missionButton = pair.Value as RescueMissionButton;
+                if (missionButton != null) missionButton.Selected = string.Equals(pair.Key, item.Id, StringComparison.Ordinal);
             }
         }
 
@@ -629,9 +657,29 @@ namespace WAHUKidsLearn
 
         private void ResizeEventButtons()
         {
-            if (_eventFlow == null || _eventFlow.IsDisposed) return;
-            var width = Math.Max(220, _eventFlow.ClientSize.Width - _eventFlow.Padding.Horizontal - 28);
-            foreach (Control control in _eventFlow.Controls) control.Width = width;
+            if (_eventFlow != null && !_eventFlow.IsDisposed)
+            {
+                var width = Math.Max(220, _eventFlow.ClientSize.Width - _eventFlow.Padding.Horizontal - 24);
+                foreach (Control control in _eventFlow.Controls) control.Width = width;
+            }
+            if (_checkpoints != null && !_checkpoints.IsDisposed)
+            {
+                var checkpointWidth = Math.Max(300, _checkpoints.ClientSize.Width - _checkpoints.Padding.Horizontal - 20);
+                foreach (Control control in _checkpoints.Controls) control.Width = checkpointWidth;
+            }
+        }
+
+        private static Color AccentForTheme(string theme)
+        {
+            switch ((theme ?? string.Empty).Trim().ToLowerInvariant())
+            {
+                case "forest_path": return Color.FromArgb(91, 157, 103);
+                case "hundred_station": return Color.FromArgb(92, 154, 189);
+                case "number_path": return Color.FromArgb(209, 145, 73);
+                case "place_value_workshop": return Color.FromArgb(146, 119, 176);
+                case "number_machine": return Color.FromArgb(207, 112, 88);
+                default: return ChildVisualTheme.MintStrong;
+            }
         }
 
         protected override void OnResize(EventArgs e)

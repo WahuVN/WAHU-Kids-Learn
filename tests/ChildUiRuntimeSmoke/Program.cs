@@ -1607,8 +1607,9 @@ namespace WAHU.ChildUiRuntimeSmoke
                 {
                     var quickButton = GetField<Button>(home, "_quickRescueButton");
                     A(quickButton != null && quickButton.Enabled &&
-                      quickButton.Text.IndexOf("Toán nhanh", StringComparison.OrdinalIgnoreCase) >= 0 &&
-                      quickButton.Text.IndexOf("Nhiệm vụ cứu hộ", StringComparison.OrdinalIgnoreCase) >= 0,
+                      quickButton.Text.IndexOf("cứu hộ", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                      quickButton.AccessibleName.IndexOf("Toán nhanh", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                      quickButton.AccessibleName.IndexOf("Nhiệm vụ cứu hộ", StringComparison.OrdinalIgnoreCase) >= 0,
                         "quick_rescue_home_entry_visible_and_enabled");
                     A(quickButton.AccessibleDescription.IndexOf("ba chặng", StringComparison.OrdinalIgnoreCase) >= 0 &&
                       quickButton.AccessibleDescription.IndexOf("đồng hồ", StringComparison.OrdinalIgnoreCase) >= 0,
@@ -1676,9 +1677,22 @@ namespace WAHU.ChildUiRuntimeSmoke
                     var buttons = GetField<System.Collections.IDictionary>(rescue, "_eventButtons");
                     A(buttons != null && buttons.Count == 5 && ((Button)buttons[eventId]).Enabled,
                         "quick_rescue_intro_lists_all_five_and_first_is_playable");
-                    A(GetField<FlowLayoutPanel>(rescue, "_checkpoints").Controls.Count == 3,
+                    var missionCards = buttons.Values.Cast<Control>().ToList();
+                    A(missionCards.All(x => x.GetType().Name == "RescueMissionButton" && x.Height == 78 &&
+                      !string.IsNullOrWhiteSpace(x.AccessibleName) && !string.IsNullOrWhiteSpace(x.AccessibleDescription)),
+                        "quick_rescue_intro_five_mission_cards_accessible");
+                    var checkpointPanel = GetField<FlowLayoutPanel>(rescue, "_checkpoints");
+                    A(checkpointPanel.Controls.Count == 3,
                         "quick_rescue_intro_renders_three_checkpoint_rows");
+                    var checkpointCards = checkpointPanel.Controls.Cast<Control>().ToList();
+                    A(checkpointCards.All(x => x.GetType().Name == "RescueCheckpointCard" && x.Height == 64 &&
+                      !string.IsNullOrWhiteSpace(x.AccessibleName) && !string.IsNullOrWhiteSpace(x.AccessibleDescription)),
+                        "quick_rescue_intro_three_checkpoint_cards_accessible");
+                    A(ContainsControlText(rescue, "KHÔNG ĐẾM NGƯỢC"),
+                        "quick_rescue_intro_visibly_reinforces_no_countdown");
                     RenderFormAndAssert(rescue, 900, 640, "quick_rescue_intro_900x640");
+                    A(missionCards.All(x => x.Width >= 220) && checkpointCards.All(x => x.Width >= 300),
+                        "quick_rescue_intro_cards_fit_900x640");
                 }
 
                 var eventLessonCtor = typeof(WAHUKidsLearn.MathLessonForm).GetConstructor(
