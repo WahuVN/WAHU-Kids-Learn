@@ -75,6 +75,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - duplicate ID toàn catalog/bank;
 - deterministic ID contract: lesson=`m2_ls_<skill>`, concept/example=`m2_cp|ex_<skill>_<ordinal>`, question=`m2_q_<skill>_<ordinal>` với ordinal contiguous `01..N`; gate tương thích pool mở rộng vì không khóa N=3;
 - question tag contract lệch/stale/duplicate: 201/201 câu phải có đúng 5 tag `{skill.lower, domain, difficulty, question_type, answer_kind}`; không cho tag dư hoặc thiếu sau khi đổi surface/difficulty;
+- validation schema phải khớp answer surface chính xác: numeric/interaction `{integer_required,numeric_min,numeric_max}`, expression 5 key riêng, unit 3 key, choice/text `{choice_count,single_correct}`; key dư/thiếu đều fail;
 - missing lesson/question/reference;
 - orphan question;
 - curriculum roadmap phải có đúng 1 chapter cho mỗi baseline domain, mọi topic có ít nhất 1 lesson, và `order_in_domain` contiguous `1..N` không duplicate/gap; hiện **7/7 domain, 17/17 topic, 67/67 lesson** đạt gate;
@@ -147,7 +148,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract;
 - **166 phương trình số instructional** đang được kiểm bằng arithmetic parser, hiện **0 sai**; detector có regression cho cả phép cộng chuỗi và phép chia dùng dấu `:`.
 
-Latest result: **47 tests PASS**.
+Latest result: **48 tests PASS**.
 
 ## Commits / waves
 

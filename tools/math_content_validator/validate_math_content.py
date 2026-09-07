@@ -1630,6 +1630,15 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
         if not isinstance(validation, dict):
             errors.append(f"missing_validation:{where}")
             validation = {}
+        expected_validation_keys = {
+            "integer": {"integer_required", "numeric_min", "numeric_max"},
+            "interaction_integer": {"integer_required", "numeric_min", "numeric_max"},
+            "expression": {"allowed_operators", "expected_numeric", "expression_syntax", "numeric_min", "numeric_max"},
+            "unit": {"expected_numeric", "numeric_min", "numeric_max"},
+            "text": {"choice_count", "single_correct"},
+        }.get(kind)
+        if expected_validation_keys is not None and set(validation) != expected_validation_keys:
+            errors.append(f"validation_schema_mismatch:{where}:{sorted(validation)}:{sorted(expected_validation_keys)}")
         if skill == "MENTAL_ADD_SUB_WITHIN_20":
             mental_max = baseline.get("hard_guards", {}).get("mental_add_sub_max", 20) if isinstance(baseline.get("hard_guards"), dict) else 20
             if validation.get("numeric_min") != 0 or validation.get("numeric_max") != mental_max:

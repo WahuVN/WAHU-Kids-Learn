@@ -253,6 +253,18 @@ class MathContentDataSmoke(unittest.TestCase):
                 self.assertEqual(5, len(set(item["tags"])))
                 self.assertEqual(expected, set(item["tags"]))
 
+    def test_validation_schema_matches_answer_surface(self):
+        expected = {
+            "integer": {"integer_required", "numeric_min", "numeric_max"},
+            "interaction_integer": {"integer_required", "numeric_min", "numeric_max"},
+            "expression": {"allowed_operators", "expected_numeric", "expression_syntax", "numeric_min", "numeric_max"},
+            "unit": {"expected_numeric", "numeric_min", "numeric_max"},
+            "text": {"choice_count", "single_correct"},
+        }
+        for item in self.questions:
+            with self.subTest(item=item["id"]):
+                self.assertEqual(expected[item["answer_kind"]], set(item["validation"]))
+
     def test_required_answer_kinds_only(self):
         kinds = Counter(q["answer_kind"] for q in self.questions)
         grade2_kinds = {"integer", "interaction_integer", "text", "unit", "expression"}
