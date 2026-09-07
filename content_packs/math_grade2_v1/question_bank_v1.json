@@ -101,17 +101,17 @@
         {
           "id": "b",
           "text": "bốn trăm hai",
-          "rationale_vi": "“bốn trăm hai” chưa đúng. 420 có 4 trăm, 2 chục và 0 đơn vị nên đọc là bốn trăm hai mươi."
+          "rationale_vi": "“bốn trăm hai” chưa đúng. Số 420 có 2 chục nên cách đọc phải thể hiện phần hai mươi; lựa chọn này đã bỏ mất hàng chục. 420 có 4 trăm, 2 chục và 0 đơn vị nên đọc là bốn trăm hai mươi."
         },
         {
           "id": "c",
           "text": "bốn mươi hai",
-          "rationale_vi": "“bốn mươi hai” chưa đúng. 420 có 4 trăm, 2 chục và 0 đơn vị nên đọc là bốn trăm hai mươi."
+          "rationale_vi": "“bốn mươi hai” chưa đúng. “bốn mươi hai” chỉ biểu diễn 42, đã bỏ mất 4 trăm của số 420. 420 có 4 trăm, 2 chục và 0 đơn vị nên đọc là bốn trăm hai mươi."
         },
         {
           "id": "d",
           "text": "hai trăm bốn mươi",
-          "rationale_vi": "“hai trăm bốn mươi” chưa đúng. 420 có 4 trăm, 2 chục và 0 đơn vị nên đọc là bốn trăm hai mươi."
+          "rationale_vi": "“hai trăm bốn mươi” chưa đúng. “hai trăm bốn mươi” biểu diễn 240, đã đổi 4 trăm thành 2 trăm và 2 chục thành 4 chục. 420 có 4 trăm, 2 chục và 0 đơn vị nên đọc là bốn trăm hai mươi."
         }
       ],
       "correct_choice_id": "a"
@@ -1218,17 +1218,17 @@
         {
           "id": "a",
           "text": "khoảng 7",
-          "rationale_vi": "“khoảng 7” chưa đúng. 73 gần 70 hơn 80 khi ước lượng theo chục gần nhất. Vậy đáp án là khoảng 70."
+          "rationale_vi": "“khoảng 7” chưa đúng. Ước lượng 73 theo chục gần nhất phải chọn 70; “khoảng 7” cách xa giá trị cần ước lượng hơn. 73 gần 70 hơn 80 khi ước lượng theo chục gần nhất. Vậy đáp án là khoảng 70."
         },
         {
           "id": "b",
           "text": "khoảng 700",
-          "rationale_vi": "“khoảng 700” chưa đúng. 73 gần 70 hơn 80 khi ước lượng theo chục gần nhất. Vậy đáp án là khoảng 70."
+          "rationale_vi": "“khoảng 700” chưa đúng. Ước lượng 73 theo chục gần nhất phải chọn 70; “khoảng 700” cách xa giá trị cần ước lượng hơn. 73 gần 70 hơn 80 khi ước lượng theo chục gần nhất. Vậy đáp án là khoảng 70."
         },
         {
           "id": "c",
           "text": "khoảng 20",
-          "rationale_vi": "“khoảng 20” chưa đúng. 73 gần 70 hơn 80 khi ước lượng theo chục gần nhất. Vậy đáp án là khoảng 70."
+          "rationale_vi": "“khoảng 20” chưa đúng. Ước lượng 73 theo chục gần nhất phải chọn 70; “khoảng 20” cách xa giá trị cần ước lượng hơn. 73 gần 70 hơn 80 khi ước lượng theo chục gần nhất. Vậy đáp án là khoảng 70."
         },
         {
           "id": "d",
@@ -5691,17 +5691,17 @@
         {
           "id": "b",
           "text": "nhẹ hơn",
-          "rationale_vi": "“nhẹ hơn” chưa đúng. Với cân hoạt động đúng, phía hạ thấp hơn là phía nặng hơn."
+          "rationale_vi": "“nhẹ hơn” chưa đúng. Đĩa cân hạ thấp là phía nặng hơn, nên vật bên trái không thể nhẹ hơn. Với cân hoạt động đúng, phía hạ thấp hơn là phía nặng hơn."
         },
         {
           "id": "c",
           "text": "bằng nhau",
-          "rationale_vi": "“bằng nhau” chưa đúng. Với cân hoạt động đúng, phía hạ thấp hơn là phía nặng hơn."
+          "rationale_vi": "“bằng nhau” chưa đúng. Nếu hai bên bằng nhau thì cân phải ngang; ở đây đĩa trái đang hạ thấp. Với cân hoạt động đúng, phía hạ thấp hơn là phía nặng hơn."
         },
         {
           "id": "d",
           "text": "không thể so sánh",
-          "rationale_vi": "“không thể so sánh” chưa đúng. Với cân hoạt động đúng, phía hạ thấp hơn là phía nặng hơn."
+          "rationale_vi": "“không thể so sánh” chưa đúng. Độ cao hai đĩa đang cho đủ thông tin để so sánh: bên trái hạ thấp nên nặng hơn. Với cân hoạt động đúng, phía hạ thấp hơn là phía nặng hơn."
         }
       ],
       "correct_choice_id": "a"
@@ -5739,7 +5739,7 @@
         {
           "id": "a",
           "text": "nặng hơn",
-          "rationale_vi": "“nặng hơn” chưa đúng. Quan hệ nặng hơn - nhẹ hơn là hai chiều đối lập."
+          "rationale_vi": "“nặng hơn” chưa đúng. Nếu A nặng hơn B thì theo chiều ngược lại B phải nhẹ hơn A, không thể nặng hơn A. Quan hệ nặng hơn - nhẹ hơn là hai chiều đối lập."
         },
         {
           "id": "b",
@@ -5749,12 +5749,12 @@
         {
           "id": "c",
           "text": "bằng nhau",
-          "rationale_vi": "“bằng nhau” chưa đúng. Quan hệ nặng hơn - nhẹ hơn là hai chiều đối lập."
+          "rationale_vi": "“bằng nhau” chưa đúng. A đã nặng hơn B nên hai vật không thể có khối lượng bằng nhau. Quan hệ nặng hơn - nhẹ hơn là hai chiều đối lập."
         },
         {
           "id": "d",
           "text": "không thể kết luận",
-          "rationale_vi": "“không thể kết luận” chưa đúng. Quan hệ nặng hơn - nhẹ hơn là hai chiều đối lập."
+          "rationale_vi": "“không thể kết luận” chưa đúng. Quan hệ A nặng hơn B đã cho trực tiếp, nên suy ra được B nhẹ hơn A. Quan hệ nặng hơn - nhẹ hơn là hai chiều đối lập."
         }
       ],
       "correct_choice_id": "b"
@@ -5792,12 +5792,12 @@
         {
           "id": "a",
           "text": "Bên trái nặng hơn",
-          "rationale_vi": "“Bên trái nặng hơn” chưa đúng. Hai đĩa cân bằng cho thấy khối lượng hai bên bằng nhau trong điều kiện cân. Vậy đáp án là Hai bên có khối lượng bằng nhau trong phép cân đó."
+          "rationale_vi": "“Bên trái nặng hơn” chưa đúng. Cân đang ngang nên không có căn cứ nói bên trái nặng hơn bên phải. Hai đĩa cân bằng cho thấy khối lượng hai bên bằng nhau trong điều kiện cân. Vậy đáp án là Hai bên có khối lượng bằng nhau trong phép cân đó."
         },
         {
           "id": "b",
           "text": "Bên phải nặng hơn",
-          "rationale_vi": "“Bên phải nặng hơn” chưa đúng. Hai đĩa cân bằng cho thấy khối lượng hai bên bằng nhau trong điều kiện cân. Vậy đáp án là Hai bên có khối lượng bằng nhau trong phép cân đó."
+          "rationale_vi": "“Bên phải nặng hơn” chưa đúng. Cân đang ngang nên không có căn cứ nói bên phải nặng hơn bên trái. Hai đĩa cân bằng cho thấy khối lượng hai bên bằng nhau trong điều kiện cân. Vậy đáp án là Hai bên có khối lượng bằng nhau trong phép cân đó."
         },
         {
           "id": "c",
@@ -5807,7 +5807,7 @@
         {
           "id": "d",
           "text": "Không thể so sánh khối lượng hai bên",
-          "rationale_vi": "“Không thể so sánh khối lượng hai bên” chưa đúng. Hai đĩa cân bằng cho thấy khối lượng hai bên bằng nhau trong điều kiện cân. Vậy đáp án là Hai bên có khối lượng bằng nhau trong phép cân đó."
+          "rationale_vi": "“Không thể so sánh khối lượng hai bên” chưa đúng. Hai đĩa ngang bằng chính là dữ kiện cho thấy khối lượng hai bên bằng nhau trong phép cân đó. Hai đĩa cân bằng cho thấy khối lượng hai bên bằng nhau trong điều kiện cân. Vậy đáp án là Hai bên có khối lượng bằng nhau trong phép cân đó."
         }
       ],
       "correct_choice_id": "c"
@@ -6583,12 +6583,12 @@
         {
           "id": "a",
           "text": "Chỉ màu sắc của tờ tiền",
-          "rationale_vi": "“Chỉ màu sắc của tờ tiền” chưa đúng. Để nhận biết giá trị, cần đọc con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền. Vậy đáp án là Con số mệnh giá và chữ đồng trên tờ."
+          "rationale_vi": "“Chỉ màu sắc của tờ tiền” chưa đúng. Màu sắc không tự xác định giá trị; cần đọc con số mệnh giá và đơn vị đồng trên tờ. Để nhận biết giá trị, cần đọc con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền. Vậy đáp án là Con số mệnh giá và chữ đồng trên tờ."
         },
         {
           "id": "b",
           "text": "Chỉ kích thước của tờ tiền",
-          "rationale_vi": "“Chỉ kích thước của tờ tiền” chưa đúng. Để nhận biết giá trị, cần đọc con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền. Vậy đáp án là Con số mệnh giá và chữ đồng trên tờ."
+          "rationale_vi": "“Chỉ kích thước của tờ tiền” chưa đúng. Kích thước không thay thế con số mệnh giá; muốn biết giá trị phải đọc thông tin in trên tờ. Để nhận biết giá trị, cần đọc con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền. Vậy đáp án là Con số mệnh giá và chữ đồng trên tờ."
         },
         {
           "id": "c",
@@ -6598,7 +6598,7 @@
         {
           "id": "d",
           "text": "Chỉ hình trang trí nổi bật trên tờ",
-          "rationale_vi": "“Chỉ hình trang trí nổi bật trên tờ” chưa đúng. Để nhận biết giá trị, cần đọc con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền. Vậy đáp án là Con số mệnh giá và chữ đồng trên tờ."
+          "rationale_vi": "“Chỉ hình trang trí nổi bật trên tờ” chưa đúng. Hình trang trí không phải con số mệnh giá, nên không đủ để xác định giá trị tờ tiền. Để nhận biết giá trị, cần đọc con số mệnh giá và đơn vị đồng thể hiện trên tờ tiền. Vậy đáp án là Con số mệnh giá và chữ đồng trên tờ."
         }
       ],
       "correct_choice_id": "c"
@@ -6679,17 +6679,17 @@
         {
           "id": "a",
           "text": "Chỉ so sánh màu sắc của hai tờ",
-          "rationale_vi": "“Chỉ so sánh màu sắc của hai tờ” chưa đúng. Đọc đúng con số mệnh giá trên từng tờ rồi so sánh hai giá trị; không đoán chỉ từ màu sắc hoặc vị trí. Vậy đáp án là Đọc và so sánh con số mệnh giá trên hai tờ."
+          "rationale_vi": "“Chỉ so sánh màu sắc của hai tờ” chưa đúng. Màu sắc không cho biết chắc tờ nào có giá trị lớn hơn; phải so sánh hai con số mệnh giá. Đọc đúng con số mệnh giá trên từng tờ rồi so sánh hai giá trị; không đoán chỉ từ màu sắc hoặc vị trí. Vậy đáp án là Đọc và so sánh con số mệnh giá trên hai tờ."
         },
         {
           "id": "b",
           "text": "Chỉ so sánh kích thước của hai tờ",
-          "rationale_vi": "“Chỉ so sánh kích thước của hai tờ” chưa đúng. Đọc đúng con số mệnh giá trên từng tờ rồi so sánh hai giá trị; không đoán chỉ từ màu sắc hoặc vị trí. Vậy đáp án là Đọc và so sánh con số mệnh giá trên hai tờ."
+          "rationale_vi": "“Chỉ so sánh kích thước của hai tờ” chưa đúng. Kích thước không phải giá trị tiền; cần đọc và so sánh con số mệnh giá trên hai tờ. Đọc đúng con số mệnh giá trên từng tờ rồi so sánh hai giá trị; không đoán chỉ từ màu sắc hoặc vị trí. Vậy đáp án là Đọc và so sánh con số mệnh giá trên hai tờ."
         },
         {
           "id": "c",
           "text": "Chọn tờ có nhiều chữ hơn",
-          "rationale_vi": "“Chọn tờ có nhiều chữ hơn” chưa đúng. Đọc đúng con số mệnh giá trên từng tờ rồi so sánh hai giá trị; không đoán chỉ từ màu sắc hoặc vị trí. Vậy đáp án là Đọc và so sánh con số mệnh giá trên hai tờ."
+          "rationale_vi": "“Chọn tờ có nhiều chữ hơn” chưa đúng. Số lượng chữ trên tờ không quyết định giá trị; con số mệnh giá mới là thông tin cần so sánh. Đọc đúng con số mệnh giá trên từng tờ rồi so sánh hai giá trị; không đoán chỉ từ màu sắc hoặc vị trí. Vậy đáp án là Đọc và so sánh con số mệnh giá trên hai tờ."
         },
         {
           "id": "d",
@@ -7744,12 +7744,12 @@
         {
           "id": "a",
           "text": "Cam",
-          "rationale_vi": "“Cam” chưa đúng. 7 biểu tượng lớn hơn 5 và 3 nên Táo nhiều nhất."
+          "rationale_vi": "“Cam” chưa đúng. Nhóm Cam có 5 biểu tượng, ít hơn Táo có 7 biểu tượng nên không phải nhóm nhiều nhất. 7 biểu tượng lớn hơn 5 và 3 nên Táo nhiều nhất."
         },
         {
           "id": "b",
           "text": "Chuối",
-          "rationale_vi": "“Chuối” chưa đúng. 7 biểu tượng lớn hơn 5 và 3 nên Táo nhiều nhất."
+          "rationale_vi": "“Chuối” chưa đúng. Nhóm Chuối có 3 biểu tượng, ít hơn Táo có 7 biểu tượng nên không phải nhóm nhiều nhất. 7 biểu tượng lớn hơn 5 và 3 nên Táo nhiều nhất."
         },
         {
           "id": "c",
@@ -7759,7 +7759,7 @@
         {
           "id": "d",
           "text": "Cả ba bằng nhau",
-          "rationale_vi": "“Cả ba bằng nhau” chưa đúng. 7 biểu tượng lớn hơn 5 và 3 nên Táo nhiều nhất."
+          "rationale_vi": "“Cả ba bằng nhau” chưa đúng. Ba nhóm có số biểu tượng 5, 7 và 3 nên không bằng nhau; nhóm có 7 biểu tượng mới nhiều nhất. 7 biểu tượng lớn hơn 5 và 3 nên Táo nhiều nhất."
         }
       ],
       "correct_choice_id": "c"

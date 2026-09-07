@@ -308,6 +308,72 @@ def structured_choice_reason(skill: str, prompt: str, choice_text: str) -> str |
             if label == "2 km":
                 return "2 km là quãng đường rất dài, hoàn toàn khác thang đo xăng-ti-mét của thanh tham chiếu."
 
+    if skill == "NUM_COUNT_READ_WRITE_0_1000" and "420" in prompt:
+        label = choice_text.strip().casefold()
+        reasons = {
+            "bốn trăm hai": "Số 420 có 2 chục nên cách đọc phải thể hiện phần hai mươi; lựa chọn này đã bỏ mất hàng chục.",
+            "bốn mươi hai": "“bốn mươi hai” chỉ biểu diễn 42, đã bỏ mất 4 trăm của số 420.",
+            "hai trăm bốn mươi": "“hai trăm bốn mươi” biểu diễn 240, đã đổi 4 trăm thành 2 trăm và 2 chục thành 4 chục.",
+        }
+        if label in reasons:
+            return reasons[label]
+
+    if skill == "ESTIMATE_OBJECTS_BY_TENS":
+        prompt_numbers = [int(x) for x in re.findall(r"\d+", prompt)]
+        choice_numbers = [int(x) for x in re.findall(r"\d+", choice_text)]
+        if prompt_numbers and choice_numbers:
+            value, chosen = prompt_numbers[0], choice_numbers[0]
+            nearest = ((value + 5) // 10) * 10
+            if chosen != nearest:
+                return (f"Ước lượng {value} theo chục gần nhất phải chọn {nearest}; “{choice_text}” "
+                        f"cách xa giá trị cần ước lượng hơn.")
+
+    if skill == "HEAVIER_LIGHTER":
+        prompt_cf = prompt.casefold()
+        label = choice_text.strip().casefold()
+        if "đĩa bên trái hạ thấp hơn" in prompt_cf:
+            reasons = {
+                "nhẹ hơn": "Đĩa cân hạ thấp là phía nặng hơn, nên vật bên trái không thể nhẹ hơn.",
+                "bằng nhau": "Nếu hai bên bằng nhau thì cân phải ngang; ở đây đĩa trái đang hạ thấp.",
+                "không thể so sánh": "Độ cao hai đĩa đang cho đủ thông tin để so sánh: bên trái hạ thấp nên nặng hơn.",
+            }
+            if label in reasons: return reasons[label]
+        if "vật a nặng hơn vật b" in prompt_cf:
+            reasons = {
+                "nặng hơn": "Nếu A nặng hơn B thì theo chiều ngược lại B phải nhẹ hơn A, không thể nặng hơn A.",
+                "bằng nhau": "A đã nặng hơn B nên hai vật không thể có khối lượng bằng nhau.",
+                "không thể kết luận": "Quan hệ A nặng hơn B đã cho trực tiếp, nên suy ra được B nhẹ hơn A.",
+            }
+            if label in reasons: return reasons[label]
+        if "hai đĩa ngang bằng" in prompt_cf:
+            reasons = {
+                "bên trái nặng hơn": "Cân đang ngang nên không có căn cứ nói bên trái nặng hơn bên phải.",
+                "bên phải nặng hơn": "Cân đang ngang nên không có căn cứ nói bên phải nặng hơn bên trái.",
+                "không thể so sánh khối lượng hai bên": "Hai đĩa ngang bằng chính là dữ kiện cho thấy khối lượng hai bên bằng nhau trong phép cân đó.",
+            }
+            if label in reasons: return reasons[label]
+
+    if skill == "MONEY_VND_NOTE_RECOGNITION":
+        label = choice_text.strip().casefold()
+        reasons = {
+            "chỉ màu sắc của tờ tiền": "Màu sắc không tự xác định giá trị; cần đọc con số mệnh giá và đơn vị đồng trên tờ.",
+            "chỉ kích thước của tờ tiền": "Kích thước không thay thế con số mệnh giá; muốn biết giá trị phải đọc thông tin in trên tờ.",
+            "chỉ hình trang trí nổi bật trên tờ": "Hình trang trí không phải con số mệnh giá, nên không đủ để xác định giá trị tờ tiền.",
+            "chỉ so sánh màu sắc của hai tờ": "Màu sắc không cho biết chắc tờ nào có giá trị lớn hơn; phải so sánh hai con số mệnh giá.",
+            "chỉ so sánh kích thước của hai tờ": "Kích thước không phải giá trị tiền; cần đọc và so sánh con số mệnh giá trên hai tờ.",
+            "chọn tờ có nhiều chữ hơn": "Số lượng chữ trên tờ không quyết định giá trị; con số mệnh giá mới là thông tin cần so sánh.",
+        }
+        if label in reasons:
+            return reasons[label]
+
+    if skill == "PICTOGRAPH_SIMPLE_INFERENCE" and "nhóm Cam 5 biểu tượng" in prompt:
+        counts = {"cam": 5, "táo": 7, "chuối": 3}
+        label = choice_text.strip().casefold()
+        if label in counts:
+            return f"Nhóm {choice_text.strip()} có {counts[label]} biểu tượng, ít hơn Táo có 7 biểu tượng nên không phải nhóm nhiều nhất."
+        if label == "cả ba bằng nhau":
+            return "Ba nhóm có số biểu tượng 5, 7 và 3 nên không bằng nhau; nhóm có 7 biểu tượng mới nhiều nhất."
+
     return None
 
 
