@@ -566,6 +566,13 @@ class MathContentDataSmoke(unittest.TestCase):
                 self.assertEqual("application", item["difficulty"])
                 self.assertIn(marker, item["prompt_vi"].casefold())
 
+    def test_application_variants_are_not_number_swap_duplicates(self):
+        for lesson in self.lessons:
+            refs = lesson["practice_sets"]["application"]
+            shapes = [validator.normalize_prompt(self.question_by_id[qid]["prompt_vi"]) for qid in refs]
+            with self.subTest(lesson=lesson["id"]):
+                self.assertEqual(len(shapes), len(set(shapes)))
+
     def test_application_prompts_are_not_lower_difficulty_number_swaps(self):
         self.assertEqual(1.0, validator.application_prompt_shape_similarity(
             "Có 4 túi, mỗi túi 5 viên. Có tất cả bao nhiêu viên?",

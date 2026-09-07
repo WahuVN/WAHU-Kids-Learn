@@ -23,7 +23,7 @@ def build(g):
         "PICTOGRAPH_SIMPLE_INFERENCE": [
             nq("Biểu đồ có nhóm A 7 biểu tượng, nhóm B 5 biểu tượng; mỗi biểu tượng = 1 bạn. A nhiều hơn B bao nhiêu bạn?", 2, "7 - 5 = 2 bạn."),
             mc("Biểu đồ có nhóm Đỏ 4 biểu tượng, Xanh 8 biểu tượng, Vàng 6 biểu tượng; chú giải như nhau. Nhóm nào nhiều nhất?", "Xanh", ["Đỏ", "Vàng", "Cả ba bằng nhau"], "Xanh có 8 biểu tượng, nhiều hơn 6 và 4."),
-            nq("Biểu đồ có 3 biểu tượng cho A và 6 biểu tượng cho B; 1 biểu tượng = 2 vật. B nhiều hơn A bao nhiêu vật?", 6, "B có 12 vật, A có 6 vật; 12 - 6 = 6."),
+            nq("Biểu đồ có 3 biểu tượng cho A và 6 biểu tượng cho B; 1 biểu tượng = 2 vật. Nam nói B nhiều hơn A 3 vật vì chỉ so số biểu tượng. B thực sự nhiều hơn A bao nhiêu vật?", 6, "B hơn A 3 biểu tượng; mỗi biểu tượng đại diện 2 vật nên chênh lệch là 3 × 2 = 6 vật. Nam quên dùng chú giải."),
         ],
         "EVENT_POSSIBLE": [
             mc("Một vòng quay có các số 1, 2, 3, 4. Kim dừng ở số 3 là sự kiện gì?", "có thể", ["chắc chắn", "không thể", "luôn xảy ra"], "Số 3 có trên vòng quay nên có thể xuất hiện, nhưng còn các số khác nên không chắc chắn."),

@@ -1917,6 +1917,18 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             if isinstance(refs, list):
                 lower_refs.extend(qid for qid in refs if isinstance(qid, str))
         if isinstance(application_refs, list):
+            application_shapes = []
+            for application_qid in application_refs:
+                application_q = question_by_id.get(application_qid)
+                if isinstance(application_q, dict) and isinstance(application_q.get("prompt_vi"), str):
+                    application_shapes.append((application_qid, normalize_prompt(application_q["prompt_vi"])))
+            for a in range(len(application_shapes)):
+                for b in range(a + 1, len(application_shapes)):
+                    qid_a, shape_a = application_shapes[a]
+                    qid_b, shape_b = application_shapes[b]
+                    if shape_a and shape_a == shape_b:
+                        errors.append(f"application_prompt_number_swap_duplicate:{lid}:{qid_a}:{qid_b}")
+
             for application_qid in application_refs:
                 application_q = question_by_id.get(application_qid)
                 if not isinstance(application_q, dict) or not isinstance(application_q.get("prompt_vi"), str):

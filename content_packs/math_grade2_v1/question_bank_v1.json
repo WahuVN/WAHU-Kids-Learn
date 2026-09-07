@@ -15531,13 +15531,13 @@
       "skill_id": "PICTOGRAPH_SIMPLE_INFERENCE",
       "difficulty": "application",
       "question_type": "numeric_input",
-      "prompt_vi": "Biểu đồ có 3 biểu tượng cho A và 6 biểu tượng cho B; 1 biểu tượng = 2 vật. B nhiều hơn A bao nhiêu vật?",
+      "prompt_vi": "Biểu đồ có 3 biểu tượng cho A và 6 biểu tượng cho B; 1 biểu tượng = 2 vật. Nam nói B nhiều hơn A 3 vật vì chỉ so số biểu tượng. B thực sự nhiều hơn A bao nhiêu vật?",
       "answer_kind": "integer",
       "correct_answer": 6,
       "accepted_answers": [
         "6"
       ],
-      "explanation_vi": "B có 12 vật, A có 6 vật; 12 - 6 = 6.",
+      "explanation_vi": "B hơn A 3 biểu tượng; mỗi biểu tượng đại diện 2 vật nên chênh lệch là 3 × 2 = 6 vật. Nam quên dùng chú giải.",
       "hints_vi": [
         "Ở câu này, tìm chỗ dễ nhầm của “Suy luận từ dữ liệu” trong tình huống và xác định bước đầu tiên cần làm.",
         "Ở câu này, với “Suy luận từ dữ liệu”, đếm đúng dữ liệu cần dùng và chú ý chú giải trước khi tính."
