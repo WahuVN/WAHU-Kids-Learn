@@ -11,11 +11,11 @@ EXTERNAL_BLOCKERS=INSTALLER_E2E_UNOWNED_LOCAL_DATA;PRODUCTION_SIGNING_UNAVAILABL
 EXECUTION_MODE=PLAYABLE_EVENT_UI_NO_WAIT
 ACTIVE_PHASE=PLAYABLE_EVENT_GAME_V1
 ACTIVE_FOCUS=FIRST_FIVE_QUICK_RESCUE_UI_E2E_RELEASE
-LAST_FULLY_VERIFIED_HEAD=`f4bb08a`
+LAST_FULLY_VERIFIED_HEAD=`1c4ce9e`
 LAST_VERIFIED_CHILD_UI=3696_ASSERTIONS_PASS
-LAST_VERIFIED_PERSISTENCE=7871_ASSERTIONS_PASS
+LAST_VERIFIED_PERSISTENCE=7933_ASSERTIONS_PASS
 LAST_VERIFIED_CONTENT=90_OF_90_PASS
-LAST_VERIFIED_RELEASE=`0.1.66-dev`_CLEAN_PROVENANCE_CONTENT_90_PERSISTENCE_7871_PORTABLE_E2E_INSTALLER_COMPILE_PASS
+LAST_VERIFIED_RELEASE=`0.1.68-dev`_POST_INSTALLER_PROVENANCE_CONTENT_90_PERSISTENCE_7933_PORTABLE_E2E_INSTALLER_PASS
 EARLY_LESSON_DEEP_HEAD=`e34136d`
 EARLY_LESSON_DEEP_CHILD_UI=3564_ASSERTIONS_PASS
 EARLY_LESSON_DEEP_PERSISTENCE=7592_ASSERTIONS_PASS
@@ -85,13 +85,15 @@ Milestones đã có, không làm lại implementation mù nếu HEAD vẫn chứ
 - 402-prompt min-window fit: `1e27ff8`
 - dynamic release smoke evidence: `3a53af7`
 
-Current closure evidence on `f4bb08a`: source provenance **PASS**, Child UI **3696 assertions PASS**, persistence **7871 assertions PASS**, content/event **90/90 PASS**, validator **402/402 + 5/5**, Build-Setup `0.1.66-dev` **15/15 PASS** với content/persistence/Portable E2E đều là first-class gate, installer compile **PASS**. Full Installer E2E is externally safety-blocked by unowned learner data; assertion counts may continue to grow.
+Current closure evidence on `1c4ce9e`: source provenance **PASS** cả sau installer, Learning **800**, Child UI **3696**, persistence **7933**, content/event **90/90**, validator **402/402 + 5/5**, Build-Setup `0.1.68-dev` **PASS** với content/persistence/Portable/post-installer provenance là first-class gates, installer compile **PASS**. Full Installer E2E is externally safety-blocked by unowned learner data; assertion counts may continue to grow.
 
 `88ecf34` additionally locks Garden accounting against zero-attempt completed sessions: they do not advance completed-session milestones and are never backfilled as rewardable; valid rescue completion remains +1 idempotent.
 
 `9736443` verifies durable DB attempts at reward time; `478e89b` rejects zero-attempt and early targeted completion; `e3bc9e0` promotes the full Math persistence smoke into Build-Setup + release-manifest evidence.
 
 `7496388` locks exact Garden milestones across all first five production rescue completions; `3af8d4a` promotes validator + full Python suite + Portable E2E into Build-Setup; `f4bb08a` refuses dirty source and locks stable Git provenance around the build.
+
+`069372d` binds reward eligibility to durable attempts of the correct child; `85a1d2a` self-heals stale canonical source-key rows and ignores orphan growth; `0e91702` locks exact 1/3/6/10 milestones; `f5e5202` adds post-installer provenance; `1c4ce9e` makes Garden milestone/UI/inventory derive from canonical rewards and self-heal after partial reward faults.
 
 ## 2. Ownership
 

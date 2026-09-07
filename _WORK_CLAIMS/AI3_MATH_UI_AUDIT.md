@@ -2,7 +2,7 @@
 
 Updated: 2026-09-07
 Owner: AI3
-Last fully verified HEAD: `f4bb08a`
+Last fully verified HEAD: `1c4ce9e`
 Status: `LANE_DONE=YES`; `PLAYABLE_UI_P0=GREEN`; `INSTALLER_E2E=BLOCKED_SAFETY_UNOWNED_LOCAL_DATA`
 
 ## PLAYABLE EVENT V1 — current evidence
@@ -23,15 +23,20 @@ Status: `LANE_DONE=YES`; `PLAYABLE_UI_P0=GREEN`; `INSTALLER_E2E=BLOCKED_SAFETY_U
 - Garden regression `7496388` khóa exact milestone cho cả 5 rescue production: seedling #1, flower patch #3, lantern vẫn khóa sau #5.
 - Release integration `3af8d4a` đưa production validator + full 90-test content/event/pool suite + Portable E2E vào Build-Setup và manifest.
 - Provenance `f4bb08a` fail-closed dirty tracked/untracked source, khóa HEAD stable và clean tree trước/sau build; Python chạy `-B` nên không để lại cache làm bẩn worktree.
+- Reward eligibility `069372d` yêu cầu durable Math attempt thuộc đúng child/session; foreign-child attempt không thể tạo Garden reward.
+- Reward canonicalization `85a1d2a` tự sửa stale same-child `source_key` collision và loại orphan/non-canonical reward khỏi `GrowthSteps`.
+- Milestone regression `0e91702` khóa chính xác/replay-safe các mốc Garden 1/3/6/10.
+- Post-installer provenance `f5e5202` kiểm HEAD/tree thêm lần cuối sau installer + update-manifest trước `BUILD_SETUP_ARTIFACTS_PASS`.
+- Garden consistency `1c4ce9e` derive milestone/visual từ canonical reward count, bỏ raw inventory trust và reconcile stale/missing milestone inventory; partial reward outage không thể mở mốc tương lai sớm.
 - Gameplay rescue đã được scale 125% trong chính active session: prompt vẫn fit từ 12pt trở lên, checkpoint/break target giữ kích thước thao tác và wrong→retry→hint→suspend vẫn chạy sau scale.
-- Child UI: **3696 assertions PASS**; persistence: **7871 assertions PASS**; Math content/event/pool suite: **90/90 PASS**.
-- `0.1.66-dev`: Build-Setup **15/15 PASS** + provenance/content/persistence/Portable first-class gates, installer compile **PASS**; publish payload chứa `game_events_v1.json` SHA `F9F25EA94DA7FCD20E360509EE53E6E758039CCF788FAFEC729A35F80D39A8B1`.
+- Child UI: **3696 assertions PASS**; persistence: **7933 assertions PASS**; Math content/event/pool suite: **90/90 PASS**.
+- `0.1.68-dev`: Build-Setup **15/15 PASS** + provenance/content/persistence/Portable/post-installer gates, installer compile **PASS**; publish payload chứa `game_events_v1.json` SHA `F9F25EA94DA7FCD20E360509EE53E6E758039CCF788FAFEC729A35F80D39A8B1`.
 - Full Installer E2E hiện **BLOCKED_SAFETY** vì `%LOCALAPPDATA%\WAHU Kids Learn\data\learning.db` tồn tại nhưng không có `.wahu-e2e-owned`; không được xóa/ghi đè dữ liệu này để ép test qua.
 - Production signing và real Windows 7 validation vẫn `UNAVAILABLE/PENDING`.
 
 ## 1. Kết luận
 
-AI3 Math UI/QA/integration lane đã hoàn tất playable P0/P1 cho 5 bài đầu và đạt STOP RULE. Lần closure gate chạy trên clean `main` HEAD `f4bb08a`; lane chuyển `LANE_DONE=YES`.
+AI3 Math UI/QA/integration lane đã hoàn tất playable P0/P1 cho 5 bài đầu và đạt STOP RULE. Lần closure gate chạy trên clean `main` HEAD `1c4ce9e`; lane chuyển `LANE_DONE=YES`.
 
 Current evidence:
 
@@ -40,8 +45,8 @@ Current evidence:
 - production Math validator: **402/402 valid**;
 - full Math content/event/pool suite: **90/90 PASS**;
 - difficulty distribution: **134 basic / 134 medium / 134 application**;
-- Math persistence: **7871 assertions PASS**; Build-Setup `10b/15` build **0 warning / 0 error**;
-- full Build-Setup `0.1.66-dev`: **15/15 PASS**, provenance + validator + 90-suite + persistence + Portable E2E recorded in release manifest;
+- Math persistence: **7933 assertions PASS**; Build-Setup `10b/15` build **0 warning / 0 error**;
+- full Build-Setup `0.1.68-dev`: **15/15 PASS**, provenance + validator + 90-suite + persistence + Portable E2E + post-installer provenance recorded in release manifest;
 - Portable E2E: **PASS**;
 - Installer compile: **PASS**; full installer E2E **BLOCKED_SAFETY** trên máy hiện tại.
 
@@ -209,20 +214,20 @@ Installer E2E:
 
 ## 10. Latest full cross-lane gate
 
-All on clean `f4bb08a`:
+All on clean `1c4ce9e`:
 
-- source provenance start/final: **PASS**; dirty-source negative probe: **PASS** (`REFUSE_DIRTY_SOURCE`);
+- source provenance start / post-Portable / post-installer: **PASS**; dirty-source negative probe: **PASS** (`REFUSE_DIRTY_SOURCE`);
+- Learning session: **800 assertions PASS**; Child UI: **3696 assertions PASS**;
 - production validator: **402/402 valid**, game events **5/5**;
 - full Math content/event/pool suite: **90/90 PASS**;
-- `MathSessionPersistenceRuntimeSmoke`: **7871 assertions PASS**; Build-Setup `10b/15` build **0 warning / 0 error**;
-- exact Garden milestones across first five production rescue: **PASS**;
-- release manifest records provenance PASS, validator `402/402 + 5/5`, Python suite `90`, persistence `PASS/7871`, Portable E2E PASS;
-- Child UI: **3696 assertions PASS**;
-- full Build-Setup `0.1.66-dev`: **15/15 PASS** plus first-class sub-gates;
-- Portable E2E: **PASS**, bootstrap hai lần exit 0, installed learner DB SHA trước/sau không đổi (`0C970952435DAC03FE56C8400D003E87C37CED5D91B79C8A7D459A8EC30868C1`);
-- installer compile: **PASS**; Full Installer E2E **BLOCKED_SAFETY** vì learner data hiện hữu không có ownership marker;
-- `game_events_v1.json` trong payload SHA256 `F9F25EA94DA7FCD20E360509EE53E6E758039CCF788FAFEC729A35F80D39A8B1`, khớp manifest;
-- Portable SHA256 `9662596CA145B031C8762EA4F991D96A4BD6074DAF74D0BF8A1ECDDF7AC5B725`; Installer SHA256 `D3AED27C79902C11CF101E8075A0B899E07D02448C5ADF1D5ABC277048380680`.
+- `MathSessionPersistenceRuntimeSmoke`: **7933 assertions PASS**; Build-Setup `10b/15` build **0 warning / 0 error**;
+- Garden exact milestones 1/3/6/10, durable-child eligibility, stale canonical reward repair, partial-reward milestone safety, stale/missing inventory self-heal: **PASS**;
+- release manifest records provenance including `source_provenance_after_installer=PASS`, validator `402/402 + 5/5`, Python suite `90`, persistence `PASS/7933`, Portable E2E PASS;
+- full Build-Setup `0.1.68-dev`: **15/15 PASS** plus first-class sub-gates through `15b`;
+- Portable E2E: **PASS**, bootstrap 2 lần exit 0, learner DB thật SHA trước/sau không đổi (`0C970952435DAC03FE56C8400D003E87C37CED5D91B79C8A7D459A8EC30868C1`);
+- installer compile: **PASS**; update-manifest installer SHA khớp; Full Installer E2E **BLOCKED_SAFETY** do learner data không có ownership marker;
+- `game_events_v1.json` SHA256 `F9F25EA94DA7FCD20E360509EE53E6E758039CCF788FAFEC729A35F80D39A8B1`, khớp manifest;
+- Portable SHA256 `1F351A2206B913E49B37FD1F054E77CCAE9BE93E7E72BAFDA6291FC4A262308E`; Installer SHA256 `26ECC47FCB14C37C255EEF8D26655631595DBCC53E590F4DE7BCE8F4124985BB`.
 
 AI1 `LANE_DONE=YES`; AI2 `LANE_DONE=YES`; AI3 `LANE_DONE=YES`.
 
