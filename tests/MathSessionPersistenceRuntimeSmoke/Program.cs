@@ -529,12 +529,17 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
             first.SubmitAnswerAt(q1.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700);
             var q2 = first.NextQuestion();
             q2Id = q2.QuestionId;
+            var wrong = first.SubmitAnswerWithRetryAt(WrongAnswer(q2), 1, "smoke", DateTime.UtcNow, 800);
+            A(!wrong.Learning.IsCorrect && wrong.Learning.CanRetry && !wrong.Learning.QuestionCompleted &&
+              wrong.EventState.RetryPending && wrong.EventState.CompletedCheckpointCount == 1,
+                "game_event_dispose_pending_retry_fixture_is_open_before_close");
             first.Dispose();
 
             A(SessionState(database, sessionId) == "active" &&
-              Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + sessionId + "';") == 1 &&
+              Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + sessionId + "';") == 2 &&
+              Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + sessionId + "';") == 1 &&
               Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + sessionId + "';") == 0,
-                "game_event_dispose_keeps_session_active_and_grants_no_reward");
+                "game_event_dispose_keeps_pending_retry_active_without_fake_mastery_or_reward");
             A(Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + sessionId + "';") == 1,
                 "game_event_dispose_keeps_runtime_checkpoint_for_resume");
 
@@ -543,14 +548,19 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
             {
                 var resumedStart = resumed.Start("Bé đóng cửa sổ cứu hộ");
                 A(resumedStart.Session.ResumedExistingSession && resumedStart.Session.SessionId == sessionId &&
-                  resumedStart.Session.CompletedQuestionCount == 1 && resumedStart.Session.SelectedContentQuestionIds.SequenceEqual(selected),
-                    "game_event_dispose_resume_restores_same_session_and_selected_set");
+                  resumedStart.Session.CompletedQuestionCount == 1 && resumedStart.Session.SelectedContentQuestionIds.SequenceEqual(selected) &&
+                  resumedStart.Session.RetryPending,
+                    "game_event_dispose_resume_restores_same_session_selected_set_and_retry_pending");
                 A(resumedStart.EventState.CompletedCheckpointCount == 1 && resumedStart.EventState.CurrentCheckpointNumber == 2 &&
-                  !resumedStart.EventState.IsComplete,
-                    "game_event_dispose_resume_restores_checkpoint_two_not_terminal");
+                  resumedStart.EventState.RetryPending && !resumedStart.EventState.IsComplete,
+                    "game_event_dispose_resume_restores_checkpoint_two_pending_retry_not_terminal");
                 var restoredQ2 = resumed.NextQuestion();
                 A(restoredQ2.QuestionId == q2Id && restoredQ2.ContentQuestionId == selected[1],
                     "game_event_dispose_resume_restores_exact_open_q2");
+                var retry = resumed.SubmitRetryAnswerAt(restoredQ2.CorrectAnswerDisplay, 1, "smoke", DateTime.UtcNow, 850);
+                A(retry.Learning.IsCorrect && retry.Learning.IsRetry && !retry.Learning.IndependentSuccess &&
+                  retry.EventState.CompletedCheckpointCount == 2 && !retry.EventState.RetryPending,
+                    "game_event_dispose_resume_pending_retry_completes_as_assisted_once");
                 resumed.SuspendForBreak("dispose_resume_cleanup");
             }
 
