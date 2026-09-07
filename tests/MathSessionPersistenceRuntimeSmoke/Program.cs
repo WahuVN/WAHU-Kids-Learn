@@ -53,6 +53,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestTargetedSelectedSetSurvivesCommitFailure(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedConcurrentCoordinatorsCannotDuplicateOrdinal(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedConcurrentPendingRetryKeepsFirstTrySemantics(root, schemaPath, templatePath, lessonCatalogPath);
+                TestAdaptiveConcurrentCoordinatorsShareSemanticOrdinalId(root, schemaPath, templatePath);
                 TestTargetedResumeDiscardsStaleConcurrentOrdinalCache(root, schemaPath, templatePath, lessonCatalogPath);
                 TestRetryAwareAnswerFlow(root, schemaPath, templatePath);
                 TestRetryWrongFinalizesOnce(root, schemaPath, templatePath);
@@ -1430,6 +1431,48 @@ END;");
             }
         }
 
+        private static void TestAdaptiveConcurrentCoordinatorsShareSemanticOrdinalId(
+            string root,
+            string schemaPath,
+            string templatePath)
+        {
+            var database = NewDatabase(Path.Combine(root, "adaptive-concurrent-semantic-id.db"), schemaPath);
+            using (var first = new MathSessionCoordinator(database, templatePath, "LOW", 8701, 3))
+            {
+                var firstStart = first.Start("Bé adaptive concurrent");
+                var firstQ1 = first.NextQuestion();
+                using (var second = new MathSessionCoordinator(database, templatePath, "NORMAL", 999999, 9))
+                {
+                    var secondStart = second.Start("Bé adaptive concurrent");
+                    var secondQ1 = second.NextQuestion();
+                    A(secondStart.ResumedExistingSession && secondStart.SessionId == firstStart.SessionId &&
+                      secondQ1.QuestionId == firstQ1.QuestionId,
+                        "adaptive_concurrent_second_coordinator_resumes_same_q1");
+
+                    first.SubmitAnswerAt(firstQ1.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700);
+                    var q1Replay = second.SubmitAnswerAt(secondQ1.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 720);
+                    A(q1Replay.QuestionCompleted && second.Summary.Attempts == 1,
+                        "adaptive_concurrent_q1_replay_is_idempotent");
+
+                    var firstQ2 = first.NextQuestion();
+                    var secondQ2 = second.NextQuestion();
+                    var firstFingerprint = firstQ2.TemplateId + "|" + firstQ2.PromptVi + "|" + firstQ2.CorrectAnswerDisplay + "|" + string.Join("~", firstQ2.DisplayChoices);
+                    var secondFingerprint = secondQ2.TemplateId + "|" + secondQ2.PromptVi + "|" + secondQ2.CorrectAnswerDisplay + "|" + string.Join("~", secondQ2.DisplayChoices);
+                    A(firstFingerprint == secondFingerprint && firstQ2.QuestionId == secondQ2.QuestionId,
+                        "adaptive_concurrent_same_ordinal_has_same_content_and_semantic_id");
+
+                    first.SubmitAnswerAt(firstQ2.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 800);
+                    var q2Replay = second.SubmitAnswerAt(secondQ2.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 820);
+                    A(q2Replay.QuestionCompleted && q2Replay.IsCorrect && second.Summary.Attempts == 2,
+                        "adaptive_concurrent_q2_submit_replays_same_semantic_attempt");
+                    A(Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + firstStart.SessionId + "';") == 2 &&
+                      Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + firstStart.SessionId + "';") == 2,
+                        "adaptive_concurrent_q2_replay_writes_no_duplicate_attempt_or_mastery");
+                    second.Abort("adaptive_concurrent_cleanup");
+                }
+            }
+        }
+
         private static void TestTargetedResumeDiscardsStaleConcurrentOrdinalCache(
             string root,
             string schemaPath,
@@ -2027,6 +2070,7 @@ END;");
         {
             var database = NewDatabase(Path.Combine(root, "corrupt-cache.db"), schemaPath);
             string sessionId;
+            string expectedSecondQuestionId;
             string expectedSecondFingerprint;
             using (var first = new MathSessionCoordinator(database, templatePath, "LOW", 314159, 3))
             {
@@ -2035,6 +2079,7 @@ END;");
                 var q1 = first.NextQuestion();
                 first.SubmitAnswerAt(q1.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 1000);
                 var q2 = first.NextQuestion();
+                expectedSecondQuestionId = q2.QuestionId;
                 expectedSecondFingerprint = q2.TemplateId + "|" + q2.PromptVi + "|" + q2.CorrectAnswerDisplay + "|" + string.Join("~", q2.DisplayChoices);
                 Exec(database, "UPDATE math_session_runtime SET current_question_json='not-json-at-all' WHERE session_id=@session;", "@session", sessionId);
                 first.Suspend("simulate_corrupt_cache");
@@ -2055,6 +2100,8 @@ END;");
                 var replacementFingerprint = replacement.TemplateId + "|" + replacement.PromptVi + "|" + replacement.CorrectAnswerDisplay + "|" + string.Join("~", replacement.DisplayChoices);
                 A(replacement != null && replacementFingerprint == expectedSecondFingerprint,
                     "corrupt_adaptive_cache_regenerates_same_second_question_not_third");
+                A(replacement.QuestionId == expectedSecondQuestionId,
+                    "corrupt_adaptive_cache_regenerates_same_semantic_question_id");
                 resumed.Abort("cleanup");
             }
         }

@@ -248,6 +248,8 @@ namespace WAHU.Session
                 }
                 var generator = new MathQuestionGenerator(QuestionSeed(_seed, nextOrdinal, _currentSelection.Template.TemplateId));
                 _currentQuestion = generator.Generate(_currentSelection);
+                _currentQuestion.QuestionId = DeterministicAdaptiveRuntimeQuestionId(
+                    _session.SessionId, nextOrdinal, _currentSelection.Template.TemplateId);
             }
             _questionStartedAtUtc = DateTime.UtcNow;
             _currentAttemptIndex = 1;
@@ -1447,12 +1449,26 @@ namespace WAHU.Session
         {
             if (string.IsNullOrWhiteSpace(sessionId)) throw new ArgumentException("sessionId");
             if (string.IsNullOrWhiteSpace(contentQuestionId)) throw new ArgumentException("contentQuestionId");
+            return DeterministicRuntimeQuestionId(contentQuestionId, sessionId + "|" + contentQuestionId);
+        }
+
+        private static string DeterministicAdaptiveRuntimeQuestionId(string sessionId, int ordinal, string templateId)
+        {
+            if (string.IsNullOrWhiteSpace(sessionId)) throw new ArgumentException("sessionId");
+            if (ordinal < 1) throw new ArgumentOutOfRangeException("ordinal");
+            if (string.IsNullOrWhiteSpace(templateId)) throw new ArgumentException("templateId");
+            return DeterministicRuntimeQuestionId(templateId,
+                sessionId + "|adaptive|" + ordinal.ToString(System.Globalization.CultureInfo.InvariantCulture) + "|" + templateId);
+        }
+
+        private static string DeterministicRuntimeQuestionId(string prefix, string material)
+        {
             byte[] hash;
             using (var sha = SHA256.Create())
-                hash = sha.ComputeHash(Encoding.UTF8.GetBytes(sessionId + "|" + contentQuestionId));
+                hash = sha.ComputeHash(Encoding.UTF8.GetBytes(material));
             var guidBytes = new byte[16];
             Array.Copy(hash, guidBytes, guidBytes.Length);
-            return contentQuestionId + "-" + new Guid(guidBytes).ToString("N");
+            return prefix + "-" + new Guid(guidBytes).ToString("N");
         }
 
         private static string TemplateIdFromQuestionId(string questionId)
