@@ -28,10 +28,10 @@ Owner: AI1 — Math Content & Data
   - interactive measurement
   - word problem
 - Semantic validator errors: **0**
-- Math content unittest: **34 / 34 PASS**
+- Math content unittest: **36 / 36 PASS**
 - Pack manifest/hash/listing check on current working tree: **PASS** (`version=1.9.0`, 3 listed files)
 - Persistence runtime smoke: **171 assertions PASS**
-- Child UI targeted build (`BuildProjectReferences=false`) + runtime smoke: **1558 assertions PASS**
+- Child UI targeted build (`BuildProjectReferences=false`) + runtime smoke: **1593 assertions PASS**
 
 ## Curriculum/content completeness
 
@@ -125,7 +125,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - skill quan hệ thời gian không mở rộng thành phép nhân/chia ngoài yêu cầu cần đạt;
 - mọi phép nhân/chia literal child-facing nằm trong bảng 2 hoặc 5, kể cả distractor;
 - mọi MCQ có choice khác nhau sau normalize text và không có hai biểu thức choice cùng giá trị số; câu equal-group `5 × 2` đã loại distractor `10 : 5` có thể mô tả cùng cấu trúc nhóm và khóa regression ambiguity; **26 câu nhận dạng/khái niệm** đã thay distractor giveaway khác miền bằng lỗi nhầm gần kiến thức và có regression chặn các mẫu vô lý cũ;
-- 201/201 hint cấp 2 hiện actionable, **201 unique / max repeat 1**; toàn bộ 402 hint slots đạt **0 unseen-answer leak** và **0 hint >130 ký tự**; readability hiện hint1 p90/max = **109/114**, hint2 = **108/119** (trước wave max 168/167); **28 application numeric hint2** dùng khung `Viết một phép tính hoặc quan hệ ngắn...` đã giảm **28 → 0** và chuyển sang bước gợi ý theo concept;
+- 201/201 hint cấp 1 và 201/201 hint cấp 2 hiện actionable, **mỗi cấp 201 unique / max repeat 1**; toàn bộ 402 hint slots đạt **0 unseen-answer leak** và **0 hint >130 ký tự**; readability hiện hint1 p90/max = **103/115**, hint2 = **108/119** (trước các wave max 168/167); **176 hint1** dùng khung `Nhớ kiến thức:` đã giảm **176 → 0** và chuyển thành bước quan sát theo question type/difficulty/concept; **28 application numeric hint2** dùng khung `Viết một phép tính hoặc quan hệ ngắn...` đã giảm **28 → 0**;
 - 267/267 distractor có **rationale unique / max repeat 1**, mỗi rationale sai chứa lời giải riêng của chính câu; 3 họ mẫu shallow cũ đã giảm **267 → 0**;
 - vị trí đáp án đúng được cân bằng deterministic: 88 câu 4-choice = 22/22/22/22 cho A/B/C/D; 3 true/false = 2/1;
 - 23 câu integer có `answer_unit` giữ đúng contract display-only, không đổi sang unit-input;
@@ -138,7 +138,7 @@ Hai skill này **không còn thiếu content**: lesson + curated question đã c
 - 12 câu cộng/trừ viết khớp chính xác số lượt nhớ/mượn theo skill contract;
 - **166 phương trình số instructional** đang được kiểm bằng arithmetic parser, hiện **0 sai**; detector có regression cho cả phép cộng chuỗi và phép chia dùng dấu `:`.
 
-Latest result: **35 tests PASS**.
+Latest result: **36 tests PASS**.
 
 ## Commits / waves
 
@@ -177,11 +177,11 @@ Latest result: **35 tests PASS**.
 
 ## Current blockers outside AI1 content ownership
 
-1. Request 005 functional path đã được commit end-to-end: engine `656a94b` + UI `1436705`. Targeted lesson dùng authored bank đúng 3 câu, all-201 answer-surface sweep PASS, Flow 5 prerequisite unlock PASS; current persistence WIP đạt **171 assertions PASS** và Child UI đạt **1558 assertions PASS**. Release-clean full solution vẫn bị SQLite/toolchain chặn.
+1. Request 005 functional path đã được commit end-to-end: engine `656a94b` + UI `1436705`. Targeted lesson dùng authored bank đúng 3 câu, all-201 answer-surface sweep PASS, Flow 5 prerequisite unlock PASS; current persistence WIP đạt **171 assertions PASS** và Child UI đạt **1593 assertions PASS**. Release-clean full solution vẫn bị SQLite/toolchain chặn.
 2. Request 007 **CLOSED** tại `7f79367`: targeted corrupt regression xác nhận cursor rollback 2→1, phát lại đúng medium, sau đó application, đủ 3 attempts mới complete; current persistence smoke hiện **171 assertions PASS**.
 3. Request 006 vẫn mở: 23 câu integer có `answer_unit` được content giữ display-only, nhưng `MathAuthoredQuestionSource`/`MathQuestion` chưa preserve field để feedback hiện `8 cm`, `5 kg`, `60 phút` mà vẫn chấm raw integer.
 4. UI smoke full project-reference build vẫn gặp lỗi reference `System.Data.SQLite` khi build `WAHU.Data.csproj`; App + Child UI targeted build với `BuildProjectReferences=false` PASS. Đây là build/dependency WIP ngoài AI1.
-5. Retry UI presentation trong current working tree hiện **PASS** sau rebuild App + Child UI với `BuildProjectReferences=false`; Child UI đạt **1558 assertions**. Chưa coi là commit-owned closure cho tới khi lane UI chốt các file WIP của họ.
+5. Retry UI presentation trong current working tree hiện **PASS** sau rebuild App + Child UI với `BuildProjectReferences=false`; Child UI đạt **1593 assertions**. Chưa coi là commit-owned closure cho tới khi lane UI chốt các file WIP của họ.
 6. Legacy generator vẫn chỉ phủ 65/67 skill, nhưng lesson-authored path đã cho phép hai skill `FOLD_CUT_COMPOSE_SHAPES` và `MONEY_VND_NOTE_RECOGNITION` có bài luyện thật mà không cần template giả.
 7. **Breadth / replay blocker — Request 009 OPEN:** cả 67 lesson hiện có đúng `(1 basic, 1 medium, 1 application)` = 3 authored questions và targeted engine luôn nạp toàn bộ IDs theo đúng thứ tự, nên học lại gặp lại nguyên 3 câu. Request 009 đề xuất tách pool size khỏi session target: AI1 mở pool `>=6` câu/bài, AI2 chọn/persist đúng 3 câu cân bằng mỗi phiên, AI3 giữ CTA/progress 3 câu nhưng hiển thị pool count riêng. AI1 chưa mở rộng bank trước khi runtime contract/regression này xanh.
 

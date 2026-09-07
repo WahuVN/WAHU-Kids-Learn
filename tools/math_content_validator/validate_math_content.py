@@ -40,6 +40,7 @@ MIN_QUESTION_EXPLANATION_CHARS = 32
 MAX_HINT_CHARS = 130
 MAX_APPLICATION_LOWER_SHAPE_SIMILARITY = 0.75
 GENERIC_SECOND_HINT = "Thực hiện từng bước và kiểm tra lại với dữ kiện của câu hỏi."
+SHALLOW_FIRST_HINT_MARKER = "nhớ kiến thức:"
 SHALLOW_SECOND_HINT_MARKER = "viết một phép tính hoặc quan hệ ngắn cho"
 GENERIC_FIRST_OBJECTIVE_PREFIX = "Nhận biết và thực hiện đúng nội dung:"
 GENERIC_SECOND_OBJECTIVE = "Giải thích được cách làm bằng ngôn ngữ ngắn gọn và kiểm tra kết quả theo dữ kiện."
@@ -666,6 +667,7 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
     question_counts_by_difficulty = Counter()
     prompts_by_lesson: dict[str, list[tuple[str, str]]] = defaultdict(list)
     all_question_prompts: list[tuple[str, str, str]] = []
+    first_hint_counts = Counter()
     second_hint_counts = Counter()
     distractor_rationale_counts = Counter()
     correct_choice_positions_by_count: dict[int, Counter] = defaultdict(Counter)
@@ -739,6 +741,10 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
                     errors.append(f"hint_too_long:{where}:{hint_index + 1}:{len(hint_text.strip())}")
                 if hint_reveals_unseen_answer(q, hint_text):
                     errors.append(f"hint_reveals_unseen_answer:{where}:{hint_index + 1}")
+            first_hint = " ".join(hints[0].split())
+            first_hint_counts[first_hint] += 1
+            if SHALLOW_FIRST_HINT_MARKER in first_hint.casefold():
+                errors.append(f"shallow_first_hint:{where}")
             second_hint = " ".join(hints[1].split())
             second_hint_counts[second_hint] += 1
             if second_hint == GENERIC_SECOND_HINT:
@@ -944,6 +950,10 @@ def validate(baseline_path: Path, lesson_path: Path, question_path: Path) -> tup
             if question_type == "true_false":
                 if len(choices) != 2 or set(choice_texts) != {"Đúng", "Sai"}:
                     errors.append(f"true_false_choices_invalid:{where}:{choice_texts!r}")
+
+    for hint_text, count in first_hint_counts.items():
+        if count > 3:
+            errors.append(f"first_hint_overused:{count}:{hint_text[:80]}")
 
     for hint_text, count in second_hint_counts.items():
         if count > 3:

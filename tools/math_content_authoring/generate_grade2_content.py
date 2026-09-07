@@ -198,6 +198,50 @@ def numeric_application_hint(concept_name: str) -> str:
     return f"Với “{concept}”, nêu quy tắc cần dùng, viết bước tính ngắn rồi kiểm tra điều đề hỏi."
 
 
+def first_hint(question_type: str, difficulty: str, concept_name: str) -> str:
+    """Start with a concrete observation step instead of repeating a lesson definition."""
+    concept = concept_name.strip()
+    hints = {
+        "multiple_choice": {
+            "basic": f"Trước tiên, nhắc lại dấu hiệu của “{concept}” rồi đọc từng lựa chọn; chưa cần chọn ngay.",
+            "medium": f"Tìm chi tiết trong đề liên quan đến “{concept}” trước, rồi mới so từng phương án.",
+            "application": f"Xác định lỗi hoặc dữ kiện quyết định của “{concept}” trong tình huống trước khi chọn.",
+        },
+        "true_false": {
+            "basic": f"Khoanh dữ kiện liên quan đến “{concept}”, rồi xem mệnh đề đang khẳng định điều gì.",
+            "medium": f"Tách mệnh đề thành dữ kiện và kết luận; dùng “{concept}” để kiểm tra từng phần.",
+            "application": f"Tìm điểm có thể làm mệnh đề sai theo “{concept}” trước khi quyết định Đúng hay Sai.",
+        },
+        "numeric_input": {
+            "basic": f"Gạch dưới số hoặc vị trí liên quan đến “{concept}”, rồi xác định điều cần tìm trước khi tính.",
+            "medium": f"Tách dữ kiện của “{concept}” thành từng phần; chỉ tính sau khi biết rõ điều cần tìm.",
+            "application": f"Tìm chỗ dễ nhầm của “{concept}” trong tình huống và xác định bước đầu tiên cần làm.",
+        },
+        "word_problem": {
+            "basic": f"Nói lại bằng lời: đề đã cho gì và hỏi gì; sau đó nối dữ kiện với “{concept}”.",
+            "medium": f"Chia đề thành phần đã biết và phần cần tìm, rồi nhận ra quan hệ “{concept}” giữa chúng.",
+            "application": f"Tìm phép tính dễ bị chọn nhầm trong tình huống và đối chiếu nó với “{concept}”.",
+        },
+        "expression_input": {
+            "basic": f"Đánh dấu các số và phép tính thuộc “{concept}”, chưa tính cho đến khi thứ tự đã rõ.",
+            "medium": f"Xác định phép tính nào phải viết trước theo “{concept}”, rồi mới ghép thành biểu thức.",
+            "application": f"Biến từng dữ kiện thành một phần của biểu thức theo “{concept}” trước khi tính.",
+        },
+        "unit_input": {
+            "basic": f"Xác định đại lượng và đơn vị đề hỏi trong “{concept}” trước khi làm phần số.",
+            "medium": f"Đánh dấu số đo và đơn vị liên quan đến “{concept}”; kiểm tra chúng có cùng loại không.",
+            "application": f"Tìm đại lượng cuối cùng cần trả lời theo “{concept}” rồi mới chọn cách tính.",
+        },
+        "interactive_measurement": {
+            "basic": f"Xác định điểm đầu, điểm cuối và độ dài cần tạo theo “{concept}” trước khi thao tác.",
+            "medium": f"Quan sát các vạch đo của “{concept}” và chọn hai đầu mút trước khi kéo đoạn thẳng.",
+            "application": f"Tìm vạch xuất phát và khoảng cách cần giữ theo “{concept}” trước khi đặt điểm cuối.",
+        },
+    }
+    by_type = hints.get(question_type, hints["numeric_input"])
+    return by_type.get(difficulty, by_type["medium"])
+
+
 def second_hint(question_type: str, difficulty: str, concept_name: str) -> str:
     """Give a child a concrete next move without revealing the authored answer."""
     concept = concept_name.strip()
@@ -1054,7 +1098,7 @@ def build() -> tuple[dict, dict]:
                 question_explanation = explanation_with_answer(
                     deepen_explanation(spec["explanation_vi"], question_type, concept_name), answer_display)
                 first_hint_text = answer_safe_hint(
-                    "Nhớ kiến thức: " + concept_def, spec["prompt_vi"], spec["correct_answer"],
+                    first_hint(question_type, difficulty, concept_name), spec["prompt_vi"], spec["correct_answer"],
                     spec["answer_kind"], question_type, 1)
                 second_hint_text = answer_safe_hint(
                     second_hint(question_type, difficulty, concept_name), spec["prompt_vi"], spec["correct_answer"],

@@ -267,6 +267,16 @@ class MathContentDataSmoke(unittest.TestCase):
                     self.assertLessEqual(len(hint.strip()), validator.MAX_HINT_CHARS)
                     self.assertFalse(validator.hint_reveals_unseen_answer(item, hint))
 
+    def test_first_hints_are_actionable_not_definition_templates(self):
+        first_hints = [x["hints_vi"][0] for x in self.questions]
+        self.assertTrue(all(validator.SHALLOW_FIRST_HINT_MARKER not in hint.casefold() for hint in first_hints))
+        counts = Counter(first_hints)
+        self.assertLessEqual(max(counts.values()), 3)
+        self.assertGreaterEqual(len(counts), int(len(first_hints) * 0.85))
+        for item in self.questions:
+            with self.subTest(item=item["id"]):
+                self.assertGreaterEqual(len(item["hints_vi"][0].strip()), 40)
+
     def test_second_hints_are_actionable_not_placeholders(self):
         second_hints = [x["hints_vi"][1] for x in self.questions]
         self.assertNotIn(validator.GENERIC_SECOND_HINT, second_hints)
