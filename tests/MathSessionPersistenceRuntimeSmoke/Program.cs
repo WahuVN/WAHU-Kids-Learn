@@ -57,6 +57,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestStaleCoordinatorCannotAppendAfterTerminalSession(root, schemaPath, templatePath);
                 TestCoordinatorRejectsStaleSkillSnapshot(root, schemaPath, templatePath);
                 TestCommitFailureRollsBackAndRestoresBehavior(root, schemaPath, templatePath);
+                TestLateReviewFailureRollsBackEntireLearningChain(root, schemaPath, templatePath);
                 TestResumeOpenQuestionAndComplete(root, schemaPath, templatePath);
                 TestCommittedStaleQuestionIsNotReplayed(root, schemaPath, templatePath);
                 TestCorruptOpenQuestionRecoversWithoutProgressReset(root, schemaPath, templatePath);
@@ -1727,6 +1728,57 @@ END;");
                   Count(database, "SELECT count(*) FROM attempt_commit_key WHERE session_id='" + started.SessionId + "';") == 1 &&
                   Count(database, "SELECT count(*) FROM mastery_event WHERE child_id='" + started.ChildId + "' AND skill_id='" + question.SkillId + "';") == 1,
                     "commit_failure_retry_writes_one_durable_learning_chain");
+                coordinator.Complete();
+            }
+        }
+
+        private static void TestLateReviewFailureRollsBackEntireLearningChain(string root, string schemaPath, string templatePath)
+        {
+            var database = NewDatabase(Path.Combine(root, "late-review-failure-rollback.db"), schemaPath);
+            using (var coordinator = new MathSessionCoordinator(database, templatePath, "LOW", 8310, 1))
+            {
+                var started = coordinator.Start("Bé late review rollback");
+                var question = coordinator.NextQuestion();
+                Exec(database, @"CREATE TRIGGER smoke_fail_math_review
+BEFORE INSERT ON review_schedule
+BEGIN
+    SELECT RAISE(ABORT, 'injected_math_review_failure');
+END;");
+
+                var failed = false;
+                try
+                {
+                    coordinator.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 900);
+                }
+                catch (SQLiteException)
+                {
+                    failed = true;
+                }
+                A(failed, "late_review_failure_surfaces_injected_error");
+                A(coordinator.HasOpenQuestion && coordinator.Summary.Attempts == 0 && coordinator.Summary.AnswerAttempts == 0,
+                    "late_review_failure_keeps_question_open_and_counters_unadvanced");
+                A(coordinator.NextQuestion().QuestionId == question.QuestionId,
+                    "late_review_failure_keeps_exact_open_question_for_retry");
+                A(Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + started.SessionId + "';") == 0,
+                    "late_review_failure_rolls_back_attempt");
+                A(Count(database, "SELECT count(*) FROM attempt_commit_key WHERE session_id='" + started.SessionId + "';") == 0,
+                    "late_review_failure_rolls_back_semantic_key");
+                A(Count(database, "SELECT count(*) FROM mastery_event WHERE child_id='" + started.ChildId + "' AND skill_id='" + question.SkillId + "';") == 0,
+                    "late_review_failure_rolls_back_mastery_event");
+                A(Count(database, "SELECT count(*) FROM child_skill WHERE child_id='" + started.ChildId + "' AND skill_id='" + question.SkillId + "';") == 0,
+                    "late_review_failure_rolls_back_child_skill");
+                A(Count(database, "SELECT count(*) FROM review_schedule WHERE child_id='" + started.ChildId + "' AND skill_id='" + question.SkillId + "';") == 0,
+                    "late_review_failure_leaves_no_review_row");
+
+                Exec(database, "DROP TRIGGER smoke_fail_math_review;");
+                var recovered = coordinator.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 950);
+                A(recovered.QuestionCompleted && recovered.IsCorrect && coordinator.Summary.Attempts == 1 && coordinator.Summary.AnswerAttempts == 1,
+                    "late_review_failure_retry_commits_once");
+                A(Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + started.SessionId + "';") == 1 &&
+                  Count(database, "SELECT count(*) FROM mastery_event WHERE child_id='" + started.ChildId + "' AND skill_id='" + question.SkillId + "';") == 1 &&
+                  Count(database, "SELECT count(*) FROM child_skill WHERE child_id='" + started.ChildId + "' AND skill_id='" + question.SkillId + "';") == 1 &&
+                  Count(database, "SELECT count(*) FROM review_schedule WHERE child_id='" + started.ChildId + "' AND skill_id='" + question.SkillId + "';") == 1,
+                    "late_review_failure_retry_writes_exactly_one_complete_learning_chain");
                 coordinator.Complete();
             }
         }
