@@ -113,6 +113,50 @@ $childUiAssertions = Invoke-SmokeWithAssertions -Name 'Child UI runtime smoke' -
 Write-Host '[6/15] Content runtime + secure import smoke'
 $contentAssertions = Invoke-SmokeWithAssertions -Name 'Content runtime smoke' -Path $contentSmoke -PassPrefix 'CONTENT_RUNTIME_SMOKE_PASS'
 
+Write-Host '[6b/15] Production Math content + game-event validator'
+$python = (Get-Command python -ErrorAction SilentlyContinue).Source
+if (-not $python) { throw 'Không tìm thấy Python để chạy Math content validator.' }
+$validatorOutput = @(& $python 'tools\math_content_validator\validate_math_content.py' --json 2>&1)
+$validatorExit = $LASTEXITCODE
+foreach ($line in $validatorOutput) { Write-Host ([string]$line) }
+if ($validatorExit -ne 0) { throw "Math content validator fail: $validatorExit" }
+$validatorText = ($validatorOutput | ForEach-Object { [string]$_ }) -join "`n"
+$validatorResult = $validatorText | ConvertFrom-Json
+if (-not $validatorResult.ok) { throw 'Math content validator returned ok=false.' }
+$mathValidatorQuestions = [int]$validatorResult.metrics.questions
+$mathValidatorValidQuestions = [int]$validatorResult.metrics.valid_questions
+$mathValidatorEvents = [int]$validatorResult.metrics.game_events
+$mathValidatorFirstFive = [int]$validatorResult.metrics.game_events_first_five
+if ($mathValidatorQuestions -le 0 -or $mathValidatorValidQuestions -ne $mathValidatorQuestions) {
+    throw "Math content validator question coverage invalid: valid=$mathValidatorValidQuestions total=$mathValidatorQuestions"
+}
+if ($mathValidatorEvents -le 0 -or $mathValidatorFirstFive -lt 5) {
+    throw "Math game-event validator coverage invalid: events=$mathValidatorEvents first_five=$mathValidatorFirstFive"
+}
+Write-Host "MATH_CONTENT_VALIDATOR_PASS questions=$mathValidatorQuestions valid=$mathValidatorValidQuestions events=$mathValidatorEvents first_five=$mathValidatorFirstFive"
+
+Write-Host '[6c/15] Full Math content/event/pool Python smoke'
+$mathContentStdoutPath = [IO.Path]::GetTempFileName()
+$mathContentStderrPath = [IO.Path]::GetTempFileName()
+try {
+    $mathContentProcess = Start-Process -FilePath $python -ArgumentList @('-m','unittest','discover','tests/MathContentDataSmoke','-p','test*.py','-q') -RedirectStandardOutput $mathContentStdoutPath -RedirectStandardError $mathContentStderrPath -Wait -PassThru -NoNewWindow
+    $mathContentTestExit = $mathContentProcess.ExitCode
+    $mathContentStdout = if (Test-Path -LiteralPath $mathContentStdoutPath) { Get-Content -Raw -LiteralPath $mathContentStdoutPath } else { '' }
+    $mathContentStderr = if (Test-Path -LiteralPath $mathContentStderrPath) { Get-Content -Raw -LiteralPath $mathContentStderrPath } else { '' }
+    if (-not [string]::IsNullOrWhiteSpace($mathContentStdout)) { Write-Host $mathContentStdout.TrimEnd() }
+    if (-not [string]::IsNullOrWhiteSpace($mathContentStderr)) { Write-Host $mathContentStderr.TrimEnd() }
+    if ($mathContentTestExit -ne 0) { throw "Math content/event/pool smoke fail: $mathContentTestExit" }
+    $mathContentTestText = $mathContentStdout + "`n" + $mathContentStderr
+    $mathContentTestMatch = [regex]::Match($mathContentTestText, 'Ran\s+(\d+)\s+tests?')
+    if (-not $mathContentTestMatch.Success) { throw 'Math content/event/pool smoke did not publish a test count.' }
+    $mathContentTestCount = [int]$mathContentTestMatch.Groups[1].Value
+    if ($mathContentTestCount -le 0) { throw 'Math content/event/pool smoke published zero tests.' }
+    Write-Host "MATH_CONTENT_EVENT_POOL_SMOKE_PASS tests=$mathContentTestCount"
+}
+finally {
+    Remove-Item -LiteralPath $mathContentStdoutPath,$mathContentStderrPath -Force -ErrorAction SilentlyContinue
+}
+
 Write-Host '[7/15] Parent PIN security smoke'
 $securityAssertions = Invoke-SmokeWithAssertions -Name 'Security runtime smoke' -Path $securitySmoke -PassPrefix 'SECURITY_RUNTIME_SMOKE_PASS'
 
@@ -237,6 +281,20 @@ $portableZipHash = Sha256 $portableZip
 Set-Content -LiteralPath (Join-Path $portableOutDir "WAHU-Kids-Learn-Portable-win7-x86-$AppVersion.sha256") -Value "$portableZipHash  $(Split-Path $portableZip -Leaf)" -Encoding ASCII
 Write-Host "PORTABLE_SHA256=$portableZipHash"
 
+Write-Host '[13b/15] Portable bootstrap/data-isolation E2E'
+$portableE2EScript = Join-Path $root 'tools\build\Test-PortableE2E.ps1'
+Require-File $portableE2EScript
+& $portableE2EScript -AppVersion $AppVersion -PortableZip $portableZip
+$portableE2EReportPath = Join-Path $root 'build\portable_e2e_dev.json'
+Require-File $portableE2EReportPath
+$portableE2EReport = Get-Content -Raw -LiteralPath $portableE2EReportPath | ConvertFrom-Json
+if ($portableE2EReport.test_result -ne 'PASS') { throw 'Portable E2E report is not PASS.' }
+if ([int]$portableE2EReport.first_bootstrap_exit -ne 0 -or [int]$portableE2EReport.second_bootstrap_exit -ne 0) {
+    throw 'Portable E2E bootstrap exit code is not zero.'
+}
+if ($portableE2EReport.zip_sha256 -ne $portableZipHash) { throw 'Portable E2E tested ZIP hash does not match the just-built artifact.' }
+Write-Host "PORTABLE_E2E_GATE_PASS report=$portableE2EReportPath"
+
 $gitCommit = $null
 try { $gitCommit = (& git rev-parse HEAD 2>$null).Trim() } catch { }
 $providerPath = Join-Path $publish 'System.Data.SQLite.dll'
@@ -277,6 +335,13 @@ $manifest = [ordered]@{
         child_ui_render_smoke_assertions = $childUiAssertions
         content_runtime_smoke = 'PASS'
         content_runtime_smoke_assertions = $contentAssertions
+        math_content_validator = 'PASS'
+        math_content_validator_questions = $mathValidatorQuestions
+        math_content_validator_valid_questions = $mathValidatorValidQuestions
+        math_game_event_validator_events = $mathValidatorEvents
+        math_game_event_validator_first_five = $mathValidatorFirstFive
+        math_content_event_pool_smoke = 'PASS'
+        math_content_event_pool_smoke_tests = $mathContentTestCount
         security_runtime_smoke = 'PASS'
         security_runtime_smoke_assertions = $securityAssertions
         audio_runtime_smoke = 'PASS'
@@ -301,6 +366,12 @@ $manifest = [ordered]@{
         zip = "build\portable\WAHU-Kids-Learn-Portable-win7-x86-$AppVersion.zip"
         zip_sha256 = $portableZipHash
         contains_user_data = $false
+        e2e = 'PASS'
+        e2e_report = 'build\portable_e2e_dev.json'
+        first_bootstrap_exit = [int]$portableE2EReport.first_bootstrap_exit
+        second_bootstrap_exit = [int]$portableE2EReport.second_bootstrap_exit
+        installed_db_hash_before = $portableE2EReport.installed_db_hash_before
+        installed_db_hash_after = $portableE2EReport.installed_db_hash_after
     }
 }
 $manifestPath = Join-Path $root 'build\win7_x86\release_manifest_dev.json'
