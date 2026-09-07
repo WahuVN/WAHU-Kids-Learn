@@ -9,19 +9,33 @@ namespace WAHUKidsLearn
 {
     internal static class ChildVisualTheme
     {
-        public static readonly Color Ink = Color.FromArgb(46, 56, 61);
-        public static readonly Color MutedInk = Color.FromArgb(99, 111, 116);
-        public static readonly Color Cream = Color.FromArgb(249, 247, 238);
-        public static readonly Color Card = Color.FromArgb(255, 253, 246);
-        public static readonly Color Mint = Color.FromArgb(211, 239, 215);
-        public static readonly Color MintStrong = Color.FromArgb(105, 172, 116);
-        public static readonly Color Sky = Color.FromArgb(216, 237, 248);
-        public static readonly Color SkyStrong = Color.FromArgb(92, 154, 189);
-        public static readonly Color Peach = Color.FromArgb(250, 226, 199);
-        public static readonly Color PeachStrong = Color.FromArgb(214, 137, 78);
-        public static readonly Color Sun = Color.FromArgb(246, 204, 92);
-        public static readonly Color SoftRed = Color.FromArgb(232, 113, 100);
-        public static readonly Color Line = Color.FromArgb(224, 222, 210);
+        // A brighter, higher-contrast palette keeps the app gentle without looking washed out.
+        public static readonly Color Ink = Color.FromArgb(39, 50, 66);
+        public static readonly Color MutedInk = Color.FromArgb(91, 104, 119);
+        public static readonly Color Cream = Color.FromArgb(247, 250, 246);
+        public static readonly Color Card = Color.FromArgb(255, 255, 252);
+        public static readonly Color Mint = Color.FromArgb(216, 242, 223);
+        public static readonly Color MintStrong = Color.FromArgb(67, 157, 100);
+        public static readonly Color Sky = Color.FromArgb(222, 239, 252);
+        public static readonly Color SkyStrong = Color.FromArgb(64, 137, 190);
+        public static readonly Color Peach = Color.FromArgb(255, 230, 202);
+        public static readonly Color PeachStrong = Color.FromArgb(224, 139, 69);
+        public static readonly Color Sun = Color.FromArgb(250, 199, 61);
+        public static readonly Color SoftRed = Color.FromArgb(225, 99, 91);
+        public static readonly Color Lavender = Color.FromArgb(234, 226, 250);
+        public static readonly Color LavenderStrong = Color.FromArgb(133, 104, 184);
+        public static readonly Color Line = Color.FromArgb(217, 225, 216);
+        public static readonly Color Shadow = Color.FromArgb(34, 56, 72, 70);
+
+        public static Color Blend(Color from, Color to, float amount)
+        {
+            amount = Math.Max(0f, Math.Min(1f, amount));
+            return Color.FromArgb(
+                (int)Math.Round(from.A + (to.A - from.A) * amount),
+                (int)Math.Round(from.R + (to.R - from.R) * amount),
+                (int)Math.Round(from.G + (to.G - from.G) * amount),
+                (int)Math.Round(from.B + (to.B - from.B) * amount));
+        }
 
         public static GraphicsPath RoundedRect(Rectangle bounds, int radius)
         {
@@ -41,11 +55,39 @@ namespace WAHUKidsLearn
         }
     }
 
+    internal sealed class ChildSceneLayout : TableLayoutPanel
+    {
+        public ChildSceneLayout()
+        {
+            SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint |
+                     ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw, true);
+            BackColor = ChildVisualTheme.Cream;
+        }
+
+        protected override void OnPaintBackground(PaintEventArgs e)
+        {
+            var bounds = ClientRectangle;
+            if (bounds.Width <= 0 || bounds.Height <= 0) return;
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            using (var bg = new LinearGradientBrush(bounds,
+                Color.FromArgb(250, 252, 248), Color.FromArgb(239, 247, 250), 32f))
+                e.Graphics.FillRectangle(bg, bounds);
+
+            using (var sky = new SolidBrush(Color.FromArgb(70, ChildVisualTheme.Sky)))
+                e.Graphics.FillEllipse(sky, Width - 245, -105, 300, 240);
+            using (var peach = new SolidBrush(Color.FromArgb(55, ChildVisualTheme.Peach)))
+                e.Graphics.FillEllipse(peach, Width - 120, 65, 170, 155);
+            using (var mint = new SolidBrush(Color.FromArgb(62, ChildVisualTheme.Mint)))
+                e.Graphics.FillEllipse(mint, -110, Height - 155, 250, 220);
+        }
+    }
+
     internal sealed class ChildCard : Panel
     {
         public Color CardColor { get; set; } = ChildVisualTheme.Card;
         public Color BorderColor { get; set; } = ChildVisualTheme.Line;
         public int Radius { get; set; } = 22;
+        public bool ShowShadow { get; set; } = true;
 
         public ChildCard()
         {
@@ -57,9 +99,18 @@ namespace WAHUKidsLearn
         protected override void OnPaintBackground(PaintEventArgs e)
         {
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            using (var path = ChildVisualTheme.RoundedRect(new Rectangle(1, 1, Math.Max(1, Width - 3), Math.Max(1, Height - 3)), Radius))
-            using (var brush = new SolidBrush(CardColor))
-            using (var pen = new Pen(BorderColor))
+            var rect = new Rectangle(2, 2, Math.Max(1, Width - 6), Math.Max(1, Height - 7));
+            if (ShowShadow && rect.Width > 8 && rect.Height > 8)
+            {
+                var shadowRect = new Rectangle(rect.X + 1, rect.Y + 3, rect.Width, rect.Height);
+                using (var shadowPath = ChildVisualTheme.RoundedRect(shadowRect, Radius))
+                using (var shadow = new SolidBrush(ChildVisualTheme.Shadow))
+                    e.Graphics.FillPath(shadow, shadowPath);
+            }
+            using (var path = ChildVisualTheme.RoundedRect(rect, Radius))
+            using (var brush = new LinearGradientBrush(rect,
+                ChildVisualTheme.Blend(CardColor, Color.White, 0.34f), CardColor, 90f))
+            using (var pen = new Pen(BorderColor, 1.15f))
             {
                 e.Graphics.FillPath(brush, path);
                 e.Graphics.DrawPath(pen, path);
@@ -78,6 +129,11 @@ namespace WAHUKidsLearn
         public Color DisabledFillColor { get; set; } = Color.FromArgb(205, 210, 204);
         public Color TextColor { get; set; } = Color.White;
         public Color DisabledTextColor { get; set; } = Color.FromArgb(120, 126, 121);
+        public Color BorderColor { get; set; } = Color.Empty;
+        public Color ShadowColor { get; set; } = Color.Empty;
+        public float BorderThickness { get; set; } = 1f;
+        public bool ShowDepth { get; set; } = true;
+        public int Depth { get; set; } = 4;
         public int Radius { get; set; } = 18;
         public string BadgeText { get; set; }
 
@@ -95,25 +151,64 @@ namespace WAHUKidsLearn
         protected override void OnMouseLeave(EventArgs e) { _hover = false; _pressed = false; Invalidate(); base.OnMouseLeave(e); }
         protected override void OnMouseDown(MouseEventArgs mevent) { if (mevent.Button == MouseButtons.Left) _pressed = true; Invalidate(); base.OnMouseDown(mevent); }
         protected override void OnMouseUp(MouseEventArgs mevent) { _pressed = false; Invalidate(); base.OnMouseUp(mevent); }
+        protected override void OnGotFocus(EventArgs e) { Invalidate(); base.OnGotFocus(e); }
+        protected override void OnLostFocus(EventArgs e) { _pressed = false; Invalidate(); base.OnLostFocus(e); }
+        protected override void OnEnabledChanged(EventArgs e) { _pressed = false; Cursor = Enabled ? Cursors.Hand : Cursors.Default; Invalidate(); base.OnEnabledChanged(e); }
 
         protected override void OnPaint(PaintEventArgs pevent)
         {
             pevent.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            var rect = new Rectangle(1, 1, Math.Max(1, Width - 3), Math.Max(1, Height - 3));
             var fill = Enabled ? (_pressed ? PressedColor : (_hover ? HoverColor : FillColor)) : DisabledFillColor;
-            using (var path = ChildVisualTheme.RoundedRect(rect, Radius))
-            using (var brush = new SolidBrush(fill))
-                pevent.Graphics.FillPath(brush, path);
+            var depth = ShowDepth ? Math.Max(0, Math.Min(7, Depth)) : 0;
+            var pressOffset = Enabled && _pressed ? Math.Min(3, depth) : 0;
+            var surfaceHeight = Math.Max(1, Height - depth - 3);
+            var rect = new Rectangle(2, 1 + pressOffset, Math.Max(1, Width - 4), surfaceHeight);
 
-            var textRect = ClientRectangle;
-            if (!string.IsNullOrWhiteSpace(BadgeText)) textRect.Width -= 52;
+            if (depth > 0 && rect.Width > 8 && rect.Height > 8)
+            {
+                var shadowRect = new Rectangle(rect.X, 1 + depth, rect.Width, rect.Height);
+                var shadowBase = ShadowColor.IsEmpty ? ChildVisualTheme.Blend(fill, ChildVisualTheme.Ink, Enabled ? 0.30f : 0.18f) : ShadowColor;
+                var shadowFill = Color.FromArgb(Enabled ? 82 : 42, shadowBase.R, shadowBase.G, shadowBase.B);
+                using (var shadowPath = ChildVisualTheme.RoundedRect(shadowRect, Radius))
+                using (var shadow = new SolidBrush(shadowFill))
+                    pevent.Graphics.FillPath(shadow, shadowPath);
+            }
+
+            var actualBorder = BorderColor.IsEmpty ? ChildVisualTheme.Blend(fill, ChildVisualTheme.Ink, Enabled ? 0.16f : 0.09f) : BorderColor;
+            using (var path = ChildVisualTheme.RoundedRect(rect, Radius))
+            using (var brush = new LinearGradientBrush(rect,
+                ChildVisualTheme.Blend(fill, Color.White, Enabled ? (_hover && !_pressed ? 0.24f : 0.18f) : 0.08f), fill, 90f))
+            using (var outline = new Pen(actualBorder, Math.Max(1f, BorderThickness)))
+            {
+                pevent.Graphics.FillPath(brush, path);
+                pevent.Graphics.DrawPath(outline, path);
+            }
+
+            if (Focused && ShowFocusCues)
+            {
+                var focusRect = Rectangle.Inflate(rect, -3, -3);
+                using (var focusPath = ChildVisualTheme.RoundedRect(focusRect, Math.Max(5, Radius - 3)))
+                using (var focusPen = new Pen(Color.FromArgb(205, ChildVisualTheme.Sun), 2f))
+                    pevent.Graphics.DrawPath(focusPen, focusPath);
+            }
+
+            var textRect = new Rectangle(
+                rect.Left + Padding.Left,
+                rect.Top + Padding.Top,
+                Math.Max(1, rect.Width - Padding.Horizontal),
+                Math.Max(1, rect.Height - Padding.Vertical));
+            Rectangle badge = Rectangle.Empty;
+            if (!string.IsNullOrWhiteSpace(BadgeText))
+            {
+                badge = new Rectangle(rect.Right - 45, rect.Top + 7, 34, Math.Max(24, rect.Height - 14));
+                textRect.Width = Math.Max(1, badge.Left - 8 - textRect.Left);
+            }
             TextRenderer.DrawText(pevent.Graphics, Text, Font, textRect,
                 Enabled ? TextColor : DisabledTextColor,
-                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+                AlignmentFlags(TextAlign) | TextFormatFlags.EndEllipsis | TextFormatFlags.WordBreak | TextFormatFlags.NoPrefix);
 
             if (!string.IsNullOrWhiteSpace(BadgeText))
             {
-                var badge = new Rectangle(Width - 48, 8, 36, Math.Max(24, Height - 16));
                 using (var b = new SolidBrush(Color.FromArgb(42, 255, 255, 255)))
                 using (var path = ChildVisualTheme.RoundedRect(badge, 12))
                     pevent.Graphics.FillPath(b, path);
@@ -122,12 +217,34 @@ namespace WAHUKidsLearn
                     TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
             }
         }
+
+        private static TextFormatFlags AlignmentFlags(ContentAlignment alignment)
+        {
+            TextFormatFlags flags;
+            switch (alignment)
+            {
+                case ContentAlignment.TopLeft: flags = TextFormatFlags.Left | TextFormatFlags.Top; break;
+                case ContentAlignment.TopCenter: flags = TextFormatFlags.HorizontalCenter | TextFormatFlags.Top; break;
+                case ContentAlignment.TopRight: flags = TextFormatFlags.Right | TextFormatFlags.Top; break;
+                case ContentAlignment.MiddleLeft: flags = TextFormatFlags.Left | TextFormatFlags.VerticalCenter; break;
+                case ContentAlignment.MiddleRight: flags = TextFormatFlags.Right | TextFormatFlags.VerticalCenter; break;
+                case ContentAlignment.BottomLeft: flags = TextFormatFlags.Left | TextFormatFlags.Bottom; break;
+                case ContentAlignment.BottomCenter: flags = TextFormatFlags.HorizontalCenter | TextFormatFlags.Bottom; break;
+                case ContentAlignment.BottomRight: flags = TextFormatFlags.Right | TextFormatFlags.Bottom; break;
+                default: flags = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter; break;
+            }
+            return flags;
+        }
     }
 
     internal sealed class AnswerChoiceButton : ChildActionButton
     {
         public enum ChoiceVisualState { Idle, Correct, Incorrect, Muted }
         private ChoiceVisualState _visualState;
+
+        public Color IdleFillColor { get; set; } = Color.White;
+        public Color IdleHoverColor { get; set; } = Color.FromArgb(244, 249, 240);
+        public Color IdlePressedColor { get; set; } = Color.FromArgb(232, 244, 226);
 
         public ChoiceVisualState VisualState
         {
@@ -180,11 +297,11 @@ namespace WAHUKidsLearn
                     DisabledTextColor = TextColor;
                     break;
                 default:
-                    FillColor = Color.White;
-                    HoverColor = Color.FromArgb(244, 249, 240);
-                    PressedColor = Color.FromArgb(232, 244, 226);
+                    FillColor = IdleFillColor;
+                    HoverColor = IdleHoverColor;
+                    PressedColor = IdlePressedColor;
                     TextColor = ChildVisualTheme.Ink;
-                    DisabledFillColor = Color.FromArgb(241, 241, 236);
+                    DisabledFillColor = ChildVisualTheme.Blend(IdleFillColor, Color.FromArgb(236, 239, 235), 0.72f);
                     DisabledTextColor = ChildVisualTheme.MutedInk;
                     break;
             }
@@ -195,8 +312,8 @@ namespace WAHUKidsLearn
     {
         private int _value;
         private int _maximum = 8;
-        public int Value { get { return _value; } set { _value = Math.Max(0, Math.Min(value, Maximum)); Invalidate(); } }
-        public int Maximum { get { return _maximum; } set { _maximum = Math.Max(1, value); _value = Math.Min(_value, _maximum); Invalidate(); } }
+        public int Value { get { return _value; } set { _value = Math.Max(0, Math.Min(value, Maximum)); UpdateAccessibleDescription(); Invalidate(); } }
+        public int Maximum { get { return _maximum; } set { _maximum = Math.Max(1, value); _value = Math.Min(_value, _maximum); UpdateAccessibleDescription(); Invalidate(); } }
 
         public ProgressStrip()
         {
@@ -204,19 +321,42 @@ namespace WAHUKidsLearn
                      ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw, true);
             Height = 14;
             AccessibleName = "Tiến độ buổi học";
+            UpdateAccessibleDescription();
+        }
+
+        private void UpdateAccessibleDescription()
+        {
+            AccessibleDescription = "Đã hoàn thành " + Value + " trên " + Maximum + " chặng học.";
         }
 
         protected override void OnPaint(PaintEventArgs e)
         {
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            var track = new Rectangle(0, 2, Math.Max(2, Width - 1), Math.Max(6, Height - 5));
+            var trackHeight = Math.Max(8, Height - 8);
+            var track = new Rectangle(1, Math.Max(2, (Height - trackHeight) / 2), Math.Max(2, Width - 2), trackHeight);
             using (var path = ChildVisualTheme.RoundedRect(track, track.Height / 2))
-            using (var b = new SolidBrush(Color.FromArgb(226, 231, 221))) e.Graphics.FillPath(b, path);
+            using (var b = new SolidBrush(Color.FromArgb(224, 231, 222))) e.Graphics.FillPath(b, path);
+
             var filledWidth = (int)Math.Round(track.Width * (Value / (double)Maximum));
-            if (filledWidth < 4) return;
-            var fill = new Rectangle(track.X, track.Y, Math.Min(track.Width, filledWidth), track.Height);
-            using (var path = ChildVisualTheme.RoundedRect(fill, fill.Height / 2))
-            using (var b = new SolidBrush(ChildVisualTheme.MintStrong)) e.Graphics.FillPath(b, path);
+            if (filledWidth >= 4)
+            {
+                var fill = new Rectangle(track.X, track.Y, Math.Min(track.Width, filledWidth), track.Height);
+                using (var path = ChildVisualTheme.RoundedRect(fill, fill.Height / 2))
+                using (var b = new LinearGradientBrush(fill, ChildVisualTheme.Blend(ChildVisualTheme.MintStrong, Color.White, 0.12f), ChildVisualTheme.MintStrong, 0f))
+                    e.Graphics.FillPath(b, path);
+            }
+
+            if (Maximum <= 12 && track.Width >= Maximum * 22)
+            {
+                for (var i = 1; i < Maximum; i++)
+                {
+                    var x = track.Left + (int)Math.Round(track.Width * (i / (double)Maximum));
+                    var passed = i <= Value;
+                    var dot = new Rectangle(x - 3, track.Top + track.Height / 2 - 3, 6, 6);
+                    using (var b = new SolidBrush(passed ? Color.FromArgb(232, 249, 236) : Color.FromArgb(249, 251, 247)))
+                        e.Graphics.FillEllipse(b, dot);
+                }
+            }
         }
     }
 

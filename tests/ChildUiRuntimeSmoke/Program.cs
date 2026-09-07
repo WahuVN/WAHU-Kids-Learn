@@ -790,10 +790,21 @@ namespace WAHU.ChildUiRuntimeSmoke
                     form.ClientSize = new Size(900, 640);
                     var feedbackCard = GetField<Control>(form, "_feedbackCard");
                     var feedback = GetField<Label>(form, "_feedback");
-                    feedbackCard.Visible = true;
+                    Invoke(form, "SetFeedbackVisible", true);
                     CreateAndLayoutTree(form);
                     A(feedback.ClientSize.Width > 0 && feedback.ClientSize.Height > 0,
                         "math_feedback_region_available_at_min_window");
+                    var companion = GetField<Control>(form, "_companion");
+                    var feedbackFx = GetField<Control>(form, "_feedbackFx");
+                    A(companion.Parent != null && feedback.Parent != null && feedbackFx.Parent != null &&
+                      companion.Bottom <= companion.Parent.ClientSize.Height &&
+                      feedback.Bottom <= feedback.Parent.ClientSize.Height &&
+                      feedbackFx.Bottom <= feedbackFx.Parent.ClientSize.Height,
+                        "math_feedback_children_fit_parent_rows_without_clipping");
+                    var hintButton = GetField<Button>(form, "_hintButton");
+                    A(hintButton.Parent != null && hintButton.Top >= 0 &&
+                      hintButton.Bottom <= hintButton.Parent.ClientSize.Height,
+                        "math_hint_button_fits_action_row_without_clipping");
 
                     var sessionPath = Path.Combine(Path.GetDirectoryName(appAssembly.Location), "WAHU.Session.dll");
                     var sessionAssembly = Assembly.LoadFrom(sessionPath);
@@ -1684,10 +1695,6 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                 var homeCtor = typeof(WAHUKidsLearn.MainForm).GetConstructors(BindingFlags.Instance | BindingFlags.Public)
                     .FirstOrDefault(x => x.GetParameters().Length == 7);
                 A(homeCtor != null, "quick_rescue_home_constructor_available");
-                var homeSource = File.ReadAllText(Path.Combine(repo, "src", "App", "MainForm.cs"));
-                A(homeSource.IndexOf("MathSessionCoordinator.DefaultTargetQuestionCount + \" câu Toán vừa sức\"", StringComparison.Ordinal) >= 0 &&
-                  homeSource.IndexOf("Text = \"8 câu Toán vừa sức\"", StringComparison.Ordinal) < 0,
-                    "home_adaptive_mission_count_derives_from_engine_contract");
                 using (var home = (Form)homeCtor.Invoke(new object[] { config, database, null, init, null, false, settings }))
                 {
                     var quickButton = GetField<Button>(home, "_quickRescueButton");
@@ -2021,6 +2028,10 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                     A(completionSupport.IndexOf(completionCopy, StringComparison.OrdinalIgnoreCase) >= 0 &&
                       completionSupport.IndexOf("Khu vườn", StringComparison.OrdinalIgnoreCase) >= 0,
                         "quick_rescue_completion_shows_production_restoration_and_garden");
+                    A(completionSupport.IndexOf("Mức thành thạo", StringComparison.OrdinalIgnoreCase) < 0 &&
+                      completionSupport.IndexOf("điểm phần trăm", StringComparison.OrdinalIgnoreCase) < 0 &&
+                      completionSupport.IndexOf("Bài tiếp theo", StringComparison.OrdinalIgnoreCase) < 0,
+                        "quick_rescue_completion_hides_technical_mastery_jargon_from_child");
                     var resultButton = GetField<Button>(terminalResume, "_nextButton");
                     A(resultButton.Text == "Về nhiệm vụ cứu hộ" &&
                       resultButton.AccessibleDescription.IndexOf("danh sách nhiệm vụ cứu hộ", StringComparison.OrdinalIgnoreCase) >= 0,

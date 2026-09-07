@@ -24,6 +24,7 @@ namespace WAHUKidsLearn
         private TableLayoutPanel _answerGrid;
         private TableLayoutPanel _typedAnswerLayout;
         private TextBox _typedAnswerBox;
+        private ChildCard _typedAnswerSurface;
         private ChildActionButton _typedSubmitButton;
         private TableLayoutPanel _interactiveAnswerLayout;
         private SegmentDrawingAnswerControl _interactiveAnswer;
@@ -39,9 +40,17 @@ namespace WAHUKidsLearn
         private Label _feedback;
         private ChildCard _feedbackCard;
         private CompanionReactionControl _companion;
+        private GameFeedbackFxControl _feedbackFx;
+        private GardenRewardArtControl _gardenRewardFx;
         private ChildActionButton _hintButton;
         private ChildActionButton _nextButton;
         private ChildActionButton _stopButton;
+        private ChildSceneLayout _rootLayout;
+        private RowStyle _questionRowStyle;
+        private RowStyle _answerRowStyle;
+        private RowStyle _feedbackRowStyle;
+        private RowStyle _supportRowStyle;
+        private Label _sceneLabel;
         private int _hintLevel;
         private int _targetQuestionCount = MathSessionCoordinator.DefaultTargetQuestionCount;
         private string _sessionNotice;
@@ -81,13 +90,18 @@ namespace WAHUKidsLearn
             Resize += delegate
             {
                 if (!_finished && _question != null && _prompt != null) ApplyPromptTypography(_question.PromptVi);
+                if (_feedbackCard != null && _feedbackCard.Visible && _feedbackRowStyle != null)
+                {
+                    _feedbackRowStyle.Height = FeedbackRowHeight();
+                    if (_rootLayout != null) _rootLayout.PerformLayout();
+                }
             };
             FormClosing += OnFormClosing;
         }
 
         private void BuildUi()
         {
-            var root = new TableLayoutPanel
+            _rootLayout = new ChildSceneLayout
             {
                 Dock = DockStyle.Fill,
                 BackColor = ChildVisualTheme.Cream,
@@ -95,12 +109,16 @@ namespace WAHUKidsLearn
                 ColumnCount = 1,
                 RowCount = 6
             };
+            var root = _rootLayout;
             root.RowStyles.Add(new RowStyle(SizeType.Absolute, 58));
             root.RowStyles.Add(new RowStyle(SizeType.Absolute, 26));
-            root.RowStyles.Add(new RowStyle(SizeType.Percent, 52));
-            root.RowStyles.Add(new RowStyle(SizeType.Percent, 48));
-            root.RowStyles.Add(new RowStyle(SizeType.Absolute, 88));
-            root.RowStyles.Add(new RowStyle(SizeType.Absolute, 58));
+            _questionRowStyle = new RowStyle(SizeType.Percent, 58);
+            _answerRowStyle = new RowStyle(SizeType.Percent, 42);
+            root.RowStyles.Add(_questionRowStyle);
+            root.RowStyles.Add(_answerRowStyle);
+            _feedbackRowStyle = new RowStyle(SizeType.Absolute, 64);
+            root.RowStyles.Add(_feedbackRowStyle);
+            root.RowStyles.Add(new RowStyle(SizeType.Absolute, 68));
 
             var header = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, RowCount = 1 };
             header.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 156));
@@ -163,27 +181,35 @@ namespace WAHUKidsLearn
             _eventCheckpointStrip.BringToFront();
             root.Controls.Add(progressHost, 0, 1);
 
+            var sceneAccent = EventAccentColor();
             var questionCard = new ChildCard
             {
                 Dock = DockStyle.Fill,
                 Margin = new Padding(50, 10, 50, 12),
                 Padding = new Padding(28, 20, 28, 18),
-                CardColor = Color.FromArgb(255, 253, 246),
+                CardColor = _eventPresentation == null
+                    ? ChildVisualTheme.Card
+                    : ChildVisualTheme.Blend(Color.White, sceneAccent, 0.055f),
+                BorderColor = _eventPresentation == null
+                    ? Color.FromArgb(201, 222, 232)
+                    : ChildVisualTheme.Blend(sceneAccent, Color.White, 0.30f),
                 Radius = 26
             };
             var questionLayout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 4 };
             questionLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
             questionLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 68));
             questionLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            questionLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 46));
-            questionLayout.Controls.Add(new Label
+            _supportRowStyle = new RowStyle(SizeType.Absolute, 46);
+            questionLayout.RowStyles.Add(_supportRowStyle);
+            _sceneLabel = new Label
             {
                 Dock = DockStyle.Fill,
-                Text = "CHỌN ĐÁP ÁN ĐÚNG",
+                Text = _eventPresentation == null ? "GIẢI CÂU TOÁN NÀY" : "NHIỆM VỤ CỨU HỘ",
                 TextAlign = ContentAlignment.MiddleCenter,
-                ForeColor = ChildVisualTheme.MintStrong,
+                ForeColor = sceneAccent,
                 Font = ChildVisualTheme.Font(9.5f, FontStyle.Bold)
-            }, 0, 0);
+            };
+            questionLayout.Controls.Add(_sceneLabel, 0, 0);
             _prompt = new Label
             {
                 Dock = DockStyle.Fill,
@@ -223,6 +249,7 @@ namespace WAHUKidsLearn
             _answerGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
             _answerGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
             _answerGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
+            var choiceTones = new[] { ChildVisualTheme.Sky, ChildVisualTheme.Mint, ChildVisualTheme.Peach, ChildVisualTheme.Lavender };
             for (var i = 0; i < _answerButtons.Length; i++)
             {
                 var index = i;
@@ -235,6 +262,11 @@ namespace WAHUKidsLearn
                     AccessibleName = "Đáp án " + (i + 1),
                     TabIndex = i
                 };
+                var tone = choiceTones[i];
+                button.IdleFillColor = ChildVisualTheme.Blend(tone, Color.White, 0.32f);
+                button.IdleHoverColor = ChildVisualTheme.Blend(tone, Color.White, 0.14f);
+                button.IdlePressedColor = ChildVisualTheme.Blend(tone, ChildVisualTheme.Ink, 0.04f);
+                button.VisualState = AnswerChoiceButton.ChoiceVisualState.Idle;
                 button.Click += delegate { SubmitChoice(index, "mouse"); };
                 _answerButtons[i] = button;
                 _answerGrid.Controls.Add(button, i % 2, i / 2);
@@ -255,15 +287,47 @@ namespace WAHUKidsLearn
             _typedAnswerLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 18));
             _typedAnswerLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 58));
             _typedAnswerLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 42));
+            _typedAnswerSurface = new ChildCard
+            {
+                Dock = DockStyle.Fill,
+                Margin = new Padding(4, 7, 4, 5),
+                Padding = new Padding(18, 12, 18, 10),
+                CardColor = Color.FromArgb(250, 253, 255),
+                BorderColor = Color.FromArgb(187, 214, 231),
+                Radius = 20,
+                ShowShadow = true,
+                AccessibleName = "Khung nhập đáp án"
+            };
             _typedAnswerBox = new TextBox
             {
                 Dock = DockStyle.Fill,
-                Margin = new Padding(8, 12, 8, 10),
+                Margin = new Padding(24, 22, 24, 18),
+                BorderStyle = BorderStyle.None,
+                BackColor = Color.FromArgb(250, 253, 255),
+                ForeColor = ChildVisualTheme.Ink,
                 Font = ChildVisualTheme.Font(22f, FontStyle.Bold),
                 TextAlign = HorizontalAlignment.Center,
                 MaxLength = 80,
                 AccessibleName = "Nhập đáp án Toán",
                 AccessibleDescription = "Nhập đáp án rồi nhấn Enter hoặc nút Kiểm tra đáp án."
+            };
+            _typedAnswerBox.Enter += delegate
+            {
+                _typedAnswerSurface.BorderColor = ChildVisualTheme.SkyStrong;
+                _typedAnswerSurface.Invalidate();
+            };
+            _typedAnswerBox.Leave += delegate
+            {
+                _typedAnswerSurface.BorderColor = Color.FromArgb(187, 214, 231);
+                _typedAnswerSurface.Invalidate();
+            };
+            _typedAnswerBox.EnabledChanged += delegate
+            {
+                var enabled = _typedAnswerBox.Enabled;
+                _typedAnswerBox.BackColor = enabled ? Color.FromArgb(250, 253, 255) : Color.FromArgb(242, 244, 241);
+                _typedAnswerSurface.CardColor = _typedAnswerBox.BackColor;
+                _typedAnswerSurface.BorderColor = enabled ? Color.FromArgb(187, 214, 231) : Color.FromArgb(218, 222, 216);
+                _typedAnswerSurface.Invalidate();
             };
             _typedAnswerBox.TextChanged += delegate
             {
@@ -284,7 +348,9 @@ namespace WAHUKidsLearn
                 Enabled = false
             };
             _typedSubmitButton.Click += delegate { SubmitTypedAnswer("mouse"); };
+            _typedAnswerLayout.Controls.Add(_typedAnswerSurface, 1, 0);
             _typedAnswerLayout.Controls.Add(_typedAnswerBox, 1, 0);
+            _typedAnswerBox.BringToFront();
             _typedAnswerLayout.Controls.Add(_typedSubmitButton, 1, 1);
             answerHost.Controls.Add(_typedAnswerLayout);
             _interactiveAnswerLayout = new TableLayoutPanel
@@ -329,17 +395,24 @@ namespace WAHUKidsLearn
             _feedbackCard = new ChildCard
             {
                 Dock = DockStyle.Fill,
-                Margin = new Padding(120, 3, 120, 3),
+                Margin = new Padding(72, 3, 72, 3),
                 Padding = new Padding(18, 6, 18, 6),
                 CardColor = Color.FromArgb(245, 244, 236),
                 BorderColor = Color.FromArgb(229, 227, 217),
                 Radius = 18,
                 Visible = false
             };
-            var feedbackLayout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1 };
+            var feedbackLayout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, RowCount = 1 };
+            feedbackLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
             feedbackLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 72));
+            feedbackLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 86));
             feedbackLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
             _companion = new CompanionReactionControl { Dock = DockStyle.Fill, Margin = new Padding(0) };
+            var feedbackFxHost = new Panel { Dock = DockStyle.Fill, BackColor = Color.Transparent, Margin = new Padding(2, 0, 8, 0) };
+            _feedbackFx = new GameFeedbackFxControl { Dock = DockStyle.Fill, VisualMood = GameFeedbackFxControl.Mood.Neutral };
+            _gardenRewardFx = new GardenRewardArtControl { Dock = DockStyle.Fill, Visible = false };
+            feedbackFxHost.Controls.Add(_gardenRewardFx);
+            feedbackFxHost.Controls.Add(_feedbackFx);
             _feedback = new Label
             {
                 Dock = DockStyle.Fill,
@@ -350,17 +423,22 @@ namespace WAHUKidsLearn
                 AccessibleName = "Phản hồi câu trả lời"
             };
             feedbackLayout.Controls.Add(_companion, 0, 0);
-            feedbackLayout.Controls.Add(_feedback, 1, 0);
+            feedbackLayout.Controls.Add(feedbackFxHost, 1, 0);
+            feedbackLayout.Controls.Add(_feedback, 2, 0);
             _feedbackCard.Controls.Add(feedbackLayout);
             root.Controls.Add(_feedbackCard, 0, 4);
 
-            var actions = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, RowCount = 1, Padding = new Padding(100, 4, 100, 0) };
+            var actions = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, RowCount = 1, Padding = new Padding(100, 4, 100, 4) };
+            actions.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
             actions.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30));
             actions.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40));
             actions.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30));
             _hintButton = new ChildActionButton
             {
-                Dock = DockStyle.Fill,
+                Dock = DockStyle.None,
+                Anchor = AnchorStyles.None,
+                AutoSize = false,
+                Size = new Size(220, 48),
                 Margin = new Padding(8),
                 Text = "Gợi ý",
                 FillColor = ChildVisualTheme.Peach,
@@ -374,7 +452,10 @@ namespace WAHUKidsLearn
             _hintButton.Click += delegate { ShowHint(); };
             _nextButton = new ChildActionButton
             {
-                Dock = DockStyle.Fill,
+                Dock = DockStyle.None,
+                Anchor = AnchorStyles.None,
+                AutoSize = false,
+                Size = new Size(220, 48),
                 Margin = new Padding(8),
                 Text = "Câu tiếp theo",
                 FillColor = ChildVisualTheme.MintStrong,
@@ -391,6 +472,82 @@ namespace WAHUKidsLearn
             actions.Controls.Add(_nextButton, 2, 0);
             root.Controls.Add(actions, 0, 5);
             Controls.Add(root);
+        }
+
+        private void SetLearningSceneLayout()
+        {
+            if (_questionRowStyle != null)
+            {
+                _questionRowStyle.SizeType = SizeType.Percent;
+                _questionRowStyle.Height = 58f;
+            }
+            if (_answerRowStyle != null)
+            {
+                _answerRowStyle.SizeType = SizeType.Percent;
+                _answerRowStyle.Height = 42f;
+            }
+            if (_supportRowStyle != null) _supportRowStyle.Height = 46f;
+            if (_rootLayout != null) _rootLayout.PerformLayout();
+        }
+
+        private void SetCompletionSceneLayout()
+        {
+            if (_questionRowStyle != null)
+            {
+                _questionRowStyle.SizeType = SizeType.Percent;
+                _questionRowStyle.Height = 100f;
+            }
+            if (_answerRowStyle != null)
+            {
+                _answerRowStyle.SizeType = SizeType.Absolute;
+                _answerRowStyle.Height = 0f;
+            }
+            if (_supportRowStyle != null) _supportRowStyle.Height = 108f;
+            if (_rootLayout != null) _rootLayout.PerformLayout();
+        }
+
+        private Color EventAccentColor()
+        {
+            var theme = _eventPresentation == null ? string.Empty : (_eventPresentation.Theme ?? string.Empty).Trim().ToLowerInvariant();
+            switch (theme)
+            {
+                case "forest_path": return Color.FromArgb(91, 157, 103);
+                case "hundred_station": return Color.FromArgb(92, 154, 189);
+                case "number_path": return Color.FromArgb(209, 145, 73);
+                case "place_value_workshop": return Color.FromArgb(146, 119, 176);
+                case "number_machine": return Color.FromArgb(207, 112, 88);
+                default: return ChildVisualTheme.MintStrong;
+            }
+        }
+
+        private float FeedbackRowHeight()
+        {
+            return ClientSize.Width <= 920 ? 118f : 86f;
+        }
+
+        private void SetFeedbackVisible(bool visible)
+        {
+            if (_feedbackRowStyle != null)
+                _feedbackRowStyle.Height = visible ? FeedbackRowHeight() : 0f;
+            if (_feedbackCard != null)
+                _feedbackCard.Visible = visible;
+            if (_rootLayout != null)
+                _rootLayout.PerformLayout();
+        }
+
+        private void SetFeedbackArt(GameFeedbackFxControl.Mood mood, bool gardenReward)
+        {
+            if (_feedbackFx != null)
+            {
+                _feedbackFx.VisualMood = mood;
+                _feedbackFx.Visible = !gardenReward;
+                if (!gardenReward) _feedbackFx.BringToFront();
+            }
+            if (_gardenRewardFx != null)
+            {
+                _gardenRewardFx.Visible = gardenReward;
+                if (gardenReward) _gardenRewardFx.BringToFront();
+            }
         }
 
         private void StartSession()
@@ -502,6 +659,7 @@ namespace WAHUKidsLearn
             {
                 _question = _coordinator.NextQuestion();
                 if (_question == null) { CompleteSession(); return; }
+                SetLearningSceneLayout();
                 _questionShownAtUtc = DateTime.UtcNow;
                 if (_gameEventCoordinator != null) _eventState = _gameEventCoordinator.CurrentState;
                 _hintLevel = 0;
@@ -511,9 +669,10 @@ namespace WAHUKidsLearn
                 _instructionVisual.Visible = true;
                 _instructionVisual.SetQuestion(_question, 0);
                 _companion.State = CompanionReactionState.Calm;
+                SetFeedbackArt(GameFeedbackFxControl.Mood.Neutral, false);
                 _support.Text = "Chọn đáp án con thấy đúng nhất.";
                 _feedback.Text = string.Empty;
-                _feedbackCard.Visible = false;
+                SetFeedbackVisible(false);
                 _hintButton.Text = "Gợi ý";
                 _hintButton.Enabled = true;
                 _hintButton.Visible = true;
@@ -521,6 +680,9 @@ namespace WAHUKidsLearn
                 _completeOnNext = false;
                 var summary = _coordinator.Summary;
                 var questionNumber = summary.Attempts + 1;
+                _sceneLabel.Text = _eventPresentation == null
+                    ? "GIẢI CÂU TOÁN NÀY"
+                    : "CHẶNG " + questionNumber + " • " + _eventPresentation.CheckpointName(Math.Max(0, questionNumber - 1));
                 UpdateProgressPresentation(summary.Attempts, questionNumber, _targetQuestionCount, _retryPending, false);
                 ConfigureAnswerInput(_question);
                 _support.Text = BuildEventQuestionSupport(_support.Text, questionNumber);
@@ -766,6 +928,7 @@ namespace WAHUKidsLearn
                 _support.Text = BuildEventQuestionSupport(_question.HintLevel1,
                     _coordinator == null ? 1 : Math.Max(1, _coordinator.Summary.Attempts + 1));
                 _hintButton.Text = "Gợi ý thêm";
+                SetFeedbackArt(GameFeedbackFxControl.Mood.Hint, false);
                 return;
             }
             _hintLevel = 2;
@@ -775,6 +938,7 @@ namespace WAHUKidsLearn
                 _coordinator == null ? 1 : Math.Max(1, _coordinator.Summary.Attempts + 1));
             _hintButton.Enabled = false;
             _hintButton.Text = "Đã xem đủ gợi ý";
+            SetFeedbackArt(GameFeedbackFxControl.Mood.Hint, false);
         }
 
         private MathAnswerOutcome SubmitCurrentAnswer(string answer, string inputMode)
@@ -802,9 +966,13 @@ namespace WAHUKidsLearn
             _submitting = false;
             _feedback.Text = outcome.FeedbackVi;
             _companion.State = CompanionReactionState.TryAgain;
+            SetFeedbackArt(GameFeedbackFxControl.Mood.Retry, false);
             _feedbackCard.CardColor = Color.FromArgb(251, 232, 222);
             _feedbackCard.BorderColor = Color.FromArgb(236, 202, 187);
-            _feedbackCard.Visible = true;
+            SetFeedbackVisible(true);
+            _sceneLabel.Text = _eventPresentation == null
+                ? "THỬ LẠI CÂU NÀY"
+                : "THỬ LẠI • " + _eventPresentation.CheckpointName(Math.Max(0, outcome.CompletedQuestionCount));
             _support.Text = _eventPresentation == null
                 ? "Con còn một lần thử ở chính câu này. Có thể xem gợi ý rồi sửa đáp án nhé."
                 : _eventPresentation.RepairCopyVi + " Con còn một lần thử ở chính chặng này; có thể xem gợi ý rồi sửa tiếp nhé.";
@@ -834,10 +1002,11 @@ namespace WAHUKidsLearn
                 UpdateProgressPresentation(Math.Max(0, summary.Attempts), Math.Max(0, summary.Attempts) + 1,
                     _targetQuestionCount, _retryPending, false);
                 _companion.State = CompanionReactionState.TryAgain;
+                SetFeedbackArt(GameFeedbackFxControl.Mood.Retry, false);
                 _feedback.Text = "Chưa lưu được câu này. Mình thử lại chính câu này nhé.";
                 _feedbackCard.CardColor = Color.FromArgb(245, 239, 224);
                 _feedbackCard.BorderColor = Color.FromArgb(225, 210, 171);
-                _feedbackCard.Visible = true;
+                SetFeedbackVisible(true);
                 _support.Text = _eventPresentation == null
                     ? (_retryPending
                         ? "Phần đã làm trước đó vẫn an toàn. Lần thử lại này chưa được tính; con thử lưu lại nhé."
@@ -906,9 +1075,10 @@ namespace WAHUKidsLearn
                 _feedback.Text = outcome.FeedbackVi;
                 _companion.State = outcome.SuggestPositiveEnd ? CompanionReactionState.Tired :
                     (outcome.IsCorrect ? CompanionReactionState.Correct : CompanionReactionState.TryAgain);
+                SetFeedbackArt(outcome.IsCorrect ? GameFeedbackFxControl.Mood.Correct : GameFeedbackFxControl.Mood.Retry, false);
                 _feedbackCard.CardColor = outcome.IsCorrect ? Color.FromArgb(226, 242, 224) : Color.FromArgb(251, 232, 222);
                 _feedbackCard.BorderColor = outcome.IsCorrect ? Color.FromArgb(190, 221, 188) : Color.FromArgb(236, 202, 187);
-                _feedbackCard.Visible = true;
+                SetFeedbackVisible(true);
                 var typedSupport = outcome.IsCorrect
                     ? "Tốt rồi. Câu trả lời này đã được lưu để lần sau ôn đúng lúc."
                     : "Đáp án đúng: " + outcome.CorrectAnswerDisplay + ". Câu sau sẽ giúp con luyện tiếp phần này.";
@@ -952,9 +1122,10 @@ namespace WAHUKidsLearn
                 _feedback.Text = outcome.FeedbackVi;
                 _companion.State = outcome.SuggestPositiveEnd ? CompanionReactionState.Tired :
                     (outcome.IsCorrect ? CompanionReactionState.Correct : CompanionReactionState.TryAgain);
+                SetFeedbackArt(outcome.IsCorrect ? GameFeedbackFxControl.Mood.Correct : GameFeedbackFxControl.Mood.Retry, false);
                 _feedbackCard.CardColor = outcome.IsCorrect ? Color.FromArgb(226, 242, 224) : Color.FromArgb(251, 232, 222);
                 _feedbackCard.BorderColor = outcome.IsCorrect ? Color.FromArgb(190, 221, 188) : Color.FromArgb(236, 202, 187);
-                _feedbackCard.Visible = true;
+                SetFeedbackVisible(true);
                 var interactiveSupport = outcome.IsCorrect
                     ? "Tốt rồi. Đoạn thẳng này đã được lưu để lần sau ôn đúng lúc."
                     : "Đoạn đúng cần dài " + outcome.CorrectAnswerDisplay + " cm. Câu sau sẽ giúp con luyện tiếp phần này.";
@@ -1027,9 +1198,10 @@ namespace WAHUKidsLearn
                 _feedback.Text = outcome.FeedbackVi;
                 _companion.State = outcome.SuggestPositiveEnd ? CompanionReactionState.Tired :
                     (outcome.IsCorrect ? CompanionReactionState.Correct : CompanionReactionState.TryAgain);
+                SetFeedbackArt(outcome.IsCorrect ? GameFeedbackFxControl.Mood.Correct : GameFeedbackFxControl.Mood.Retry, false);
                 _feedbackCard.CardColor = outcome.IsCorrect ? Color.FromArgb(226, 242, 224) : Color.FromArgb(251, 232, 222);
                 _feedbackCard.BorderColor = outcome.IsCorrect ? Color.FromArgb(190, 221, 188) : Color.FromArgb(236, 202, 187);
-                _feedbackCard.Visible = true;
+                SetFeedbackVisible(true);
                 var choiceSupport = outcome.IsCorrect
                     ? "Tốt rồi. Câu này đã được lưu để lần sau ôn đúng lúc."
                     : "Mình đã chỉ ra đáp án đúng. Câu sau sẽ giúp con luyện tiếp phần này.";
@@ -1127,6 +1299,20 @@ namespace WAHUKidsLearn
             return details;
         }
 
+        private static string BuildEventCompletionPerformanceText(MathSessionSummary summary)
+        {
+            if (summary == null) return "Ba chặng đã hoàn thành.";
+            var completed = Math.Max(0, summary.Attempts);
+            var independent = Math.Max(0, Math.Min(completed, summary.IndependentCorrect));
+            var hinted = Math.Max(0, Math.Min(completed, summary.HintedCorrect));
+            var retriedCorrect = Math.Max(0, Math.Min(completed, summary.RetriedCorrect));
+            var text = completed + " chặng đã hoàn thành";
+            if (independent > 0) text += " • Tự làm đúng " + independent;
+            if (retriedCorrect > 0) text += " • Sửa lại thành công " + retriedCorrect;
+            if (hinted > 0) text += " • Dùng gợi ý và làm đúng " + hinted;
+            return text;
+        }
+
         private static string BuildCompletionSupportText(MathSessionSummary summary)
         {
             if (summary == null) return "Các câu đã làm được lưu an toàn. Mình về thư viện Toán nhé.";
@@ -1159,9 +1345,22 @@ namespace WAHUKidsLearn
             return text;
         }
 
+        private static string BuildEventCompletionSupportText(MathSessionSummary summary)
+        {
+            if (summary == null) return "Phần đã làm được lưu an toàn. Khu vườn vẫn giữ nguyên tiến bộ của con.";
+            var text = summary.GardenGrowthSteps > 0
+                ? "Khu vườn đã ghi nhận tiến bộ của con."
+                : "Phần đã làm được lưu an toàn.";
+            if (!string.IsNullOrWhiteSpace(summary.GardenUnlockMessage))
+                text += " " + summary.GardenUnlockMessage.Trim();
+            return text;
+        }
+
         private void ShowCompletion(MathSessionSummary summary)
         {
             _question = null;
+            SetCompletionSceneLayout();
+            _sceneLabel.Text = _eventPresentation == null ? "BUỔI HỌC ĐÃ HOÀN THÀNH" : "NHIỆM VỤ ĐÃ KHÔI PHỤC";
             _instructionVisual.SetQuestion(null, 0);
             _instructionVisual.Visible = false;
             var unlockedItem = summary != null && summary.GardenUnlockedItemIds != null && summary.GardenUnlockedItemIds.Count > 0
@@ -1171,20 +1370,25 @@ namespace WAHUKidsLearn
                 summary == null ? null : summary.NextGardenMilestoneItemId);
             _completionVisual.Visible = true;
             _companion.State = CompanionReactionState.Celebrate;
+            SetFeedbackArt(GameFeedbackFxControl.Mood.Correct, true);
             _prompt.Text = _eventPresentation != null
                 ? "Nhiệm vụ cứu hộ hoàn thành"
                 : (summary != null && string.Equals(summary.SessionMode, "lesson", StringComparison.Ordinal)
                     ? "Hoàn thành bài học" : "Hoàn thành nhiệm vụ");
-            var completionSupport = BuildCompletionSupportText(summary);
+            var completionSupport = _eventPresentation == null
+                ? BuildCompletionSupportText(summary)
+                : BuildEventCompletionSupportText(summary);
             _support.Text = _eventPresentation == null
                 ? completionSupport
                 : _eventPresentation.CompletionVi + " " + completionSupport;
             _support.AccessibleName = "Tóm tắt tiến bộ: " + _support.Text;
-            _feedback.Text = BuildCompletionPerformanceText(summary);
+            _feedback.Text = _eventPresentation == null
+                ? BuildCompletionPerformanceText(summary)
+                : BuildEventCompletionPerformanceText(summary);
             _feedback.AccessibleName = "Kết quả nhiệm vụ: " + _feedback.Text;
             _feedbackCard.CardColor = Color.FromArgb(226, 242, 224);
             _feedbackCard.BorderColor = Color.FromArgb(190, 221, 188);
-            _feedbackCard.Visible = true;
+            SetFeedbackVisible(true);
             foreach (var button in _answerButtons) button.Visible = false;
             _answerGrid.Visible = false;
             _typedAnswerLayout.Visible = false;
@@ -1249,11 +1453,12 @@ namespace WAHUKidsLearn
             _instructionVisual.Visible = false;
             _completionVisual.Visible = false;
             _companion.State = CompanionReactionState.Tired;
+            SetFeedbackArt(GameFeedbackFxControl.Mood.Retry, false);
             _prompt.Text = "Mình dừng ở đây nhé";
             _support.Text = message;
             _feedback.Text = "Những dữ liệu đã lưu trước đó vẫn an toàn.";
             _feedbackCard.CardColor = Color.FromArgb(245, 239, 224);
-            _feedbackCard.Visible = true;
+            SetFeedbackVisible(true);
             foreach (var button in _answerButtons) button.Visible = false;
             _answerGrid.Visible = false;
             _typedAnswerLayout.Visible = false;

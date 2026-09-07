@@ -169,12 +169,16 @@ namespace WAHUKidsLearn
 
             var g = e.Graphics;
             g.SmoothingMode = SmoothingMode.AntiAlias;
-            var card = new Rectangle(2, 2, Math.Max(1, Width - 5), Math.Max(1, Height - 5));
+            var card = new Rectangle(3, 2, Math.Max(1, Width - 7), Math.Max(1, Height - 8));
             var borderColor = _resultCorrect.HasValue
                 ? (_resultCorrect.Value ? Color.FromArgb(153, 205, 157) : Color.FromArgb(229, 171, 156))
-                : (Focused ? Color.FromArgb(147, 188, 155) : Color.FromArgb(214, 218, 207));
+                : (Focused ? ChildVisualTheme.SkyStrong : Color.FromArgb(214, 218, 207));
+            var shadowRect = new Rectangle(card.X, card.Y + 4, card.Width, card.Height);
+            using (var shadowPath = ChildVisualTheme.RoundedRect(shadowRect, 18))
+            using (var shadow = new SolidBrush(Color.FromArgb(38, 61, 75, 68)))
+                g.FillPath(shadow, shadowPath);
             using (var path = ChildVisualTheme.RoundedRect(card, 18))
-            using (var fill = new SolidBrush(Color.FromArgb(252, 251, 245)))
+            using (var fill = new LinearGradientBrush(card, Color.FromArgb(255, 254, 248), Color.FromArgb(248, 251, 246), 90f))
             using (var border = new Pen(borderColor, Focused ? 2f : 1.3f))
             {
                 g.FillPath(fill, path);
@@ -187,12 +191,17 @@ namespace WAHUKidsLearn
                 TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
 
             var ruler = RulerBounds();
-            using (var body = new SolidBrush(Color.FromArgb(246, 235, 194)))
+            var bodyRect = new Rectangle(ruler.Left, ruler.Top, ruler.Width, 34);
+            var bodyShadow = new Rectangle(bodyRect.X, bodyRect.Y + 3, bodyRect.Width, bodyRect.Height);
+            using (var shadowPath = ChildVisualTheme.RoundedRect(bodyShadow, 9))
+            using (var shadow = new SolidBrush(Color.FromArgb(34, 113, 105, 80)))
+                g.FillPath(shadow, shadowPath);
+            using (var bodyPath = ChildVisualTheme.RoundedRect(bodyRect, 9))
+            using (var body = new LinearGradientBrush(bodyRect, Color.FromArgb(252, 243, 207), Color.FromArgb(241, 226, 174), 90f))
             using (var outline = new Pen(Color.FromArgb(151, 135, 92), 1.4f))
             {
-                var bodyRect = new Rectangle(ruler.Left, ruler.Top, ruler.Width, 34);
-                g.FillRectangle(body, bodyRect);
-                g.DrawRectangle(outline, bodyRect);
+                g.FillPath(body, bodyPath);
+                g.DrawPath(outline, bodyPath);
             }
 
             var labelEveryMark = ruler.Width / Math.Max(1, _maxMark) >= 27;

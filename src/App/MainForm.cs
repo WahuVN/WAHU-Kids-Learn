@@ -6,7 +6,6 @@ using WAHU.Data;
 using WAHU.Performance;
 using WAHU.Platform;
 using WAHU.Security;
-using WAHU.Session;
 
 namespace WAHUKidsLearn
 {
@@ -51,21 +50,24 @@ namespace WAHUKidsLearn
             KeyPreview = true;
             DoubleBuffered = true;
             BuildUi();
-            Shown += delegate { RefreshHomeProgress(); };
+            Shown += delegate
+            {
+                RefreshHomeProgress();
+                if (_quickRescueButton != null && _quickRescueButton.Enabled) _quickRescueButton.Focus();
+            };
         }
 
         private void BuildUi()
         {
-            var root = new TableLayoutPanel
+            var root = new ChildSceneLayout
             {
                 Dock = DockStyle.Fill,
-                BackColor = ChildVisualTheme.Cream,
                 Padding = new Padding(26, 20, 26, 18),
                 ColumnCount = 2,
                 RowCount = 3
             };
-            root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 62));
-            root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 38));
+            root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 58));
+            root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 42));
             root.RowStyles.Add(new RowStyle(SizeType.Absolute, 76));
             root.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
             root.RowStyles.Add(new RowStyle(SizeType.Absolute, 52));
@@ -189,36 +191,61 @@ namespace WAHUKidsLearn
                 RowCount = 3,
                 Margin = new Padding(2, 8, 4, 8)
             };
-            right.RowStyles.Add(new RowStyle(SizeType.Percent, 58));
-            right.RowStyles.Add(new RowStyle(SizeType.Percent, 27));
-            right.RowStyles.Add(new RowStyle(SizeType.Percent, 15));
+            right.RowStyles.Add(new RowStyle(SizeType.Percent, 65));
+            right.RowStyles.Add(new RowStyle(SizeType.Percent, 22));
+            right.RowStyles.Add(new RowStyle(SizeType.Percent, 13));
 
             var mission = new ChildCard
             {
                 Dock = DockStyle.Fill,
                 Margin = new Padding(0, 0, 0, 10),
-                Padding = new Padding(22, 18, 22, 18),
+                Padding = new Padding(20, 14, 20, 14),
                 CardColor = Color.FromArgb(255, 253, 246),
+                BorderColor = Color.FromArgb(236, 213, 177),
                 Radius = 24
             };
             var missionLayout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 5 };
-            missionLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 38));
-            missionLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 58));
+            missionLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
+            missionLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 50));
             missionLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            missionLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 82));
-            missionLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 44));
-            missionLayout.Controls.Add(new Label
+            missionLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 88));
+            missionLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
+            var missionHeader = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1, Margin = new Padding(0) };
+            missionHeader.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 42));
+            missionHeader.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 58));
+            missionHeader.Controls.Add(new Label
             {
                 Dock = DockStyle.Fill,
-                Text = "NHIỆM VỤ HÔM NAY",
+                Text = "TOÁN HÔM NAY",
                 TextAlign = ContentAlignment.MiddleLeft,
                 ForeColor = ChildVisualTheme.MintStrong,
                 Font = ChildVisualTheme.Font(9.5f, FontStyle.Bold)
             }, 0, 0);
+            var missionPill = new ChildCard
+            {
+                Dock = DockStyle.Fill,
+                Margin = new Padding(4, 4, 0, 4),
+                Padding = new Padding(6, 0, 6, 0),
+                CardColor = Color.FromArgb(238, 247, 252),
+                BorderColor = Color.FromArgb(196, 221, 236),
+                Radius = 13,
+                ShowShadow = false,
+                AccessibleName = "Nhiệm vụ ba chặng không đếm giờ"
+            };
+            missionPill.Controls.Add(new Label
+            {
+                Dock = DockStyle.Fill,
+                Text = "3 CHẶNG • KHÔNG ĐẾM GIỜ",
+                TextAlign = ContentAlignment.MiddleCenter,
+                ForeColor = ChildVisualTheme.SkyStrong,
+                Font = ChildVisualTheme.Font(7.8f, FontStyle.Bold)
+            });
+            missionHeader.Controls.Add(missionPill, 1, 0);
+            missionLayout.Controls.Add(missionHeader, 0, 0);
             missionLayout.Controls.Add(new Label
             {
                 Dock = DockStyle.Fill,
-                Text = MathSessionCoordinator.DefaultTargetQuestionCount + " câu Toán vừa sức",
+                Text = "Chọn cách học vừa sức",
                 TextAlign = ContentAlignment.MiddleLeft,
                 ForeColor = ChildVisualTheme.Ink,
                 Font = ChildVisualTheme.Font(19f, FontStyle.Bold),
@@ -227,27 +254,40 @@ namespace WAHUKidsLearn
             _missionSummary = new Label
             {
                 Dock = DockStyle.Fill,
-                Text = "Ứng dụng sẽ chọn câu dựa trên phần bé đang cần luyện và lần ôn đã tới.",
+                Text = "Chơi nhanh 3 chặng hoặc mở thư viện để học theo bài. Mình có thể nghỉ bất cứ lúc nào.",
                 TextAlign = ContentAlignment.TopLeft,
                 ForeColor = ChildVisualTheme.MutedInk,
                 Font = ChildVisualTheme.Font(10.5f),
                 Padding = new Padding(0, 8, 0, 0),
                 AccessibleName = "Mô tả nhiệm vụ"
             };
-            missionLayout.Controls.Add(_missionSummary, 0, 2);
+            var missionStory = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1, Margin = new Padding(0) };
+            missionStory.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 55));
+            missionStory.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 45));
+            missionStory.Controls.Add(_missionSummary, 0, 0);
+            missionStory.Controls.Add(new RescueHeroArtControl
+            {
+                Dock = DockStyle.Fill,
+                Margin = new Padding(8, 4, 0, 6)
+            }, 1, 0);
+            missionLayout.Controls.Add(missionStory, 0, 2);
             var mathActions = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1 };
-            mathActions.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 58));
-            mathActions.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 42));
+            mathActions.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 62));
+            mathActions.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 38));
             _quickRescueButton = new ChildActionButton
             {
                 Dock = DockStyle.Fill,
                 Margin = new Padding(0, 8, 6, 6),
-                Text = "Toán nhanh — Nhiệm vụ cứu hộ",
+                Text = "Bắt đầu cứu hộ",
                 BadgeText = "3",
-                Font = ChildVisualTheme.Font(11.5f, FontStyle.Bold),
-                FillColor = ChildVisualTheme.MintStrong,
-                HoverColor = Color.FromArgb(90, 156, 103),
-                PressedColor = Color.FromArgb(75, 139, 88),
+                Font = ChildVisualTheme.Font(12.2f, FontStyle.Bold),
+                FillColor = Color.FromArgb(232, 174, 93),
+                HoverColor = Color.FromArgb(220, 158, 77),
+                PressedColor = Color.FromArgb(204, 142, 64),
+                TextColor = Color.FromArgb(79, 55, 31),
+                BorderColor = Color.FromArgb(210, 145, 65),
+                BorderThickness = 1.2f,
+                Depth = 5,
                 Radius = 20,
                 AccessibleName = "Mở Toán nhanh — Nhiệm vụ cứu hộ",
                 AccessibleDescription = "Mở một nhiệm vụ ngắn gồm ba chặng Toán. Không có đồng hồ đếm ngược và có thể nghỉ bất cứ lúc nào."
@@ -261,12 +301,15 @@ namespace WAHUKidsLearn
                 Dock = DockStyle.Fill,
                 Margin = new Padding(6, 8, 0, 6),
                 Text = "Thư viện Toán",
-                BadgeText = "67",
-                Font = ChildVisualTheme.Font(10.5f, FontStyle.Bold),
-                FillColor = Color.FromArgb(226, 239, 247),
-                HoverColor = Color.FromArgb(210, 230, 241),
-                PressedColor = Color.FromArgb(194, 219, 233),
+                BadgeText = string.Empty,
+                Font = ChildVisualTheme.Font(10.8f, FontStyle.Bold),
+                FillColor = Color.FromArgb(248, 252, 255),
+                HoverColor = Color.FromArgb(230, 242, 250),
+                PressedColor = Color.FromArgb(214, 233, 245),
                 TextColor = ChildVisualTheme.SkyStrong,
+                BorderColor = Color.FromArgb(156, 200, 226),
+                BorderThickness = 1.4f,
+                Depth = 3,
                 Radius = 20,
                 AccessibleName = "Mở thư viện Toán lớp 2",
                 AccessibleDescription = "Mở bảy chương và sáu mươi bảy bài học Toán lớp 2."
@@ -343,7 +386,7 @@ namespace WAHUKidsLearn
             var footer = new Label
             {
                 Dock = DockStyle.Fill,
-                Text = "Học nhẹ • Không mất chuỗi ngày • Có thể dừng bất cứ lúc nào",
+                Text = "Học nhẹ • Có thể nghỉ bất cứ lúc nào • Phần đã làm luôn được lưu",
                 TextAlign = ContentAlignment.MiddleLeft,
                 Padding = new Padding(10, 0, 0, 0),
                 ForeColor = ChildVisualTheme.MutedInk,
@@ -353,6 +396,7 @@ namespace WAHUKidsLearn
             root.Controls.Add(footer, 0, 2);
             root.SetColumnSpan(footer, 2);
             Controls.Add(root);
+            AcceptButton = _quickRescueButton;
         }
 
         private void OpenMathHub()

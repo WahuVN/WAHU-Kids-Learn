@@ -175,6 +175,7 @@ namespace WAHUKidsLearn
     internal sealed class RescueMissionButton : Button
     {
         private bool _hover;
+        private bool _pressed;
         private bool _selected;
         private bool _locked;
 
@@ -205,31 +206,52 @@ namespace WAHUKidsLearn
         }
 
         protected override void OnMouseEnter(EventArgs e) { _hover = true; Invalidate(); base.OnMouseEnter(e); }
-        protected override void OnMouseLeave(EventArgs e) { _hover = false; Invalidate(); base.OnMouseLeave(e); }
+        protected override void OnMouseLeave(EventArgs e) { _hover = false; _pressed = false; Invalidate(); base.OnMouseLeave(e); }
+        protected override void OnMouseDown(MouseEventArgs e) { if (e.Button == MouseButtons.Left) _pressed = true; Invalidate(); base.OnMouseDown(e); }
+        protected override void OnMouseUp(MouseEventArgs e) { _pressed = false; Invalidate(); base.OnMouseUp(e); }
+        protected override void OnEnabledChanged(EventArgs e) { _pressed = false; Cursor = Enabled ? Cursors.Hand : Cursors.Default; Invalidate(); base.OnEnabledChanged(e); }
 
         protected override void OnPaint(PaintEventArgs e)
         {
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            var rect = new Rectangle(1, 1, Math.Max(1, Width - 3), Math.Max(1, Height - 3));
+            var pressOffset = Enabled && _pressed ? 2 : 0;
+            var rect = new Rectangle(2, 1 + pressOffset, Math.Max(1, Width - 4), Math.Max(1, Height - 7));
             var fill = _locked
                 ? Color.FromArgb(242, 241, 235)
-                : (_selected ? Color.FromArgb(246, 250, 241) : (_hover ? Color.FromArgb(251, 249, 241) : Color.White));
-            var border = _selected ? AccentColor : Color.FromArgb(226, 223, 210);
+                : (_pressed ? ChildVisualTheme.Blend(Color.White, AccentColor, 0.13f)
+                    : (_selected ? Color.FromArgb(246, 250, 241) : (_hover ? Color.FromArgb(251, 249, 241) : Color.White)));
+            var border = _selected ? AccentColor : ChildVisualTheme.Blend(Color.FromArgb(226, 223, 210), AccentColor, _hover ? 0.18f : 0.06f);
+
+            var shadowRect = new Rectangle(rect.X, 5, rect.Width, rect.Height);
+            var shadowBase = ChildVisualTheme.Blend(AccentColor, ChildVisualTheme.Ink, 0.38f);
+            using (var shadowPath = ChildVisualTheme.RoundedRect(shadowRect, 18))
+            using (var shadow = new SolidBrush(Color.FromArgb(Enabled ? 45 : 24, shadowBase.R, shadowBase.G, shadowBase.B)))
+                e.Graphics.FillPath(shadow, shadowPath);
+
             using (var path = ChildVisualTheme.RoundedRect(rect, 18))
-            using (var brush = new SolidBrush(fill))
+            using (var brush = new System.Drawing.Drawing2D.LinearGradientBrush(rect,
+                ChildVisualTheme.Blend(fill, Color.White, _hover && !_pressed ? 0.34f : 0.20f), fill, 90f))
             using (var pen = new Pen(border, _selected ? 2f : 1f))
             {
                 e.Graphics.FillPath(brush, path);
                 e.Graphics.DrawPath(pen, path);
             }
 
-            var accent = new Rectangle(10, 14, 7, Math.Max(24, Height - 28));
+            var accent = new Rectangle(rect.Left + 9, rect.Top + 13, 7, Math.Max(24, rect.Height - 26));
             using (var path = ChildVisualTheme.RoundedRect(accent, 4))
             using (var brush = new SolidBrush(_locked ? Color.FromArgb(184, 188, 181) : AccentColor))
                 e.Graphics.FillPath(brush, path);
 
-            var titleRect = new Rectangle(30, 12, Math.Max(60, Width - 42), 32);
-            var stateRect = new Rectangle(30, 43, Math.Max(60, Width - 42), Math.Max(22, Height - 49));
+            if (_selected)
+            {
+                var marker = new Rectangle(rect.Right - 21, rect.Top + 10, 10, 10);
+                using (var outer = new SolidBrush(AccentColor)) e.Graphics.FillEllipse(outer, marker);
+                var inner = Rectangle.Inflate(marker, -3, -3);
+                using (var innerBrush = new SolidBrush(Color.White)) e.Graphics.FillEllipse(innerBrush, inner);
+            }
+
+            var titleRect = new Rectangle(rect.Left + 29, rect.Top + 11, Math.Max(60, rect.Width - 42), 32);
+            var stateRect = new Rectangle(rect.Left + 29, rect.Top + 42, Math.Max(60, rect.Width - 42), Math.Max(22, rect.Height - 48));
             TextRenderer.DrawText(e.Graphics, TitleText ?? Text, ChildVisualTheme.Font(10.2f, FontStyle.Bold), titleRect,
                 _locked ? ChildVisualTheme.MutedInk : ChildVisualTheme.Ink,
                 TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
@@ -238,7 +260,12 @@ namespace WAHUKidsLearn
                 TextFormatFlags.Left | TextFormatFlags.Top | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
 
             if (Focused && ShowFocusCues)
-                ControlPaint.DrawFocusRectangle(e.Graphics, Rectangle.Inflate(rect, -5, -5));
+            {
+                var focusRect = Rectangle.Inflate(rect, -4, -4);
+                using (var focusPath = ChildVisualTheme.RoundedRect(focusRect, 14))
+                using (var focusPen = new Pen(Color.FromArgb(205, ChildVisualTheme.Sun), 2f))
+                    e.Graphics.DrawPath(focusPen, focusPath);
+            }
         }
     }
 
@@ -348,13 +375,12 @@ namespace WAHUKidsLearn
             root.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
             root.RowStyles.Add(new RowStyle(SizeType.Absolute, 50));
 
-            var header = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1 };
+            var header = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 2 };
             header.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
             header.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 142));
-            var headerCopy = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 2, Margin = new Padding(0) };
-            headerCopy.RowStyles.Add(new RowStyle(SizeType.Absolute, 24));
-            headerCopy.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            headerCopy.Controls.Add(new Label
+            header.RowStyles.Add(new RowStyle(SizeType.Absolute, 18));
+            header.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+            header.Controls.Add(new Label
             {
                 Dock = DockStyle.Fill,
                 Text = "3 CHẶNG • KHÔNG ĐẾM NGƯỢC",
@@ -367,16 +393,15 @@ namespace WAHUKidsLearn
                 Dock = DockStyle.Fill,
                 Text = "Toán nhanh — Nhiệm vụ cứu hộ",
                 TextAlign = ContentAlignment.TopLeft,
-                Font = ChildVisualTheme.Font(23f, FontStyle.Bold),
+                Font = ChildVisualTheme.Font(21.5f, FontStyle.Bold),
                 ForeColor = ChildVisualTheme.Ink,
                 AccessibleName = "Toán nhanh — Nhiệm vụ cứu hộ"
             };
-            headerCopy.Controls.Add(title, 0, 1);
-            header.Controls.Add(headerCopy, 0, 0);
+            header.Controls.Add(title, 0, 1);
             var exit = new ChildActionButton
             {
                 Dock = DockStyle.Fill,
-                Margin = new Padding(10, 16, 0, 16),
+                Margin = new Padding(10, 10, 0, 10),
                 Text = "Để sau",
                 FillColor = Color.FromArgb(236, 233, 223),
                 HoverColor = Color.FromArgb(224, 220, 208),
@@ -390,11 +415,12 @@ namespace WAHUKidsLearn
             exit.Click += delegate { Close(); };
             CancelButton = exit;
             header.Controls.Add(exit, 1, 0);
+            header.SetRowSpan(exit, 2);
             root.Controls.Add(header, 0, 0);
 
             var body = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1 };
-            body.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 36));
-            body.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 64));
+            body.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 37));
+            body.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 63));
 
             _eventFlow = new FlowLayoutPanel
             {
@@ -448,7 +474,9 @@ namespace WAHUKidsLearn
                 BorderColor = Color.FromArgb(226, 221, 204),
                 Radius = 24
             };
-            var introLayout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 5 };
+            var introLayout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 5 };
+            introLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 62));
+            introLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 38));
             introLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 58));
             introLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 78));
             introLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
@@ -474,6 +502,13 @@ namespace WAHUKidsLearn
                 AccessibleName = "Câu chuyện nhiệm vụ cứu hộ"
             };
             introLayout.Controls.Add(_intro, 0, 1);
+            var heroArt = new RescueHeroArtControl
+            {
+                Dock = DockStyle.Fill,
+                Margin = new Padding(12, 0, 0, 8)
+            };
+            introLayout.Controls.Add(heroArt, 1, 0);
+            introLayout.SetRowSpan(heroArt, 2);
             _checkpoints = new FlowLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -483,6 +518,7 @@ namespace WAHUKidsLearn
                 Padding = new Padding(8, 10, 8, 8)
             };
             introLayout.Controls.Add(_checkpoints, 0, 2);
+            introLayout.SetColumnSpan(_checkpoints, 2);
             _status = new Label
             {
                 Dock = DockStyle.Fill,
@@ -492,6 +528,7 @@ namespace WAHUKidsLearn
                 AccessibleName = "Trạng thái nhiệm vụ cứu hộ"
             };
             introLayout.Controls.Add(_status, 0, 3);
+            introLayout.SetColumnSpan(_status, 2);
             _startButton = new ChildActionButton
             {
                 Dock = DockStyle.Fill,
@@ -509,6 +546,7 @@ namespace WAHUKidsLearn
             _startButton.Click += delegate { StartSelectedEvent(); };
             AcceptButton = _startButton;
             introLayout.Controls.Add(_startButton, 0, 4);
+            introLayout.SetColumnSpan(_startButton, 2);
             introCard.Controls.Add(introLayout);
             body.Controls.Add(introCard, 1, 0);
             root.Controls.Add(body, 0, 1);

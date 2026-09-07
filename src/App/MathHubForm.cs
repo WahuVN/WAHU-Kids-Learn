@@ -112,7 +112,7 @@ namespace WAHUKidsLearn
 
         private void BuildUi()
         {
-            var root = new TableLayoutPanel
+            var root = new ChildSceneLayout
             {
                 Dock = DockStyle.Fill,
                 BackColor = ChildVisualTheme.Cream,
@@ -167,7 +167,7 @@ namespace WAHUKidsLearn
                 Text = "Toán lớp 2",
                 TextAlign = ContentAlignment.BottomLeft,
                 ForeColor = ChildVisualTheme.Ink,
-                Font = ChildVisualTheme.Font(23f, FontStyle.Bold),
+                Font = ChildVisualTheme.Font(25f, FontStyle.Bold),
                 AccessibleName = "Toán lớp 2"
             }, 0, 0);
             _summary = new Label
@@ -188,7 +188,7 @@ namespace WAHUKidsLearn
                 Margin = new Padding(12, 12, 0, 12),
                 Text = "LỚP 2",
                 TextAlign = ContentAlignment.MiddleCenter,
-                BackColor = Color.FromArgb(226, 242, 224),
+                BackColor = ChildVisualTheme.Mint,
                 ForeColor = ChildVisualTheme.MintStrong,
                 Font = ChildVisualTheme.Font(11f, FontStyle.Bold),
                 AccessibleName = "Chương trình lớp 2"
@@ -211,17 +211,17 @@ namespace WAHUKidsLearn
             _detailFlow.Visible = false;
 
             body.Controls.Add(BuildColumnCard("CHƯƠNG", "Chọn một phần để xem các bài học.", _chapterFlow,
-                new Padding(0, 6, 8, 6)), 0, 0);
+                new Padding(0, 6, 8, 6), ChildVisualTheme.SkyStrong, ChildVisualTheme.Sky), 0, 0);
             body.Controls.Add(BuildColumnCard("BÀI HỌC", "Chọn bài để đọc mục tiêu, kiến thức và ví dụ.", _lessonFlow,
-                new Padding(4, 6, 8, 6)), 1, 0);
+                new Padding(4, 6, 8, 6), ChildVisualTheme.LavenderStrong, ChildVisualTheme.Lavender), 1, 0);
 
             var detailHost = new ChildCard
             {
                 Dock = DockStyle.Fill,
                 Margin = new Padding(4, 6, 0, 6),
                 Padding = new Padding(6),
-                CardColor = Color.FromArgb(255, 253, 246),
-                BorderColor = Color.FromArgb(226, 221, 204),
+                CardColor = ChildVisualTheme.Blend(ChildVisualTheme.Peach, Color.White, 0.76f),
+                BorderColor = ChildVisualTheme.Blend(ChildVisualTheme.Peach, ChildVisualTheme.PeachStrong, 0.30f),
                 Radius = 22
             };
             _detailEmpty = new Label
@@ -328,15 +328,15 @@ namespace WAHUKidsLearn
             };
         }
 
-        private static Control BuildColumnCard(string title, string subtitle, Control content, Padding margin)
+        private static Control BuildColumnCard(string title, string subtitle, Control content, Padding margin, Color accent, Color surface)
         {
             var card = new ChildCard
             {
                 Dock = DockStyle.Fill,
                 Margin = margin,
                 Padding = new Padding(10),
-                CardColor = Color.FromArgb(250, 248, 239),
-                BorderColor = Color.FromArgb(226, 223, 210),
+                CardColor = ChildVisualTheme.Blend(surface, Color.White, 0.70f),
+                BorderColor = ChildVisualTheme.Blend(surface, accent, 0.28f),
                 Radius = 22
             };
             var layout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 3 };
@@ -348,7 +348,7 @@ namespace WAHUKidsLearn
                 Dock = DockStyle.Fill,
                 Text = title,
                 TextAlign = ContentAlignment.BottomLeft,
-                ForeColor = ChildVisualTheme.MintStrong,
+                ForeColor = accent,
                 Font = ChildVisualTheme.Font(9f, FontStyle.Bold)
             }, 0, 0);
             layout.Controls.Add(new Label
@@ -400,8 +400,29 @@ namespace WAHUKidsLearn
             foreach (var pair in _chapterButtons)
             {
                 var selected = string.Equals(pair.Key, chapter.Id, StringComparison.Ordinal);
-                pair.Value.BackColor = selected ? Color.FromArgb(220, 239, 222) : Color.FromArgb(244, 242, 232);
-                pair.Value.ForeColor = selected ? ChildVisualTheme.MintStrong : ChildVisualTheme.Ink;
+                var chapterIndex = ChapterIndex(pair.Key);
+                var tone = ChapterTone(chapterIndex);
+                var fill = ChildVisualTheme.Blend(tone, Color.White, selected ? 0.14f : 0.46f);
+                var ink = selected ? ChapterAccent(chapterIndex) : ChildVisualTheme.Ink;
+                var border = ChildVisualTheme.Blend(tone, ChapterAccent(chapterIndex), selected ? 0.52f : 0.20f);
+                var themed = pair.Value as ChildActionButton;
+                if (themed != null)
+                {
+                    themed.FillColor = fill;
+                    themed.HoverColor = ChildVisualTheme.Blend(fill, ChapterAccent(chapterIndex), 0.10f);
+                    themed.PressedColor = ChildVisualTheme.Blend(fill, ChapterAccent(chapterIndex), 0.18f);
+                    themed.TextColor = ink;
+                    themed.BorderColor = border;
+                    themed.BorderThickness = selected ? 2f : 1f;
+                    themed.Depth = selected ? 4 : 3;
+                    themed.Invalidate();
+                }
+                else
+                {
+                    pair.Value.BackColor = fill;
+                    pair.Value.ForeColor = ink;
+                    pair.Value.FlatAppearance.BorderColor = border;
+                }
             }
 
             _lessonFlow.SuspendLayout();
@@ -461,15 +482,19 @@ namespace WAHUKidsLearn
                 var descriptor = _catalog.FindLesson(pair.Key);
                 if (descriptor == null) continue;
                 ApplyLessonStateStyle(button, descriptor);
-                if (string.Equals(pair.Key, lesson.Id, StringComparison.Ordinal))
+                var selected = string.Equals(pair.Key, lesson.Id, StringComparison.Ordinal);
+                var themed = button as ChildActionButton;
+                if (themed != null)
                 {
-                    button.FlatAppearance.BorderSize = 2;
-                    button.FlatAppearance.BorderColor = ChildVisualTheme.MintStrong;
+                    themed.BorderThickness = selected ? 2f : 1f;
+                    themed.BorderColor = selected ? ChildVisualTheme.MintStrong : Color.FromArgb(222, 219, 205);
+                    themed.Depth = selected ? 4 : 3;
+                    themed.Invalidate();
                 }
                 else
                 {
-                    button.FlatAppearance.BorderSize = 1;
-                    button.FlatAppearance.BorderColor = Color.FromArgb(222, 219, 205);
+                    button.FlatAppearance.BorderSize = selected ? 2 : 1;
+                    button.FlatAppearance.BorderColor = selected ? ChildVisualTheme.MintStrong : Color.FromArgb(222, 219, 205);
                 }
             }
             RenderLessonDetail(lesson);
@@ -614,34 +639,79 @@ namespace WAHUKidsLearn
             return lesson == null ? lessonId : lesson.TitleVi;
         }
 
+        private int ChapterIndex(string chapterId)
+        {
+            if (_catalog == null || _catalog.Chapters == null) return 0;
+            for (var i = 0; i < _catalog.Chapters.Count; i++)
+            {
+                if (string.Equals(_catalog.Chapters[i].Id, chapterId, StringComparison.Ordinal)) return i;
+            }
+            return 0;
+        }
+
+        private static Color ChapterTone(int index)
+        {
+            switch (Math.Abs(index) % 4)
+            {
+                case 1: return ChildVisualTheme.Mint;
+                case 2: return ChildVisualTheme.Peach;
+                case 3: return ChildVisualTheme.Lavender;
+                default: return ChildVisualTheme.Sky;
+            }
+        }
+
+        private static Color ChapterAccent(int index)
+        {
+            switch (Math.Abs(index) % 4)
+            {
+                case 1: return ChildVisualTheme.MintStrong;
+                case 2: return ChildVisualTheme.PeachStrong;
+                case 3: return ChildVisualTheme.LavenderStrong;
+                default: return ChildVisualTheme.SkyStrong;
+            }
+        }
+
         private Button CreateCatalogButton(string text, int height)
         {
-            var button = new Button
+            return new ChildActionButton
             {
                 AutoSize = false,
                 Height = height,
                 Margin = new Padding(4, 4, 4, 4),
                 Text = text,
                 TextAlign = ContentAlignment.MiddleLeft,
-                Padding = new Padding(12, 5, 8, 5),
-                FlatStyle = FlatStyle.Flat,
-                BackColor = Color.FromArgb(244, 242, 232),
-                ForeColor = ChildVisualTheme.Ink,
+                Padding = new Padding(14, 6, 10, 6),
+                FillColor = Color.FromArgb(247, 249, 244),
+                HoverColor = Color.FromArgb(236, 246, 241),
+                PressedColor = Color.FromArgb(226, 239, 232),
+                TextColor = ChildVisualTheme.Ink,
+                BorderColor = ChildVisualTheme.Line,
+                BorderThickness = 1f,
+                Depth = 3,
+                Radius = 16,
                 Font = ChildVisualTheme.Font(9.5f, FontStyle.Bold),
-                Cursor = Cursors.Hand,
-                UseVisualStyleBackColor = false,
                 TabStop = true
             };
-            button.FlatAppearance.BorderSize = 1;
-            button.FlatAppearance.BorderColor = Color.FromArgb(222, 219, 205);
-            button.FlatAppearance.MouseOverBackColor = Color.FromArgb(235, 239, 228);
-            return button;
         }
 
         private void ApplyLessonStateStyle(Button button, MathLessonDescriptor lesson)
         {
-            button.BackColor = LessonStateBackground(lesson);
-            button.ForeColor = LessonStateColor(lesson);
+            var fill = LessonStateBackground(lesson);
+            var ink = LessonStateColor(lesson);
+            var themed = button as ChildActionButton;
+            if (themed != null)
+            {
+                themed.FillColor = fill;
+                themed.HoverColor = ChildVisualTheme.Blend(fill, ink, 0.08f);
+                themed.PressedColor = ChildVisualTheme.Blend(fill, ink, 0.15f);
+                themed.TextColor = ink;
+                themed.DisabledFillColor = ChildVisualTheme.Blend(fill, Color.FromArgb(235, 236, 231), 0.34f);
+                themed.DisabledTextColor = ChildVisualTheme.MutedInk;
+                themed.Invalidate();
+                return;
+            }
+            button.BackColor = fill;
+            button.ForeColor = ink;
         }
 
         private Color LessonStateBackground(MathLessonDescriptor lesson)
