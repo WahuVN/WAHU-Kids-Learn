@@ -20,7 +20,7 @@ Branch: `main`
 
 - `tests/MathEngineRuntimeSmoke`: PASS — **47 assertions**.
 - `tests/MathDataEngineRuntimeSmoke`: PASS — **104 assertions** (idempotency + terminal-session guard + optimistic skill-state guard + true cross-process mastery/session contention + atomic startup + subject/child-scoped dangling recovery).
-- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **378 assertions** (authored bank + targeted lesson + prerequisite unlock + exact resume + mastery delta + next lesson + corrupt authored cursor/core-runtime recovery + retry/resume/anti-double-submit + stale coordinator/skill guards + injected write-failure rollback/retry + post-completion enrichment failure safety).
+- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **7080 assertions** (toàn bộ gate cũ + real 402-bank selector breadth trên 67 lesson × 3 bucket × 16 seed; same seed deterministic, index luôn trong range và mỗi bucket xoay đủ cả 2 variant).
 - `tests/SQLiteRuntimeSmoke`: PASS — **179 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
 - `tests/LearningSessionRuntimeSmoke`: PASS — **800 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
 - Request 009: CLOSED tại `05cdb2a` — authored pool >=6 dùng selected set đúng 3 câu (1 basic + 1 medium + 1 application), deterministic theo seed/lesson, persisted qua checkpoint JSON; retry/resume/corrupt-open recovery giữ nguyên selected set và complete sau 3 câu. Synthetic pool-6 regression + legacy path đạt **264 assertions PASS**.
@@ -28,7 +28,7 @@ Branch: `main`
 - Request 006: CLOSED tại `3cf7fc6` — integer `answer_unit` được preserve qua authored loader -> runtime instance -> current-question JSON -> coordinator resume; raw grading vẫn chỉ nhận số, còn feedback outcome xuất `N đơn vị` cho UI. Persistence **277 assertions PASS**.
 - Selected-set corruption stress: CLOSED tại `3b8a10b` — malformed/missing persisted selection metadata được dựng lại deterministic theo seed+lesson trong cùng pack, checkpoint được sửa và ordinal tiếp tục đúng; same seed giữ cùng ordered set.
 - V5 pack-identity hardening: DB trigger reject partial `pack_id/pack_version` pair; rejected write leaves complete pair intact and session remains resumable.
-- Selected-set stress: real/synthetic pool-6 chạy 16 seed liên tiếp, mỗi bucket basic/medium/application đều xoay đủ 2 biến thể, target luôn 3; persistence **374 assertions PASS**.
+- Selected-set stress: synthetic pool-6 chạy 16 seed liên tiếp, mỗi bucket basic/medium/application xoay đủ 2 biến thể, target luôn 3. Hardening mới trên **real 402-bank** quét đủ 67 lesson × 3 bucket × 16 seed, selector deterministic/in-range và mỗi bucket xoay đủ 2 variant; persistence tổng **7080 assertions PASS**.
 - Expanded-bank integration: `373d9d1` bỏ test coupling `Single(...)`/`_01`, chạy được cả baseline 201 và pool 402; AI1 working pool 402 đã chạy **374 assertions PASS** mà không đổi content trong suốt gate.
 - PowerShell release/build scripts: schema V5 payload/bootstrap expectations đã cập nhật; staged `Build-SetupArtifacts.ps1` PASS qua Release x86 + runtime smokes + staged payload/preflight + portable packaging.
 - `git diff --check` + staged `git diff --cached --check`: PASS cho wave V5.

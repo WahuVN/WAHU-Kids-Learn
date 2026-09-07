@@ -38,6 +38,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 var questionBankPath = Path.Combine(repo, "content_packs", "math_grade2_v1", "question_bank_v1.json");
                 var lessonCatalogPath = Path.Combine(repo, "content_packs", "math_grade2_v1", "lesson_catalog_v1.json");
                 TestAuthoredQuestionBank(questionBankPath);
+                TestRealPoolSelectionBreadth(lessonCatalogPath);
                 TestAnswerUnitFeedbackSurvivesCoordinatorResume(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedLessonUnlockAndResume(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedCompletionSurvivesNextLessonReadFailure(root, schemaPath, templatePath, lessonCatalogPath);
@@ -161,6 +162,51 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 "authored_runtime_instances_keep_stable_content_id");
             A(runtimeA.QuestionId != runtimeB.QuestionId && runtimeA.QuestionId.StartsWith(authored.ContentQuestionId + "-", StringComparison.Ordinal),
                 "authored_runtime_question_id_remains_unique_instance_id");
+        }
+
+        private static void TestRealPoolSelectionBreadth(string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            A(catalog != null && catalog.Lessons != null && catalog.Lessons.Count == 67,
+                "real_pool_selection_breadth_loads_67_lessons");
+
+            var deterministicIndex = typeof(MathSessionCoordinator).GetMethod(
+                "DeterministicBucketIndex",
+                System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
+            A(deterministicIndex != null, "real_pool_selection_breadth_finds_engine_selector");
+
+            var bucketNames = new[] { "basic", "medium", "application" };
+            foreach (var lesson in catalog.Lessons)
+            {
+                var buckets = new[]
+                {
+                    lesson.PracticeSets.Basic,
+                    lesson.PracticeSets.Medium,
+                    lesson.PracticeSets.Application
+                };
+                A(buckets.All(x => x != null && x.Count == 2),
+                    "real_pool_selection_breadth_two_variants_each_bucket_" + lesson.Id);
+
+                for (var bucketIndex = 0; bucketIndex < bucketNames.Length; bucketIndex++)
+                {
+                    var bucket = buckets[bucketIndex];
+                    var bucketName = bucketNames[bucketIndex];
+                    var reached = new HashSet<int>();
+                    for (var seed = 0; seed < 16; seed++)
+                    {
+                        var args = new object[] { seed, lesson.Id, bucketName, bucket.Count };
+                        var first = (int)deterministicIndex.Invoke(null, args);
+                        var repeated = (int)deterministicIndex.Invoke(null, args);
+                        A(first == repeated,
+                            "real_pool_selection_breadth_deterministic_" + lesson.Id + "_" + bucketName + "_" + seed.ToString(CultureInfo.InvariantCulture));
+                        A(first >= 0 && first < bucket.Count,
+                            "real_pool_selection_breadth_in_range_" + lesson.Id + "_" + bucketName + "_" + seed.ToString(CultureInfo.InvariantCulture));
+                        reached.Add(first);
+                    }
+                    A(reached.Count == bucket.Count,
+                        "real_pool_selection_breadth_rotates_both_variants_" + lesson.Id + "_" + bucketName);
+                }
+            }
         }
 
         private static void TestAnswerUnitFeedbackSurvivesCoordinatorResume(string root, string schemaPath, string templatePath, string lessonCatalogPath)
