@@ -3602,6 +3602,26 @@ END;");
                     "game_art_visible_control_resumes_animation_timer");
             }
 
+            using (var host = new Panel { Size = new Size(260, 160) })
+            using (var nestedHero = (Control)heroCtor.Invoke(new object[] { normal }))
+            {
+                nestedHero.Dock = DockStyle.Fill;
+                host.Controls.Add(nestedHero);
+                host.CreateControl();
+                nestedHero.CreateControl();
+                Invoke(nestedHero, "UpdateAnimationState");
+                A(Get<bool>(nestedHero, "AnimationRunning"),
+                    "game_art_visible_child_animation_starts_inside_visible_parent");
+                host.Visible = false;
+                A(!Get<bool>(nestedHero, "AnimationRunning"),
+                    "game_art_hidden_parent_stops_child_animation_timer");
+                host.Visible = true;
+                Invoke(nestedHero, "UpdateAnimationState");
+                A(Get<bool>(nestedHero, "AnimationRunning"),
+                    "game_art_visible_parent_resumes_child_animation_timer");
+                host.Controls.Remove(nestedHero);
+            }
+
             var feedbackType = appAssembly.GetType("WAHUKidsLearn.GameFeedbackFxControl", true);
             var feedbackCtor = feedbackType.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
                 null, new[] { typeof(RuntimePerformanceSettings), typeof(bool) }, null);

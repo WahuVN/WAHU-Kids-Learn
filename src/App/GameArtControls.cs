@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
@@ -22,10 +23,81 @@ namespace WAHUKidsLearn
         }
     }
 
+    internal sealed class GameArtVisibilityWatcher : IDisposable
+    {
+        private readonly Control _owner;
+        private readonly EventHandler _changed;
+        private readonly List<Control> _ancestors = new List<Control>();
+
+        public GameArtVisibilityWatcher(Control owner, EventHandler changed)
+        {
+            _owner = owner ?? throw new ArgumentNullException("owner");
+            _changed = changed ?? throw new ArgumentNullException("changed");
+            _owner.ParentChanged += OwnerParentChanged;
+            RewireAncestors();
+        }
+
+        public bool IsHierarchyVisible
+        {
+            get
+            {
+                if (_owner.IsDisposed || _owner.Disposing || !_owner.Visible) return false;
+                for (var parent = _owner.Parent; parent != null; parent = parent.Parent)
+                    if (!parent.Visible || parent.IsDisposed || parent.Disposing) return false;
+                return true;
+            }
+        }
+
+        private void OwnerParentChanged(object sender, EventArgs e)
+        {
+            RewireAncestors();
+            _changed(sender, e);
+        }
+
+        private void AncestorVisibleChanged(object sender, EventArgs e)
+        {
+            _changed(sender, e);
+        }
+
+        private void AncestorParentChanged(object sender, EventArgs e)
+        {
+            RewireAncestors();
+            _changed(sender, e);
+        }
+
+        private void RewireAncestors()
+        {
+            UnwireAncestors();
+            for (var parent = _owner.Parent; parent != null; parent = parent.Parent)
+            {
+                _ancestors.Add(parent);
+                parent.VisibleChanged += AncestorVisibleChanged;
+                parent.ParentChanged += AncestorParentChanged;
+            }
+        }
+
+        private void UnwireAncestors()
+        {
+            foreach (var ancestor in _ancestors)
+            {
+                ancestor.VisibleChanged -= AncestorVisibleChanged;
+                ancestor.ParentChanged -= AncestorParentChanged;
+            }
+            _ancestors.Clear();
+        }
+
+        public void Dispose()
+        {
+            _owner.ParentChanged -= OwnerParentChanged;
+            UnwireAncestors();
+        }
+    }
+
     internal sealed class RescueHeroArtControl : Control
     {
         private readonly Timer _timer;
         private readonly bool _motionAllowed;
+        private readonly GameArtVisibilityWatcher _visibilityWatcher;
         private int _frame;
 
         public RescueHeroArtControl() : this(null) { }
@@ -41,6 +113,7 @@ namespace WAHUKidsLearn
             _motionAllowed = GameArtMotionPolicy.AllowsDecorativeMotion(performance, false);
             _timer = new Timer { Interval = GameArtMotionPolicy.IntervalFor(performance, 90) };
             _timer.Tick += delegate { _frame = (_frame + 1) % 80; Invalidate(); };
+            if (_motionAllowed) _visibilityWatcher = new GameArtVisibilityWatcher(this, delegate { UpdateAnimationState(); });
         }
 
         internal bool MotionAllowed { get { return _motionAllowed; } }
@@ -52,12 +125,17 @@ namespace WAHUKidsLearn
 
         private void UpdateAnimationState()
         {
-            _timer.Enabled = _motionAllowed && IsHandleCreated && Visible && !IsDisposed && !Disposing;
+            var visible = _visibilityWatcher == null ? Visible : _visibilityWatcher.IsHierarchyVisible;
+            _timer.Enabled = _motionAllowed && IsHandleCreated && visible && !IsDisposed && !Disposing;
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing) _timer.Dispose();
+            if (disposing)
+            {
+                if (_visibilityWatcher != null) _visibilityWatcher.Dispose();
+                _timer.Dispose();
+            }
             base.Dispose(disposing);
         }
 
@@ -218,6 +296,7 @@ namespace WAHUKidsLearn
         public enum Mood { Neutral, Correct, Retry, Hint }
         private readonly Timer _timer;
         private readonly bool _motionAllowed;
+        private readonly GameArtVisibilityWatcher _visibilityWatcher;
         private int _frame;
         private Mood _mood;
 
@@ -232,6 +311,7 @@ namespace WAHUKidsLearn
             _motionAllowed = GameArtMotionPolicy.AllowsDecorativeMotion(performance, learningFocus);
             _timer = new Timer { Interval = GameArtMotionPolicy.IntervalFor(performance, 85) };
             _timer.Tick += delegate { _frame = (_frame + 1) % 72; Invalidate(); };
+            if (_motionAllowed) _visibilityWatcher = new GameArtVisibilityWatcher(this, delegate { UpdateAnimationState(); });
         }
 
         internal bool MotionAllowed { get { return _motionAllowed; } }
@@ -243,10 +323,19 @@ namespace WAHUKidsLearn
 
         private void UpdateAnimationState()
         {
-            _timer.Enabled = _motionAllowed && IsHandleCreated && Visible && !IsDisposed && !Disposing;
+            var visible = _visibilityWatcher == null ? Visible : _visibilityWatcher.IsHierarchyVisible;
+            _timer.Enabled = _motionAllowed && IsHandleCreated && visible && !IsDisposed && !Disposing;
         }
 
-        protected override void Dispose(bool disposing) { if (disposing) _timer.Dispose(); base.Dispose(disposing); }
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_visibilityWatcher != null) _visibilityWatcher.Dispose();
+                _timer.Dispose();
+            }
+            base.Dispose(disposing);
+        }
 
         private static string MoodDescription(Mood mood)
         {
@@ -295,6 +384,7 @@ namespace WAHUKidsLearn
     {
         private readonly Timer _timer;
         private readonly bool _motionAllowed;
+        private readonly GameArtVisibilityWatcher _visibilityWatcher;
         private int _frame;
 
         public GardenRewardArtControl() : this(null) { }
@@ -307,6 +397,7 @@ namespace WAHUKidsLearn
             _motionAllowed = GameArtMotionPolicy.AllowsDecorativeMotion(performance, false);
             _timer = new Timer { Interval = GameArtMotionPolicy.IntervalFor(performance, 100) };
             _timer.Tick += delegate { _frame = (_frame + 1) % 80; Invalidate(); };
+            if (_motionAllowed) _visibilityWatcher = new GameArtVisibilityWatcher(this, delegate { UpdateAnimationState(); });
         }
 
         internal bool MotionAllowed { get { return _motionAllowed; } }
@@ -318,10 +409,19 @@ namespace WAHUKidsLearn
 
         private void UpdateAnimationState()
         {
-            _timer.Enabled = _motionAllowed && IsHandleCreated && Visible && !IsDisposed && !Disposing;
+            var visible = _visibilityWatcher == null ? Visible : _visibilityWatcher.IsHierarchyVisible;
+            _timer.Enabled = _motionAllowed && IsHandleCreated && visible && !IsDisposed && !Disposing;
         }
 
-        protected override void Dispose(bool disposing) { if (disposing) _timer.Dispose(); base.Dispose(disposing); }
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_visibilityWatcher != null) _visibilityWatcher.Dispose();
+                _timer.Dispose();
+            }
+            base.Dispose(disposing);
+        }
 
         protected override void OnPaint(PaintEventArgs e)
         {
