@@ -52,6 +52,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestFirstLessonAllSixVariantsWithRetryResume(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedCompletionSurvivesNextLessonReadFailure(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedCompletionProgressFaultRollsBackAndRetriesExactlyOnce(root, schemaPath, templatePath, lessonCatalogPath);
+                TestTargetedCompletionRejectsCorruptPendingProgress(root, schemaPath, templatePath, lessonCatalogPath);
                 TestCorruptRuntimeMetadataIsQuarantined(root, schemaPath, templatePath);
                 TestMoreThanFourInvalidRuntimeSessionsAllRecover(root, schemaPath, templatePath);
                 TestMultipleValidActiveRuntimeSessionsKeepNewestOnly(root, schemaPath, templatePath);
@@ -3859,6 +3860,152 @@ BEGIN SELECT RAISE(ABORT,'injected lesson completion progress failure'); END;");
                   Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + sessionId + "';") == 3 &&
                   Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + sessionId + "';") == 3,
                     "completion_progress_fault_retry_keeps_learning_and_reward_exactly_once");
+            }
+        }
+
+        private static void TestTargetedCompletionRejectsCorruptPendingProgress(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.Lessons.First(x => x.PrerequisiteSkills == null || x.PrerequisiteSkills.Count == 0);
+            var database = NewDatabase(Path.Combine(root, "targeted-completion-corrupt-pending-progress.db"), schemaPath);
+            string sessionId;
+            string childId;
+
+            using (var coordinator = new MathSessionCoordinator(database, templatePath, "LOW", 8062, lesson.Id))
+            {
+                var started = coordinator.Start("Bé corrupt pending completion progress");
+                sessionId = started.SessionId;
+                childId = started.ChildId;
+                for (var ordinal = 0; ordinal < 3; ordinal++)
+                {
+                    var question = coordinator.NextQuestion();
+                    coordinator.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 740 + ordinal * 100);
+                }
+                A(coordinator.Summary.Attempts == 3 && coordinator.NextQuestion() == null &&
+                  Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + sessionId + "';") == 3,
+                    "corrupt_pending_progress_fixture_has_three_durable_questions_before_complete");
+
+                Exec(database, @"UPDATE math_lesson_progress
+SET skill_id='M2_WRONG_PENDING_COMPLETION_SKILL',started_count=1,completed_count=1,
+    last_score_percent=25,best_score_percent=100,last_completed_at_utc=last_started_at_utc
+WHERE child_id=@child AND lesson_id=@lesson;",
+                    "@child", childId, "@lesson", lesson.Id);
+
+                Exception completionError = null;
+                try { coordinator.Complete(); } catch (Exception ex) { completionError = ex; }
+                A(completionError is InvalidOperationException && coordinator.IsActive &&
+                  SessionState(database, sessionId) == "active",
+                    "corrupt_pending_progress_rejects_completion_without_terminalizing_session");
+                A(Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + childId +
+                  "' AND lesson_id='" + lesson.Id + "' AND skill_id='M2_WRONG_PENDING_COMPLETION_SKILL' AND started_count=1 AND completed_count=1;") == 1 &&
+                  Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + sessionId + "';") == 1 &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + sessionId + "';") == 0,
+                    "corrupt_pending_progress_failure_preserves_raw_corruption_and_resumable_runtime");
+                coordinator.Suspend("corrupt_pending_progress_retry_via_resume");
+            }
+
+            using (var resumed = new MathSessionCoordinator(database, templatePath, "NORMAL", 999999, lesson.Id))
+            {
+                var start = resumed.Start("Bé corrupt pending completion progress");
+                var repaired = new MathLessonProgressStore(database).LoadOne(childId, lesson.Id);
+                A(start.ResumedExistingSession && start.SessionId == sessionId && repaired != null &&
+                  repaired.SkillId == lesson.SkillId && repaired.StartedCount == 1 && repaired.CompletedCount == 0 &&
+                  !repaired.LastScorePercent.HasValue && !repaired.BestScorePercent.HasValue &&
+                  !repaired.LastCompletedAtUtc.HasValue,
+                    "corrupt_pending_progress_resume_repairs_completion_slot_before_retry");
+                A(resumed.Summary.Attempts == 3 && resumed.NextQuestion() == null,
+                    "corrupt_pending_progress_resume_keeps_three_durable_answers");
+                var completed = resumed.Complete();
+                A(completed.LessonCompleted && !resumed.IsActive && SessionState(database, sessionId) == "completed" &&
+                  Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + childId +
+                  "' AND lesson_id='" + lesson.Id + "' AND skill_id='" + lesson.SkillId + "' AND started_count=1 AND completed_count=1;") == 1,
+                    "corrupt_pending_progress_retry_completes_one_real_slot_exactly_once");
+                A(Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + sessionId + "';") == 1 &&
+                  Count(database, "SELECT count(*) FROM attempt WHERE session_id='" + sessionId + "';") == 3,
+                    "corrupt_pending_progress_retry_keeps_reward_and_attempt_chain_exactly_once");
+            }
+
+            var missingDatabase = NewDatabase(Path.Combine(root, "targeted-completion-missing-progress.db"), schemaPath);
+            string missingSessionId;
+            string missingChildId;
+            using (var coordinator = new MathSessionCoordinator(missingDatabase, templatePath, "LOW", 8063, lesson.Id))
+            {
+                var started = coordinator.Start("Bé missing pending completion progress");
+                missingSessionId = started.SessionId;
+                missingChildId = started.ChildId;
+                for (var ordinal = 0; ordinal < 3; ordinal++)
+                {
+                    var question = coordinator.NextQuestion();
+                    coordinator.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 760 + ordinal * 100);
+                }
+                Exec(missingDatabase,
+                    "DELETE FROM math_lesson_progress WHERE child_id=@child AND lesson_id=@lesson;",
+                    "@child", missingChildId, "@lesson", lesson.Id);
+                Exception completionError = null;
+                try { coordinator.Complete(); } catch (Exception ex) { completionError = ex; }
+                A(completionError is InvalidOperationException && coordinator.IsActive &&
+                  SessionState(missingDatabase, missingSessionId) == "active" &&
+                  Count(missingDatabase, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + missingChildId +
+                  "' AND lesson_id='" + lesson.Id + "';") == 0,
+                    "missing_pending_progress_rejects_completion_and_does_not_invent_history");
+                coordinator.Suspend("missing_pending_progress_retry_via_resume");
+            }
+            using (var resumed = new MathSessionCoordinator(missingDatabase, templatePath, "NORMAL", 999999, lesson.Id))
+            {
+                var start = resumed.Start("Bé missing pending completion progress");
+                var recreated = new MathLessonProgressStore(missingDatabase).LoadOne(missingChildId, lesson.Id);
+                A(start.ResumedExistingSession && start.SessionId == missingSessionId && recreated != null &&
+                  recreated.SkillId == lesson.SkillId && recreated.StartedCount == 1 && recreated.CompletedCount == 0,
+                    "missing_pending_progress_resume_recreates_exact_active_start_before_retry");
+                var completed = resumed.Complete();
+                A(completed.LessonCompleted && !resumed.IsActive &&
+                  Count(missingDatabase, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + missingChildId +
+                  "' AND lesson_id='" + lesson.Id + "' AND started_count=1 AND completed_count=1;") == 1,
+                    "missing_pending_progress_retry_completes_recreated_slot_once");
+            }
+
+            var staleStartDatabase = NewDatabase(Path.Combine(root, "targeted-completion-stale-start-progress.db"), schemaPath);
+            string staleSessionId;
+            string staleChildId;
+            using (var coordinator = new MathSessionCoordinator(staleStartDatabase, templatePath, "LOW", 8064, lesson.Id))
+            {
+                var started = coordinator.Start("Bé stale start pending completion progress");
+                staleSessionId = started.SessionId;
+                staleChildId = started.ChildId;
+                for (var ordinal = 0; ordinal < 3; ordinal++)
+                {
+                    var question = coordinator.NextQuestion();
+                    coordinator.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 780 + ordinal * 100);
+                }
+                Exec(staleStartDatabase, @"UPDATE math_lesson_progress
+SET last_started_at_utc='2001-01-01T00:00:00.0000000Z'
+WHERE child_id=@child AND lesson_id=@lesson;",
+                    "@child", staleChildId, "@lesson", lesson.Id);
+                Exception completionError = null;
+                try { coordinator.Complete(); } catch (Exception ex) { completionError = ex; }
+                A(completionError is InvalidOperationException && coordinator.IsActive &&
+                  SessionState(staleStartDatabase, staleSessionId) == "active" &&
+                  Count(staleStartDatabase, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + staleChildId +
+                  "' AND lesson_id='" + lesson.Id + "' AND started_count=1 AND completed_count=0;") == 1,
+                    "stale_last_started_progress_cannot_complete_different_active_session");
+                coordinator.Suspend("stale_start_progress_retry_via_resume");
+            }
+            using (var resumed = new MathSessionCoordinator(staleStartDatabase, templatePath, "NORMAL", 999999, lesson.Id))
+            {
+                var start = resumed.Start("Bé stale start pending completion progress");
+                var repaired = new MathLessonProgressStore(staleStartDatabase).LoadOne(staleChildId, lesson.Id);
+                A(start.ResumedExistingSession && start.SessionId == staleSessionId && repaired != null &&
+                  repaired.LastStartedAtUtc.HasValue && repaired.LastStartedAtUtc.Value == resumed.Summary.StartedAtUtc,
+                    "stale_last_started_progress_resume_rebinds_exact_active_session_start");
+                var completed = resumed.Complete();
+                A(completed.LessonCompleted && !resumed.IsActive &&
+                  Count(staleStartDatabase, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + staleChildId +
+                  "' AND lesson_id='" + lesson.Id + "' AND started_count=1 AND completed_count=1;") == 1,
+                    "stale_last_started_progress_retry_completes_after_exact_rebind");
             }
         }
 
