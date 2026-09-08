@@ -12,10 +12,12 @@ EXECUTION_MODE=PLAYABLE_EVENT_UI_NO_WAIT
 ACTIVE_PHASE=PLAYABLE_EVENT_GAME_V1
 ACTIVE_FOCUS=FIRST_FIVE_QUICK_RESCUE_UI_E2E_RELEASE
 LAST_FULLY_VERIFIED_HEAD=`b45dc56`
-LATEST_UI_VERIFIED_HEAD=`b45dc56`
-LATEST_PERSISTENCE_VERIFIED_HEAD=`b45dc56`
+LATEST_UI_VERIFIED_HEAD=`2812536`
+LATEST_PERSISTENCE_VERIFIED_HEAD=`2812536`
 LAST_VERIFIED_CHILD_UI=3743_ASSERTIONS_PASS
 LAST_VERIFIED_PERSISTENCE=8053_ASSERTIONS_PASS
+LATEST_OFFSCREEN_CAPTURE_HEAD=`2812536`
+LAST_VERIFIED_OFFSCREEN_CAPTURE=10_PNG_3774_ASSERTIONS_PASS
 LAST_VERIFIED_CONTENT=90_OF_90_PASS
 LAST_VERIFIED_RELEASE=`0.1.80-dev`_POST_INSTALLER_PROVENANCE_CONTENT_90_PERSISTENCE_8053_UI_3743_PORTABLE_E2E_INSTALLER_PASS
 EARLY_LESSON_DEEP_HEAD=`e34136d`
@@ -30,10 +32,10 @@ EARLY_LESSON_DEEP_VALIDATOR=402_OF_402_VALID
 
 ### Post-closure visual integration — 2026-09-08
 
-- `468dd55` landed the visual polish; `af48f89` then bound game-art motion to the existing performance policy. Current common-head verification is `b45dc56`.
+- `468dd55` landed the visual polish; `af48f89` then bound game-art motion to the existing performance policy. Latest non-release QA verification is `2812536`; full release evidence remains `b45dc56`.
 - Home/Hub/lesson/rescue use richer child cards, raised action states, mission/checkpoint styling, procedural rescue hero art, feedback FX and Garden completion art without changing grading/session semantics.
 - LOW keeps decorative game art static; NORMAL respects the configured FPS cap and disables decorative feedback during learning focus; `a0344f4` makes timers follow the parent visibility hierarchy, and `dcf844b` closes the detach/re-attach lifecycle so a control removed from the visual tree stops its timer and resumes safely only after being attached again. The visual integration still preserves focusable locked missions, exact prerequisite narration, Enter/Esc actions, 900×640 and 125% DPI regressions, resume/retry/failure safety and terminal completion behavior.
-- Verification on `b45dc56`: Child UI **3743 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, Math persistence **8053 assertions PASS**, `git diff --check` PASS.
+- Verification on `2812536`: Child UI **3743 assertions PASS**, offscreen capture **10 PNG / 3774 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, Math persistence **8053 assertions PASS**, `git diff --check` PASS.
 - Release-full evidence is now `b45dc56` / `0.1.80-dev`: full Build-Setup/Installer distribution gate trên cùng common head ghi Child UI **3743**, persistence **8053**, Portable E2E PASS và post-installer provenance PASS.
 
 Đọc và tuân thủ `_WORK_CLAIMS/MATH_PLAYABLE_EVENT_GAME_V1.md`. P0 mới là đưa first-five thành flow chơi được: Home/Hub entry → intro → 3 checkpoints dùng lại MathLessonForm → behavior-aware repair/break → completion restoration/Garden → resume E2E. Dùng internal fixture/view-model trước khi AI1/AI2 land; final adapter mỏng sau. Không chờ và không đổi engine/content semantics.

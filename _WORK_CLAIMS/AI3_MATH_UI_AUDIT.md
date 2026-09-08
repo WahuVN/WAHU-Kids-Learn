@@ -3,8 +3,8 @@
 Updated: 2026-09-08
 Owner: AI3
 Last fully verified release HEAD: `b45dc56`
-Latest UI/performance verified HEAD: `b45dc56`
-Latest persistence verified HEAD: `b45dc56`
+Latest UI/performance verified HEAD: `2812536`
+Latest persistence verified HEAD: `2812536`
 Status: `LANE_DONE=YES`; `PLAYABLE_UI_P0=GREEN`; `INSTALLER_E2E=BLOCKED_SAFETY_UNOWNED_LOCAL_DATA`
 
 ## PLAYABLE EVENT V1 — current evidence
@@ -12,7 +12,7 @@ Status: `LANE_DONE=YES`; `PLAYABLE_UI_P0=GREEN`; `INSTALLER_E2E=BLOCKED_SAFETY_U
 - Post-closure visual wave `468dd55` adds richer Home/Hub/lesson/rescue cards and button depth, procedural rescue hero/feedback/Garden art, improved typed-answer surface and child-facing completion feedback. Runtime/session/content semantics were not changed.
 - Motion hardening `af48f89` binds the new art to the existing performance contract: LOW decorative motion stays off, NORMAL respects its FPS cap, and learning-focus feedback stays static. `a0344f4` tracks the parent visibility hierarchy; `dcf844b` additionally closes detach/re-attach lifecycle so controls removed from the visual tree stop animation timers and resume only after being attached again, with subscriptions still disposed cleanly.
 - Integration intentionally retained the newer remote accessibility/lifecycle guards: locked rescue missions stay keyboard-focusable for prerequisite explanation, Enter/Esc remain wired, exact resume and failure-safe status remain intact, and 900×640 plus 125% DPI regressions still pass.
-- Gate on `b45dc56`: Child UI **3743 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, Math persistence **8053 assertions PASS**, `git diff --check` PASS.
+- Latest QA gate on `2812536`: Child UI **3743 assertions PASS**, offscreen capture **10 PNG / 3774 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, Math persistence **8053 assertions PASS**, `git diff --check` PASS. Full Build-Setup release gate remains `b45dc56`.
 
 - Home/Math Hub có entry **Toán nhanh — Nhiệm vụ cứu hộ**; 5 event production cho 5 bài đầu.
 - Flow UI E2E khóa: intro → 3 checkpoint → cố tình sai → repair/hint → suspend khi retry pending → resume exact event/session/open question → hoàn thành → Garden tăng đúng 1 lần.
@@ -38,7 +38,7 @@ Status: `LANE_DONE=YES`; `PLAYABLE_UI_P0=GREEN`; `INSTALLER_E2E=BLOCKED_SAFETY_U
 - Progress chronology/score `d6002a9` rejects malformed/missing/inverted completion chronology, skill/count mismatch and stale score-only evidence; effective completion/score therefore fail closed and fresh start repairs untrusted metadata.
 - UI/rescue regression `b45dc56` injects malformed completion timestamp into bài 1 and verifies Hub hides false completion/scores, bài 2 stays locked, rescue #2 remains focusable for prerequisite narration but cannot start.
 - Gameplay rescue đã được scale 125% trong chính active session: prompt vẫn fit từ 12pt trở lên, checkpoint/break target giữ kích thước thao tác và wrong→retry→hint→suspend vẫn chạy sau scale.
-- Latest UI/performance/persistence: Child UI **3743 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, persistence **8053 assertions PASS** on `b45dc56`. Most recent Math content/event/pool suite remains **90/90 PASS** with no content files changed by the visual/motion waves.
+- Latest UI/performance/persistence on `2812536`: Child UI **3743 assertions PASS**, offscreen capture **10 PNG / 3774 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, persistence **8053 assertions PASS**. Most recent Math content/event/pool suite remains **90/90 PASS** with no content files changed by the visual/motion waves.
 - `0.1.80-dev`: Build-Setup **15/15 PASS** + provenance/content/persistence/Portable/post-installer gates, installer compile **PASS**; publish payload chứa `game_events_v1.json` SHA `F9F25EA94DA7FCD20E360509EE53E6E758039CCF788FAFEC729A35F80D39A8B1`.
 - Full Installer E2E hiện **BLOCKED_SAFETY** vì `%LOCALAPPDATA%\WAHU Kids Learn\data\learning.db` tồn tại nhưng không có `.wahu-e2e-owned`; không được xóa/ghi đè dữ liệu này để ép test qua.
 - Production signing và real Windows 7 validation vẫn `UNAVAILABLE/PENDING`.
@@ -54,7 +54,7 @@ Current evidence:
 - production Math validator: **402/402 valid**;
 - full Math content/event/pool suite: **90/90 PASS**;
 - difficulty distribution: **134 basic / 134 medium / 134 application**;
-- Math persistence latest: **8053 assertions PASS** on `b45dc56`; Performance **13 assertions PASS** and Motion **25 assertions PASS** on the same common head; release Build-Setup `10b/15` cũng ghi **8053 assertions PASS** với build **0 warning / 0 error**.
+- Math persistence latest: **8053 assertions PASS** on `2812536`; Performance **13 assertions PASS** and Motion **25 assertions PASS** on the same QA head; offscreen UI capture **10 PNG / 3774 assertions PASS**. Release Build-Setup `10b/15` on `b45dc56` cũng ghi **8053 assertions PASS** với build **0 warning / 0 error**.
 - full Build-Setup `0.1.80-dev`: **15/15 PASS**, provenance + validator + 90-suite + persistence + Portable E2E + post-installer provenance recorded in release manifest;
 - Portable E2E: **PASS**;
 - Installer compile: **PASS**; full installer E2E **BLOCKED_SAFETY** trên máy hiện tại.
@@ -247,4 +247,4 @@ No remaining Math UI/QA/integration blocker. The following are release-wide appl
 - production Authenticode signing;
 - compatibility execution on a real Windows 7 machine.
 
-`0.1.45-dev` is an unsigned dev artifact and must not be represented as a production-signed release. Real Windows 7 execution remains `UNAVAILABLE` in the current environment; the manifest correctly leaves that gate `PENDING`.
+`0.1.80-dev` is an unsigned dev artifact and must not be represented as a production-signed release. Real Windows 7 execution remains `UNAVAILABLE` in the current environment; the manifest correctly leaves that gate `PENDING`.
