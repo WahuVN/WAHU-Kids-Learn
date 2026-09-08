@@ -139,7 +139,11 @@ skill_id=excluded.skill_id,
 started_count=math_lesson_progress.started_count+1,
 completed_count=CASE WHEN " + MathLessonProgressStore.UntrustedCompletionOnStartPredicate + @" THEN 0 ELSE math_lesson_progress.completed_count END,
 last_score_percent=CASE WHEN " + MathLessonProgressStore.UntrustedCompletionOnStartPredicate + @" THEN NULL ELSE math_lesson_progress.last_score_percent END,
-best_score_percent=CASE WHEN " + MathLessonProgressStore.UntrustedCompletionOnStartPredicate + @" THEN NULL ELSE math_lesson_progress.best_score_percent END,
+best_score_percent=CASE WHEN " + MathLessonProgressStore.UntrustedCompletionOnStartPredicate + @" THEN NULL
+    WHEN math_lesson_progress.last_score_percent IS NOT NULL AND
+         (math_lesson_progress.best_score_percent IS NULL OR math_lesson_progress.best_score_percent<math_lesson_progress.last_score_percent)
+    THEN math_lesson_progress.last_score_percent
+    ELSE math_lesson_progress.best_score_percent END,
 last_completed_at_utc=CASE WHEN " + MathLessonProgressStore.UntrustedCompletionOnStartPredicate + @" THEN NULL ELSE math_lesson_progress.last_completed_at_utc END,
 last_started_at_utc=excluded.last_started_at_utc,
 updated_at_utc=excluded.updated_at_utc;";

@@ -677,8 +677,11 @@ namespace WAHU.Session
             {
                 var score = 100.0 * _correct / _targetQuestionCount;
                 var existing = _lessonProgressStore.LoadOne(_profile.ChildId, _targetLesson.Id);
-                var best = existing == null || !existing.BestScorePercent.HasValue
-                    ? score : Math.Max(existing.BestScorePercent.Value, score);
+                var best = score;
+                if (existing != null && existing.BestScorePercent.HasValue)
+                    best = Math.Max(best, existing.BestScorePercent.Value);
+                if (existing != null && existing.LastScorePercent.HasValue)
+                    best = Math.Max(best, existing.LastScorePercent.Value);
                 summary.LessonCompleted = true;
                 summary.LessonScorePercent = score;
                 summary.LessonBestScorePercent = best;
@@ -1028,6 +1031,8 @@ namespace WAHU.Session
             if (string.Equals(_sessionMode, "lesson", StringComparison.Ordinal))
             {
                 EnsureTargetLessonLoaded();
+                _lessonProgressStore.ReconcileResumedTargetedSession(
+                    _profile.ChildId, _targetLesson.Id, _targetLesson.SkillId, _session.StartedAtUtc);
                 hadPersistedLessonSelection = TryRestorePersistedTargetSelection(
                     runtime.CurrentSelectionJson, out lessonSelectionMetadataNeedsRepair);
                 if (!hadPersistedLessonSelection) SelectTargetLessonQuestionsForFreshSession();
