@@ -16,10 +16,15 @@ namespace WAHU.ChildUiRuntimeSmoke
     internal static class Program
     {
         private static int _assertions;
+        private static string _captureDirectory;
+        private static int _capturedImages;
 
         [STAThread]
-        private static void Main()
+        private static void Main(string[] args)
         {
+            _captureDirectory = ResolveCaptureDirectory(args);
+            if (!string.IsNullOrWhiteSpace(_captureDirectory)) Directory.CreateDirectory(_captureDirectory);
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             var appAssembly = typeof(WAHUKidsLearn.MainForm).Assembly;
@@ -56,6 +61,11 @@ namespace WAHU.ChildUiRuntimeSmoke
             TestGameArtMotionPolicy(appAssembly);
             TestBasicControls(appAssembly);
 
+            if (!string.IsNullOrWhiteSpace(_captureDirectory))
+            {
+                A(_capturedImages > 0, "offscreen_capture_exports_at_least_one_png");
+                Console.WriteLine("CHILD_UI_CAPTURE_PASS files=" + _capturedImages + " dir=" + _captureDirectory);
+            }
             Console.WriteLine("CHILD_UI_RUNTIME_SMOKE_PASS assertions=" + _assertions);
         }
 
@@ -3817,6 +3827,79 @@ END;");
             A(Math.Abs(root.Width - form.ClientSize.Width) <= 2, name + "_root_fills_width");
             A(Math.Abs(root.Height - form.ClientSize.Height) <= 2, name + "_root_fills_height");
             A(CountSizedControls(root) >= 15, name + "_keeps_sized_layout_tree");
+            CaptureControlIfRequested(root, name);
+        }
+
+        private static string ResolveCaptureDirectory(string[] args)
+        {
+            if (args == null) return null;
+            for (var i = 0; i < args.Length; i++)
+            {
+                if (!string.Equals(args[i], "--capture-dir", StringComparison.OrdinalIgnoreCase)) continue;
+                if (i + 1 >= args.Length || string.IsNullOrWhiteSpace(args[i + 1]))
+                    throw new ArgumentException("--capture-dir requires a directory path.");
+                return Path.GetFullPath(args[i + 1]);
+            }
+            return null;
+        }
+
+        private static void CaptureControlIfRequested(Control root, string name)
+        {
+            if (string.IsNullOrWhiteSpace(_captureDirectory) || root == null) return;
+            A(root.Width > 0 && root.Height > 0, name + "_capture_positive_bounds");
+
+            using (var bitmap = new Bitmap(root.Width, root.Height))
+            {
+                root.DrawToBitmap(bitmap, new Rectangle(0, 0, root.Width, root.Height));
+                var colors = SampleBitmapColors(bitmap);
+                var mode = "root";
+                if (colors.Count < 3)
+                {
+                    using (var graphics = Graphics.FromImage(bitmap)) graphics.Clear(root.BackColor);
+                    DrawControlTreeToBitmap(root, bitmap, 0, 0);
+                    colors = SampleBitmapColors(bitmap);
+                    mode = "tree";
+                }
+
+                var fileName = string.Concat(name.Select(ch => Path.GetInvalidFileNameChars().Contains(ch) ? '_' : ch)) + ".png";
+                var path = Path.Combine(_captureDirectory, fileName);
+                bitmap.Save(path, System.Drawing.Imaging.ImageFormat.Png);
+                var bytes = new FileInfo(path).Length;
+                Console.WriteLine("CHILD_UI_CAPTURE_FILE name=" + name + " mode=" + mode + " colors=" + colors.Count + " bytes=" + bytes + " path=" + path);
+                A(colors.Count >= 3, name + "_capture_renders_nonempty_visual");
+                A(File.Exists(path) && bytes > 1024, name + "_capture_png_written");
+                _capturedImages++;
+            }
+        }
+
+        private static HashSet<int> SampleBitmapColors(Bitmap bitmap)
+        {
+            var colors = new HashSet<int>();
+            var stepX = Math.Max(1, bitmap.Width / 32);
+            var stepY = Math.Max(1, bitmap.Height / 18);
+            for (var y = 0; y < bitmap.Height; y += stepY)
+                for (var x = 0; x < bitmap.Width; x += stepX)
+                    colors.Add(bitmap.GetPixel(x, y).ToArgb());
+            return colors;
+        }
+
+        private static void DrawControlTreeToBitmap(Control control, Bitmap target, int offsetX, int offsetY)
+        {
+            if (control == null || !IsControlLocallyVisible(control) || control.Width <= 0 || control.Height <= 0) return;
+            using (var layer = new Bitmap(control.Width, control.Height))
+            {
+                control.DrawToBitmap(layer, new Rectangle(0, 0, control.Width, control.Height));
+                using (var graphics = Graphics.FromImage(target)) graphics.DrawImageUnscaled(layer, offsetX, offsetY);
+            }
+            foreach (Control child in control.Controls)
+                DrawControlTreeToBitmap(child, target, offsetX + child.Left, offsetY + child.Top);
+        }
+
+        private static bool IsControlLocallyVisible(Control control)
+        {
+            var getState = typeof(Control).GetMethod("GetState", BindingFlags.Instance | BindingFlags.NonPublic);
+            if (getState == null) return true;
+            return (bool)getState.Invoke(control, new object[] { 0x00000002 });
         }
 
         private static void CreateAndLayoutTree(Control root)
