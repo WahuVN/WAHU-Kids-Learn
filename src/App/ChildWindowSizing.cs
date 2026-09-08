@@ -15,12 +15,14 @@ namespace WAHUKidsLearn
             form.ClientSize = preferredClientSize;
 
             // Learner-facing screens are easier to use full-screen on the small 1366x768-class
-            // displays that are common on older Windows 7 machines. Maximize only when the form
-            // is actually shown: offscreen layout/capture tests must still be able to exercise
-            // explicit 900x640 and scaled sizes deterministically.
+            // displays that are common on older Windows 7 machines. Child screens are opened
+            // modally with an Owner in production; the main learner window is CenterScreen.
+            // Keep ownerless CenterParent forms at their explicit client size so deterministic
+            // layout/capture tests do not enter a transient maximized 100x23 layout.
             form.Shown += delegate
             {
-                if (form.WindowState != FormWindowState.Maximized)
+                var shouldMaximize = form.Owner != null || form.StartPosition == FormStartPosition.CenterScreen;
+                if (shouldMaximize && form.WindowState != FormWindowState.Maximized)
                     form.WindowState = FormWindowState.Maximized;
             };
         }
