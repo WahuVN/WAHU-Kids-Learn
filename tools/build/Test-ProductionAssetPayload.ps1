@@ -94,6 +94,11 @@ function Read-ZipEntryText($Entry) {
     finally { $stream.Dispose() }
 }
 
+function Normalize-ZipEntryName([string]$Name) {
+    if ($null -eq $Name) { return '' }
+    return $Name.Replace('\', '/')
+}
+
 function Assert-Zip([string]$ZipPath) {
     if (-not (Test-Path -LiteralPath $ZipPath -PathType Leaf)) { throw "Portable ZIP does not exist: $ZipPath" }
     Add-Type -AssemblyName System.IO.Compression.FileSystem
@@ -101,7 +106,7 @@ function Assert-Zip([string]$ZipPath) {
     try {
         $prefix = 'Assets/Generated/Ready/'
         $manifestName = $prefix + 'ASSET_SELECTION_MANIFEST.json'
-        $manifestEntries = @($zip.Entries | Where-Object { [string]::Equals($_.FullName, $manifestName, [StringComparison]::OrdinalIgnoreCase) })
+        $manifestEntries = @($zip.Entries | Where-Object { [string]::Equals((Normalize-ZipEntryName $_.FullName), $manifestName, [StringComparison]::OrdinalIgnoreCase) })
         if ($manifestEntries.Count -ne 1) { throw "Portable ZIP must contain exactly one production asset manifest. count=$($manifestEntries.Count)" }
         $manifestEntry = $manifestEntries[0]
         $manifestHash = Get-ZipEntrySha256 $manifestEntry
@@ -112,14 +117,14 @@ function Assert-Zip([string]$ZipPath) {
         $manifest = (Read-ZipEntryText $manifestEntry) | ConvertFrom-Json
         $expected = Assert-ManifestShape $manifest
         $pngEntries = @($zip.Entries | Where-Object {
-            $_.FullName.StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase) -and
-            $_.FullName.EndsWith('.png', [StringComparison]::OrdinalIgnoreCase)
+            (Normalize-ZipEntryName $_.FullName).StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase) -and
+            (Normalize-ZipEntryName $_.FullName).EndsWith('.png', [StringComparison]::OrdinalIgnoreCase)
         })
         if ($pngEntries.Count -ne $expected) { throw "Portable ZIP production asset PNG count mismatch. expected=$expected actual=$($pngEntries.Count)" }
         foreach ($asset in @($manifest.assets)) {
             $rel = ([string]$asset.finalPath).Replace('\', '/')
             $entryName = $prefix + $rel
-            $entries = @($zip.Entries | Where-Object { [string]::Equals($_.FullName, $entryName, [StringComparison]::OrdinalIgnoreCase) })
+            $entries = @($zip.Entries | Where-Object { [string]::Equals((Normalize-ZipEntryName $_.FullName), $entryName, [StringComparison]::OrdinalIgnoreCase) })
             if ($entries.Count -ne 1) { throw "Portable ZIP asset missing/duplicated: $entryName count=$($entries.Count)" }
             $entry = $entries[0]
             if ([long]$entry.Length -ne [long]$asset.bytes) {
