@@ -155,34 +155,82 @@ WHERE id=@id AND child_id=@child AND state IN ('started','active') AND ended_at_
                 using (var progress = connection.CreateCommand())
                 {
                     progress.Transaction = transaction;
-                    progress.CommandText = @"INSERT INTO math_lesson_progress(
-child_id,lesson_id,skill_id,started_count,completed_count,last_score_percent,best_score_percent,last_started_at_utc,last_completed_at_utc,updated_at_utc)
-VALUES(@child,@lesson,@skill,1,1,@score,@score,@utc,@utc,@utc)
-ON CONFLICT(child_id,lesson_id) DO UPDATE SET
-skill_id=excluded.skill_id,
-completed_count=math_lesson_progress.completed_count+1,
-last_score_percent=excluded.last_score_percent,
-best_score_percent=CASE
-    WHEN math_lesson_progress.best_score_percent IS NULL
-      OR excluded.best_score_percent > math_lesson_progress.best_score_percent
-      OR (math_lesson_progress.last_score_percent IS NOT NULL
-          AND math_lesson_progress.last_score_percent > math_lesson_progress.best_score_percent)
-    THEN CASE WHEN math_lesson_progress.last_score_percent IS NOT NULL
-                   AND math_lesson_progress.last_score_percent > excluded.best_score_percent
-              THEN math_lesson_progress.last_score_percent ELSE excluded.best_score_percent END
-    ELSE math_lesson_progress.best_score_percent END,
-last_completed_at_utc=excluded.last_completed_at_utc,
-updated_at_utc=excluded.updated_at_utc;";
+
+                    progress.CommandText = @"UPDATE math_lesson_progress
+SET completed_count=math_lesson_progress.completed_count+1,
+    last_score_percent=@score,
+    best_score_percent=CASE
+        WHEN math_lesson_progress.best_score_percent IS NULL
+          OR @score > math_lesson_progress.best_score_percent
+          OR (math_lesson_progress.last_score_percent IS NOT NULL
+              AND math_lesson_progress.last_score_percent > math_lesson_progress.best_score_percent)
+        THEN CASE WHEN math_lesson_progress.last_score_percent IS NOT NULL
+                       AND math_lesson_progress.last_score_percent > @score
+                  THEN math_lesson_progress.last_score_percent ELSE @score END
+        ELSE math_lesson_progress.best_score_percent END,
+    last_completed_at_utc=@utc,
+    updated_at_utc=@utc
+WHERE child_id=@child AND lesson_id=@lesson
+  AND skill_id=@skill
+  AND started_count>completed_count
+  AND last_started_at_utc IS NOT NULL
+  AND julianday(last_started_at_utc) IS NOT NULL
+  AND julianday(last_started_at_utc)=julianday((
+      SELECT started_at_utc FROM session WHERE id=@id AND child_id=@child
+  ))
+  AND NOT (" + UntrustedCompletionOnStartPredicate + @");";
+                    progress.Parameters.AddWithValue("@id", sessionId);
+
                     progress.Parameters.AddWithValue("@child", childId);
                     progress.Parameters.AddWithValue("@lesson", lessonId);
                     progress.Parameters.AddWithValue("@skill", skillId);
                     progress.Parameters.AddWithValue("@score", score);
                     progress.Parameters.AddWithValue("@utc", utc);
-                    progress.ExecuteNonQuery();
+                    if (progress.ExecuteNonQuery() != 1)
+                        throw new InvalidOperationException("Targeted Math lesson progress is not a trusted pending completion.");
                 }
             });
 
             return LoadOne(childId, lessonId);
+        }
+
+        public MathLessonProgressRecord LoadTrustedCompletionEvidence(string childId, string lessonId, string expectedSkillId)
+        {
+            Require(childId, "childId");
+            Require(lessonId, "lessonId");
+            Require(expectedSkillId, "expectedSkillId");
+            var progress = LoadOne(childId, lessonId);
+            if (!HasTrustedCompletionEvidence(progress, expectedSkillId)) return null;
+
+            progress.LastScorePercent = IsValidScorePercent(progress.LastScorePercent) ? progress.LastScorePercent : null;
+            progress.BestScorePercent = IsValidScorePercent(progress.BestScorePercent) ? progress.BestScorePercent : null;
+            if (progress.LastScorePercent.HasValue &&
+                (!progress.BestScorePercent.HasValue || progress.LastScorePercent.Value > progress.BestScorePercent.Value))
+                progress.BestScorePercent = progress.LastScorePercent;
+            return progress;
+        }
+
+        public double? LoadTrustedBestScorePercent(string childId, string lessonId, string expectedSkillId)
+        {
+            var progress = LoadTrustedCompletionEvidence(childId, lessonId, expectedSkillId);
+            return progress == null ? (double?)null : progress.BestScorePercent;
+        }
+
+        private static bool HasTrustedCompletionEvidence(MathLessonProgressRecord progress, string expectedSkillId)
+        {
+            if (progress == null || progress.CompletedCount <= 0) return false;
+            if (!string.Equals(progress.SkillId, expectedSkillId, StringComparison.Ordinal)) return false;
+            if (progress.StartedCount <= 0 || progress.CompletedCount > progress.StartedCount) return false;
+            if (!progress.LastStartedAtUtc.HasValue || !progress.LastCompletedAtUtc.HasValue) return false;
+            if (progress.CompletedCount == progress.StartedCount &&
+                progress.LastCompletedAtUtc.Value < progress.LastStartedAtUtc.Value) return false;
+            return true;
+        }
+
+        private static bool IsValidScorePercent(double? value)
+        {
+            return value.HasValue && !double.IsNaN(value.Value) && !double.IsInfinity(value.Value) &&
+                   value.Value >= 0.0 && value.Value <= 100.0;
         }
 
         public IDictionary<string, MathLessonProgressRecord> Load(string childId)
