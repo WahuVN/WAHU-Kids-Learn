@@ -90,6 +90,7 @@ try {
         'data\schema\003_math_attempt_idempotency_runtime.sql',
         'data\schema\004_math_lesson_progress.sql',
         'data\schema\005_math_runtime_pack_identity.sql',
+        'data\schema\006_attempt_commit_key_immutability.sql',
         'content_packs\math_grade2_v1\manifest.json',
         'content_packs\math_grade2_v1\verified_templates_v1.json',
         'content_packs\math_grade2_v1\lesson_catalog_v1.json',
@@ -116,7 +117,7 @@ try {
     Assert ($app.ExitCode -eq 0) "app bootstrap smoke exit $($app.ExitCode)"
     Assert (Test-Path -LiteralPath $bootstrapReport) 'bootstrap report missing'
     $bootstrapText = Get-Content -Raw -LiteralPath $bootstrapReport
-    foreach ($needle in @('result=PASS','previous_run_unclean=False','storage_mode=INSTALLED','config_files=10','config_journal=DELETE','update_enabled=True','update_channel=dev','update_manifest_url=https://github.com/WahuVN/WAHU-Kids-Learn/releases/download/update-dev/update-manifest.json','update_installed_mode_only=True','startup_default=True','config_low_fps_cap=18','config_normal_fps_cap=30','provider_version=2.0.4.0','sqlite_version=3.53.4','journal=DELETE','schema_version=5','migration_version=5','pre_migration_backup=none','integrity=ok','foreign_key_issues=0','verified_content_packs=2','performance_profile=','performance_motion_fps_cap=','performance_max_animated_regions=','performance_image_cache_mb=','performance_audio_cache_mb=','performance_evidence=','parent_pin_configured=False')) {
+    foreach ($needle in @('result=PASS','previous_run_unclean=False','storage_mode=INSTALLED','config_files=10','config_journal=DELETE','update_enabled=True','update_channel=dev','update_manifest_url=https://github.com/WahuVN/WAHU-Kids-Learn/releases/download/update-dev/update-manifest.json','update_installed_mode_only=True','startup_default=True','config_low_fps_cap=18','config_normal_fps_cap=30','provider_version=2.0.4.0','sqlite_version=3.53.4','journal=DELETE','schema_version=6','migration_version=6','pre_migration_backup=none','integrity=ok','foreign_key_issues=0','verified_content_packs=2','performance_profile=','performance_motion_fps_cap=','performance_max_animated_regions=','performance_image_cache_mb=','performance_audio_cache_mb=','performance_evidence=','parent_pin_configured=False')) {
         Assert ($bootstrapText.Contains($needle)) "bootstrap report missing: $needle"
     }
     Assert ($bootstrapText.Contains('app_version=' + $AppVersion)) 'installed runtime app_version mismatch'
