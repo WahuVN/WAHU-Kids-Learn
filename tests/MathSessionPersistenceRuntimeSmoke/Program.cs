@@ -4177,6 +4177,39 @@ WHERE child_id=@child AND lesson_id=@lesson;",
                     "restored_target_question_count_completes_exactly_once");
             }
 
+            var packDatabase = NewDatabase(Path.Combine(root, "targeted-completion-tampered-runtime-pack.db"), schemaPath);
+            using (var coordinator = new MathSessionCoordinator(packDatabase, templatePath, "LOW", 8068, lesson.Id))
+            {
+                var started = coordinator.Start("Bé tampered targeted runtime pack");
+                for (var ordinal = 0; ordinal < 3; ordinal++)
+                {
+                    var question = coordinator.NextQuestion();
+                    coordinator.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 815 + ordinal * 100);
+                }
+                Exec(packDatabase,
+                    "UPDATE math_session_runtime SET pack_id='math_grade2_tampered_pack',pack_version='9.9.9' WHERE session_id=@session;",
+                    "@session", started.SessionId);
+                Exception completionError = null;
+                try { coordinator.Complete(); } catch (Exception ex) { completionError = ex; }
+                A(completionError is InvalidOperationException && coordinator.IsActive &&
+                  SessionState(packDatabase, started.SessionId) == "active" &&
+                  Count(packDatabase, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + started.ChildId +
+                  "' AND lesson_id='" + lesson.Id + "' AND completed_count=0;") == 1,
+                    "tampered_runtime_pack_identity_cannot_terminalize_current_pack_lesson");
+                A(Count(packDatabase, "SELECT count(*) FROM reward_event WHERE source_ref='" + started.SessionId + "';") == 0 &&
+                  Count(packDatabase, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + started.SessionId +
+                  "' AND pack_id='math_grade2_tampered_pack' AND pack_version='9.9.9';") == 1,
+                    "tampered_runtime_pack_identity_failure_preserves_runtime_without_reward");
+                Exec(packDatabase,
+                    "UPDATE math_session_runtime SET pack_id=@pack,pack_version=@version WHERE session_id=@session;",
+                    "@pack", MathSessionCoordinator.PackId, "@version", MathSessionCoordinator.PackVersion, "@session", started.SessionId);
+                var completed = coordinator.Complete();
+                A(completed.LessonCompleted && !coordinator.IsActive &&
+                  Count(packDatabase, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + started.ChildId +
+                  "' AND lesson_id='" + lesson.Id + "' AND started_count=1 AND completed_count=1;") == 1,
+                    "restored_runtime_pack_identity_completes_exactly_once");
+            }
+
             var missingDatabase = NewDatabase(Path.Combine(root, "targeted-completion-missing-runtime-identity.db"), schemaPath);
             using (var coordinator = new MathSessionCoordinator(missingDatabase, templatePath, "LOW", 8066, lesson.Id))
             {

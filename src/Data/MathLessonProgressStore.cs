@@ -120,6 +120,8 @@ updated_at_utc=@updated;";
             string childId,
             string lessonId,
             string skillId,
+            string packId,
+            string packVersion,
             int correct,
             int attempts,
             string summaryJson,
@@ -130,6 +132,8 @@ updated_at_utc=@updated;";
             Require(childId, "childId");
             Require(lessonId, "lessonId");
             Require(skillId, "skillId");
+            Require(packId, "packId");
+            Require(packVersion, "packVersion");
             if (attempts < 1) throw new ArgumentOutOfRangeException("attempts");
             if (correct < 0 || correct > attempts) throw new ArgumentOutOfRangeException("correct");
             var score = 100.0 * correct / attempts;
@@ -148,6 +152,7 @@ WHERE id=@id AND child_id=@child AND planned_subject='math'
       SELECT 1 FROM math_session_runtime r
       WHERE r.session_id=@id AND r.session_mode='lesson'
         AND r.target_lesson_id=@lesson AND r.target_question_count=@attempts
+        AND r.pack_id=@packId AND r.pack_version=@packVersion
   );";
                     session.Parameters.AddWithValue("@utc", utc);
                     session.Parameters.AddWithValue("@summary", string.IsNullOrWhiteSpace(summaryJson) ? (object)DBNull.Value : summaryJson);
@@ -156,6 +161,8 @@ WHERE id=@id AND child_id=@child AND planned_subject='math'
                     session.Parameters.AddWithValue("@child", childId);
                     session.Parameters.AddWithValue("@lesson", lessonId);
                     session.Parameters.AddWithValue("@attempts", attempts);
+                    session.Parameters.AddWithValue("@packId", packId);
+                    session.Parameters.AddWithValue("@packVersion", packVersion);
                     if (session.ExecuteNonQuery() != 1)
                         throw new InvalidOperationException("Targeted Math session is not active or does not exist.");
                 }

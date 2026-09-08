@@ -689,7 +689,8 @@ namespace WAHU.Session
                 {
                     _lessonProgressStore.CompleteActiveSession(
                         _session.SessionId, _profile.ChildId, _targetLesson.Id, _targetLesson.SkillId,
-                        _correct, _targetQuestionCount, _json.Serialize(summaryData), behaviorJson, ended);
+                        PackId, PackVersion, _correct, _targetQuestionCount,
+                        _json.Serialize(summaryData), behaviorJson, ended);
                 }
                 catch (InvalidOperationException)
                 {
