@@ -1926,6 +1926,12 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                     A(GetField<Label>(rescue, "_eventTitle").Text == eventTitle &&
                       GetField<Label>(rescue, "_intro").Text.IndexOf("ba", StringComparison.OrdinalIgnoreCase) >= 0,
                         "quick_rescue_intro_renders_production_title_and_story");
+                    var missionArt = GetField<Control>(rescue, "_missionArt");
+                    A(missionArt != null && string.Equals(Get<string>(missionArt, "Theme"), Get<string>(presentation, "Theme"), StringComparison.Ordinal),
+                        "quick_rescue_intro_mission_art_tracks_selected_theme");
+                    A(Get<string>(missionArt, "ActiveAssetPath").EndsWith("mission_13_forest_sign_repair.png", StringComparison.Ordinal) &&
+                      missionArt.AccessibleDescription.IndexOf(eventTitle, StringComparison.OrdinalIgnoreCase) >= 0,
+                        "quick_rescue_intro_uses_selected_production_mission_illustration");
                     var startButton = GetField<Button>(rescue, "_startButton");
                     A(startButton.Enabled && startButton.Text.IndexOf("3 chặng", StringComparison.OrdinalIgnoreCase) >= 0,
                         "quick_rescue_intro_primary_cta_is_three_checkpoints");
@@ -1950,6 +1956,8 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                     A(lockedButton.Enabled && lockedButton.TabStop,
                         "quick_rescue_locked_mission_stays_focusable_for_keyboard_explanation");
                     Invoke(rescue, "SelectEvent", lockedPresentation);
+                    A(Get<string>(missionArt, "ActiveAssetPath").EndsWith("mission_14_hundreds_station.png", StringComparison.Ordinal),
+                        "quick_rescue_intro_switches_art_with_locked_mission_selection");
                     var prerequisiteTitle = new MathLessonCatalogSource().Load(catalogPath).FindLesson(lessonId).TitleVi;
                     A(!startButton.Enabled && startButton.Text.IndexOf("Học bài nền", StringComparison.OrdinalIgnoreCase) >= 0,
                         "quick_rescue_locked_mission_cannot_start");
@@ -3795,10 +3803,10 @@ END;");
             var rescueSource = File.ReadAllText(Path.Combine(repo, "src", "App", "MathQuickRescueForm.cs"));
             var lessonSource = File.ReadAllText(Path.Combine(repo, "src", "App", "MathLessonForm.cs"));
             A(homeSource.IndexOf("new RescueHeroArtControl(_performance)", StringComparison.Ordinal) >= 0 &&
-              rescueSource.IndexOf("new RescueHeroArtControl(_performance)", StringComparison.Ordinal) >= 0 &&
+              rescueSource.IndexOf("new RescueMissionIllustrationControl", StringComparison.Ordinal) >= 0 &&
               lessonSource.IndexOf("new GameFeedbackFxControl(_performance, true)", StringComparison.Ordinal) >= 0 &&
               lessonSource.IndexOf("new GardenRewardArtControl(_performance)", StringComparison.Ordinal) >= 0,
-                "game_art_forms_wire_runtime_performance_settings");
+                "game_art_forms_wire_motion_policy_and_static_mission_art");
         }
         private static void TestProductionGameAssets(Assembly appAssembly)
         {
@@ -3807,7 +3815,8 @@ END;");
             var countMethod = libraryType.GetMethod("CountProductionPngAssets", flags);
             var manifestMethod = libraryType.GetMethod("HasProductionManifest", flags);
             var completeMethod = libraryType.GetMethod("HasCompleteProductionPayload", flags);
-            A(countMethod != null && manifestMethod != null && completeMethod != null,
+            var hasAssetMethod = libraryType.GetMethod("HasAsset", flags);
+            A(countMethod != null && manifestMethod != null && completeMethod != null && hasAssetMethod != null,
                 "production_assets_library_contract_available");
             var pngCount = (int)countMethod.Invoke(null, null);
             A(pngCount == 74, "production_assets_exact_74_png_payload");
@@ -3821,6 +3830,33 @@ END;");
                 new object[] { low }, null))
                 A(RenderAssetControlColorCount(rescue, 420, 180) >= 30,
                     "production_assets_rescue_scene_renders_rich_visual");
+
+            var missionType = appAssembly.GetType("WAHUKidsLearn.RescueMissionIllustrationControl", true);
+            var missionMappings = new[]
+            {
+                new[] { "forest_path", "13_MissionIllustrations/mission_13_forest_sign_repair.png" },
+                new[] { "hundred_station", "13_MissionIllustrations/mission_14_hundreds_station.png" },
+                new[] { "number_path", "13_MissionIllustrations/mission_15_number_path.png" },
+                new[] { "place_value_workshop", "13_MissionIllustrations/mission_16_warehouse.png" },
+                new[] { "number_machine", "13_MissionIllustrations/mission_17_number_machine.png" }
+            };
+            using (var mission = (Control)Activator.CreateInstance(missionType, true))
+            {
+                foreach (var mapping in missionMappings)
+                {
+                    Set(mission, "Theme", mapping[0]);
+                    A(string.Equals(Get<string>(mission, "ActiveAssetPath"), mapping[1], StringComparison.Ordinal),
+                        "production_assets_mission_mapping_" + mapping[0]);
+                    A((bool)hasAssetMethod.Invoke(null, new object[] { mapping[1] }),
+                        "production_assets_mission_file_present_" + mapping[0]);
+                    A(RenderAssetControlColorCount(mission, 300, 170) >= 20,
+                        "production_assets_mission_visual_rich_" + mapping[0]);
+                }
+                Set(mission, "Theme", null);
+                A(string.Equals(Get<string>(mission, "ActiveAssetPath"),
+                    "13_MissionIllustrations/mission_12_rescue_map.png", StringComparison.Ordinal),
+                    "production_assets_mission_default_uses_rescue_map");
+            }
 
             var feedbackType = appAssembly.GetType("WAHUKidsLearn.GameFeedbackFxControl", true);
             using (var feedback = (Control)Activator.CreateInstance(feedbackType,

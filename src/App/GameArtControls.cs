@@ -333,6 +333,100 @@ namespace WAHUKidsLearn
         }
     }
 
+    internal sealed class RescueMissionIllustrationControl : Control
+    {
+        private string _theme;
+
+        public RescueMissionIllustrationControl()
+        {
+            SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint |
+                     ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw |
+                     ControlStyles.SupportsTransparentBackColor, true);
+            BackColor = Color.Transparent;
+            AccessibleName = "Minh họa nhiệm vụ cứu hộ";
+            AccessibleDescription = "Bản đồ minh họa cho nhiệm vụ cứu hộ đã chọn.";
+        }
+
+        public string Theme
+        {
+            get { return _theme; }
+            set
+            {
+                var normalized = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+                if (string.Equals(_theme, normalized, StringComparison.OrdinalIgnoreCase)) return;
+                _theme = normalized;
+                Invalidate();
+            }
+        }
+
+        internal string ActiveAssetPath
+        {
+            get { return AssetForTheme(_theme); }
+        }
+
+        internal static string AssetForTheme(string theme)
+        {
+            switch ((theme ?? string.Empty).Trim().ToLowerInvariant())
+            {
+                case "forest_path": return "13_MissionIllustrations/mission_13_forest_sign_repair.png";
+                case "hundred_station": return "13_MissionIllustrations/mission_14_hundreds_station.png";
+                case "number_path": return "13_MissionIllustrations/mission_15_number_path.png";
+                case "place_value_workshop": return "13_MissionIllustrations/mission_16_warehouse.png";
+                case "number_machine": return "13_MissionIllustrations/mission_17_number_machine.png";
+                default: return "13_MissionIllustrations/mission_12_rescue_map.png";
+            }
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
+            if (Width < 48 || Height < 40) return;
+
+            var g = e.Graphics;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            var scene = new RectangleF(2, 2, Math.Max(1, Width - 5), Math.Max(1, Height - 5));
+            var state = g.Save();
+            var drawn = false;
+            try
+            {
+                using (var clip = ChildVisualTheme.RoundedRect(Rectangle.Round(scene), 18)) g.SetClip(clip);
+                drawn = GameAssetLibrary.DrawCover(g, ActiveAssetPath, scene);
+                if (!drawn && !string.Equals(ActiveAssetPath,
+                    "13_MissionIllustrations/mission_12_rescue_map.png", StringComparison.OrdinalIgnoreCase))
+                    drawn = GameAssetLibrary.DrawCover(g, "13_MissionIllustrations/mission_12_rescue_map.png", scene);
+                if (!drawn)
+                    drawn = GameAssetLibrary.DrawCover(g, "03_Rescue/rescue_map_background.png", scene);
+                if (!drawn) DrawProceduralFallback(g, scene);
+            }
+            finally
+            {
+                g.Restore(state);
+            }
+
+            using (var borderPath = ChildVisualTheme.RoundedRect(Rectangle.Round(scene), 18))
+            using (var border = new Pen(Color.FromArgb(156, 112, 135, 126), 1.2f))
+                g.DrawPath(border, borderPath);
+        }
+
+        private static void DrawProceduralFallback(Graphics g, RectangleF scene)
+        {
+            using (var bg = new LinearGradientBrush(scene, Color.FromArgb(234, 247, 255), Color.FromArgb(238, 249, 226), 90f))
+                g.FillRectangle(bg, scene);
+            using (var hill = new SolidBrush(Color.FromArgb(185, 225, 151)))
+                g.FillEllipse(hill, scene.Left - scene.Width * .08f, scene.Top + scene.Height * .58f,
+                    scene.Width * 1.16f, scene.Height * .55f);
+            using (var route = new Pen(Color.FromArgb(220, 154, 78), Math.Max(2f, scene.Width * .018f)))
+            {
+                route.DashStyle = DashStyle.Dot;
+                g.DrawLine(route, scene.Left + scene.Width * .18f, scene.Top + scene.Height * .68f,
+                    scene.Left + scene.Width * .80f, scene.Top + scene.Height * .48f);
+            }
+            RescueHeroArtControl.DrawStar(g, scene.Left + scene.Width * .78f, scene.Top + scene.Height * .25f,
+                Math.Max(6f, scene.Width * .06f), ChildVisualTheme.Sun, ChildVisualTheme.PeachStrong);
+        }
+    }
+
     internal sealed class GameFeedbackFxControl : Control
     {
         public enum Mood { Neutral, Correct, Retry, Hint }

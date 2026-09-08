@@ -328,6 +328,7 @@ namespace WAHUKidsLearn
         private FlowLayoutPanel _checkpoints;
         private Label _status;
         private ChildActionButton _startButton;
+        private RescueMissionIllustrationControl _missionArt;
 
         public MathQuickRescueForm(LearningDatabase database, RuntimePerformanceSettings performance)
             : this(database, performance, ResolveCatalogPath(), null, new List<MathQuickRescueEventPresentation>())
@@ -502,13 +503,13 @@ namespace WAHUKidsLearn
                 AccessibleName = "Câu chuyện nhiệm vụ cứu hộ"
             };
             introLayout.Controls.Add(_intro, 0, 1);
-            var heroArt = new RescueHeroArtControl(_performance)
+            _missionArt = new RescueMissionIllustrationControl
             {
                 Dock = DockStyle.Fill,
                 Margin = new Padding(12, 0, 0, 8)
             };
-            introLayout.Controls.Add(heroArt, 1, 0);
-            introLayout.SetRowSpan(heroArt, 2);
+            introLayout.Controls.Add(_missionArt, 1, 0);
+            introLayout.SetRowSpan(_missionArt, 2);
             _checkpoints = new FlowLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -646,6 +647,8 @@ namespace WAHUKidsLearn
             _eventTitle.AccessibleDescription = "Nhiệm vụ " + item.TitleVi + ".";
             _intro.Text = item.IntroVi;
             _intro.AccessibleDescription = item.IntroVi;
+            _missionArt.Theme = item.Theme;
+            _missionArt.AccessibleDescription = "Minh họa cho nhiệm vụ " + item.TitleVi + ".";
             _checkpoints.Controls.Clear();
             for (var i = 0; i < 3; i++)
             {
@@ -783,6 +786,8 @@ namespace WAHUKidsLearn
             _eventTitle.AccessibleDescription = "Danh sách nhiệm vụ cứu hộ hiện chưa sẵn sàng.";
             _intro.Text = message;
             _intro.AccessibleDescription = message;
+            _missionArt.Theme = null;
+            _missionArt.AccessibleDescription = "Bản đồ cứu hộ chung trong lúc danh sách nhiệm vụ đang chuẩn bị.";
             _checkpoints.Controls.Clear();
             _status.Text = "Không có tiến bộ nào bị mất.";
             _status.AccessibleDescription = "Phần học đã lưu vẫn an toàn.";
