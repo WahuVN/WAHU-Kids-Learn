@@ -20,13 +20,13 @@ Playable Event Engine P0: **GREEN**
 ## Tests
 
 - `tests/MathEngineRuntimeSmoke`: PASS — **72 assertions** (baseline equivalence + adversarial Unicode/NFD, int overflow, answer-length, unit alias, expression depth/token-bomb, Unicode operators và invalid per-question whitelist fail-closed).
-- `tests/MathDataEngineRuntimeSmoke`: PASS — **122 assertions** (idempotency + terminal-session guard + optimistic skill-state guard + true cross-process mastery/session contention + atomic startup + cross-process recovery/cleanup races + subject/child-scoped dangling recovery).
-- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **8124 assertions** (toàn bộ gate cũ + real 402-bank selector breadth + targeted write-failure/corruption repair + deterministic authored runtime IDs + concurrent pending-retry/completion semantics + generated/open-ordinal/timestamp self-heal + multi-runtime reconciliation + late-review transaction rollback + operational DB failure fail-safe).
-- Cross-gate `tests/ChildUiRuntimeSmoke`: **3743 assertions PASS** trên Visual Studio MSBuild/net48/x86 + executable trực tiếp; xác nhận Math Hub/Quick Rescue vẫn đúng sau progress integrity repair.
+- `tests/MathDataEngineRuntimeSmoke`: PASS — **134 assertions** (idempotency + terminal-session guard + optimistic skill-state guard + true cross-process mastery/session contention + atomic startup + cross-process recovery/cleanup races + subject/child-scoped dangling recovery).
+- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **8145 assertions** (toàn bộ gate cũ + real 402-bank selector breadth + targeted write-failure/corruption repair + deterministic authored runtime IDs + concurrent pending-retry/completion semantics + generated/open-ordinal/timestamp self-heal + multi-runtime reconciliation + late-review transaction rollback + operational DB failure fail-safe).
+- Cross-gate `tests/ChildUiRuntimeSmoke`: **4477 assertions PASS** trên Visual Studio MSBuild/net48/x86 + executable trực tiếp; xác nhận Math Hub/Quick Rescue vẫn đúng sau progress integrity repair.
 - Pending-retry early complete: q2 wrong/pending retry rồi gọi `Complete()` bị reject nhưng `RetryPending`, checkpoint=1, exact q2 và reward=0 đều giữ nguyên; suspend/resume tiếp tục flow cũ.
 - Corrupt-catalog completion: synthetic event q1 complete rồi catalog hỏng; fallback lesson giữ selected q2/q3, đạt 3/3 nhưng chưa terminal cho tới `Complete()`, sau đó đúng 3 attempts/3 mastery + 1 reward; khôi phục catalog mở cùng event tạo session mới 0/3 và không duplicate reward.
 - Mismatched event/lesson fail-closed: production event 1 ID ghép nhầm fallback lesson event 2 bị `ResolveEventFailSafe()` reject trước session start; regression xác nhận 0 active session, 0 `math_session_runtime`, 0 `math_lesson_progress`, 0 reward.
-- `tests/SQLiteRuntimeSmoke`: PASS — **179 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
+- `tests/SQLiteRuntimeSmoke`: PASS — **184 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
 - `tests/LearningSessionRuntimeSmoke`: PASS — **800 assertions** trên Visual Studio MSBuild/net48/x86 production toolchain.
 - Request 009: CLOSED tại `05cdb2a` — authored pool >=6 dùng selected set đúng 3 câu (1 basic + 1 medium + 1 application), deterministic theo seed/lesson, persisted qua checkpoint JSON; retry/resume/corrupt-open recovery giữ nguyên selected set và complete sau 3 câu. Synthetic pool-6 regression + legacy path đạt **264 assertions PASS**.
 - Request 010: CLOSED tại `7afbb7b` — authored expression preserve `allowed_operators`; `75`, `100 - 30 + 5`, `70 + 5` PASS; `15*5`, `150/2` FAIL; JSON roundtrip giữ whitelist; expression legacy không whitelist vẫn backward-compatible.
@@ -56,9 +56,9 @@ Playable Event Engine P0: **GREEN**
 - FIRST-5 hint/mastery matrix: mỗi bài đầu có một câu đúng với `hint_level=2` và hai câu independent; outcome hinted không được tính independent, mastery reason chứa `hinted_correct_lower_weight`, review reason `hinted_success_short_recall`, DB persist đúng 1 max-hint + 2 no-hint attempts và child_skill đúng `independent_success_count=2`, `hinted_success_count=1`.
 - Pack-byte identity audit: production `Program.BootstrapRuntime()` bắt buộc `ContentPackValidator.ValidateDirectory(..., true)` cho bundled Math pack trước UI; manifest SHA-256 mismatch fail startup, nên V5 `pack_id+version` kết hợp verified manifest đủ contract hiện tại, chưa cần invent schema V6 chỉ để lưu hash lần hai.
 - Late-review transaction fault: injected failure tại `review_schedule` (sau attempt/mastery/child_skill trong cùng transaction) rollback sạch toàn chain + semantic key; retry sau khi gỡ trigger ghi đúng một attempt/mastery/child_skill/review duy nhất.
-- Expanded-bank integration: `373d9d1` bỏ test coupling `Single(...)`/`_01`, chạy được cả baseline 201 và pool 402; current real 402-bank persistence tổng **8124 assertions PASS**.
-- PowerShell release/build scripts: schema V5 payload/bootstrap expectations đã cập nhật; staged `Build-SetupArtifacts.ps1` PASS qua Release x86 + runtime smokes + staged payload/preflight + portable packaging.
-- `git diff --check` + staged `git diff --cached --check`: PASS cho wave V5.
+- Expanded-bank integration: `373d9d1` bỏ test coupling `Single(...)`/`_01`, chạy được cả baseline 201 và pool 402; current real 402-bank persistence tổng **8145 assertions PASS**.
+- PowerShell release/build scripts: schema V6 payload/bootstrap expectations đã cập nhật; staged `Build-SetupArtifacts.ps1` PASS qua Release x86 + runtime smokes + staged payload/preflight + portable packaging, production-art Tree/Zip và Portable E2E.
+- `git diff --check` + staged `git diff --cached --check`: PASS cho wave V6.
 
 ## Playable Event / Game V1
 
@@ -107,7 +107,7 @@ Playable Event Engine P0: **GREEN**
 - Trusted completion evidence sau resume (`ace02d6`): historical best và stale-winner convergence đọc trực tiếp trusted durable progress, không phụ thuộc catalog derived read; post-resume corruption ở completion metadata fail-closed và retry sau reconcile không giữ best score giả.
 - Trusted pending completion (`2f0f3e4`): winner targeted completion chỉ terminalize khi progress còn đúng một pending slot canonical, `last_started_at_utc` khớp exact active session, runtime còn `lesson` đúng target lesson và target count; wrong skill/consumed slot, row bị mất, stale start, runtime bị mất/tamper đều rollback terminal transaction.
 - Durable pack completion identity (`c89378e`): atomic winner guard còn yêu cầu exact runtime `pack_id+pack_version` hiện tại. Pair tampered nhưng schema-hợp-lệ không còn được stale in-memory coordinator dùng để terminalize; restore canonical pack mới Complete exactly-once.
-- Playable Event P0 persistence total trên current HEAD: **8124 assertions PASS**. Production AI1 catalog `bd1809e` đã tích hợp thật 5/5 event; synthetic fixtures vẫn giữ để fault/corruption/race test độc lập.
+- Playable Event P0 persistence total trên current HEAD: **8145 assertions PASS**. Production AI1 catalog `bd1809e` đã tích hợp thật 5/5 event; synthetic fixtures vẫn giữ để fault/corruption/race test độc lập.
 
 ## Session
 
@@ -140,8 +140,9 @@ Playable Event Engine P0: **GREEN**
 - dangling recovery subject/child scope: PASS — chỉ Math session thiếu `math_session_runtime` của child đang start bị recovery; active `english`/`mixed` và Math session của child khác không bị thu hồi nhầm. Global overload vẫn giữ cho maintenance.
 - schema V4: PASS — thêm `session_mode`, `target_lesson_id`, `math_lesson_progress`.
 - schema V5: PASS — thêm runtime `pack_id`/`pack_version`; migration backfill chỉ khi durable attempts có đúng một non-empty pack identity; mixed/blank history để unbound cho runtime quarantine; SQLite trigger cấm partial/blank pair; checksum/tamper/deployment payload gate đã có.
-- V1 → V5: PASS với pre-migration verified backup; migration history giữ đủ V1/V2/V3/V4/V5.
-- V2 → V3 historical duplicate semantic attempt: PASS, không xóa lịch sử; key pin vào earliest committed attempt; các migration V4/V5 apply bình thường.
+- schema V6 (`ff31866`): PASS — `attempt_commit_key` được khóa append-only bằng trigger `ATTEMPT_COMMIT_KEY_IMMUTABLE`; V5→V6 tạo verified pre-migration backup, migration history/checksum V6 được verify và bootstrap/release payload đều yêu cầu schema 006. Checksum migration canonicalize LF/CRLF và vẫn chấp nhận known-equivalent V5 legacy checksum (`f81ae34`).
+- V1 → V6: PASS với pre-migration verified backup; migration history giữ đủ V1/V2/V3/V4/V5/V6.
+- V2 → V3 historical duplicate semantic attempt: PASS, không xóa lịch sử; key pin vào earliest committed attempt; các migration V4/V5/V6 apply bình thường.
 - session seed / target / generated ordinal / mode / targeted lesson id: PASS durable.
 - current question / selection / started timestamp / forced repair: PASS durable; open-question clock malformed/future self-heal exact ordinal, còn core session timestamp malformed quarantine fail-closed.
 - resume after close: PASS.
@@ -199,6 +200,10 @@ Còn phải làm: skip policy nếu product cho phép, numeric XP/daily streak n
 - `a871626` — `fix(toán): cô lập lỗi sau khi hoàn tất bài` — pushed.
 - `03fc6c1` — `fix(toán): cách ly runtime hỏng khi tiếp tục bài` — pushed.
 - `ece2a0c` — runtime schema V5/content-pack identity đã khóa và pushed; persistence regression hiện vẫn PASS.
+- `ff31866` — `fix(sqlite): khóa semantic key bằng schema V6` — pushed; thêm migration 006 và trigger immutable cho `attempt_commit_key`.
+- `64408e5` — `chore(schema): đồng bộ gate và payload V6` — pushed; bootstrap/release/portable đều yêu cầu schema 6.
+- `f81ae34` — `test(sqlite): cập nhật checksum gate cho schema V6` — pushed; giữ canonical LF/CRLF + known legacy V5 checksum trên schema 6.
+- `36a84e8` — `fix(ui): chỉ maximize cửa sổ learner có owner` — pushed; sửa lifecycle maximize làm collapse layout offscreen 100x23, Child UI 4477 PASS.
 
 ## Blocker / coordination
 
@@ -207,9 +212,10 @@ AI1/AI3 đang sửa song song content/Math Hub/UI trên cùng `main`. AI2 chỉ 
 ## Final AI2 gate
 
 - MathEngineRuntimeSmoke: **72 PASS**.
-- MathDataEngineRuntimeSmoke: **122 PASS** — race/idempotency/concurrency/recovery.
+- MathDataEngineRuntimeSmoke: **134 PASS** — race/idempotency/concurrency/recovery.
 - LearningSessionRuntimeSmoke: **800 PASS** — selector/generator fuzz.
-- MathSessionPersistenceRuntimeSmoke: **8124 PASS** — current full persistence/event/corruption/concurrency gate.
-- ChildUiRuntimeSmoke cross-gate: **3743 PASS** — Visual Studio MSBuild/net48/x86 + executable trực tiếp trên cùng source content.
-- AI1 working pool 402 integration: covered trong current **8124 PASS** persistence gate.
+- SQLiteRuntimeSmoke: **184 PASS** — migration V1→V6, checksum canonical LF/CRLF, legacy V5 compatibility, backup/restore và schema tamper gate.
+- MathSessionPersistenceRuntimeSmoke: **8145 PASS** — current full persistence/event/corruption/concurrency gate.
+- ChildUiRuntimeSmoke cross-gate: **4477 PASS** — Visual Studio MSBuild/net48/x86 + executable trực tiếp trên cùng source content.
+- AI1 working pool 402 integration: covered trong current **8145 PASS** persistence gate.
 - Lane AI2 core engine/session/persistence: **DONE**. Các mục `skip policy` và numeric XP/daily streak không có product contract nên không tự invent semantics.
