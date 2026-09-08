@@ -21,6 +21,17 @@ namespace WAHU.Data
     {
         private readonly LearningDatabase _database;
 
+        internal const string UntrustedCompletionOnStartPredicate = @"math_lesson_progress.completed_count>math_lesson_progress.started_count
+    OR math_lesson_progress.skill_id<>excluded.skill_id
+    OR (math_lesson_progress.completed_count>0 AND (
+        math_lesson_progress.last_started_at_utc IS NULL OR math_lesson_progress.last_completed_at_utc IS NULL
+        OR julianday(math_lesson_progress.last_started_at_utc) IS NULL OR julianday(math_lesson_progress.last_completed_at_utc) IS NULL
+        OR (math_lesson_progress.completed_count=math_lesson_progress.started_count
+            AND julianday(math_lesson_progress.last_completed_at_utc)<julianday(math_lesson_progress.last_started_at_utc))))
+    OR (math_lesson_progress.completed_count=0 AND (
+        math_lesson_progress.last_score_percent IS NOT NULL OR math_lesson_progress.best_score_percent IS NOT NULL
+        OR math_lesson_progress.last_completed_at_utc IS NOT NULL))";
+
         public MathLessonProgressStore(LearningDatabase database)
         {
             _database = database ?? throw new ArgumentNullException("database");
@@ -43,10 +54,10 @@ VALUES(@child,@lesson,@skill,1,0,@utc,@utc)
 ON CONFLICT(child_id,lesson_id) DO UPDATE SET
 skill_id=excluded.skill_id,
 started_count=math_lesson_progress.started_count+1,
-completed_count=CASE WHEN math_lesson_progress.completed_count>math_lesson_progress.started_count OR math_lesson_progress.skill_id<>excluded.skill_id THEN 0 ELSE math_lesson_progress.completed_count END,
-last_score_percent=CASE WHEN math_lesson_progress.completed_count>math_lesson_progress.started_count OR math_lesson_progress.skill_id<>excluded.skill_id THEN NULL ELSE math_lesson_progress.last_score_percent END,
-best_score_percent=CASE WHEN math_lesson_progress.completed_count>math_lesson_progress.started_count OR math_lesson_progress.skill_id<>excluded.skill_id THEN NULL ELSE math_lesson_progress.best_score_percent END,
-last_completed_at_utc=CASE WHEN math_lesson_progress.completed_count>math_lesson_progress.started_count OR math_lesson_progress.skill_id<>excluded.skill_id THEN NULL ELSE math_lesson_progress.last_completed_at_utc END,
+completed_count=CASE WHEN " + UntrustedCompletionOnStartPredicate + @" THEN 0 ELSE math_lesson_progress.completed_count END,
+last_score_percent=CASE WHEN " + UntrustedCompletionOnStartPredicate + @" THEN NULL ELSE math_lesson_progress.last_score_percent END,
+best_score_percent=CASE WHEN " + UntrustedCompletionOnStartPredicate + @" THEN NULL ELSE math_lesson_progress.best_score_percent END,
+last_completed_at_utc=CASE WHEN " + UntrustedCompletionOnStartPredicate + @" THEN NULL ELSE math_lesson_progress.last_completed_at_utc END,
 last_started_at_utc=excluded.last_started_at_utc,
 updated_at_utc=excluded.updated_at_utc;";
                     command.Parameters.AddWithValue("@child", childId);

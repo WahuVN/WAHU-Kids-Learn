@@ -132,8 +132,8 @@ namespace WAHU.Session
                 IsCompleted = ownCompletedCount > 0,
                 StartedCount = own == null ? 0 : own.StartedCount,
                 CompletedCount = ownCompletedCount,
-                LastScorePercent = own == null ? null : own.LastScorePercent,
-                BestScorePercent = own == null ? null : own.BestScorePercent,
+                LastScorePercent = ownCompletedCount <= 0 || own == null ? null : own.LastScorePercent,
+                BestScorePercent = ownCompletedCount <= 0 || own == null ? null : own.BestScorePercent,
                 PrerequisiteLessonIds = prerequisiteLessonIds,
                 UnsatisfiedPrerequisiteLessonIds = unsatisfied
             };
@@ -144,6 +144,9 @@ namespace WAHU.Session
             if (progress == null || progress.CompletedCount <= 0) return 0;
             if (!string.Equals(progress.SkillId, expectedSkillId, StringComparison.Ordinal)) return 0;
             if (progress.StartedCount <= 0 || progress.CompletedCount > progress.StartedCount) return 0;
+            if (!progress.LastStartedAtUtc.HasValue || !progress.LastCompletedAtUtc.HasValue) return 0;
+            if (progress.CompletedCount == progress.StartedCount &&
+                progress.LastCompletedAtUtc.Value < progress.LastStartedAtUtc.Value) return 0;
             return progress.CompletedCount;
         }
     }
