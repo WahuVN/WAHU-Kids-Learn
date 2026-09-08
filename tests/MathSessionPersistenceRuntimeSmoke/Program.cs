@@ -45,6 +45,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestTargetedLessonUnlockAndResume(root, schemaPath, templatePath, lessonCatalogPath);
                 TestImpossibleLessonProgressDoesNotUnlockPrerequisite(root, schemaPath, lessonCatalogPath);
                 TestImpossibleLessonProgressRepairsOnRealStart(root, schemaPath, templatePath, lessonCatalogPath);
+                TestPostResumeProgressCorruptionFailsClosedAtCompletion(root, schemaPath, templatePath, lessonCatalogPath);
                 TestFirstFiveLessonsGoldenPath(root, schemaPath, templatePath, lessonCatalogPath);
                 TestFirstFiveAllAuthoredVariantsEndToEnd(root, schemaPath, templatePath, lessonCatalogPath);
                 TestFirstFiveRetryErrorMatrix(root, schemaPath, templatePath, lessonCatalogPath);
@@ -75,6 +76,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestAdaptiveConcurrentCoordinatorsShareSemanticOrdinalId(root, schemaPath, templatePath);
                 TestAdaptiveDuplicateCompletionConvergesWithoutFalseError(root, schemaPath, templatePath);
                 TestTargetedDuplicateCompletionRequiresTrustedProgress(root, schemaPath, templatePath, lessonCatalogPath);
+                TestTargetedDuplicateCompletionConvergesWithoutCatalogRead(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedResumeDiscardsStaleConcurrentOrdinalCache(root, schemaPath, templatePath, lessonCatalogPath);
                 TestRetryAwareAnswerFlow(root, schemaPath, templatePath);
                 TestRetryWrongFinalizesOnce(root, schemaPath, templatePath);
@@ -3225,6 +3227,99 @@ WHERE child_id=@child AND lesson_id=@lesson;",
             }
         }
 
+        private static void TestPostResumeProgressCorruptionFailsClosedAtCompletion(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.Lessons.First(x => x.Id == "m2_ls_num_count_read_write_0_1000");
+            var database = NewDatabase(Path.Combine(root, "post-resume-progress-corruption.db"), schemaPath);
+            var profile = new LearnerSessionService(database).EnsurePrimaryChild("Post resume corruption");
+
+            string sessionId;
+            string openQuestionId;
+            IList<string> selected;
+            using (var first = new MathSessionCoordinator(database, templatePath, "LOW", 9411, lesson.Id))
+            {
+                var started = first.Start("Post resume corruption");
+                sessionId = started.SessionId;
+                selected = started.SelectedContentQuestionIds.ToList();
+                var q1 = first.NextQuestion();
+                first.SubmitAnswerAt(WrongAnswer(q1), 0, "smoke", DateTime.UtcNow, 700);
+                var q2 = first.NextQuestion();
+                openQuestionId = q2.QuestionId;
+                first.Suspend("post_resume_corruption_fixture");
+            }
+
+            using (var resumed = new MathSessionCoordinator(database, templatePath, "NORMAL", 999999, lesson.Id))
+            {
+                var started = resumed.Start("Post resume corruption");
+                A(started.ResumedExistingSession && started.SessionId == sessionId &&
+                  started.CompletedQuestionCount == 1 && started.RestoredOpenQuestion,
+                    "post_resume_corruption_restores_active_targeted_session");
+                var q2 = resumed.NextQuestion();
+                A(q2.QuestionId == openQuestionId && q2.ContentQuestionId == selected[1],
+                    "post_resume_corruption_restores_exact_open_question");
+
+                var corruptUtc = DateTime.UtcNow.AddDays(-3).ToString("o", CultureInfo.InvariantCulture);
+                Exec(database, @"UPDATE math_lesson_progress
+SET completed_count=0,last_score_percent=100,best_score_percent=100,last_completed_at_utc=@completed,updated_at_utc=@completed
+WHERE child_id=@child AND lesson_id=@lesson;",
+                    "@completed", corruptUtc,
+                    "@child", profile.ChildId,
+                    "@lesson", lesson.Id);
+                var corrupt = new MathLessonProgressStore(database).LoadOne(profile.ChildId, lesson.Id);
+                A(corrupt != null && corrupt.StartedCount == 1 && corrupt.CompletedCount == 0 &&
+                  corrupt.LastScorePercent.HasValue && corrupt.BestScorePercent.HasValue &&
+                  Math.Abs(corrupt.BestScorePercent.Value - 100.0) < 0.0001,
+                    "post_resume_corruption_fixture_is_injected_after_reconcile");
+
+                resumed.SubmitAnswerAt(q2.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 800);
+                var q3 = resumed.NextQuestion();
+                resumed.SubmitAnswerAt(q3.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 900);
+                Exception completionError = null;
+                try { resumed.Complete(); } catch (Exception ex) { completionError = ex; }
+                A(completionError is InvalidOperationException && resumed.IsActive &&
+                  SessionState(database, sessionId) == "active",
+                    "post_resume_corruption_is_rejected_at_completion_without_terminalizing_session");
+                var stillCorrupt = new MathLessonProgressStore(database).LoadOne(profile.ChildId, lesson.Id);
+                A(stillCorrupt != null && stillCorrupt.CompletedCount == 0 &&
+                  stillCorrupt.BestScorePercent.HasValue && Math.Abs(stillCorrupt.BestScorePercent.Value - 100.0) < 0.0001 &&
+                  Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + sessionId + "';") == 1,
+                    "post_resume_corruption_failed_completion_rolls_back_and_preserves_resumable_checkpoint");
+                resumed.Suspend("post_resume_corruption_retry_after_fail_closed");
+            }
+
+            using (var repairedResume = new MathSessionCoordinator(database, templatePath, "NORMAL", 999999, lesson.Id))
+            {
+                var started = repairedResume.Start("Post resume corruption");
+                var repaired = new MathLessonProgressStore(database).LoadOne(profile.ChildId, lesson.Id);
+                A(started.ResumedExistingSession && started.SessionId == sessionId &&
+                  started.CompletedQuestionCount == 3 && repaired != null && repaired.StartedCount == 1 &&
+                  repaired.CompletedCount == 0 && !repaired.LastScorePercent.HasValue &&
+                  !repaired.BestScorePercent.HasValue && !repaired.LastCompletedAtUtc.HasValue,
+                    "post_resume_corruption_next_resume_repairs_stale_completion_metadata");
+                A(repairedResume.Summary.Attempts == 3 && repairedResume.NextQuestion() == null,
+                    "post_resume_corruption_retry_keeps_all_three_durable_answers");
+                var summary = repairedResume.Complete();
+                A(summary.LessonCompleted && summary.LessonScorePercent.HasValue &&
+                  Math.Abs(summary.LessonScorePercent.Value - (200.0 / 3.0)) < 0.0001,
+                    "post_resume_corruption_retry_reports_current_score");
+                A(summary.LessonBestScorePercent.HasValue &&
+                  Math.Abs(summary.LessonBestScorePercent.Value - summary.LessonScorePercent.Value) < 0.0001,
+                    "post_resume_corruption_stale_best_cannot_survive_retry_summary");
+            }
+
+            var stored = new MathLessonProgressStore(database).LoadOne(profile.ChildId, lesson.Id);
+            A(stored != null && stored.StartedCount == 1 && stored.CompletedCount == 1 &&
+              stored.LastScorePercent.HasValue && stored.BestScorePercent.HasValue &&
+              Math.Abs(stored.LastScorePercent.Value - (200.0 / 3.0)) < 0.0001 &&
+              Math.Abs(stored.BestScorePercent.Value - stored.LastScorePercent.Value) < 0.0001,
+                "post_resume_corruption_stale_best_cannot_survive_durable_retry_completion");
+        }
+
         private static void TestFirstFiveLessonsGoldenPath(string root, string schemaPath, string templatePath, string lessonCatalogPath)
         {
             var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
@@ -5481,6 +5576,59 @@ END;");
                   Count(identityDatabase, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + firstStart.ChildId +
                   "' AND lesson_id='" + lesson.Id + "' AND completed_count=1;") == 1,
                     "targeted_duplicate_completion_corrupt_progress_keeps_terminal_winner_exactly_once");
+            }
+        }
+
+        private static void TestTargetedDuplicateCompletionConvergesWithoutCatalogRead(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var packDir = Path.Combine(root, "targeted-duplicate-no-catalog-pack");
+            Directory.CreateDirectory(packDir);
+            var localTemplatePath = Path.Combine(packDir, "verified_templates_v1.json");
+            var localCatalogPath = Path.Combine(packDir, "lesson_catalog_v1.json");
+            var localQuestionBankPath = Path.Combine(packDir, "question_bank_v1.json");
+            File.Copy(templatePath, localTemplatePath, true);
+            File.Copy(lessonCatalogPath, localCatalogPath, true);
+            File.Copy(Path.Combine(Path.GetDirectoryName(templatePath), "question_bank_v1.json"), localQuestionBankPath, true);
+
+            var catalog = new MathLessonCatalogSource().Load(localCatalogPath);
+            var lesson = catalog.Lessons[0];
+            var database = NewDatabase(Path.Combine(root, "targeted-duplicate-no-catalog.db"), schemaPath);
+
+            using (var first = new MathSessionCoordinator(database, localTemplatePath, "LOW", 8705, lesson.Id))
+            using (var second = new MathSessionCoordinator(database, localTemplatePath, "NORMAL", 999999, lesson.Id))
+            {
+                var firstStart = first.Start("Duplicate completion no catalog");
+                var secondStart = second.Start("Duplicate completion no catalog");
+                A(secondStart.ResumedExistingSession && secondStart.SessionId == firstStart.SessionId,
+                    "targeted_duplicate_no_catalog_wrappers_share_session");
+
+                for (var ordinal = 0; ordinal < 3; ordinal++)
+                {
+                    var qA = first.NextQuestion();
+                    var qB = second.NextQuestion();
+                    first.SubmitAnswerAt(qA.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700 + ordinal * 100);
+                    second.SubmitAnswerAt(qB.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 720 + ordinal * 100);
+                }
+
+                var winner = first.Complete();
+                A(winner.LessonCompleted && winner.LessonBestScorePercent.HasValue &&
+                  Math.Abs(winner.LessonBestScorePercent.Value - 100.0) < 0.0001,
+                    "targeted_duplicate_no_catalog_winner_completes_before_catalog_loss");
+
+                File.WriteAllText(localCatalogPath, "{ broken catalog after winner completion ");
+                var loser = second.Complete();
+                A(loser.LessonCompleted && loser.LessonBestScorePercent.HasValue &&
+                  Math.Abs(loser.LessonBestScorePercent.Value - 100.0) < 0.0001 && !second.IsActive,
+                    "targeted_duplicate_no_catalog_loser_converges_from_durable_progress_only");
+                A(Count(database, "SELECT count(*) FROM session WHERE id='" + firstStart.SessionId +
+                  "' AND state='completed' AND ended_at_utc IS NOT NULL;") == 1 &&
+                  Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + firstStart.ChildId +
+                  "' AND lesson_id='" + lesson.Id + "' AND started_count=1 AND completed_count=1;") == 1,
+                    "targeted_duplicate_no_catalog_keeps_terminal_chain_exactly_once");
             }
         }
 

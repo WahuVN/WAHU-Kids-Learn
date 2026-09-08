@@ -676,12 +676,9 @@ namespace WAHU.Session
                 _attempts >= _targetQuestionCount && _targetQuestionCount > 0)
             {
                 var score = 100.0 * _correct / _targetQuestionCount;
-                var existing = _lessonProgressStore.LoadOne(_profile.ChildId, _targetLesson.Id);
-                var best = score;
-                if (existing != null && existing.BestScorePercent.HasValue)
-                    best = Math.Max(best, existing.BestScorePercent.Value);
-                if (existing != null && existing.LastScorePercent.HasValue)
-                    best = Math.Max(best, existing.LastScorePercent.Value);
+                var historicalBest = _lessonProgressStore.LoadTrustedBestScorePercent(
+                    _profile.ChildId, _targetLesson.Id, _targetLesson.SkillId);
+                var best = historicalBest.HasValue ? Math.Max(score, historicalBest.Value) : score;
                 summary.LessonCompleted = true;
                 summary.LessonScorePercent = score;
                 summary.LessonBestScorePercent = best;
@@ -704,13 +701,12 @@ namespace WAHU.Session
                         throw;
                     }
                     _active = false;
-                    var durableProgress = _lessonProgressStore.LoadOne(_profile.ChildId, _targetLesson.Id);
-                    var durableAccess = CurrentLessonAccess();
-                    if (durableProgress == null || durableAccess == null || !durableAccess.IsCompleted ||
-                        durableAccess.CompletedCount <= 0 || !durableProgress.LastCompletedAtUtc.HasValue ||
+                    var durableProgress = _lessonProgressStore.LoadTrustedCompletionEvidence(
+                        _profile.ChildId, _targetLesson.Id, _targetLesson.SkillId);
+                    if (durableProgress == null || !durableProgress.LastCompletedAtUtc.HasValue ||
                         durableProgress.LastCompletedAtUtc.Value < _session.StartedAtUtc) throw;
-                    if (durableAccess.BestScorePercent.HasValue)
-                        summary.LessonBestScorePercent = durableAccess.BestScorePercent;
+                    if (durableProgress.BestScorePercent.HasValue)
+                        summary.LessonBestScorePercent = durableProgress.BestScorePercent;
                 }
             }
             else
