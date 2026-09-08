@@ -687,9 +687,12 @@ namespace WAHU.Session
                 summaryData["lesson_best_score_percent"] = best;
                 try
                 {
+                    var expectedFinalizedQuestionIds = _selectedContentQuestionIds
+                        .Select(id => DeterministicAuthoredRuntimeQuestionId(_session.SessionId, id))
+                        .ToList();
                     _lessonProgressStore.CompleteActiveSession(
                         _session.SessionId, _profile.ChildId, _targetLesson.Id, _targetLesson.SkillId,
-                        PackId, PackVersion, _correct, _targetQuestionCount,
+                        PackId, PackVersion, expectedFinalizedQuestionIds, _correct, _targetQuestionCount,
                         _json.Serialize(summaryData), behaviorJson, ended);
                 }
                 catch (InvalidOperationException)

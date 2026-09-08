@@ -122,6 +122,7 @@ updated_at_utc=@updated;";
             string skillId,
             string packId,
             string packVersion,
+            IList<string> expectedFinalizedQuestionIds,
             int correct,
             int attempts,
             string summaryJson,
@@ -136,11 +137,62 @@ updated_at_utc=@updated;";
             Require(packVersion, "packVersion");
             if (attempts < 1) throw new ArgumentOutOfRangeException("attempts");
             if (correct < 0 || correct > attempts) throw new ArgumentOutOfRangeException("correct");
+            if (expectedFinalizedQuestionIds == null || expectedFinalizedQuestionIds.Count != attempts)
+                throw new ArgumentException("Expected durable finalized question ids must match attempts.", "expectedFinalizedQuestionIds");
+            var expectedQuestionIds = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var questionId in expectedFinalizedQuestionIds)
+            {
+                Require(questionId, "expectedFinalizedQuestionIds");
+                if (!expectedQuestionIds.Add(questionId))
+                    throw new ArgumentException("Expected durable finalized question ids must be unique.", "expectedFinalizedQuestionIds");
+            }
             var score = 100.0 * correct / attempts;
             var utc = Utc(completedAtUtc);
 
             _database.Writes.Execute((connection, transaction) =>
             {
+                var missingQuestionIds = new HashSet<string>(expectedQuestionIds, StringComparer.Ordinal);
+                var durableFinalizedCount = 0;
+                using (var evidence = connection.CreateCommand())
+                {
+                    evidence.Transaction = transaction;
+                    evidence.CommandText = @"SELECT a.question_id,a.child_id,a.pack_id,a.pack_version,a.skill_id,a.subject,
+       COUNT(k.attempt_id),COUNT(m.id)
+FROM attempt a
+LEFT JOIN attempt_commit_key k
+  ON k.attempt_id=a.id AND k.session_id=a.session_id
+ AND k.question_id=a.question_id AND k.attempt_index=a.attempt_index
+JOIN mastery_event m ON m.attempt_id=a.id
+WHERE a.session_id=@id AND a.answered_at_utc IS NOT NULL
+GROUP BY a.id,a.question_id,a.child_id,a.pack_id,a.pack_version,a.skill_id,a.subject;";
+                    evidence.Parameters.AddWithValue("@id", sessionId);
+                    using (var reader = evidence.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            durableFinalizedCount++;
+                            var questionId = Text(reader[0]);
+                            var durableChildId = Text(reader[1]);
+                            var durablePackId = Text(reader[2]);
+                            var durablePackVersion = Text(reader[3]);
+                            var durableSkillId = Text(reader[4]);
+                            var durableSubject = Text(reader[5]);
+                            var commitKeyCount = Convert.ToInt32(reader[6], CultureInfo.InvariantCulture);
+                            var masteryEventCount = Convert.ToInt32(reader[7], CultureInfo.InvariantCulture);
+                            if (!string.Equals(durableChildId, childId, StringComparison.Ordinal) ||
+                                !string.Equals(durablePackId, packId, StringComparison.Ordinal) ||
+                                !string.Equals(durablePackVersion, packVersion, StringComparison.Ordinal) ||
+                                !string.Equals(durableSkillId, skillId, StringComparison.Ordinal) ||
+                                !string.Equals(durableSubject, "math", StringComparison.Ordinal) ||
+                                commitKeyCount != 1 || masteryEventCount != 1 ||
+                                !missingQuestionIds.Remove(questionId))
+                                throw new InvalidOperationException("Targeted Math durable finalized attempt evidence is inconsistent.");
+                        }
+                    }
+                }
+                if (durableFinalizedCount != attempts || missingQuestionIds.Count != 0)
+                    throw new InvalidOperationException("Targeted Math durable finalized attempt evidence is incomplete.");
+
                 using (var session = connection.CreateCommand())
                 {
                     session.Transaction = transaction;
