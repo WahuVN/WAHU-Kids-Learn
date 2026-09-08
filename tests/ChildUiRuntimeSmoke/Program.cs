@@ -3816,12 +3816,41 @@ END;");
             var manifestMethod = libraryType.GetMethod("HasProductionManifest", flags);
             var completeMethod = libraryType.GetMethod("HasCompleteProductionPayload", flags);
             var hasAssetMethod = libraryType.GetMethod("HasAsset", flags);
-            A(countMethod != null && manifestMethod != null && completeMethod != null && hasAssetMethod != null,
+            var expectedProperty = libraryType.GetProperty("ExpectedProductionPngCount", flags);
+            var rootProperty = libraryType.GetProperty("RootPath", flags);
+            A(countMethod != null && manifestMethod != null && completeMethod != null && hasAssetMethod != null &&
+              expectedProperty != null && rootProperty != null,
                 "production_assets_library_contract_available");
             var pngCount = (int)countMethod.Invoke(null, null);
-            A(pngCount == 74, "production_assets_exact_74_png_payload");
+            var expectedCount = (int)expectedProperty.GetValue(null, null);
+            A(expectedCount > 0, "production_assets_manifest_expected_count_positive");
+            A(pngCount == expectedCount, "production_assets_png_count_matches_manifest");
             A((bool)manifestMethod.Invoke(null, null), "production_assets_manifest_present");
             A((bool)completeMethod.Invoke(null, null), "production_assets_payload_complete");
+
+            var runtimeAssetRoot = (string)rootProperty.GetValue(null, null);
+            var runtimeManifestPath = Path.Combine(runtimeAssetRoot, "ASSET_SELECTION_MANIFEST.json");
+            var originalManifestBytes = File.ReadAllBytes(runtimeManifestPath);
+            try
+            {
+                var originalText = File.ReadAllText(runtimeManifestPath);
+                var countPattern = new Regex("(\"totalSelected\"\\s*:\\s*)\\d+", RegexOptions.CultureInvariant);
+                var tamperedText = countPattern.Replace(originalText, "${1}" + (expectedCount + 1), 1);
+                A(!string.Equals(tamperedText, originalText, StringComparison.Ordinal),
+                    "production_assets_manifest_count_tamper_fixture_applied");
+                File.WriteAllText(runtimeManifestPath, tamperedText);
+                A((int)expectedProperty.GetValue(null, null) == expectedCount + 1,
+                    "production_assets_expected_count_follows_manifest");
+                A(!(bool)completeMethod.Invoke(null, null),
+                    "production_assets_manifest_count_mismatch_fails_closed");
+            }
+            finally
+            {
+                File.WriteAllBytes(runtimeManifestPath, originalManifestBytes);
+            }
+            A((int)expectedProperty.GetValue(null, null) == expectedCount &&
+              (bool)completeMethod.Invoke(null, null),
+                "production_assets_manifest_restore_recovers_payload");
 
             var low = new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW };
             var rescueType = appAssembly.GetType("WAHUKidsLearn.RescueHeroArtControl", true);
