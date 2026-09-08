@@ -122,6 +122,9 @@ namespace WAHU.Data
 
             using (var tx = connection.BeginTransaction())
             {
+                if (version == AttemptCommitKeyImmutabilityVersion)
+                    ValidateAttemptCommitKeyAuthority(connection, tx);
+
                 using (var command = connection.CreateCommand())
                 {
                     command.Transaction = tx;
@@ -213,6 +216,24 @@ namespace WAHU.Data
                 .Replace("\r\n", "\n")
                 .Replace("\r", "\n");
             return Hashing.Sha256Text(text);
+        }
+
+        private static void ValidateAttemptCommitKeyAuthority(SQLiteConnection connection, SQLiteTransaction tx)
+        {
+            using (var command = connection.CreateCommand())
+            {
+                command.Transaction = tx;
+                command.CommandText = @"SELECT count(*)
+FROM attempt_commit_key k
+LEFT JOIN attempt a ON a.id=k.attempt_id
+WHERE a.id IS NULL
+   OR a.session_id<>k.session_id
+   OR a.question_id<>k.question_id
+   OR a.attempt_index<>k.attempt_index;";
+                var invalid = Convert.ToInt32(command.ExecuteScalar(), CultureInfo.InvariantCulture);
+                if (invalid != 0)
+                    throw new InvalidDataException("attempt_commit_key semantic authority mismatch before migration V6.");
+            }
         }
 
         private static void InsertHistory(

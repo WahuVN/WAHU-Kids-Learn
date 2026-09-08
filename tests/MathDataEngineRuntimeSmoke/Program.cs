@@ -49,6 +49,7 @@ namespace WAHU.MathDataEngineRuntimeSmoke
                 TestDanglingRecoveryIsScopedToChild(root, sourceSchema);
                 TestExistingV1UpgradesToV3WithBackup(root, sourceSchema);
                 TestV5UpgradeLocksSemanticCommitKey(root, sourceSchema);
+                TestV5UpgradeRejectsMismatchedSemanticCommitKey(root, sourceSchema);
                 TestV3BackfillPreservesLegacyDuplicates(root, sourceSchema);
                 Console.WriteLine("MATH_DATA_ENGINE_RUNTIME_SMOKE_PASS assertions=" + _assertions);
                 return 0;
@@ -1147,6 +1148,63 @@ FROM attempt WHERE id='v6-key-original';");
                 A(updateRejected, "v6_semantic_key_upgrade_blocks_repoint_after_migration");
                 A(Convert.ToString(Scalar(c, "SELECT attempt_id FROM attempt_commit_key WHERE session_id='v6-key-session' AND question_id='v6-key-q' AND attempt_index=1;"), CultureInfo.InvariantCulture) == "v6-key-original",
                     "v6_semantic_key_upgrade_preserves_original_authority_after_rejected_update");
+            }
+        }
+
+        private static void TestV5UpgradeRejectsMismatchedSemanticCommitKey(string root, string sourceSchema)
+        {
+            var schemaDir = Path.Combine(root, "schema-v5-to-v6-corrupt-semantic-key");
+            CopySchemas(sourceSchema, schemaDir);
+            var dbPath = Path.Combine(root, "legacy-v5-corrupt-semantic-key.db");
+            var schemaV1 = Path.Combine(schemaDir, "001_initial.sql");
+            var now = new DateTime(2026, 9, 8, 6, 0, 0, DateTimeKind.Utc).ToString("o", CultureInfo.InvariantCulture);
+            using (var c = new SQLiteConnection("Data Source=" + dbPath + ";Version=3;Foreign Keys=True;Pooling=False;"))
+            {
+                c.Open();
+                using (var command = c.CreateCommand())
+                {
+                    command.CommandText = File.ReadAllText(schemaV1);
+                    command.ExecuteNonQuery();
+                }
+                MigrationManager.VerifyOrRecordInitial(c, schemaV1);
+                MigrationManager.ApplyMigration(c, 2, MigrationManager.AttemptImmutabilityName, Path.Combine(schemaDir, "002_attempt_immutability.sql"));
+                MigrationManager.ApplyMigration(c, 3, MigrationManager.MathAttemptRuntimeName, Path.Combine(schemaDir, "003_math_attempt_idempotency_runtime.sql"));
+                MigrationManager.ApplyMigration(c, 4, MigrationManager.MathLessonProgressName, Path.Combine(schemaDir, "004_math_lesson_progress.sql"));
+                MigrationManager.ApplyMigration(c, 5, MigrationManager.MathRuntimePackIdentityName, Path.Combine(schemaDir, "005_math_runtime_pack_identity.sql"));
+
+                Exec(c, "INSERT INTO child(id,display_name,grade_level,created_at_utc,updated_at_utc) VALUES('v6-corrupt-child','B\u00e9 V6 corrupt',2,@t,@t);", "@t", now);
+                Exec(c, "INSERT INTO session(id,child_id,started_at_utc,state,planned_subject,performance_profile) VALUES('v6-corrupt-session','v6-corrupt-child',@t,'active','math','LOW');", "@t", now);
+                Exec(c, @"INSERT INTO attempt(
+id,session_id,child_id,pack_id,pack_version,question_id,skill_id,subject,started_at_utc,answered_at_utc,answer_json,is_correct,response_ms,hint_level,representation,input_method,attempt_index,listen_count)
+VALUES('v6-corrupt-original','v6-corrupt-session','v6-corrupt-child','math_grade2_verified_templates_v1','1.8.0','v6-corrupt-q1','V6_CORRUPT_SKILL','math',@t,@t,'{}',1,700,0,'symbolic','smoke',1,0);", "@t", now);
+                Exec(c, @"INSERT INTO attempt(
+id,session_id,child_id,pack_id,pack_version,question_id,skill_id,subject,started_at_utc,answered_at_utc,answer_json,is_correct,response_ms,hint_level,representation,input_method,attempt_index,listen_count)
+VALUES('v6-corrupt-wrong','v6-corrupt-session','v6-corrupt-child','math_grade2_verified_templates_v1','1.8.0','v6-corrupt-q2','V6_CORRUPT_SKILL','math',@t,@t,'{}',1,700,0,'symbolic','smoke',1,0);", "@t", now);
+                Exec(c, "INSERT INTO attempt_commit_key(session_id,question_id,attempt_index,attempt_id,created_at_utc) VALUES('v6-corrupt-session','v6-corrupt-q1',1,'v6-corrupt-original',@t);", "@t", now);
+                Exec(c, "UPDATE attempt_commit_key SET attempt_id='v6-corrupt-wrong' WHERE session_id='v6-corrupt-session' AND question_id='v6-corrupt-q1' AND attempt_index=1;");
+                A(Convert.ToString(Scalar(c, "SELECT attempt_id FROM attempt_commit_key WHERE session_id='v6-corrupt-session' AND question_id='v6-corrupt-q1' AND attempt_index=1;"), CultureInfo.InvariantCulture) == "v6-corrupt-wrong",
+                    "v6_corrupt_semantic_key_fixture_is_fk_valid_but_mismatched");
+            }
+
+            var database = new LearningDatabase(dbPath, schemaV1);
+            var rejected = false;
+            try
+            {
+                database.Initialize("DELETE", Path.Combine(root, "v5-corrupt-semantic-key-backups"), "ai2-v6-corrupt-smoke");
+            }
+            catch (InvalidDataException ex)
+            {
+                rejected = ex.Message.IndexOf("attempt_commit_key", StringComparison.OrdinalIgnoreCase) >= 0;
+            }
+            A(rejected, "v6_upgrade_rejects_preexisting_mismatched_semantic_commit_key");
+            using (var c = database.OpenConnection())
+            {
+                A(MigrationManager.GetSchemaVersion(c) == 5 &&
+                  Count(c, "SELECT count(*) FROM migration_history WHERE version=6;") == 0 &&
+                  Count(c, "SELECT count(*) FROM sqlite_master WHERE type='trigger' AND name='trg_attempt_commit_key_immutable_update';") == 0,
+                    "v6_rejected_semantic_key_upgrade_rolls_back_schema_history_and_trigger");
+                A(Convert.ToString(Scalar(c, "SELECT attempt_id FROM attempt_commit_key WHERE session_id='v6-corrupt-session' AND question_id='v6-corrupt-q1' AND attempt_index=1;"), CultureInfo.InvariantCulture) == "v6-corrupt-wrong",
+                    "v6_rejected_semantic_key_upgrade_does_not_rewrite_corrupt_history");
             }
         }
 
