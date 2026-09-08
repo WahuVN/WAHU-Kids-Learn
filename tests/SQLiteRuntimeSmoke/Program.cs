@@ -109,8 +109,8 @@ namespace WAHU.SQLiteRuntimeSmoke
             Assert(init.ProviderVersion == "2.0.4.0", "service_provider_version");
             Assert(init.SQLiteVersion.StartsWith("3.53.4", StringComparison.Ordinal), "service_sqlite_version");
             Assert(init.JournalMode == "DELETE", "service_safe_default_delete");
-            Assert(init.SchemaVersion == 5, "service_schema_version_5");
-            Assert(init.Migration != null && init.Migration.Version == 5, "service_latest_migration_v5");
+            Assert(init.SchemaVersion == 6, "service_schema_version_6");
+            Assert(init.Migration != null && init.Migration.Version == 6, "service_latest_migration_v6");
 
             using (var c = database.OpenConnection()) InsertLearningFixture(c);
             var backup = SQLiteBackupService.CreateVerifiedBackup(database, backupPath);
@@ -147,31 +147,35 @@ namespace WAHU.SQLiteRuntimeSmoke
             var migrationV4Copy = Path.Combine(migrationDir, "004_math_lesson_progress.sql");
             var sourceV5 = Path.Combine(Path.GetDirectoryName(schemaPath), "005_math_runtime_pack_identity.sql");
             var migrationV5Copy = Path.Combine(migrationDir, "005_math_runtime_pack_identity.sql");
+            var sourceV6 = Path.Combine(Path.GetDirectoryName(schemaPath), "006_attempt_commit_key_immutability.sql");
+            var migrationV6Copy = Path.Combine(migrationDir, "006_attempt_commit_key_immutability.sql");
             File.Copy(schemaPath, schemaCopy, true);
             File.Copy(sourceV2, migrationV2Copy, true);
             File.Copy(sourceV3, migrationV3Copy, true);
             File.Copy(sourceV4, migrationV4Copy, true);
             File.Copy(sourceV5, migrationV5Copy, true);
+            File.Copy(sourceV6, migrationV6Copy, true);
             var dbPath = Path.Combine(root, "migration-coordinator.db");
             var database = new LearningDatabase(dbPath, schemaCopy);
 
             var first = database.Initialize("DELETE");
-            Assert(first.SchemaVersion == 5, "migration_fresh_boot_schema_v5");
-            Assert(first.Migration != null && first.Migration.Version == 5 && first.Migration.RecordedNow, "migration_v5_recorded_first_boot");
-            Assert(first.Migration.ChecksumSha256.Length == 64, "migration_v5_checksum_sha256");
+            Assert(first.SchemaVersion == 6, "migration_fresh_boot_schema_v6");
+            Assert(first.Migration != null && first.Migration.Version == 6 && first.Migration.RecordedNow, "migration_v6_recorded_first_boot");
+            Assert(first.Migration.ChecksumSha256.Length == 64, "migration_v6_checksum_sha256");
             using (var c = database.OpenConnection())
             {
-                Assert(Convert.ToInt32(Scalar(c, "SELECT count(*) FROM migration_history;"), CultureInfo.InvariantCulture) == 5, "migration_history_five_rows");
+                Assert(Convert.ToInt32(Scalar(c, "SELECT count(*) FROM migration_history;"), CultureInfo.InvariantCulture) == 6, "migration_history_six_rows");
                 Assert(Convert.ToInt32(Scalar(c, "SELECT count(*) FROM migration_history WHERE version=1;"), CultureInfo.InvariantCulture) == 1, "migration_history_v1_one_row");
                 Assert(Convert.ToInt32(Scalar(c, "SELECT count(*) FROM migration_history WHERE version=2;"), CultureInfo.InvariantCulture) == 1, "migration_history_v2_one_row");
                 Assert(Convert.ToInt32(Scalar(c, "SELECT count(*) FROM migration_history WHERE version=3;"), CultureInfo.InvariantCulture) == 1, "migration_history_v3_one_row");
                 Assert(Convert.ToInt32(Scalar(c, "SELECT count(*) FROM migration_history WHERE version=4;"), CultureInfo.InvariantCulture) == 1, "migration_history_v4_one_row");
                 Assert(Convert.ToInt32(Scalar(c, "SELECT count(*) FROM migration_history WHERE version=5;"), CultureInfo.InvariantCulture) == 1, "migration_history_v5_one_row");
-                Assert(Convert.ToString(Scalar(c, "SELECT checksum_sha256 FROM migration_history WHERE version=5;"), CultureInfo.InvariantCulture) == first.Migration.ChecksumSha256, "migration_history_v5_checksum_matches");
+                Assert(Convert.ToInt32(Scalar(c, "SELECT count(*) FROM migration_history WHERE version=6;"), CultureInfo.InvariantCulture) == 1, "migration_history_v6_one_row");
+                Assert(Convert.ToString(Scalar(c, "SELECT checksum_sha256 FROM migration_history WHERE version=6;"), CultureInfo.InvariantCulture) == first.Migration.ChecksumSha256, "migration_history_v6_checksum_matches");
             }
 
             var second = database.Initialize("DELETE");
-            Assert(second.SchemaVersion == 5 && second.Migration != null && second.Migration.Version == 5 && !second.Migration.RecordedNow, "migration_v5_not_duplicated_second_boot");
+            Assert(second.SchemaVersion == 6 && second.Migration != null && second.Migration.Version == 6 && !second.Migration.RecordedNow, "migration_v6_not_duplicated_second_boot");
 
             var v4LfOnly = File.ReadAllText(migrationV4Copy)
                 .Replace("\r\n", "\n")
@@ -245,6 +249,13 @@ namespace WAHU.SQLiteRuntimeSmoke
             Assert(rollbackObserved, "write_coordinator_exception_propagated");
             using (var c = database.OpenConnection())
                 Assert(Convert.ToInt32(Scalar(c, "SELECT count(*) FROM parent_note WHERE id='rollback-note';"), CultureInfo.InvariantCulture) == 0, "write_coordinator_transaction_rolled_back");
+
+            File.AppendAllText(migrationV6Copy, Environment.NewLine + "-- intentional v6 checksum tamper" + Environment.NewLine);
+            bool v6TamperRejected = false;
+            try { database.Initialize("DELETE"); }
+            catch (InvalidDataException) { v6TamperRejected = true; }
+            Assert(v6TamperRejected, "migration_v6_checksum_tamper_rejected");
+            File.Copy(sourceV6, migrationV6Copy, true);
 
             File.AppendAllText(migrationV5Copy, Environment.NewLine + "-- intentional v5 checksum tamper" + Environment.NewLine);
             bool v5TamperRejected = false;
@@ -353,7 +364,7 @@ VALUES('math_grade2_v1','1','math',2,'builtin','VERIFIED',1,'ABCDEF','content_pa
 
             var verified = ManagedBackupService.VerifyManagedBackup(latestRecent.MetadataPath);
             Assert(verified.IsValid, "managed_latest_metadata_valid");
-            Assert(verified.SchemaVersion == 5, "managed_latest_schema_v5");
+            Assert(verified.SchemaVersion == 6, "managed_latest_schema_v6");
             Assert(string.Equals(verified.ActualSha256, latestRecent.Sha256, StringComparison.OrdinalIgnoreCase), "managed_latest_sha_matches");
             var metadataText = File.ReadAllText(latestRecent.MetadataPath);
             Assert(metadataText.Contains("math_grade2_v1@1"), "managed_metadata_active_pack_recorded");
@@ -424,7 +435,7 @@ VALUES('math_grade2_v1','1','math',2,'builtin','VERIFIED',1,'ABCDEF','content_pa
         {
             var schemaDir = Path.Combine(root, "v4-pack-identity-schema");
             Directory.CreateDirectory(schemaDir);
-            foreach (var name in new[] { "001_initial.sql", "002_attempt_immutability.sql", "003_math_attempt_idempotency_runtime.sql", "004_math_lesson_progress.sql", "005_math_runtime_pack_identity.sql" })
+            foreach (var name in new[] { "001_initial.sql", "002_attempt_immutability.sql", "003_math_attempt_idempotency_runtime.sql", "004_math_lesson_progress.sql", "005_math_runtime_pack_identity.sql", "006_attempt_commit_key_immutability.sql" })
                 File.Copy(Path.Combine(Path.GetDirectoryName(schemaPath), name), Path.Combine(schemaDir, name), true);
 
             var schemaV1 = Path.Combine(schemaDir, "001_initial.sql");
@@ -481,9 +492,9 @@ VALUES('pack-blank-attempt','pack-blank-session','pack-backfill-child',' ','','b
             }
 
             var database = new LearningDatabase(dbPath, schemaV1);
-            var migrated = database.Initialize("DELETE", Path.Combine(root, "v4-pack-identity-backups"), "ai2-v5-smoke");
-            Assert(migrated.SchemaVersion == 5 && migrated.Migration != null && migrated.Migration.Version == 5,
-                "v5_pack_backfill_migrates_v4_to_v5");
+            var migrated = database.Initialize("DELETE", Path.Combine(root, "v4-pack-identity-backups"), "ai2-v6-smoke");
+            Assert(migrated.SchemaVersion == 6 && migrated.Migration != null && migrated.Migration.Version == 6,
+                "v5_pack_backfill_migrates_v4_through_v6");
             Assert(migrated.PreMigrationBackup != null && ManagedBackupService.VerifyManagedBackup(migrated.PreMigrationBackup.MetadataPath).SchemaVersion == 4,
                 "v5_pack_backfill_preserves_schema_v4_pre_migration_backup");
             using (var c = database.OpenConnection())
@@ -493,8 +504,9 @@ VALUES('pack-blank-attempt','pack-blank-session','pack-backfill-child',' ','','b
                 Assert(Scalar(c, "SELECT pack_id FROM math_session_runtime WHERE session_id='pack-mixed-session';") == DBNull.Value &&
                        Scalar(c, "SELECT pack_version FROM math_session_runtime WHERE session_id='pack-mixed-session';") == DBNull.Value,
                     "v5_pack_backfill_leaves_ambiguous_mixed_history_unbound");
-                Assert(Convert.ToInt32(Scalar(c, "SELECT count(*) FROM migration_history WHERE version=5;"), CultureInfo.InvariantCulture) == 1,
-                    "v5_pack_backfill_records_migration_once");
+                Assert(Convert.ToInt32(Scalar(c, "SELECT count(*) FROM migration_history WHERE version=5;"), CultureInfo.InvariantCulture) == 1 &&
+                       Convert.ToInt32(Scalar(c, "SELECT count(*) FROM migration_history WHERE version=6;"), CultureInfo.InvariantCulture) == 1,
+                    "v5_pack_backfill_records_v5_and_v6_once");
                 Assert(Scalar(c, "SELECT pack_id FROM math_session_runtime WHERE session_id='pack-blank-session';") == DBNull.Value &&
                        Scalar(c, "SELECT pack_version FROM math_session_runtime WHERE session_id='pack-blank-session';") == DBNull.Value,
                     "v5_pack_backfill_leaves_blank_historical_identity_unbound");
@@ -523,11 +535,13 @@ VALUES('pack-blank-attempt','pack-blank-session','pack-backfill-child',' ','','b
             var schemaV3 = Path.Combine(migrationDir, "003_math_attempt_idempotency_runtime.sql");
             var schemaV4 = Path.Combine(migrationDir, "004_math_lesson_progress.sql");
             var schemaV5 = Path.Combine(migrationDir, "005_math_runtime_pack_identity.sql");
+            var schemaV6 = Path.Combine(migrationDir, "006_attempt_commit_key_immutability.sql");
             File.Copy(schemaPath, schemaV1, true);
             File.Copy(Path.Combine(Path.GetDirectoryName(schemaPath), "002_attempt_immutability.sql"), schemaV2, true);
             File.Copy(Path.Combine(Path.GetDirectoryName(schemaPath), "003_math_attempt_idempotency_runtime.sql"), schemaV3, true);
             File.Copy(Path.Combine(Path.GetDirectoryName(schemaPath), "004_math_lesson_progress.sql"), schemaV4, true);
             File.Copy(Path.Combine(Path.GetDirectoryName(schemaPath), "005_math_runtime_pack_identity.sql"), schemaV5, true);
+            File.Copy(Path.Combine(Path.GetDirectoryName(schemaPath), "006_attempt_commit_key_immutability.sql"), schemaV6, true);
 
             var dbPath = Path.Combine(root, "existing-v1-learning.db");
             using (var c = new SQLiteConnection("Data Source=" + dbPath + ";Version=3;Foreign Keys=True;Pooling=False;"))
@@ -557,8 +571,8 @@ VALUES('pack-blank-attempt','pack-blank-session','pack-backfill-child',' ','','b
 
             var backupRoot = Path.Combine(root, "existing-v1-pre-migration-backups");
             var migrated = database.Initialize("DELETE", backupRoot, "0.1-test");
-            Assert(migrated.SchemaVersion == 5, "existing_v1_migrated_to_v5");
-            Assert(migrated.Migration != null && migrated.Migration.Version == 5, "existing_v1_latest_migration_v5");
+            Assert(migrated.SchemaVersion == 6, "existing_v1_migrated_to_v6");
+            Assert(migrated.Migration != null && migrated.Migration.Version == 6, "existing_v1_latest_migration_v6");
             Assert(migrated.PreMigrationBackup != null, "existing_v1_pre_migration_backup_returned");
             Assert(File.Exists(migrated.PreMigrationBackup.DatabasePath), "existing_v1_pre_migration_db_exists");
             Assert(File.Exists(migrated.PreMigrationBackup.MetadataPath), "existing_v1_pre_migration_metadata_exists");
@@ -567,11 +581,12 @@ VALUES('pack-blank-attempt','pack-blank-session','pack-backfill-child',' ','','b
 
             using (var c = database.OpenConnection())
             {
-                Assert(MigrationManager.GetSchemaVersion(c) == 5, "existing_v1_db_now_schema5");
+                Assert(MigrationManager.GetSchemaVersion(c) == 6, "existing_v1_db_now_schema6");
                 Assert(Convert.ToInt32(Scalar(c, "SELECT count(*) FROM migration_history WHERE version=2;"), CultureInfo.InvariantCulture) == 1, "existing_v1_migration_history_v2");
                 Assert(Convert.ToInt32(Scalar(c, "SELECT count(*) FROM migration_history WHERE version=3;"), CultureInfo.InvariantCulture) == 1, "existing_v1_migration_history_v3");
                 Assert(Convert.ToInt32(Scalar(c, "SELECT count(*) FROM migration_history WHERE version=4;"), CultureInfo.InvariantCulture) == 1, "existing_v1_migration_history_v4");
                 Assert(Convert.ToInt32(Scalar(c, "SELECT count(*) FROM migration_history WHERE version=5;"), CultureInfo.InvariantCulture) == 1, "existing_v1_migration_history_v5");
+                Assert(Convert.ToInt32(Scalar(c, "SELECT count(*) FROM migration_history WHERE version=6;"), CultureInfo.InvariantCulture) == 1, "existing_v1_migration_history_v6");
 
                 bool updateRejected = false;
                 try { Exec(c, null, "UPDATE attempt SET response_ms=999 WHERE id='attempt-1';"); }
@@ -591,7 +606,7 @@ VALUES('corr-1','attempt-1','metadata_fix','{""response_ms"":1200}','{""response
             var dbPath = Path.Combine(root, "answer-commit-learning.db");
             var database = new LearningDatabase(dbPath, schemaPath);
             var init = database.Initialize("DELETE");
-            Assert(init.SchemaVersion == 5, "answer_commit_schema_v5_ready");
+            Assert(init.SchemaVersion == 6, "answer_commit_schema_v6_ready");
 
             var now = DateTime.UtcNow;
             using (var c = database.OpenConnection())
@@ -770,7 +785,7 @@ VALUES('corr-1','attempt-1','metadata_fix','{""response_ms"":1200}','{""response
             var dbPath = Path.Combine(root, "behavior-audit.db");
             var database = new LearningDatabase(dbPath, schemaPath);
             var init = database.Initialize("DELETE");
-            Assert(init.SchemaVersion == 5, "behavior_audit_schema_v5");
+            Assert(init.SchemaVersion == 6, "behavior_audit_schema_v6");
             var now = DateTime.UtcNow;
             using (var c = database.OpenConnection())
             {
