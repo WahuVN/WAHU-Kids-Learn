@@ -24,24 +24,19 @@ function Assert([bool]$Condition, [string]$Message) {
 }
 
 function Assert-ProductionArtPayload([string]$PayloadRoot) {
+    $validator = Join-Path $root 'tools\build\Test-ProductionAssetPayload.ps1'
+    Assert (Test-Path -LiteralPath $validator -PathType Leaf) 'production-art validator missing'
+    $sourceManifestPath = Join-Path $root 'src\App\Assets\Generated\Ready\ASSET_SELECTION_MANIFEST.json'
+    Assert (Test-Path -LiteralPath $sourceManifestPath -PathType Leaf) 'production-art source manifest missing'
+    $sourceManifest = Get-Content -Raw -LiteralPath $sourceManifestPath | ConvertFrom-Json
+    $expectedCount = [int]$sourceManifest.summary.totalSelected
+    Assert ($expectedCount -gt 0) 'production-art source manifest has invalid totalSelected'
+    $expectedManifestSha = (Get-FileHash -Algorithm SHA256 -LiteralPath $sourceManifestPath).Hash.ToUpperInvariant()
     $assetRoot = Join-Path $PayloadRoot 'Assets\Generated\Ready'
-    $manifestPath = Join-Path $assetRoot 'ASSET_SELECTION_MANIFEST.json'
-    Assert (Test-Path -LiteralPath $manifestPath -PathType Leaf) 'installed production-art manifest missing'
-    $manifest = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
-    $assets = @($manifest.assets)
-    Assert ($assets.Count -eq 74) "installed production-art manifest count $($assets.Count)"
-    $pngFiles = @(Get-ChildItem -LiteralPath $assetRoot -Recurse -Filter *.png -File)
-    Assert ($pngFiles.Count -eq 74) "installed production-art PNG count $($pngFiles.Count)"
-    foreach ($asset in $assets) {
-        $rel = ([string]$asset.finalPath).Replace('\\','\').Replace('/','\')
-        $path = Join-Path $assetRoot $rel
-        Assert (Test-Path -LiteralPath $path -PathType Leaf) "installed production-art file missing: $rel"
-        $actualSha = (Get-FileHash -Algorithm SHA256 -LiteralPath $path).Hash.ToUpperInvariant()
-        Assert ($actualSha -eq ([string]$asset.sha256).ToUpperInvariant()) "installed production-art SHA mismatch: $rel"
-    }
+    & $validator -Mode Tree -Path $assetRoot -ExpectedManifestSha256 $expectedManifestSha
     return [ordered]@{
-        png_count = $pngFiles.Count
-        manifest_sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $manifestPath).Hash.ToUpperInvariant()
+        png_count = $expectedCount
+        manifest_sha256 = $expectedManifestSha
     }
 }
 
