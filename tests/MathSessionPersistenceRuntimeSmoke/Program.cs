@@ -55,6 +55,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestTargetedCompletionProgressFaultRollsBackAndRetriesExactlyOnce(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedCompletionRejectsCorruptPendingProgress(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedCompletionRequiresDurableRuntimeIdentity(root, schemaPath, templatePath, lessonCatalogPath);
+                TestTargetedCompletionRequiresDurableFinalizedOutcomes(root, schemaPath, templatePath, lessonCatalogPath);
                 TestCorruptRuntimeMetadataIsQuarantined(root, schemaPath, templatePath);
                 TestMoreThanFourInvalidRuntimeSessionsAllRecover(root, schemaPath, templatePath);
                 TestMultipleValidActiveRuntimeSessionsKeepNewestOnly(root, schemaPath, templatePath);
@@ -4235,6 +4236,75 @@ WHERE child_id=@child AND lesson_id=@lesson;",
                   Count(missingDatabase, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + started.ChildId +
                   "' AND lesson_id='" + lesson.Id + "' AND completed_count=0;") == 1,
                     "missing_targeted_runtime_falls_back_to_existing_dangling_recovery_contract");
+            }
+        }
+
+        private static void TestTargetedCompletionRequiresDurableFinalizedOutcomes(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.Lessons.First(x => x.PrerequisiteSkills == null || x.PrerequisiteSkills.Count == 0);
+            var database = NewDatabase(Path.Combine(root, "targeted-completion-durable-finalized-outcomes.db"), schemaPath);
+
+            using (var coordinator = new MathSessionCoordinator(database, templatePath, "LOW", 8069, lesson.Id))
+            {
+                var started = coordinator.Start("Bé durable finalized completion outcomes");
+                for (var ordinal = 0; ordinal < 3; ordinal++)
+                {
+                    var question = coordinator.NextQuestion();
+                    coordinator.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 830 + ordinal * 100);
+                }
+                A(coordinator.Summary.Attempts == 3 &&
+                  Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + started.SessionId + "';") == 3,
+                    "durable_finalized_completion_fixture_has_three_mastery_bearing_outcomes");
+
+                var masteryId = ScalarText(database,
+                    "SELECT m.id FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + started.SessionId + "' ORDER BY m.created_at_utc ASC,m.id ASC LIMIT 1;");
+                var attemptId = ScalarText(database,
+                    "SELECT attempt_id FROM mastery_event WHERE id='" + masteryId + "';");
+                A(!string.IsNullOrWhiteSpace(masteryId) && !string.IsNullOrWhiteSpace(attemptId),
+                    "durable_finalized_completion_fixture_resolves_mastery_attempt_link");
+
+                Exec(database, "UPDATE mastery_event SET attempt_id=NULL WHERE id=@id;", "@id", masteryId);
+                Exception missingOutcomeError = null;
+                try { coordinator.Complete(); } catch (Exception ex) { missingOutcomeError = ex; }
+                A(missingOutcomeError is InvalidOperationException && coordinator.IsActive &&
+                  SessionState(database, started.SessionId) == "active" &&
+                  Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + started.ChildId +
+                  "' AND lesson_id='" + lesson.Id + "' AND completed_count=0;") == 1,
+                    "missing_durable_finalized_outcome_cannot_terminalize_targeted_lesson");
+                A(Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + started.SessionId + "';") == 0 &&
+                  Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + started.SessionId + "';") == 1,
+                    "missing_durable_finalized_outcome_rolls_back_terminal_chain");
+
+                Exec(database, "UPDATE mastery_event SET attempt_id=@attempt WHERE id=@id;", "@attempt", attemptId, "@id", masteryId);
+                var fakeAttemptId = "attempt-wrong-pack-finalized-" + Guid.NewGuid().ToString("N");
+                Exec(database, @"INSERT INTO attempt(
+id,session_id,child_id,pack_id,pack_version,question_id,skill_id,subject,started_at_utc,answered_at_utc,answer_json,is_correct,response_ms,hint_level,representation,input_method,attempt_index,listen_count)
+SELECT @fake,session_id,child_id,'math_grade2_tampered_attempt_pack','9.9.9',question_id,skill_id,subject,started_at_utc,answered_at_utc,answer_json,is_correct,response_ms,hint_level,representation,input_method,attempt_index,listen_count
+FROM attempt WHERE id=@attempt;",
+                    "@fake", fakeAttemptId, "@attempt", attemptId);
+                Exec(database, "UPDATE mastery_event SET attempt_id=@fake WHERE id=@id;", "@fake", fakeAttemptId, "@id", masteryId);
+                Exception wrongPackOutcomeError = null;
+                try { coordinator.Complete(); } catch (Exception ex) { wrongPackOutcomeError = ex; }
+                A(wrongPackOutcomeError is InvalidOperationException && coordinator.IsActive &&
+                  SessionState(database, started.SessionId) == "active" &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + started.SessionId + "';") == 0,
+                    "wrong_pack_durable_finalized_outcome_cannot_terminalize_targeted_lesson");
+
+                Exec(database, "UPDATE mastery_event SET attempt_id=@attempt WHERE id=@id;", "@attempt", attemptId, "@id", masteryId);
+                Exec(database, "DELETE FROM attempt WHERE id=@fake;", "@fake", fakeAttemptId);
+                var completed = coordinator.Complete();
+                A(completed.LessonCompleted && !coordinator.IsActive && SessionState(database, started.SessionId) == "completed" &&
+                  Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + started.ChildId +
+                  "' AND lesson_id='" + lesson.Id + "' AND started_count=1 AND completed_count=1;") == 1,
+                    "restored_durable_finalized_outcomes_complete_exactly_once");
+                A(Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + started.SessionId + "';") == 1 &&
+                  Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + started.SessionId + "';") == 3,
+                    "restored_durable_finalized_outcomes_keep_reward_and_mastery_exactly_once");
             }
         }
 
