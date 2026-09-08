@@ -95,7 +95,8 @@ function Read-ZipEntryText($Entry) {
 }
 
 function Normalize-ZipEntryName([string]$Name) {
-    return ([string]$Name).Replace('\', '/')
+    if ($null -eq $Name) { return '' }
+    return $Name.Replace('\', '/')
 }
 
 function Assert-Zip([string]$ZipPath) {
@@ -116,9 +117,8 @@ function Assert-Zip([string]$ZipPath) {
         $manifest = (Read-ZipEntryText $manifestEntry) | ConvertFrom-Json
         $expected = Assert-ManifestShape $manifest
         $pngEntries = @($zip.Entries | Where-Object {
-            $normalizedName = Normalize-ZipEntryName $_.FullName
-            $normalizedName.StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase) -and
-            $normalizedName.EndsWith('.png', [StringComparison]::OrdinalIgnoreCase)
+            (Normalize-ZipEntryName $_.FullName).StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase) -and
+            (Normalize-ZipEntryName $_.FullName).EndsWith('.png', [StringComparison]::OrdinalIgnoreCase)
         })
         if ($pngEntries.Count -ne $expected) { throw "Portable ZIP production asset PNG count mismatch. expected=$expected actual=$($pngEntries.Count)" }
         foreach ($asset in @($manifest.assets)) {
