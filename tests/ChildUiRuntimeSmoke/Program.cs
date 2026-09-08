@@ -3858,6 +3858,55 @@ END;");
                     "production_assets_mission_default_uses_rescue_map");
             }
 
+            var uiIconPaths = new[]
+            {
+                "10_UIIcons/icon_math.png",
+                "10_UIIcons/icon_hint.png",
+                "10_UIIcons/icon_reward.png",
+                "10_UIIcons/icon_garden.png"
+            };
+            var actionButtonType = appAssembly.GetType("WAHUKidsLearn.ChildActionButton", true);
+            using (var iconButton = (Control)Activator.CreateInstance(actionButtonType, true))
+            {
+                iconButton.Text = "Luyện Toán";
+                foreach (var iconPath in uiIconPaths)
+                {
+                    A((bool)hasAssetMethod.Invoke(null, new object[] { iconPath }),
+                        "production_assets_ui_icon_present_" + Path.GetFileNameWithoutExtension(iconPath));
+                    Set(iconButton, "IconAssetPath", iconPath);
+                    Set(iconButton, "IconSize", 28);
+                    A(RenderAssetControlColorCount(iconButton, 220, 52) >= 6,
+                        "production_assets_action_button_icon_renders_" + Path.GetFileNameWithoutExtension(iconPath));
+                }
+                Set(iconButton, "IconAssetPath", "10_UIIcons/missing_icon.png");
+                A(RenderAssetControlColorCount(iconButton, 220, 52) >= 3,
+                    "production_assets_action_button_missing_icon_keeps_text_surface");
+            }
+
+            var standaloneIconType = appAssembly.GetType("WAHUKidsLearn.ChildAssetIconControl", true);
+            using (var gardenIcon = (Control)Activator.CreateInstance(standaloneIconType, true))
+            {
+                Set(gardenIcon, "AssetPath", "10_UIIcons/icon_garden.png");
+                Set(gardenIcon, "Inset", 3);
+                A(RenderAssetControlColorCount(gardenIcon, 44, 44) >= 4,
+                    "production_assets_garden_header_icon_renders");
+            }
+
+            var repo = Directory.GetCurrentDirectory();
+            var mainSource = File.ReadAllText(Path.Combine(repo, "src", "App", "MainForm.cs"));
+            var hubSource = File.ReadAllText(Path.Combine(repo, "src", "App", "MathHubForm.cs"));
+            var lessonSource = File.ReadAllText(Path.Combine(repo, "src", "App", "MathLessonForm.cs"));
+            A(mainSource.IndexOf("icon_garden.png", StringComparison.Ordinal) >= 0 &&
+              mainSource.IndexOf("icon_math.png", StringComparison.Ordinal) >= 0 &&
+              mainSource.IndexOf("icon_reward.png", StringComparison.Ordinal) >= 0,
+                "production_assets_home_wires_garden_math_reward_icons");
+            A(hubSource.IndexOf("icon_math.png", StringComparison.Ordinal) >= 0 &&
+              hubSource.IndexOf("icon_reward.png", StringComparison.Ordinal) >= 0,
+                "production_assets_hub_wires_math_reward_icons");
+            A(lessonSource.IndexOf("icon_hint.png", StringComparison.Ordinal) >= 0 &&
+              lessonSource.IndexOf("icon_reward.png", StringComparison.Ordinal) >= 0,
+                "production_assets_lesson_wires_hint_reward_icons");
+
             var feedbackType = appAssembly.GetType("WAHUKidsLearn.GameFeedbackFxControl", true);
             using (var feedback = (Control)Activator.CreateInstance(feedbackType,
                 BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null,

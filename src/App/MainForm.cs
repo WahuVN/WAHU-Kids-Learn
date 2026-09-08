@@ -132,16 +132,28 @@ namespace WAHUKidsLearn
             gardenLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
             gardenLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 180));
             gardenLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 44));
-            gardenLayout.Controls.Add(new Label
+            var gardenHeader = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1, Margin = new Padding(0) };
+            gardenHeader.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 46));
+            gardenHeader.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            gardenHeader.Controls.Add(new ChildAssetIconControl
+            {
+                Dock = DockStyle.Fill,
+                Margin = new Padding(4, 3, 2, 3),
+                AssetPath = "10_UIIcons/icon_garden.png",
+                Inset = 3,
+                AccessibleName = "Biểu tượng khu vườn"
+            }, 0, 0);
+            gardenHeader.Controls.Add(new Label
             {
                 Dock = DockStyle.Fill,
                 Text = "Khu vườn của bé",
                 TextAlign = ContentAlignment.MiddleLeft,
-                Padding = new Padding(10, 0, 0, 0),
+                Padding = new Padding(2, 0, 0, 0),
                 Font = ChildVisualTheme.Font(16f, FontStyle.Bold),
                 ForeColor = ChildVisualTheme.Ink,
                 AccessibleName = "Khu vườn của bé"
-            }, 0, 0);
+            }, 1, 0);
+            gardenLayout.Controls.Add(gardenHeader, 0, 0);
             _garden = new GardenWorldControl { Dock = DockStyle.Fill, Margin = new Padding(3), GrowthLevel = 1 };
             gardenLayout.Controls.Add(_garden, 0, 1);
 
@@ -280,6 +292,8 @@ namespace WAHUKidsLearn
                 Margin = new Padding(0, 8, 6, 6),
                 Text = "Bắt đầu cứu hộ",
                 BadgeText = "3",
+                IconAssetPath = "10_UIIcons/icon_reward.png",
+                IconSize = 28,
                 Font = ChildVisualTheme.Font(12.2f, FontStyle.Bold),
                 FillColor = Color.FromArgb(232, 174, 93),
                 HoverColor = Color.FromArgb(220, 158, 77),
@@ -302,6 +316,8 @@ namespace WAHUKidsLearn
                 Margin = new Padding(6, 8, 0, 6),
                 Text = "Thư viện Toán",
                 BadgeText = string.Empty,
+                IconAssetPath = "10_UIIcons/icon_math.png",
+                IconSize = 28,
                 Font = ChildVisualTheme.Font(10.8f, FontStyle.Bold),
                 FillColor = Color.FromArgb(248, 252, 255),
                 HoverColor = Color.FromArgb(230, 242, 250),

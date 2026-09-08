@@ -441,6 +441,8 @@ namespace WAHUKidsLearn
                 Size = new Size(220, 48),
                 Margin = new Padding(8),
                 Text = "Gợi ý",
+                IconAssetPath = "10_UIIcons/icon_hint.png",
+                IconSize = 24,
                 FillColor = ChildVisualTheme.Peach,
                 HoverColor = Color.FromArgb(245, 214, 178),
                 PressedColor = Color.FromArgb(236, 200, 159),
@@ -1396,6 +1398,8 @@ namespace WAHUKidsLearn
             _hintButton.Visible = false;
             _stopButton.Visible = false;
             _nextButton.Visible = true;
+            _nextButton.IconAssetPath = "10_UIIcons/icon_reward.png";
+            _nextButton.IconSize = 24;
             _nextButton.Text = _eventPresentation == null ? "Về thư viện Toán" : "Về nhiệm vụ cứu hộ";
             _nextButton.AccessibleName = _eventPresentation == null ? "Về thư viện Toán" : "Về nhiệm vụ cứu hộ";
             _nextButton.AccessibleDescription = _eventPresentation == null

@@ -134,6 +134,8 @@ namespace WAHUKidsLearn
     {
         private bool _hover;
         private bool _pressed;
+        private string _iconAssetPath;
+        private int _iconSize = 26;
 
         public Color FillColor { get; set; } = ChildVisualTheme.MintStrong;
         public Color HoverColor { get; set; } = Color.FromArgb(92, 155, 104);
@@ -148,6 +150,21 @@ namespace WAHUKidsLearn
         public int Depth { get; set; } = 4;
         public int Radius { get; set; } = 18;
         public string BadgeText { get; set; }
+        public string IconAssetPath
+        {
+            get { return _iconAssetPath; }
+            set
+            {
+                if (string.Equals(_iconAssetPath, value, StringComparison.OrdinalIgnoreCase)) return;
+                _iconAssetPath = value;
+                Invalidate();
+            }
+        }
+        public int IconSize
+        {
+            get { return _iconSize; }
+            set { _iconSize = Math.Max(12, Math.Min(40, value)); Invalidate(); }
+        }
 
         public ChildActionButton()
         {
@@ -215,6 +232,17 @@ namespace WAHUKidsLearn
                 badge = new Rectangle(rect.Right - 45, rect.Top + 7, 34, Math.Max(24, rect.Height - 14));
                 textRect.Width = Math.Max(1, badge.Left - 8 - textRect.Left);
             }
+            if (!string.IsNullOrWhiteSpace(IconAssetPath) && GameAssetLibrary.HasAsset(IconAssetPath))
+            {
+                var iconSize = Math.Min(IconSize, Math.Max(12, rect.Height - 14));
+                var iconRect = new Rectangle(textRect.Left + 4, rect.Top + (rect.Height - iconSize) / 2, iconSize, iconSize);
+                if (GameAssetLibrary.DrawContain(pevent.Graphics, IconAssetPath, iconRect))
+                {
+                    var textLeft = iconRect.Right + 8;
+                    textRect.Width = Math.Max(1, textRect.Right - textLeft);
+                    textRect.X = textLeft;
+                }
+            }
             TextRenderer.DrawText(pevent.Graphics, Text, Font, textRect,
                 Enabled ? TextColor : DisabledTextColor,
                 AlignmentFlags(TextAlign) | TextFormatFlags.EndEllipsis | TextFormatFlags.WordBreak | TextFormatFlags.NoPrefix);
@@ -246,6 +274,47 @@ namespace WAHUKidsLearn
                 default: flags = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter; break;
             }
             return flags;
+        }
+    }
+
+    internal sealed class ChildAssetIconControl : Control
+    {
+        private string _assetPath;
+        private int _inset = 4;
+
+        public string AssetPath
+        {
+            get { return _assetPath; }
+            set
+            {
+                if (string.Equals(_assetPath, value, StringComparison.OrdinalIgnoreCase)) return;
+                _assetPath = value;
+                Invalidate();
+            }
+        }
+
+        public int Inset
+        {
+            get { return _inset; }
+            set { _inset = Math.Max(0, Math.Min(12, value)); Invalidate(); }
+        }
+
+        public ChildAssetIconControl()
+        {
+            SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint |
+                     ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw |
+                     ControlStyles.SupportsTransparentBackColor, true);
+            BackColor = Color.Transparent;
+            TabStop = false;
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
+            if (Width <= 0 || Height <= 0 || string.IsNullOrWhiteSpace(AssetPath)) return;
+            var bounds = Rectangle.Inflate(ClientRectangle, -Inset, -Inset);
+            if (bounds.Width <= 0 || bounds.Height <= 0) return;
+            GameAssetLibrary.DrawContain(e.Graphics, AssetPath, bounds);
         }
     }
 
