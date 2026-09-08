@@ -44,6 +44,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestAnswerUnitFeedbackSurvivesCoordinatorResume(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedLessonUnlockAndResume(root, schemaPath, templatePath, lessonCatalogPath);
                 TestImpossibleLessonProgressDoesNotUnlockPrerequisite(root, schemaPath, lessonCatalogPath);
+                TestImpossibleLessonProgressRepairsOnRealStart(root, schemaPath, templatePath, lessonCatalogPath);
                 TestFirstFiveLessonsGoldenPath(root, schemaPath, templatePath, lessonCatalogPath);
                 TestFirstFiveAllAuthoredVariantsEndToEnd(root, schemaPath, templatePath, lessonCatalogPath);
                 TestFirstFiveRetryErrorMatrix(root, schemaPath, templatePath, lessonCatalogPath);
@@ -2873,6 +2874,66 @@ VALUES(@child,@skill,'math',0.9,0.9,3,3,0,1,@utc,@utc,@utc,'STABLE','legacy-smok
             dependentAccess = accessService.GetAccess(profile.ChildId, dependent.Id);
             A(dependentAccess.IsUnlocked && dependentAccess.UnsatisfiedPrerequisiteLessonIds.Count == 0,
                 "impossible_progress_guard_preserves_legacy_stable_mastery_unlock");
+        }
+
+        private static void TestImpossibleLessonProgressRepairsOnRealStart(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.Lessons.First(x => x.PrerequisiteSkills == null || x.PrerequisiteSkills.Count == 0);
+            var database = NewDatabase(Path.Combine(root, "impossible-progress-real-start.db"), schemaPath);
+            var profile = new LearnerSessionService(database).EnsurePrimaryChild("Bé impossible progress real start");
+            var oldUtc = DateTime.UtcNow.AddDays(-2).ToString("o", CultureInfo.InvariantCulture);
+            Exec(database, @"INSERT INTO math_lesson_progress(
+child_id,lesson_id,skill_id,started_count,completed_count,last_score_percent,best_score_percent,last_started_at_utc,last_completed_at_utc,updated_at_utc)
+VALUES(@child,@lesson,@skill,1,2,25,100,@utc,@utc,@utc);",
+                "@child", profile.ChildId,
+                "@lesson", lesson.Id,
+                "@skill", lesson.SkillId,
+                "@utc", oldUtc);
+
+            string sessionId;
+            using (var coordinator = new MathSessionCoordinator(database, templatePath, "LOW", 9401, lesson.Id))
+            {
+                var started = coordinator.Start("Bé impossible progress real start");
+                sessionId = started.SessionId;
+                var afterStart = new MathLessonProgressStore(database).LoadOne(profile.ChildId, lesson.Id);
+                A(afterStart != null && afterStart.StartedCount == 2 && afterStart.CompletedCount == 0 &&
+                  !afterStart.LastScorePercent.HasValue && !afterStart.BestScorePercent.HasValue &&
+                  !afterStart.LastCompletedAtUtc.HasValue,
+                    "impossible_progress_real_start_repairs_derived_completion_before_counting_new_start");
+                A(started.LessonAccess != null && !started.LessonAccess.IsCompleted && started.LessonAccess.CompletedCount == 0,
+                    "impossible_progress_real_start_access_stays_incomplete_after_repair");
+
+                var selected = started.SelectedContentQuestionIds.ToList();
+                for (var ordinal = 0; ordinal < selected.Count; ordinal++)
+                {
+                    var question = coordinator.NextQuestion();
+                    if (ordinal == 0)
+                        coordinator.SubmitAnswerAt(WrongAnswer(question), 0, "smoke", DateTime.UtcNow, 700);
+                    else
+                        coordinator.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 800 + ordinal * 100);
+                }
+                var completed = coordinator.Complete();
+                A(completed.LessonCompleted && completed.LessonScorePercent.HasValue &&
+                  Math.Abs(completed.LessonScorePercent.Value - (200.0 / 3.0)) < 0.0001 &&
+                  completed.LessonBestScorePercent.HasValue &&
+                  Math.Abs(completed.LessonBestScorePercent.Value - completed.LessonScorePercent.Value) < 0.0001,
+                    "impossible_progress_real_completion_uses_real_score_not_corrupt_historical_best");
+            }
+
+            var repaired = new MathLessonProgressStore(database).LoadOne(profile.ChildId, lesson.Id);
+            A(repaired != null && repaired.StartedCount == 2 && repaired.CompletedCount == 1 &&
+              repaired.LastScorePercent.HasValue && repaired.BestScorePercent.HasValue &&
+              Math.Abs(repaired.LastScorePercent.Value - (200.0 / 3.0)) < 0.0001 &&
+              Math.Abs(repaired.BestScorePercent.Value - repaired.LastScorePercent.Value) < 0.0001 &&
+              repaired.LastCompletedAtUtc.HasValue,
+                "impossible_progress_real_completion_restarts_completion_history_from_durable_evidence");
+            A(SessionState(database, sessionId) == "completed",
+                "impossible_progress_real_completion_terminalizes_repaired_session_normally");
         }
 
         private static void TestFirstFiveLessonsGoldenPath(string root, string schemaPath, string templatePath, string lessonCatalogPath)
