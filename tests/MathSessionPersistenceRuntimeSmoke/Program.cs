@@ -73,6 +73,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestTargetedConcurrentPendingRetryKeepsFirstTrySemantics(root, schemaPath, templatePath, lessonCatalogPath);
                 TestAdaptiveConcurrentCoordinatorsShareSemanticOrdinalId(root, schemaPath, templatePath);
                 TestAdaptiveDuplicateCompletionConvergesWithoutFalseError(root, schemaPath, templatePath);
+                TestTargetedDuplicateCompletionRequiresTrustedProgress(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedResumeDiscardsStaleConcurrentOrdinalCache(root, schemaPath, templatePath, lessonCatalogPath);
                 TestRetryAwareAnswerFlow(root, schemaPath, templatePath);
                 TestRetryWrongFinalizesOnce(root, schemaPath, templatePath);
@@ -5261,6 +5262,78 @@ END;");
                   Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + firstStart.SessionId + "';") == 1 &&
                   Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + firstStart.SessionId + "';") == 1,
                     "adaptive_duplicate_completion_keeps_reward_and_mastery_exactly_once");
+            }
+        }
+
+        private static void TestTargetedDuplicateCompletionRequiresTrustedProgress(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.Lessons[0];
+
+            var scoreDatabase = NewDatabase(Path.Combine(root, "targeted-duplicate-completion-score-normalization.db"), schemaPath);
+            using (var first = new MathSessionCoordinator(scoreDatabase, templatePath, "LOW", 8703, lesson.Id))
+            using (var second = new MathSessionCoordinator(scoreDatabase, templatePath, "NORMAL", 999999, lesson.Id))
+            {
+                var firstStart = first.Start("Bé targeted duplicate completion score");
+                var secondStart = second.Start("Bé targeted duplicate completion score");
+                A(secondStart.ResumedExistingSession && secondStart.SessionId == firstStart.SessionId,
+                    "targeted_duplicate_completion_score_wrappers_share_session");
+                for (var ordinal = 0; ordinal < 3; ordinal++)
+                {
+                    var qA = first.NextQuestion();
+                    var qB = second.NextQuestion();
+                    first.SubmitAnswerAt(qA.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700 + ordinal * 100);
+                    second.SubmitAnswerAt(qB.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 720 + ordinal * 100);
+                }
+                var winner = first.Complete();
+                A(winner.LessonCompleted && winner.LessonBestScorePercent.HasValue &&
+                  Math.Abs(winner.LessonBestScorePercent.Value - 100.0) < 0.0001,
+                    "targeted_duplicate_completion_score_winner_completes_normally");
+                Exec(scoreDatabase,
+                    "UPDATE math_lesson_progress SET best_score_percent=40 WHERE child_id=@child AND lesson_id=@lesson;",
+                    "@child", firstStart.ChildId, "@lesson", lesson.Id);
+                var loser = second.Complete();
+                A(loser.LessonCompleted && loser.LessonBestScorePercent.HasValue &&
+                  Math.Abs(loser.LessonBestScorePercent.Value - 100.0) < 0.0001 && !second.IsActive,
+                    "targeted_duplicate_completion_score_loser_normalizes_trusted_best_score");
+                A(Count(scoreDatabase, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + firstStart.ChildId +
+                  "' AND lesson_id='" + lesson.Id + "' AND started_count=1 AND completed_count=1;") == 1 &&
+                  Count(scoreDatabase, "SELECT count(*) FROM reward_event WHERE source_ref='" + firstStart.SessionId + "';") == 1,
+                    "targeted_duplicate_completion_score_loser_keeps_terminal_chain_exactly_once");
+            }
+
+            var identityDatabase = NewDatabase(Path.Combine(root, "targeted-duplicate-completion-corrupt-progress.db"), schemaPath);
+            using (var first = new MathSessionCoordinator(identityDatabase, templatePath, "LOW", 8704, lesson.Id))
+            using (var second = new MathSessionCoordinator(identityDatabase, templatePath, "NORMAL", 999999, lesson.Id))
+            {
+                var firstStart = first.Start("Bé targeted duplicate completion corrupt progress");
+                var secondStart = second.Start("Bé targeted duplicate completion corrupt progress");
+                A(secondStart.ResumedExistingSession && secondStart.SessionId == firstStart.SessionId,
+                    "targeted_duplicate_completion_corrupt_wrappers_share_session");
+                for (var ordinal = 0; ordinal < 3; ordinal++)
+                {
+                    var qA = first.NextQuestion();
+                    var qB = second.NextQuestion();
+                    first.SubmitAnswerAt(qA.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 800 + ordinal * 100);
+                    second.SubmitAnswerAt(qB.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 820 + ordinal * 100);
+                }
+                first.Complete();
+                Exec(identityDatabase,
+                    "UPDATE math_lesson_progress SET skill_id='M2_WRONG_STALE_COMPLETION_SKILL' WHERE child_id=@child AND lesson_id=@lesson;",
+                    "@child", firstStart.ChildId, "@lesson", lesson.Id);
+                Exception loserError = null;
+                try { second.Complete(); } catch (Exception ex) { loserError = ex; }
+                A(loserError is InvalidOperationException && !second.IsActive &&
+                  SessionState(identityDatabase, firstStart.SessionId) == "completed",
+                    "targeted_duplicate_completion_corrupt_progress_cannot_converge_false_success");
+                A(Count(identityDatabase, "SELECT count(*) FROM reward_event WHERE source_ref='" + firstStart.SessionId + "';") == 1 &&
+                  Count(identityDatabase, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + firstStart.ChildId +
+                  "' AND lesson_id='" + lesson.Id + "' AND completed_count=1;") == 1,
+                    "targeted_duplicate_completion_corrupt_progress_keeps_terminal_winner_exactly_once");
             }
         }
 
