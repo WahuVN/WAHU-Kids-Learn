@@ -60,6 +60,7 @@ namespace WAHU.ChildUiRuntimeSmoke
             TestInteractionRetryUiFlow(appAssembly);
             TestInteractiveSegmentAnswer(appAssembly);
             TestGameArtMotionPolicy(appAssembly);
+            TestProductionGameAssets(appAssembly);
             TestBasicControls(appAssembly);
 
             if (!string.IsNullOrWhiteSpace(_captureDirectory))
@@ -3799,6 +3800,59 @@ END;");
               lessonSource.IndexOf("new GardenRewardArtControl(_performance)", StringComparison.Ordinal) >= 0,
                 "game_art_forms_wire_runtime_performance_settings");
         }
+        private static void TestProductionGameAssets(Assembly appAssembly)
+        {
+            var flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+            var libraryType = appAssembly.GetType("WAHUKidsLearn.GameAssetLibrary", true);
+            var countMethod = libraryType.GetMethod("CountProductionPngAssets", flags);
+            var manifestMethod = libraryType.GetMethod("HasProductionManifest", flags);
+            var completeMethod = libraryType.GetMethod("HasCompleteProductionPayload", flags);
+            A(countMethod != null && manifestMethod != null && completeMethod != null,
+                "production_assets_library_contract_available");
+            var pngCount = (int)countMethod.Invoke(null, null);
+            A(pngCount == 74, "production_assets_exact_74_png_payload");
+            A((bool)manifestMethod.Invoke(null, null), "production_assets_manifest_present");
+            A((bool)completeMethod.Invoke(null, null), "production_assets_payload_complete");
+
+            var low = new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW };
+            var rescueType = appAssembly.GetType("WAHUKidsLearn.RescueHeroArtControl", true);
+            using (var rescue = (Control)Activator.CreateInstance(rescueType,
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null,
+                new object[] { low }, null))
+                A(RenderAssetControlColorCount(rescue, 420, 180) >= 30,
+                    "production_assets_rescue_scene_renders_rich_visual");
+
+            var feedbackType = appAssembly.GetType("WAHUKidsLearn.GameFeedbackFxControl", true);
+            using (var feedback = (Control)Activator.CreateInstance(feedbackType,
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null,
+                new object[] { low, true }, null))
+            {
+                var moodProperty = feedbackType.GetProperty("VisualMood", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                var correctMood = Enum.Parse(moodProperty.PropertyType, "Correct");
+                moodProperty.SetValue(feedback, correctMood, null);
+                A(RenderAssetControlColorCount(feedback, 180, 120) >= 4,
+                    "production_assets_feedback_fx_renders_asset");
+            }
+
+            var gardenType = appAssembly.GetType("WAHUKidsLearn.GardenRewardArtControl", true);
+            using (var garden = (Control)Activator.CreateInstance(gardenType,
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null,
+                new object[] { low }, null))
+                A(RenderAssetControlColorCount(garden, 320, 180) >= 20,
+                    "production_assets_garden_scene_renders_rich_visual");
+        }
+
+        private static int RenderAssetControlColorCount(Control control, int width, int height)
+        {
+            control.Size = new Size(width, height);
+            control.CreateControl();
+            using (var bitmap = new Bitmap(width, height))
+            {
+                control.DrawToBitmap(bitmap, new Rectangle(0, 0, width, height));
+                return SampleBitmapColors(bitmap).Count;
+            }
+        }
+
         private static void TestBasicControls(Assembly appAssembly)
         {
             using (var button = CreateInternalControl(appAssembly, "WAHUKidsLearn.AnswerChoiceButton"))

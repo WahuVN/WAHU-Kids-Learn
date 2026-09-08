@@ -153,6 +153,8 @@ namespace WAHUKidsLearn
             var r = ClientRectangle;
             var pulse = (float)((Math.Sin(_frame * Math.PI / 20d) + 1d) * 0.5d);
 
+            if (DrawProductionRescueArt(g, r, pulse)) return;
+
             using (var bg = new LinearGradientBrush(r, Color.FromArgb(238, 249, 255), Color.FromArgb(240, 250, 229), 90f))
             using (var path = ChildVisualTheme.RoundedRect(new Rectangle(1, 1, Width - 3, Height - 3), 20))
             {
@@ -167,6 +169,42 @@ namespace WAHUKidsLearn
             DrawBunny(g, new RectangleF(Width * 0.035f, Height * 0.22f, Width * 0.24f, Height * 0.68f));
             DrawRobot(g, new RectangleF(Width * 0.72f, Height * 0.25f, Width * 0.24f, Height * 0.62f));
             DrawSparkles(g, pulse);
+        }
+
+        private static bool DrawProductionRescueArt(Graphics g, Rectangle bounds, float pulse)
+        {
+            const string background = "03_Rescue/rescue_map_background.png";
+            if (!GameAssetLibrary.HasAsset(background)) return false;
+
+            var scene = new RectangleF(2, 2, Math.Max(1, bounds.Width - 5), Math.Max(1, bounds.Height - 5));
+            var state = g.Save();
+            try
+            {
+                using (var clip = ChildVisualTheme.RoundedRect(Rectangle.Round(scene), 20)) g.SetClip(clip);
+                GameAssetLibrary.DrawCover(g, background, scene);
+                var bob = (float)Math.Round(pulse * 3f);
+                GameAssetLibrary.DrawContain(g, "03_Rescue/rescue_start_marker.png", Slot(scene, .04f, .62f, .16f, .28f));
+                GameAssetLibrary.DrawContain(g, "03_Rescue/rescue_checkpoint_idle.png", Slot(scene, .29f, .43f, .14f, .27f));
+                GameAssetLibrary.DrawContain(g, "03_Rescue/rescue_checkpoint_active.png", Slot(scene, .45f, .38f, .16f, .30f));
+                GameAssetLibrary.DrawContain(g, "03_Rescue/rescue_checkpoint_done.png", Slot(scene, .61f, .43f, .14f, .27f));
+                GameAssetLibrary.DrawContain(g, "03_Rescue/rescue_reward_chest_closed.png", Slot(scene, .61f, .66f, .18f, .27f));
+                GameAssetLibrary.DrawContain(g, "03_Rescue/rescue_bunny_walk.png", Slot(scene, .00f, .21f - bob / Math.Max(1f, scene.Height), .28f, .68f));
+                GameAssetLibrary.DrawContain(g, "03_Rescue/rescue_robot_walk.png", Slot(scene, .74f, .23f + bob / Math.Max(1f, scene.Height), .25f, .65f));
+            }
+            finally
+            {
+                g.Restore(state);
+            }
+
+            using (var borderPath = ChildVisualTheme.RoundedRect(Rectangle.Round(scene), 20))
+            using (var border = new Pen(Color.FromArgb(160, 93, 122, 117), 1.2f))
+                g.DrawPath(border, borderPath);
+            return true;
+        }
+
+        private static RectangleF Slot(RectangleF r, float x, float y, float width, float height)
+        {
+            return new RectangleF(r.Left + r.Width * x, r.Top + r.Height * y, r.Width * width, r.Height * height);
         }
 
         private void DrawHill(Graphics g)
@@ -355,6 +393,7 @@ namespace WAHUKidsLearn
             var g = e.Graphics; g.SmoothingMode = SmoothingMode.AntiAlias;
             var pulse = (float)((Math.Sin(_frame * Math.PI / 18d) + 1d) * .5d);
             var cx = Width / 2f; var cy = Height / 2f;
+            if (DrawProductionFeedback(g)) return;
             if (_mood == Mood.Correct)
             {
                 using (var halo = new SolidBrush(Color.FromArgb((int)(40 + pulse * 55), ChildVisualTheme.Sun))) g.FillEllipse(halo, cx - 30, cy - 30, 60, 60);
@@ -381,6 +420,17 @@ namespace WAHUKidsLearn
                 using (var p = new Pen(ChildVisualTheme.SkyStrong, 2f)) g.DrawEllipse(p, cx - 19, cy - 19, 38, 38);
                 RescueHeroArtControl.DrawStar(g, cx, cy, 10, ChildVisualTheme.Sun, ChildVisualTheme.PeachStrong);
             }
+        }
+
+        private bool DrawProductionFeedback(Graphics g)
+        {
+            string asset = null;
+            if (_mood == Mood.Correct) asset = "02_GameEffects/fx_correct_star.png";
+            else if (_mood == Mood.Retry) asset = "02_GameEffects/fx_retry_cloud.png";
+            else if (_mood == Mood.Hint) asset = "02_GameEffects/fx_hint_bulb.png";
+            if (string.IsNullOrWhiteSpace(asset) || !GameAssetLibrary.HasAsset(asset)) return false;
+            return GameAssetLibrary.DrawContain(g, asset,
+                new RectangleF(2, 2, Math.Max(1, Width - 4), Math.Max(1, Height - 4)));
         }
     }
 
@@ -433,6 +483,14 @@ namespace WAHUKidsLearn
             if (Width < 80 || Height < 50) return;
             var g = e.Graphics; g.SmoothingMode = SmoothingMode.AntiAlias;
             var pulse = (float)((Math.Sin(_frame * Math.PI / 20d) + 1d) * .5d);
+            if (GameAssetLibrary.HasAsset("12_Garden/garden_mission_complete.png"))
+            {
+                GameAssetLibrary.DrawCover(g, "12_Garden/garden_mission_complete.png", ClientRectangle);
+                if (GameAssetLibrary.HasAsset("11_Rewards/reward_happy_star.png"))
+                    GameAssetLibrary.DrawContain(g, "11_Rewards/reward_happy_star.png",
+                        new RectangleF(Width * .67f, Height * .03f, Width * .27f, Height * .42f));
+                return;
+            }
             using (var sky = new LinearGradientBrush(ClientRectangle, Color.FromArgb(231, 247, 255), Color.FromArgb(238, 250, 225), 90f)) g.FillRectangle(sky, ClientRectangle);
             using (var ground = new SolidBrush(Color.FromArgb(186, 225, 139))) g.FillEllipse(ground, -Width * .1f, Height * .60f, Width * 1.2f, Height * .55f);
             using (var soil = new SolidBrush(Color.FromArgb(135, 91, 57))) g.FillEllipse(soil, Width * .25f, Height * .69f, Width * .5f, Height * .22f);
