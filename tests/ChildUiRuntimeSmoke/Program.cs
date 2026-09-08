@@ -3620,6 +3620,12 @@ END;");
                 A(Get<bool>(nestedHero, "AnimationRunning"),
                     "game_art_visible_parent_resumes_child_animation_timer");
                 host.Controls.Remove(nestedHero);
+                A(!Get<bool>(nestedHero, "AnimationRunning"),
+                    "game_art_detached_child_stops_animation_timer");
+                host.Controls.Add(nestedHero);
+                A(Get<bool>(nestedHero, "AnimationRunning"),
+                    "game_art_reattached_child_resumes_animation_timer");
+                host.Controls.Remove(nestedHero);
             }
 
             var feedbackType = appAssembly.GetType("WAHUKidsLearn.GameFeedbackFxControl", true);

@@ -28,11 +28,13 @@ namespace WAHUKidsLearn
         private readonly Control _owner;
         private readonly EventHandler _changed;
         private readonly List<Control> _ancestors = new List<Control>();
+        private bool _wasParented;
 
         public GameArtVisibilityWatcher(Control owner, EventHandler changed)
         {
             _owner = owner ?? throw new ArgumentNullException("owner");
             _changed = changed ?? throw new ArgumentNullException("changed");
+            _wasParented = _owner.Parent != null;
             _owner.ParentChanged += OwnerParentChanged;
             RewireAncestors();
         }
@@ -42,6 +44,7 @@ namespace WAHUKidsLearn
             get
             {
                 if (_owner.IsDisposed || _owner.Disposing || !_owner.Visible) return false;
+                if (_wasParented && _owner.Parent == null) return false;
                 for (var parent = _owner.Parent; parent != null; parent = parent.Parent)
                     if (!parent.Visible || parent.IsDisposed || parent.Disposing) return false;
                 return true;
@@ -50,6 +53,7 @@ namespace WAHUKidsLearn
 
         private void OwnerParentChanged(object sender, EventArgs e)
         {
+            if (_owner.Parent != null) _wasParented = true;
             RewireAncestors();
             _changed(sender, e);
         }
