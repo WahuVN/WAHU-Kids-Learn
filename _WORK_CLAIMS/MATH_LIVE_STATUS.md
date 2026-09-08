@@ -1,9 +1,9 @@
 # MATH LIVE STATUS
 
 Updated: 2026-09-08
-LAST_FULLY_VERIFIED_HEAD=`9dd767e`
-LATEST_UI_VERIFIED_HEAD=`9dd767e`
-LATEST_PERSISTENCE_VERIFIED_HEAD=`9dd767e`
+LAST_FULLY_VERIFIED_HEAD=`afb302f`
+LATEST_UI_VERIFIED_HEAD=`afb302f`
+LATEST_PERSISTENCE_VERIFIED_HEAD=`afb302f`
 MATH_3AI_DONE=YES
 AI3_LANE_DONE=YES
 PLAYABLE_FIRST_FIVE_P0=GREEN
@@ -11,12 +11,14 @@ PLAYABLE_INSTALLER_E2E=BLOCKED_SAFETY_UNOWNED_LOCAL_DATA
 
 Definition: trạng thái dưới đây dùng strict three-lane Math Definition of Done, không lấy việc “mở được màn hình” làm DONE.
 
+**CURRENT RELEASE AUTHORITY — `afb302f / 0.1.92-dev`: GREEN.** Full Build-Setup **15/15 PASS**; Child UI **4477**; deterministic real-state offscreen capture **12 PNG / 4529**; persistence **8145**; SQLite **181**; production art **74/74**; Portable E2E PASS; installer compile PASS; Portable All-in-One E2E PASS với official Microsoft .NET Framework 4.8 offline redistributable. GitHub prerelease `v0.1.92-dev` và `update-dev` feed đã publish. Installed-mode Installer E2E vẫn `BLOCKED_SAFETY_UNOWNED_LOCAL_DATA`; production signing và real Win7 target smoke vẫn external.
+
 ## Playable Event V1 — current
 
-- **Visual/motion QA head `9dd767e`: GREEN** — Home/Hub/lesson/rescue có visual polish mới; `af48f89` nối game-art motion vào performance contract để LOW tĩnh, NORMAL có FPS cap và learning-focus feedback tĩnh; `a0344f4` theo dõi hierarchy cha để container ẩn/offscreen dừng timer con, và `dcf844b` khóa detach/re-attach để control rời visual tree cũng dừng timer rồi resume an toàn khi gắn lại. `cd0cc91` thêm deterministic offscreen capture không cần desktop interactive. Child UI **3769 assertions PASS**, offscreen capture **10 PNG / 3800 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, persistence **8145 assertions PASS**, `git diff --check` PASS.
+- **Visual/motion QA head `afb302f`: GREEN** — Home/Hub/lesson/rescue giữ visual polish + production icons; learner screens maximize theo policy mới, min-size/clipping regressions xanh và offscreen capture quan sát state thật. Child UI **4477 assertions PASS**, offscreen capture **12 PNG / 4529 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, persistence **8145 assertions PASS**, SQLite **181 assertions PASS**, `git diff --check` PASS.
 - **Production art V1 `33b7b6c`: GREEN** — payload **74/74 PNG SHA-256 khớp manifest**, gồm **61 transparent + 13 opaque**; Rescue Hero, feedback đúng/thử lại/gợi ý và Garden completion ưu tiên production assets, vẫn có procedural fallback. Manifest SHA `6BD7172D8B7D0239960207B5A43C2CAE466220421F88D6D7C57215005BC1D8A6`.
 - **Mission-specific rescue art `426a514`: GREEN** — 5 first-five themes render production `mission_13…17` on the rescue intro; selecting a locked mission still previews the correct illustration without enabling start. Static art keeps the learning-focus motion contract unchanged; Child UI **3769 PASS**, offscreen capture **10 PNG / 3800 PASS**.
-- Release-full artifact hiện tại là `0.1.87-dev` tại clean `9dd767e`; full Build-Setup **15/15**, Child UI **3769**, persistence **8145**, offscreen capture **10 PNG / 3800**, production art **74/74 SHA-verified** ở source/app-output/publish/portable-tree/portable-ZIP/extracted-Portable-E2E, Portable E2E, installer compile và post-installer provenance đều PASS trên cùng source head.
+- Release-full artifact hiện tại là `0.1.92-dev` tại clean `afb302f`; full Build-Setup **15/15**, Child UI **4477**, persistence **8145**, SQLite **181**, offscreen capture **12 PNG / 4529**, production art **74/74 SHA-verified** ở source/app-output/publish/portable-tree/portable-ZIP/extracted-Portable-E2E, Portable E2E, installer compile, Portable All-in-One E2E và post-installer provenance đều PASS trên cùng source head.
 
 - **First-five playable P0: GREEN** — Home/Hub → 5 nhiệm vụ cứu hộ production → intro → 3 checkpoint → wrong/retry/hint/repair → suspend/resume exact event/session/question → completion → Garden reward idempotent.
 - P1 hardening đã khóa keyboard/prerequisite, exact resume-shell routing, valid→corrupt→valid recovery và dynamic accessibility theo state.
@@ -39,9 +41,9 @@ Definition: trạng thái dưới đây dùng strict three-lane Math Definition 
 - Pending-completion hardening `537da25`: completion targeted chỉ UPDATE đúng row progress đang là trusted pending slot; progress hỏng ngay trước completion bị reject và transaction rollback, session vẫn resumable. `ace02d6` nối thêm trusted historical best + durable completion convergence và regression corruption **sau resume**: fail-closed → resume repair → retry completion, stale best không sống lại.
 - Durable-runtime identity hardening `2f0f3e4`: targeted completion chỉ được terminalize khi `math_session_runtime` còn đúng subject Math, lesson và target question count; runtime bị sửa/mất fail-closed, giữ session/progress/reward ở trạng thái resumable. `c89378e` khóa tiếp `pack_id + pack_version`, nên runtime thuộc pack khác cũng không thể hoàn tất lesson hiện tại. Common-head evidence `330bb15`: persistence **8124 PASS**.
 - DPI hardening: rescue intro + active gameplay đều được scale 125%; active prompt/checkpoint/break target vẫn đọc và thao tác được, flow retry/suspend tiếp tục bình thường.
-- Latest QA on `9dd767e`: Child UI **3769 assertions PASS**, persistence **8145 assertions PASS**, build **0 warning / 0 error**, `git diff --check` PASS. Offscreen capture remains **10 PNG / 3800 assertions PASS** on release head `9dd767e`; Performance **13**, Motion **25**, full Math content/event/pool **90/90** and production-art packaging **74/74** are green in full release `0.1.87-dev`.
-- `0.1.87-dev`: Build-Setup **15/15 PASS** + provenance/content/persistence/production-art/Portable first-class gates + post-installer provenance, Portable E2E **PASS**, installer compile **PASS**.
-- Portable SHA256 `FBFFBFFC1D7F9553C6613E953D526E328AED82166FD6EFCE6C106909A084CC68`; Installer SHA256 `3B23A91F8FABF21245370C588D7B4713EDE726014301DB2342139E93B8B29600`; production-art manifest SHA256 `6BD7172D8B7D0239960207B5A43C2CAE466220421F88D6D7C57215005BC1D8A6`.
+- Latest QA on `afb302f`: Child UI **4477 assertions PASS**, persistence **8145 assertions PASS**, SQLite **181 assertions PASS**, build **0 warning / 0 error**, `git diff --check` PASS. Offscreen capture is **12 PNG / 4529 assertions PASS** on release head `afb302f`; Performance **13**, Motion **25**, full Math content/event/pool **90/90** and production-art packaging **74/74** are green in full release `0.1.92-dev`.
+- `0.1.92-dev`: Build-Setup **15/15 PASS** + provenance/content/persistence/production-art/Portable first-class gates + post-installer provenance, Portable E2E **PASS**, installer compile **PASS**, Portable All-in-One E2E **PASS**.
+- Portable SHA256 `02BDCA84433F11F82B6560B2B9C1D3F9F2E66B6BE490CE70BB2D69D899593C36`; Installer SHA256 `CF6D48F56E91466B2E8FFB3B981BE866D3BACC81BBC691B8693483E75C451DA2`; All-in-One SHA256 `5AD73E88AC95B0DC29CDA94DFCCF4EC84A993635C2D37F333257EBE7A4609C2D`; production-art manifest SHA256 `6BD7172D8B7D0239960207B5A43C2CAE466220421F88D6D7C57215005BC1D8A6`.
 - Release payload hard-requires `game_events_v1.json`; fresh checkout SHA của cả 4 Math runtime JSON khớp manifest. Event SHA `F9F25EA94DA7FCD20E360509EE53E6E758039CCF788FAFEC729A35F80D39A8B1`.
 - Full Installer E2E **BLOCKED_SAFETY** vì cây learner data hiện hữu không có `.wahu-e2e-owned`; safety probe từ chối trước khi tạo/xóa test data. Portable E2E xác nhận DB hash trước/sau không đổi.
 - Production signing và real Windows 7 validation vẫn `UNAVAILABLE/PENDING`.
@@ -49,9 +51,9 @@ Definition: trạng thái dưới đây dùng strict three-lane Math Definition 
 ## Overall
 
 - **Content: 100% theo Math lane** — 7 chương, 17 chủ đề, 67 lesson, **402 authored questions**, đúng 6 câu/lesson = 2 basic + 2 medium + 2 application. Production semantic validator: **402/402 valid, 0 errors**; full Math content/event/pool suite **90/90 PASS**.
-- **Engine: 100% theo Math lane** — schema V5 + pack identity, targeted session 3 câu từ pool 6, durable ordered selected-set, exact resume/retry/corrupt recovery, rescue runtime/checkpoint/repair/terminal/reward idempotency. Latest `MathSessionPersistenceRuntimeSmoke`: **8145 assertions PASS** on `9dd767e`, including exact durable finalized selected-set completion guards.
-- **UI/QA: playable P0 GREEN cho 5 bài đầu** — Home/Hub rescue entry, 5 mission cards, 3 checkpoint cards, behavior-aware repair/break, exact rescue resume, fail-safe event fallback, Garden completion, accessibility/keyboard/responsive, plus production art integration. Latest `ChildUiRuntimeSmoke`: **3769 assertions PASS** on `9dd767e`; offscreen capture **10 PNG / 3800 assertions PASS**; Performance **13 assertions PASS**; Motion **25 assertions PASS**.
-- **Distribution playable dev artifact** — Build-Setup **15/15 PASS** + production art **74/74 SHA-verified** + Portable E2E PASS + installer compile PASS trên clean `9dd767e`, artifact `0.1.87-dev`; full Installer E2E safety-blocked trên máy hiện tại vì learner data không có ownership marker.
+- **Engine: 100% theo Math lane** — schema V5 + pack identity, targeted session 3 câu từ pool 6, durable ordered selected-set, exact resume/retry/corrupt recovery, rescue runtime/checkpoint/repair/terminal/reward idempotency. Latest `MathSessionPersistenceRuntimeSmoke`: **8145 assertions PASS** on `afb302f`, including exact durable finalized selected-set completion guards.
+- **UI/QA: playable P0 GREEN cho 5 bài đầu** — Home/Hub rescue entry, 5 mission cards, 3 checkpoint cards, behavior-aware repair/break, exact rescue resume, fail-safe event fallback, Garden completion, accessibility/keyboard/responsive, production art/icons, maximize/min-size/clipping hardening. Latest `ChildUiRuntimeSmoke`: **4477 assertions PASS** on `afb302f`; offscreen capture **12 PNG / 4529 assertions PASS**; Performance **13 assertions PASS**; Motion **25 assertions PASS**.
+- **Distribution playable dev artifact** — Build-Setup **15/15 PASS** + production art **74/74 SHA-verified** + Portable E2E PASS + installer compile PASS + Portable All-in-One E2E PASS trên clean `afb302f`, artifact `0.1.92-dev`; GitHub prerelease/tag/feed đã publish. Full Installer E2E safety-blocked trên máy hiện tại vì learner data không có ownership marker.
 - **Three-AI Math DoD: DONE** — AI1, AI2 và AI3 đã hoàn tất baseline; AI3 playable first-five lane đã đạt STOP RULE và chuyển `LANE_DONE=YES`.
 
 ## Contract hiện hành
@@ -112,22 +114,22 @@ Artifact hashes:
 - Portable: `E644E73F49E28156E065DDDD944F8C46A154A7AE8E01D05381BE762C10CBE2CE`.
 - Installer: `6D79CDD3B43B4E9CCF1DCCB42C521DDA08D680B4070C525DDB7F280E1AD322E8`.
 
-## Latest fully verified gates — `9dd767e / 0.1.87-dev`
+## Latest fully verified gates — `afb302f / 0.1.92-dev`
 
 - Source provenance đầu build, sau Portable và **sau installer/update-manifest**: **PASS**; manifest ghi `source_provenance/source_tree_clean/source_commit_stable/source_provenance_after_installer=PASS`.
 - Dirty-source negative probe: **PASS**, fail-closed đúng `REFUSE_DIRTY_SOURCE`.
 - `WAHUKidsLearn.sln` Release/x86 rebuild inside Build-Setup: **PASS**.
-- Learning session vertical-slice: **800 assertions PASS**; Child UI: **3769 assertions PASS**.
+- Learning session vertical-slice: **800 assertions PASS**; Child UI: **4477 assertions PASS**; deterministic offscreen real-state capture **12 PNG / 4529 assertions PASS**.
 - Production Math validator: **402/402 valid**, game events **5/5 first-five**.
 - Full Math content/event/pool suite: **90/90 PASS**, count parse động và ghi vào manifest.
-- Persistence: Build-Setup `10b/15` build **0 warnings / 0 errors**, **8145 assertions PASS** on `9dd767e`.
+- Persistence: Build-Setup `10b/15` build **0 warnings / 0 errors**, **8145 assertions PASS** on `afb302f`.
 - Garden: durable-child eligibility + canonical stale-key repair + exact milestones **1/3/6/10** + partial-reward fault + stale/missing inventory reconciliation đều nằm trong persistence regression.
-- Content runtime: **21 assertions PASS**; SQLite/Data runtime: **179 assertions PASS**.
-- Build-Setup `0.1.87-dev`: **15/15 PASS** cùng sub-gates `0/15`, `6b`, `6c`, `10b`, `13b`, `13c`, `15b`; staged/portable production-art gate xác nhận **74/74 PNG** theo manifest SHA, gồm cả extracted Portable E2E validation.
+- Content runtime: **21 assertions PASS**; SQLite/Data runtime: **181 assertions PASS**.
+- Build-Setup `0.1.92-dev`: **15/15 PASS** cùng sub-gates `0/15`, `6b`, `6c`, `10b`, `13b`, `13c`, `15b`; staged/portable production-art gate xác nhận **74/74 PNG** theo manifest SHA, gồm cả extracted Portable E2E validation; Portable All-in-One E2E PASS với official .NET 4.8 offline redistributable.
 - Portable E2E: **PASS** trong Build-Setup; bootstrap 2 lần exit 0; learner DB thật trước/sau đều `0C970952435DAC03FE56C8400D003E87C37CED5D91B79C8A7D459A8EC30868C1`.
 - Installer compile: **PASS**; update-manifest installer SHA khớp artifact. Full Installer E2E: **BLOCKED_SAFETY** vì learner data hiện hữu không có `.wahu-e2e-owned`.
 - Payload `game_events_v1.json` SHA256 `F9F25EA94DA7FCD20E360509EE53E6E758039CCF788FAFEC729A35F80D39A8B1`, khớp manifest.
-- Artifact `0.1.87-dev`: Portable `FBFFBFFC1D7F9553C6613E953D526E328AED82166FD6EFCE6C106909A084CC68`; Installer `3B23A91F8FABF21245370C588D7B4713EDE726014301DB2342139E93B8B29600`; production-art manifest `6BD7172D8B7D0239960207B5A43C2CAE466220421F88D6D7C57215005BC1D8A6`.
+- Artifact `0.1.92-dev`: Portable `02BDCA84433F11F82B6560B2B9C1D3F9F2E66B6BE490CE70BB2D69D899593C36`; Installer `CF6D48F56E91466B2E8FFB3B981BE866D3BACC81BBC691B8693483E75C451DA2`; All-in-One `5AD73E88AC95B0DC29CDA94DFCCF4EC84A993635C2D37F333257EBE7A4609C2D`; production-art manifest `6BD7172D8B7D0239960207B5A43C2CAE466220421F88D6D7C57215005BC1D8A6`.
 - Production signing và real Windows 7 validation vẫn `PENDING/UNAVAILABLE`; dev artifact không được mô tả là production-signed.
 
 ## Blocker cũ đã đóng trong AI3 no-wait wave
@@ -149,5 +151,5 @@ Artifact hashes:
 
 Không còn P0/P1 Math theo board 3-AI. Còn hai release-wide mục của toàn ứng dụng không được phép đánh tráo thành Math blocker:
 
-1. production Authenticode signing — artifact `0.1.87-dev` hiện là unsigned dev build (`signed=false`);
+1. production Authenticode signing — artifact `0.1.92-dev` hiện là unsigned dev build (`signed=false`);
 2. compatibility smoke trên máy Windows 7 thật — current environment không có Win7 target, nên gate vẫn `PENDING/UNAVAILABLE`; preflight trên Windows mới báo `NEWER_WINDOWS_DEV_COMPATIBLE`.
