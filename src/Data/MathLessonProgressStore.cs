@@ -142,12 +142,20 @@ updated_at_utc=@updated;";
                     session.Transaction = transaction;
                     session.CommandText = @"UPDATE session
 SET ended_at_utc=@utc,state='completed',summary_json=@summary,behavior_summary_json=@behavior
-WHERE id=@id AND child_id=@child AND state IN ('started','active') AND ended_at_utc IS NULL;";
+WHERE id=@id AND child_id=@child AND planned_subject='math'
+  AND state IN ('started','active') AND ended_at_utc IS NULL
+  AND EXISTS (
+      SELECT 1 FROM math_session_runtime r
+      WHERE r.session_id=@id AND r.session_mode='lesson'
+        AND r.target_lesson_id=@lesson AND r.target_question_count=@attempts
+  );";
                     session.Parameters.AddWithValue("@utc", utc);
                     session.Parameters.AddWithValue("@summary", string.IsNullOrWhiteSpace(summaryJson) ? (object)DBNull.Value : summaryJson);
                     session.Parameters.AddWithValue("@behavior", string.IsNullOrWhiteSpace(behaviorSummaryJson) ? (object)DBNull.Value : behaviorSummaryJson);
                     session.Parameters.AddWithValue("@id", sessionId);
                     session.Parameters.AddWithValue("@child", childId);
+                    session.Parameters.AddWithValue("@lesson", lessonId);
+                    session.Parameters.AddWithValue("@attempts", attempts);
                     if (session.ExecuteNonQuery() != 1)
                         throw new InvalidOperationException("Targeted Math session is not active or does not exist.");
                 }
