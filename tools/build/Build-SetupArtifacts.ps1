@@ -238,6 +238,24 @@ $updaterExe = Join-Path $updaterOut 'WAHU.Updater.exe'
 Require-File $updaterExe
 Copy-Item -LiteralPath $updaterExe -Destination $publish -Force
 
+$productionAssetGate = Join-Path $root 'tools\build\Test-ProductionAssetPayload.ps1'
+Require-File $productionAssetGate
+$sourceAssetReady = Join-Path $root 'src\App\Assets\Generated\Ready'
+$sourceAssetManifest = Join-Path $sourceAssetReady 'ASSET_SELECTION_MANIFEST.json'
+Require-File $sourceAssetManifest
+$productionAssetManifestSha256 = Sha256 $sourceAssetManifest
+$sourceAssetManifestJson = Get-Content -Raw -LiteralPath $sourceAssetManifest | ConvertFrom-Json
+$productionAssetPngCount = [int]$sourceAssetManifestJson.summary.totalSelected
+& $productionAssetGate -Mode Tree -Path $sourceAssetReady -ExpectedManifestSha256 $productionAssetManifestSha256
+
+$appAssetReady = Join-Path $appOut 'Assets\Generated\Ready'
+& $productionAssetGate -Mode Tree -Path $appAssetReady -ExpectedManifestSha256 $productionAssetManifestSha256
+$publishAssetReady = Join-Path $publish 'Assets\Generated\Ready'
+New-Item -ItemType Directory -Force -Path $publishAssetReady | Out-Null
+Copy-Item -Path (Join-Path $appAssetReady '*') -Destination $publishAssetReady -Recurse -Force
+& $productionAssetGate -Mode Tree -Path $publishAssetReady -ExpectedManifestSha256 $productionAssetManifestSha256
+Write-Host "PRODUCTION_ASSET_STAGE_GATE_PASS png_count=$productionAssetPngCount manifest_sha256=$productionAssetManifestSha256"
+
 $dirs = @('config','policies','content_packs','curriculum','assets','data\schema')
 foreach ($d in $dirs) { New-Item -ItemType Directory -Force -Path (Join-Path $publish $d) | Out-Null }
 Copy-Item 'setup\config\*.json' (Join-Path $publish 'config') -Force
@@ -282,6 +300,9 @@ New-Item -ItemType Directory -Force -Path $portableRoot | Out-Null
 Copy-Item (Join-Path $publish '*') $portableRoot -Recurse -Force
 Set-Content -LiteralPath (Join-Path $portableRoot 'portable.mode') -Value 'WAHU_KIDS_LEARN_PORTABLE_V1' -Encoding ASCII
 if (Test-Path (Join-Path $portableRoot 'UserData')) { throw 'Portable package must never contain learner UserData.' }
+$portableAssetReady = Join-Path $portableRoot 'Assets\Generated\Ready'
+& $productionAssetGate -Mode Tree -Path $portableAssetReady -ExpectedManifestSha256 $productionAssetManifestSha256
+Write-Host "PORTABLE_PRODUCTION_ASSET_TREE_GATE_PASS png_count=$productionAssetPngCount"
 
 $portableHashPath = Join-Path $root 'build\win7_x86\PORTABLE_SHA256SUMS.txt'
 Get-ChildItem -LiteralPath $portableRoot -Recurse -File | Sort-Object FullName | ForEach-Object {
@@ -295,6 +316,8 @@ $portableZip = Join-Path $portableOutDir "WAHU-Kids-Learn-Portable-win7-x86-$App
 if (Test-Path $portableZip) { Remove-Item -LiteralPath $portableZip -Force }
 Compress-Archive -Path (Join-Path $portableRoot '*') -DestinationPath $portableZip -CompressionLevel Optimal
 Require-File $portableZip
+& $productionAssetGate -Mode Zip -Path $portableZip -ExpectedManifestSha256 $productionAssetManifestSha256
+Write-Host "PORTABLE_PRODUCTION_ASSET_ZIP_GATE_PASS png_count=$productionAssetPngCount"
 $portableZipHash = Sha256 $portableZip
 Set-Content -LiteralPath (Join-Path $portableOutDir "WAHU-Kids-Learn-Portable-win7-x86-$AppVersion.sha256") -Value "$portableZipHash  $(Split-Path $portableZip -Leaf)" -Encoding ASCII
 Write-Host "PORTABLE_SHA256=$portableZipHash"
@@ -384,6 +407,11 @@ $manifest = [ordered]@{
         math_session_persistence_runtime_smoke_assertions = $mathPersistenceAssertions
         backup_restore_smoke = 'PASS'
         staged_payload_guard = 'PASS'
+        production_asset_payload = 'PASS'
+        production_asset_png_count = $productionAssetPngCount
+        production_asset_manifest_sha256 = $productionAssetManifestSha256
+        portable_production_asset_tree = 'PASS'
+        portable_production_asset_zip = 'PASS'
         source_provenance = 'PASS'
         source_tree_clean = 'PASS'
         source_commit_stable = 'PASS'
@@ -399,6 +427,8 @@ $manifest = [ordered]@{
         zip = "build\portable\WAHU-Kids-Learn-Portable-win7-x86-$AppVersion.zip"
         zip_sha256 = $portableZipHash
         contains_user_data = $false
+        production_asset_png_count = $productionAssetPngCount
+        production_asset_manifest_sha256 = $productionAssetManifestSha256
         e2e = 'PASS'
         e2e_report = 'build\portable_e2e_dev.json'
         first_bootstrap_exit = [int]$portableE2EReport.first_bootstrap_exit
