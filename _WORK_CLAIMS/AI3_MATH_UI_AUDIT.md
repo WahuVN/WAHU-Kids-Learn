@@ -3,8 +3,8 @@
 Updated: 2026-09-08
 Owner: AI3
 Last fully verified release HEAD: `b45dc56`
-Latest UI/performance verified HEAD: `b2a6c9f`
-Latest persistence verified HEAD: `b2a6c9f`
+Latest UI/performance verified HEAD: `9d7dfb0`
+Latest persistence verified HEAD: `9d7dfb0`
 Status: `LANE_DONE=YES`; `PLAYABLE_UI_P0=GREEN`; `INSTALLER_E2E=BLOCKED_SAFETY_UNOWNED_LOCAL_DATA`
 
 ## PLAYABLE EVENT V1 — current evidence
@@ -12,7 +12,8 @@ Status: `LANE_DONE=YES`; `PLAYABLE_UI_P0=GREEN`; `INSTALLER_E2E=BLOCKED_SAFETY_U
 - Post-closure visual wave `468dd55` adds richer Home/Hub/lesson/rescue cards and button depth, procedural rescue hero/feedback/Garden art, improved typed-answer surface and child-facing completion feedback. Runtime/session/content semantics were not changed.
 - Motion hardening `af48f89` binds the new art to the existing performance contract: LOW decorative motion stays off, NORMAL respects its FPS cap, and learning-focus feedback stays static. `a0344f4` tracks the parent visibility hierarchy; `dcf844b` additionally closes detach/re-attach lifecycle so controls removed from the visual tree stop animation timers and resume only after being attached again, with subscriptions still disposed cleanly.
 - Integration intentionally retained the newer remote accessibility/lifecycle guards: locked rescue missions stay keyboard-focusable for prerequisite explanation, Enter/Esc remain wired, exact resume and failure-safe status remain intact, and 900×640 plus 125% DPI regressions still pass.
-- Latest QA gate on `b2a6c9f`: Child UI **3743 assertions PASS**, offscreen capture **10 PNG / 3774 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, Math persistence **8077 assertions PASS**, `git diff --check` PASS. Full Build-Setup release gate remains `b45dc56`.
+- Latest QA gate on `9d7dfb0`: Child UI **3750 assertions PASS**, offscreen capture **10 PNG / 3781 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, Math persistence **8120 assertions PASS**, `git diff --check` PASS. Full Build-Setup release gate remains `b45dc56`.
+- Production art V1 `33b7b6c`: **74/74 PNG SHA-256 khớp manifest**, **61 transparent + 13 opaque**; Rescue Hero, feedback đúng/thử lại/gợi ý và Garden completion ưu tiên production assets, có procedural fallback an toàn. Manifest SHA `6BD7172D8B7D0239960207B5A43C2CAE466220421F88D6D7C57215005BC1D8A6`.
 
 - Home/Math Hub có entry **Toán nhanh — Nhiệm vụ cứu hộ**; 5 event production cho 5 bài đầu.
 - Flow UI E2E khóa: intro → 3 checkpoint → cố tình sai → repair/hint → suspend khi retry pending → resume exact event/session/open question → hoàn thành → Garden tăng đúng 1 lần.
@@ -38,7 +39,7 @@ Status: `LANE_DONE=YES`; `PLAYABLE_UI_P0=GREEN`; `INSTALLER_E2E=BLOCKED_SAFETY_U
 - Progress chronology/score `d6002a9` rejects malformed/missing/inverted completion chronology, skill/count mismatch and stale score-only evidence; effective completion/score therefore fail closed and fresh start repairs untrusted metadata.
 - UI/rescue regression `b45dc56` injects malformed completion timestamp into bài 1 and verifies Hub hides false completion/scores, bài 2 stays locked, rescue #2 remains focusable for prerequisite narration but cannot start.
 - Gameplay rescue đã được scale 125% trong chính active session: prompt vẫn fit từ 12pt trở lên, checkpoint/break target giữ kích thước thao tác và wrong→retry→hint→suspend vẫn chạy sau scale.
-- Latest UI/performance/persistence on `b2a6c9f`: Child UI **3743 assertions PASS**, offscreen capture **10 PNG / 3774 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, persistence **8077 assertions PASS**. Most recent Math content/event/pool suite remains **90/90 PASS** with no content files changed by the visual/motion waves.
+- Latest UI/performance/persistence on `9d7dfb0`: Child UI **3750 assertions PASS**, offscreen capture **10 PNG / 3781 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, persistence **8120 assertions PASS**. Most recent Math content/event/pool suite remains **90/90 PASS** with no authored content changes from the asset wave.
 - `0.1.80-dev`: Build-Setup **15/15 PASS** + provenance/content/persistence/Portable/post-installer gates, installer compile **PASS**; publish payload chứa `game_events_v1.json` SHA `F9F25EA94DA7FCD20E360509EE53E6E758039CCF788FAFEC729A35F80D39A8B1`.
 - Full Installer E2E hiện **BLOCKED_SAFETY** vì `%LOCALAPPDATA%\WAHU Kids Learn\data\learning.db` tồn tại nhưng không có `.wahu-e2e-owned`; không được xóa/ghi đè dữ liệu này để ép test qua.
 - Production signing và real Windows 7 validation vẫn `UNAVAILABLE/PENDING`.
@@ -50,11 +51,11 @@ AI3 Math UI/QA/integration lane đã hoàn tất playable P0/P1 cho 5 bài đầ
 Current evidence:
 
 - runtime Math bank: **402 questions / 67 lessons / 6 per lesson / 2 per difficulty**;
-- Child UI latest common-head: **3743 assertions PASS**;
+- Child UI latest common-head: **3750 assertions PASS**;
 - production Math validator: **402/402 valid**;
 - full Math content/event/pool suite: **90/90 PASS**;
 - difficulty distribution: **134 basic / 134 medium / 134 application**;
-- Math persistence latest: **8077 assertions PASS** on `b2a6c9f`; Performance **13 assertions PASS** and Motion **25 assertions PASS** on the same QA head; offscreen UI capture **10 PNG / 3774 assertions PASS**. Release Build-Setup `10b/15` on `b45dc56` vẫn ghi **8053 assertions PASS** với build **0 warning / 0 error**.
+- Math persistence latest: **8120 assertions PASS** on `9d7dfb0`; Performance **13 assertions PASS** and Motion **25 assertions PASS** on the same QA head; offscreen UI capture **10 PNG / 3781 assertions PASS**. Release Build-Setup `10b/15` on `b45dc56` vẫn ghi **8053 assertions PASS** với build **0 warning / 0 error**.
 - full Build-Setup `0.1.80-dev`: **15/15 PASS**, provenance + validator + 90-suite + persistence + Portable E2E + post-installer provenance recorded in release manifest;
 - Portable E2E: **PASS**;
 - Installer compile: **PASS**; full installer E2E **BLOCKED_SAFETY** trên máy hiện tại.
