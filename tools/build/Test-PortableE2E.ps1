@@ -76,6 +76,7 @@ try {
         'data\schema\003_math_attempt_idempotency_runtime.sql',
         'data\schema\004_math_lesson_progress.sql',
         'data\schema\005_math_runtime_pack_identity.sql',
+        'data\schema\006_attempt_commit_key_immutability.sql',
         'content_packs\math_grade2_v1\manifest.json',
         'content_packs\math_grade2_v1\verified_templates_v1.json',
         'content_packs\math_grade2_v1\lesson_catalog_v1.json',
@@ -114,8 +115,8 @@ try {
         'config_normal_fps_cap=30',
         'provider_version=2.0.4.0',
         'sqlite_version=3.53.4',
-        'schema_version=5',
-        'migration_version=5',
+        'schema_version=6',
+        'migration_version=6',
         'pre_migration_backup=none',
         'integrity=ok',
         'foreign_key_issues=0','verified_content_packs=2','performance_profile=','performance_motion_fps_cap=','performance_max_animated_regions=','performance_image_cache_mb=','performance_audio_cache_mb=','performance_evidence=','parent_pin_configured=False'

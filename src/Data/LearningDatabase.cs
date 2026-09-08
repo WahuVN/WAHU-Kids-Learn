@@ -22,7 +22,7 @@ namespace WAHU.Data
     {
         public const string SafeDefaultJournalMode = "DELETE";
         public const int DefaultBusyTimeoutMs = 2500;
-        public const int CurrentSchemaVersion = 5;
+        public const int CurrentSchemaVersion = 6;
 
         private readonly string _databasePath;
         private readonly string _schemaPath;
@@ -67,6 +67,8 @@ namespace WAHU.Data
             if (!File.Exists(migrationV4Path)) throw new FileNotFoundException("Không tìm thấy SQLite migration V4.", migrationV4Path);
             var migrationV5Path = Path.Combine(_schemaDirectory, "005_math_runtime_pack_identity.sql");
             if (!File.Exists(migrationV5Path)) throw new FileNotFoundException("Không tìm thấy SQLite migration V5.", migrationV5Path);
+            var migrationV6Path = Path.Combine(_schemaDirectory, "006_attempt_commit_key_immutability.sql");
+            if (!File.Exists(migrationV6Path)) throw new FileNotFoundException("Không tìm thấy SQLite migration V6.", migrationV6Path);
 
             var parent = Path.GetDirectoryName(_databasePath);
             if (!string.IsNullOrWhiteSpace(parent)) Directory.CreateDirectory(parent);
@@ -124,6 +126,14 @@ namespace WAHU.Data
                         MigrationManager.MathRuntimePackIdentityVersion,
                         MigrationManager.MathRuntimePackIdentityName,
                         migrationV5Path);
+                }
+                if (schemaVersion >= MigrationManager.AttemptCommitKeyImmutabilityVersion)
+                {
+                    latestMigration = MigrationManager.VerifyRecordedMigration(
+                        connection,
+                        MigrationManager.AttemptCommitKeyImmutabilityVersion,
+                        MigrationManager.AttemptCommitKeyImmutabilityName,
+                        migrationV6Path);
                 }
             }
 
@@ -184,6 +194,15 @@ namespace WAHU.Data
                             migrationV5Path);
                         schemaVersion = MigrationManager.GetSchemaVersion(connection);
                     }
+                    if (schemaVersion < MigrationManager.AttemptCommitKeyImmutabilityVersion)
+                    {
+                        latestMigration = MigrationManager.ApplyMigration(
+                            connection,
+                            MigrationManager.AttemptCommitKeyImmutabilityVersion,
+                            MigrationManager.AttemptCommitKeyImmutabilityName,
+                            migrationV6Path);
+                        schemaVersion = MigrationManager.GetSchemaVersion(connection);
+                    }
                     if (schemaVersion != CurrentSchemaVersion)
                         throw new InvalidDataException("Migration completed without expected schema_version=" + CurrentSchemaVersion);
                 }
@@ -213,8 +232,13 @@ namespace WAHU.Data
                     MigrationManager.MathRuntimePackIdentityVersion,
                     MigrationManager.MathRuntimePackIdentityName,
                     migrationV5Path);
-                if (latestMigration == null || latestMigration.Version < verifiedV5.Version)
-                    latestMigration = verifiedV5;
+                var verifiedV6 = MigrationManager.VerifyRecordedMigration(
+                    connection,
+                    MigrationManager.AttemptCommitKeyImmutabilityVersion,
+                    MigrationManager.AttemptCommitKeyImmutabilityName,
+                    migrationV6Path);
+                if (latestMigration == null || latestMigration.Version < verifiedV6.Version)
+                    latestMigration = verifiedV6;
                 schemaVersion = MigrationManager.GetSchemaVersion(connection);
                 if (schemaVersion != CurrentSchemaVersion)
                     throw new InvalidDataException("Final learner DB schema_version mismatch=" + schemaVersion);

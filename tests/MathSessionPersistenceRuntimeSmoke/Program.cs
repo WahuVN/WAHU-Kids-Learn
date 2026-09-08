@@ -6740,7 +6740,7 @@ END;");
         {
             var database = new LearningDatabase(dbPath, schemaPath);
             var init = database.Initialize("DELETE");
-            A(init.SchemaVersion == 5 && init.Health.IsHealthy, "database_ready_v5_" + Path.GetFileNameWithoutExtension(dbPath));
+            A(init.SchemaVersion == 6 && init.Health.IsHealthy, "database_ready_v6_" + Path.GetFileNameWithoutExtension(dbPath));
             return database;
         }
 

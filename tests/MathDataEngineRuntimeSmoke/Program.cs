@@ -33,6 +33,7 @@ namespace WAHU.MathDataEngineRuntimeSmoke
                 var repo = FindRepoRoot();
                 var sourceSchema = Path.Combine(repo, "data", "schema");
                 TestFreshV3AndIdempotentCommit(root, sourceSchema);
+                TestSemanticCommitKeyIsImmutable(root, sourceSchema);
                 TestTerminalSessionRejectsNewAttemptsButAllowsExactReplay(root, sourceSchema);
                 TestOptimisticSkillStateGuard(root, sourceSchema);
                 TestCrossProcessConcurrentSkillWrites(root, sourceSchema);
@@ -47,6 +48,7 @@ namespace WAHU.MathDataEngineRuntimeSmoke
                 TestDanglingRecoveryIsScopedToMath(root, sourceSchema);
                 TestDanglingRecoveryIsScopedToChild(root, sourceSchema);
                 TestExistingV1UpgradesToV3WithBackup(root, sourceSchema);
+                TestV5UpgradeLocksSemanticCommitKey(root, sourceSchema);
                 TestV3BackfillPreservesLegacyDuplicates(root, sourceSchema);
                 Console.WriteLine("MATH_DATA_ENGINE_RUNTIME_SMOKE_PASS assertions=" + _assertions);
                 return 0;
@@ -68,8 +70,8 @@ namespace WAHU.MathDataEngineRuntimeSmoke
             CopySchemas(sourceSchema, schemaDir);
             var database = new LearningDatabase(Path.Combine(root, "fresh.db"), Path.Combine(schemaDir, "001_initial.sql"));
             var init = database.Initialize("DELETE");
-            A(init.SchemaVersion == 5, "fresh_schema_v5");
-            A(init.Migration != null && init.Migration.Version == 5, "fresh_latest_migration_v5");
+            A(init.SchemaVersion == 6, "fresh_schema_v6");
+            A(init.Migration != null && init.Migration.Version == 6, "fresh_latest_migration_v6");
             A(init.Health != null && init.Health.IsHealthy, "fresh_health_ok");
 
             var sessions = new LearnerSessionService(database);
@@ -117,6 +119,50 @@ namespace WAHU.MathDataEngineRuntimeSmoke
                     "@started", now.ToString("o", CultureInfo.InvariantCulture),
                     "@updated", now.ToString("o", CultureInfo.InvariantCulture));
                 A(Count(c, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + session.SessionId + "' AND generated_question_count=2;") == 1, "runtime_state_insertable");
+            }
+        }
+
+        private static void TestSemanticCommitKeyIsImmutable(string root, string sourceSchema)
+        {
+            var schemaDir = Path.Combine(root, "schema-semantic-key-immutable");
+            CopySchemas(sourceSchema, schemaDir);
+            var database = new LearningDatabase(Path.Combine(root, "semantic-key-immutable.db"), Path.Combine(schemaDir, "001_initial.sql"));
+            var init = database.Initialize("DELETE");
+            A(init.Health != null && init.Health.IsHealthy, "semantic_key_immutable_database_ready");
+
+            var sessions = new LearnerSessionService(database);
+            var profile = sessions.EnsurePrimaryChild("Bé semantic key immutable");
+            var session = sessions.BeginSession(profile.ChildId, "math", "LOW");
+            var now = DateTime.UtcNow;
+            var originalAttemptId = "attempt-semantic-key-original";
+            var fakeAttemptId = "attempt-semantic-key-fake";
+            var questionId = "q-semantic-key-immutable";
+            new AnswerCommitService(database).Commit(BuildRequest(
+                profile.ChildId, session.SessionId, originalAttemptId, questionId, "12", true, now));
+
+            using (var c = database.OpenConnection())
+            {
+                Exec(c, @"INSERT INTO attempt(
+id,session_id,child_id,pack_id,pack_version,question_id,skill_id,subject,started_at_utc,answered_at_utc,answer_json,is_correct,response_ms,hint_level,representation,input_method,attempt_index,listen_count)
+SELECT @fake,session_id,child_id,pack_id,pack_version,question_id,skill_id,subject,started_at_utc,answered_at_utc,answer_json,is_correct,response_ms,hint_level,representation,input_method,attempt_index,listen_count
+FROM attempt WHERE id=@original;",
+                    "@fake", fakeAttemptId, "@original", originalAttemptId);
+                A(Count(c, "SELECT count(*) FROM attempt_commit_key WHERE attempt_id='" + originalAttemptId + "';") == 1 &&
+                  Count(c, "SELECT count(*) FROM attempt_commit_key WHERE attempt_id='" + fakeAttemptId + "';") == 0,
+                    "semantic_key_immutable_fixture_starts_on_original_attempt");
+
+                var updateRejected = false;
+                try
+                {
+                    Exec(c, "UPDATE attempt_commit_key SET attempt_id=@fake WHERE session_id=@session AND question_id=@question AND attempt_index=1;",
+                        "@fake", fakeAttemptId, "@session", session.SessionId, "@question", questionId);
+                }
+                catch (SQLiteException) { updateRejected = true; }
+                A(updateRejected, "semantic_commit_key_attempt_id_cannot_be_repointed");
+                A(Convert.ToString(Scalar(c,
+                    "SELECT attempt_id FROM attempt_commit_key WHERE session_id='" + session.SessionId + "' AND question_id='" + questionId + "' AND attempt_index=1;"),
+                    CultureInfo.InvariantCulture) == originalAttemptId,
+                    "semantic_commit_key_preserves_original_attempt_authority");
             }
         }
 
@@ -1029,8 +1075,8 @@ END;");
 
             var backupRoot = Path.Combine(root, "v1-upgrade-backups");
             var migrated = database.Initialize("DELETE", backupRoot, "ai2-smoke");
-            A(migrated.SchemaVersion == 5, "v1_upgrade_reaches_schema_five");
-            A(migrated.Migration != null && migrated.Migration.Version == 5, "v1_upgrade_latest_migration_five");
+            A(migrated.SchemaVersion == 6, "v1_upgrade_reaches_schema_six");
+            A(migrated.Migration != null && migrated.Migration.Version == 6, "v1_upgrade_latest_migration_six");
             A(migrated.PreMigrationBackup != null && File.Exists(migrated.PreMigrationBackup.DatabasePath), "v1_upgrade_prebackup_database_exists");
             A(migrated.PreMigrationBackup != null && File.Exists(migrated.PreMigrationBackup.MetadataPath), "v1_upgrade_prebackup_metadata_exists");
             var verified = ManagedBackupService.VerifyManagedBackup(migrated.PreMigrationBackup.MetadataPath);
@@ -1041,6 +1087,66 @@ END;");
                 A(Count(c, "SELECT count(*) FROM migration_history WHERE version=3;") == 1, "v1_upgrade_records_v3_once");
                 A(Count(c, "SELECT count(*) FROM migration_history WHERE version=4;") == 1, "v1_upgrade_records_v4_once");
                 A(Count(c, "SELECT count(*) FROM migration_history WHERE version=5;") == 1, "v1_upgrade_records_v5_once");
+                A(Count(c, "SELECT count(*) FROM migration_history WHERE version=6;") == 1, "v1_upgrade_records_v6_once");
+            }
+        }
+
+        private static void TestV5UpgradeLocksSemanticCommitKey(string root, string sourceSchema)
+        {
+            var schemaDir = Path.Combine(root, "schema-v5-to-v6-semantic-key");
+            CopySchemas(sourceSchema, schemaDir);
+            var dbPath = Path.Combine(root, "legacy-v5-semantic-key.db");
+            var schemaV1 = Path.Combine(schemaDir, "001_initial.sql");
+            var now = new DateTime(2026, 9, 8, 5, 0, 0, DateTimeKind.Utc).ToString("o", CultureInfo.InvariantCulture);
+            using (var c = new SQLiteConnection("Data Source=" + dbPath + ";Version=3;Foreign Keys=True;Pooling=False;"))
+            {
+                c.Open();
+                using (var command = c.CreateCommand())
+                {
+                    command.CommandText = File.ReadAllText(schemaV1);
+                    command.ExecuteNonQuery();
+                }
+                MigrationManager.VerifyOrRecordInitial(c, schemaV1);
+                MigrationManager.ApplyMigration(c, 2, MigrationManager.AttemptImmutabilityName, Path.Combine(schemaDir, "002_attempt_immutability.sql"));
+                MigrationManager.ApplyMigration(c, 3, MigrationManager.MathAttemptRuntimeName, Path.Combine(schemaDir, "003_math_attempt_idempotency_runtime.sql"));
+                MigrationManager.ApplyMigration(c, 4, MigrationManager.MathLessonProgressName, Path.Combine(schemaDir, "004_math_lesson_progress.sql"));
+                MigrationManager.ApplyMigration(c, 5, MigrationManager.MathRuntimePackIdentityName, Path.Combine(schemaDir, "005_math_runtime_pack_identity.sql"));
+                A(MigrationManager.GetSchemaVersion(c) == 5, "v6_semantic_key_upgrade_fixture_schema_v5");
+
+                Exec(c, "INSERT INTO child(id,display_name,grade_level,created_at_utc,updated_at_utc) VALUES('v6-key-child','Bé V6 key',2,@t,@t);", "@t", now);
+                Exec(c, "INSERT INTO session(id,child_id,started_at_utc,state,planned_subject,performance_profile) VALUES('v6-key-session','v6-key-child',@t,'active','math','LOW');", "@t", now);
+                Exec(c, @"INSERT INTO attempt(
+id,session_id,child_id,pack_id,pack_version,question_id,skill_id,subject,started_at_utc,answered_at_utc,answer_json,is_correct,response_ms,hint_level,representation,input_method,attempt_index,listen_count)
+VALUES('v6-key-original','v6-key-session','v6-key-child','math_grade2_verified_templates_v1','1.8.0','v6-key-q','V6_KEY_SKILL','math',@t,@t,'{}',1,700,0,'symbolic','smoke',1,0);", "@t", now);
+                Exec(c, @"INSERT INTO attempt(
+id,session_id,child_id,pack_id,pack_version,question_id,skill_id,subject,started_at_utc,answered_at_utc,answer_json,is_correct,response_ms,hint_level,representation,input_method,attempt_index,listen_count)
+SELECT 'v6-key-fake',session_id,child_id,pack_id,pack_version,question_id,skill_id,subject,started_at_utc,answered_at_utc,answer_json,is_correct,response_ms,hint_level,representation,input_method,attempt_index,listen_count
+FROM attempt WHERE id='v6-key-original';");
+                Exec(c, "INSERT INTO attempt_commit_key(session_id,question_id,attempt_index,attempt_id,created_at_utc) VALUES('v6-key-session','v6-key-q',1,'v6-key-original',@t);", "@t", now);
+                Exec(c, "UPDATE attempt_commit_key SET attempt_id='v6-key-fake' WHERE session_id='v6-key-session' AND question_id='v6-key-q' AND attempt_index=1;");
+                A(Convert.ToString(Scalar(c, "SELECT attempt_id FROM attempt_commit_key WHERE session_id='v6-key-session' AND question_id='v6-key-q' AND attempt_index=1;"), CultureInfo.InvariantCulture) == "v6-key-fake",
+                    "v6_semantic_key_upgrade_fixture_proves_v5_key_was_mutable");
+                Exec(c, "UPDATE attempt_commit_key SET attempt_id='v6-key-original' WHERE session_id='v6-key-session' AND question_id='v6-key-q' AND attempt_index=1;");
+            }
+
+            var database = new LearningDatabase(dbPath, schemaV1);
+            var backupRoot = Path.Combine(root, "v5-to-v6-semantic-key-backups");
+            var migrated = database.Initialize("DELETE", backupRoot, "ai2-v6-smoke");
+            A(migrated.SchemaVersion == 6 && migrated.Migration != null && migrated.Migration.Version == 6,
+                "v6_semantic_key_upgrade_reaches_schema_six");
+            A(migrated.PreMigrationBackup != null && ManagedBackupService.VerifyManagedBackup(migrated.PreMigrationBackup.MetadataPath).SchemaVersion == 5,
+                "v6_semantic_key_upgrade_preserves_verified_schema_v5_backup");
+            using (var c = database.OpenConnection())
+            {
+                A(Count(c, "SELECT count(*) FROM migration_history WHERE version=6;") == 1 &&
+                  Count(c, "SELECT count(*) FROM sqlite_master WHERE type='trigger' AND name='trg_attempt_commit_key_immutable_update';") == 1,
+                    "v6_semantic_key_upgrade_records_migration_and_trigger_once");
+                var updateRejected = false;
+                try { Exec(c, "UPDATE attempt_commit_key SET attempt_id='v6-key-fake' WHERE session_id='v6-key-session' AND question_id='v6-key-q' AND attempt_index=1;"); }
+                catch (SQLiteException) { updateRejected = true; }
+                A(updateRejected, "v6_semantic_key_upgrade_blocks_repoint_after_migration");
+                A(Convert.ToString(Scalar(c, "SELECT attempt_id FROM attempt_commit_key WHERE session_id='v6-key-session' AND question_id='v6-key-q' AND attempt_index=1;"), CultureInfo.InvariantCulture) == "v6-key-original",
+                    "v6_semantic_key_upgrade_preserves_original_authority_after_rejected_update");
             }
         }
 
@@ -1145,7 +1251,7 @@ END;");
         private static void CopySchemas(string source, string destination)
         {
             Directory.CreateDirectory(destination);
-            foreach (var name in new[] { "001_initial.sql", "002_attempt_immutability.sql", "003_math_attempt_idempotency_runtime.sql", "004_math_lesson_progress.sql", "005_math_runtime_pack_identity.sql" })
+            foreach (var name in new[] { "001_initial.sql", "002_attempt_immutability.sql", "003_math_attempt_idempotency_runtime.sql", "004_math_lesson_progress.sql", "005_math_runtime_pack_identity.sql", "006_attempt_commit_key_immutability.sql" })
                 File.Copy(Path.Combine(source, name), Path.Combine(destination, name), true);
         }
 

@@ -34,6 +34,8 @@ namespace WAHU.Data
             "1E87F8780BB1D67FEB50854C80700A86D3F26D994F33524B20760C9506FD77BA";
         private const string CanonicalV5Checksum =
             "C625584A8ED62BFF4D14FC8EA994C43C03D3A79A5A16121D7C1DAAAF5E0E5CC5";
+        public const int AttemptCommitKeyImmutabilityVersion = 6;
+        public const string AttemptCommitKeyImmutabilityName = "006_attempt_commit_key_immutability";
 
         public static int GetSchemaVersion(SQLiteConnection connection)
         {
