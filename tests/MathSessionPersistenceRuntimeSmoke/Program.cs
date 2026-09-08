@@ -4212,6 +4212,80 @@ WHERE child_id=@child AND lesson_id=@lesson;",
                     "restored_runtime_pack_identity_completes_exactly_once");
             }
 
+            var durableAttemptDatabase = NewDatabase(Path.Combine(root, "targeted-completion-missing-durable-final-attempt.db"), schemaPath);
+            using (var coordinator = new MathSessionCoordinator(durableAttemptDatabase, templatePath, "LOW", 8069, lesson.Id))
+            {
+                var started = coordinator.Start("Be missing durable final attempt");
+                for (var ordinal = 0; ordinal < 3; ordinal++)
+                {
+                    var question = coordinator.NextQuestion();
+                    coordinator.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 825 + ordinal * 100);
+                }
+                Exec(durableAttemptDatabase,
+                    "DELETE FROM attempt WHERE id=(SELECT id FROM attempt WHERE session_id=@session ORDER BY answered_at_utc ASC,id ASC LIMIT 1);",
+                    "@session", started.SessionId);
+                Exception completionError = null;
+                try { coordinator.Complete(); } catch (Exception ex) { completionError = ex; }
+                A(completionError is InvalidOperationException && coordinator.IsActive &&
+                  SessionState(durableAttemptDatabase, started.SessionId) == "active" &&
+                  Count(durableAttemptDatabase, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + started.ChildId +
+                  "' AND lesson_id='" + lesson.Id + "' AND completed_count=0;") == 1,
+                    "missing_durable_final_attempt_cannot_terminalize_targeted_lesson");
+                A(Count(durableAttemptDatabase, "SELECT count(*) FROM attempt WHERE session_id='" + started.SessionId + "';") == 2 &&
+                  Count(durableAttemptDatabase, "SELECT count(*) FROM mastery_event WHERE child_id='" + started.ChildId + "' AND attempt_id IS NULL;") >= 1 &&
+                  Count(durableAttemptDatabase, "SELECT count(*) FROM reward_event WHERE source_ref='" + started.SessionId + "';") == 0,
+                    "missing_durable_final_attempt_failure_preserves_pending_session_without_reward");
+            }
+
+            var selectedSetDatabase = NewDatabase(Path.Combine(root, "targeted-completion-unexpected-finalized-question.db"), schemaPath);
+            using (var coordinator = new MathSessionCoordinator(selectedSetDatabase, templatePath, "LOW", 8091, lesson.Id))
+            {
+                var started = coordinator.Start("Be unexpected finalized selected question");
+                for (var ordinal = 0; ordinal < 3; ordinal++)
+                {
+                    var question = coordinator.NextQuestion();
+                    coordinator.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 835 + ordinal * 100);
+                }
+                var masteryId = ScalarText(selectedSetDatabase,
+                    "SELECT m.id FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + started.SessionId +
+                    "' ORDER BY m.created_at_utc ASC,m.id ASC LIMIT 1;");
+                var originalAttemptId = ScalarText(selectedSetDatabase, "SELECT attempt_id FROM mastery_event WHERE id='" + masteryId + "';");
+                var fakeAttemptId = "attempt-unexpected-selected-" + Guid.NewGuid().ToString("N");
+                var fakeQuestionId = "unexpected_selected_question-" + Guid.NewGuid().ToString("N");
+                Exec(selectedSetDatabase, @"INSERT INTO attempt(
+id,session_id,child_id,pack_id,pack_version,question_id,skill_id,subject,started_at_utc,answered_at_utc,answer_json,is_correct,response_ms,hint_level,representation,input_method,attempt_index,listen_count)
+SELECT @fake,session_id,child_id,pack_id,pack_version,@question,skill_id,subject,started_at_utc,answered_at_utc,answer_json,is_correct,response_ms,hint_level,representation,input_method,attempt_index,listen_count
+FROM attempt WHERE id=@original;",
+                    "@fake", fakeAttemptId, "@question", fakeQuestionId, "@original", originalAttemptId);
+                Exec(selectedSetDatabase, @"INSERT INTO attempt_commit_key(session_id,question_id,attempt_index,attempt_id,created_at_utc)
+SELECT session_id,question_id,attempt_index,id,answered_at_utc FROM attempt WHERE id=@fake;",
+                    "@fake", fakeAttemptId);
+                Exec(selectedSetDatabase, "UPDATE mastery_event SET attempt_id=@fake WHERE id=@id;",
+                    "@fake", fakeAttemptId, "@id", masteryId);
+                A(Count(selectedSetDatabase,
+                    "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id JOIN attempt_commit_key k ON k.attempt_id=a.id AND k.session_id=a.session_id AND k.question_id=a.question_id AND k.attempt_index=a.attempt_index WHERE a.session_id='" +
+                    started.SessionId + "' AND a.child_id='" + started.ChildId + "' AND a.pack_id='" + MathSessionCoordinator.PackId +
+                    "' AND a.pack_version='" + MathSessionCoordinator.PackVersion + "' AND a.skill_id='" + lesson.SkillId + "';") == 3,
+                    "unexpected_selected_question_fixture_still_has_three_valid_durable_outcomes");
+                Exception completionError = null;
+                try { coordinator.Complete(); } catch (Exception ex) { completionError = ex; }
+                A(completionError is InvalidOperationException && coordinator.IsActive &&
+                  SessionState(selectedSetDatabase, started.SessionId) == "active" &&
+                  Count(selectedSetDatabase, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + started.ChildId +
+                  "' AND lesson_id='" + lesson.Id + "' AND completed_count=0;") == 1 &&
+                  Count(selectedSetDatabase, "SELECT count(*) FROM reward_event WHERE source_ref='" + started.SessionId + "';") == 0,
+                    "unexpected_finalized_question_outside_selected_set_cannot_terminalize_lesson");
+                Exec(selectedSetDatabase, "UPDATE mastery_event SET attempt_id=@original WHERE id=@id;",
+                    "@original", originalAttemptId, "@id", masteryId);
+                Exec(selectedSetDatabase, "DELETE FROM attempt WHERE id=@fake;", "@fake", fakeAttemptId);
+                var completed = coordinator.Complete();
+                A(completed.LessonCompleted && !coordinator.IsActive &&
+                  Count(selectedSetDatabase, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + started.ChildId +
+                  "' AND lesson_id='" + lesson.Id + "' AND started_count=1 AND completed_count=1;") == 1 &&
+                  Count(selectedSetDatabase, "SELECT count(*) FROM reward_event WHERE source_ref='" + started.SessionId + "';") == 1,
+                    "restored_exact_selected_finalized_set_completes_exactly_once");
+            }
+
             var missingDatabase = NewDatabase(Path.Combine(root, "targeted-completion-missing-runtime-identity.db"), schemaPath);
             using (var coordinator = new MathSessionCoordinator(missingDatabase, templatePath, "LOW", 8066, lesson.Id))
             {
