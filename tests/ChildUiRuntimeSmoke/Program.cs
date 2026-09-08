@@ -1872,6 +1872,8 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                     A(quickButton.AccessibleDescription.IndexOf("ba chặng", StringComparison.OrdinalIgnoreCase) >= 0 &&
                       quickButton.AccessibleDescription.IndexOf("đồng hồ", StringComparison.OrdinalIgnoreCase) >= 0,
                         "quick_rescue_home_entry_accessibility_is_pressure_free");
+                    RenderFormAndAssert(home, 1080, 720, "home_default_window");
+                    RenderFormAndAssert(home, 900, 640, "home_min_window");
                 }
 
                 var catalogPath = Path.Combine(sourceContent, "lesson_catalog_v1.json");
