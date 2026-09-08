@@ -2920,6 +2920,22 @@ WHERE child_id=@child AND lesson_id=@lesson;",
                 "incomplete_replay_keeps_older_valid_completion_unlocked");
 
             Exec(database, @"UPDATE math_lesson_progress
+SET started_count=1,completed_count=1,last_score_percent=90,best_score_percent=40,
+    last_started_at_utc=@utc,last_completed_at_utc=@utc,updated_at_utc=@utc
+WHERE child_id=@child AND lesson_id=@lesson;",
+                "@child", profile.ChildId, "@lesson", prerequisite.Id, "@utc", utc);
+            prerequisiteAccess = accessService.GetAccess(profile.ChildId, prerequisite.Id);
+            dependentAccess = accessService.GetAccess(profile.ChildId, dependent.Id);
+            A(prerequisiteAccess.IsCompleted && prerequisiteAccess.LastScorePercent.HasValue &&
+              prerequisiteAccess.BestScorePercent.HasValue &&
+              Math.Abs(prerequisiteAccess.LastScorePercent.Value - 90.0) < 0.0001 &&
+              Math.Abs(prerequisiteAccess.BestScorePercent.Value - 90.0) < 0.0001 && dependentAccess.IsUnlocked,
+                "access_normalizes_best_score_not_below_last_real_score");
+            A(Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + profile.ChildId +
+              "' AND lesson_id='" + prerequisite.Id + "' AND last_score_percent=90 AND best_score_percent=40;") == 1,
+                "score_read_normalization_does_not_mutate_raw_history");
+
+            Exec(database, @"UPDATE math_lesson_progress
 SET started_count=1,completed_count=1,last_completed_at_utc='not-a-date'
 WHERE child_id=@child AND lesson_id=@lesson;",
                 "@child", profile.ChildId, "@lesson", prerequisite.Id);
@@ -3064,6 +3080,146 @@ VALUES(@child,@lesson,@skill,1,0,30,100,@utc,@utc,@utc);",
                   Math.Abs(completed.LessonScorePercent.Value - (200.0 / 3.0)) < 0.0001 &&
                   Math.Abs(completed.LessonBestScorePercent.Value - completed.LessonScorePercent.Value) < 0.0001,
                     "zero_completion_stale_best_cannot_survive_real_completion");
+            }
+
+            var lowBestDatabase = NewDatabase(Path.Combine(root, "best-below-last-real-start.db"), schemaPath);
+            var lowBestProfile = new LearnerSessionService(lowBestDatabase).EnsurePrimaryChild("Bé best below last real start");
+            Exec(lowBestDatabase, @"INSERT INTO math_lesson_progress(
+child_id,lesson_id,skill_id,started_count,completed_count,last_score_percent,best_score_percent,last_started_at_utc,last_completed_at_utc,updated_at_utc)
+VALUES(@child,@lesson,@skill,1,1,90,40,@utc,@utc,@utc);",
+                "@child", lowBestProfile.ChildId,
+                "@lesson", lesson.Id,
+                "@skill", lesson.SkillId,
+                "@utc", oldUtc);
+            using (var coordinator = new MathSessionCoordinator(lowBestDatabase, templatePath, "LOW", 9405, lesson.Id))
+            {
+                var started = coordinator.Start("Bé best below last real start");
+                var afterStart = new MathLessonProgressStore(lowBestDatabase).LoadOne(lowBestProfile.ChildId, lesson.Id);
+                A(afterStart != null && afterStart.StartedCount == 2 && afterStart.CompletedCount == 1 &&
+                  afterStart.LastScorePercent.HasValue && afterStart.BestScorePercent.HasValue &&
+                  Math.Abs(afterStart.LastScorePercent.Value - 90.0) < 0.0001 &&
+                  Math.Abs(afterStart.BestScorePercent.Value - 90.0) < 0.0001,
+                    "real_start_normalizes_best_score_not_below_last_score");
+                Exec(lowBestDatabase,
+                    "UPDATE math_lesson_progress SET best_score_percent=40 WHERE child_id=@child AND lesson_id=@lesson;",
+                    "@child", lowBestProfile.ChildId, "@lesson", lesson.Id);
+                for (var ordinal = 0; ordinal < started.SelectedContentQuestionIds.Count; ordinal++)
+                {
+                    var question = coordinator.NextQuestion();
+                    coordinator.SubmitAnswerAt(ordinal == 0 ? WrongAnswer(question) : question.CorrectAnswerDisplay,
+                        0, "smoke", DateTime.UtcNow, 900 + ordinal * 100);
+                }
+                var completed = coordinator.Complete();
+                A(completed.LessonScorePercent.HasValue && completed.LessonBestScorePercent.HasValue &&
+                  Math.Abs(completed.LessonScorePercent.Value - (200.0 / 3.0)) < 0.0001 &&
+                  Math.Abs(completed.LessonBestScorePercent.Value - 90.0) < 0.0001,
+                    "real_completion_preserves_normalized_historical_best_score");
+            }
+            var normalizedBest = new MathLessonProgressStore(lowBestDatabase).LoadOne(lowBestProfile.ChildId, lesson.Id);
+            A(normalizedBest != null && normalizedBest.CompletedCount == 2 && normalizedBest.BestScorePercent.HasValue &&
+              Math.Abs(normalizedBest.BestScorePercent.Value - 90.0) < 0.0001,
+                "durable_best_score_remains_at_least_historical_last_score_after_completion");
+
+            var resumeRepairDatabase = NewDatabase(Path.Combine(root, "corrupt-progress-existing-resume.db"), schemaPath);
+            string resumedSessionId;
+            DateTime resumedSessionStartedAtUtc;
+            string resumeRepairChildId;
+            using (var first = new MathSessionCoordinator(resumeRepairDatabase, templatePath, "LOW", 9406, lesson.Id))
+            {
+                var started = first.Start("Bé corrupt progress existing resume");
+                resumedSessionId = started.SessionId;
+                resumeRepairChildId = started.ChildId;
+                resumedSessionStartedAtUtc = first.Summary.StartedAtUtc;
+                first.Suspend("corrupt_progress_existing_resume_fixture");
+            }
+            Exec(resumeRepairDatabase, @"UPDATE math_lesson_progress
+SET skill_id='M2_WRONG_RESUMED_PROGRESS_SKILL',started_count=0,completed_count=2,
+    last_score_percent=25,best_score_percent=100,last_started_at_utc='not-a-date',
+    last_completed_at_utc='also-not-a-date',updated_at_utc='not-a-date'
+WHERE child_id=@child AND lesson_id=@lesson;",
+                "@child", resumeRepairChildId, "@lesson", lesson.Id);
+            using (var resumed = new MathSessionCoordinator(resumeRepairDatabase, templatePath, "NORMAL", 999999, lesson.Id))
+            {
+                var start = resumed.Start("Bé corrupt progress existing resume");
+                var repairedOnResume = new MathLessonProgressStore(resumeRepairDatabase).LoadOne(resumeRepairChildId, lesson.Id);
+                A(start.ResumedExistingSession && start.SessionId == resumedSessionId && repairedOnResume != null &&
+                  repairedOnResume.SkillId == lesson.SkillId && repairedOnResume.StartedCount == 1 && repairedOnResume.CompletedCount == 0 &&
+                  !repairedOnResume.LastScorePercent.HasValue && !repairedOnResume.BestScorePercent.HasValue &&
+                  !repairedOnResume.LastCompletedAtUtc.HasValue && repairedOnResume.LastStartedAtUtc.HasValue &&
+                  repairedOnResume.LastStartedAtUtc.Value == resumedSessionStartedAtUtc &&
+                  start.LessonAccess != null && !start.LessonAccess.IsCompleted,
+                    "existing_targeted_resume_repairs_corrupt_progress_without_double_counting_start");
+                for (var ordinal = 0; ordinal < start.SelectedContentQuestionIds.Count; ordinal++)
+                {
+                    var question = resumed.NextQuestion();
+                    resumed.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 700 + ordinal * 100);
+                }
+                var completed = resumed.Complete();
+                A(completed.LessonCompleted && completed.LessonBestScorePercent.HasValue &&
+                  Math.Abs(completed.LessonBestScorePercent.Value - 100.0) < 0.0001,
+                    "existing_targeted_resume_completes_from_repaired_progress_evidence");
+            }
+            var afterResumeComplete = new MathLessonProgressStore(resumeRepairDatabase).LoadOne(resumeRepairChildId, lesson.Id);
+            A(afterResumeComplete != null && afterResumeComplete.StartedCount == 1 && afterResumeComplete.CompletedCount == 1 &&
+              afterResumeComplete.SkillId == lesson.SkillId && afterResumeComplete.BestScorePercent.HasValue &&
+              Math.Abs(afterResumeComplete.BestScorePercent.Value - 100.0) < 0.0001,
+                "existing_targeted_resume_persists_one_real_start_and_one_real_completion");
+
+            var repeatedResumeDatabase = NewDatabase(Path.Combine(root, "repeated-targeted-resume-progress.db"), schemaPath);
+            string repeatedResumeSessionId;
+            string repeatedResumeChildId;
+            using (var first = new MathSessionCoordinator(repeatedResumeDatabase, templatePath, "LOW", 9407, lesson.Id))
+            {
+                var started = first.Start("Bé repeated targeted resume progress");
+                repeatedResumeSessionId = started.SessionId;
+                repeatedResumeChildId = started.ChildId;
+                first.Suspend("repeated_targeted_resume_first_suspend");
+            }
+            using (var resumedOnce = new MathSessionCoordinator(repeatedResumeDatabase, templatePath, "NORMAL", 111111, lesson.Id))
+            {
+                var start = resumedOnce.Start("Bé repeated targeted resume progress");
+                var progress = new MathLessonProgressStore(repeatedResumeDatabase).LoadOne(repeatedResumeChildId, lesson.Id);
+                A(start.ResumedExistingSession && start.SessionId == repeatedResumeSessionId && progress != null &&
+                  progress.StartedCount == 1 && progress.CompletedCount == 0,
+                    "repeated_targeted_resume_first_resume_keeps_single_start_count");
+                resumedOnce.Suspend("repeated_targeted_resume_second_suspend");
+            }
+            using (var resumedTwice = new MathSessionCoordinator(repeatedResumeDatabase, templatePath, "LOW", 222222, lesson.Id))
+            {
+                var start = resumedTwice.Start("Bé repeated targeted resume progress");
+                var progress = new MathLessonProgressStore(repeatedResumeDatabase).LoadOne(repeatedResumeChildId, lesson.Id);
+                A(start.ResumedExistingSession && start.SessionId == repeatedResumeSessionId && progress != null &&
+                  progress.StartedCount == 1 && progress.CompletedCount == 0,
+                    "repeated_targeted_resume_second_resume_still_does_not_double_count_start");
+                resumedTwice.Abort("repeated_targeted_resume_cleanup");
+            }
+
+            var missingProgressDatabase = NewDatabase(Path.Combine(root, "missing-progress-existing-resume.db"), schemaPath);
+            string missingProgressSessionId;
+            string missingProgressChildId;
+            DateTime missingProgressStartedAtUtc;
+            using (var first = new MathSessionCoordinator(missingProgressDatabase, templatePath, "LOW", 9408, lesson.Id))
+            {
+                var started = first.Start("Bé missing progress existing resume");
+                missingProgressSessionId = started.SessionId;
+                missingProgressChildId = started.ChildId;
+                missingProgressStartedAtUtc = first.Summary.StartedAtUtc;
+                first.Suspend("missing_progress_existing_resume_fixture");
+            }
+            Exec(missingProgressDatabase,
+                "DELETE FROM math_lesson_progress WHERE child_id=@child AND lesson_id=@lesson;",
+                "@child", missingProgressChildId, "@lesson", lesson.Id);
+            using (var resumed = new MathSessionCoordinator(missingProgressDatabase, templatePath, "NORMAL", 333333, lesson.Id))
+            {
+                var start = resumed.Start("Bé missing progress existing resume");
+                var recreated = new MathLessonProgressStore(missingProgressDatabase).LoadOne(missingProgressChildId, lesson.Id);
+                A(start.ResumedExistingSession && start.SessionId == missingProgressSessionId && recreated != null &&
+                  recreated.SkillId == lesson.SkillId && recreated.StartedCount == 1 && recreated.CompletedCount == 0 &&
+                  !recreated.LastScorePercent.HasValue && !recreated.BestScorePercent.HasValue &&
+                  !recreated.LastCompletedAtUtc.HasValue && recreated.LastStartedAtUtc.HasValue &&
+                  recreated.LastStartedAtUtc.Value == missingProgressStartedAtUtc,
+                    "missing_progress_existing_resume_recreates_exact_active_start_evidence");
+                resumed.Abort("missing_progress_existing_resume_cleanup");
             }
         }
 

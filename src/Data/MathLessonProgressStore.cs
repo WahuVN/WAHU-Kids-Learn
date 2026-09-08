@@ -22,7 +22,7 @@ namespace WAHU.Data
         private readonly LearningDatabase _database;
 
         internal const string UntrustedCompletionOnStartPredicate = @"math_lesson_progress.completed_count>math_lesson_progress.started_count
-    OR math_lesson_progress.skill_id<>excluded.skill_id
+    OR math_lesson_progress.skill_id<>@skill
     OR (math_lesson_progress.completed_count>0 AND (
         math_lesson_progress.last_started_at_utc IS NULL OR math_lesson_progress.last_completed_at_utc IS NULL
         OR julianday(math_lesson_progress.last_started_at_utc) IS NULL OR julianday(math_lesson_progress.last_completed_at_utc) IS NULL
@@ -56,7 +56,11 @@ skill_id=excluded.skill_id,
 started_count=math_lesson_progress.started_count+1,
 completed_count=CASE WHEN " + UntrustedCompletionOnStartPredicate + @" THEN 0 ELSE math_lesson_progress.completed_count END,
 last_score_percent=CASE WHEN " + UntrustedCompletionOnStartPredicate + @" THEN NULL ELSE math_lesson_progress.last_score_percent END,
-best_score_percent=CASE WHEN " + UntrustedCompletionOnStartPredicate + @" THEN NULL ELSE math_lesson_progress.best_score_percent END,
+best_score_percent=CASE WHEN " + UntrustedCompletionOnStartPredicate + @" THEN NULL
+    WHEN math_lesson_progress.last_score_percent IS NOT NULL AND
+         (math_lesson_progress.best_score_percent IS NULL OR math_lesson_progress.best_score_percent<math_lesson_progress.last_score_percent)
+    THEN math_lesson_progress.last_score_percent
+    ELSE math_lesson_progress.best_score_percent END,
 last_completed_at_utc=CASE WHEN " + UntrustedCompletionOnStartPredicate + @" THEN NULL ELSE math_lesson_progress.last_completed_at_utc END,
 last_started_at_utc=excluded.last_started_at_utc,
 updated_at_utc=excluded.updated_at_utc;";
@@ -64,6 +68,48 @@ updated_at_utc=excluded.updated_at_utc;";
                     command.Parameters.AddWithValue("@lesson", lessonId);
                     command.Parameters.AddWithValue("@skill", skillId);
                     command.Parameters.AddWithValue("@utc", utc);
+                    command.ExecuteNonQuery();
+                }
+            });
+        }
+
+        public void ReconcileResumedTargetedSession(
+            string childId,
+            string lessonId,
+            string skillId,
+            DateTime sessionStartedAtUtc)
+        {
+            Require(childId, "childId");
+            Require(lessonId, "lessonId");
+            Require(skillId, "skillId");
+            var startedUtc = Utc(sessionStartedAtUtc);
+            var updatedUtc = Utc(DateTime.UtcNow);
+            _database.Writes.Execute((connection, transaction) =>
+            {
+                using (var command = connection.CreateCommand())
+                {
+                    command.Transaction = transaction;
+                    command.CommandText = @"INSERT INTO math_lesson_progress(
+child_id,lesson_id,skill_id,started_count,completed_count,last_started_at_utc,updated_at_utc)
+VALUES(@child,@lesson,@skill,1,0,@started,@updated)
+ON CONFLICT(child_id,lesson_id) DO UPDATE SET
+skill_id=@skill,
+started_count=CASE WHEN math_lesson_progress.started_count<1 THEN 1 ELSE math_lesson_progress.started_count END,
+completed_count=CASE WHEN " + UntrustedCompletionOnStartPredicate + @" THEN 0 ELSE math_lesson_progress.completed_count END,
+last_score_percent=CASE WHEN " + UntrustedCompletionOnStartPredicate + @" THEN NULL ELSE math_lesson_progress.last_score_percent END,
+best_score_percent=CASE WHEN " + UntrustedCompletionOnStartPredicate + @" THEN NULL
+    WHEN math_lesson_progress.last_score_percent IS NOT NULL AND
+         (math_lesson_progress.best_score_percent IS NULL OR math_lesson_progress.best_score_percent<math_lesson_progress.last_score_percent)
+    THEN math_lesson_progress.last_score_percent
+    ELSE math_lesson_progress.best_score_percent END,
+last_completed_at_utc=CASE WHEN " + UntrustedCompletionOnStartPredicate + @" THEN NULL ELSE math_lesson_progress.last_completed_at_utc END,
+last_started_at_utc=@started,
+updated_at_utc=@updated;";
+                    command.Parameters.AddWithValue("@child", childId);
+                    command.Parameters.AddWithValue("@lesson", lessonId);
+                    command.Parameters.AddWithValue("@skill", skillId);
+                    command.Parameters.AddWithValue("@started", startedUtc);
+                    command.Parameters.AddWithValue("@updated", updatedUtc);
                     command.ExecuteNonQuery();
                 }
             });
@@ -117,8 +163,14 @@ skill_id=excluded.skill_id,
 completed_count=math_lesson_progress.completed_count+1,
 last_score_percent=excluded.last_score_percent,
 best_score_percent=CASE
-    WHEN math_lesson_progress.best_score_percent IS NULL OR excluded.best_score_percent > math_lesson_progress.best_score_percent
-    THEN excluded.best_score_percent ELSE math_lesson_progress.best_score_percent END,
+    WHEN math_lesson_progress.best_score_percent IS NULL
+      OR excluded.best_score_percent > math_lesson_progress.best_score_percent
+      OR (math_lesson_progress.last_score_percent IS NOT NULL
+          AND math_lesson_progress.last_score_percent > math_lesson_progress.best_score_percent)
+    THEN CASE WHEN math_lesson_progress.last_score_percent IS NOT NULL
+                   AND math_lesson_progress.last_score_percent > excluded.best_score_percent
+              THEN math_lesson_progress.last_score_percent ELSE excluded.best_score_percent END
+    ELSE math_lesson_progress.best_score_percent END,
 last_completed_at_utc=excluded.last_completed_at_utc,
 updated_at_utc=excluded.updated_at_utc;";
                     progress.Parameters.AddWithValue("@child", childId);

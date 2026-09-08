@@ -104,6 +104,10 @@ namespace WAHU.Session
             MathLessonProgressRecord own;
             progress.TryGetValue(lesson.Id, out own);
             var ownCompletedCount = EffectiveCompletedCount(own, lesson.SkillId);
+            var ownLastScore = ownCompletedCount <= 0 || own == null ? null : own.LastScorePercent;
+            var ownBestScore = ownCompletedCount <= 0 || own == null ? null : own.BestScorePercent;
+            if (ownLastScore.HasValue && (!ownBestScore.HasValue || ownLastScore.Value > ownBestScore.Value))
+                ownBestScore = ownLastScore;
             var prerequisiteLessonIds = new List<string>();
             var unsatisfied = new List<string>();
             foreach (var prerequisiteSkill in lesson.PrerequisiteSkills ?? new List<string>())
@@ -132,8 +136,8 @@ namespace WAHU.Session
                 IsCompleted = ownCompletedCount > 0,
                 StartedCount = own == null ? 0 : own.StartedCount,
                 CompletedCount = ownCompletedCount,
-                LastScorePercent = ownCompletedCount <= 0 || own == null ? null : own.LastScorePercent,
-                BestScorePercent = ownCompletedCount <= 0 || own == null ? null : own.BestScorePercent,
+                LastScorePercent = ownLastScore,
+                BestScorePercent = ownBestScore,
                 PrerequisiteLessonIds = prerequisiteLessonIds,
                 UnsatisfiedPrerequisiteLessonIds = unsatisfied
             };
