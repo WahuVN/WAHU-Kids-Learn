@@ -360,9 +360,8 @@ namespace WAHUKidsLearn
             Text = "Toán nhanh — Nhiệm vụ cứu hộ";
             AccessibleName = "Toán nhanh — Nhiệm vụ cứu hộ";
             StartPosition = FormStartPosition.CenterParent;
-            MinimumSize = new Size(900, 640);
-            ClientSize = new Size(1040, 720);
-            AutoScaleMode = AutoScaleMode.Dpi;
+            ChildWindowSizing.ApplyLearnerWindowDefaults(this, new Size(1180, 760), new Size(900, 640));
+            ShowInTaskbar = false;
             BackColor = ChildVisualTheme.Cream;
             Font = ChildVisualTheme.Font(10.5f);
             KeyPreview = true;

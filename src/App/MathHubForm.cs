@@ -51,9 +51,8 @@ namespace WAHUKidsLearn
             Text = "Toán lớp 2";
             AccessibleName = "Thư viện Toán lớp 2";
             StartPosition = FormStartPosition.CenterParent;
-            MinimumSize = new Size(900, 640);
-            ClientSize = new Size(1180, 760);
-            AutoScaleMode = AutoScaleMode.Dpi;
+            ChildWindowSizing.ApplyLearnerWindowDefaults(this, new Size(1180, 760), new Size(900, 640));
+            ShowInTaskbar = false;
             BackColor = ChildVisualTheme.Cream;
             Font = ChildVisualTheme.Font(10.5f);
             KeyPreview = true;

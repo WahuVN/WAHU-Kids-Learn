@@ -42,9 +42,7 @@ namespace WAHUKidsLearn
 
             Text = "WAHU Kids Learn";
             StartPosition = FormStartPosition.CenterScreen;
-            MinimumSize = new Size(900, 640);
-            ClientSize = new Size(1080, 720);
-            AutoScaleMode = AutoScaleMode.Dpi;
+            ChildWindowSizing.ApplyLearnerWindowDefaults(this, new Size(1180, 760), new Size(900, 640));
             Font = ChildVisualTheme.Font(11f);
             BackColor = ChildVisualTheme.Cream;
             KeyPreview = true;
