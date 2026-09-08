@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace WAHUKidsLearn
 {
@@ -23,7 +24,26 @@ namespace WAHUKidsLearn
         private static long _cacheBudgetBytes = DefaultCacheBudgetBytes;
         private static long _cachedBytes;
 
-        public const int ExpectedProductionPngCount = 74;
+        private static readonly Regex ProductionAssetCountRegex = new Regex(
+            "\"totalSelected\"\\s*:\\s*(\\d+)",
+            RegexOptions.CultureInvariant);
+
+        public static int ExpectedProductionPngCount
+        {
+            get
+            {
+                try
+                {
+                    var manifestPath = Path.Combine(RootPath, "ASSET_SELECTION_MANIFEST.json");
+                    if (!File.Exists(manifestPath)) return 0;
+                    var matches = ProductionAssetCountRegex.Matches(File.ReadAllText(manifestPath));
+                    if (matches.Count != 1) return 0;
+                    int value;
+                    return int.TryParse(matches[0].Groups[1].Value, out value) && value > 0 ? value : 0;
+                }
+                catch { return 0; }
+            }
+        }
 
         public static string RootPath
         {
@@ -93,7 +113,8 @@ namespace WAHUKidsLearn
 
         public static bool HasCompleteProductionPayload()
         {
-            return HasProductionManifest() && CountProductionPngAssets() == ExpectedProductionPngCount;
+            var expected = ExpectedProductionPngCount;
+            return expected > 0 && HasProductionManifest() && CountProductionPngAssets() == expected;
         }
 
         public static Image Get(string relativePath)
