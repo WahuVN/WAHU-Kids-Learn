@@ -705,11 +705,12 @@ namespace WAHU.Session
                     }
                     _active = false;
                     var durableProgress = _lessonProgressStore.LoadOne(_profile.ChildId, _targetLesson.Id);
-                    if (durableProgress == null || durableProgress.CompletedCount <= 0 ||
-                        !durableProgress.LastCompletedAtUtc.HasValue ||
+                    var durableAccess = CurrentLessonAccess();
+                    if (durableProgress == null || durableAccess == null || !durableAccess.IsCompleted ||
+                        durableAccess.CompletedCount <= 0 || !durableProgress.LastCompletedAtUtc.HasValue ||
                         durableProgress.LastCompletedAtUtc.Value < _session.StartedAtUtc) throw;
-                    if (durableProgress.BestScorePercent.HasValue)
-                        summary.LessonBestScorePercent = durableProgress.BestScorePercent;
+                    if (durableAccess.BestScorePercent.HasValue)
+                        summary.LessonBestScorePercent = durableAccess.BestScorePercent;
                 }
             }
             else
