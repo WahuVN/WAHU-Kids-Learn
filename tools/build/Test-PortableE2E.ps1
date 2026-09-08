@@ -30,6 +30,28 @@ function Optional-Hash([string]$Path) {
     return $null
 }
 
+function Assert-ProductionArtPayload([string]$PayloadRoot) {
+    $assetRoot = Join-Path $PayloadRoot 'Assets\Generated\Ready'
+    $manifestPath = Join-Path $assetRoot 'ASSET_SELECTION_MANIFEST.json'
+    Assert (Test-Path -LiteralPath $manifestPath -PathType Leaf) 'portable production-art manifest missing'
+    $manifest = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
+    $assets = @($manifest.assets)
+    Assert ($assets.Count -eq 74) "portable production-art manifest count $($assets.Count)"
+    $pngFiles = @(Get-ChildItem -LiteralPath $assetRoot -Recurse -Filter *.png -File)
+    Assert ($pngFiles.Count -eq 74) "portable production-art PNG count $($pngFiles.Count)"
+    foreach ($asset in $assets) {
+        $rel = ([string]$asset.finalPath).Replace('\\','\').Replace('/','\')
+        $path = Join-Path $assetRoot $rel
+        Assert (Test-Path -LiteralPath $path -PathType Leaf) "portable production-art file missing: $rel"
+        $actualSha = (Get-FileHash -Algorithm SHA256 -LiteralPath $path).Hash.ToUpperInvariant()
+        Assert ($actualSha -eq ([string]$asset.sha256).ToUpperInvariant()) "portable production-art SHA mismatch: $rel"
+    }
+    return [ordered]@{
+        png_count = $pngFiles.Count
+        manifest_sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $manifestPath).Hash.ToUpperInvariant()
+    }
+}
+
 $result = [ordered]@{}
 $installedRootExistedBefore = Test-Path -LiteralPath $installedRoot
 $installedDbHashBefore = Optional-Hash $installedDb
@@ -72,6 +94,9 @@ try {
     foreach ($rel in $required) {
         Assert (Test-Path -LiteralPath (Join-Path $extractRoot $rel)) "portable payload missing: $rel"
     }
+    $productionArtEvidence = Assert-ProductionArtPayload $extractRoot
+    $result.production_art_png_count = [int]$productionArtEvidence.png_count
+    $result.production_art_manifest_sha256 = [string]$productionArtEvidence.manifest_sha256
     Assert (-not (Test-Path -LiteralPath (Join-Path $extractRoot 'UserData'))) 'portable ZIP unexpectedly contains UserData'
 
     $exe = Join-Path $extractRoot 'WAHUKidsLearn.exe'

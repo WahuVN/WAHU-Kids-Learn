@@ -23,6 +23,28 @@ function Assert([bool]$Condition, [string]$Message) {
     if (-not $Condition) { throw $Message }
 }
 
+function Assert-ProductionArtPayload([string]$PayloadRoot) {
+    $assetRoot = Join-Path $PayloadRoot 'Assets\Generated\Ready'
+    $manifestPath = Join-Path $assetRoot 'ASSET_SELECTION_MANIFEST.json'
+    Assert (Test-Path -LiteralPath $manifestPath -PathType Leaf) 'installed production-art manifest missing'
+    $manifest = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
+    $assets = @($manifest.assets)
+    Assert ($assets.Count -eq 74) "installed production-art manifest count $($assets.Count)"
+    $pngFiles = @(Get-ChildItem -LiteralPath $assetRoot -Recurse -Filter *.png -File)
+    Assert ($pngFiles.Count -eq 74) "installed production-art PNG count $($pngFiles.Count)"
+    foreach ($asset in $assets) {
+        $rel = ([string]$asset.finalPath).Replace('\\','\').Replace('/','\')
+        $path = Join-Path $assetRoot $rel
+        Assert (Test-Path -LiteralPath $path -PathType Leaf) "installed production-art file missing: $rel"
+        $actualSha = (Get-FileHash -Algorithm SHA256 -LiteralPath $path).Hash.ToUpperInvariant()
+        Assert ($actualSha -eq ([string]$asset.sha256).ToUpperInvariant()) "installed production-art SHA mismatch: $rel"
+    }
+    return [ordered]@{
+        png_count = $pngFiles.Count
+        manifest_sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $manifestPath).Hash.ToUpperInvariant()
+    }
+}
+
 function Remove-TestArtifacts {
     if (Test-Path -LiteralPath $appDir) { Remove-Item -LiteralPath $appDir -Recurse -Force -ErrorAction SilentlyContinue }
     if (Test-Path -LiteralPath $dataDir) {
@@ -82,6 +104,9 @@ try {
         'WAHU.SetupPreflight.exe'
     )
     foreach ($rel in $required) { Assert (Test-Path -LiteralPath (Join-Path $appDir $rel)) "installed payload missing: $rel" }
+    $productionArtEvidence = Assert-ProductionArtPayload $appDir
+    $result.production_art_png_count = [int]$productionArtEvidence.png_count
+    $result.production_art_manifest_sha256 = [string]$productionArtEvidence.manifest_sha256
     $result.installed_file_count = (Get-ChildItem -LiteralPath $appDir -Recurse -File).Count
     $runValue = (Get-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -Name 'WAHU Kids Learn' -ErrorAction Stop).'WAHU Kids Learn'
     Assert ($runValue -like '*WAHUKidsLearn.exe*--startup*') 'startup Run registry value missing/invalid'

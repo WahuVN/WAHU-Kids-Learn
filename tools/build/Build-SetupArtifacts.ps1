@@ -22,6 +22,38 @@ function Sha256([string]$Path) {
     (Get-FileHash -Algorithm SHA256 -LiteralPath $Path).Hash
 }
 
+function Assert-ProductionArtPayload {
+    param(
+        [string]$PayloadRoot,
+        [string]$ExpectedManifestSha256
+    )
+
+    $assetRoot = Join-Path $PayloadRoot 'Assets\Generated\Ready'
+    $manifestPath = Join-Path $assetRoot 'ASSET_SELECTION_MANIFEST.json'
+    Require-File $manifestPath
+    $manifest = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
+    $assets = @($manifest.assets)
+    if ($assets.Count -ne 74) { throw "Production art manifest count invalid: $($assets.Count)" }
+    $pngFiles = @(Get-ChildItem -LiteralPath $assetRoot -Recurse -Filter *.png -File)
+    if ($pngFiles.Count -ne 74) { throw "Production art PNG count invalid: $($pngFiles.Count)" }
+
+    foreach ($asset in $assets) {
+        $rel = ([string]$asset.finalPath).Replace('\\','\').Replace('/','\')
+        if ([string]::IsNullOrWhiteSpace($rel)) { throw 'Production art manifest contains empty finalPath.' }
+        $path = Join-Path $assetRoot $rel
+        Require-File $path
+        $expectedSha = ([string]$asset.sha256).ToUpperInvariant()
+        $actualSha = (Sha256 $path).ToUpperInvariant()
+        if ($actualSha -ne $expectedSha) { throw "Production art SHA mismatch: $rel" }
+    }
+
+    $manifestSha = (Sha256 $manifestPath).ToUpperInvariant()
+    if (-not [string]::IsNullOrWhiteSpace($ExpectedManifestSha256) -and $manifestSha -ne $ExpectedManifestSha256.ToUpperInvariant()) {
+        throw "Production art manifest SHA mismatch: expected=$ExpectedManifestSha256 actual=$manifestSha"
+    }
+    return [ordered]@{ png_count = $pngFiles.Count; manifest_sha256 = $manifestSha }
+}
+
 function Invoke-SmokeWithAssertions {
     param(
         [string]$Name,
@@ -238,6 +270,21 @@ $updaterExe = Join-Path $updaterOut 'WAHU.Updater.exe'
 Require-File $updaterExe
 Copy-Item -LiteralPath $updaterExe -Destination $publish -Force
 
+$productionArtRepoRoot = Join-Path $root 'src\App\Assets\Generated\Ready'
+$productionArtRepoManifest = Join-Path $productionArtRepoRoot 'ASSET_SELECTION_MANIFEST.json'
+Require-File $productionArtRepoManifest
+$productionArtManifestSha = (Sha256 $productionArtRepoManifest).ToUpperInvariant()
+$productionArtSource = Join-Path $appOut 'Assets\Generated\Ready'
+$productionArtSourceEvidence = Assert-ProductionArtPayload -PayloadRoot $appOut -ExpectedManifestSha256 $productionArtManifestSha
+$productionArtGeneratedPublish = Join-Path $publish 'Assets\Generated'
+New-Item -ItemType Directory -Force -Path $productionArtGeneratedPublish | Out-Null
+Copy-Item -LiteralPath $productionArtSource -Destination $productionArtGeneratedPublish -Recurse -Force
+$productionArtPublishEvidence = Assert-ProductionArtPayload -PayloadRoot $publish -ExpectedManifestSha256 $productionArtManifestSha
+if ([int]$productionArtSourceEvidence.png_count -ne [int]$productionArtPublishEvidence.png_count) {
+    throw 'Production art source/publish count mismatch.'
+}
+Write-Host "PRODUCTION_ART_PAYLOAD_PASS png=$($productionArtPublishEvidence.png_count) manifest_sha256=$productionArtManifestSha"
+
 $dirs = @('config','policies','content_packs','curriculum','assets','data\schema')
 foreach ($d in $dirs) { New-Item -ItemType Directory -Force -Path (Join-Path $publish $d) | Out-Null }
 Copy-Item 'setup\config\*.json' (Join-Path $publish 'config') -Force
@@ -311,6 +358,8 @@ if ([int]$portableE2EReport.first_bootstrap_exit -ne 0 -or [int]$portableE2ERepo
     throw 'Portable E2E bootstrap exit code is not zero.'
 }
 if ($portableE2EReport.zip_sha256 -ne $portableZipHash) { throw 'Portable E2E tested ZIP hash does not match the just-built artifact.' }
+if ([int]$portableE2EReport.production_art_png_count -ne 74) { throw 'Portable E2E production-art PNG count mismatch.' }
+if ([string]$portableE2EReport.production_art_manifest_sha256 -ne $productionArtManifestSha) { throw 'Portable E2E production-art manifest SHA mismatch.' }
 Write-Host "PORTABLE_E2E_GATE_PASS report=$portableE2EReportPath"
 
 Write-Host '[13c/15] Final source provenance gate'
@@ -351,6 +400,12 @@ $manifest = [ordered]@{
         default_journal = 'DELETE'
         sqlite_runtime_smoke_assertions = $sqliteAssertions
     }
+    production_art = [ordered]@{
+        png_count = [int]$productionArtPublishEvidence.png_count
+        manifest = 'Assets\Generated\Ready\ASSET_SELECTION_MANIFEST.json'
+        manifest_sha256 = $productionArtManifestSha
+        portable_verified = $true
+    }
     gates = [ordered]@{
         preflight_smoke = 'PASS'
         preflight_smoke_assertions = $preflightAssertions
@@ -384,6 +439,9 @@ $manifest = [ordered]@{
         math_session_persistence_runtime_smoke_assertions = $mathPersistenceAssertions
         backup_restore_smoke = 'PASS'
         staged_payload_guard = 'PASS'
+        production_art_payload = 'PASS'
+        production_art_png_count = [int]$productionArtPublishEvidence.png_count
+        production_art_manifest_sha256 = $productionArtManifestSha
         source_provenance = 'PASS'
         source_tree_clean = 'PASS'
         source_commit_stable = 'PASS'
