@@ -173,6 +173,24 @@ namespace WAHU.SQLiteRuntimeSmoke
             var second = database.Initialize("DELETE");
             Assert(second.SchemaVersion == 5 && second.Migration != null && second.Migration.Version == 5 && !second.Migration.RecordedNow, "migration_v5_not_duplicated_second_boot");
 
+            var v4LfOnly = File.ReadAllText(migrationV4Copy)
+                .Replace("\r\n", "\n")
+                .Replace("\r", "\n");
+            File.WriteAllText(migrationV4Copy, v4LfOnly, new System.Text.UTF8Encoding(false));
+            var newlineEquivalent = database.Initialize("DELETE");
+            Assert(newlineEquivalent.SchemaVersion == 5 && newlineEquivalent.Health.IsHealthy,
+                "migration_line_endings_do_not_change_identity");
+            File.Copy(sourceV4, migrationV4Copy, true);
+
+            database.Writes.Execute((c, tx) =>
+            {
+                Exec(c, tx,
+                    "UPDATE migration_history SET checksum_sha256='1E87F8780BB1D67FEB50854C80700A86D3F26D994F33524B20760C9506FD77BA' WHERE version=5;");
+            });
+            var legacyV5 = database.Initialize("DELETE");
+            Assert(legacyV5.SchemaVersion == 5 && legacyV5.Health.IsHealthy,
+                "migration_v5_known_legacy_checksum_accepted");
+
             database.Writes.Execute((c, tx) =>
             {
                 Exec(c, tx, "INSERT INTO child(id,display_name,grade_level,created_at_utc,updated_at_utc) VALUES('coordinator-child','Bé coordinator',2,@t,@t);", "@t", DateTime.UtcNow.ToString("o"));

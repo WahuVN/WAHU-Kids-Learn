@@ -26,6 +26,14 @@ namespace WAHU.Data
         public const string MathLessonProgressName = "004_math_lesson_progress";
         public const int MathRuntimePackIdentityVersion = 5;
         public const string MathRuntimePackIdentityName = "005_math_runtime_pack_identity";
+        // A short-lived V5 development build shipped the same V5 schema contract
+        // with a different migration-file byte representation. Existing learner
+        // databases may legitimately contain this recorded checksum. Keep the
+        // exact known value fail-closed instead of rewriting learner history.
+        private const string LegacyEquivalentV5Checksum =
+            "1E87F8780BB1D67FEB50854C80700A86D3F26D994F33524B20760C9506FD77BA";
+        private const string CanonicalV5Checksum =
+            "C625584A8ED62BFF4D14FC8EA994C43C03D3A79A5A16121D7C1DAAAF5E0E5CC5";
 
         public static int GetSchemaVersion(SQLiteConnection connection)
         {
@@ -44,10 +52,11 @@ namespace WAHU.Data
         public static MigrationVerificationResult VerifyOrRecordInitial(SQLiteConnection connection, string schemaPath)
         {
             ValidateMigrationFile(schemaPath);
-            var currentChecksum = Hashing.Sha256File(schemaPath);
+            var currentChecksum = CanonicalMigrationChecksum(schemaPath);
+            var rawChecksum = Hashing.Sha256File(schemaPath);
             var existing = TryReadRecorded(connection, InitialVersion);
             if (existing != null)
-                return VerifyExisting(existing, InitialVersion, InitialName, currentChecksum);
+                return VerifyExisting(existing, InitialVersion, InitialName, currentChecksum, rawChecksum);
 
             if (GetSchemaVersion(connection) < InitialVersion)
                 throw new InvalidDataException("Cannot record initial migration before schema V1 exists.");
@@ -74,11 +83,12 @@ namespace WAHU.Data
             string migrationPath)
         {
             ValidateMigrationFile(migrationPath);
-            var checksum = Hashing.Sha256File(migrationPath);
+            var checksum = CanonicalMigrationChecksum(migrationPath);
+            var rawChecksum = Hashing.Sha256File(migrationPath);
             var existing = TryReadRecorded(connection, version);
             if (existing == null)
                 throw new InvalidDataException("Missing migration_history row for version " + version + ".");
-            var result = VerifyExisting(existing, version, name, checksum);
+            var result = VerifyExisting(existing, version, name, checksum, rawChecksum);
             if (GetSchemaVersion(connection) < version)
                 throw new InvalidDataException("migration_history is ahead of app_meta schema_version.");
             return result;
@@ -95,10 +105,11 @@ namespace WAHU.Data
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("name");
             ValidateMigrationFile(migrationPath);
 
-            var checksum = Hashing.Sha256File(migrationPath);
+            var checksum = CanonicalMigrationChecksum(migrationPath);
+            var rawChecksum = Hashing.Sha256File(migrationPath);
             var existing = TryReadRecorded(connection, version);
             if (existing != null)
-                return VerifyExisting(existing, version, name, checksum);
+                return VerifyExisting(existing, version, name, checksum, rawChecksum);
 
             var current = GetSchemaVersion(connection);
             if (current != version - 1)
@@ -168,11 +179,18 @@ namespace WAHU.Data
             RecordedMigration existing,
             int version,
             string expectedName,
-            string expectedChecksum)
+            string expectedChecksum,
+            string rawChecksum)
         {
             if (!string.Equals(existing.Name, expectedName, StringComparison.Ordinal))
                 throw new InvalidDataException("Migration v" + version + " name mismatch: " + existing.Name);
-            if (!string.Equals(existing.Checksum, expectedChecksum, StringComparison.OrdinalIgnoreCase))
+            var checksumMatches =
+                string.Equals(existing.Checksum, expectedChecksum, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(existing.Checksum, rawChecksum, StringComparison.OrdinalIgnoreCase) ||
+                (version == MathRuntimePackIdentityVersion &&
+                 string.Equals(expectedChecksum, CanonicalV5Checksum, StringComparison.OrdinalIgnoreCase) &&
+                 string.Equals(existing.Checksum, LegacyEquivalentV5Checksum, StringComparison.OrdinalIgnoreCase));
+            if (!checksumMatches)
                 throw new InvalidDataException("Migration v" + version + " checksum mismatch. Shipped migration differs from recorded migration.");
             return new MigrationVerificationResult
             {
@@ -181,6 +199,18 @@ namespace WAHU.Data
                 ChecksumSha256 = expectedChecksum,
                 RecordedNow = false
             };
+        }
+
+        private static string CanonicalMigrationChecksum(string path)
+        {
+            // Git, ZIP and Windows checkouts may materialize the exact same SQL
+            // with LF or CRLF. Migration identity follows SQL text, not checkout
+            // newline bytes, so a harmless line-ending conversion cannot brick
+            // an otherwise healthy learner database.
+            var text = File.ReadAllText(path)
+                .Replace("\r\n", "\n")
+                .Replace("\r", "\n");
+            return Hashing.Sha256Text(text);
         }
 
         private static void InsertHistory(
