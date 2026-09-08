@@ -22,38 +22,6 @@ function Sha256([string]$Path) {
     (Get-FileHash -Algorithm SHA256 -LiteralPath $Path).Hash
 }
 
-function Assert-ProductionArtPayload {
-    param(
-        [string]$PayloadRoot,
-        [string]$ExpectedManifestSha256
-    )
-
-    $assetRoot = Join-Path $PayloadRoot 'Assets\Generated\Ready'
-    $manifestPath = Join-Path $assetRoot 'ASSET_SELECTION_MANIFEST.json'
-    Require-File $manifestPath
-    $manifest = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
-    $assets = @($manifest.assets)
-    if ($assets.Count -ne 74) { throw "Production art manifest count invalid: $($assets.Count)" }
-    $pngFiles = @(Get-ChildItem -LiteralPath $assetRoot -Recurse -Filter *.png -File)
-    if ($pngFiles.Count -ne 74) { throw "Production art PNG count invalid: $($pngFiles.Count)" }
-
-    foreach ($asset in $assets) {
-        $rel = ([string]$asset.finalPath).Replace('\\','\').Replace('/','\')
-        if ([string]::IsNullOrWhiteSpace($rel)) { throw 'Production art manifest contains empty finalPath.' }
-        $path = Join-Path $assetRoot $rel
-        Require-File $path
-        $expectedSha = ([string]$asset.sha256).ToUpperInvariant()
-        $actualSha = (Sha256 $path).ToUpperInvariant()
-        if ($actualSha -ne $expectedSha) { throw "Production art SHA mismatch: $rel" }
-    }
-
-    $manifestSha = (Sha256 $manifestPath).ToUpperInvariant()
-    if (-not [string]::IsNullOrWhiteSpace($ExpectedManifestSha256) -and $manifestSha -ne $ExpectedManifestSha256.ToUpperInvariant()) {
-        throw "Production art manifest SHA mismatch: expected=$ExpectedManifestSha256 actual=$manifestSha"
-    }
-    return [ordered]@{ png_count = $pngFiles.Count; manifest_sha256 = $manifestSha }
-}
-
 function Invoke-SmokeWithAssertions {
     param(
         [string]$Name,
@@ -270,20 +238,23 @@ $updaterExe = Join-Path $updaterOut 'WAHU.Updater.exe'
 Require-File $updaterExe
 Copy-Item -LiteralPath $updaterExe -Destination $publish -Force
 
-$productionArtRepoRoot = Join-Path $root 'src\App\Assets\Generated\Ready'
-$productionArtRepoManifest = Join-Path $productionArtRepoRoot 'ASSET_SELECTION_MANIFEST.json'
-Require-File $productionArtRepoManifest
-$productionArtManifestSha = (Sha256 $productionArtRepoManifest).ToUpperInvariant()
-$productionArtSource = Join-Path $appOut 'Assets\Generated\Ready'
-$productionArtSourceEvidence = Assert-ProductionArtPayload -PayloadRoot $appOut -ExpectedManifestSha256 $productionArtManifestSha
-$productionArtGeneratedPublish = Join-Path $publish 'Assets\Generated'
-New-Item -ItemType Directory -Force -Path $productionArtGeneratedPublish | Out-Null
-Copy-Item -LiteralPath $productionArtSource -Destination $productionArtGeneratedPublish -Recurse -Force
-$productionArtPublishEvidence = Assert-ProductionArtPayload -PayloadRoot $publish -ExpectedManifestSha256 $productionArtManifestSha
-if ([int]$productionArtSourceEvidence.png_count -ne [int]$productionArtPublishEvidence.png_count) {
-    throw 'Production art source/publish count mismatch.'
-}
-Write-Host "PRODUCTION_ART_PAYLOAD_PASS png=$($productionArtPublishEvidence.png_count) manifest_sha256=$productionArtManifestSha"
+$productionAssetGate = Join-Path $root 'tools\build\Test-ProductionAssetPayload.ps1'
+Require-File $productionAssetGate
+$sourceAssetReady = Join-Path $root 'src\App\Assets\Generated\Ready'
+$sourceAssetManifest = Join-Path $sourceAssetReady 'ASSET_SELECTION_MANIFEST.json'
+Require-File $sourceAssetManifest
+$productionAssetManifestSha256 = Sha256 $sourceAssetManifest
+$sourceAssetManifestJson = Get-Content -Raw -LiteralPath $sourceAssetManifest | ConvertFrom-Json
+$productionAssetPngCount = [int]$sourceAssetManifestJson.summary.totalSelected
+& $productionAssetGate -Mode Tree -Path $sourceAssetReady -ExpectedManifestSha256 $productionAssetManifestSha256
+
+$appAssetReady = Join-Path $appOut 'Assets\Generated\Ready'
+& $productionAssetGate -Mode Tree -Path $appAssetReady -ExpectedManifestSha256 $productionAssetManifestSha256
+$publishAssetReady = Join-Path $publish 'Assets\Generated\Ready'
+New-Item -ItemType Directory -Force -Path $publishAssetReady | Out-Null
+Copy-Item -Path (Join-Path $appAssetReady '*') -Destination $publishAssetReady -Recurse -Force
+& $productionAssetGate -Mode Tree -Path $publishAssetReady -ExpectedManifestSha256 $productionAssetManifestSha256
+Write-Host "PRODUCTION_ASSET_STAGE_GATE_PASS png_count=$productionAssetPngCount manifest_sha256=$productionAssetManifestSha256"
 
 $dirs = @('config','policies','content_packs','curriculum','assets','data\schema')
 foreach ($d in $dirs) { New-Item -ItemType Directory -Force -Path (Join-Path $publish $d) | Out-Null }
@@ -329,6 +300,9 @@ New-Item -ItemType Directory -Force -Path $portableRoot | Out-Null
 Copy-Item (Join-Path $publish '*') $portableRoot -Recurse -Force
 Set-Content -LiteralPath (Join-Path $portableRoot 'portable.mode') -Value 'WAHU_KIDS_LEARN_PORTABLE_V1' -Encoding ASCII
 if (Test-Path (Join-Path $portableRoot 'UserData')) { throw 'Portable package must never contain learner UserData.' }
+$portableAssetReady = Join-Path $portableRoot 'Assets\Generated\Ready'
+& $productionAssetGate -Mode Tree -Path $portableAssetReady -ExpectedManifestSha256 $productionAssetManifestSha256
+Write-Host "PORTABLE_PRODUCTION_ASSET_TREE_GATE_PASS png_count=$productionAssetPngCount"
 
 $portableHashPath = Join-Path $root 'build\win7_x86\PORTABLE_SHA256SUMS.txt'
 Get-ChildItem -LiteralPath $portableRoot -Recurse -File | Sort-Object FullName | ForEach-Object {
@@ -342,6 +316,8 @@ $portableZip = Join-Path $portableOutDir "WAHU-Kids-Learn-Portable-win7-x86-$App
 if (Test-Path $portableZip) { Remove-Item -LiteralPath $portableZip -Force }
 Compress-Archive -Path (Join-Path $portableRoot '*') -DestinationPath $portableZip -CompressionLevel Optimal
 Require-File $portableZip
+& $productionAssetGate -Mode Zip -Path $portableZip -ExpectedManifestSha256 $productionAssetManifestSha256
+Write-Host "PORTABLE_PRODUCTION_ASSET_ZIP_GATE_PASS png_count=$productionAssetPngCount"
 $portableZipHash = Sha256 $portableZip
 Set-Content -LiteralPath (Join-Path $portableOutDir "WAHU-Kids-Learn-Portable-win7-x86-$AppVersion.sha256") -Value "$portableZipHash  $(Split-Path $portableZip -Leaf)" -Encoding ASCII
 Write-Host "PORTABLE_SHA256=$portableZipHash"
@@ -358,8 +334,8 @@ if ([int]$portableE2EReport.first_bootstrap_exit -ne 0 -or [int]$portableE2ERepo
     throw 'Portable E2E bootstrap exit code is not zero.'
 }
 if ($portableE2EReport.zip_sha256 -ne $portableZipHash) { throw 'Portable E2E tested ZIP hash does not match the just-built artifact.' }
-if ([int]$portableE2EReport.production_art_png_count -ne 74) { throw 'Portable E2E production-art PNG count mismatch.' }
-if ([string]$portableE2EReport.production_art_manifest_sha256 -ne $productionArtManifestSha) { throw 'Portable E2E production-art manifest SHA mismatch.' }
+if ([int]$portableE2EReport.production_art_png_count -ne [int]$productionAssetPngCount) { throw 'Portable E2E production-art PNG count mismatch.' }
+if (-not [string]::Equals([string]$portableE2EReport.production_art_manifest_sha256, [string]$productionAssetManifestSha256, [StringComparison]::OrdinalIgnoreCase)) { throw 'Portable E2E production-art manifest SHA mismatch.' }
 Write-Host "PORTABLE_E2E_GATE_PASS report=$portableE2EReportPath"
 
 Write-Host '[13c/15] Final source provenance gate'
@@ -401,9 +377,9 @@ $manifest = [ordered]@{
         sqlite_runtime_smoke_assertions = $sqliteAssertions
     }
     production_art = [ordered]@{
-        png_count = [int]$productionArtPublishEvidence.png_count
+        png_count = [int]$productionAssetPngCount
         manifest = 'Assets\Generated\Ready\ASSET_SELECTION_MANIFEST.json'
-        manifest_sha256 = $productionArtManifestSha
+        manifest_sha256 = $productionAssetManifestSha256
         portable_verified = $true
     }
     gates = [ordered]@{
@@ -439,9 +415,11 @@ $manifest = [ordered]@{
         math_session_persistence_runtime_smoke_assertions = $mathPersistenceAssertions
         backup_restore_smoke = 'PASS'
         staged_payload_guard = 'PASS'
-        production_art_payload = 'PASS'
-        production_art_png_count = [int]$productionArtPublishEvidence.png_count
-        production_art_manifest_sha256 = $productionArtManifestSha
+        production_asset_payload = 'PASS'
+        production_asset_png_count = $productionAssetPngCount
+        production_asset_manifest_sha256 = $productionAssetManifestSha256
+        portable_production_asset_tree = 'PASS'
+        portable_production_asset_zip = 'PASS'
         source_provenance = 'PASS'
         source_tree_clean = 'PASS'
         source_commit_stable = 'PASS'
@@ -457,6 +435,8 @@ $manifest = [ordered]@{
         zip = "build\portable\WAHU-Kids-Learn-Portable-win7-x86-$AppVersion.zip"
         zip_sha256 = $portableZipHash
         contains_user_data = $false
+        production_asset_png_count = $productionAssetPngCount
+        production_asset_manifest_sha256 = $productionAssetManifestSha256
         e2e = 'PASS'
         e2e_report = 'build\portable_e2e_dev.json'
         first_bootstrap_exit = [int]$portableE2EReport.first_bootstrap_exit
