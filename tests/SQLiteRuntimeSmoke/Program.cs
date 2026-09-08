@@ -182,7 +182,7 @@ namespace WAHU.SQLiteRuntimeSmoke
                 .Replace("\r", "\n");
             File.WriteAllText(migrationV4Copy, v4LfOnly, new System.Text.UTF8Encoding(false));
             var newlineEquivalent = database.Initialize("DELETE");
-            Assert(newlineEquivalent.SchemaVersion == 5 && newlineEquivalent.Health.IsHealthy,
+            Assert(newlineEquivalent.SchemaVersion == 6 && newlineEquivalent.Health.IsHealthy,
                 "migration_line_endings_do_not_change_identity");
             File.Copy(sourceV4, migrationV4Copy, true);
 
@@ -192,7 +192,7 @@ namespace WAHU.SQLiteRuntimeSmoke
                     "UPDATE migration_history SET checksum_sha256='1E87F8780BB1D67FEB50854C80700A86D3F26D994F33524B20760C9506FD77BA' WHERE version=5;");
             });
             var legacyV5 = database.Initialize("DELETE");
-            Assert(legacyV5.SchemaVersion == 5 && legacyV5.Health.IsHealthy,
+            Assert(legacyV5.SchemaVersion == 6 && legacyV5.Health.IsHealthy,
                 "migration_v5_known_legacy_checksum_accepted");
 
             database.Writes.Execute((c, tx) =>
