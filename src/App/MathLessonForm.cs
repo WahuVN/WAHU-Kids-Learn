@@ -78,9 +78,8 @@ namespace WAHUKidsLearn
             _eventPresentation = eventPresentation;
             Text = _eventPresentation == null ? "WAHU Kids Learn — Toán lớp 2" : "WAHU Kids Learn — " + _eventPresentation.TitleVi;
             StartPosition = FormStartPosition.CenterParent;
-            MinimumSize = new Size(900, 640);
-            ClientSize = new Size(1080, 720);
-            AutoScaleMode = AutoScaleMode.Dpi;
+            ChildWindowSizing.ApplyLearnerWindowDefaults(this, new Size(1180, 760), new Size(900, 640));
+            ShowInTaskbar = false;
             Font = ChildVisualTheme.Font(11f);
             BackColor = ChildVisualTheme.Cream;
             KeyPreview = true;
@@ -110,6 +109,7 @@ namespace WAHUKidsLearn
                 RowCount = 6
             };
             var root = _rootLayout;
+            root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
             root.RowStyles.Add(new RowStyle(SizeType.Absolute, 58));
             root.RowStyles.Add(new RowStyle(SizeType.Absolute, 26));
             _questionRowStyle = new RowStyle(SizeType.Percent, 58);
@@ -121,6 +121,7 @@ namespace WAHUKidsLearn
             root.RowStyles.Add(new RowStyle(SizeType.Absolute, 68));
 
             var header = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, RowCount = 1 };
+            header.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
             header.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 156));
             header.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
             header.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 170));
@@ -196,6 +197,7 @@ namespace WAHUKidsLearn
                 Radius = 26
             };
             var questionLayout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 4 };
+            questionLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
             questionLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
             questionLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 68));
             questionLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
@@ -428,11 +430,11 @@ namespace WAHUKidsLearn
             _feedbackCard.Controls.Add(feedbackLayout);
             root.Controls.Add(_feedbackCard, 0, 4);
 
-            var actions = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, RowCount = 1, Padding = new Padding(100, 4, 100, 4) };
+            var actions = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, RowCount = 1, Padding = new Padding(72, 4, 72, 4) };
             actions.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            actions.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30));
-            actions.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40));
-            actions.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30));
+            actions.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
+            actions.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 60));
+            actions.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
             _hintButton = new ChildActionButton
             {
                 Dock = DockStyle.None,
@@ -470,8 +472,10 @@ namespace WAHUKidsLearn
             };
             _nextButton.Click += delegate { HandleNextButton(); };
             actions.Controls.Add(new Panel(), 0, 0);
+            // Hint and next are mutually exclusive states. Keep them in the same wide center cell
+            // so neither button can spill into a narrow side column at 900px or 125% DPI.
             actions.Controls.Add(_hintButton, 1, 0);
-            actions.Controls.Add(_nextButton, 2, 0);
+            actions.Controls.Add(_nextButton, 1, 0);
             root.Controls.Add(actions, 0, 5);
             Controls.Add(root);
         }

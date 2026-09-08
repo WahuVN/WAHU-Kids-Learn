@@ -47,12 +47,34 @@ $portable = Join-Path $root "build\portable\WAHU-Kids-Learn-Portable-win7-x86-$A
 $portableSha = Join-Path $root "build\portable\WAHU-Kids-Learn-Portable-win7-x86-$AppVersion.sha256"
 $updateManifest = Join-Path $root 'build\release\update-manifest.json'
 $releaseManifest = Join-Path $root 'build\win7_x86\release_manifest_dev.json'
+$allInOne = Join-Path $root "build\allinone\WAHU-Kids-Learn-Portable-AllInOne-win7-x86-$AppVersion.exe"
+$allInOneSha = Join-Path $root "build\allinone\WAHU-Kids-Learn-Portable-AllInOne-win7-x86-$AppVersion.sha256"
 
 foreach ($file in @($installer,$installerSha,$portable,$portableSha,$updateManifest,$releaseManifest)) { Require-File $file }
 
 $runtimeManifest = Get-Content -Raw -LiteralPath $releaseManifest | ConvertFrom-Json
 if ($runtimeManifest.app_version -ne $AppVersion) { throw 'release_manifest_dev.json app_version không khớp AppVersion.' }
 if ($runtimeManifest.git_commit -ne $localHead) { throw "Build không thuộc HEAD hiện tại. build=$($runtimeManifest.git_commit), HEAD=$localHead" }
+
+$releaseHasAllInOne = $false
+$allInOneHash = $null
+if ($runtimeManifest.PSObject.Properties.Name -contains 'all_in_one' -and $runtimeManifest.all_in_one.enabled -eq $true) {
+    Require-File $allInOne
+    Require-File $allInOneSha
+    $allInOneHash = Sha256 $allInOne
+    if (-not [string]::Equals([string]$runtimeManifest.all_in_one.artifact_sha256, $allInOneHash, [StringComparison]::OrdinalIgnoreCase)) {
+        throw 'Portable All-in-One SHA-256 không khớp release manifest.'
+    }
+    if ([int64]$runtimeManifest.all_in_one.artifact_bytes -ne (Get-Item -LiteralPath $allInOne).Length) {
+        throw 'Portable All-in-One size không khớp release manifest.'
+    }
+    if ($runtimeManifest.all_in_one.bundles_net48_offline -ne $true -or $runtimeManifest.all_in_one.e2e -ne 'PASS') {
+        throw 'Portable All-in-One chưa có evidence bundled .NET 4.8 + E2E PASS.'
+    }
+    $allInOneShaLine = Get-Content -LiteralPath $allInOneSha | Select-Object -First 1
+    if ($allInOneShaLine -notmatch [regex]::Escape($allInOneHash)) { throw 'File .sha256 của Portable All-in-One không khớp.' }
+    $releaseHasAllInOne = $true
+}
 
 $update = Get-Content -Raw -LiteralPath $updateManifest | ConvertFrom-Json
 if ($update.app_version -ne $AppVersion) { throw 'update-manifest.json app_version không khớp.' }
@@ -85,12 +107,14 @@ $tag = "v$AppVersion"
 $title = "WAHU Kids Learn $AppVersion"
 $feedTag = if ($isDev) { 'update-dev' } else { 'update-stable' }
 $feedUrl = "https://github.com/WahuVN/WAHU-Kids-Learn/releases/download/$feedTag/update-manifest.json"
+$allInOneReleaseNote = if ($releaseHasAllInOne) { "- Portable All-in-One: bundled official .NET Framework 4.8 offline runtime; SHA-256: $allInOneHash" } else { '- Portable All-in-One: not included in this build' }
 $notes = @"
 WAHU Kids Learn $AppVersion
 
 - Windows 7 SP1+ / x86 runtime
 - .NET Framework 4.8
 - Installer SHA-256: $actualInstallerSha
+$allInOneReleaseNote
 - Git commit: $localHead
 - Update channel: $($update.channel)
 - Channel feed: $feedUrl
@@ -99,6 +123,7 @@ Learner data is stored outside the application directory and is preserved across
 "@
 
 $assets = @($installer,$installerSha,$portable,$portableSha,$updateManifest)
+if ($releaseHasAllInOne) { $assets += @($allInOne,$allInOneSha) }
 $exists = $false
 $previousErrorActionPreference = $ErrorActionPreference
 try {

@@ -2,12 +2,17 @@
     [string]$Configuration = 'Release',
     [string]$AppVersion = '0.1.0-dev',
     [switch]$CompileInstaller,
-    [switch]$RequireInstaller
+    [switch]$RequireInstaller,
+    [switch]$CompileAllInOne,
+    [string]$Net48RedistPath
 )
 
 $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 Set-Location $root
+
+$net48ExpectedSha256 = '0A3A390C47E639D0F7FC65B21195FEE6B7F65B066F80F70C60FAB191D14B7E40'
+$net48ExpectedBytes = 121346568L
 
 function Find-FirstExisting([string[]]$Paths) {
     foreach ($p in $Paths) { if ($p -and (Test-Path -LiteralPath $p)) { return $p } }
@@ -447,6 +452,17 @@ $manifest = [ordered]@{
         installed_db_hash_after = $portableE2EReport.installed_db_hash_after
     }
 }
+$manifest['all_in_one'] = [ordered]@{
+    enabled = $false
+    kind = 'portable_bootstrapper'
+    bundles_net48_offline = $false
+    net48_sha256 = $null
+    artifact = $null
+    artifact_sha256 = $null
+    artifact_bytes = $null
+    e2e = 'NOT_RUN'
+    e2e_report = $null
+}
 $manifestPath = Join-Path $root 'build\win7_x86\release_manifest_dev.json'
 $manifest | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $manifestPath -Encoding UTF8
 $null = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
@@ -493,6 +509,70 @@ if ($CompileInstaller -or $RequireInstaller) {
     }
 } else {
     Write-Host '[15/15] Installer compile chưa được yêu cầu.'
+}
+
+$allInOnePath = Join-Path $root "build\allinone\WAHU-Kids-Learn-Portable-AllInOne-win7-x86-$AppVersion.exe"
+if ($CompileAllInOne) {
+    if (-not $iscc) { throw 'Không tìm thấy ISCC.exe để build Portable All-in-One.' }
+    if ([string]::IsNullOrWhiteSpace($Net48RedistPath)) {
+        $Net48RedistPath = Join-Path $root 'build\prerequisites\ndp48-x86-x64-allos-enu.exe'
+    }
+    Require-File $Net48RedistPath
+    $resolvedNet48 = (Resolve-Path -LiteralPath $Net48RedistPath).Path
+    $net48Item = Get-Item -LiteralPath $resolvedNet48
+    $net48Sha = Sha256 $resolvedNet48
+    if ($net48Item.Length -ne $net48ExpectedBytes) {
+        throw "NET48_REDIST_SIZE_MISMATCH expected=$net48ExpectedBytes actual=$($net48Item.Length)"
+    }
+    if (-not [string]::Equals($net48Sha, $net48ExpectedSha256, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "NET48_REDIST_SHA256_MISMATCH expected=$net48ExpectedSha256 actual=$net48Sha"
+    }
+    $net48Signature = Get-AuthenticodeSignature -LiteralPath $resolvedNet48
+    if ($net48Signature.Status -ne 'Valid' -or -not $net48Signature.SignerCertificate -or $net48Signature.SignerCertificate.Subject -notmatch 'Microsoft Corporation') {
+        throw "NET48_REDIST_SIGNATURE_INVALID status=$($net48Signature.Status) signer=$($net48Signature.SignerCertificate.Subject)"
+    }
+    Require-File (Join-Path $portableRoot 'portable.mode')
+    New-Item -ItemType Directory -Force -Path (Split-Path -Parent $allInOnePath) | Out-Null
+    Write-Host '[15a/15] Compile Portable All-in-One + official .NET 4.8 offline runtime'
+    & $iscc "/DAppVersion=$AppVersion" "/DNet48Redist=$resolvedNet48" "/DNet48Sha256=$net48ExpectedSha256" 'setup\installer\WAHU_Kids_Learn_Portable_AllInOne.iss'
+    if ($LASTEXITCODE -ne 0) { throw "Portable All-in-One Inno compile fail: $LASTEXITCODE" }
+    Require-File $allInOnePath
+    $allInOneHash = Sha256 $allInOnePath
+    $allInOneShaPath = Join-Path $root "build\allinone\WAHU-Kids-Learn-Portable-AllInOne-win7-x86-$AppVersion.sha256"
+    Set-Content -LiteralPath $allInOneShaPath -Value "$allInOneHash  $(Split-Path $allInOnePath -Leaf)" -Encoding ASCII
+
+    $allInOneE2EScript = Join-Path $root 'tools\build\Test-AllInOneE2E.ps1'
+    Require-File $allInOneE2EScript
+    & $allInOneE2EScript -AppVersion $AppVersion -AllInOneExe $allInOnePath
+    if ($LASTEXITCODE -ne 0) { throw "Portable All-in-One E2E fail: $LASTEXITCODE" }
+    $allInOneE2EReportPath = Join-Path $root 'build\allinone_e2e_dev.json'
+    Require-File $allInOneE2EReportPath
+    $allInOneE2E = Get-Content -Raw -LiteralPath $allInOneE2EReportPath | ConvertFrom-Json
+    if ($allInOneE2E.test_result -ne 'PASS' -or [int]$allInOneE2E.setup_exit -ne 0 -or [int]$allInOneE2E.bootstrap_exit -ne 0) {
+        throw 'Portable All-in-One E2E report is not PASS.'
+    }
+    if (-not [string]::Equals([string]$allInOneE2E.all_in_one_sha256, $allInOneHash, [StringComparison]::OrdinalIgnoreCase)) {
+        throw 'Portable All-in-One E2E tested a different artifact hash.'
+    }
+
+    $manifest['all_in_one'] = [ordered]@{
+        enabled = $true
+        kind = 'portable_bootstrapper'
+        bundles_net48_offline = $true
+        net48_sha256 = $net48ExpectedSha256
+        net48_bytes = $net48ExpectedBytes
+        net48_signer = [string]$net48Signature.SignerCertificate.Subject
+        artifact = "build\allinone\WAHU-Kids-Learn-Portable-AllInOne-win7-x86-$AppVersion.exe"
+        artifact_sha256 = $allInOneHash
+        artifact_bytes = (Get-Item -LiteralPath $allInOnePath).Length
+        e2e = 'PASS'
+        e2e_report = 'build\allinone_e2e_dev.json'
+        installed_db_hash_before = $allInOneE2E.installed_db_hash_before
+        installed_db_hash_after = $allInOneE2E.installed_db_hash_after
+    }
+    Write-Host "ALL_IN_ONE_BUILD_PASS path=$allInOnePath sha256=$allInOneHash bytes=$((Get-Item -LiteralPath $allInOnePath).Length)"
+} else {
+    Write-Host '[15a/15] Portable All-in-One compile chưa được yêu cầu.'
 }
 
 Write-Host '[15b/15] Final post-installer source provenance gate'

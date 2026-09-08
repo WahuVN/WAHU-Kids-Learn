@@ -42,9 +42,7 @@ namespace WAHUKidsLearn
 
             Text = "WAHU Kids Learn";
             StartPosition = FormStartPosition.CenterScreen;
-            MinimumSize = new Size(900, 640);
-            ClientSize = new Size(1080, 720);
-            AutoScaleMode = AutoScaleMode.Dpi;
+            ChildWindowSizing.ApplyLearnerWindowDefaults(this, new Size(1180, 760), new Size(900, 640));
             Font = ChildVisualTheme.Font(11f);
             BackColor = ChildVisualTheme.Cream;
             KeyPreview = true;
@@ -223,6 +221,7 @@ namespace WAHUKidsLearn
             missionLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 88));
             missionLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
             var missionHeader = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1, Margin = new Padding(0) };
+            missionHeader.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
             missionHeader.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 42));
             missionHeader.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 58));
             missionHeader.Controls.Add(new Label
@@ -274,6 +273,7 @@ namespace WAHUKidsLearn
                 AccessibleName = "Mô tả nhiệm vụ"
             };
             var missionStory = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1, Margin = new Padding(0) };
+            missionStory.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
             missionStory.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 55));
             missionStory.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 45));
             missionStory.Controls.Add(_missionSummary, 0, 0);
@@ -284,6 +284,7 @@ namespace WAHUKidsLearn
             }, 1, 0);
             missionLayout.Controls.Add(missionStory, 0, 2);
             var mathActions = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1 };
+            mathActions.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
             mathActions.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 62));
             mathActions.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 38));
             _quickRescueButton = new ChildActionButton

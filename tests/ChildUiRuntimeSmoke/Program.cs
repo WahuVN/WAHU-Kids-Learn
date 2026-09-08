@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using WAHU.Content;
@@ -18,6 +19,8 @@ namespace WAHU.ChildUiRuntimeSmoke
         private static int _assertions;
         private static string _captureDirectory;
         private static int _capturedImages;
+        private static readonly Dictionary<string, string> CaptureSha256 =
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         [STAThread]
         private static void Main(string[] args)
@@ -66,6 +69,7 @@ namespace WAHU.ChildUiRuntimeSmoke
             if (!string.IsNullOrWhiteSpace(_captureDirectory))
             {
                 A(_capturedImages > 0, "offscreen_capture_exports_at_least_one_png");
+                AssertCriticalCaptureDifferences();
                 Console.WriteLine("CHILD_UI_CAPTURE_PASS files=" + _capturedImages + " dir=" + _captureDirectory);
             }
             Console.WriteLine("CHILD_UI_RUNTIME_SMOKE_PASS assertions=" + _assertions);
@@ -1868,6 +1872,8 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                     A(quickButton.AccessibleDescription.IndexOf("ba chặng", StringComparison.OrdinalIgnoreCase) >= 0 &&
                       quickButton.AccessibleDescription.IndexOf("đồng hồ", StringComparison.OrdinalIgnoreCase) >= 0,
                         "quick_rescue_home_entry_accessibility_is_pressure_free");
+                    RenderFormAndAssert(home, 1080, 720, "home_default_window");
+                    RenderFormAndAssert(home, 900, 640, "home_min_window");
                 }
 
                 var catalogPath = Path.Combine(sourceContent, "lesson_catalog_v1.json");
@@ -1968,7 +1974,7 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                     Invoke(rescue, "SelectEvent", presentation);
                     var checkpointPanel = GetField<FlowLayoutPanel>(rescue, "_checkpoints");
                     A(checkpointPanel.Controls.Count == 3,
-                        "quick_rescue_intro_renders_three_checkpoint_rows");
+                        "quick_rescue_intro_renders_three_checkpoint_cards");
                     var checkpointCards = checkpointPanel.Controls.Cast<Control>().ToList();
                     A(checkpointCards.All(x => x.GetType().Name == "RescueCheckpointCard" && x.Height == 64 &&
                       !string.IsNullOrWhiteSpace(x.AccessibleName) && !string.IsNullOrWhiteSpace(x.AccessibleDescription)),
@@ -1976,7 +1982,13 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                     A(ContainsControlText(rescue, "KHÔNG ĐẾM NGƯỢC"),
                         "quick_rescue_intro_visibly_reinforces_no_countdown");
                     RenderFormAndAssert(rescue, 900, 640, "quick_rescue_intro_900x640");
-                    A(missionCards.All(x => x.Width >= 220) && checkpointCards.All(x => x.Width >= 300),
+                    var orderedCheckpoints = checkpointCards.OrderBy(x => x.Left).ToList();
+                    var checkpointsFit = orderedCheckpoints.All(x => x.Width >= 100 && x.Left >= checkpointPanel.Padding.Left - 2 &&
+                        x.Right <= checkpointPanel.ClientSize.Width - checkpointPanel.Padding.Right + 2 &&
+                        x.Top >= checkpointPanel.Padding.Top - 2 && x.Bottom <= checkpointPanel.ClientSize.Height - checkpointPanel.Padding.Bottom + 2);
+                    for (var i = 1; i < orderedCheckpoints.Count; i++)
+                        checkpointsFit = checkpointsFit && orderedCheckpoints[i - 1].Right <= orderedCheckpoints[i].Left;
+                    A(missionCards.All(x => x.Width >= 220) && checkpointsFit,
                         "quick_rescue_intro_cards_fit_900x640");
                 }
 
@@ -4117,7 +4129,35 @@ END;");
             A(Math.Abs(root.Width - form.ClientSize.Width) <= 2, name + "_root_fills_width");
             A(Math.Abs(root.Height - form.ClientSize.Height) <= 2, name + "_root_fills_height");
             A(CountSizedControls(root) >= 15, name + "_keeps_sized_layout_tree");
+            AssertVisibleTreeWithinParents(root, name);
             CaptureControlIfRequested(root, name);
+        }
+
+        private static void AssertVisibleTreeWithinParents(Control parent, string name)
+        {
+            if (parent == null) return;
+            var scrollable = parent as ScrollableControl;
+            var allowScrolledChildren = scrollable != null && scrollable.AutoScroll;
+            var client = parent.ClientRectangle;
+            const int tolerance = 2;
+
+            foreach (Control child in parent.Controls)
+            {
+                if (!IsControlLocallyVisible(child)) continue;
+                A(child.Width > 0 && child.Height > 0,
+                    name + "_visible_child_positive_bounds_" + child.GetType().Name);
+                if (!allowScrolledChildren && client.Width > 0 && client.Height > 0)
+                {
+                    var bounds = child.Bounds;
+                    A(bounds.Left >= client.Left - tolerance && bounds.Top >= client.Top - tolerance &&
+                      bounds.Right <= client.Right + tolerance && bounds.Bottom <= client.Bottom + tolerance,
+                        name + "_visible_child_fits_parent_" + parent.GetType().Name + "_to_" + child.GetType().Name +
+                        "_parent" + client.Width + "x" + client.Height + "_child" +
+                        bounds.Left + "x" + bounds.Top + "x" + bounds.Width + "x" + bounds.Height +
+                        "_text_" + (child.Text ?? string.Empty).Replace("\r", " ").Replace("\n", " "));
+                }
+                AssertVisibleTreeWithinParents(child, name);
+            }
         }
 
         private static string ResolveCaptureDirectory(string[] args)
@@ -4140,26 +4180,50 @@ END;");
 
             using (var bitmap = new Bitmap(root.Width, root.Height))
             {
-                root.DrawToBitmap(bitmap, new Rectangle(0, 0, root.Width, root.Height));
+                // DrawToBitmap on an offscreen WinForms root can look non-empty while
+                // omitting descendants. Always composite the locally-visible tree so
+                // captures reflect prompt/support/buttons/art state changes.
+                using (var graphics = Graphics.FromImage(bitmap)) graphics.Clear(root.BackColor);
+                DrawControlTreeToBitmap(root, bitmap, 0, 0);
                 var colors = SampleBitmapColors(bitmap);
-                var mode = "root";
-                if (colors.Count < 3)
-                {
-                    using (var graphics = Graphics.FromImage(bitmap)) graphics.Clear(root.BackColor);
-                    DrawControlTreeToBitmap(root, bitmap, 0, 0);
-                    colors = SampleBitmapColors(bitmap);
-                    mode = "tree";
-                }
+                var mode = "tree";
 
                 var fileName = string.Concat(name.Select(ch => Path.GetInvalidFileNameChars().Contains(ch) ? '_' : ch)) + ".png";
                 var path = Path.Combine(_captureDirectory, fileName);
                 bitmap.Save(path, System.Drawing.Imaging.ImageFormat.Png);
                 var bytes = new FileInfo(path).Length;
+                CaptureSha256[name] = Sha256File(path);
                 Console.WriteLine("CHILD_UI_CAPTURE_FILE name=" + name + " mode=" + mode + " colors=" + colors.Count + " bytes=" + bytes + " path=" + path);
                 A(colors.Count >= 3, name + "_capture_renders_nonempty_visual");
                 A(File.Exists(path) && bytes > 1024, name + "_capture_png_written");
                 _capturedImages++;
             }
+        }
+
+        private static void AssertCriticalCaptureDifferences()
+        {
+            AssertCaptureDifferent("math_hub_min_window", "typed_answer_min_window");
+            AssertCaptureDifferent("typed_answer_min_window", "quick_rescue_event_900x640");
+            AssertCaptureDifferent("quick_rescue_event_active_125pct", "quick_rescue_resume_retry_125pct");
+            AssertCaptureDifferent("quick_rescue_resume_retry_125pct", "quick_rescue_completion_125pct");
+            AssertCaptureDifferent("quick_rescue_event_active_125pct", "quick_rescue_completion_125pct");
+        }
+
+        private static void AssertCaptureDifferent(string first, string second)
+        {
+            string firstHash;
+            string secondHash;
+            A(CaptureSha256.TryGetValue(first, out firstHash), first + "_capture_hash_available");
+            A(CaptureSha256.TryGetValue(second, out secondHash), second + "_capture_hash_available");
+            A(!string.Equals(firstHash, secondHash, StringComparison.OrdinalIgnoreCase),
+                first + "_differs_from_" + second);
+        }
+
+        private static string Sha256File(string path)
+        {
+            using (var sha = SHA256.Create())
+            using (var stream = File.OpenRead(path))
+                return BitConverter.ToString(sha.ComputeHash(stream)).Replace("-", string.Empty);
         }
 
         private static HashSet<int> SampleBitmapColors(Bitmap bitmap)

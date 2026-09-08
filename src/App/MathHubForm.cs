@@ -51,9 +51,8 @@ namespace WAHUKidsLearn
             Text = "Toán lớp 2";
             AccessibleName = "Thư viện Toán lớp 2";
             StartPosition = FormStartPosition.CenterParent;
-            MinimumSize = new Size(900, 640);
-            ClientSize = new Size(1180, 760);
-            AutoScaleMode = AutoScaleMode.Dpi;
+            ChildWindowSizing.ApplyLearnerWindowDefaults(this, new Size(1180, 760), new Size(900, 640));
+            ShowInTaskbar = false;
             BackColor = ChildVisualTheme.Cream;
             Font = ChildVisualTheme.Font(10.5f);
             KeyPreview = true;
@@ -120,6 +119,7 @@ namespace WAHUKidsLearn
                 ColumnCount = 1,
                 RowCount = 3
             };
+            root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
             root.RowStyles.Add(new RowStyle(SizeType.Absolute, 76));
             root.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
             root.RowStyles.Add(new RowStyle(SizeType.Absolute, 72));
@@ -139,6 +139,7 @@ namespace WAHUKidsLearn
         private Control BuildHeader()
         {
             var header = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, RowCount = 1 };
+            header.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
             header.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 110));
             header.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
             header.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 118));
@@ -159,6 +160,7 @@ namespace WAHUKidsLearn
             header.Controls.Add(back, 0, 0);
 
             var title = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 2 };
+            title.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
             title.RowStyles.Add(new RowStyle(SizeType.Percent, 62));
             title.RowStyles.Add(new RowStyle(SizeType.Percent, 38));
             title.Controls.Add(new Label
@@ -200,6 +202,7 @@ namespace WAHUKidsLearn
         private Control BuildCatalogBody()
         {
             var body = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, RowCount = 1 };
+            body.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
             body.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 23));
             body.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
             body.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 44));
@@ -243,6 +246,7 @@ namespace WAHUKidsLearn
         private Control BuildFooter()
         {
             var footer = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 4, RowCount = 1, Padding = new Padding(4, 8, 2, 2) };
+            footer.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
             footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
             footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 22));
             footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 27));
@@ -344,6 +348,7 @@ namespace WAHUKidsLearn
                 Radius = 22
             };
             var layout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 3 };
+            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
             layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
             layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 42));
             layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
