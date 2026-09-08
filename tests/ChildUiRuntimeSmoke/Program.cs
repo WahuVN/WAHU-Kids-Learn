@@ -1972,7 +1972,7 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                     Invoke(rescue, "SelectEvent", presentation);
                     var checkpointPanel = GetField<FlowLayoutPanel>(rescue, "_checkpoints");
                     A(checkpointPanel.Controls.Count == 3,
-                        "quick_rescue_intro_renders_three_checkpoint_rows");
+                        "quick_rescue_intro_renders_three_checkpoint_cards");
                     var checkpointCards = checkpointPanel.Controls.Cast<Control>().ToList();
                     A(checkpointCards.All(x => x.GetType().Name == "RescueCheckpointCard" && x.Height == 64 &&
                       !string.IsNullOrWhiteSpace(x.AccessibleName) && !string.IsNullOrWhiteSpace(x.AccessibleDescription)),
@@ -1980,7 +1980,13 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                     A(ContainsControlText(rescue, "KHÔNG ĐẾM NGƯỢC"),
                         "quick_rescue_intro_visibly_reinforces_no_countdown");
                     RenderFormAndAssert(rescue, 900, 640, "quick_rescue_intro_900x640");
-                    A(missionCards.All(x => x.Width >= 220) && checkpointCards.All(x => x.Width >= 300),
+                    var orderedCheckpoints = checkpointCards.OrderBy(x => x.Left).ToList();
+                    var checkpointsFit = orderedCheckpoints.All(x => x.Width >= 100 && x.Left >= checkpointPanel.Padding.Left - 2 &&
+                        x.Right <= checkpointPanel.ClientSize.Width - checkpointPanel.Padding.Right + 2 &&
+                        x.Top >= checkpointPanel.Padding.Top - 2 && x.Bottom <= checkpointPanel.ClientSize.Height - checkpointPanel.Padding.Bottom + 2);
+                    for (var i = 1; i < orderedCheckpoints.Count; i++)
+                        checkpointsFit = checkpointsFit && orderedCheckpoints[i - 1].Right <= orderedCheckpoints[i].Left;
+                    A(missionCards.All(x => x.Width >= 220) && checkpointsFit,
                         "quick_rescue_intro_cards_fit_900x640");
                 }
 
@@ -4072,7 +4078,35 @@ END;");
             A(Math.Abs(root.Width - form.ClientSize.Width) <= 2, name + "_root_fills_width");
             A(Math.Abs(root.Height - form.ClientSize.Height) <= 2, name + "_root_fills_height");
             A(CountSizedControls(root) >= 15, name + "_keeps_sized_layout_tree");
+            AssertVisibleTreeWithinParents(root, name);
             CaptureControlIfRequested(root, name);
+        }
+
+        private static void AssertVisibleTreeWithinParents(Control parent, string name)
+        {
+            if (parent == null) return;
+            var scrollable = parent as ScrollableControl;
+            var allowScrolledChildren = scrollable != null && scrollable.AutoScroll;
+            var client = parent.ClientRectangle;
+            const int tolerance = 2;
+
+            foreach (Control child in parent.Controls)
+            {
+                if (!IsControlLocallyVisible(child)) continue;
+                A(child.Width > 0 && child.Height > 0,
+                    name + "_visible_child_positive_bounds_" + child.GetType().Name);
+                if (!allowScrolledChildren && client.Width > 0 && client.Height > 0)
+                {
+                    var bounds = child.Bounds;
+                    A(bounds.Left >= client.Left - tolerance && bounds.Top >= client.Top - tolerance &&
+                      bounds.Right <= client.Right + tolerance && bounds.Bottom <= client.Bottom + tolerance,
+                        name + "_visible_child_fits_parent_" + parent.GetType().Name + "_to_" + child.GetType().Name +
+                        "_parent" + client.Width + "x" + client.Height + "_child" +
+                        bounds.Left + "x" + bounds.Top + "x" + bounds.Width + "x" + bounds.Height +
+                        "_text_" + (child.Text ?? string.Empty).Replace("\r", " ").Replace("\n", " "));
+                }
+                AssertVisibleTreeWithinParents(child, name);
+            }
         }
 
         private static string ResolveCaptureDirectory(string[] args)

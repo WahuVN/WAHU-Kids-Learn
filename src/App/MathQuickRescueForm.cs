@@ -294,6 +294,18 @@ namespace WAHUKidsLearn
                 e.Graphics.DrawPath(pen, path);
             }
 
+            if (Width < 220)
+            {
+                var compactBubble = new Rectangle(Math.Max(8, Width / 2 - 14), 7, 28, 28);
+                using (var compactBrush = new SolidBrush(AccentColor)) e.Graphics.FillEllipse(compactBrush, compactBubble);
+                ChildVisualTheme.DrawTextWithOwnedFont(e.Graphics, Math.Max(1, StepNumber).ToString(), ChildVisualTheme.Font(9f, FontStyle.Bold), compactBubble,
+                    Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
+                var compactTitle = new Rectangle(8, 36, Math.Max(40, Width - 16), 20);
+                ChildVisualTheme.DrawTextWithOwnedFont(e.Graphics, StepTitle ?? string.Empty, ChildVisualTheme.Font(8.4f, FontStyle.Bold), compactTitle,
+                    ChildVisualTheme.Ink, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
+                return;
+            }
+
             var bubble = new Rectangle(14, 14, 34, 34);
             using (var brush = new SolidBrush(AccentColor)) e.Graphics.FillEllipse(brush, bubble);
             ChildVisualTheme.DrawTextWithOwnedFont(e.Graphics, Math.Max(1, StepNumber).ToString(), ChildVisualTheme.Font(10f, FontStyle.Bold), bubble,
@@ -372,6 +384,7 @@ namespace WAHUKidsLearn
                 RowCount = 3,
                 BackColor = ChildVisualTheme.Cream
             };
+            root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
             root.RowStyles.Add(new RowStyle(SizeType.Absolute, 92));
             root.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
             root.RowStyles.Add(new RowStyle(SizeType.Absolute, 50));
@@ -420,6 +433,7 @@ namespace WAHUKidsLearn
             root.Controls.Add(header, 0, 0);
 
             var body = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1 };
+            body.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
             body.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 37));
             body.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 63));
 
@@ -441,6 +455,7 @@ namespace WAHUKidsLearn
                 Radius = 22
             };
             var listLayout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 3, Margin = new Padding(0) };
+            listLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
             listLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
             listLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
             listLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
@@ -514,7 +529,7 @@ namespace WAHUKidsLearn
             {
                 Dock = DockStyle.Fill,
                 WrapContents = false,
-                FlowDirection = FlowDirection.TopDown,
+                FlowDirection = FlowDirection.LeftToRight,
                 AutoScroll = false,
                 Padding = new Padding(8, 10, 8, 8)
             };
@@ -806,8 +821,13 @@ namespace WAHUKidsLearn
             }
             if (_checkpoints != null && !_checkpoints.IsDisposed)
             {
-                var checkpointWidth = Math.Max(300, _checkpoints.ClientSize.Width - _checkpoints.Padding.Horizontal - 20);
-                foreach (Control control in _checkpoints.Controls) control.Width = checkpointWidth;
+                var availableWidth = Math.Max(1, _checkpoints.ClientSize.Width - _checkpoints.Padding.Horizontal);
+                var checkpointWidth = Math.Max(100, (availableWidth - 24) / 3);
+                foreach (Control control in _checkpoints.Controls)
+                {
+                    control.Width = checkpointWidth;
+                    control.Height = 64;
+                }
             }
         }
 

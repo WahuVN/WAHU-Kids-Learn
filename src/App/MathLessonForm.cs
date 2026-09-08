@@ -110,6 +110,7 @@ namespace WAHUKidsLearn
                 RowCount = 6
             };
             var root = _rootLayout;
+            root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
             root.RowStyles.Add(new RowStyle(SizeType.Absolute, 58));
             root.RowStyles.Add(new RowStyle(SizeType.Absolute, 26));
             _questionRowStyle = new RowStyle(SizeType.Percent, 58);
@@ -121,6 +122,7 @@ namespace WAHUKidsLearn
             root.RowStyles.Add(new RowStyle(SizeType.Absolute, 68));
 
             var header = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, RowCount = 1 };
+            header.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
             header.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 156));
             header.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
             header.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 170));
@@ -196,6 +198,7 @@ namespace WAHUKidsLearn
                 Radius = 26
             };
             var questionLayout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 4 };
+            questionLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
             questionLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
             questionLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 68));
             questionLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
