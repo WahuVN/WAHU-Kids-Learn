@@ -2875,6 +2875,54 @@ VALUES(@child,@lesson,@skill,0,1,100,100,NULL,@utc,@utc);",
               "' AND lesson_id='" + prerequisite.Id + "' AND skill_id='M2_WRONG_PROGRESS_SKILL' AND started_count=1 AND completed_count=1;") == 1,
                 "lesson_progress_wrong_skill_fail_closed_preserves_raw_history");
 
+            Exec(database, @"UPDATE math_lesson_progress
+SET skill_id=@skill,started_count=1,completed_count=1,last_score_percent=80,best_score_percent=80,
+    last_started_at_utc=@utc,last_completed_at_utc='not-a-date',updated_at_utc=@utc
+WHERE child_id=@child AND lesson_id=@lesson;",
+                "@child", profile.ChildId, "@lesson", prerequisite.Id, "@skill", prerequisite.SkillId, "@utc", utc);
+            prerequisiteAccess = accessService.GetAccess(profile.ChildId, prerequisite.Id);
+            dependentAccess = accessService.GetAccess(profile.ChildId, dependent.Id);
+            A(!prerequisiteAccess.IsCompleted && prerequisiteAccess.CompletedCount == 0 &&
+              !prerequisiteAccess.LastScorePercent.HasValue && !prerequisiteAccess.BestScorePercent.HasValue &&
+              !dependentAccess.IsUnlocked,
+                "malformed_completion_timestamp_cannot_publish_completion_score_or_unlock");
+
+            Exec(database, @"UPDATE math_lesson_progress
+SET last_completed_at_utc=NULL WHERE child_id=@child AND lesson_id=@lesson;",
+                "@child", profile.ChildId, "@lesson", prerequisite.Id);
+            prerequisiteAccess = accessService.GetAccess(profile.ChildId, prerequisite.Id);
+            dependentAccess = accessService.GetAccess(profile.ChildId, dependent.Id);
+            A(!prerequisiteAccess.IsCompleted && prerequisiteAccess.CompletedCount == 0 && !dependentAccess.IsUnlocked,
+                "missing_completion_timestamp_cannot_publish_or_unlock_completion");
+
+            var latestStartUtc = DateTime.UtcNow.AddHours(-1);
+            var olderCompletionUtc = latestStartUtc.AddHours(-1);
+            Exec(database, @"UPDATE math_lesson_progress
+SET started_count=1,completed_count=1,last_started_at_utc=@started,last_completed_at_utc=@completed,updated_at_utc=@started
+WHERE child_id=@child AND lesson_id=@lesson;",
+                "@child", profile.ChildId, "@lesson", prerequisite.Id,
+                "@started", latestStartUtc.ToString("o", CultureInfo.InvariantCulture),
+                "@completed", olderCompletionUtc.ToString("o", CultureInfo.InvariantCulture));
+            prerequisiteAccess = accessService.GetAccess(profile.ChildId, prerequisite.Id);
+            dependentAccess = accessService.GetAccess(profile.ChildId, dependent.Id);
+            A(!prerequisiteAccess.IsCompleted && prerequisiteAccess.CompletedCount == 0 && !dependentAccess.IsUnlocked,
+                "equal_start_completion_counts_reject_completion_older_than_latest_start");
+
+            Exec(database, @"UPDATE math_lesson_progress
+SET started_count=2,completed_count=1,last_started_at_utc=@started,last_completed_at_utc=@completed,updated_at_utc=@started
+WHERE child_id=@child AND lesson_id=@lesson;",
+                "@child", profile.ChildId, "@lesson", prerequisite.Id,
+                "@started", latestStartUtc.ToString("o", CultureInfo.InvariantCulture),
+                "@completed", olderCompletionUtc.ToString("o", CultureInfo.InvariantCulture));
+            prerequisiteAccess = accessService.GetAccess(profile.ChildId, prerequisite.Id);
+            dependentAccess = accessService.GetAccess(profile.ChildId, dependent.Id);
+            A(prerequisiteAccess.IsCompleted && prerequisiteAccess.CompletedCount == 1 && dependentAccess.IsUnlocked,
+                "incomplete_replay_keeps_older_valid_completion_unlocked");
+
+            Exec(database, @"UPDATE math_lesson_progress
+SET started_count=1,completed_count=1,last_completed_at_utc='not-a-date'
+WHERE child_id=@child AND lesson_id=@lesson;",
+                "@child", profile.ChildId, "@lesson", prerequisite.Id);
             Exec(database, @"INSERT INTO child_skill(
 child_id,skill_id,subject,mastery_score,confidence,attempts_count,
 independent_success_count,hinted_success_count,transfer_success_count,last_seen_at_utc,
@@ -2965,6 +3013,57 @@ VALUES(@child,@lesson,'M2_WRONG_REAL_START_SKILL',1,1,40,95,@utc,@utc,@utc);",
                   !repairedWrongSkill.LastCompletedAtUtc.HasValue && started.LessonAccess != null && !started.LessonAccess.IsCompleted,
                     "wrong_skill_progress_real_start_repairs_identity_and_completion_evidence_atomically");
                 coordinator.Abort("wrong_skill_progress_real_start_cleanup");
+            }
+
+            var badTimeDatabase = NewDatabase(Path.Combine(root, "bad-time-progress-real-start.db"), schemaPath);
+            var badTimeProfile = new LearnerSessionService(badTimeDatabase).EnsurePrimaryChild("Bé bad time progress real start");
+            Exec(badTimeDatabase, @"INSERT INTO math_lesson_progress(
+child_id,lesson_id,skill_id,started_count,completed_count,last_score_percent,best_score_percent,last_started_at_utc,last_completed_at_utc,updated_at_utc)
+VALUES(@child,@lesson,@skill,1,1,30,90,@utc,'not-a-date',@utc);",
+                "@child", badTimeProfile.ChildId,
+                "@lesson", lesson.Id,
+                "@skill", lesson.SkillId,
+                "@utc", oldUtc);
+            using (var coordinator = new MathSessionCoordinator(badTimeDatabase, templatePath, "LOW", 9403, lesson.Id))
+            {
+                var started = coordinator.Start("Bé bad time progress real start");
+                var repairedBadTime = new MathLessonProgressStore(badTimeDatabase).LoadOne(badTimeProfile.ChildId, lesson.Id);
+                A(repairedBadTime != null && repairedBadTime.SkillId == lesson.SkillId &&
+                  repairedBadTime.StartedCount == 2 && repairedBadTime.CompletedCount == 0 &&
+                  !repairedBadTime.LastScorePercent.HasValue && !repairedBadTime.BestScorePercent.HasValue &&
+                  !repairedBadTime.LastCompletedAtUtc.HasValue && started.LessonAccess != null && !started.LessonAccess.IsCompleted,
+                    "bad_completion_timestamp_real_start_resets_untrusted_completion_evidence_atomically");
+                coordinator.Abort("bad_completion_timestamp_real_start_cleanup");
+            }
+
+            var staleScoreDatabase = NewDatabase(Path.Combine(root, "zero-completion-stale-score-real-start.db"), schemaPath);
+            var staleScoreProfile = new LearnerSessionService(staleScoreDatabase).EnsurePrimaryChild("Bé zero completion stale score");
+            Exec(staleScoreDatabase, @"INSERT INTO math_lesson_progress(
+child_id,lesson_id,skill_id,started_count,completed_count,last_score_percent,best_score_percent,last_started_at_utc,last_completed_at_utc,updated_at_utc)
+VALUES(@child,@lesson,@skill,1,0,30,100,@utc,@utc,@utc);",
+                "@child", staleScoreProfile.ChildId,
+                "@lesson", lesson.Id,
+                "@skill", lesson.SkillId,
+                "@utc", oldUtc);
+            using (var coordinator = new MathSessionCoordinator(staleScoreDatabase, templatePath, "LOW", 9404, lesson.Id))
+            {
+                var started = coordinator.Start("Bé zero completion stale score");
+                var afterStart = new MathLessonProgressStore(staleScoreDatabase).LoadOne(staleScoreProfile.ChildId, lesson.Id);
+                A(afterStart != null && afterStart.StartedCount == 2 && afterStart.CompletedCount == 0 &&
+                  !afterStart.LastScorePercent.HasValue && !afterStart.BestScorePercent.HasValue &&
+                  !afterStart.LastCompletedAtUtc.HasValue,
+                    "zero_completion_real_start_clears_stale_score_and_completion_metadata");
+                for (var ordinal = 0; ordinal < started.SelectedContentQuestionIds.Count; ordinal++)
+                {
+                    var question = coordinator.NextQuestion();
+                    coordinator.SubmitAnswerAt(ordinal == 0 ? WrongAnswer(question) : question.CorrectAnswerDisplay,
+                        0, "smoke", DateTime.UtcNow, 700 + ordinal * 100);
+                }
+                var completed = coordinator.Complete();
+                A(completed.LessonBestScorePercent.HasValue && completed.LessonScorePercent.HasValue &&
+                  Math.Abs(completed.LessonScorePercent.Value - (200.0 / 3.0)) < 0.0001 &&
+                  Math.Abs(completed.LessonBestScorePercent.Value - completed.LessonScorePercent.Value) < 0.0001,
+                    "zero_completion_stale_best_cannot_survive_real_completion");
             }
         }
 
