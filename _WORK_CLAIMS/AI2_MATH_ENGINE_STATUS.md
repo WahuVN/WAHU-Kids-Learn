@@ -20,7 +20,7 @@ Playable Event Engine P0: **GREEN**
 ## Tests
 
 - `tests/MathEngineRuntimeSmoke`: PASS — **72 assertions** (baseline equivalence + adversarial Unicode/NFD, int overflow, answer-length, unit alias, expression depth/token-bomb, Unicode operators và invalid per-question whitelist fail-closed).
-- `tests/MathDataEngineRuntimeSmoke`: PASS — **134 assertions** (idempotency + terminal-session guard + optimistic skill-state guard + true cross-process mastery/session contention + atomic startup + cross-process recovery/cleanup races + subject/child-scoped dangling recovery).
+- `tests/MathDataEngineRuntimeSmoke`: PASS — **138 assertions** (idempotency + terminal-session guard + optimistic skill-state guard + true cross-process mastery/session contention + atomic startup + cross-process recovery/cleanup races + subject/child-scoped dangling recovery).
 - `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **8145 assertions** (toàn bộ gate cũ + real 402-bank selector breadth + targeted write-failure/corruption repair + deterministic authored runtime IDs + concurrent pending-retry/completion semantics + generated/open-ordinal/timestamp self-heal + multi-runtime reconciliation + late-review transaction rollback + operational DB failure fail-safe).
 - Cross-gate `tests/ChildUiRuntimeSmoke`: **4477 assertions PASS** trên Visual Studio MSBuild/net48/x86 + executable trực tiếp; xác nhận Math Hub/Quick Rescue vẫn đúng sau progress integrity repair.
 - Pending-retry early complete: q2 wrong/pending retry rồi gọi `Complete()` bị reject nhưng `RetryPending`, checkpoint=1, exact q2 và reward=0 đều giữ nguyên; suspend/resume tiếp tục flow cũ.
@@ -141,6 +141,7 @@ Playable Event Engine P0: **GREEN**
 - schema V4: PASS — thêm `session_mode`, `target_lesson_id`, `math_lesson_progress`.
 - schema V5: PASS — thêm runtime `pack_id`/`pack_version`; migration backfill chỉ khi durable attempts có đúng một non-empty pack identity; mixed/blank history để unbound cho runtime quarantine; SQLite trigger cấm partial/blank pair; checksum/tamper/deployment payload gate đã có.
 - schema V6 (`ff31866`): PASS — `attempt_commit_key` được khóa append-only bằng trigger `ATTEMPT_COMMIT_KEY_IMMUTABLE`; V5→V6 tạo verified pre-migration backup, migration history/checksum V6 được verify và bootstrap/release payload đều yêu cầu schema 006. Checksum migration canonicalize LF/CRLF và vẫn chấp nhận known-equivalent V5 legacy checksum (`f81ae34`).
+- V5→V6 semantic-key preflight (`696fee5`): PASS — migration từ chối `attempt_commit_key` đã bị re-point sai `session_id/question_id/attempt_index` trước khi khóa V6; transaction giữ schema/history/trigger ở V5 và không tự rewrite lịch sử corrupt.
 - V1 → V6: PASS với pre-migration verified backup; migration history giữ đủ V1/V2/V3/V4/V5/V6.
 - V2 → V3 historical duplicate semantic attempt: PASS, không xóa lịch sử; key pin vào earliest committed attempt; các migration V4/V5/V6 apply bình thường.
 - session seed / target / generated ordinal / mode / targeted lesson id: PASS durable.
@@ -212,7 +213,7 @@ AI1/AI3 đang sửa song song content/Math Hub/UI trên cùng `main`. AI2 chỉ 
 ## Final AI2 gate
 
 - MathEngineRuntimeSmoke: **72 PASS**.
-- MathDataEngineRuntimeSmoke: **134 PASS** — race/idempotency/concurrency/recovery.
+- MathDataEngineRuntimeSmoke: **138 PASS** — race/idempotency/concurrency/recovery.
 - LearningSessionRuntimeSmoke: **800 PASS** — selector/generator fuzz.
 - SQLiteRuntimeSmoke: **184 PASS** — migration V1→V6, checksum canonical LF/CRLF, legacy V5 compatibility, backup/restore và schema tamper gate.
 - MathSessionPersistenceRuntimeSmoke: **8145 PASS** — current full persistence/event/corruption/concurrency gate.
