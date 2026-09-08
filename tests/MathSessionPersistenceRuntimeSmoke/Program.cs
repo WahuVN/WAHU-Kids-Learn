@@ -56,6 +56,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestTargetedCompletionRejectsCorruptPendingProgress(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedCompletionRequiresDurableRuntimeIdentity(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedCompletionRequiresDurableFinalizedOutcomes(root, schemaPath, templatePath, lessonCatalogPath);
+                TestTargetedCompletionRequiresSemanticCommitKeys(root, schemaPath, templatePath, lessonCatalogPath);
                 TestCorruptRuntimeMetadataIsQuarantined(root, schemaPath, templatePath);
                 TestMoreThanFourInvalidRuntimeSessionsAllRecover(root, schemaPath, templatePath);
                 TestMultipleValidActiveRuntimeSessionsKeepNewestOnly(root, schemaPath, templatePath);
@@ -4305,6 +4306,63 @@ FROM attempt WHERE id=@attempt;",
                 A(Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + started.SessionId + "';") == 1 &&
                   Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + started.SessionId + "';") == 3,
                     "restored_durable_finalized_outcomes_keep_reward_and_mastery_exactly_once");
+            }
+        }
+
+        private static void TestTargetedCompletionRequiresSemanticCommitKeys(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.Lessons.First(x => x.PrerequisiteSkills == null || x.PrerequisiteSkills.Count == 0);
+            var database = NewDatabase(Path.Combine(root, "targeted-completion-semantic-commit-key.db"), schemaPath);
+
+            using (var coordinator = new MathSessionCoordinator(database, templatePath, "LOW", 8070, lesson.Id))
+            {
+                var started = coordinator.Start("Bé semantic commit key completion");
+                for (var ordinal = 0; ordinal < 3; ordinal++)
+                {
+                    var question = coordinator.NextQuestion();
+                    coordinator.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 840 + ordinal * 100);
+                }
+                A(Count(database, "SELECT count(*) FROM attempt_commit_key WHERE session_id='" + started.SessionId + "';") == 3 &&
+                  Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + started.SessionId + "';") == 3,
+                    "semantic_commit_key_fixture_has_three_committed_finalized_outcomes");
+
+                var masteryId = ScalarText(database,
+                    "SELECT m.id FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + started.SessionId + "' ORDER BY m.created_at_utc ASC,m.id ASC LIMIT 1;");
+                var attemptId = ScalarText(database, "SELECT attempt_id FROM mastery_event WHERE id='" + masteryId + "';");
+                var fakeAttemptId = "attempt-no-semantic-key-" + Guid.NewGuid().ToString("N");
+                Exec(database, @"INSERT INTO attempt(
+id,session_id,child_id,pack_id,pack_version,question_id,skill_id,subject,started_at_utc,answered_at_utc,answer_json,is_correct,response_ms,hint_level,representation,input_method,attempt_index,listen_count)
+SELECT @fake,session_id,child_id,pack_id,pack_version,question_id,skill_id,subject,started_at_utc,answered_at_utc,answer_json,is_correct,response_ms,hint_level,representation,input_method,attempt_index,listen_count
+FROM attempt WHERE id=@attempt;",
+                    "@fake", fakeAttemptId, "@attempt", attemptId);
+                Exec(database, "UPDATE mastery_event SET attempt_id=@fake WHERE id=@id;", "@fake", fakeAttemptId, "@id", masteryId);
+                A(Count(database, "SELECT count(*) FROM attempt_commit_key WHERE attempt_id='" + fakeAttemptId + "';") == 0 &&
+                  Count(database, "SELECT count(*) FROM attempt_commit_key WHERE attempt_id='" + attemptId + "';") == 1,
+                    "semantic_commit_key_fixture_repoints_mastery_without_moving_authoritative_key");
+
+                Exception completionError = null;
+                try { coordinator.Complete(); } catch (Exception ex) { completionError = ex; }
+                A(completionError is InvalidOperationException && coordinator.IsActive &&
+                  SessionState(database, started.SessionId) == "active" &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + started.SessionId + "';") == 0,
+                    "mastery_without_matching_semantic_commit_key_cannot_terminalize_targeted_lesson");
+
+                Exec(database, "UPDATE mastery_event SET attempt_id=@attempt WHERE id=@id;", "@attempt", attemptId, "@id", masteryId);
+                Exec(database, "DELETE FROM attempt WHERE id=@fake;", "@fake", fakeAttemptId);
+                var completed = coordinator.Complete();
+                A(completed.LessonCompleted && !coordinator.IsActive && SessionState(database, started.SessionId) == "completed" &&
+                  Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + started.ChildId +
+                  "' AND lesson_id='" + lesson.Id + "' AND started_count=1 AND completed_count=1;") == 1,
+                    "restored_semantic_commit_key_chain_completes_exactly_once");
+                A(Count(database, "SELECT count(*) FROM attempt_commit_key WHERE session_id='" + started.SessionId + "';") == 3 &&
+                  Count(database, "SELECT count(*) FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id WHERE a.session_id='" + started.SessionId + "';") == 3 &&
+                  Count(database, "SELECT count(*) FROM reward_event WHERE source_ref='" + started.SessionId + "';") == 1,
+                    "restored_semantic_commit_key_chain_keeps_learning_and_reward_exactly_once");
             }
         }
 

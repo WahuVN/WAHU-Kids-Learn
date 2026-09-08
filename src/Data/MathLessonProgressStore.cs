@@ -156,9 +156,13 @@ WHERE id=@id AND child_id=@child AND planned_subject='math'
   )
   AND (SELECT COUNT(*)
        FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id
+       JOIN attempt_commit_key k ON k.attempt_id=a.id AND k.session_id=a.session_id
+         AND k.question_id=a.question_id AND k.attempt_index=a.attempt_index
        WHERE a.session_id=@id AND a.subject='math' AND a.answered_at_utc IS NOT NULL) = @attempts
   AND (SELECT COUNT(DISTINCT a.question_id)
        FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id
+       JOIN attempt_commit_key k ON k.attempt_id=a.id AND k.session_id=a.session_id
+         AND k.question_id=a.question_id AND k.attempt_index=a.attempt_index
        WHERE a.session_id=@id AND a.child_id=@child AND a.subject='math'
          AND a.answered_at_utc IS NOT NULL AND a.attempt_index BETWEEN 1 AND 2
          AND a.pack_id=@packId AND a.pack_version=@packVersion
