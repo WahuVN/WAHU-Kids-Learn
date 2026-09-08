@@ -103,7 +103,7 @@ namespace WAHU.Session
         {
             MathLessonProgressRecord own;
             progress.TryGetValue(lesson.Id, out own);
-            var ownCompletedCount = EffectiveCompletedCount(own);
+            var ownCompletedCount = EffectiveCompletedCount(own, lesson.SkillId);
             var prerequisiteLessonIds = new List<string>();
             var unsatisfied = new List<string>();
             foreach (var prerequisiteSkill in lesson.PrerequisiteSkills ?? new List<string>())
@@ -116,7 +116,7 @@ namespace WAHU.Session
                 MathLessonProgressRecord prerequisiteProgress;
                 SkillSnapshot prerequisiteMastery;
                 var completed = progress.TryGetValue(prerequisiteLesson.Id, out prerequisiteProgress) &&
-                                EffectiveCompletedCount(prerequisiteProgress) > 0;
+                                EffectiveCompletedCount(prerequisiteProgress, prerequisiteLesson.SkillId) > 0;
                 var stableLegacyMastery = skills.TryGetValue(prerequisiteSkill, out prerequisiteMastery) &&
                                           prerequisiteMastery != null &&
                                           string.Equals(prerequisiteMastery.LearningState, "STABLE", StringComparison.OrdinalIgnoreCase);
@@ -139,9 +139,10 @@ namespace WAHU.Session
             };
         }
 
-        private static int EffectiveCompletedCount(MathLessonProgressRecord progress)
+        private static int EffectiveCompletedCount(MathLessonProgressRecord progress, string expectedSkillId)
         {
             if (progress == null || progress.CompletedCount <= 0) return 0;
+            if (!string.Equals(progress.SkillId, expectedSkillId, StringComparison.Ordinal)) return 0;
             if (progress.StartedCount <= 0 || progress.CompletedCount > progress.StartedCount) return 0;
             return progress.CompletedCount;
         }
