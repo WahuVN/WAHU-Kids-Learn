@@ -2,8 +2,8 @@
 
 Updated: 2026-09-08
 LAST_FULLY_VERIFIED_HEAD=`afb302f`
-LATEST_UI_VERIFIED_HEAD=`afb302f`
-LATEST_PERSISTENCE_VERIFIED_HEAD=`afb302f`
+LATEST_UI_VERIFIED_HEAD=`8360d44`
+LATEST_PERSISTENCE_VERIFIED_HEAD=`8360d44`
 MATH_3AI_DONE=YES
 AI3_LANE_DONE=YES
 PLAYABLE_FIRST_FIVE_P0=GREEN
@@ -12,6 +12,8 @@ PLAYABLE_INSTALLER_E2E=BLOCKED_SAFETY_UNOWNED_LOCAL_DATA
 Definition: trạng thái dưới đây dùng strict three-lane Math Definition of Done, không lấy việc “mở được màn hình” làm DONE.
 
 **CURRENT RELEASE AUTHORITY — `afb302f / 0.1.92-dev`: GREEN.** Full Build-Setup **15/15 PASS**; Child UI **4477**; deterministic real-state offscreen capture **12 PNG / 4529**; persistence **8145**; SQLite **181**; production art **74/74**; Portable E2E PASS; installer compile PASS; Portable All-in-One E2E PASS với official Microsoft .NET Framework 4.8 offline redistributable. GitHub prerelease `v0.1.92-dev` và `update-dev` feed đã publish. Installed-mode Installer E2E vẫn `BLOCKED_SAFETY_UNOWNED_LOCAL_DATA`; production signing và real Win7 target smoke vẫn external.
+
+**POST-RELEASE SCHEMA V6 QA — `8360d44`: GREEN.** SQLite **184 PASS**, persistence **8145 PASS** (0 warning / 0 error), Learning **800 PASS**, Child UI **4477 PASS**, offscreen **12 PNG / 4529 PASS**, Performance **13 PASS**, Motion **25 PASS**, `git diff --check` PASS. Đây là latest source QA; không đổi provenance/tag của published `0.1.92-dev` tại `afb302f`.
 
 ## Playable Event V1 — current
 

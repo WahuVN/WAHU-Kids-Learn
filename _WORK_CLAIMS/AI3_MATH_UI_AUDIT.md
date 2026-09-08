@@ -3,18 +3,18 @@
 Updated: 2026-09-08
 Owner: AI3
 Last fully verified release HEAD: `afb302f`
-Latest UI/performance verified HEAD: `afb302f`
-Latest persistence verified HEAD: `afb302f`
+Latest UI/performance verified HEAD: `8360d44`
+Latest persistence verified HEAD: `8360d44`
 Status: `LANE_DONE=YES`; `PLAYABLE_UI_P0=GREEN`; `INSTALLER_E2E=BLOCKED_SAFETY_UNOWNED_LOCAL_DATA`
 
-**Current release authority:** `afb302f / 0.1.92-dev` — Build-Setup **15/15 PASS**, Child UI **4477**, offscreen real-state capture **12 PNG / 4529**, persistence **8145**, SQLite **181**, production art **74/74**, Portable E2E PASS, installer compile PASS, and Portable All-in-One E2E PASS with verified Microsoft .NET Framework 4.8 offline runtime. GitHub prerelease `v0.1.92-dev` and `update-dev` feed are published. Installed-mode Installer E2E remains safety-blocked before touching real learner data. Older release-specific sections below are retained as historical audit evidence.
+**Current release authority:** `afb302f / 0.1.92-dev` — Build-Setup **15/15 PASS**, Child UI **4477**, offscreen real-state capture **12 PNG / 4529**, persistence **8145**, SQLite **181**, production art **74/74**, Portable E2E PASS, installer compile PASS, and Portable All-in-One E2E PASS with verified Microsoft .NET Framework 4.8 offline runtime. GitHub prerelease `v0.1.92-dev` and `update-dev` feed are published. Installed-mode Installer E2E remains safety-blocked before touching real learner data. **Post-release schema V6 QA on `8360d44` is GREEN:** SQLite **184**, persistence **8145**, Learning **800**, Child UI **4477**, capture **12/4529**, Performance **13**, Motion **25**; this does not change the `0.1.92` release provenance. Older release-specific sections below are retained as historical audit evidence.
 
 ## PLAYABLE EVENT V1 — current evidence
 
 - Post-closure visual wave `468dd55` adds richer Home/Hub/lesson/rescue cards and button depth, procedural rescue hero/feedback/Garden art, improved typed-answer surface and child-facing completion feedback. Runtime/session/content semantics were not changed.
 - Motion hardening `af48f89` binds the new art to the existing performance contract: LOW decorative motion stays off, NORMAL respects its FPS cap, and learning-focus feedback stays static. `a0344f4` tracks the parent visibility hierarchy; `dcf844b` additionally closes detach/re-attach lifecycle so controls removed from the visual tree stop animation timers and resume only after being attached again, with subscriptions still disposed cleanly.
 - Integration intentionally retained the newer remote accessibility/lifecycle guards: locked rescue missions stay keyboard-focusable for prerequisite explanation, Enter/Esc remain wired, exact resume and failure-safe status remain intact, and 900×640 plus 125% DPI regressions still pass.
-- Latest QA gate on `afb302f`: Child UI **4477 assertions PASS**, Math persistence **8145 assertions PASS**, SQLite **181 assertions PASS**, build **0 warning / 0 error**, `git diff --check` PASS. Offscreen real-state capture is verified on release head `afb302f` at **12 PNG / 4529 assertions PASS**; Performance **13** and Motion **25** are green in the `0.1.92-dev` full release. Full Build-Setup release gate is `afb302f`.
+- Latest QA gate on `8360d44`: Child UI **4477 assertions PASS**, Math persistence **8145 assertions PASS**, SQLite **184 assertions PASS**, Learning **800 assertions PASS**, build **0 warning / 0 error**, `git diff --check` PASS. Offscreen real-state capture is **12 PNG / 4529 assertions PASS**; Performance **13** and Motion **25** are green. Full published Build-Setup release gate remains exact `afb302f / 0.1.92-dev`.
 - Production art V1 `33b7b6c`: **74/74 PNG SHA-256 khớp manifest**, **61 transparent + 13 opaque**; Rescue Hero, feedback đúng/thử lại/gợi ý và Garden completion ưu tiên production assets, có procedural fallback an toàn. Manifest SHA `6BD7172D8B7D0239960207B5A43C2CAE466220421F88D6D7C57215005BC1D8A6`.
 - Mission illustration wave `426a514`: intro shell maps `forest_path / hundred_station / number_path / place_value_workshop / number_machine` to production `mission_13…17`; locked selection also updates the preview, the control stays static, accessibility names the selected mission, and fallback remains fail-safe. Regression adds 19 assertions: Child UI **3769 PASS**, offscreen capture **10 PNG / 3800 PASS**.
 
@@ -44,14 +44,14 @@ Status: `LANE_DONE=YES`; `PLAYABLE_UI_P0=GREEN`; `INSTALLER_E2E=BLOCKED_SAFETY_U
 - Completion transaction hardening `537da25` only consumes a trusted pending progress slot; corruption introduced immediately before completion is rejected atomically. `ace02d6` extends trusted historical-best/convergence evidence and proves corruption injected **after resume reconciliation** cannot terminalize the session: completion rolls back, next resume repairs the slot, retry completes exactly once and stale best does not survive.
 - Durable-runtime identity hardening `2f0f3e4` requires the active runtime to still match Math subject, target lesson and target question count before terminalization; tampered or missing runtime fails closed without reward. `c89378e` extends the same transactional guard to canonical `pack_id + pack_version`. Common-head `330bb15` verifies the combined chain at **8124 persistence assertions PASS** and full `0.1.83-dev` release gate PASS.
 - Gameplay rescue đã được scale 125% trong chính active session: prompt vẫn fit từ 12pt trở lên, checkpoint/break target giữ kích thước thao tác và wrong→retry→hint→suspend vẫn chạy sau scale.
-- Latest UI/performance/persistence on `afb302f`: Child UI **4477 assertions PASS**, offscreen capture **12 PNG / 4529 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, persistence **8145 assertions PASS**, SQLite **181 assertions PASS**. Most recent Math content/event/pool remains **90/90 PASS**; asset integration did not change authored content.
+- Latest UI/performance/persistence on `8360d44`: Child UI **4477 assertions PASS**, offscreen capture **12 PNG / 4529 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, persistence **8145 assertions PASS**, SQLite **184 assertions PASS**, Learning **800 assertions PASS**. Most recent Math content/event/pool remains **90/90 PASS**; schema V6 did not change authored content.
 - `0.1.92-dev`: Build-Setup **15/15 PASS** + provenance/content/persistence/production-art/Portable/post-installer gates, installer compile **PASS**, Portable All-in-One E2E **PASS**; publish payload contains **74/74 SHA-verified production PNG** plus `game_events_v1.json` SHA `F9F25EA94DA7FCD20E360509EE53E6E758039CCF788FAFEC729A35F80D39A8B1`.
 - Full Installer E2E hiện **BLOCKED_SAFETY** vì `%LOCALAPPDATA%\WAHU Kids Learn` đã tồn tại nhưng không có `.wahu-e2e-owned`; safety probe từ chối trước khi tạo/xóa test data, không được xóa/ghi đè cây dữ liệu này để ép test qua.
 - Production signing và real Windows 7 validation vẫn `UNAVAILABLE/PENDING`.
 
 ## 1. Kết luận
 
-AI3 Math UI/QA/integration lane đã hoàn tất playable P0/P1 cho 5 bài đầu và đạt STOP RULE. Latest full release gate chạy trên clean HEAD `afb302f` với artifact `0.1.92-dev`; latest common-head QA là `afb302f`; lane giữ `LANE_DONE=YES`.
+AI3 Math UI/QA/integration lane đã hoàn tất playable P0/P1 cho 5 bài đầu và đạt STOP RULE. Latest full release gate chạy trên clean HEAD `afb302f` với artifact `0.1.92-dev`; latest post-release common-head QA là `8360d44`; lane giữ `LANE_DONE=YES`.
 
 Current evidence:
 
@@ -60,7 +60,7 @@ Current evidence:
 - production Math validator: **402/402 valid**;
 - full Math content/event/pool suite: **90/90 PASS**;
 - difficulty distribution: **134 basic / 134 medium / 134 application**;
-- Math persistence latest: **8145 assertions PASS** on `afb302f`, build **0 warning / 0 error**. Release Build-Setup `10b/15` on `afb302f` ghi **8145 assertions PASS**; SQLite **181**, Performance **13**, Motion **25**, Child UI **4477**, và offscreen capture **12 PNG / 4529 assertions PASS** đều xanh trên release evidence `0.1.92-dev`.
+- Math persistence latest: **8145 assertions PASS** on `8360d44`, build **0 warning / 0 error**. Post-release V6 QA trên `8360d44` có SQLite **184**, Performance **13**, Motion **25**, Child UI **4477**, Learning **800** và offscreen capture **12 PNG / 4529 assertions PASS**; full release Build-Setup `0.1.92-dev` vẫn là exact `afb302f`.
 - full Build-Setup `0.1.92-dev`: **15/15 PASS**, provenance + validator + 90-suite + persistence + production-art 74/74 + extracted Portable asset validation + Portable E2E + installer + Portable All-in-One E2E + post-installer provenance recorded in release manifest;
 - Portable E2E: **PASS**;
 - Installer compile: **PASS**; full installer E2E **BLOCKED_SAFETY** trên máy hiện tại.

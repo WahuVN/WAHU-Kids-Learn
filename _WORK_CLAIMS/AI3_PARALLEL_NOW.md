@@ -12,11 +12,11 @@ EXECUTION_MODE=PLAYABLE_EVENT_UI_NO_WAIT
 ACTIVE_PHASE=PLAYABLE_EVENT_GAME_V1
 ACTIVE_FOCUS=FIRST_FIVE_QUICK_RESCUE_UI_E2E_RELEASE
 LAST_FULLY_VERIFIED_HEAD=`afb302f`
-LATEST_UI_VERIFIED_HEAD=`afb302f`
-LATEST_PERSISTENCE_VERIFIED_HEAD=`afb302f`
+LATEST_UI_VERIFIED_HEAD=`8360d44`
+LATEST_PERSISTENCE_VERIFIED_HEAD=`8360d44`
 LAST_VERIFIED_CHILD_UI=4477_ASSERTIONS_PASS
 LAST_VERIFIED_PERSISTENCE=8145_ASSERTIONS_PASS
-LATEST_OFFSCREEN_CAPTURE_HEAD=`afb302f`
+LATEST_OFFSCREEN_CAPTURE_HEAD=`8360d44`
 LAST_VERIFIED_OFFSCREEN_CAPTURE=12_PNG_4529_ASSERTIONS_PASS
 LAST_VERIFIED_CONTENT=90_OF_90_PASS
 LAST_VERIFIED_RELEASE=`0.1.92-dev`_POST_INSTALLER_PROVENANCE_CONTENT_90_PERSISTENCE_8145_UI_4477_CAPTURE_4529_SQLITE_181_PRODUCTION_ART_74_PORTABLE_E2E_INSTALLER_ALL_IN_ONE_E2E_PASS
@@ -39,14 +39,20 @@ EARLY_LESSON_DEEP_VALIDATOR=402_OF_402_VALID
 
 Các mốc release/head cũ phía dưới được giữ làm historical audit snapshot.
 
+## POST-RELEASE SCHEMA V6 QA — `8360d44`
+
+- `ff31866` + `64408e5` + `f81ae34` nâng database lên schema V6 và khóa `attempt_commit_key` immutability; `36a84e8` giới hạn maximize cho learner window có owner.
+- Exact common-head QA trên detached clean `8360d44`: SQLite **184 PASS**, Math persistence **8145 PASS** (build **0 warning / 0 error**), Learning **800 PASS**, Child UI **4477 PASS**, offscreen **12 PNG / 4529 PASS**, Performance **13 PASS**, Motion **25 PASS**, `git diff --check` PASS.
+- Đây là post-release source QA, **không** thay đổi provenance của published `v0.1.92-dev`; full release authority vẫn là exact `afb302f / 0.1.92-dev`.
+
 ## PLAYABLE EVENT V1 OVERRIDE
 
 ### Post-closure visual integration — 2026-09-08
 
-- `468dd55` landed the visual polish; `af48f89` then bound game-art motion to the existing performance policy. Latest common-head QA evidence is `afb302f`; latest full release evidence is `afb302f / 0.1.92-dev`.
+- `468dd55` landed the visual polish; `af48f89` then bound game-art motion to the existing performance policy. Latest common-head QA evidence is `8360d44`; latest full release evidence remains `afb302f / 0.1.92-dev`.
 - Home/Hub/lesson/rescue use richer child cards, raised action states, mission/checkpoint styling, procedural rescue hero art, feedback FX and Garden completion art without changing grading/session semantics.
 - LOW keeps decorative game art static; NORMAL respects the configured FPS cap and disables decorative feedback during learning focus; `a0344f4` makes timers follow the parent visibility hierarchy, and `dcf844b` closes the detach/re-attach lifecycle so a control removed from the visual tree stops its timer and resumes safely only after being attached again. The visual integration still preserves focusable locked missions, exact prerequisite narration, Enter/Esc actions, 900×640 and 125% DPI regressions, resume/retry/failure safety and terminal completion behavior.
-- Verification on `afb302f`: Child UI **4477 assertions PASS**, offscreen capture **12 PNG / 4529 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, Math persistence **8145 assertions PASS**, SQLite **181 assertions PASS**, `git diff --check` PASS.
+- Verification on `8360d44`: Child UI **4477 assertions PASS**, offscreen capture **12 PNG / 4529 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, Math persistence **8145 assertions PASS**, SQLite **184 assertions PASS**, Learning **800 assertions PASS**, `git diff --check` PASS.
 - Production art V1 `33b7b6c`: **74/74 PNG SHA-256 khớp manifest**, gồm **61 transparent + 13 opaque**; Rescue Hero, feedback đúng/thử lại/gợi ý và Garden completion ưu tiên asset thật, vẫn giữ procedural fallback khi asset thiếu/hỏng. Manifest SHA `6BD7172D8B7D0239960207B5A43C2CAE466220421F88D6D7C57215005BC1D8A6`.
 - Mission illustration integration `426a514`: 5 production rescue themes render their own `mission_13`→`mission_17` art in the intro shell, including locked-selection preview; artwork is static, accessibility follows the selected mission, and fallback is mission-map → rescue background → procedural art. Child UI **3769 PASS**; offscreen capture **10 PNG / 3800 PASS**.
 - Release-full evidence is now `afb302f` / `0.1.92-dev`: full Build-Setup **15/15 PASS** on the same clean head with Child UI **4477**, persistence **8145**, SQLite **181**, offscreen capture **12 PNG / 4529**, Performance **13**, Motion **25**, production assets **74/74 SHA-verified** across source/app-output/publish/portable-tree/portable-ZIP/extracted-Portable-E2E, Portable E2E PASS, installer compile PASS, Portable All-in-One E2E PASS and post-installer provenance PASS.
