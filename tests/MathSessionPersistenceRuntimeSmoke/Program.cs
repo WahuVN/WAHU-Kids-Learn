@@ -2863,6 +2863,18 @@ VALUES(@child,@lesson,@skill,0,1,100,100,NULL,@utc,@utc);",
               "' AND lesson_id='" + prerequisite.Id + "' AND started_count=1 AND completed_count=2;") == 1,
                 "completed_above_started_guard_preserves_raw_history");
 
+            Exec(database, "UPDATE math_lesson_progress SET started_count=1,completed_count=1,skill_id='M2_WRONG_PROGRESS_SKILL' WHERE child_id=@child AND lesson_id=@lesson;",
+                "@child", profile.ChildId, "@lesson", prerequisite.Id);
+            prerequisiteAccess = accessService.GetAccess(profile.ChildId, prerequisite.Id);
+            dependentAccess = accessService.GetAccess(profile.ChildId, dependent.Id);
+            A(!prerequisiteAccess.IsCompleted && prerequisiteAccess.CompletedCount == 0,
+                "lesson_progress_wrong_skill_is_not_exposed_as_completion");
+            A(!dependentAccess.IsUnlocked && dependentAccess.UnsatisfiedPrerequisiteLessonIds.Contains(prerequisite.Id),
+                "lesson_progress_wrong_skill_cannot_unlock_prerequisite_edge");
+            A(Count(database, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + profile.ChildId +
+              "' AND lesson_id='" + prerequisite.Id + "' AND skill_id='M2_WRONG_PROGRESS_SKILL' AND started_count=1 AND completed_count=1;") == 1,
+                "lesson_progress_wrong_skill_fail_closed_preserves_raw_history");
+
             Exec(database, @"INSERT INTO child_skill(
 child_id,skill_id,subject,mastery_score,confidence,attempts_count,
 independent_success_count,hinted_success_count,transfer_success_count,last_seen_at_utc,
@@ -2934,6 +2946,26 @@ VALUES(@child,@lesson,@skill,1,2,25,100,@utc,@utc,@utc);",
                 "impossible_progress_real_completion_restarts_completion_history_from_durable_evidence");
             A(SessionState(database, sessionId) == "completed",
                 "impossible_progress_real_completion_terminalizes_repaired_session_normally");
+
+            var wrongSkillDatabase = NewDatabase(Path.Combine(root, "wrong-skill-progress-real-start.db"), schemaPath);
+            var wrongSkillProfile = new LearnerSessionService(wrongSkillDatabase).EnsurePrimaryChild("Bé wrong skill progress real start");
+            Exec(wrongSkillDatabase, @"INSERT INTO math_lesson_progress(
+child_id,lesson_id,skill_id,started_count,completed_count,last_score_percent,best_score_percent,last_started_at_utc,last_completed_at_utc,updated_at_utc)
+VALUES(@child,@lesson,'M2_WRONG_REAL_START_SKILL',1,1,40,95,@utc,@utc,@utc);",
+                "@child", wrongSkillProfile.ChildId,
+                "@lesson", lesson.Id,
+                "@utc", oldUtc);
+            using (var coordinator = new MathSessionCoordinator(wrongSkillDatabase, templatePath, "LOW", 9402, lesson.Id))
+            {
+                var started = coordinator.Start("Bé wrong skill progress real start");
+                var repairedWrongSkill = new MathLessonProgressStore(wrongSkillDatabase).LoadOne(wrongSkillProfile.ChildId, lesson.Id);
+                A(repairedWrongSkill != null && repairedWrongSkill.SkillId == lesson.SkillId &&
+                  repairedWrongSkill.StartedCount == 2 && repairedWrongSkill.CompletedCount == 0 &&
+                  !repairedWrongSkill.LastScorePercent.HasValue && !repairedWrongSkill.BestScorePercent.HasValue &&
+                  !repairedWrongSkill.LastCompletedAtUtc.HasValue && started.LessonAccess != null && !started.LessonAccess.IsCompleted,
+                    "wrong_skill_progress_real_start_repairs_identity_and_completion_evidence_atomically");
+                coordinator.Abort("wrong_skill_progress_real_start_cleanup");
+            }
         }
 
         private static void TestFirstFiveLessonsGoldenPath(string root, string schemaPath, string templatePath, string lessonCatalogPath)
