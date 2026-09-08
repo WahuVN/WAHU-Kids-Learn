@@ -381,6 +381,7 @@ $manifest = [ordered]@{
         manifest = 'Assets\Generated\Ready\ASSET_SELECTION_MANIFEST.json'
         manifest_sha256 = $productionAssetManifestSha256
         portable_verified = $true
+        portable_extracted_e2e_verified = $true
     }
     gates = [ordered]@{
         preflight_smoke = 'PASS'
@@ -420,6 +421,7 @@ $manifest = [ordered]@{
         production_asset_manifest_sha256 = $productionAssetManifestSha256
         portable_production_asset_tree = 'PASS'
         portable_production_asset_zip = 'PASS'
+        portable_e2e_production_art_extracted = 'PASS'
         source_provenance = 'PASS'
         source_tree_clean = 'PASS'
         source_commit_stable = 'PASS'
