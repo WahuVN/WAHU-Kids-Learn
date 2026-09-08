@@ -2,7 +2,7 @@
 
 Updated: 2026-09-08
 Owner: AI3
-Last fully verified release HEAD: `b45dc56`
+Last fully verified release HEAD: `330bb15`
 Latest UI/performance verified HEAD: `3ec4b86`
 Latest persistence verified HEAD: `3ec4b86`
 Status: `LANE_DONE=YES`; `PLAYABLE_UI_P0=GREEN`; `INSTALLER_E2E=BLOCKED_SAFETY_UNOWNED_LOCAL_DATA`
@@ -12,8 +12,7 @@ Status: `LANE_DONE=YES`; `PLAYABLE_UI_P0=GREEN`; `INSTALLER_E2E=BLOCKED_SAFETY_U
 - Post-closure visual wave `468dd55` adds richer Home/Hub/lesson/rescue cards and button depth, procedural rescue hero/feedback/Garden art, improved typed-answer surface and child-facing completion feedback. Runtime/session/content semantics were not changed.
 - Motion hardening `af48f89` binds the new art to the existing performance contract: LOW decorative motion stays off, NORMAL respects its FPS cap, and learning-focus feedback stays static. `a0344f4` tracks the parent visibility hierarchy; `dcf844b` additionally closes detach/re-attach lifecycle so controls removed from the visual tree stop animation timers and resume only after being attached again, with subscriptions still disposed cleanly.
 - Integration intentionally retained the newer remote accessibility/lifecycle guards: locked rescue missions stay keyboard-focusable for prerequisite explanation, Enter/Esc remain wired, exact resume and failure-safe status remain intact, and 900×640 plus 125% DPI regressions still pass.
-- Latest QA gate on `3ec4b86`: Child UI **3750 assertions PASS**, offscreen capture **10 PNG / 3781 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, Math persistence **8124 assertions PASS**, `git diff --check` PASS. Full Build-Setup release gate remains `b45dc56`.
-- Production art V1 `33b7b6c`: **74/74 PNG SHA-256 khớp manifest**, **61 transparent + 13 opaque**; Rescue Hero, feedback đúng/thử lại/gợi ý và Garden completion ưu tiên production assets, có procedural fallback an toàn. Manifest SHA `6BD7172D8B7D0239960207B5A43C2CAE466220421F88D6D7C57215005BC1D8A6`.
+- Latest QA gate on `3ec4b86`: Child UI **3750 assertions PASS**, offscreen capture **10 PNG / 3781 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, Math persistence **8124 assertions PASS**, `git diff --check` PASS. Full Build-Setup release gate remains `330bb15`.`r`n- Production art V1 `33b7b6c`: **74/74 PNG SHA-256 khớp manifest**, **61 transparent + 13 opaque**; Rescue Hero, feedback đúng/thử lại/gợi ý và Garden completion ưu tiên production assets, có procedural fallback an toàn. Manifest SHA `6BD7172D8B7D0239960207B5A43C2CAE466220421F88D6D7C57215005BC1D8A6`.
 
 - Home/Math Hub có entry **Toán nhanh — Nhiệm vụ cứu hộ**; 5 event production cho 5 bài đầu.
 - Flow UI E2E khóa: intro → 3 checkpoint → cố tình sai → repair/hint → suspend khi retry pending → resume exact event/session/open question → hoàn thành → Garden tăng đúng 1 lần.
@@ -38,15 +37,17 @@ Status: `LANE_DONE=YES`; `PLAYABLE_UI_P0=GREEN`; `INSTALLER_E2E=BLOCKED_SAFETY_U
 - Garden consistency `1c4ce9e` derive milestone/visual từ canonical reward count, bỏ raw inventory trust và reconcile stale/missing milestone inventory; partial reward outage không thể mở mốc tương lai sớm.
 - Progress chronology/score `d6002a9` rejects malformed/missing/inverted completion chronology, skill/count mismatch and stale score-only evidence; effective completion/score therefore fail closed and fresh start repairs untrusted metadata.
 - UI/rescue regression `b45dc56` injects malformed completion timestamp into bài 1 and verifies Hub hides false completion/scores, bài 2 stays locked, rescue #2 remains focusable for prerequisite narration but cannot start.
+- Completion transaction hardening `537da25` only consumes a trusted pending progress slot; corruption introduced immediately before completion is rejected atomically. `ace02d6` extends trusted historical-best/convergence evidence and proves corruption injected **after resume reconciliation** cannot terminalize the session: completion rolls back, next resume repairs the slot, retry completes exactly once and stale best does not survive.
+- Durable-runtime identity hardening `2f0f3e4` requires the active runtime to still match Math subject, target lesson and target question count before terminalization; tampered or missing runtime fails closed without reward. `c89378e` extends the same transactional guard to canonical `pack_id + pack_version`. Common-head `330bb15` verifies the combined chain at **8124 persistence assertions PASS** and full `0.1.83-dev` release gate PASS.
 - Gameplay rescue đã được scale 125% trong chính active session: prompt vẫn fit từ 12pt trở lên, checkpoint/break target giữ kích thước thao tác và wrong→retry→hint→suspend vẫn chạy sau scale.
-- Latest UI/performance/persistence on `3ec4b86`: Child UI **3750 assertions PASS**, offscreen capture **10 PNG / 3781 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, persistence **8124 assertions PASS**. Most recent Math content/event/pool suite remains **90/90 PASS** with no authored content changes from the asset wave.
-- `0.1.80-dev`: Build-Setup **15/15 PASS** + provenance/content/persistence/Portable/post-installer gates, installer compile **PASS**; publish payload chứa `game_events_v1.json` SHA `F9F25EA94DA7FCD20E360509EE53E6E758039CCF788FAFEC729A35F80D39A8B1`.
-- Full Installer E2E hiện **BLOCKED_SAFETY** vì `%LOCALAPPDATA%\WAHU Kids Learn\data\learning.db` tồn tại nhưng không có `.wahu-e2e-owned`; không được xóa/ghi đè dữ liệu này để ép test qua.
+- Latest UI/performance/persistence on `3ec4b86`: Child UI **3750 assertions PASS**, offscreen capture **10 PNG / 3781 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, persistence **8124 assertions PASS**. Most recent Math content/event/pool remains **90/90 PASS**; asset integration did not change authored content.
+- `0.1.83-dev`: Build-Setup **15/15 PASS** + provenance/content/persistence/Portable/post-installer gates, installer compile **PASS**; publish payload chứa `game_events_v1.json` SHA `F9F25EA94DA7FCD20E360509EE53E6E758039CCF788FAFEC729A35F80D39A8B1`.
+- Full Installer E2E hiện **BLOCKED_SAFETY** vì `%LOCALAPPDATA%\WAHU Kids Learn` đã tồn tại nhưng không có `.wahu-e2e-owned`; safety probe từ chối trước khi tạo/xóa test data, không được xóa/ghi đè cây dữ liệu này để ép test qua.
 - Production signing và real Windows 7 validation vẫn `UNAVAILABLE/PENDING`.
 
 ## 1. Kết luận
 
-AI3 Math UI/QA/integration lane đã hoàn tất playable P0/P1 cho 5 bài đầu và đạt STOP RULE. Latest full release gate chạy trên clean common HEAD `b45dc56` với artifact `0.1.80-dev`; lane giữ `LANE_DONE=YES`.
+AI3 Math UI/QA/integration lane đã hoàn tất playable P0/P1 cho 5 bài đầu và đạt STOP RULE. Latest full release gate chạy trên clean common HEAD `330bb15` với artifact `0.1.83-dev`; lane giữ `LANE_DONE=YES`.
 
 Current evidence:
 
@@ -55,8 +56,8 @@ Current evidence:
 - production Math validator: **402/402 valid**;
 - full Math content/event/pool suite: **90/90 PASS**;
 - difficulty distribution: **134 basic / 134 medium / 134 application**;
-- Math persistence latest: **8124 assertions PASS** on `3ec4b86`; Performance **13 assertions PASS** and Motion **25 assertions PASS** on the same QA head; offscreen UI capture **10 PNG / 3781 assertions PASS**. Release Build-Setup `10b/15` on `b45dc56` vẫn ghi **8053 assertions PASS** với build **0 warning / 0 error**.
-- full Build-Setup `0.1.80-dev`: **15/15 PASS**, provenance + validator + 90-suite + persistence + Portable E2E + post-installer provenance recorded in release manifest;
+- Math persistence latest: **8124 assertions PASS** on `3ec4b86`; Performance **13 assertions PASS** and Motion **25 assertions PASS** on the same QA head; offscreen UI capture **10 PNG / 3781 assertions PASS**. Release Build-Setup `10b/15` on `330bb15` ghi **8124 assertions PASS** với build **0 warning / 0 error**.
+- full Build-Setup `0.1.83-dev`: **15/15 PASS**, provenance + validator + 90-suite + persistence + Portable E2E + post-installer provenance recorded in release manifest;
 - Portable E2E: **PASS**;
 - Installer compile: **PASS**; full installer E2E **BLOCKED_SAFETY** trên máy hiện tại.
 
@@ -224,20 +225,20 @@ Installer E2E:
 
 ## 10. Latest full cross-lane gate
 
-All on clean `b45dc56`:
+All on clean `330bb15`:
 
 - source provenance start / post-Portable / post-installer: **PASS**; dirty-source negative probe: **PASS** (`REFUSE_DIRTY_SOURCE`);
 - Learning session: **800 assertions PASS**; Child UI: **3743 assertions PASS**;
 - production validator: **402/402 valid**, game events **5/5**;
 - full Math content/event/pool suite: **90/90 PASS**;
-- `MathSessionPersistenceRuntimeSmoke`: **8053 assertions PASS**; Build-Setup `10b/15` build **0 warning / 0 error**;
+- `MathSessionPersistenceRuntimeSmoke`: **8124 assertions PASS**; Build-Setup `10b/15` build **0 warning / 0 error**;
 - Garden exact milestones 1/3/6/10, durable-child eligibility, stale canonical reward repair, partial-reward milestone safety, stale/missing inventory self-heal: **PASS**;
-- release manifest records provenance including `source_provenance_after_installer=PASS`, validator `402/402 + 5/5`, Python suite `90`, persistence `PASS/8053`, Child UI `3743`, Portable E2E PASS;
-- full Build-Setup `0.1.80-dev`: **15/15 PASS** plus first-class sub-gates through `15b`;
+- release manifest records provenance including `source_provenance_after_installer=PASS`, validator `402/402 + 5/5`, Python suite `90`, persistence `PASS/8124`, Child UI `3743`, Portable E2E PASS;
+- full Build-Setup `0.1.83-dev`: **15/15 PASS**, provenance + validator + 90-suite + persistence + Portable E2E + post-installer provenance recorded in release manifest;
 - Portable E2E: **PASS**, bootstrap 2 lần exit 0, learner DB thật SHA trước/sau không đổi (`0C970952435DAC03FE56C8400D003E87C37CED5D91B79C8A7D459A8EC30868C1`);
 - installer compile: **PASS**; update-manifest installer SHA khớp; Full Installer E2E **BLOCKED_SAFETY** do learner data không có ownership marker;
 - `game_events_v1.json` SHA256 `F9F25EA94DA7FCD20E360509EE53E6E758039CCF788FAFEC729A35F80D39A8B1`, khớp manifest;
-- Portable SHA256 `85EE0FB9DA514BD7362CE2C07695167EC6DE3D76ED2AE7A12AAC43D58A60862C`; Installer SHA256 `676AAB4606B2D9A22F123135DD365C14F39B37A945B2B7BB8FBEBB2255231A97`.
+- Portable SHA256 `40EDEB9F2C988FF1A5216C5BB24D5B3BC30F4EC1B2FAE0E1F4C1FF3A4E4D51AE`; Installer SHA256 `ADA17E788EEECBDD48C2169B7FE4B95F0ABF59D49A4CF71A537D6892BC4C016E`.
 
 AI1 `LANE_DONE=YES`; AI2 `LANE_DONE=YES`; AI3 `LANE_DONE=YES`.
 
@@ -248,4 +249,4 @@ No remaining Math UI/QA/integration blocker. The following are release-wide appl
 - production Authenticode signing;
 - compatibility execution on a real Windows 7 machine.
 
-`0.1.80-dev` is an unsigned dev artifact and must not be represented as a production-signed release. Real Windows 7 execution remains `UNAVAILABLE` in the current environment; the manifest correctly leaves that gate `PENDING`.
+`0.1.83-dev` is an unsigned dev artifact and must not be represented as a production-signed release. Real Windows 7 execution remains `UNAVAILABLE` in the current environment; the manifest correctly leaves that gate `PENDING`.
