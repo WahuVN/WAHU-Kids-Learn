@@ -54,6 +54,7 @@ namespace WAHU.MathSessionPersistenceRuntimeSmoke
                 TestTargetedCompletionSurvivesNextLessonReadFailure(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedCompletionProgressFaultRollsBackAndRetriesExactlyOnce(root, schemaPath, templatePath, lessonCatalogPath);
                 TestTargetedCompletionRejectsCorruptPendingProgress(root, schemaPath, templatePath, lessonCatalogPath);
+                TestTargetedCompletionRequiresDurableRuntimeIdentity(root, schemaPath, templatePath, lessonCatalogPath);
                 TestCorruptRuntimeMetadataIsQuarantined(root, schemaPath, templatePath);
                 TestMoreThanFourInvalidRuntimeSessionsAllRecover(root, schemaPath, templatePath);
                 TestMultipleValidActiveRuntimeSessionsKeepNewestOnly(root, schemaPath, templatePath);
@@ -4101,6 +4102,106 @@ WHERE child_id=@child AND lesson_id=@lesson;",
                   Count(staleStartDatabase, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + staleChildId +
                   "' AND lesson_id='" + lesson.Id + "' AND started_count=1 AND completed_count=1;") == 1,
                     "stale_last_started_progress_retry_completes_after_exact_rebind");
+            }
+        }
+
+        private static void TestTargetedCompletionRequiresDurableRuntimeIdentity(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string lessonCatalogPath)
+        {
+            var catalog = new MathLessonCatalogSource().Load(lessonCatalogPath);
+            var lesson = catalog.Lessons.First(x => x.PrerequisiteSkills == null || x.PrerequisiteSkills.Count == 0);
+
+            var tamperedDatabase = NewDatabase(Path.Combine(root, "targeted-completion-tampered-runtime-identity.db"), schemaPath);
+            using (var coordinator = new MathSessionCoordinator(tamperedDatabase, templatePath, "LOW", 8065, lesson.Id))
+            {
+                var started = coordinator.Start("Bé tampered targeted runtime completion");
+                for (var ordinal = 0; ordinal < 3; ordinal++)
+                {
+                    var question = coordinator.NextQuestion();
+                    coordinator.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 800 + ordinal * 100);
+                }
+                Exec(tamperedDatabase,
+                    "UPDATE math_session_runtime SET target_lesson_id='m2_ls_tampered_runtime_identity' WHERE session_id=@session;",
+                    "@session", started.SessionId);
+                Exception completionError = null;
+                try { coordinator.Complete(); } catch (Exception ex) { completionError = ex; }
+                A(completionError is InvalidOperationException && coordinator.IsActive &&
+                  SessionState(tamperedDatabase, started.SessionId) == "active" &&
+                  Count(tamperedDatabase, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + started.ChildId +
+                  "' AND lesson_id='" + lesson.Id + "' AND started_count=1 AND completed_count=0;") == 1,
+                    "tampered_targeted_runtime_identity_cannot_terminalize_original_lesson");
+                A(Count(tamperedDatabase, "SELECT count(*) FROM reward_event WHERE source_ref='" + started.SessionId + "';") == 0 &&
+                  Count(tamperedDatabase, "SELECT count(*) FROM math_session_runtime WHERE session_id='" + started.SessionId +
+                  "' AND session_mode='lesson' AND target_lesson_id='m2_ls_tampered_runtime_identity';") == 1,
+                    "tampered_targeted_runtime_identity_failure_keeps_runtime_and_reward_unchanged");
+                Exec(tamperedDatabase,
+                    "UPDATE math_session_runtime SET target_lesson_id=@lesson WHERE session_id=@session;",
+                    "@lesson", lesson.Id, "@session", started.SessionId);
+                var completed = coordinator.Complete();
+                A(completed.LessonCompleted && !coordinator.IsActive &&
+                  Count(tamperedDatabase, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + started.ChildId +
+                  "' AND lesson_id='" + lesson.Id + "' AND started_count=1 AND completed_count=1;") == 1 &&
+                  Count(tamperedDatabase, "SELECT count(*) FROM reward_event WHERE source_ref='" + started.SessionId + "';") == 1,
+                    "restored_targeted_runtime_identity_completes_exactly_once");
+            }
+
+            var countDatabase = NewDatabase(Path.Combine(root, "targeted-completion-tampered-runtime-count.db"), schemaPath);
+            using (var coordinator = new MathSessionCoordinator(countDatabase, templatePath, "LOW", 8067, lesson.Id))
+            {
+                var started = coordinator.Start("Bé tampered targeted runtime count");
+                for (var ordinal = 0; ordinal < 3; ordinal++)
+                {
+                    var question = coordinator.NextQuestion();
+                    coordinator.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 810 + ordinal * 100);
+                }
+                Exec(countDatabase,
+                    "UPDATE math_session_runtime SET target_question_count=4 WHERE session_id=@session;",
+                    "@session", started.SessionId);
+                Exception completionError = null;
+                try { coordinator.Complete(); } catch (Exception ex) { completionError = ex; }
+                A(completionError is InvalidOperationException && coordinator.IsActive &&
+                  SessionState(countDatabase, started.SessionId) == "active" &&
+                  Count(countDatabase, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + started.ChildId +
+                  "' AND lesson_id='" + lesson.Id + "' AND completed_count=0;") == 1,
+                    "tampered_target_question_count_cannot_terminalize_three_question_lesson");
+                Exec(countDatabase,
+                    "UPDATE math_session_runtime SET target_question_count=3 WHERE session_id=@session;",
+                    "@session", started.SessionId);
+                var completed = coordinator.Complete();
+                A(completed.LessonCompleted && !coordinator.IsActive &&
+                  Count(countDatabase, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + started.ChildId +
+                  "' AND lesson_id='" + lesson.Id + "' AND started_count=1 AND completed_count=1;") == 1,
+                    "restored_target_question_count_completes_exactly_once");
+            }
+
+            var missingDatabase = NewDatabase(Path.Combine(root, "targeted-completion-missing-runtime-identity.db"), schemaPath);
+            using (var coordinator = new MathSessionCoordinator(missingDatabase, templatePath, "LOW", 8066, lesson.Id))
+            {
+                var started = coordinator.Start("Bé missing targeted runtime completion");
+                for (var ordinal = 0; ordinal < 3; ordinal++)
+                {
+                    var question = coordinator.NextQuestion();
+                    coordinator.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 820 + ordinal * 100);
+                }
+                Exec(missingDatabase, "DELETE FROM math_session_runtime WHERE session_id=@session;", "@session", started.SessionId);
+                Exception completionError = null;
+                try { coordinator.Complete(); } catch (Exception ex) { completionError = ex; }
+                A(completionError is InvalidOperationException && coordinator.IsActive &&
+                  SessionState(missingDatabase, started.SessionId) == "active" &&
+                  Count(missingDatabase, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + started.ChildId +
+                  "' AND lesson_id='" + lesson.Id + "' AND started_count=1 AND completed_count=0;") == 1,
+                    "missing_targeted_runtime_cannot_complete_from_stale_in_memory_state");
+                A(Count(missingDatabase, "SELECT count(*) FROM reward_event WHERE source_ref='" + started.SessionId + "';") == 0 &&
+                  Count(missingDatabase, "SELECT count(*) FROM attempt WHERE session_id='" + started.SessionId + "';") == 3,
+                    "missing_targeted_runtime_failure_preserves_attempts_without_reward");
+                var recovered = new LearnerSessionService(missingDatabase).RecoverDanglingSessions(started.ChildId);
+                A(recovered == 1 && SessionState(missingDatabase, started.SessionId) == "recovered" &&
+                  Count(missingDatabase, "SELECT count(*) FROM math_lesson_progress WHERE child_id='" + started.ChildId +
+                  "' AND lesson_id='" + lesson.Id + "' AND completed_count=0;") == 1,
+                    "missing_targeted_runtime_falls_back_to_existing_dangling_recovery_contract");
             }
         }
 
