@@ -21,7 +21,7 @@ Playable Event Engine P0: **GREEN**
 
 - `tests/MathEngineRuntimeSmoke`: PASS — **72 assertions** (baseline equivalence + adversarial Unicode/NFD, int overflow, answer-length, unit alias, expression depth/token-bomb, Unicode operators và invalid per-question whitelist fail-closed).
 - `tests/MathDataEngineRuntimeSmoke`: PASS — **122 assertions** (idempotency + terminal-session guard + optimistic skill-state guard + true cross-process mastery/session contention + atomic startup + cross-process recovery/cleanup races + subject/child-scoped dangling recovery).
-- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **8068 assertions** (toàn bộ gate cũ + real 402-bank selector breadth + targeted write-failure/corruption repair + deterministic authored runtime IDs + concurrent pending-retry/completion semantics + generated/open-ordinal/timestamp self-heal + multi-runtime reconciliation + late-review transaction rollback + operational DB failure fail-safe).
+- `tests/MathSessionPersistenceRuntimeSmoke`: PASS — **8077 assertions** (toàn bộ gate cũ + real 402-bank selector breadth + targeted write-failure/corruption repair + deterministic authored runtime IDs + concurrent pending-retry/completion semantics + generated/open-ordinal/timestamp self-heal + multi-runtime reconciliation + late-review transaction rollback + operational DB failure fail-safe).
 - Cross-gate `tests/ChildUiRuntimeSmoke`: **3743 assertions PASS** trên Visual Studio MSBuild/net48/x86 + executable trực tiếp; xác nhận Math Hub/Quick Rescue vẫn đúng sau progress integrity repair.
 - Pending-retry early complete: q2 wrong/pending retry rồi gọi `Complete()` bị reject nhưng `RetryPending`, checkpoint=1, exact q2 và reward=0 đều giữ nguyên; suspend/resume tiếp tục flow cũ.
 - Corrupt-catalog completion: synthetic event q1 complete rồi catalog hỏng; fallback lesson giữ selected q2/q3, đạt 3/3 nhưng chưa terminal cho tới `Complete()`, sau đó đúng 3 attempts/3 mastery + 1 reward; khôi phục catalog mở cùng event tạo session mới 0/3 và không duplicate reward.
@@ -56,7 +56,7 @@ Playable Event Engine P0: **GREEN**
 - FIRST-5 hint/mastery matrix: mỗi bài đầu có một câu đúng với `hint_level=2` và hai câu independent; outcome hinted không được tính independent, mastery reason chứa `hinted_correct_lower_weight`, review reason `hinted_success_short_recall`, DB persist đúng 1 max-hint + 2 no-hint attempts và child_skill đúng `independent_success_count=2`, `hinted_success_count=1`.
 - Pack-byte identity audit: production `Program.BootstrapRuntime()` bắt buộc `ContentPackValidator.ValidateDirectory(..., true)` cho bundled Math pack trước UI; manifest SHA-256 mismatch fail startup, nên V5 `pack_id+version` kết hợp verified manifest đủ contract hiện tại, chưa cần invent schema V6 chỉ để lưu hash lần hai.
 - Late-review transaction fault: injected failure tại `review_schedule` (sau attempt/mastery/child_skill trong cùng transaction) rollback sạch toàn chain + semantic key; retry sau khi gỡ trigger ghi đúng một attempt/mastery/child_skill/review duy nhất.
-- Expanded-bank integration: `373d9d1` bỏ test coupling `Single(...)`/`_01`, chạy được cả baseline 201 và pool 402; current real 402-bank persistence tổng **8068 assertions PASS**.
+- Expanded-bank integration: `373d9d1` bỏ test coupling `Single(...)`/`_01`, chạy được cả baseline 201 và pool 402; current real 402-bank persistence tổng **8077 assertions PASS**.
 - PowerShell release/build scripts: schema V5 payload/bootstrap expectations đã cập nhật; staged `Build-SetupArtifacts.ps1` PASS qua Release x86 + runtime smokes + staged payload/preflight + portable packaging.
 - `git diff --check` + staged `git diff --cached --check`: PASS cho wave V5.
 
@@ -103,7 +103,8 @@ Playable Event Engine P0: **GREEN**
 - Lesson/skill progress identity guard (`d90118f`): completion evidence chỉ hợp lệ khi `math_lesson_progress.skill_id` khớp skill canonical của lesson. Row count hợp lệ nhưng gắn sai skill không còn báo completed/mở prerequisite; Start thật atomically sửa skill identity đồng thời reset completion/score/timestamp giả để không “rửa” corruption thành lịch sử hợp lệ. `STABLE` legacy mastery vẫn giữ quyền unlock độc lập.
 - Progress chronology/score fail-closed (`d6002a9`): completion count hợp lệ vẫn cần timestamp parse được; khi `completed_count==started_count`, completion cuối không được trước latest Start, còn replay đang dở `started>completed` vẫn giữ completion cũ hợp lệ. Completion invalid không publish last/best score; fresh Start dọn orphan score/timestamp khi `completed_count=0` và dùng một predicate Data-layer chung để tránh drift.
 - Resume + best-score integrity (`54fc336`): effective/durable `best_score_percent` luôn ít nhất bằng `last_score_percent` ở access, fresh Start và Complete. Targeted active-session resume giờ reconcile progress idempotent theo exact `session.StartedAtUtc`, không tăng `started_count` khi resume lặp, repair wrong skill/count/timestamp/score, và tái tạo row bị mất thành đúng `started=1/completed=0` trước khi tiếp tục.
-- Playable Event P0 persistence total trên current HEAD: **8068 assertions PASS**. Production AI1 catalog `bd1809e` đã tích hợp thật 5/5 event; synthetic fixtures vẫn giữ để fault/corruption/race test độc lập.
+- Trusted stale-completion convergence (`05a9dd3`): targeted coordinator thua race chỉ converge success khi durable progress vẫn qua trusted access/identity guard. Corruption chỉ ở `best_score_percent` được normalize từ last score; wrong skill/count/timestamp completion không còn được báo completed giả, trong khi exact terminal reward/progress chain vẫn exactly-once.
+- Playable Event P0 persistence total trên current HEAD: **8077 assertions PASS**. Production AI1 catalog `bd1809e` đã tích hợp thật 5/5 event; synthetic fixtures vẫn giữ để fault/corruption/race test độc lập.
 
 ## Session
 
@@ -205,7 +206,7 @@ AI1/AI3 đang sửa song song content/Math Hub/UI trên cùng `main`. AI2 chỉ 
 - MathEngineRuntimeSmoke: **72 PASS**.
 - MathDataEngineRuntimeSmoke: **122 PASS** — race/idempotency/concurrency/recovery.
 - LearningSessionRuntimeSmoke: **800 PASS** — selector/generator fuzz.
-- MathSessionPersistenceRuntimeSmoke: **8068 PASS** — current full persistence/event/corruption/concurrency gate.
+- MathSessionPersistenceRuntimeSmoke: **8077 PASS** — current full persistence/event/corruption/concurrency gate.
 - ChildUiRuntimeSmoke cross-gate: **3743 PASS** — Visual Studio MSBuild/net48/x86 + executable trực tiếp trên cùng source content.
-- AI1 working pool 402 integration: covered trong current **8068 PASS** persistence gate.
+- AI1 working pool 402 integration: covered trong current **8077 PASS** persistence gate.
 - Lane AI2 core engine/session/persistence: **DONE**. Các mục `skip policy` và numeric XP/daily streak không có product contract nên không tự invent semantics.
