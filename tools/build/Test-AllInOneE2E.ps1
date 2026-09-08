@@ -32,6 +32,20 @@ function Optional-Hash([string]$Path) {
     return $null
 }
 
+function Assert-ProductionArtPayload([string]$PayloadRoot) {
+    $validator = Join-Path $root 'tools\build\Test-ProductionAssetPayload.ps1'
+    Assert (Test-Path -LiteralPath $validator -PathType Leaf) 'production-art validator missing'
+    $sourceManifestPath = Join-Path $root 'src\App\Assets\Generated\Ready\ASSET_SELECTION_MANIFEST.json'
+    Assert (Test-Path -LiteralPath $sourceManifestPath -PathType Leaf) 'production-art source manifest missing'
+    $sourceManifest = Get-Content -Raw -LiteralPath $sourceManifestPath | ConvertFrom-Json
+    $expectedCount = [int]$sourceManifest.summary.totalSelected
+    Assert ($expectedCount -gt 0) 'production-art source manifest has invalid totalSelected'
+    $expectedManifestSha = (Get-FileHash -Algorithm SHA256 -LiteralPath $sourceManifestPath).Hash.ToUpperInvariant()
+    $assetRoot = Join-Path $PayloadRoot 'Assets\Generated\Ready'
+    & $validator -Mode Tree -Path $assetRoot -ExpectedManifestSha256 $expectedManifestSha
+    return [ordered]@{ png_count = $expectedCount; manifest_sha256 = $expectedManifestSha }
+}
+
 $result = [ordered]@{}
 $installedDbHashBefore = Optional-Hash $installedDb
 
@@ -50,11 +64,15 @@ try {
         'System.Data.SQLite.dll',
         'e_sqlite3.dll',
         'config\install_manifest_v1.json',
+        'data\schema\006_attempt_commit_key_immutability.sql',
         'content_packs\math_grade2_v1\question_bank_v1.json',
         'Assets\Generated\Ready\ASSET_SELECTION_MANIFEST.json'
     )) {
         Assert (Test-Path -LiteralPath (Join-Path $extractRoot $rel) -PathType Leaf) "All-in-One payload missing: $rel"
     }
+    $productionArtEvidence = Assert-ProductionArtPayload $extractRoot
+    $result.production_art_png_count = [int]$productionArtEvidence.png_count
+    $result.production_art_manifest_sha256 = [string]$productionArtEvidence.manifest_sha256
 
     Assert (-not (Get-ChildItem -LiteralPath $extractRoot -Filter 'unins*.exe' -File -ErrorAction SilentlyContinue)) 'Portable All-in-One unexpectedly created an uninstaller.'
     Assert (-not (Test-Path -LiteralPath (Join-Path $extractRoot 'UserData'))) 'All-in-One payload unexpectedly contains learner UserData before first boot.'
@@ -73,7 +91,8 @@ try {
         'result=PASS',
         'storage_mode=PORTABLE',
         ('app_version=' + $AppVersion),
-        'schema_version=5',
+        'schema_version=6',
+        'migration_version=6',
         'integrity=ok',
         'foreign_key_issues=0'
     )) {

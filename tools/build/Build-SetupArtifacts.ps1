@@ -554,6 +554,12 @@ if ($CompileAllInOne) {
     if (-not [string]::Equals([string]$allInOneE2E.all_in_one_sha256, $allInOneHash, [StringComparison]::OrdinalIgnoreCase)) {
         throw 'Portable All-in-One E2E tested a different artifact hash.'
     }
+    if ([int]$allInOneE2E.production_art_png_count -ne [int]$productionAssetPngCount) {
+        throw 'Portable All-in-One E2E production-art PNG count mismatch.'
+    }
+    if (-not [string]::Equals([string]$allInOneE2E.production_art_manifest_sha256, [string]$productionAssetManifestSha256, [StringComparison]::OrdinalIgnoreCase)) {
+        throw 'Portable All-in-One E2E production-art manifest SHA mismatch.'
+    }
 
     $manifest['all_in_one'] = [ordered]@{
         enabled = $true
@@ -567,6 +573,8 @@ if ($CompileAllInOne) {
         artifact_bytes = (Get-Item -LiteralPath $allInOnePath).Length
         e2e = 'PASS'
         e2e_report = 'build\allinone_e2e_dev.json'
+        production_art_png_count = [int]$allInOneE2E.production_art_png_count
+        production_art_manifest_sha256 = [string]$allInOneE2E.production_art_manifest_sha256
         installed_db_hash_before = $allInOneE2E.installed_db_hash_before
         installed_db_hash_after = $allInOneE2E.installed_db_hash_after
     }
