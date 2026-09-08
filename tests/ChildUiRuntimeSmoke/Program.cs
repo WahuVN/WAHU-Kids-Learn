@@ -33,6 +33,7 @@ namespace WAHU.ChildUiRuntimeSmoke
             TestRoadmap(appAssembly);
             TestMathCatalogAndHub(appAssembly);
             TestMathHubRuntimeContinue(appAssembly);
+            TestMathHubCorruptProgressFailClosed(appAssembly);
             TestResumePresentation(appAssembly);
             TestCompletionPresentation(appAssembly);
             TestFeedbackCardReadability(appAssembly);
@@ -605,6 +606,127 @@ namespace WAHU.ChildUiRuntimeSmoke
                         "math_hub_adaptive_runtime_keeps_lesson_continue_disabled");
                 }
                 sessions.CompleteSession(adaptive.SessionId, true, null, null);
+            }
+            finally
+            {
+                try { Directory.Delete(tempRoot, true); } catch { }
+            }
+        }
+
+        private static void TestMathHubCorruptProgressFailClosed(Assembly appAssembly)
+        {
+            var repo = Directory.GetCurrentDirectory();
+            var catalogPath = Path.Combine(repo, "content_packs", "math_grade2_v1", "lesson_catalog_v1.json");
+            var catalog = new MathLessonCatalogSource().Load(catalogPath);
+            var first = catalog.FindLesson("m2_ls_num_count_read_write_0_1000");
+            var second = catalog.FindLesson("m2_ls_num_full_hundreds_recognize");
+            A(first != null && second != null && second.PrerequisiteSkills != null &&
+              second.PrerequisiteSkills.Contains(first.SkillId),
+                "math_hub_corrupt_progress_first_two_fixture_ready");
+
+            var tempRoot = Path.Combine(Path.GetTempPath(), "wahu-child-ui-corrupt-progress-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempRoot);
+            try
+            {
+                var sourceSchemaDir = Path.Combine(repo, "data", "schema");
+                var schemaDir = Path.Combine(tempRoot, "schema");
+                Directory.CreateDirectory(schemaDir);
+                foreach (var source in Directory.GetFiles(sourceSchemaDir, "*.sql"))
+                    File.Copy(source, Path.Combine(schemaDir, Path.GetFileName(source)), true);
+
+                var database = new LearningDatabase(Path.Combine(tempRoot, "learning.db"), Path.Combine(schemaDir, "001_initial.sql"));
+                var init = database.Initialize("DELETE");
+                A(init.SchemaVersion == 5 && init.Health.IsHealthy, "math_hub_corrupt_progress_database_v5_ready");
+                new LearnerSessionService(database).EnsurePrimaryChild("Bé UI progress hỏng");
+
+                ExecuteDatabaseSql(database,
+                    "INSERT INTO math_lesson_progress(child_id,lesson_id,skill_id,started_count,completed_count,last_score_percent,best_score_percent,last_started_at_utc,last_completed_at_utc,updated_at_utc) VALUES(" +
+                    "'" + LearnerSessionService.PrimaryChildId + "','" + first.Id + "','" + first.SkillId + "',1,1,88,99,'2026-09-08T03:00:00.0000000Z','not-a-date','2026-09-08T03:00:00.0000000Z');");
+
+                var ctor = typeof(WAHUKidsLearn.MathHubForm).GetConstructor(
+                    BindingFlags.Instance | BindingFlags.NonPublic,
+                    null,
+                    new[] { typeof(LearningDatabase), typeof(RuntimePerformanceSettings), typeof(string) },
+                    null);
+                A(ctor != null, "math_hub_corrupt_progress_constructor_available");
+
+                using (var form = (WAHUKidsLearn.MathHubForm)ctor.Invoke(new object[]
+                {
+                    database,
+                    new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW },
+                    catalogPath
+                }))
+                {
+                    Invoke(form, "LoadCatalogAndProgress");
+                    var accessMap = GetField<object>(form, "_lessonAccess") as System.Collections.IDictionary;
+                    A(accessMap != null && accessMap.Count == 67,
+                        "math_hub_corrupt_progress_access_snapshot_complete");
+                    var firstAccess = accessMap[first.Id];
+                    var secondAccess = accessMap[second.Id];
+                    A(firstAccess != null && !Get<bool>(firstAccess, "IsCompleted") &&
+                      Get<int>(firstAccess, "CompletedCount") == 0 &&
+                      Get<object>(firstAccess, "LastScorePercent") == null &&
+                      Get<object>(firstAccess, "BestScorePercent") == null,
+                        "math_hub_corrupt_progress_hides_false_completion_and_scores");
+                    A(secondAccess != null && !Get<bool>(secondAccess, "IsUnlocked"),
+                        "math_hub_corrupt_progress_does_not_unlock_second_lesson");
+
+                    Invoke(form, "SelectLessonInCatalog", first);
+                    var detailFlow = GetField<FlowLayoutPanel>(form, "_detailFlow");
+                    var firstPractice = FindButtonContaining(detailFlow, "Luyện bài này");
+                    A(firstPractice != null && firstPractice.Enabled &&
+                      FindButtonContaining(detailFlow, "Luyện lại bài này") == null,
+                        "math_hub_corrupt_progress_first_lesson_stays_uncompleted_in_ui");
+                    A(!ContainsControlText(detailFlow, "Lần gần nhất:") && !ContainsControlText(detailFlow, "Tốt nhất:"),
+                        "math_hub_corrupt_progress_does_not_render_stale_scores");
+                    var stateMethod = form.GetType().GetMethod("LessonStateText", BindingFlags.Instance | BindingFlags.NonPublic);
+                    A(stateMethod != null, "math_hub_corrupt_progress_state_method_available");
+                    var firstState = Convert.ToString(stateMethod.Invoke(form, new object[] { first }));
+                    A(firstState.IndexOf("chưa hoàn thành", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                      firstState.IndexOf("Đã hoàn thành", StringComparison.OrdinalIgnoreCase) < 0,
+                        "math_hub_corrupt_progress_state_text_fails_closed");
+
+                    Invoke(form, "SelectLessonInCatalog", second);
+                    var secondPractice = FindButtonContaining(detailFlow, "Học bài trước để mở luyện tập");
+                    A(secondPractice != null && !secondPractice.Enabled &&
+                      secondPractice.AccessibleDescription.IndexOf(first.TitleVi, StringComparison.OrdinalIgnoreCase) >= 0,
+                        "math_hub_corrupt_progress_second_lesson_remains_locked_and_names_prerequisite");
+
+                    var rescueType = appAssembly.GetType("WAHUKidsLearn.MathQuickRescueForm", true);
+                    var rescueCtor = rescueType.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                        .FirstOrDefault(x => x.GetParameters().Length == 5);
+                    A(rescueCtor != null, "quick_rescue_corrupt_progress_internal_constructor_available");
+                    using (var rescue = (Form)rescueCtor.Invoke(new object[]
+                    {
+                        database,
+                        new RuntimePerformanceSettings { Profile = PerformanceProfileKind.LOW },
+                        catalogPath,
+                        null,
+                        null
+                    }))
+                    {
+                        Invoke(rescue, "LoadEvents");
+                        A(Get<int>(rescue, "EventCount") == 5,
+                            "quick_rescue_corrupt_progress_loads_first_five_events");
+                        var eventItems = ((System.Collections.IEnumerable)GetField<object>(rescue, "_events"))
+                            .Cast<object>().ToList();
+                        var secondEvent = eventItems.FirstOrDefault(x =>
+                            string.Equals(Get<string>(x, "TargetLessonId"), second.Id, StringComparison.Ordinal));
+                        A(secondEvent != null, "quick_rescue_corrupt_progress_second_event_available");
+                        var eventButtons = GetField<System.Collections.IDictionary>(rescue, "_eventButtons");
+                        var secondEventId = Get<string>(secondEvent, "Id");
+                        var secondMission = eventButtons[secondEventId] as Button;
+                        A(secondMission != null && secondMission.Enabled && secondMission.TabStop,
+                            "quick_rescue_corrupt_progress_locked_mission_remains_focusable");
+                        Invoke(rescue, "SelectEvent", secondEvent);
+                        var startButton = GetField<Button>(rescue, "_startButton");
+                        A(!startButton.Enabled &&
+                          startButton.Text.IndexOf("Học bài nền", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                          startButton.AccessibleDescription.IndexOf(first.TitleVi, StringComparison.OrdinalIgnoreCase) >= 0 &&
+                          secondMission.AccessibleDescription.IndexOf(first.TitleVi, StringComparison.OrdinalIgnoreCase) >= 0,
+                            "quick_rescue_corrupt_progress_cannot_start_or_hide_prerequisite");
+                    }
+                }
             }
             finally
             {
