@@ -11,15 +11,15 @@ EXTERNAL_BLOCKERS=INSTALLER_E2E_UNOWNED_LOCAL_DATA;PRODUCTION_SIGNING_UNAVAILABL
 EXECUTION_MODE=PLAYABLE_EVENT_UI_NO_WAIT
 ACTIVE_PHASE=PLAYABLE_EVENT_GAME_V1
 ACTIVE_FOCUS=FIRST_FIVE_QUICK_RESCUE_UI_E2E_RELEASE
-LAST_FULLY_VERIFIED_HEAD=`ac77050`
-LATEST_UI_VERIFIED_HEAD=`ac77050`
-LATEST_PERSISTENCE_VERIFIED_HEAD=`ac77050`
+LAST_FULLY_VERIFIED_HEAD=`e3cc0e2`
+LATEST_UI_VERIFIED_HEAD=`e3cc0e2`
+LATEST_PERSISTENCE_VERIFIED_HEAD=`e3cc0e2`
 LAST_VERIFIED_CHILD_UI=3750_ASSERTIONS_PASS
 LAST_VERIFIED_PERSISTENCE=8145_ASSERTIONS_PASS
 LATEST_OFFSCREEN_CAPTURE_HEAD=`ac77050`
 LAST_VERIFIED_OFFSCREEN_CAPTURE=10_PNG_3781_ASSERTIONS_PASS
 LAST_VERIFIED_CONTENT=90_OF_90_PASS
-LAST_VERIFIED_RELEASE=`0.1.86-dev`_POST_INSTALLER_PROVENANCE_CONTENT_90_PERSISTENCE_8145_UI_3750_PRODUCTION_ART_74_PORTABLE_E2E_INSTALLER_PASS
+LAST_VERIFIED_RELEASE=`0.1.87-dev`_POST_INSTALLER_PROVENANCE_CONTENT_90_PERSISTENCE_8145_UI_3750_PRODUCTION_ART_74_PORTABLE_EXTRACTED_E2E_INSTALLER_PASS
 EARLY_LESSON_DEEP_HEAD=`e34136d`
 EARLY_LESSON_DEEP_CHILD_UI=3564_ASSERTIONS_PASS
 EARLY_LESSON_DEEP_PERSISTENCE=7592_ASSERTIONS_PASS
@@ -32,12 +32,13 @@ EARLY_LESSON_DEEP_VALIDATOR=402_OF_402_VALID
 
 ### Post-closure visual integration — 2026-09-08
 
-- `468dd55` landed the visual polish; `af48f89` then bound game-art motion to the existing performance policy. Latest common-head QA evidence is `ac77050`; latest full release evidence is `ac77050 / 0.1.86-dev`.
+- `468dd55` landed the visual polish; `af48f89` then bound game-art motion to the existing performance policy. Latest common-head/full-release evidence is `e3cc0e2 / 0.1.87-dev`; deterministic offscreen capture evidence remains separately at `ac77050`.
 - Home/Hub/lesson/rescue use richer child cards, raised action states, mission/checkpoint styling, procedural rescue hero art, feedback FX and Garden completion art without changing grading/session semantics.
 - LOW keeps decorative game art static; NORMAL respects the configured FPS cap and disables decorative feedback during learning focus; `a0344f4` makes timers follow the parent visibility hierarchy, and `dcf844b` closes the detach/re-attach lifecycle so a control removed from the visual tree stops its timer and resumes safely only after being attached again. The visual integration still preserves focusable locked missions, exact prerequisite narration, Enter/Esc actions, 900×640 and 125% DPI regressions, resume/retry/failure safety and terminal completion behavior.
-- Verification on `ac77050`: Child UI **3750 assertions PASS**, offscreen capture **10 PNG / 3781 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, Math persistence **8145 assertions PASS**, `git diff --check` PASS.
+- Verification on `e3cc0e2`: Child UI **3750 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, Math persistence **8145 assertions PASS**, `git diff --check` PASS. Offscreen capture remains **10 PNG / 3781 assertions PASS** on `ac77050`.
 - Production art V1 `33b7b6c`: **74/74 PNG SHA-256 khớp manifest**, gồm **61 transparent + 13 opaque**; Rescue Hero, feedback đúng/thử lại/gợi ý và Garden completion ưu tiên asset thật, vẫn giữ procedural fallback khi asset thiếu/hỏng. Manifest SHA `6BD7172D8B7D0239960207B5A43C2CAE466220421F88D6D7C57215005BC1D8A6`.
-- Release-full evidence is now `ac77050` / `0.1.86-dev`: full Build-Setup **15/15 PASS** on the same clean head with Child UI **3750**, persistence **8145**, offscreen capture **10 PNG / 3781**, Performance **13**, Motion **25**, production assets **74/74 SHA-verified** across source/app-output/publish/portable-tree/portable-ZIP, Portable E2E PASS, installer compile PASS and post-installer provenance PASS.
+- Release-full evidence is now `e3cc0e2` / `0.1.87-dev`: full Build-Setup **PASS** on the same clean head with Child UI **3750**, persistence **8145**, Performance **13**, Motion **25**, production assets **74/74 SHA-verified** across source/app-output/publish/portable-tree/portable-ZIP **and after Expand-Archive inside Portable E2E**, installer compile PASS and post-installer provenance PASS. Offscreen capture stays evidenced at `ac77050`.
+- `e3cc0e2` removes duplicated/hard-coded production-art checks from Portable/Installer E2E and delegates to shared `Test-ProductionAssetPayload.ps1`; release manifest records `portable_e2e_production_art_extracted=PASS`. Artifact SHA: Portable `CB3C530D89C9B2B7B47D947453DAFD95E33F5A6C715559CE1EA177B771596C27`, Installer `AD0B1F10CD0C115113C9C7F54AAECCBD1BF4A0E26683C7F424279BF0F831568B`.
 
 Đọc và tuân thủ `_WORK_CLAIMS/MATH_PLAYABLE_EVENT_GAME_V1.md`. P0 mới là đưa first-five thành flow chơi được: Home/Hub entry → intro → 3 checkpoints dùng lại MathLessonForm → behavior-aware repair/break → completion restoration/Garden → resume E2E. Dùng internal fixture/view-model trước khi AI1/AI2 land; final adapter mỏng sau. Không chờ và không đổi engine/content semantics.
 
@@ -98,7 +99,7 @@ Milestones đã có, không làm lại implementation mù nếu HEAD vẫn chứ
 - 402-prompt min-window fit: `1e27ff8`
 - dynamic release smoke evidence: `3a53af7`
 
-Current closure evidence on `ac77050 / 0.1.86-dev`: source provenance **PASS** cả sau installer, Learning **800**, Child UI **3750**, offscreen capture **3781**, persistence **8145**, content/event **90/90**, validator **402/402 + 5/5**, Performance **13**, Motion **25**, production art **74/74 SHA-verified** through tree + ZIP gates, Portable E2E PASS and installer compile **PASS**. Full Installer E2E remains safety-blocked by unowned learner data; production signing and real Windows 7 validation remain PENDING/UNAVAILABLE.
+Current closure evidence on `e3cc0e2 / 0.1.87-dev`: source provenance **PASS** cả sau installer, Learning **800**, Child UI **3750**, persistence **8145**, content/event **90/90**, validator **402/402 + 5/5**, Performance **13**, Motion **25**, production art **74/74 SHA-verified** through tree + ZIP + **post-extraction shared-validator E2E**, Portable bootstrap **0/0**, installer compile **PASS**. Offscreen capture **3781** remains on `ac77050`. Full Installer E2E remains safety-blocked by unowned learner data; production signing and real Windows 7 validation remain PENDING/UNAVAILABLE.
 
 `88ecf34` additionally locks Garden accounting against zero-attempt completed sessions: they do not advance completed-session milestones and are never backfilled as rewardable; valid rescue completion remains +1 idempotent.
 
