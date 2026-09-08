@@ -103,6 +103,7 @@ namespace WAHU.Session
         {
             MathLessonProgressRecord own;
             progress.TryGetValue(lesson.Id, out own);
+            var ownCompletedCount = EffectiveCompletedCount(own);
             var prerequisiteLessonIds = new List<string>();
             var unsatisfied = new List<string>();
             foreach (var prerequisiteSkill in lesson.PrerequisiteSkills ?? new List<string>())
@@ -115,7 +116,7 @@ namespace WAHU.Session
                 MathLessonProgressRecord prerequisiteProgress;
                 SkillSnapshot prerequisiteMastery;
                 var completed = progress.TryGetValue(prerequisiteLesson.Id, out prerequisiteProgress) &&
-                                prerequisiteProgress != null && prerequisiteProgress.CompletedCount > 0;
+                                EffectiveCompletedCount(prerequisiteProgress) > 0;
                 var stableLegacyMastery = skills.TryGetValue(prerequisiteSkill, out prerequisiteMastery) &&
                                           prerequisiteMastery != null &&
                                           string.Equals(prerequisiteMastery.LearningState, "STABLE", StringComparison.OrdinalIgnoreCase);
@@ -128,14 +129,21 @@ namespace WAHU.Session
                 SkillId = lesson.SkillId,
                 TitleVi = lesson.TitleVi,
                 IsUnlocked = unsatisfied.Count == 0,
-                IsCompleted = own != null && own.CompletedCount > 0,
+                IsCompleted = ownCompletedCount > 0,
                 StartedCount = own == null ? 0 : own.StartedCount,
-                CompletedCount = own == null ? 0 : own.CompletedCount,
+                CompletedCount = ownCompletedCount,
                 LastScorePercent = own == null ? null : own.LastScorePercent,
                 BestScorePercent = own == null ? null : own.BestScorePercent,
                 PrerequisiteLessonIds = prerequisiteLessonIds,
                 UnsatisfiedPrerequisiteLessonIds = unsatisfied
             };
+        }
+
+        private static int EffectiveCompletedCount(MathLessonProgressRecord progress)
+        {
+            if (progress == null || progress.CompletedCount <= 0) return 0;
+            if (progress.StartedCount <= 0 || progress.CompletedCount > progress.StartedCount) return 0;
+            return progress.CompletedCount;
         }
     }
 }
