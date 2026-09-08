@@ -11,13 +11,13 @@ EXTERNAL_BLOCKERS=INSTALLER_E2E_UNOWNED_LOCAL_DATA;PRODUCTION_SIGNING_UNAVAILABL
 EXECUTION_MODE=PLAYABLE_EVENT_UI_NO_WAIT
 ACTIVE_PHASE=PLAYABLE_EVENT_GAME_V1
 ACTIVE_FOCUS=FIRST_FIVE_QUICK_RESCUE_UI_E2E_RELEASE
-LAST_FULLY_VERIFIED_HEAD=`d821874`
-LATEST_UI_VERIFIED_HEAD=`d821874`
-LATEST_PERSISTENCE_VERIFIED_HEAD=`d821874`
-LAST_VERIFIED_CHILD_UI=3727_ASSERTIONS_PASS
-LAST_VERIFIED_PERSISTENCE=8044_ASSERTIONS_PASS
+LAST_FULLY_VERIFIED_HEAD=`b45dc56`
+LATEST_UI_VERIFIED_HEAD=`b45dc56`
+LATEST_PERSISTENCE_VERIFIED_HEAD=`b45dc56`
+LAST_VERIFIED_CHILD_UI=3743_ASSERTIONS_PASS
+LAST_VERIFIED_PERSISTENCE=8053_ASSERTIONS_PASS
 LAST_VERIFIED_CONTENT=90_OF_90_PASS
-LAST_VERIFIED_RELEASE=`0.1.79-dev`_POST_INSTALLER_PROVENANCE_CONTENT_90_PERSISTENCE_8044_UI_3727_PORTABLE_E2E_INSTALLER_PASS
+LAST_VERIFIED_RELEASE=`0.1.80-dev`_POST_INSTALLER_PROVENANCE_CONTENT_90_PERSISTENCE_8053_UI_3743_PORTABLE_E2E_INSTALLER_PASS
 EARLY_LESSON_DEEP_HEAD=`e34136d`
 EARLY_LESSON_DEEP_CHILD_UI=3564_ASSERTIONS_PASS
 EARLY_LESSON_DEEP_PERSISTENCE=7592_ASSERTIONS_PASS
@@ -30,11 +30,11 @@ EARLY_LESSON_DEEP_VALIDATOR=402_OF_402_VALID
 
 ### Post-closure visual integration — 2026-09-08
 
-- `468dd55` landed the visual polish; `af48f89` then bound game-art motion to the existing performance policy. Current common-head verification is `d821874`.
+- `468dd55` landed the visual polish; `af48f89` then bound game-art motion to the existing performance policy. Current common-head verification is `b45dc56`.
 - Home/Hub/lesson/rescue use richer child cards, raised action states, mission/checkpoint styling, procedural rescue hero art, feedback FX and Garden completion art without changing grading/session semantics.
 - LOW keeps decorative game art static; NORMAL respects the configured FPS cap and disables decorative feedback during learning focus; `a0344f4` makes timers follow the parent visibility hierarchy, and `dcf844b` closes the detach/re-attach lifecycle so a control removed from the visual tree stops its timer and resumes safely only after being attached again. The visual integration still preserves focusable locked missions, exact prerequisite narration, Enter/Esc actions, 900×640 and 125% DPI regressions, resume/retry/failure safety and terminal completion behavior.
-- Verification on `d821874`: Child UI **3727 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, Math persistence **8044 assertions PASS**, `git diff --check` PASS.
-- Release-full evidence is now `d821874` / `0.1.79-dev`: full Build-Setup/Installer distribution gate reran on the same common head with Child UI **3727**, persistence **8044**, Portable E2E PASS and post-installer provenance PASS.
+- Verification on `b45dc56`: Child UI **3743 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, Math persistence **8053 assertions PASS**, `git diff --check` PASS.
+- Release-full evidence is now `b45dc56` / `0.1.80-dev`: full Build-Setup/Installer distribution gate trên cùng common head ghi Child UI **3743**, persistence **8053**, Portable E2E PASS và post-installer provenance PASS.
 
 Đọc và tuân thủ `_WORK_CLAIMS/MATH_PLAYABLE_EVENT_GAME_V1.md`. P0 mới là đưa first-five thành flow chơi được: Home/Hub entry → intro → 3 checkpoints dùng lại MathLessonForm → behavior-aware repair/break → completion restoration/Garden → resume E2E. Dùng internal fixture/view-model trước khi AI1/AI2 land; final adapter mỏng sau. Không chờ và không đổi engine/content semantics.
 
@@ -95,7 +95,7 @@ Milestones đã có, không làm lại implementation mù nếu HEAD vẫn chứ
 - 402-prompt min-window fit: `1e27ff8`
 - dynamic release smoke evidence: `3a53af7`
 
-Current closure evidence on `d821874`: source provenance **PASS** cả sau installer, Learning **800**, Child UI **3727**, persistence **8044**, content/event **90/90**, validator **402/402 + 5/5**, Build-Setup `0.1.79-dev` **PASS** với content/persistence/Portable/post-installer provenance là first-class gates, installer compile **PASS**. Full Installer E2E is externally safety-blocked by unowned learner data; production signing và real Windows 7 validation vẫn PENDING/UNAVAILABLE.
+Current closure evidence on `b45dc56`: source provenance **PASS** cả sau installer, Learning **800**, Child UI **3743**, persistence **8053**, content/event **90/90**, validator **402/402 + 5/5**, Build-Setup `0.1.80-dev` **PASS** với content/persistence/Portable/post-installer provenance là first-class gates, installer compile **PASS**. Full Installer E2E is externally safety-blocked by unowned learner data; production signing và real Windows 7 validation vẫn PENDING/UNAVAILABLE.
 
 `88ecf34` additionally locks Garden accounting against zero-attempt completed sessions: they do not advance completed-session milestones and are never backfilled as rewardable; valid rescue completion remains +1 idempotent.
 
@@ -104,6 +104,8 @@ Current closure evidence on `d821874`: source provenance **PASS** cả sau insta
 `7496388` locks exact Garden milestones across all first five production rescue completions; `3af8d4a` promotes validator + full Python suite + Portable E2E into Build-Setup; `f4bb08a` refuses dirty source and locks stable Git provenance around the build.
 
 `069372d` binds reward eligibility to durable attempts of the correct child; `85a1d2a` self-heals stale canonical source-key rows and ignores orphan growth; `0e91702` locks exact 1/3/6/10 milestones; `f5e5202` adds post-installer provenance; `1c4ce9e` makes Garden milestone/UI/inventory derive from canonical rewards and self-heal after partial reward faults.
+
+`d6002a9` fails closed malformed lesson-progress chronology and stale score metadata; `b45dc56` locks the same invariant through Hub and Quick Rescue UI so bad bài-1 completion evidence cannot unlock bài 2 / rescue #2.
 
 ## 2. Ownership
 
