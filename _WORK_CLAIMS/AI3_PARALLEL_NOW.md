@@ -12,11 +12,11 @@ EXECUTION_MODE=PLAYABLE_EVENT_UI_NO_WAIT
 ACTIVE_PHASE=PLAYABLE_EVENT_GAME_V1
 ACTIVE_FOCUS=FIRST_FIVE_QUICK_RESCUE_UI_E2E_RELEASE
 LAST_FULLY_VERIFIED_HEAD=`b45dc56`
-LATEST_UI_VERIFIED_HEAD=`9d7dfb0`
-LATEST_PERSISTENCE_VERIFIED_HEAD=`9d7dfb0`
+LATEST_UI_VERIFIED_HEAD=`3ec4b86`
+LATEST_PERSISTENCE_VERIFIED_HEAD=`3ec4b86`
 LAST_VERIFIED_CHILD_UI=3750_ASSERTIONS_PASS
-LAST_VERIFIED_PERSISTENCE=8120_ASSERTIONS_PASS
-LATEST_OFFSCREEN_CAPTURE_HEAD=`9d7dfb0`
+LAST_VERIFIED_PERSISTENCE=8124_ASSERTIONS_PASS
+LATEST_OFFSCREEN_CAPTURE_HEAD=`3ec4b86`
 LAST_VERIFIED_OFFSCREEN_CAPTURE=10_PNG_3781_ASSERTIONS_PASS
 LAST_VERIFIED_CONTENT=90_OF_90_PASS
 LAST_VERIFIED_RELEASE=`0.1.80-dev`_POST_INSTALLER_PROVENANCE_CONTENT_90_PERSISTENCE_8053_UI_3743_PORTABLE_E2E_INSTALLER_PASS
@@ -32,10 +32,10 @@ EARLY_LESSON_DEEP_VALIDATOR=402_OF_402_VALID
 
 ### Post-closure visual integration — 2026-09-08
 
-- `468dd55` landed the visual polish; `af48f89` then bound game-art motion to the existing performance policy. Latest non-release QA verification is `9d7dfb0`; full release evidence remains `b45dc56`.
+- `468dd55` landed the visual polish; `af48f89` then bound game-art motion to the existing performance policy. Latest non-release QA verification is `3ec4b86`; full release evidence remains `b45dc56`.
 - Home/Hub/lesson/rescue use richer child cards, raised action states, mission/checkpoint styling, procedural rescue hero art, feedback FX and Garden completion art without changing grading/session semantics.
 - LOW keeps decorative game art static; NORMAL respects the configured FPS cap and disables decorative feedback during learning focus; `a0344f4` makes timers follow the parent visibility hierarchy, and `dcf844b` closes the detach/re-attach lifecycle so a control removed from the visual tree stops its timer and resumes safely only after being attached again. The visual integration still preserves focusable locked missions, exact prerequisite narration, Enter/Esc actions, 900×640 and 125% DPI regressions, resume/retry/failure safety and terminal completion behavior.
-- Verification on `9d7dfb0`: Child UI **3750 assertions PASS**, offscreen capture **10 PNG / 3781 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, Math persistence **8120 assertions PASS**, `git diff --check` PASS.
+- Verification on `3ec4b86`: Child UI **3750 assertions PASS**, offscreen capture **10 PNG / 3781 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, Math persistence **8124 assertions PASS**, `git diff --check` PASS.
 - Production art V1 `33b7b6c`: **74/74 PNG SHA-256 khớp manifest**, gồm **61 transparent + 13 opaque**; Rescue Hero, feedback đúng/thử lại/gợi ý và Garden completion ưu tiên asset thật, vẫn giữ procedural fallback khi asset thiếu/hỏng. Manifest SHA `6BD7172D8B7D0239960207B5A43C2CAE466220421F88D6D7C57215005BC1D8A6`.
 - Release-full evidence is now `b45dc56` / `0.1.80-dev`: full Build-Setup/Installer distribution gate trên cùng common head ghi Child UI **3743**, persistence **8053**, Portable E2E PASS và post-installer provenance PASS.
 

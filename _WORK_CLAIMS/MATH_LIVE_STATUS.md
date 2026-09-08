@@ -2,8 +2,8 @@
 
 Updated: 2026-09-08
 LAST_FULLY_VERIFIED_HEAD=`b45dc56`
-LATEST_UI_VERIFIED_HEAD=`9d7dfb0`
-LATEST_PERSISTENCE_VERIFIED_HEAD=`9d7dfb0`
+LATEST_UI_VERIFIED_HEAD=`3ec4b86`
+LATEST_PERSISTENCE_VERIFIED_HEAD=`3ec4b86`
 MATH_3AI_DONE=YES
 AI3_LANE_DONE=YES
 PLAYABLE_FIRST_FIVE_P0=GREEN
@@ -13,7 +13,7 @@ Definition: trạng thái dưới đây dùng strict three-lane Math Definition 
 
 ## Playable Event V1 — current
 
-- **Visual/motion QA head `9d7dfb0`: GREEN** — Home/Hub/lesson/rescue có visual polish mới; `af48f89` nối game-art motion vào performance contract để LOW tĩnh, NORMAL có FPS cap và learning-focus feedback tĩnh; `a0344f4` theo dõi hierarchy cha để container ẩn/offscreen dừng timer con, và `dcf844b` khóa detach/re-attach để control rời visual tree cũng dừng timer rồi resume an toàn khi gắn lại. `cd0cc91` thêm deterministic offscreen capture không cần desktop interactive. Không đổi grading/session semantics. Child UI **3750 assertions PASS**, offscreen capture **10 PNG / 3781 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, persistence **8120 assertions PASS**, `git diff --check` PASS.
+- **Visual/motion QA head `3ec4b86`: GREEN** — Home/Hub/lesson/rescue có visual polish mới; `af48f89` nối game-art motion vào performance contract để LOW tĩnh, NORMAL có FPS cap và learning-focus feedback tĩnh; `a0344f4` theo dõi hierarchy cha để container ẩn/offscreen dừng timer con, và `dcf844b` khóa detach/re-attach để control rời visual tree cũng dừng timer rồi resume an toàn khi gắn lại. `cd0cc91` thêm deterministic offscreen capture không cần desktop interactive. Không đổi grading/session semantics. Child UI **3750 assertions PASS**, offscreen capture **10 PNG / 3781 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, persistence **8124 assertions PASS**, `git diff --check` PASS.
 - **Production art V1 `33b7b6c`: GREEN** — payload **74/74 PNG SHA-256 khớp manifest**, gồm **61 transparent + 13 opaque**; Rescue Hero, feedback đúng/thử lại/gợi ý và Garden completion ưu tiên production assets, vẫn có procedural fallback. Manifest SHA `6BD7172D8B7D0239960207B5A43C2CAE466220421F88D6D7C57215005BC1D8A6`.
 - Release-full artifact hiện tại là `0.1.80-dev` tại clean `b45dc56`; full Build-Setup/Installer distribution gate, Portable E2E và post-installer provenance đều PASS trên cùng source head.
 
@@ -36,7 +36,7 @@ Definition: trạng thái dưới đây dùng strict three-lane Math Definition 
 - Progress chronology/score hardening `d6002a9`: completion chỉ được tin khi skill/count/timestamp chronology hợp lệ; completion hỏng bị fail-closed, score stale bị ẩn và fresh start tự reset metadata completion không đáng tin.
 - Hub/rescue integration guard `b45dc56`: Child UI regression chứng minh malformed completion timestamp của bài 1 không hiện hoàn thành/score giả, không mở bài 2 và không cho start rescue #2; mission khóa vẫn focusable để đọc đúng prerequisite.
 - DPI hardening: rescue intro + active gameplay đều được scale 125%; active prompt/checkpoint/break target vẫn đọc và thao tác được, flow retry/suspend tiếp tục bình thường.
-- Latest UI/performance/persistence on `9d7dfb0`: Child UI **3750 assertions PASS**, offscreen capture **10 PNG / 3781 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, persistence **8120 assertions PASS**. Most recent full Math content/event/pool suite remains **90/90 PASS**; asset integration did not change authored content.
+- Latest UI/performance/persistence on `3ec4b86`: Child UI **3750 assertions PASS**, offscreen capture **10 PNG / 3781 assertions PASS**, Performance **13 assertions PASS**, Motion **25 assertions PASS**, persistence **8124 assertions PASS**. Most recent full Math content/event/pool suite remains **90/90 PASS**; asset integration did not change authored content.
 - `0.1.80-dev`: Build-Setup **15/15 PASS** + provenance/content/persistence/Portable first-class gates + post-installer provenance, Portable E2E **PASS**, installer compile **PASS**.
 - Portable SHA256 `85EE0FB9DA514BD7362CE2C07695167EC6DE3D76ED2AE7A12AAC43D58A60862C`; Installer SHA256 `676AAB4606B2D9A22F123135DD365C14F39B37A945B2B7BB8FBEBB2255231A97`.
 - Release payload hard-requires `game_events_v1.json`; fresh checkout SHA của cả 4 Math runtime JSON khớp manifest. Event SHA `F9F25EA94DA7FCD20E360509EE53E6E758039CCF788FAFEC729A35F80D39A8B1`.
@@ -46,8 +46,8 @@ Definition: trạng thái dưới đây dùng strict three-lane Math Definition 
 ## Overall
 
 - **Content: 100% theo Math lane** — 7 chương, 17 chủ đề, 67 lesson, **402 authored questions**, đúng 6 câu/lesson = 2 basic + 2 medium + 2 application. Production semantic validator: **402/402 valid, 0 errors**; full Math content/event/pool suite **90/90 PASS**.
-- **Engine: 100% theo Math lane** — schema V5 + pack identity, targeted session 3 câu từ pool 6, durable ordered selected-set, exact resume/retry/corrupt recovery, rescue runtime/checkpoint/repair/terminal/reward idempotency. Latest `MathSessionPersistenceRuntimeSmoke`: **8120 assertions PASS** on `9d7dfb0`.
-- **UI/QA: playable P0 GREEN cho 5 bài đầu** — Home/Hub rescue entry, 5 mission cards, 3 checkpoint cards, behavior-aware repair/break, exact rescue resume, fail-safe event fallback, Garden completion, accessibility/keyboard/responsive, plus production art integration. Latest `ChildUiRuntimeSmoke`: **3750 assertions PASS** on `9d7dfb0`; offscreen capture **10 PNG / 3781 assertions PASS**; Performance **13 assertions PASS**; Motion **25 assertions PASS**.
+- **Engine: 100% theo Math lane** — schema V5 + pack identity, targeted session 3 câu từ pool 6, durable ordered selected-set, exact resume/retry/corrupt recovery, rescue runtime/checkpoint/repair/terminal/reward idempotency. Latest `MathSessionPersistenceRuntimeSmoke`: **8124 assertions PASS** on `3ec4b86`.
+- **UI/QA: playable P0 GREEN cho 5 bài đầu** — Home/Hub rescue entry, 5 mission cards, 3 checkpoint cards, behavior-aware repair/break, exact rescue resume, fail-safe event fallback, Garden completion, accessibility/keyboard/responsive, plus production art integration. Latest `ChildUiRuntimeSmoke`: **3750 assertions PASS** on `3ec4b86`; offscreen capture **10 PNG / 3781 assertions PASS**; Performance **13 assertions PASS**; Motion **25 assertions PASS**.
 - **Distribution playable dev artifact** — Build-Setup 15/15 + Portable E2E PASS + installer compile PASS trên clean `b45dc56`, artifact `0.1.80-dev`; full Installer E2E safety-blocked trên máy hiện tại vì learner data không có ownership marker.
 - **Three-AI Math DoD: DONE** — AI1, AI2 và AI3 đã hoàn tất baseline; AI3 playable first-five lane đã đạt STOP RULE và chuyển `LANE_DONE=YES`.
 
