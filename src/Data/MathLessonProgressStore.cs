@@ -153,7 +153,16 @@ WHERE id=@id AND child_id=@child AND planned_subject='math'
       WHERE r.session_id=@id AND r.session_mode='lesson'
         AND r.target_lesson_id=@lesson AND r.target_question_count=@attempts
         AND r.pack_id=@packId AND r.pack_version=@packVersion
-  );";
+  )
+  AND (SELECT COUNT(*)
+       FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id
+       WHERE a.session_id=@id AND a.subject='math' AND a.answered_at_utc IS NOT NULL) = @attempts
+  AND (SELECT COUNT(DISTINCT a.question_id)
+       FROM mastery_event m JOIN attempt a ON a.id=m.attempt_id
+       WHERE a.session_id=@id AND a.child_id=@child AND a.subject='math'
+         AND a.answered_at_utc IS NOT NULL AND a.attempt_index BETWEEN 1 AND 2
+         AND a.pack_id=@packId AND a.pack_version=@packVersion
+         AND m.child_id=@child AND m.skill_id=a.skill_id) = @attempts;";
                     session.Parameters.AddWithValue("@utc", utc);
                     session.Parameters.AddWithValue("@summary", string.IsNullOrWhiteSpace(summaryJson) ? (object)DBNull.Value : summaryJson);
                     session.Parameters.AddWithValue("@behavior", string.IsNullOrWhiteSpace(behaviorSummaryJson) ? (object)DBNull.Value : behaviorSummaryJson);
