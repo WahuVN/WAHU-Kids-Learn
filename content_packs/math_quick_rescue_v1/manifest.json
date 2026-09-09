@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "pack_id": "math_grade2_quick_rescue_learning_v1",
+  "version": "1.0.0",
+  "subject": "math",
+  "grade": 2,
+  "status": "VERIFIED",
+  "content_kind": "learning_game_content",
+  "files": [
+    {
+      "path": "learning_content_v1.json",
+      "sha256": "23471343D50AD45FCEBE5A6E75F2177D44D83D4DB65029CDFC3FCAB6CB221475"
+    }
+  ]
+}

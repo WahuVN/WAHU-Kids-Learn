@@ -4,3 +4,5 @@ content_packs/math_grade2_v1/verified_templates_v1.json text eol=crlf
 content_packs/math_grade2_v1/lesson_catalog_v1.json text eol=crlf
 content_packs/math_grade2_v1/question_bank_v1.json text eol=crlf
 content_packs/math_grade2_v1/game_events_v1.json text eol=lf
+content_packs/math_quick_rescue_v1/learning_content_v1.json text eol=lf
+content_packs/math_quick_rescue_v1/manifest.json text eol=lf
