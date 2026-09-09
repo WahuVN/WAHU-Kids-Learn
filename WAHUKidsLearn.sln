@@ -87,6 +87,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UpdateRuntimeSmoke", "Updat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WAHU.UpdateRuntimeSmoke", "tests\UpdateRuntimeSmoke\WAHU.UpdateRuntimeSmoke.csproj", "{CB54AB9F-24C6-4225-8CC3-E017521D67EC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WAHU.TypingSpace.Integration", "src\TypingSpaceIntegration\WAHU.TypingSpace.Integration.csproj", "{D1A3E2CF-0A0E-4D37-9F7A-7FB01B4A1001}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -181,6 +183,10 @@ Global
 		{CB54AB9F-24C6-4225-8CC3-E017521D67EC}.Debug|x86.Build.0 = Debug|x86
 		{CB54AB9F-24C6-4225-8CC3-E017521D67EC}.Release|x86.ActiveCfg = Release|x86
 		{CB54AB9F-24C6-4225-8CC3-E017521D67EC}.Release|x86.Build.0 = Release|x86
+		{D1A3E2CF-0A0E-4D37-9F7A-7FB01B4A1001}.Debug|x86.ActiveCfg = Debug|x86
+		{D1A3E2CF-0A0E-4D37-9F7A-7FB01B4A1001}.Debug|x86.Build.0 = Debug|x86
+		{D1A3E2CF-0A0E-4D37-9F7A-7FB01B4A1001}.Release|x86.ActiveCfg = Release|x86
+		{D1A3E2CF-0A0E-4D37-9F7A-7FB01B4A1001}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
