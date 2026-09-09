@@ -1,9 +1,9 @@
 # MATH LIVE STATUS
 
-Updated: 2026-09-08
-LAST_FULLY_VERIFIED_HEAD=`afb302f`
-LATEST_UI_VERIFIED_HEAD=`8360d44`
-LATEST_PERSISTENCE_VERIFIED_HEAD=`8360d44`
+Updated: 2026-09-09
+LAST_FULLY_VERIFIED_HEAD=`9c19e95`
+LATEST_UI_VERIFIED_HEAD=`9c19e95`
+LATEST_PERSISTENCE_VERIFIED_HEAD=`9c19e95`
 MATH_3AI_DONE=YES
 AI3_LANE_DONE=YES
 PLAYABLE_FIRST_FIVE_P0=GREEN
@@ -11,9 +11,11 @@ PLAYABLE_INSTALLER_E2E=BLOCKED_SAFETY_UNOWNED_LOCAL_DATA
 
 Definition: trạng thái dưới đây dùng strict three-lane Math Definition of Done, không lấy việc “mở được màn hình” làm DONE.
 
-**CURRENT RELEASE AUTHORITY — `afb302f / 0.1.92-dev`: GREEN.** Full Build-Setup **15/15 PASS**; Child UI **4477**; deterministic real-state offscreen capture **12 PNG / 4529**; persistence **8145**; SQLite **181**; production art **74/74**; Portable E2E PASS; installer compile PASS; Portable All-in-One E2E PASS với official Microsoft .NET Framework 4.8 offline redistributable. GitHub prerelease `v0.1.92-dev` và `update-dev` feed đã publish. Installed-mode Installer E2E vẫn `BLOCKED_SAFETY_UNOWNED_LOCAL_DATA`; production signing và real Win7 target smoke vẫn external.
+**CURRENT RELEASE AUTHORITY — `9c19e95 / 0.1.94-dev`: GREEN.** GitHub prerelease `v0.1.94-dev` và `update-dev` feed đã publish đúng `9c19e9567c297e5cf6627bf992d438c7c815b8ca`. Child learner flow là **single-window native**: Home → Thế giới Toán → Bản đồ cứu hộ → Bài học; Parent/PIN là modal duy nhất có chủ đích. Full Build-Setup PASS: Child UI **4852**, deterministic offscreen **17 PNG / 4919**, persistence **8145**, SQLite **184**, Learning **800**, Performance **13**, Motion **25**, production art **74/74**, Portable E2E PASS, installer compile PASS và All-in-One E2E PASS. Portable SHA `306F9FDEF1C5CD57D4A4ABE93221B8554E47BFB997A1FC553E9D997029C33DBB`; Installer SHA `A966B516D3FB620959B13D8D64E3C4A9EAC7102121A3BEDC12BBF9F636B7A819`; All-in-One SHA `2EEFCCCB183E1D8BDB4ADEB6C74650B23B7DDB5489507ECEEAA474CCBD62F71E` (**210,453,349 bytes**). Installed-mode Installer E2E = `BLOCKED_SAFETY_UNOWNED_LOCAL_DATA`; no learner data was touched. Production signing and real Win7 target smoke remain external.
 
-**POST-RELEASE SCHEMA V6 QA — `8360d44`: GREEN.** SQLite **184 PASS**, persistence **8145 PASS** (0 warning / 0 error), Learning **800 PASS**, Child UI **4477 PASS**, offscreen **12 PNG / 4529 PASS**, Performance **13 PASS**, Motion **25 PASS**, `git diff --check` PASS. Đây là latest source QA; không đổi provenance/tag của published `0.1.92-dev` tại `afb302f`.
+**HISTORICAL RELEASE AUTHORITY — `afb302f / 0.1.92-dev`: GREEN.** Full Build-Setup **15/15 PASS**; Child UI **4477**; deterministic real-state offscreen capture **12 PNG / 4529**; persistence **8145**; SQLite **181**; production art **74/74**; Portable E2E PASS; installer compile PASS; Portable All-in-One E2E PASS với official Microsoft .NET Framework 4.8 offline redistributable. GitHub prerelease `v0.1.92-dev` và `update-dev` feed đã publish. Installed-mode Installer E2E vẫn `BLOCKED_SAFETY_UNOWNED_LOCAL_DATA`; production signing và real Win7 target smoke vẫn external.
+
+**HISTORICAL POST-RELEASE SCHEMA V6 QA — `8360d44`: GREEN.** SQLite **184 PASS**, persistence **8145 PASS** (0 warning / 0 error), Learning **800 PASS**, Child UI **4477 PASS**, offscreen **12 PNG / 4529 PASS**, Performance **13 PASS**, Motion **25 PASS**, `git diff --check` PASS. Đây là latest source QA; không đổi provenance/tag của published `0.1.92-dev` tại `afb302f`.
 
 ## Playable Event V1 — current
 

@@ -1,13 +1,15 @@
 # AI3 — MATH UI / QA / INTEGRATION AUDIT
 
-Updated: 2026-09-08
+Updated: 2026-09-09
 Owner: AI3
-Last fully verified release HEAD: `afb302f`
-Latest UI/performance verified HEAD: `8360d44`
-Latest persistence verified HEAD: `8360d44`
+Last fully verified release HEAD: `9c19e95`
+Latest UI/performance verified HEAD: `9c19e95`
+Latest persistence verified HEAD: `9c19e95`
 Status: `LANE_DONE=YES`; `PLAYABLE_UI_P0=GREEN`; `INSTALLER_E2E=BLOCKED_SAFETY_UNOWNED_LOCAL_DATA`
 
-**Current release authority:** `afb302f / 0.1.92-dev` — Build-Setup **15/15 PASS**, Child UI **4477**, offscreen real-state capture **12 PNG / 4529**, persistence **8145**, SQLite **181**, production art **74/74**, Portable E2E PASS, installer compile PASS, and Portable All-in-One E2E PASS with verified Microsoft .NET Framework 4.8 offline runtime. GitHub prerelease `v0.1.92-dev` and `update-dev` feed are published. Installed-mode Installer E2E remains safety-blocked before touching real learner data. **Post-release schema V6 QA on `8360d44` is GREEN:** SQLite **184**, persistence **8145**, Learning **800**, Child UI **4477**, capture **12/4529**, Performance **13**, Motion **25**; this does not change the `0.1.92` release provenance. Older release-specific sections below are retained as historical audit evidence.
+**Current release authority:** `9c19e95 / 0.1.94-dev` — GitHub prerelease `v0.1.94-dev` và `update-dev` feed đã publish đúng `9c19e9567c297e5cf6627bf992d438c7c815b8ca`. Child learner flow là **single-window native** (Home → Math World → Rescue Map → Lesson Play), chỉ Parent/PIN còn modal có chủ đích. Full Build-Setup PASS với Child UI **4852**, deterministic capture **17 PNG / 4919**, persistence **8145**, SQLite **184**, Learning **800**, Performance **13**, Motion **25**, validator **402/402 + 5/5**, content/event/pool **90/90**, production art **74/74**, Portable E2E PASS, installer compile PASS và All-in-One E2E PASS. Portable SHA `306F9FDEF1C5CD57D4A4ABE93221B8554E47BFB997A1FC553E9D997029C33DBB`; Installer SHA `A966B516D3FB620959B13D8D64E3C4A9EAC7102121A3BEDC12BBF9F636B7A819`; All-in-One SHA `2EEFCCCB183E1D8BDB4ADEB6C74650B23B7DDB5489507ECEEAA474CCBD62F71E` (**210,453,349 bytes**, verified Microsoft .NET Framework 4.8 offline runtime). Installed-mode Installer E2E remains safety-blocked before touching real learner data; production signing and real Win7 validation remain external. Older release-specific sections below are historical audit evidence.
+
+**Historical release authority:** `afb302f / 0.1.92-dev` — Build-Setup **15/15 PASS**, Child UI **4477**, offscreen real-state capture **12 PNG / 4529**, persistence **8145**, SQLite **181**, production art **74/74**, Portable E2E PASS, installer compile PASS, and Portable All-in-One E2E PASS with verified Microsoft .NET Framework 4.8 offline runtime. GitHub prerelease `v0.1.92-dev` and `update-dev` feed are published. Installed-mode Installer E2E remains safety-blocked before touching real learner data. **Post-release schema V6 QA on `8360d44` is GREEN:** SQLite **184**, persistence **8145**, Learning **800**, Child UI **4477**, capture **12/4529**, Performance **13**, Motion **25**; this does not change the `0.1.92` release provenance. Older release-specific sections below are retained as historical audit evidence.
 
 ## PLAYABLE EVENT V1 — current evidence
 

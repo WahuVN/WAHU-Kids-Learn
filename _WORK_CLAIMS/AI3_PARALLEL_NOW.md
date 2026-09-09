@@ -11,15 +11,15 @@ EXTERNAL_BLOCKERS=INSTALLER_E2E_UNOWNED_LOCAL_DATA;PRODUCTION_SIGNING_UNAVAILABL
 EXECUTION_MODE=PLAYABLE_EVENT_UI_NO_WAIT
 ACTIVE_PHASE=PLAYABLE_EVENT_GAME_V1
 ACTIVE_FOCUS=FIRST_FIVE_QUICK_RESCUE_UI_E2E_RELEASE
-LAST_FULLY_VERIFIED_HEAD=`afb302f`
-LATEST_UI_VERIFIED_HEAD=`8360d44`
-LATEST_PERSISTENCE_VERIFIED_HEAD=`8360d44`
-LAST_VERIFIED_CHILD_UI=4477_ASSERTIONS_PASS
+LAST_FULLY_VERIFIED_HEAD=`9c19e95`
+LATEST_UI_VERIFIED_HEAD=`9c19e95`
+LATEST_PERSISTENCE_VERIFIED_HEAD=`9c19e95`
+LAST_VERIFIED_CHILD_UI=4852_ASSERTIONS_PASS
 LAST_VERIFIED_PERSISTENCE=8145_ASSERTIONS_PASS
-LATEST_OFFSCREEN_CAPTURE_HEAD=`8360d44`
-LAST_VERIFIED_OFFSCREEN_CAPTURE=12_PNG_4529_ASSERTIONS_PASS
+LATEST_OFFSCREEN_CAPTURE_HEAD=`9c19e95`
+LAST_VERIFIED_OFFSCREEN_CAPTURE=17_PNG_4919_ASSERTIONS_PASS
 LAST_VERIFIED_CONTENT=90_OF_90_PASS
-LAST_VERIFIED_RELEASE=`0.1.92-dev`_POST_INSTALLER_PROVENANCE_CONTENT_90_PERSISTENCE_8145_UI_4477_CAPTURE_4529_SQLITE_181_PRODUCTION_ART_74_PORTABLE_E2E_INSTALLER_ALL_IN_ONE_E2E_PASS
+LAST_VERIFIED_RELEASE=`0.1.94-dev`_SINGLE_WINDOW_UI_4852_CAPTURE_17_4919_PERSISTENCE_8145_SQLITE_184_PRODUCTION_ART_74_PORTABLE_E2E_INSTALLER_ALL_IN_ONE_E2E_GITHUB_UPDATE_FEED_PASS
 EARLY_LESSON_DEEP_HEAD=`e34136d`
 EARLY_LESSON_DEEP_CHILD_UI=3564_ASSERTIONS_PASS
 EARLY_LESSON_DEEP_PERSISTENCE=7592_ASSERTIONS_PASS
@@ -28,7 +28,18 @@ EARLY_LESSON_DEEP_VALIDATOR=402_OF_402_VALID
 
 > Khi người dùng bảo “đọc file và làm”: đọc toàn bộ file này, inspect current HEAD, verify UI/release trên contract hiện hành rồi tiếp tục QA/hardening. Không dừng chỉ vì `LANE_DONE=YES`.
 
-## RELEASE AUTHORITY OVERRIDE — `afb302f / 0.1.92-dev`
+## RELEASE AUTHORITY OVERRIDE — `9c19e95 / 0.1.94-dev`
+
+- GitHub prerelease `v0.1.94-dev` đã publish đúng source `9c19e9567c297e5cf6627bf992d438c7c815b8ca`; `update-dev` feed đã cập nhật và chỉ có đúng một `update-manifest.json`.
+- Learner UI V2 dùng **một top-level window** cho flow trẻ em: Home → Thế giới Toán → Bản đồ cứu hộ → Bài học; Back đổi page trong shell, không mở chồng Form/tab. Modal chỉ còn ở khu vực Phụ huynh/PIN có chủ đích.
+- Full Build-Setup **PASS**: Setup 42, Behavior 15, Learning 800, Motion 25, Child UI **4852**, Content 21, Security 19, Audio 14, Performance 13, Update 33, SQLite **184**, persistence **8145**, validator **402/402 + 5/5**, content/event/pool **90/90**.
+- Deterministic release-head capture **17 PNG / 4919 assertions PASS**; production art **74/74** với manifest SHA `6BD7172D8B7D0239960207B5A43C2CAE466220421F88D6D7C57215005BC1D8A6`.
+- Portable **88,033,286 bytes**, SHA256 `306F9FDEF1C5CD57D4A4ABE93221B8554E47BFB997A1FC553E9D997029C33DBB`; Portable E2E PASS và xác nhận installed learner DB hash không đổi.
+- Installer **89,227,977 bytes**, SHA256 `A966B516D3FB620959B13D8D64E3C4A9EAC7102121A3BEDC12BBF9F636B7A819`; compile PASS. Installed-mode Installer E2E **BLOCKED_SAFETY_UNOWNED_LOCAL_DATA** trước khi chạm dữ liệu thật.
+- Portable All-in-One **210,453,349 bytes**, SHA256 `2EEFCCCB183E1D8BDB4ADEB6C74650B23B7DDB5489507ECEEAA474CCBD62F71E`; nhúng official Microsoft .NET Framework 4.8 offline runtime, E2E PASS và learner DB không đổi.
+- `production_signed=false`; production signing và real Windows 7 target smoke vẫn là external PENDING/UNAVAILABLE.
+
+## HISTORICAL RELEASE AUTHORITY — `afb302f / 0.1.92-dev`
 
 - GitHub prerelease `v0.1.92-dev` đã publish đúng source `afb302f`; `update-dev` feed đã cập nhật.
 - Full Build-Setup **15/15 PASS**: Child UI **4477**, persistence **8145**, SQLite **181**, Performance **13**, Motion **25**, validator **402/402 + 5/5**, content/event/pool **90/90**, production art **74/74**, Portable E2E PASS, installer compile PASS, post-installer provenance PASS.
