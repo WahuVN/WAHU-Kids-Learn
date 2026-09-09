@@ -22,6 +22,7 @@ namespace WAHU.AudioRuntimeSmoke
                 TestInspector(shortWav, root);
                 TestCache(shortWav, otherWav);
                 TestCoordinator(shortWav, otherWav);
+                TestRescueHooks(shortWav, root);
                 Console.WriteLine("AUDIO_RUNTIME_SMOKE_PASS assertions=" + _assertions);
             }
             finally
@@ -82,6 +83,52 @@ namespace WAHU.AudioRuntimeSmoke
             var failing = new FakeBackend { ThrowOnPlay = true };
             using (var audio = new AudioCoordinator(failing, 128 * 1024))
                 Assert(audio.PlayVoice(voice).Reason == "audio_backend_failure", "backend_failure_no_crash");
+        }
+
+        private static void TestRescueHooks(string sourceWav, string root)
+        {
+            var cueRoot = Path.Combine(root, "rescue-cues");
+            Directory.CreateDirectory(cueRoot);
+            foreach (var file in new[]
+            {
+                RescueGameAudioHooks.PositiveAnswerFile,
+                RescueGameAudioHooks.CheckpointStarFile,
+                RescueGameAudioHooks.MissionCompleteFile,
+                RescueGameAudioHooks.GardenUnlockFile,
+                RescueGameAudioHooks.MissionMusicFile
+            })
+                File.Copy(sourceWav, Path.Combine(cueRoot, file), true);
+
+            var backend = new FakeBackend();
+            using (var audio = new AudioCoordinator(backend, 128 * 1024))
+            {
+                var hooks = new RescueGameAudioHooks(audio, cueRoot);
+                Assert(hooks.PlayPositiveAnswer().Played, "rescue_positive_answer_hook_plays");
+                audio.Stop();
+                Assert(hooks.PlayCheckpointStar().Played, "rescue_checkpoint_star_hook_plays");
+                audio.Stop();
+                Assert(hooks.PlayMissionComplete().Played, "rescue_mission_complete_hook_plays");
+                audio.Stop();
+                Assert(hooks.PlayGardenUnlock().Played, "rescue_garden_unlock_hook_plays");
+                audio.Stop();
+
+                var musicDisabled = hooks.TryStartMissionMusic();
+                Assert(!musicDisabled.Played && musicDisabled.Reason == "audio_channel_disabled", "rescue_music_respects_opt_in");
+                audio.MusicEnabled = true;
+                Assert(hooks.TryStartMissionMusic().Played, "rescue_music_hook_plays_when_enabled");
+                audio.Stop();
+
+                var unknown = hooks.Play((RescueGameAudioCue)999);
+                Assert(!unknown.Played && unknown.Reason == "rescue_audio_cue_unknown", "rescue_unknown_cue_safe_fallback");
+            }
+
+            var missingBackend = new FakeBackend();
+            using (var audio = new AudioCoordinator(missingBackend, 128 * 1024))
+            {
+                var hooks = new RescueGameAudioHooks(audio, Path.Combine(root, "missing-cues"));
+                var missing = hooks.PlayCheckpointStar();
+                Assert(!missing.Played && missing.Reason == "audio_file_missing", "rescue_missing_audio_asset_no_crash");
+            }
         }
 
         private static void WritePcmWave(string path, int sampleRate, short channels, short bits, int durationMs)
