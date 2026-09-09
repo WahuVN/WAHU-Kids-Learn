@@ -16,7 +16,6 @@ namespace WAHUKidsLearn
         private Label _missionSummary;
         private ChildActionButton _primaryMissionButton;
         private ChildActionButton _mathWorldButton;
-        private ChildActionButton _gardenButton;
         private ChildCard _gardenCard;
         private GardenWorldControl _garden;
         private Label _gardenProgress;
@@ -168,10 +167,9 @@ namespace WAHUKidsLearn
             _heroCard.Controls.Add(_heroLayout);
             _root.Controls.Add(_heroCard, 0, 1);
 
-            var bottom = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, RowCount = 1, Margin = Padding.Empty };
-            bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 34));
-            bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
-            bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
+            var bottom = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1, Margin = Padding.Empty };
+            bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 42));
+            bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 58));
             bottom.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
             _mathWorldButton = BuildBottomButton("Học theo bài", "10_UIIcons/icon_math.png", ChildVisualTheme.Sky, ChildVisualTheme.SkyStrong);
@@ -180,11 +178,6 @@ namespace WAHUKidsLearn
             _mathWorldButton.Enabled = _context.IsLearnerReady;
             bottom.Controls.Add(_mathWorldButton, 0, 0);
 
-            _gardenButton = BuildBottomButton("Khu vườn của bé", "10_UIIcons/icon_garden.png", ChildVisualTheme.Mint, ChildVisualTheme.MintStrong);
-            _gardenButton.AccessibleName = "Xem tiến bộ khu vườn";
-            _gardenButton.TabStop = false;
-            bottom.Controls.Add(_gardenButton, 1, 0);
-
             _gardenCard = new ChildCard
             {
                 Dock = DockStyle.Fill,
@@ -192,25 +185,46 @@ namespace WAHUKidsLearn
                 Padding = new Padding(LearnerDesignTokens.SpaceS),
                 CardColor = Color.FromArgb(248, 251, 244),
                 BorderColor = Color.FromArgb(214, 229, 208),
-                Radius = LearnerDesignTokens.RadiusCard
+                Radius = LearnerDesignTokens.RadiusCard,
+                AccessibleName = "Khu vườn tiến bộ của bé"
             };
-            var gardenLayout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 2, Margin = Padding.Empty };
-            gardenLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 68));
-            gardenLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 32));
+            var gardenLayout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 2, Margin = Padding.Empty };
+            gardenLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 42));
+            gardenLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            gardenLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
+            gardenLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+            gardenLayout.Controls.Add(new ChildAssetIconControl
+            {
+                Dock = DockStyle.Fill,
+                Margin = new Padding(2),
+                AssetPath = "10_UIIcons/icon_garden.png",
+                Inset = 3,
+                AccessibleName = "Biểu tượng khu vườn"
+            }, 0, 0);
+            gardenLayout.Controls.Add(new Label
+            {
+                Dock = DockStyle.Fill,
+                Text = "Khu vườn của bé",
+                TextAlign = ContentAlignment.MiddleLeft,
+                ForeColor = ChildVisualTheme.MintStrong,
+                Font = ChildVisualTheme.Font(10f, FontStyle.Bold),
+                AccessibleName = "Khu vườn của bé"
+            }, 1, 0);
             _garden = new GardenWorldControl { Dock = DockStyle.Fill, Margin = Padding.Empty, GrowthLevel = 1 };
-            gardenLayout.Controls.Add(_garden, 0, 0);
+            gardenLayout.Controls.Add(_garden, 0, 1);
             _gardenProgress = new Label
             {
                 Dock = DockStyle.Fill,
                 Text = "Khu vườn đang chờ nhiệm vụ đầu tiên.",
-                TextAlign = ContentAlignment.MiddleCenter,
+                TextAlign = ContentAlignment.MiddleLeft,
                 ForeColor = ChildVisualTheme.MutedInk,
                 Font = ChildVisualTheme.Font(9f),
+                Padding = new Padding(8, 0, 2, 0),
                 AccessibleName = "Tiến bộ khu vườn"
             };
-            gardenLayout.Controls.Add(_gardenProgress, 0, 1);
+            gardenLayout.Controls.Add(_gardenProgress, 1, 1);
             _gardenCard.Controls.Add(gardenLayout);
-            bottom.Controls.Add(_gardenCard, 2, 0);
+            bottom.Controls.Add(_gardenCard, 1, 0);
 
             _root.Controls.Add(bottom, 0, 2);
             Controls.Add(_root);

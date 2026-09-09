@@ -337,7 +337,8 @@ namespace WAHUKidsLearn
             catch { }
             var lesson = _catalog == null ? null : _catalog.FindLesson(_resumableLessonId);
             _continueButton.Enabled = lesson != null;
-            _continueButton.Text = lesson == null ? "Chưa có bài đang học" : "Tiếp tục: " + lesson.TitleVi;
+            _continueButton.Text = lesson == null ? "Chưa có bài đang học" : "Tiếp tục bài đang học";
+            _continueButton.AccessibleName = lesson == null ? "Chưa có bài Toán đang học" : "Tiếp tục bài " + lesson.TitleVi;
             _continueButton.AccessibleDescription = lesson == null ? "Không có bài học đang dở." : "Tiếp tục đúng bài " + lesson.TitleVi + " đang được lưu.";
         }
 

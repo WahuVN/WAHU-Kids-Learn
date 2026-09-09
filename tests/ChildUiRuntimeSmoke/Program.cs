@@ -1899,6 +1899,12 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                     RenderFormAndAssert(shell, 1180, 760, "learner_shell_home_default_window");
                     A(string.Equals(Get<string>(shell, "CurrentLayoutProfileName"), "Standard", StringComparison.Ordinal),
                         "learner_shell_default_window_uses_standard_profile");
+                    RenderFormAndAssert(shell, 1125, 800, "learner_shell_home_125pct_window");
+                    var homePage = Get<Control>(shell, "CurrentPageControl");
+                    A(FindButtonContaining(homePage, "Khu vườn") == null,
+                        "learner_shell_home_has_no_dead_garden_button");
+                    A(CountControlsOfType(shell, typeof(TabControl)) == 0,
+                        "learner_shell_home_has_no_tab_control");
                     Invoke(shell, "NavigateToRouteName", "MathWorld");
                     Application.DoEvents();
                     A(string.Equals(Get<string>(shell, "CurrentRouteName"), "MathWorld", StringComparison.Ordinal),
@@ -1910,6 +1916,11 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                     A(!(activePage is Form) && activePage.Parent == shellHost,
                         "learner_shell_math_world_stays_inside_single_top_level_window");
                     RenderFormAndAssert(shell, 900, 640, "learner_shell_math_world_min_window");
+                    RenderFormAndAssert(shell, 1180, 760, "learner_shell_math_world_default_window");
+                    RenderFormAndAssert(shell, 1125, 800, "learner_shell_math_world_125pct_window");
+                    var continueButton = FindButtonContaining(activePage, "Tiếp tục bài đang học");
+                    if (continueButton != null)
+                        A(continueButton.Text.Length <= 22, "learner_shell_math_world_resume_cta_stays_short");
                     Invoke(shell, "NavigateToRouteName", "RescueMap");
                     Application.DoEvents();
                     activePage = Get<Control>(shell, "CurrentPageControl");
@@ -1918,6 +1929,8 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                     A(Get<int>(activePage, "EventCount") == 5 && !string.IsNullOrWhiteSpace(Get<string>(activePage, "SelectedEventId")),
                         "learner_shell_rescue_map_loads_five_authored_events");
                     RenderFormAndAssert(shell, 900, 640, "learner_shell_rescue_map_min_window");
+                    RenderFormAndAssert(shell, 1180, 760, "learner_shell_rescue_map_default_window");
+                    RenderFormAndAssert(shell, 1125, 800, "learner_shell_rescue_map_125pct_window");
 
                     var firstLessonId = "m2_ls_num_count_read_write_0_1000";
                     var shellContext = GetField<object>(shell, "_context");
@@ -1932,6 +1945,12 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                       Get<bool>(activePage, "HasActiveSession") && !string.IsNullOrWhiteSpace(Get<string>(activePage, "CurrentContentQuestionId")),
                         "learner_shell_lesson_play_starts_real_targeted_session");
                     RenderFormAndAssert(shell, 900, 640, "learner_shell_lesson_play_min_window");
+                    RenderFormAndAssert(shell, 1180, 760, "learner_shell_lesson_play_default_window");
+                    RenderFormAndAssert(shell, 1125, 800, "learner_shell_lesson_play_125pct_window");
+                    A(shellHost.Controls.Count == 4 && shellHost.Controls.Cast<Control>().All(x => !(x is Form)),
+                        "learner_shell_caches_exactly_four_native_pages_without_extra_forms");
+                    A(CountControlsOfType(shell, typeof(TabControl)) == 0,
+                        "learner_shell_all_routes_have_no_tab_control");
 
                     var router = GetField<object>(shell, "_router");
                     Invoke(router, "GoBack");
@@ -1946,6 +1965,12 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                     Application.DoEvents();
                     A(string.Equals(Get<string>(shell, "CurrentRouteName"), "MathWorld", StringComparison.Ordinal),
                         "learner_shell_back_from_rescue_returns_math_world");
+                    activePage = Get<Control>(shell, "CurrentPageControl");
+                    var resumedCta = FindButtonContaining(activePage, "Tiếp tục bài đang học");
+                    A(resumedCta != null && string.Equals(resumedCta.Text, "Tiếp tục bài đang học", StringComparison.Ordinal),
+                        "learner_shell_math_world_resume_cta_avoids_dynamic_long_title");
+                    A(resumedCta.AccessibleName.IndexOf("Đếm, đọc và viết số đến 1000", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "learner_shell_math_world_resume_cta_keeps_exact_lesson_accessibility");
                     Invoke(router, "GoBack");
                     Application.DoEvents();
                     A(string.Equals(Get<string>(shell, "CurrentRouteName"), "Home", StringComparison.Ordinal),
@@ -4199,6 +4224,15 @@ END;");
             return null;
         }
 
+        private static int CountControlsOfType(Control root, Type type)
+        {
+            if (root == null || type == null) return 0;
+            var count = type.IsAssignableFrom(root.GetType()) ? 1 : 0;
+            foreach (Control child in root.Controls)
+                count += CountControlsOfType(child, type);
+            return count;
+        }
+
         private static void RenderFormAndAssert(Form form, int width, int height, string name)
         {
             A(width >= form.MinimumSize.Width && height >= form.MinimumSize.Height, name + "_meets_minimum_size");
@@ -4211,6 +4245,7 @@ END;");
             A(Math.Abs(root.Height - form.ClientSize.Height) <= 2, name + "_root_fills_height");
             A(CountSizedControls(root) >= 15, name + "_keeps_sized_layout_tree");
             AssertVisibleTreeWithinParents(root, name);
+            AssertLayoutSiblingsDoNotOverlap(root, name);
             CaptureControlIfRequested(root, name);
         }
 
@@ -4239,6 +4274,34 @@ END;");
                 }
                 AssertVisibleTreeWithinParents(child, name);
             }
+        }
+
+        private static void AssertLayoutSiblingsDoNotOverlap(Control parent, string name)
+        {
+            if (parent == null) return;
+            var checksSiblings = parent is TableLayoutPanel || parent is FlowLayoutPanel;
+            if (checksSiblings)
+            {
+                var visible = parent.Controls.Cast<Control>()
+                    .Where(IsControlLocallyVisible)
+                    .Where(x => x.Width > 0 && x.Height > 0)
+                    .ToList();
+                for (var i = 0; i < visible.Count; i++)
+                {
+                    for (var j = i + 1; j < visible.Count; j++)
+                    {
+                        var first = visible[i];
+                        var second = visible[j];
+                        var intersection = Rectangle.Intersect(first.Bounds, second.Bounds);
+                        A(intersection.Width <= 1 || intersection.Height <= 1,
+                            name + "_layout_siblings_do_not_overlap_" + parent.GetType().Name + "_" +
+                            first.GetType().Name + "_" + i + "_" + second.GetType().Name + "_" + j);
+                    }
+                }
+            }
+
+            foreach (Control child in parent.Controls)
+                if (IsControlLocallyVisible(child)) AssertLayoutSiblingsDoNotOverlap(child, name);
         }
 
         private static string ResolveCaptureDirectory(string[] args)
