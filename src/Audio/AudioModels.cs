@@ -25,6 +25,13 @@ namespace WAHU.Audio
         public string Path { get; set; }
         public AudioPriority Priority { get; set; }
         public bool Loop { get; set; }
+        public double Volume { get; set; } = 1.0;
+    }
+
+    /// <summary>Optional capability; legacy backends may ignore per-request volume safely.</summary>
+    public interface IAudioVolumeBackend
+    {
+        void SetVolume(double volume);
     }
 
     public sealed class AudioPlaybackResult

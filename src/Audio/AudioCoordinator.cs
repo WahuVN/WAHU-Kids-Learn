@@ -70,6 +70,13 @@ namespace WAHU.Audio
             try
             {
                 _backend.Stop();
+                var volumeBackend = _backend as IAudioVolumeBackend;
+                if (volumeBackend != null)
+                {
+                    var volume = request.Volume;
+                    if (double.IsNaN(volume) || double.IsInfinity(volume)) volume = 1.0;
+                    volumeBackend.SetVolume(Math.Max(0.0, Math.Min(1.0, volume)));
+                }
                 _backend.Play(data, request.Loop);
                 _activePriority = request.Priority;
                 _busyUntilUtc = request.Loop ? DateTime.MaxValue : now.AddMilliseconds(clip.DurationMs);

@@ -13,6 +13,7 @@
     <Compile Include="SoundPlayerBackend.cs" />
     <Compile Include="AudioCoordinator.cs" />
     <Compile Include="RescueGameAudioHooks.cs" />
+    <Compile Include="TypingGameAudioFeedback.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
