@@ -56,6 +56,24 @@ namespace WAHU.Audio
         }
 
         /// <summary>
+        /// Bridges a durable reward transition to exactly one child-facing cue. Terminal reward wins
+        /// over checkpoint feedback so GAME_COMPLETE never stacks two sounds on top of each other.
+        /// A newly unlocked Garden item gets the Garden cue; otherwise completion gets the fixed
+        /// mission-complete cue. Resume/no-change transitions intentionally stay silent.
+        /// </summary>
+        public AudioPlaybackResult PlayRewardFeedback(
+            int newlyEarnedCheckpointStars,
+            bool finalChestNewlyUnlocked,
+            bool gardenItemNewlyUnlocked)
+        {
+            if (finalChestNewlyUnlocked)
+                return gardenItemNewlyUnlocked ? PlayGardenUnlock() : PlayMissionComplete();
+            if (newlyEarnedCheckpointStars > 0)
+                return PlayCheckpointStar();
+            return Denied("no_reward_transition");
+        }
+
+        /// <summary>
         /// Music remains opt-in through AudioCoordinator.MusicEnabled. Calling this while music is
         /// disabled is safe and returns audio_channel_disabled.
         /// </summary>

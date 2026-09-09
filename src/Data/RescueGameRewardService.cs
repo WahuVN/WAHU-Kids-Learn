@@ -52,7 +52,7 @@ namespace WAHU.Data
     {
         public const int CheckpointStarGoal = 3;
         public const string CheckpointRewardId = "rescue_checkpoint_star";
-        public const string FinalChestRewardId = "garden_growth_step";
+        public const string FinalChestRewardId = GameWorldRewardService.RewardId;
 
         private readonly LearningDatabase _database;
         private readonly GameWorldRewardService _garden;
@@ -228,10 +228,12 @@ FROM (
 FROM reward_event
 WHERE child_id=@child
   AND reward_type=@type
+  AND reward_id=@reward
   AND source_event='session_completed'
   AND source_ref=@session;";
                 command.Parameters.AddWithValue("@child", childId);
                 command.Parameters.AddWithValue("@type", GameWorldRewardService.RewardType);
+                command.Parameters.AddWithValue("@reward", GameWorldRewardService.RewardId);
                 command.Parameters.AddWithValue("@session", sessionId);
                 return Convert.ToInt32(command.ExecuteScalar(), CultureInfo.InvariantCulture) > 0;
             }

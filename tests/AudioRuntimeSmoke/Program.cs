@@ -22,7 +22,7 @@ namespace WAHU.AudioRuntimeSmoke
                 TestInspector(shortWav, root);
                 TestCache(shortWav, otherWav);
                 TestCoordinator(shortWav, otherWav);
-                TestRescueHooks(shortWav, root);
+                TestRescueHooks(shortWav, otherWav, root);
                 Console.WriteLine("AUDIO_RUNTIME_SMOKE_PASS assertions=" + _assertions);
             }
             finally
@@ -85,7 +85,7 @@ namespace WAHU.AudioRuntimeSmoke
                 Assert(audio.PlayVoice(voice).Reason == "audio_backend_failure", "backend_failure_no_crash");
         }
 
-        private static void TestRescueHooks(string sourceWav, string root)
+        private static void TestRescueHooks(string sourceWav, string shortGardenWav, string root)
         {
             var cueRoot = Path.Combine(root, "rescue-cues");
             Directory.CreateDirectory(cueRoot);
@@ -98,6 +98,7 @@ namespace WAHU.AudioRuntimeSmoke
                 RescueGameAudioHooks.MissionMusicFile
             })
                 File.Copy(sourceWav, Path.Combine(cueRoot, file), true);
+            File.Copy(shortGardenWav, Path.Combine(cueRoot, RescueGameAudioHooks.GardenUnlockFile), true);
 
             var backend = new FakeBackend();
             using (var audio = new AudioCoordinator(backend, 128 * 1024))
@@ -110,6 +111,19 @@ namespace WAHU.AudioRuntimeSmoke
                 Assert(hooks.PlayMissionComplete().Played, "rescue_mission_complete_hook_plays");
                 audio.Stop();
                 Assert(hooks.PlayGardenUnlock().Played, "rescue_garden_unlock_hook_plays");
+                audio.Stop();
+
+                var noReward = hooks.PlayRewardFeedback(0, false, false);
+                Assert(!noReward.Played && noReward.Reason == "no_reward_transition", "rescue_reward_bridge_silent_without_transition");
+                var checkpointReward = hooks.PlayRewardFeedback(1, false, false);
+                Assert(checkpointReward.Played && checkpointReward.DurationMs > 790, "rescue_reward_bridge_maps_checkpoint_star");
+                audio.Stop();
+                var finalReward = hooks.PlayRewardFeedback(0, true, false);
+                Assert(finalReward.Played && finalReward.DurationMs > 790, "rescue_reward_bridge_maps_plain_mission_complete");
+                audio.Stop();
+                var gardenReward = hooks.PlayRewardFeedback(1, true, true);
+                Assert(gardenReward.Played && gardenReward.DurationMs > 390 && gardenReward.DurationMs < 410,
+                    "rescue_reward_bridge_terminal_garden_cue_wins_over_checkpoint");
                 audio.Stop();
 
                 var musicDisabled = hooks.TryStartMissionMusic();

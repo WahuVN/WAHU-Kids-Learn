@@ -28,6 +28,7 @@ namespace WAHU.Data
     public sealed class GameWorldRewardService
     {
         public const string RewardType = "garden_growth";
+        public const string RewardId = "growth_step";
         private readonly LearningDatabase _database;
 
         private static readonly KeyValuePair<int, string>[] Milestones =
@@ -79,7 +80,7 @@ VALUES(@id,@child,@type,@reward,'session_completed',@session,@key,@utc);";
                     reward.Parameters.AddWithValue("@id", "reward-" + Guid.NewGuid().ToString("N"));
                     reward.Parameters.AddWithValue("@child", childId);
                     reward.Parameters.AddWithValue("@type", RewardType);
-                    reward.Parameters.AddWithValue("@reward", "growth_step");
+                    reward.Parameters.AddWithValue("@reward", RewardId);
                     reward.Parameters.AddWithValue("@session", sessionId);
                     reward.Parameters.AddWithValue("@key", sourceKey);
                     reward.Parameters.AddWithValue("@utc", DateTime.UtcNow.ToString("o"));
