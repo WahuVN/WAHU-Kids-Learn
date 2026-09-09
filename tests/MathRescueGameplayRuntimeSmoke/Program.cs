@@ -33,6 +33,7 @@ namespace WAHU.MathRescueGameplayRuntimeSmoke
                 TestHeadlessThreeCheckpointJourney(root, schemaPath, templatePath, eventPath);
                 TestTransitionRaceAndDoubleSubmit(root, schemaPath, templatePath, eventPath);
                 TestExactRepairResumeToken(root, schemaPath, templatePath, eventPath);
+                TestReplayAfterCompleted(root, schemaPath, templatePath, eventPath);
 
                 Console.WriteLine("MATH_RESCUE_GAMEPLAY_RUNTIME_SMOKE_PASS assertions=" + _assertions);
                 return 0;
@@ -263,6 +264,51 @@ namespace WAHU.MathRescueGameplayRuntimeSmoke
                     "resumed_game_reaches_game_complete_without_replaying_checkpoint_one");
                 A(Count(database, "SELECT count(*) FROM attempt WHERE session_id=@session;", "@session", sessionId) == 4,
                     "resume_preserves_one_wrong_retry_plus_two_later_checkpoints_exactly_once");
+            }
+        }
+
+        private static void TestReplayAfterCompleted(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string eventPath)
+        {
+            var database = NewDatabase(Path.Combine(root, "replay-after-completed.db"), schemaPath);
+            string firstSessionId;
+
+            using (var first = NewGame(database, templatePath, eventPath, 91004))
+            {
+                var start = first.Start("Bé rescue replay lần một");
+                firstSessionId = start.State.SessionId;
+                first.AcknowledgeIntro();
+                CompleteCorrectCheckpoint(first, 1);
+                CompleteCorrectCheckpoint(first, 2);
+                var completed = CompleteCorrectCheckpoint(first, 3);
+                A(completed != null && completed.Completion != null && completed.State.Completed &&
+                  completed.State.Phase == MathRescueGameplayPhase.GAME_COMPLETE,
+                    "first_completed_run_reaches_game_complete_before_replay");
+                A(Count(database, "SELECT count(*) FROM attempt WHERE session_id=@session;", "@session", firstSessionId) == 3,
+                    "first_completed_run_persists_exactly_three_attempts");
+            }
+
+            using (var replay = NewGame(database, templatePath, eventPath, 91005))
+            {
+                var start = replay.Start("Bé rescue replay lần hai");
+                A(!start.Learning.Session.ResumedExistingSession &&
+                  !string.Equals(start.State.SessionId, firstSessionId, StringComparison.Ordinal) &&
+                  start.State.Phase == MathRescueGameplayPhase.INTRO &&
+                  start.State.Progress.CompletedCheckpoints == 0 && !start.State.Completed,
+                    "completed_game_can_start_fresh_replay_session");
+
+                replay.AcknowledgeIntro();
+                CompleteCorrectCheckpoint(replay, 1);
+                CompleteCorrectCheckpoint(replay, 2);
+                var completedAgain = CompleteCorrectCheckpoint(replay, 3);
+                A(completedAgain != null && completedAgain.Completion != null && completedAgain.State.Completed &&
+                  completedAgain.State.Phase == MathRescueGameplayPhase.GAME_COMPLETE,
+                    "fresh_replay_can_complete_all_three_checkpoints_again");
+                A(Count(database, "SELECT count(*) FROM attempt WHERE session_id=@session;", "@session", start.State.SessionId) == 3,
+                    "fresh_replay_persists_attempts_only_in_new_session");
             }
         }
 
