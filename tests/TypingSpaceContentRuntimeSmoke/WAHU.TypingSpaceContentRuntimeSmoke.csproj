@@ -1,19 +1,12 @@
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration><Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProjectGuid>{2A3E6A62-F17E-4D44-BFC0-18FD2300F8C2}</ProjectGuid><OutputType>Library</OutputType><RootNamespace>WAHU.Content</RootNamespace><AssemblyName>WAHU.Content</AssemblyName><TargetFrameworkVersion>v4.8</TargetFrameworkVersion><FileAlignment>512</FileAlignment><Deterministic>true</Deterministic>
+    <ProjectGuid>{A606C941-4270-4A58-92D0-8B3C5E2A0606}</ProjectGuid><OutputType>Exe</OutputType><RootNamespace>WAHU.TypingSpaceContentRuntimeSmoke</RootNamespace><AssemblyName>WAHU.TypingSpaceContentRuntimeSmoke</AssemblyName><TargetFrameworkVersion>v4.8</TargetFrameworkVersion><FileAlignment>512</FileAlignment><Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' "><DebugSymbols>true</DebugSymbols><DebugType>full</DebugType><Optimize>false</Optimize><OutputPath>bin\Debug\</OutputPath><DefineConstants>DEBUG;TRACE</DefineConstants><PlatformTarget>x86</PlatformTarget></PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' "><DebugType>pdbonly</DebugType><Optimize>true</Optimize><OutputPath>bin\Release\</OutputPath><DefineConstants>TRACE</DefineConstants><PlatformTarget>x86</PlatformTarget></PropertyGroup>
-  <ItemGroup><Reference Include="System" /><Reference Include="System.Core" /><Reference Include="System.IO.Compression" /><Reference Include="System.IO.Compression.FileSystem" /><Reference Include="System.Web.Extensions" /></ItemGroup>
-  <ItemGroup>
-    <Compile Include="ContentPackModels.cs" />
-    <Compile Include="ContentPackValidator.cs" />
-    <Compile Include="SecureContentImporter.cs" />
-    <Compile Include="ContentPackCatalog.cs" />
-    <Compile Include="MathVerifiedTemplateSource.cs" />
-    <Compile Include="MathLessonCatalogSource.cs" />
-    <Compile Include="TypingSpaceContent.cs" />
-  </ItemGroup>
+  <ItemGroup><Reference Include="System" /><Reference Include="System.Core" /></ItemGroup>
+  <ItemGroup><Compile Include="Program.cs" /></ItemGroup>
+  <ItemGroup><ProjectReference Include="..\..\src\Content\WAHU.Content.csproj"><Project>{2A3E6A62-F17E-4D44-BFC0-18FD2300F8C2}</Project><Name>WAHU.Content</Name></ProjectReference></ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
