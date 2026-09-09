@@ -17,7 +17,7 @@
     <DebugType>pdbonly</DebugType><Optimize>true</Optimize><OutputPath>bin\Release\</OutputPath><DefineConstants>TRACE</DefineConstants><PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" /><Reference Include="System.Core" /><Reference Include="System.Numerics" />
+    <Reference Include="System" /><Reference Include="System.Core" /><Reference Include="System.Numerics" /><Reference Include="System.Web.Extensions" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BehaviorModels.cs" />
@@ -27,6 +27,7 @@
     <Compile Include="MathAnswerValidator.cs" />
     <Compile Include="AdaptiveMathSelector.cs" />
     <Compile Include="MathQuestionGenerator.cs" />
+    <Compile Include="MathQuickRescueContent.cs" />
     <Compile Include="MasteryReviewEngine.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

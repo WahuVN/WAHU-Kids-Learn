@@ -1,0 +1,176 @@
+{
+  "schema_version": 1,
+  "pack_id": "math_grade2_quick_rescue_learning_v1",
+  "subject": "math",
+  "grade": 2,
+  "language": "vi",
+  "target_lesson_id": "m2_ls_num_count_read_write_0_1000",
+  "target_skill_id": "NUM_COUNT_READ_WRITE_0_1000",
+  "checkpoint_count": 3,
+  "pacing": [
+    "basic",
+    "medium",
+    "application"
+  ],
+  "anti_repeat": {
+    "recent_question_window": 3,
+    "prefer_unseen": true
+  },
+  "feedback": {
+    "ready_vi": "Mình làm từng bước nhé.",
+    "correct_vi": "Đúng rồi, mình tiếp tục nhé.",
+    "wrong_vi": "Chưa khớp thôi. Mình xem một bước nhỏ rồi thử lại nhé.",
+    "break_vi": "Con có thể nghỉ ở đây. Phần đã làm được vẫn được giữ để lần sau mình tiếp tục."
+  },
+  "adaptive_rules": [
+    {
+      "state": "READY",
+      "preferred_variant": "any",
+      "hint_level": 0,
+      "use_repair": false,
+      "offer_break": false,
+      "minimal_feedback": false,
+      "select_question": true
+    },
+    {
+      "state": "FLOW_LIKELY",
+      "preferred_variant": "any",
+      "hint_level": 0,
+      "use_repair": false,
+      "offer_break": false,
+      "minimal_feedback": true,
+      "select_question": true
+    },
+    {
+      "state": "BORED_OR_UNDERCHALLENGED",
+      "preferred_variant": "transfer",
+      "hint_level": 0,
+      "use_repair": false,
+      "offer_break": false,
+      "minimal_feedback": true,
+      "select_question": true
+    },
+    {
+      "state": "STRAINED",
+      "preferred_variant": "support",
+      "hint_level": 1,
+      "use_repair": false,
+      "offer_break": false,
+      "minimal_feedback": false,
+      "select_question": true
+    },
+    {
+      "state": "FRUSTRATED_LIKELY",
+      "preferred_variant": "support",
+      "hint_level": 2,
+      "use_repair": true,
+      "offer_break": false,
+      "minimal_feedback": false,
+      "select_question": true
+    },
+    {
+      "state": "FATIGUED_LIKELY",
+      "preferred_variant": "support",
+      "hint_level": 0,
+      "use_repair": false,
+      "offer_break": true,
+      "minimal_feedback": true,
+      "select_question": false
+    }
+  ],
+  "checkpoints": [
+    {
+      "number": 1,
+      "difficulty": "basic",
+      "label_vi": "Biển số đầu tiên",
+      "goal_vi": "Nhận đúng vị trí hàng trăm, hàng chục và hàng đơn vị.",
+      "question_options": [
+        {
+          "question_id": "m2_q_num_count_read_write_0_1000_01",
+          "variant": "support"
+        },
+        {
+          "question_id": "m2_q_num_count_read_write_0_1000_04",
+          "variant": "transfer"
+        }
+      ],
+      "hint_level_1_vi": "Con nhìn lần lượt ba hàng: trăm, chục, rồi đơn vị nhé.",
+      "hint_level_2_vi": "Mình đổi từng hàng thành giá trị rồi cộng lại: trăm trước, chục tiếp theo, đơn vị cuối cùng.",
+      "repair_vi": "Mình chưa cần làm nhanh. Con đặt từng chữ số đúng vào hàng trăm, chục, đơn vị rồi kiểm tra lại nhé.",
+      "common_errors": [
+        {
+          "id": "place_value_shift",
+          "cue_vi": "Có vẻ một chữ số đang đứng lệch hàng.",
+          "repair_vi": "Mình đọc lại theo thứ tự trăm → chục → đơn vị và giữ đúng từng vị trí nhé."
+        },
+        {
+          "id": "zero_place_omitted",
+          "cue_vi": "Hàng có số 0 vẫn giữ một vị trí trong số.",
+          "repair_vi": "Nếu một hàng có 0, con vẫn chừa đúng vị trí của hàng đó rồi mới viết hàng tiếp theo."
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "difficulty": "medium",
+      "label_vi": "Biển số thứ hai",
+      "goal_vi": "Đọc đúng số có hàng chục hoặc hàng đơn vị bằng 0.",
+      "question_options": [
+        {
+          "question_id": "m2_q_num_count_read_write_0_1000_02",
+          "variant": "support"
+        },
+        {
+          "question_id": "m2_q_num_count_read_write_0_1000_05",
+          "variant": "transfer"
+        }
+      ],
+      "hint_level_1_vi": "Con xác định hàng trăm, hàng chục và hàng đơn vị trước khi đọc cả số nhé.",
+      "hint_level_2_vi": "Nếu hàng chục bằng 0 mà vẫn còn đơn vị, mình nhớ cách đọc có từ “linh” giữa hàng trăm và hàng đơn vị.",
+      "repair_vi": "Mình tách số thành ba hàng rồi đọc lại chậm rãi. Không cần đoán theo đáp án đang nằm ở đâu.",
+      "common_errors": [
+        {
+          "id": "drop_zero_tens_when_reading",
+          "cue_vi": "Hàng chục bằng 0 có thể làm mình đọc hụt một phần.",
+          "repair_vi": "Con nhìn xem sau hàng trăm còn đơn vị hay không; nếu có, mình giữ dấu hiệu của hàng chục bằng 0 khi đọc."
+        },
+        {
+          "id": "drop_hundreds_place",
+          "cue_vi": "Có vẻ phần hàng trăm đã bị bỏ qua.",
+          "repair_vi": "Mình đọc từ hàng lớn nhất trước: hàng trăm, rồi đến hàng chục và hàng đơn vị."
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "difficulty": "application",
+      "label_vi": "Biển số cuối cùng",
+      "goal_vi": "Phát hiện và sửa lỗi đặt sai hàng trong một tình huống quen thuộc.",
+      "question_options": [
+        {
+          "question_id": "m2_q_num_count_read_write_0_1000_03",
+          "variant": "support"
+        },
+        {
+          "question_id": "m2_q_num_count_read_write_0_1000_06",
+          "variant": "transfer"
+        }
+      ],
+      "hint_level_1_vi": "Con tìm xem bạn trong đề đã đặt sai chữ số ở hàng nào trước nhé.",
+      "hint_level_2_vi": "Mình viết riêng giá trị của hàng trăm, hàng chục và hàng đơn vị, rồi ghép lại đúng thứ tự.",
+      "repair_vi": "Mình chỉ sửa một chỗ mỗi lần: xác định hàng bị đặt sai, đưa chữ số về đúng hàng, rồi đọc lại số vừa sửa.",
+      "common_errors": [
+        {
+          "id": "tens_value_as_units",
+          "cue_vi": "Có thể hàng chục đang được hiểu như hàng đơn vị.",
+          "repair_vi": "Một chữ số ở hàng chục biểu diễn số chục, nên mình giữ nó ở đúng hàng chục trước khi ghép số."
+        },
+        {
+          "id": "zero_tens_shift",
+          "cue_vi": "Số 0 ở hàng chục có thể khiến chữ số phía sau bị dịch sang trái.",
+          "repair_vi": "Con giữ vị trí hàng chục bằng 0, rồi đặt chữ số hàng đơn vị ở vị trí cuối cùng."
+        }
+      ]
+    }
+  ]
+}
