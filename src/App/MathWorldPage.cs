@@ -89,6 +89,8 @@ namespace WAHUKidsLearn
                 TextAlign = ContentAlignment.TopLeft,
                 ForeColor = ChildVisualTheme.MutedInk,
                 Font = ChildVisualTheme.Font(9.5f),
+                AutoEllipsis = true,
+                UseMnemonic = false,
                 AccessibleName = "Tóm tắt lộ trình Toán"
             };
             title.Controls.Add(_summary, 0, 1);
@@ -161,6 +163,8 @@ namespace WAHUKidsLearn
                 TextAlign = ContentAlignment.MiddleLeft,
                 ForeColor = ChildVisualTheme.SkyStrong,
                 Font = ChildVisualTheme.Font(12f, FontStyle.Bold),
+                AutoEllipsis = true,
+                UseMnemonic = false,
                 AccessibleName = "Chương Toán đang chọn"
             };
             lessonLayout.Controls.Add(_chapterTitle, 0, 0);
@@ -200,6 +204,8 @@ namespace WAHUKidsLearn
                 TextAlign = ContentAlignment.MiddleLeft,
                 ForeColor = ChildVisualTheme.Ink,
                 Font = ChildVisualTheme.Font(17f, FontStyle.Bold),
+                AutoEllipsis = true,
+                UseMnemonic = false,
                 AccessibleName = "Bài Toán đang chọn"
             };
             _detailLayout.Controls.Add(_lessonTitle, 0, 0);
@@ -210,6 +216,8 @@ namespace WAHUKidsLearn
                 TextAlign = ContentAlignment.MiddleLeft,
                 ForeColor = ChildVisualTheme.MutedInk,
                 Font = ChildVisualTheme.Font(9.5f, FontStyle.Bold),
+                AutoEllipsis = true,
+                UseMnemonic = false,
                 AccessibleName = "Trạng thái bài học"
             };
             _detailLayout.Controls.Add(_lessonState, 0, 1);

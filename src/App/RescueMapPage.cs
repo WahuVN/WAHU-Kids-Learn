@@ -85,6 +85,8 @@ namespace WAHUKidsLearn
                 TextAlign = ContentAlignment.TopLeft,
                 ForeColor = ChildVisualTheme.MutedInk,
                 Font = ChildVisualTheme.Font(9.5f),
+                AutoEllipsis = true,
+                UseMnemonic = false,
                 AccessibleName = "Nguyên tắc nhiệm vụ cứu hộ"
             };
             header.Controls.Add(_summary, 0, 1);
@@ -137,6 +139,8 @@ namespace WAHUKidsLearn
                 TextAlign = ContentAlignment.MiddleLeft,
                 ForeColor = ChildVisualTheme.Ink,
                 Font = ChildVisualTheme.Font(18f, FontStyle.Bold),
+                AutoEllipsis = true,
+                UseMnemonic = false,
                 AccessibleName = "Nhiệm vụ cứu hộ đang chọn"
             };
             detail.Controls.Add(_eventTitle, 0, 0);
@@ -147,6 +151,8 @@ namespace WAHUKidsLearn
                 TextAlign = ContentAlignment.TopLeft,
                 ForeColor = ChildVisualTheme.MutedInk,
                 Font = ChildVisualTheme.Font(10.5f),
+                AutoEllipsis = true,
+                UseMnemonic = false,
                 AccessibleName = "Câu chuyện nhiệm vụ"
             };
             detail.Controls.Add(_intro, 0, 1);
@@ -167,6 +173,8 @@ namespace WAHUKidsLearn
                 TextAlign = ContentAlignment.TopLeft,
                 ForeColor = ChildVisualTheme.MutedInk,
                 Font = ChildVisualTheme.Font(9.7f),
+                AutoEllipsis = true,
+                UseMnemonic = false,
                 AccessibleName = "Trạng thái nhiệm vụ"
             };
             detail.Controls.Add(_status, 0, 3);

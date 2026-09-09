@@ -2099,6 +2099,39 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                     A(CountControlsOfType(shell, typeof(TabControl)) == 0,
                         "learner_shell_all_routes_have_no_tab_control");
 
+                    RenderFormAndAssert(shell, 900, 640, "learner_shell_lesson_play_win7_text_fit");
+                    var nativePrompt = GetField<Label>(activePage, "_prompt");
+                    var nativeSupport = GetField<Label>(activePage, "_support");
+                    var nativeFeedback = GetField<Label>(activePage, "_feedback");
+                    var nativeScene = GetField<Label>(activePage, "_sceneLabel");
+                    var nativeProgress = GetField<Label>(activePage, "_progressText");
+                    A(nativePrompt.AutoEllipsis && nativeSupport.AutoEllipsis && nativeFeedback.AutoEllipsis &&
+                      nativeScene.AutoEllipsis && nativeProgress.AutoEllipsis &&
+                      !nativePrompt.UseMnemonic && !nativeSupport.UseMnemonic && !nativeFeedback.UseMnemonic,
+                        "learner_shell_lesson_play_dynamic_text_is_clipped_inside_owned_bounds");
+                    var nativeQuestion = GetField<MathQuestion>(activePage, "_question");
+                    var longPrompt = "Một câu hỏi kiểm tra rất dài để bảo đảm chữ tiếng Việt trên Windows 7 vẫn tự co và xuống dòng bên trong thẻ câu hỏi, không bao giờ vẽ tràn ra ngoài hình hoặc nút bấm.";
+                    Invoke(activePage, "ApplyPromptTypography", longPrompt);
+                    Application.DoEvents();
+                    var nativeMeasured = TextRenderer.MeasureText(nativePrompt.Text, nativePrompt.Font,
+                        new Size(Math.Max(80, nativePrompt.ClientSize.Width - 8), 4096), TextFormatFlags.WordBreak | TextFormatFlags.NoPrefix);
+                    A(nativeMeasured.Height <= nativePrompt.ClientSize.Height && nativePrompt.Font.Size >= 10.4f,
+                        "learner_shell_lesson_play_win7_long_prompt_fits_without_text_escape");
+                    Invoke(activePage, "ApplyPromptTypography", nativeQuestion.PromptVi);
+                    Application.DoEvents();
+
+                    var beforeAutoQuestionId = Get<string>(activePage, "CurrentContentQuestionId");
+                    SubmitCurrentLearnerPageQuestionCorrectly(activePage, "learner_shell_native_auto_advance_correct");
+                    var nativeNext = GetField<Button>(activePage, "_nextButton");
+                    A(Get<bool>(activePage, "AutoAdvancePending") && !nativeNext.Visible &&
+                      Get<int>(activePage, "AutoAdvanceDelayMs") >= 600 && Get<int>(activePage, "AutoAdvanceDelayMs") <= 1200,
+                        "learner_shell_correct_answer_removes_redundant_next_click");
+                    Invoke(activePage, "AdvanceAfterCorrect");
+                    Application.DoEvents();
+                    A(!Get<bool>(activePage, "AutoAdvancePending") &&
+                      !string.Equals(beforeAutoQuestionId, Get<string>(activePage, "CurrentContentQuestionId"), StringComparison.Ordinal),
+                        "learner_shell_correct_answer_advances_to_next_question_without_click");
+
                     var router = GetField<object>(shell, "_router");
                     Invoke(router, "GoBack");
                     Application.DoEvents();
@@ -3211,6 +3244,33 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                 if (string.Equals(question.DisplayChoices[i], question.CorrectAnswerDisplay, StringComparison.Ordinal)) correctIndex = i;
             A(correctIndex >= 0, assertionPrefix + "_choice_correct_index");
             Invoke(form, "SubmitChoice", correctIndex, assertionPrefix);
+        }
+
+        private static void SubmitCurrentLearnerPageQuestionCorrectly(Control page, string assertionPrefix)
+        {
+            var question = GetField<MathQuestion>(page, "_question");
+            A(question != null, assertionPrefix + "_question_available");
+            if (string.Equals(question.AnswerKind, "interaction_integer", StringComparison.Ordinal))
+            {
+                var interactive = GetField<Control>(page, "_interactiveAnswer");
+                Invoke(interactive, "SelectCursor");
+                Invoke(interactive, "MoveCursor", question.CorrectAnswer);
+                Invoke(interactive, "SelectCursor");
+                Invoke(page, "SubmitInteractive", assertionPrefix);
+                return;
+            }
+            if (question.DisplayChoices == null || question.DisplayChoices.Count == 0)
+            {
+                var input = GetField<TextBox>(page, "_typedBox");
+                input.Text = question.CorrectAnswerDisplay;
+                Invoke(page, "SubmitTyped", assertionPrefix);
+                return;
+            }
+            var correctIndex = -1;
+            for (var i = 0; i < question.DisplayChoices.Count; i++)
+                if (string.Equals(question.DisplayChoices[i], question.CorrectAnswerDisplay, StringComparison.Ordinal)) correctIndex = i;
+            A(correctIndex >= 0, assertionPrefix + "_choice_correct_index");
+            Invoke(page, "SubmitChoice", correctIndex, assertionPrefix);
         }
 
         private static void TestChoiceRetryUiFlow(Assembly appAssembly)

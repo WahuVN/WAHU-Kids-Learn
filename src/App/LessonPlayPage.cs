@@ -28,7 +28,12 @@ namespace WAHUKidsLearn
         private bool _breakOnNext;
         private bool _finished;
         private bool _suspendOnLeave;
+        private bool _autoAdvancePending;
         private DateTime _questionShownAtUtc;
+        private readonly Timer _autoAdvanceTimer;
+        private string _promptTypographyText;
+        private int _promptTypographyWidthBucket = -1;
+        private int _promptTypographyHeightBucket = -1;
 
         private TableLayoutPanel _body;
         private Label _sceneLabel;
@@ -63,6 +68,8 @@ namespace WAHUKidsLearn
             _context = context ?? throw new ArgumentNullException("context");
             _back = back ?? throw new ArgumentNullException("back");
             AccessibleName = "Màn chơi bài Toán";
+            _autoAdvanceTimer = new Timer { Interval = 850 };
+            _autoAdvanceTimer.Tick += delegate { AdvanceAfterCorrect(); };
             BuildUi();
         }
 
@@ -81,6 +88,8 @@ namespace WAHUKidsLearn
         internal bool IsFinished { get { return _finished; } }
         internal int HintLevel { get { return _hintLevel; } }
         internal bool RetryPending { get { return _retryPending; } }
+        internal bool AutoAdvancePending { get { return _autoAdvancePending; } }
+        internal int AutoAdvanceDelayMs { get { return _autoAdvanceTimer.Interval; } }
         internal string CurrentContentQuestionId { get { return _question == null ? null : _question.ContentQuestionId; } }
 
         public override void OnNavigatedTo()
@@ -108,6 +117,7 @@ namespace WAHUKidsLearn
 
         public override void OnNavigatedFrom()
         {
+            CancelAutoAdvance();
             if (!_suspendOnLeave || _finished) return;
             try
             {
@@ -139,6 +149,7 @@ namespace WAHUKidsLearn
                 if (_rescueBridge != null) _rescueBridge.Dispose();
                 else if (_gameEventCoordinator != null) _gameEventCoordinator.Dispose();
                 else if (_coordinator != null) _coordinator.Dispose();
+                _autoAdvanceTimer.Dispose();
             }
             base.Dispose(disposing);
         }
@@ -170,6 +181,8 @@ namespace WAHUKidsLearn
                 TextAlign = ContentAlignment.MiddleLeft,
                 ForeColor = ChildVisualTheme.MintStrong,
                 Font = ChildVisualTheme.Font(9.2f, FontStyle.Bold),
+                AutoEllipsis = true,
+                UseMnemonic = false,
                 AccessibleName = "Trạng thái câu hỏi"
             };
             progressRow.Controls.Add(_sceneLabel, 0, 0);
@@ -182,6 +195,8 @@ namespace WAHUKidsLearn
                 TextAlign = ContentAlignment.MiddleRight,
                 ForeColor = ChildVisualTheme.MutedInk,
                 Font = ChildVisualTheme.Font(9.2f, FontStyle.Bold),
+                AutoEllipsis = true,
+                UseMnemonic = false,
                 AccessibleName = "Tiến độ bài học"
             };
             progressRow.Controls.Add(_progressText, 2, 0);
@@ -247,6 +262,8 @@ namespace WAHUKidsLearn
                 TextAlign = ContentAlignment.MiddleLeft,
                 ForeColor = ChildVisualTheme.Ink,
                 Font = ChildVisualTheme.Font(21f, FontStyle.Bold),
+                AutoEllipsis = true,
+                UseMnemonic = false,
                 AccessibleName = "Câu hỏi Toán"
             };
             questionLayout.Controls.Add(_prompt, 0, 0);
@@ -257,6 +274,8 @@ namespace WAHUKidsLearn
                 TextAlign = ContentAlignment.TopLeft,
                 ForeColor = ChildVisualTheme.MutedInk,
                 Font = ChildVisualTheme.Font(9.8f),
+                AutoEllipsis = true,
+                UseMnemonic = false,
                 AccessibleName = "Hỗ trợ câu hỏi"
             };
             questionLayout.Controls.Add(_support, 0, 1);
@@ -283,6 +302,8 @@ namespace WAHUKidsLearn
                 TextAlign = ContentAlignment.MiddleLeft,
                 ForeColor = ChildVisualTheme.Ink,
                 Font = ChildVisualTheme.Font(9.6f, FontStyle.Bold),
+                AutoEllipsis = true,
+                UseMnemonic = false,
                 AccessibleName = "Phản hồi câu trả lời"
             };
             _feedbackCard.Controls.Add(_feedback);
@@ -441,6 +462,7 @@ namespace WAHUKidsLearn
 
         private void StartSession(string lessonId, MathQuickRescueEventPresentation requestedEvent)
         {
+            CancelAutoAdvance();
             DisposeCoordinator();
             _loadedLessonId = lessonId;
             _eventPresentation = requestedEvent;
@@ -501,6 +523,7 @@ namespace WAHUKidsLearn
 
         private void ShowNextQuestion(MathSessionStartResult started)
         {
+            CancelAutoAdvance();
             if (_finished || (_rescueBridge == null && (_coordinator == null || !_coordinator.IsActive))) return;
             try
             {
@@ -697,6 +720,7 @@ namespace WAHUKidsLearn
         private bool PrepareRetry(MathAnswerOutcome outcome)
         {
             if (outcome == null || outcome.QuestionCompleted || !outcome.CanRetry) return false;
+            CancelAutoAdvance();
             _retryPending = true;
             _submitting = false;
             _feedback.Text = outcome.FeedbackVi;
@@ -822,11 +846,20 @@ namespace WAHUKidsLearn
             _support.Text = BuildOutcomeSupport(outcome);
             UpdateProgress(outcome.CompletedQuestionCount, outcome.CompletedQuestionCount, false, true);
             _hintButton.Visible = false;
-            _nextButton.Visible = true;
             _breakOnNext = _rescueBridge != null && outcome.SuggestPositiveEnd && outcome.CompletedQuestionCount < outcome.TargetQuestionCount;
             _completeOnNext = outcome.CompletedQuestionCount >= outcome.TargetQuestionCount || (_rescueBridge == null && outcome.SuggestPositiveEnd);
             _nextButton.Text = outcome.SuggestPositiveEnd ? "Nghỉ ở đây" : (outcome.CompletedQuestionCount >= outcome.TargetQuestionCount ? "Xem kết quả" : "Câu tiếp theo");
-            _nextButton.Focus();
+            if (outcome.IsCorrect && !outcome.SuggestPositiveEnd)
+            {
+                _nextButton.Visible = false;
+                _support.Text += _completeOnNext ? " Mình mở kết quả nhé." : " Mình sang câu tiếp theo nhé.";
+                ScheduleAutoAdvance();
+            }
+            else
+            {
+                _nextButton.Visible = true;
+                _nextButton.Focus();
+            }
         }
 
         private string BuildOutcomeSupport(MathAnswerOutcome outcome)
@@ -863,6 +896,7 @@ namespace WAHUKidsLearn
 
         private void HandleNext()
         {
+            CancelAutoAdvance();
             if (_finished) { _back(); return; }
             if (_breakOnNext) { PauseAndBack(); return; }
             if (_completeOnNext) CompleteSession();
@@ -899,6 +933,7 @@ namespace WAHUKidsLearn
 
         private void ShowCompletion(MathSessionSummary summary)
         {
+            CancelAutoAdvance();
             _question = null;
             _instructionVisual.SetQuestion(null, 0);
             _instructionVisual.Visible = false;
@@ -963,6 +998,7 @@ namespace WAHUKidsLearn
 
         private void PauseAndBack()
         {
+            CancelAutoAdvance();
             if (_finished) { _back(); return; }
             try
             {
@@ -980,6 +1016,7 @@ namespace WAHUKidsLearn
 
         private void RecoverOrFail()
         {
+            CancelAutoAdvance();
             try
             {
                 if (_coordinator == null || !_coordinator.IsActive || !_coordinator.HasOpenQuestion || _question == null)
@@ -1023,6 +1060,7 @@ namespace WAHUKidsLearn
 
         private void ShowFatal(string message)
         {
+            CancelAutoAdvance();
             try
             {
                 if (_rescueBridge != null && _rescueBridge.IsInteractive) _rescueBridge.SuspendForBreak("runtime_ui_error");
@@ -1116,20 +1154,50 @@ namespace WAHUKidsLearn
 
         private void ApplyPromptTypography(string text)
         {
-            _prompt.Text = text ?? string.Empty;
+            var value = text ?? string.Empty;
+            _prompt.Text = value;
             var width = Math.Max(220, _prompt.ClientSize.Width > 0 ? _prompt.ClientSize.Width : 520);
             var height = Math.Max(54, _prompt.ClientSize.Height > 0 ? _prompt.ClientSize.Height : 96);
-            var sizes = new[] { 24f, 21f, 18f, 16f, 14f, 12f };
-            var selected = 12f;
+            var widthBucket = Math.Max(1, (width + 31) / 32);
+            var heightBucket = Math.Max(1, (height + 15) / 16);
+            if (string.Equals(_promptTypographyText, value, StringComparison.Ordinal) &&
+                _promptTypographyWidthBucket == widthBucket && _promptTypographyHeightBucket == heightBucket) return;
+            _promptTypographyText = value;
+            _promptTypographyWidthBucket = widthBucket;
+            _promptTypographyHeightBucket = heightBucket;
+            var sizes = new[] { 24f, 21f, 18f, 16f, 14f, 12f, 10.5f };
+            var selected = 10.5f;
             foreach (var size in sizes)
             {
                 using (var font = ChildVisualTheme.Font(size, FontStyle.Bold))
                 {
-                    var measured = TextRenderer.MeasureText(_prompt.Text, font, new Size(width - 4, 4096), TextFormatFlags.WordBreak);
-                    if (measured.Height <= height - 4) { selected = size; break; }
+                    var measured = TextRenderer.MeasureText(value, font, new Size(Math.Max(80, width - 8), 4096),
+                        TextFormatFlags.WordBreak | TextFormatFlags.NoPrefix);
+                    if (measured.Height <= Math.Max(20, height - 8) && measured.Width <= width) { selected = size; break; }
                 }
             }
             _prompt.Font = ChildVisualTheme.Font(selected, FontStyle.Bold);
+        }
+
+        private void ScheduleAutoAdvance()
+        {
+            CancelAutoAdvance();
+            _autoAdvancePending = true;
+            _autoAdvanceTimer.Start();
+        }
+
+        private void CancelAutoAdvance()
+        {
+            _autoAdvancePending = false;
+            if (_autoAdvanceTimer != null) _autoAdvanceTimer.Stop();
+        }
+
+        private void AdvanceAfterCorrect()
+        {
+            if (!_autoAdvancePending) return;
+            CancelAutoAdvance();
+            if (_finished) return;
+            HandleNext();
         }
 
         protected override void ApplyLayoutProfile(LearnerLayoutProfile profile)
@@ -1156,6 +1224,13 @@ namespace WAHUKidsLearn
                 _questionCard.Padding = new Padding(18, 14, 18, 14);
                 _visualCard.Padding = new Padding(10);
             }
+            if (_prompt != null && !string.IsNullOrWhiteSpace(_prompt.Text)) ApplyPromptTypography(_prompt.Text);
+        }
+
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            if (_prompt != null && !string.IsNullOrWhiteSpace(_prompt.Text)) ApplyPromptTypography(_prompt.Text);
         }
     }
 }

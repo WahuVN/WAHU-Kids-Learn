@@ -121,6 +121,8 @@ namespace WAHUKidsLearn
                 Padding = new Padding(0, LearnerDesignTokens.SpaceS, LearnerDesignTokens.SpaceM, 0),
                 ForeColor = ChildVisualTheme.MutedInk,
                 Font = ChildVisualTheme.Font(11f),
+                AutoEllipsis = true,
+                UseMnemonic = false,
                 AccessibleName = "Mô tả nhiệm vụ hôm nay"
             };
             copy.Controls.Add(_missionSummary, 0, 2);
@@ -220,6 +222,8 @@ namespace WAHUKidsLearn
                 ForeColor = ChildVisualTheme.MutedInk,
                 Font = ChildVisualTheme.Font(9f),
                 Padding = new Padding(8, 0, 2, 0),
+                AutoEllipsis = true,
+                UseMnemonic = false,
                 AccessibleName = "Tiến bộ khu vườn"
             };
             gardenLayout.Controls.Add(_gardenProgress, 1, 1);
