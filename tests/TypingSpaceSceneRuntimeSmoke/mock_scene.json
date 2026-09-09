@@ -1,0 +1,12 @@
+{
+  "phase": "boss",
+  "shipY": 0.64,
+  "bossVisible": true,
+  "bossHealth01": 0.72,
+  "paused": false,
+  "targets": [
+    { "id": "vi-01", "displayText": "phi thuyền", "kind": "shoot", "x": 0.16, "y": 0.24, "active": true, "typedCount": 3, "totalCount": 10 },
+    { "id": "vi-02", "displayText": "cứu hộ", "kind": "rescue", "x": 0.52, "y": 0.62, "active": false, "typedCount": 0, "totalCount": 6 },
+    { "id": "en-01", "displayText": "SPACE", "kind": "unlock", "x": 0.82, "y": 0.42, "active": false, "typedCount": 1, "totalCount": 5 }
+  ]
+}
