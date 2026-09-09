@@ -1,0 +1,9 @@
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup><Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration><Platform Condition=" '$(Platform)' == '' ">x86</Platform><ProjectGuid>{D1A3E2CF-0A0E-4D37-9F7A-7FB01B4A1002}</ProjectGuid><OutputType>Exe</OutputType><RootNamespace>WAHU.TypingSpaceIntegrationRuntimeSmoke</RootNamespace><AssemblyName>WAHU.TypingSpaceIntegrationRuntimeSmoke</AssemblyName><TargetFrameworkVersion>v4.8</TargetFrameworkVersion><FileAlignment>512</FileAlignment><Deterministic>true</Deterministic></PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' "><OutputPath>bin\Debug\</OutputPath><PlatformTarget>x86</PlatformTarget></PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' "><OutputPath>bin\Release\</OutputPath><PlatformTarget>x86</PlatformTarget><Optimize>true</Optimize></PropertyGroup>
+  <ItemGroup><Reference Include="System" /><Reference Include="System.Core" /></ItemGroup>
+  <ItemGroup><Compile Include="Program.cs" /></ItemGroup>
+  <ItemGroup><ProjectReference Include="..\..\src\TypingSpaceIntegration\WAHU.TypingSpace.Integration.csproj"><Project>{D1A3E2CF-0A0E-4D37-9F7A-7FB01B4A1001}</Project><Name>WAHU.TypingSpace.Integration</Name></ProjectReference></ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
