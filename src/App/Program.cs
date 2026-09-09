@@ -104,7 +104,10 @@ namespace WAHUKidsLearn
                     if (issue == null && !portableMode && config.UpdateEnabled && config.UpdateCheckOnStartup)
                         QueueBackgroundUpdateCheck(config);
 
-                    Application.Run(new MainForm(config, learningDatabase, preflight, database, issue, runtimeMarker.PreviousRunUnclean, performance));
+                    if (HasArg(args, "--legacy-ui"))
+                        Application.Run(new MainForm(config, learningDatabase, preflight, database, issue, runtimeMarker.PreviousRunUnclean, performance));
+                    else
+                        Application.Run(new LearnerShellForm(config, learningDatabase, preflight, database, issue, runtimeMarker.PreviousRunUnclean, performance));
                     return 0;
                 }
             }

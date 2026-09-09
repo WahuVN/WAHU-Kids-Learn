@@ -1876,6 +1876,87 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                     RenderFormAndAssert(home, 900, 640, "home_min_window");
                 }
 
+                var shellFixtureRoot = Path.Combine(tempRoot, "learner-shell-fixture");
+                var shellSchemaDir = Path.Combine(shellFixtureRoot, "schema");
+                Directory.CreateDirectory(shellSchemaDir);
+                foreach (var source in Directory.GetFiles(schemaSource, "*.sql"))
+                    File.Copy(source, Path.Combine(shellSchemaDir, Path.GetFileName(source)), true);
+                var shellDatabase = new LearningDatabase(Path.Combine(shellFixtureRoot, "learning.db"), Path.Combine(shellSchemaDir, "001_initial.sql"));
+                var shellInit = shellDatabase.Initialize("DELETE");
+                var shellLearner = new LearnerSessionService(shellDatabase).EnsurePrimaryChild("Bé UI Shell V2");
+                A(shellInit.SchemaVersion == 6 && shellInit.Health.IsHealthy, "learner_shell_database_v6_ready");
+
+                var shellType = appAssembly.GetType("WAHUKidsLearn.LearnerShellForm", true);
+                var shellCtor = shellType.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                    .FirstOrDefault(x => x.GetParameters().Length == 7);
+                A(shellCtor != null, "learner_shell_constructor_available");
+                using (var shell = (Form)shellCtor.Invoke(new object[] { config, shellDatabase, null, shellInit, null, false, settings }))
+                {
+                    RenderFormAndAssert(shell, 900, 640, "learner_shell_home_min_window");
+                    A(string.Equals(Get<string>(shell, "CurrentRouteName"), "Home", StringComparison.Ordinal) &&
+                      string.Equals(Get<string>(shell, "CurrentLayoutProfileName"), "Compact", StringComparison.Ordinal),
+                        "learner_shell_home_starts_compact_single_window_route");
+                    RenderFormAndAssert(shell, 1180, 760, "learner_shell_home_default_window");
+                    A(string.Equals(Get<string>(shell, "CurrentLayoutProfileName"), "Standard", StringComparison.Ordinal),
+                        "learner_shell_default_window_uses_standard_profile");
+                    Invoke(shell, "NavigateToRouteName", "MathWorld");
+                    Application.DoEvents();
+                    A(string.Equals(Get<string>(shell, "CurrentRouteName"), "MathWorld", StringComparison.Ordinal),
+                        "learner_shell_routes_home_to_math_world_without_new_shell");
+                    var shellHost = GetField<Panel>(shell, "_pageHost");
+                    var activePage = Get<Control>(shell, "CurrentPageControl");
+                    A(activePage != null && string.Equals(Get<string>(shell, "CurrentPageTypeName"), "MathWorldPage", StringComparison.Ordinal),
+                        "learner_shell_math_world_is_native_page_not_embedded_form");
+                    A(!(activePage is Form) && activePage.Parent == shellHost,
+                        "learner_shell_math_world_stays_inside_single_top_level_window");
+                    RenderFormAndAssert(shell, 900, 640, "learner_shell_math_world_min_window");
+                    Invoke(shell, "NavigateToRouteName", "RescueMap");
+                    Application.DoEvents();
+                    activePage = Get<Control>(shell, "CurrentPageControl");
+                    A(activePage != null && string.Equals(Get<string>(shell, "CurrentPageTypeName"), "RescueMapPage", StringComparison.Ordinal),
+                        "learner_shell_rescue_map_is_native_page");
+                    A(Get<int>(activePage, "EventCount") == 5 && !string.IsNullOrWhiteSpace(Get<string>(activePage, "SelectedEventId")),
+                        "learner_shell_rescue_map_loads_five_authored_events");
+                    RenderFormAndAssert(shell, 900, 640, "learner_shell_rescue_map_min_window");
+
+                    var firstLessonId = "m2_ls_num_count_read_write_0_1000";
+                    var shellContext = GetField<object>(shell, "_context");
+                    Set(shellContext, "RequestedLessonId", firstLessonId);
+                    Set(shellContext, "RequestedEvent", null);
+                    Invoke(shell, "NavigateToRouteName", "LessonPlay");
+                    Application.DoEvents();
+                    activePage = Get<Control>(shell, "CurrentPageControl");
+                    A(activePage != null && string.Equals(Get<string>(shell, "CurrentPageTypeName"), "LessonPlayPage", StringComparison.Ordinal),
+                        "learner_shell_lesson_play_is_native_page");
+                    A(string.Equals(Get<string>(activePage, "LoadedLessonId"), firstLessonId, StringComparison.Ordinal) &&
+                      Get<bool>(activePage, "HasActiveSession") && !string.IsNullOrWhiteSpace(Get<string>(activePage, "CurrentContentQuestionId")),
+                        "learner_shell_lesson_play_starts_real_targeted_session");
+                    RenderFormAndAssert(shell, 900, 640, "learner_shell_lesson_play_min_window");
+
+                    var router = GetField<object>(shell, "_router");
+                    Invoke(router, "GoBack");
+                    Application.DoEvents();
+                    A(string.Equals(Get<string>(shell, "CurrentRouteName"), "RescueMap", StringComparison.Ordinal),
+                        "learner_shell_back_from_lesson_returns_rescue_map");
+                    var suspended = new MathSessionRuntimeService(shellDatabase).LoadLatestResumable(shellLearner.ChildId);
+                    A(suspended != null && string.Equals(suspended.TargetLessonId, firstLessonId, StringComparison.Ordinal) &&
+                      string.Equals(suspended.SessionMode, "lesson", StringComparison.Ordinal) && suspended.TargetQuestionCount == 3,
+                        "learner_shell_back_suspends_exact_targeted_session_durably");
+                    Invoke(router, "GoBack");
+                    Application.DoEvents();
+                    A(string.Equals(Get<string>(shell, "CurrentRouteName"), "MathWorld", StringComparison.Ordinal),
+                        "learner_shell_back_from_rescue_returns_math_world");
+                    Invoke(router, "GoBack");
+                    Application.DoEvents();
+                    A(string.Equals(Get<string>(shell, "CurrentRouteName"), "Home", StringComparison.Ordinal),
+                        "learner_shell_third_back_returns_home_without_recreating_shell");
+                }
+
+                var programSource = File.ReadAllText(Path.Combine(repo, "src", "App", "Program.cs"));
+                A(programSource.IndexOf("new LearnerShellForm", StringComparison.Ordinal) >= 0 &&
+                  programSource.IndexOf("--legacy-ui", StringComparison.Ordinal) >= 0,
+                    "learner_shell_is_default_startup_with_explicit_legacy_escape_hatch");
+
                 var catalogPath = Path.Combine(sourceContent, "lesson_catalog_v1.json");
                 var hubCtor = typeof(WAHUKidsLearn.MathHubForm).GetConstructor(
                     BindingFlags.Instance | BindingFlags.NonPublic, null,
