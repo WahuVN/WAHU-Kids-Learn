@@ -170,7 +170,7 @@ namespace WAHUKidsLearn
                 Visible = _eventPresentation == null
             };
             progressHost.Controls.Add(_progressBar);
-            _eventCheckpointStrip = new QuickRescueCheckpointStrip
+            _eventCheckpointStrip = new QuickRescueCheckpointStrip(_performance)
             {
                 Dock = DockStyle.Fill,
                 Margin = new Padding(158, 0, 170, 2),

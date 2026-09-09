@@ -200,7 +200,7 @@ namespace WAHUKidsLearn
                 AccessibleName = "Tiến độ bài học"
             };
             progressRow.Controls.Add(_progressText, 2, 0);
-            _eventProgress = new QuickRescueCheckpointStrip { Dock = DockStyle.Fill, Visible = false, Margin = new Padding(0, 1, 0, 0) };
+            _eventProgress = new QuickRescueCheckpointStrip(_context.Performance) { Dock = DockStyle.Fill, Visible = false, Margin = new Padding(0, 1, 0, 0) };
             progressRow.Controls.Add(_eventProgress, 0, 1);
             progressRow.SetColumnSpan(_eventProgress, 3);
             root.Controls.Add(progressRow, 0, 0);
@@ -891,7 +891,9 @@ namespace WAHUKidsLearn
             var rewardChestReady = _rescueBridge != null && _rescueBridge.RewardSnapshot != null &&
                 _rescueBridge.RewardSnapshot.FinalChestUnlocked;
             _eventProgress.SetState(safeCompleted, activeIndex, _eventPresentation.CheckpointNounsVi, rewardChestReady);
-            _progressText.Text = safeCompleted >= target ? target + " / " + target + " chặng đã xong" : "Chặng " + (activeIndex + 1) + " / " + target + (retry ? " • thử lại" : string.Empty);
+            _progressText.Text = safeCompleted >= target
+                ? target + " / " + target + " chặng đã xong" + (rewardChestReady ? " • rương sao đã mở" : string.Empty)
+                : "Chặng " + (activeIndex + 1) + " / " + target + (retry ? " • thử lại" : string.Empty);
         }
 
         private void HandleNext()
@@ -941,11 +943,16 @@ namespace WAHUKidsLearn
             _completionVisual.SetProgress(summary == null ? 0 : summary.GardenGrowthSteps, unlocked,
                 summary == null ? 0 : summary.SessionsUntilNextGardenMilestone,
                 summary == null ? null : summary.NextGardenMilestoneItemId);
+            var rescueRewardReady = _eventPresentation != null && _rescueBridge != null &&
+                _rescueBridge.RewardSnapshot != null && _rescueBridge.RewardSnapshot.FinalChestUnlocked;
+            _completionVisual.SetRescueRewardState(_eventPresentation != null, rescueRewardReady);
             _completionVisual.Visible = true;
             _companion.State = CompanionReactionState.Celebrate;
             _feedbackFx.VisualMood = GameFeedbackFxControl.Mood.Correct;
             _sceneLabel.Text = _eventPresentation == null ? "BÀI HỌC HOÀN THÀNH" : "NHIỆM VỤ HOÀN THÀNH";
-            _prompt.Text = _eventPresentation == null ? "Hoàn thành bài học" : "Nhiệm vụ cứu hộ hoàn thành";
+            _prompt.Text = _eventPresentation == null
+                ? "Hoàn thành bài học"
+                : (rescueRewardReady ? "Cứu hộ thành công!" : "Đã hoàn thành 3 chặng");
             _support.Text = BuildCompletionSupport(summary);
             _feedback.Text = BuildCompletionPerformance(summary);
             _feedbackCard.CardColor = Color.FromArgb(226, 242, 224);
