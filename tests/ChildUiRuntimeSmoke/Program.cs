@@ -1978,6 +1978,8 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
 
                     var bridgeShellContext = GetField<object>(shell, "_context");
                     var bridgeRouter = GetField<object>(shell, "_router");
+                    var bridgeEventItems = ((System.Collections.IEnumerable)GetField<object>(activePage, "_events")).Cast<object>().ToList();
+                    A(bridgeEventItems.Count == 5, "learner_shell_rescue_bridge_has_five_event_definitions");
                     var selectedShellEvent = GetField<object>(activePage, "_selectedEvent");
                     A(selectedShellEvent != null, "learner_shell_rescue_bridge_has_selected_event");
                     var bridgeLessonId = Get<string>(selectedShellEvent, "TargetLessonId");
@@ -2003,6 +2005,42 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                     var supportDecision = supportMethod == null ? null : supportMethod.Invoke(rescueBridge, null);
                     A(supportDecision != null && !string.IsNullOrWhiteSpace(Get<string>(supportDecision, "SupportVi")),
                         "learner_shell_rescue_bridge_ai3_support_is_live");
+                    var persistedGameplayQuestion = Get<object>(gameplayState, "CurrentQuestion");
+                    A(persistedGameplayQuestion != null &&
+                      string.Equals(Get<string>(supportDecision, "QuestionId"), Get<string>(persistedGameplayQuestion, "ContentQuestionId"), StringComparison.Ordinal),
+                        "learner_shell_rescue_bridge_ai3_decision_matches_persisted_question");
+                    A(!string.IsNullOrWhiteSpace(Get<string>(supportDecision, "Variant")),
+                        "learner_shell_rescue_bridge_ai3_variant_matches_actual_question");
+
+                    var secondBridgeEvent = bridgeEventItems[1];
+                    var secondBridgeLessonId = Get<string>(secondBridgeEvent, "TargetLessonId");
+                    A(!string.Equals(secondBridgeLessonId, bridgeLessonId, StringComparison.Ordinal),
+                        "learner_shell_rescue_bridge_second_event_targets_different_lesson");
+                    var rescueBridgeCtor = rescueBridge.GetType().GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                        .FirstOrDefault(x => x.GetParameters().Length == 9);
+                    A(rescueBridgeCtor != null, "learner_shell_rescue_bridge_constructor_available_for_scope_guard");
+                    var mismatchedContentBridge = rescueBridgeCtor.Invoke(new object[]
+                    {
+                        shellDatabase,
+                        Path.Combine(runtimeContent, "verified_templates_v1.json"),
+                        Path.Combine(runtimeContent, "game_events_v1.json"),
+                        "LOW",
+                        9917,
+                        Get<string>(secondBridgeEvent, "Id"),
+                        secondBridgeLessonId,
+                        Path.Combine(runtimeRescueContent, "learning_content_v1.json"),
+                        Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "audio", "rescue")
+                    });
+                    try
+                    {
+                        A(GetField<object>(mismatchedContentBridge, "_content") == null,
+                            "learner_shell_rescue_bridge_non_target_lesson_does_not_reuse_ai3_content");
+                    }
+                    finally
+                    {
+                        var disposableMismatchedBridge = mismatchedContentBridge as IDisposable;
+                        if (disposableMismatchedBridge != null) disposableMismatchedBridge.Dispose();
+                    }
                     RenderFormAndAssert(shell, 900, 640, "learner_shell_rescue_play_min_window");
                     Invoke(bridgeRouter, "GoBack");
                     Application.DoEvents();

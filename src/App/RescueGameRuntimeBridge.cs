@@ -39,15 +39,20 @@ namespace WAHUKidsLearn
             _gameplay = new MathRescueGameplayCoordinator(
                 database, templatePath, eventCatalogPath, performanceProfile, seed, eventId, fallbackLessonId);
             _rewards = new RescueGameRewardService(database);
+            MathQuickRescueLearningPack loadedContent = null;
             try
             {
                 if (!string.IsNullOrWhiteSpace(learningContentPath) && File.Exists(learningContentPath))
-                    _content = new MathQuickRescueContentSource().Load(learningContentPath);
+                    loadedContent = new MathQuickRescueContentSource().Load(learningContentPath);
             }
             catch
             {
-                _content = null;
+                loadedContent = null;
             }
+            _content = loadedContent != null &&
+                string.Equals(loadedContent.TargetLessonId, fallbackLessonId, StringComparison.Ordinal)
+                ? loadedContent
+                : null;
             try
             {
                 _audio = new AudioCoordinator(new SoundPlayerBackend(), 8L * 1024L * 1024L);
@@ -162,8 +167,30 @@ namespace WAHUKidsLearn
             try
             {
                 var state = _gameplay.CurrentState;
-                var checkpoint = Math.Max(1, Math.Min(3, state.CurrentCheckpoint));
-                return _adaptive.Select(_content, checkpoint, _lastBehavior, _recentQuestionIds, _seed);
+                var checkpointNumber = Math.Max(1, Math.Min(3, state.CurrentCheckpoint));
+                var decision = _adaptive.Select(_content, checkpointNumber, _lastBehavior, _recentQuestionIds, _seed);
+                if (decision == null || state.CurrentQuestion == null ||
+                    string.IsNullOrWhiteSpace(state.CurrentQuestion.ContentQuestionId)) return null;
+
+                var checkpoint = _content.GetCheckpoint(checkpointNumber);
+                if (checkpoint == null || checkpoint.QuestionOptions == null) return null;
+                MathQuickRescueQuestionOption actual = null;
+                foreach (var option in checkpoint.QuestionOptions)
+                {
+                    if (option != null && string.Equals(option.QuestionId, state.CurrentQuestion.ContentQuestionId, StringComparison.Ordinal))
+                    {
+                        actual = option;
+                        break;
+                    }
+                }
+                if (actual == null) return null;
+
+                var adaptiveQuestionId = decision.QuestionId;
+                decision.QuestionId = actual.QuestionId;
+                decision.Variant = actual.Variant;
+                if (!string.Equals(adaptiveQuestionId, actual.QuestionId, StringComparison.Ordinal))
+                    decision.Reason = (decision.Reason ?? string.Empty) + ":reconciled_persisted_question";
+                return decision;
             }
             catch { return null; }
         }
