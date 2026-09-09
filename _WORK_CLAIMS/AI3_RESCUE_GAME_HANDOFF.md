@@ -91,3 +91,22 @@ Kết quả đã chạy trên worktree sạch:
 ## Ranh giới tích hợp cho AI5
 
 Không cherry-pick bất kỳ thay đổi generated nào từ build. Commit AI3 chỉ chứa content/adaptive/tests/handoff. Worktree chính `D:\APP HOC TAP` không bị AI3 ghi đè; toàn bộ công việc nằm ở `D:\APP HOC TAP_AI3_RESCUE` trên branch riêng.
+
+## Wave 2 — hardening sau audit sâu
+
+AI3 tiếp tục khóa thêm các khoảng trống integration mà wave đầu chưa bắt buộc:
+
+1. `ValidateAgainstAuthoredQuestions(...)` fail-closed nếu pack cứu hộ trỏ ID không tồn tại, sai lesson, sai skill hoặc sai difficulty so với authored question bank.
+2. `variant` chỉ còn chấp nhận `support|transfer`; mỗi checkpoint bắt buộc có cả hai. `preferred_variant` chỉ chấp nhận `any|support|transfer`.
+3. Semantic guard khóa cấu hình an toàn cho từng `BehaviorState`: READY zero-hint, FLOW minimal feedback, BORED transfer, STRAINED support+hint, FRUSTRATED support+repair, FATIGUED break/no-next-question.
+4. Anti-repeat được nâng thành hard child-UX guard: khi tất cả option vừa xuất hiện, selector lấy câu **ít gần đây nhất trước**, adaptive variant chỉ phá tie. Vì vậy đổi BehaviorState không thể vô tình ép lặp đúng prompt vừa thấy.
+5. Thêm `ResolveErrorSupport(...)` để consumer lấy common-error cue/repair trực tiếp. Error ID match không phân biệt hoa thường; lỗi lạ fallback về hint/repair checkpoint; FATIGUED luôn override về break copy.
+6. Runtime adversarial tests khóa malformed variant, drift rule, missing authored question, mismatch lesson/difficulty, anti-repeat-vs-adaptive và common-error/fatigue path.
+
+Gate wave 2:
+
+- Quick Rescue runtime smoke: `44/44 assertions PASS`.
+- Quick Rescue runtime Release/x86 build: `0 warning, 0 error`.
+- Full `MathContentDataSmoke`: `100/100 PASS`.
+- Existing `BehaviorRuntimeSmoke`: `15/15 assertions PASS`.
+- `git diff --check`: PASS.
