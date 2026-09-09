@@ -67,7 +67,13 @@ namespace WAHU.Audio
             bool gardenItemNewlyUnlocked)
         {
             if (finalChestNewlyUnlocked)
-                return gardenItemNewlyUnlocked ? PlayGardenUnlock() : PlayMissionComplete();
+            {
+                if (!gardenItemNewlyUnlocked) return PlayMissionComplete();
+                var garden = PlayGardenUnlock();
+                if (garden.Played) return garden;
+                var fallback = PlayMissionComplete();
+                return fallback.Played ? fallback : garden;
+            }
             if (newlyEarnedCheckpointStars > 0)
                 return PlayCheckpointStar();
             return Denied("no_reward_transition");

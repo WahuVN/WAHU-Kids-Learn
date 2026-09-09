@@ -29,6 +29,7 @@ namespace WAHU.Data
     {
         public const string RewardType = "garden_growth";
         public const string RewardId = "growth_step";
+        public const string SourceKeyPrefix = "garden_growth:session:";
         private readonly LearningDatabase _database;
 
         private static readonly KeyValuePair<int, string>[] Milestones =
@@ -51,7 +52,7 @@ namespace WAHU.Data
             // Caller attempt count is advisory only. Durable SQLite evidence decides eligibility.
 
             var created = false;
-            var sourceKey = "garden_growth:session:" + sessionId;
+            var rewardSourceKey = SourceKeyForSession(sessionId);
             var unlocked = new List<string>();
             _database.Writes.Execute((connection, transaction) =>
             {
@@ -60,7 +61,7 @@ namespace WAHU.Data
                     verify.Transaction = transaction;
                     verify.CommandText = @"SELECT count(a.id)
 FROM session s
-LEFT JOIN attempt a ON a.session_id=s.id AND a.child_id=s.child_id AND a.subject='math'
+LEFT JOIN attempt a ON a.session_id=s.id AND a.child_id=s.child_id AND a.subject='math' AND a.answered_at_utc IS NOT NULL
 WHERE s.id=@session AND s.child_id=@child AND s.state='completed' AND s.planned_subject='math'
 GROUP BY s.id;";
                     verify.Parameters.AddWithValue("@session", sessionId);
@@ -82,25 +83,42 @@ VALUES(@id,@child,@type,@reward,'session_completed',@session,@key,@utc);";
                     reward.Parameters.AddWithValue("@type", RewardType);
                     reward.Parameters.AddWithValue("@reward", RewardId);
                     reward.Parameters.AddWithValue("@session", sessionId);
-                    reward.Parameters.AddWithValue("@key", sourceKey);
+                    reward.Parameters.AddWithValue("@key", rewardSourceKey);
                     reward.Parameters.AddWithValue("@utc", DateTime.UtcNow.ToString("o"));
                     created = reward.ExecuteNonQuery() == 1;
                 }
+
                 if (!created)
                 {
                     using (var repair = connection.CreateCommand())
                     {
                         repair.Transaction = transaction;
                         repair.CommandText = @"UPDATE reward_event
-SET reward_type=@type,reward_id='growth_step',source_event='session_completed',source_ref=@session
+SET reward_type=@type,reward_id=@reward,source_event='session_completed',source_ref=@session
 WHERE child_id=@child AND source_key=@key
-  AND (reward_type<>@type OR reward_id<>'growth_step' OR source_event<>'session_completed' OR source_ref<>@session);";
+  AND (reward_type<>@type OR reward_id<>@reward OR source_event<>'session_completed' OR source_ref<>@session);";
                         repair.Parameters.AddWithValue("@type", RewardType);
+                        repair.Parameters.AddWithValue("@reward", RewardId);
                         repair.Parameters.AddWithValue("@session", sessionId);
                         repair.Parameters.AddWithValue("@child", childId);
-                        repair.Parameters.AddWithValue("@key", sourceKey);
+                        repair.Parameters.AddWithValue("@key", rewardSourceKey);
                         created = repair.ExecuteNonQuery() == 1;
                     }
+                }
+
+                using (var verifyReward = connection.CreateCommand())
+                {
+                    verifyReward.Transaction = transaction;
+                    verifyReward.CommandText = @"SELECT count(*) FROM reward_event
+WHERE child_id=@child AND reward_type=@type AND reward_id=@reward
+  AND source_event='session_completed' AND source_ref=@session AND source_key=@key;";
+                    verifyReward.Parameters.AddWithValue("@child", childId);
+                    verifyReward.Parameters.AddWithValue("@type", RewardType);
+                    verifyReward.Parameters.AddWithValue("@reward", RewardId);
+                    verifyReward.Parameters.AddWithValue("@session", sessionId);
+                    verifyReward.Parameters.AddWithValue("@key", rewardSourceKey);
+                    if (Convert.ToInt32(verifyReward.ExecuteScalar(), CultureInfo.InvariantCulture) != 1)
+                        throw new InvalidOperationException("Garden reward source key conflicts with non-canonical reward data.");
                 }
 
                 // Milestones follow canonical Garden rewards, not merely completed sessions.
@@ -134,18 +152,20 @@ VALUES(@child,@item,@utc,0);";
             {
                 command.CommandText = @"SELECT s.id, count(a.id)
 FROM session s
-JOIN attempt a ON a.session_id=s.id AND a.child_id=s.child_id AND a.subject='math'
+JOIN attempt a ON a.session_id=s.id AND a.child_id=s.child_id AND a.subject='math' AND a.answered_at_utc IS NOT NULL
 WHERE s.child_id=@child AND s.state='completed' AND s.planned_subject='math'
   AND NOT EXISTS (
       SELECT 1 FROM reward_event r
-      WHERE r.child_id=s.child_id AND r.reward_type=@type AND r.reward_id='growth_step'
+      WHERE r.child_id=s.child_id AND r.reward_type=@type AND r.reward_id=@reward
         AND r.source_event='session_completed' AND r.source_ref=s.id
-        AND r.source_key='garden_growth:session:' || s.id)
+        AND r.source_key=@sourcePrefix || s.id)
 GROUP BY s.id
 HAVING count(a.id)>0
 ORDER BY s.started_at_utc,s.id;";
                 command.Parameters.AddWithValue("@child", childId);
                 command.Parameters.AddWithValue("@type", RewardType);
+                command.Parameters.AddWithValue("@reward", RewardId);
+                command.Parameters.AddWithValue("@sourcePrefix", SourceKeyPrefix);
                 using (var reader = command.ExecuteReader())
                 {
                     while (reader.Read())
@@ -178,7 +198,7 @@ ORDER BY s.started_at_utc,s.id;";
                     CompletedMathSessions = Count(connection,
                         @"SELECT count(*) FROM session s
 WHERE s.child_id=@child AND s.state='completed' AND s.planned_subject='math'
-  AND EXISTS (SELECT 1 FROM attempt a WHERE a.session_id=s.id AND a.child_id=s.child_id AND a.subject='math');", childId),
+  AND EXISTS (SELECT 1 FROM attempt a WHERE a.session_id=s.id AND a.child_id=s.child_id AND a.subject='math' AND a.answered_at_utc IS NOT NULL);", childId),
                     UnlockedItems = new List<string>()
                 };
                 // Garden visual state is derived from canonical Garden rewards. Inventory is a
@@ -203,6 +223,12 @@ WHERE s.child_id=@child AND s.state='completed' AND s.planned_subject='math'
                 NextMilestoneSessionCount = progress.NextMilestoneSessionCount,
                 NextMilestoneItemId = progress.NextMilestoneItemId
             };
+        }
+
+        public static string SourceKeyForSession(string sessionId)
+        {
+            Require(sessionId, "sessionId");
+            return SourceKeyPrefix + sessionId;
         }
 
         private static void PopulateNextMilestone(GameWorldProgress progress)
@@ -261,7 +287,7 @@ JOIN session s ON s.id=r.source_ref AND s.child_id=r.child_id
 WHERE r.child_id=@child AND r.reward_type='garden_growth' AND r.reward_id='growth_step'
   AND r.source_event='session_completed' AND r.source_key='garden_growth:session:' || s.id
   AND s.state='completed' AND s.planned_subject='math'
-  AND EXISTS (SELECT 1 FROM attempt a WHERE a.session_id=s.id AND a.child_id=s.child_id AND a.subject='math');";
+  AND EXISTS (SELECT 1 FROM attempt a WHERE a.session_id=s.id AND a.child_id=s.child_id AND a.subject='math' AND a.answered_at_utc IS NOT NULL);";
                 command.Parameters.AddWithValue("@child", childId);
                 return Convert.ToInt32(command.ExecuteScalar(), CultureInfo.InvariantCulture);
             }

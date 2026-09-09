@@ -1,6 +1,8 @@
 using System;
 using System.Globalization;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using WAHU.Data;
 
 namespace WAHU.RescueRewardRuntimeSmoke
@@ -98,6 +100,159 @@ namespace WAHU.RescueRewardRuntimeSmoke
                 Assert(!shortReward.FinalChestUnlocked && !shortReward.GardenRewardRecorded, "incomplete_three_checkpoint_game_cannot_unlock_chest");
                 Assert(CountRewards(database, shortChild) == 0, "incomplete_three_checkpoint_game_mints_no_reward");
 
+                const string noAttemptChild = "child-ai4-no-attempt";
+                const string noAttemptSession = "session-ai4-no-attempt";
+                InsertChildAndSession(database, noAttemptChild, noAttemptSession);
+                CompleteSession(database, noAttemptSession);
+                var noAttemptIgnored = new GameWorldRewardService(database)
+                    .GrantCompletedMathSession(noAttemptChild, noAttemptSession, 3);
+                Assert(!noAttemptIgnored.RewardCreated, "completed_session_without_durable_attempt_cannot_mint_reward");
+                Assert(CountRewards(database, noAttemptChild) == 0, "no_attempt_session_mints_no_reward_row");
+                var noAttemptProgress = new GameWorldRewardService(database).ReadProgress(noAttemptChild);
+                Assert(noAttemptProgress.GrowthSteps == 0 && noAttemptProgress.CompletedMathSessions == 0,
+                    "no_attempt_completed_session_does_not_advance_garden_progress");
+                InsertForeignGardenReward(database, noAttemptChild, noAttemptSession, GameWorldRewardService.RewardId,
+                    "session_completed", GameWorldRewardService.SourceKeyForSession(noAttemptSession));
+                const string orphanSession = "session-ai4-orphan-reward";
+                InsertForeignGardenReward(database, noAttemptChild, orphanSession, GameWorldRewardService.RewardId,
+                    "session_completed", GameWorldRewardService.SourceKeyForSession(orphanSession));
+                Assert(new GameWorldRewardService(database).ReadProgress(noAttemptChild).GrowthSteps == 0,
+                    "canonical_looking_reward_requires_real_eligible_session_and_attempt");
+
+                const string dirtyChild = "child-ai4-dirty-reward";
+                const string dirtySession = "session-ai4-dirty-reward";
+                InsertChildAndSession(database, dirtyChild, dirtySession);
+                InsertCheckpoint(database, dirtySession, dirtyChild, "dirty-q1", "dirty-a1", 1);
+                InsertCheckpoint(database, dirtySession, dirtyChild, "dirty-q2", "dirty-a2", 1);
+                InsertCheckpoint(database, dirtySession, dirtyChild, "dirty-q3", "dirty-a3", 1);
+                CompleteSession(database, dirtySession);
+                InsertForeignGardenReward(database, dirtyChild, dirtySession, "legacy_growth", "session_completed", "dirty-legacy-reward");
+                InsertForeignGardenReward(database, dirtyChild, dirtySession, GameWorldRewardService.RewardId, "manual_adjustment", "dirty-manual-reward");
+                InsertForeignGardenReward(database, dirtyChild, dirtySession, GameWorldRewardService.RewardId, "session_completed", "dirty-wrong-source-key");
+                var dirtyWorld = new GameWorldRewardService(database);
+                Assert(dirtyWorld.ReadProgress(dirtyChild).GrowthSteps == 0, "noncanonical_garden_rows_do_not_inflate_growth");
+                Assert(dirtyWorld.ReconcileMissingCompletedMathSessionRewards(dirtyChild) == 1, "noncanonical_garden_rows_do_not_block_reconciliation");
+                Assert(CountCanonicalRewards(database, dirtyChild, dirtySession) == 1, "reconciliation_creates_exactly_one_canonical_growth_reward");
+                Assert(dirtyWorld.ReadProgress(dirtyChild).GrowthSteps == 1, "garden_growth_counts_only_canonical_reward_rows");
+                const string milestoneChild = "child-ai4-milestones";
+                var milestoneWorld = new GameWorldRewardService(database);
+                GameWorldRewardResult milestoneResult = null;
+                for (var i = 1; i <= 10; i++)
+                {
+                    var milestoneSession = "session-ai4-milestone-" + i.ToString(CultureInfo.InvariantCulture);
+                    if (i == 1) InsertChildAndSession(database, milestoneChild, milestoneSession);
+                    else InsertSessionForExistingChild(database, milestoneChild, milestoneSession);
+                    for (var q = 1; q <= 3; q++)
+                        InsertCheckpoint(database, milestoneSession, milestoneChild,
+                            "milestone-q" + i + "-" + q, "milestone-a" + i + "-" + q, 1);
+                    CompleteSession(database, milestoneSession);
+                    milestoneResult = milestoneWorld.GrantCompletedMathSession(milestoneChild, milestoneSession, 3);
+                    Assert(milestoneResult.RewardCreated, "milestone_session_" + i + "_creates_one_reward");
+                    if (i == 1)
+                        Assert(milestoneResult.NewlyUnlockedItems.Contains("garden_seedling"), "milestone_1_unlocks_seedling");
+                    if (i == 2)
+                        Assert(!milestoneResult.NewlyUnlockedItems.Contains("garden_flower_patch"), "milestone_2_does_not_unlock_flower_early");
+                    if (i == 3)
+                        Assert(milestoneResult.NewlyUnlockedItems.Contains("garden_flower_patch"), "milestone_3_unlocks_flower_patch");
+                    if (i == 5)
+                        Assert(!milestoneResult.NewlyUnlockedItems.Contains("garden_lantern"), "milestone_5_does_not_unlock_lantern_early");
+                    if (i == 6)
+                        Assert(milestoneResult.NewlyUnlockedItems.Contains("garden_lantern"), "milestone_6_unlocks_lantern");
+                    if (i == 9)
+                        Assert(!milestoneResult.NewlyUnlockedItems.Contains("garden_bench"), "milestone_9_does_not_unlock_bench_early");
+                    if (i == 10)
+                        Assert(milestoneResult.NewlyUnlockedItems.Contains("garden_bench"), "milestone_10_unlocks_bench");
+                }
+                var milestoneProgress = milestoneWorld.ReadProgress(milestoneChild);
+                Assert(milestoneProgress.GrowthSteps == 10 && milestoneProgress.CompletedMathSessions == 10,
+                    "ten_completed_sessions_produce_ten_growth_steps");
+                Assert(milestoneProgress.UnlockedItems.Contains("garden_seedling") &&
+                       milestoneProgress.UnlockedItems.Contains("garden_flower_patch") &&
+                       milestoneProgress.UnlockedItems.Contains("garden_lantern") &&
+                       milestoneProgress.UnlockedItems.Contains("garden_bench"),
+                    "all_garden_milestones_persist_after_ten_sessions");
+                Assert(milestoneProgress.SessionsUntilNextMilestone == 0 && milestoneProgress.NextMilestoneItemId == null,
+                    "garden_milestone_progress_finishes_cleanly_after_last_threshold");
+                var milestoneReplay = milestoneWorld.GrantCompletedMathSession(milestoneChild, "session-ai4-milestone-10", 3);
+                Assert(!milestoneReplay.RewardCreated && milestoneReplay.GrowthSteps == 10 &&
+                       milestoneReplay.NewlyUnlockedItems.Count == 0,
+                    "milestone_replay_does_not_duplicate_growth_or_inventory");
+
+                const string rollbackChild = "child-ai4-rollback";
+                const string rollbackSession = "session-ai4-rollback";
+                InsertChildAndSession(database, rollbackChild, rollbackSession);
+                InsertCheckpoint(database, rollbackSession, rollbackChild, "rollback-q1", "rollback-a1", 1);
+                InsertCheckpoint(database, rollbackSession, rollbackChild, "rollback-q2", "rollback-a2", 1);
+                InsertCheckpoint(database, rollbackSession, rollbackChild, "rollback-q3", "rollback-a3", 1);
+                CompleteSession(database, rollbackSession);
+                InstallInventoryFailureTrigger(database);
+                var rollbackFaulted = false;
+                try
+                {
+                    new GameWorldRewardService(database).GrantCompletedMathSession(rollbackChild, rollbackSession, 3);
+                }
+                catch (Exception)
+                {
+                    rollbackFaulted = true;
+                }
+                Assert(rollbackFaulted, "inventory_write_fault_aborts_reward_transaction");
+                Assert(CountCanonicalRewards(database, rollbackChild, rollbackSession) == 0,
+                    "inventory_write_fault_rolls_back_reward_row");
+                Assert(new GameWorldRewardService(database).ReadProgress(rollbackChild).GrowthSteps == 0,
+                    "inventory_write_fault_leaves_garden_growth_unchanged");
+                DropInventoryFailureTrigger(database);
+                var rollbackWorld = new GameWorldRewardService(database);
+                Assert(rollbackWorld.ReconcileMissingCompletedMathSessionRewards(rollbackChild) == 1,
+                    "next_reconcile_repairs_transient_reward_failure_once");
+                var rollbackRecovered = rollbackWorld.ReadProgress(rollbackChild);
+                Assert(rollbackRecovered.GrowthSteps == 1 &&
+                       rollbackRecovered.UnlockedItems.Contains("garden_seedling"),
+                    "reward_recovers_cleanly_after_transient_inventory_failure");
+                Assert(CountCanonicalRewards(database, rollbackChild, rollbackSession) == 1,
+                    "recovered_transaction_persists_one_canonical_reward");
+                var rollbackRescue = new RescueGameRewardService(database).Read(rollbackSession);
+                Assert(rollbackRescue.GardenRewardRecorded && rollbackRescue.FinalChestUnlocked,
+                    "reconciled_reward_unlocks_rescue_chest_from_durable_state");
+                Assert(rollbackWorld.ReconcileMissingCompletedMathSessionRewards(rollbackChild) == 0,
+                    "reconcile_after_recovery_is_idempotent");
+
+                const string collisionChild = "child-ai4-source-collision";
+                const string collisionSession = "session-ai4-source-collision";
+                InsertChildAndSession(database, collisionChild, collisionSession);
+                InsertCheckpoint(database, collisionSession, collisionChild, "collision-q1", "collision-a1", 1);
+                InsertCheckpoint(database, collisionSession, collisionChild, "collision-q2", "collision-a2", 1);
+                InsertCheckpoint(database, collisionSession, collisionChild, "collision-q3", "collision-a3", 1);
+                CompleteSession(database, collisionSession);
+                InsertForeignGardenReward(database, collisionChild, collisionSession, "legacy_growth", "session_completed",
+                    GameWorldRewardService.SourceKeyForSession(collisionSession));
+                var collisionRepair = new GameWorldRewardService(database)
+                    .GrantCompletedMathSession(collisionChild, collisionSession, 3);
+                Assert(collisionRepair.RewardCreated && collisionRepair.GrowthSteps == 1,
+                    "canonical_source_key_collision_is_self_healed_once");
+                Assert(CountCanonicalRewards(database, collisionChild, collisionSession) == 1,
+                    "source_key_collision_repairs_exactly_one_canonical_row");
+                var collisionSnapshot = new RescueGameRewardService(database).Read(collisionSession);
+                Assert(collisionSnapshot.GardenRewardRecorded && collisionSnapshot.FinalChestUnlocked,
+                    "self_healed_source_key_collision_unlocks_chest_from_durable_state");
+
+                const string concurrentChild = "child-ai4-concurrent";
+                const string concurrentSession = "session-ai4-concurrent";
+                InsertChildAndSession(database, concurrentChild, concurrentSession);
+                InsertCheckpoint(database, concurrentSession, concurrentChild, "concurrent-q1", "concurrent-a1", 1);
+                InsertCheckpoint(database, concurrentSession, concurrentChild, "concurrent-q2", "concurrent-a2", 1);
+                InsertCheckpoint(database, concurrentSession, concurrentChild, "concurrent-q3", "concurrent-a3", 1);
+                CompleteSession(database, concurrentSession);
+                var concurrentWorld = new GameWorldRewardService(database);
+                var grantTasks = Enumerable.Range(0, 8)
+                    .Select(_ => Task.Run(() => concurrentWorld.GrantCompletedMathSession(concurrentChild, concurrentSession, 3)))
+                    .ToArray();
+                Task.WaitAll(grantTasks);
+                Assert(grantTasks.Count(x => x.Result.RewardCreated) == 1, "concurrent_reward_grant_has_one_creator");
+                Assert(CountCanonicalRewards(database, concurrentChild, concurrentSession) == 1,
+                    "concurrent_reward_grant_persists_one_canonical_row");
+                Assert(concurrentWorld.ReadProgress(concurrentChild).GrowthSteps == 1,
+                    "concurrent_reward_grant_counts_one_growth_step");
+
                 Console.WriteLine("RESCUE_REWARD_RUNTIME_SMOKE_PASS assertions=" + _assertions);
             }
             finally
@@ -114,6 +269,20 @@ namespace WAHU.RescueRewardRuntimeSmoke
                 command.CommandText = @"INSERT INTO child(id,display_name,grade_level,created_at_utc,updated_at_utc)
 VALUES(@child,'Bé cứu hộ',2,@now,@now);
 INSERT INTO session(id,child_id,started_at_utc,state,planned_subject,performance_profile)
+VALUES(@session,@child,@now,'active','math','LOW');";
+                command.Parameters.AddWithValue("@child", childId);
+                command.Parameters.AddWithValue("@session", sessionId);
+                command.Parameters.AddWithValue("@now", DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture));
+                command.ExecuteNonQuery();
+            }
+        }
+
+        private static void InsertSessionForExistingChild(LearningDatabase database, string childId, string sessionId)
+        {
+            using (var connection = database.OpenConnection())
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = @"INSERT INTO session(id,child_id,started_at_utc,state,planned_subject,performance_profile)
 VALUES(@session,@child,@now,'active','math','LOW');";
                 command.Parameters.AddWithValue("@child", childId);
                 command.Parameters.AddWithValue("@session", sessionId);
@@ -211,6 +380,73 @@ WHERE id=@session;";
             }
         }
 
+        private static void InstallInventoryFailureTrigger(LearningDatabase database)
+        {
+            using (var connection = database.OpenConnection())
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = @"CREATE TRIGGER ai4_reward_inventory_abort
+BEFORE INSERT ON inventory
+WHEN NEW.child_id='child-ai4-rollback'
+BEGIN
+    SELECT RAISE(ABORT, 'ai4_inventory_fault');
+END;";
+                command.ExecuteNonQuery();
+            }
+        }
+
+        private static void DropInventoryFailureTrigger(LearningDatabase database)
+        {
+            using (var connection = database.OpenConnection())
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = "DROP TRIGGER IF EXISTS ai4_reward_inventory_abort;";
+                command.ExecuteNonQuery();
+            }
+        }
+
+        private static void InsertForeignGardenReward(
+            LearningDatabase database,
+            string childId,
+            string sessionId,
+            string rewardId,
+            string sourceEvent,
+            string sourceKey)
+        {
+            using (var connection = database.OpenConnection())
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = @"INSERT INTO reward_event(
+id,child_id,reward_type,reward_id,source_event,source_ref,source_key,created_at_utc)
+VALUES(@id,@child,@type,@reward,@event,@session,@key,@utc);";
+                command.Parameters.AddWithValue("@id", "foreign-" + Guid.NewGuid().ToString("N"));
+                command.Parameters.AddWithValue("@child", childId);
+                command.Parameters.AddWithValue("@type", GameWorldRewardService.RewardType);
+                command.Parameters.AddWithValue("@reward", rewardId);
+                command.Parameters.AddWithValue("@event", sourceEvent);
+                command.Parameters.AddWithValue("@session", sessionId);
+                command.Parameters.AddWithValue("@key", sourceKey);
+                command.Parameters.AddWithValue("@utc", DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture));
+                command.ExecuteNonQuery();
+            }
+        }
+
+        private static int CountCanonicalRewards(LearningDatabase database, string childId, string sessionId)
+        {
+            using (var connection = database.OpenConnection())
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = @"SELECT COUNT(*) FROM reward_event
+WHERE child_id=@child AND reward_type=@type AND reward_id=@reward
+  AND source_event='session_completed' AND source_ref=@session AND source_key=@sourceKey;";
+                command.Parameters.AddWithValue("@child", childId);
+                command.Parameters.AddWithValue("@type", GameWorldRewardService.RewardType);
+                command.Parameters.AddWithValue("@reward", GameWorldRewardService.RewardId);
+                command.Parameters.AddWithValue("@session", sessionId);
+                command.Parameters.AddWithValue("@sourceKey", GameWorldRewardService.SourceKeyForSession(sessionId));
+                return Convert.ToInt32(command.ExecuteScalar(), CultureInfo.InvariantCulture);
+            }
+        }
         private static int CountRewards(LearningDatabase database, string childId)
         {
             using (var connection = database.OpenConnection())

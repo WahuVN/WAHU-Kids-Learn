@@ -131,6 +131,7 @@ namespace WAHUKidsLearn
     {
         private int _completed;
         private int _activeIndex;
+        private bool _rewardChestReady;
         private IList<string> _nouns = new List<string>();
         private readonly Timer _travelTimer;
         private float _travelVisual;
@@ -164,10 +165,16 @@ namespace WAHUKidsLearn
 
         public void SetState(int completed, int activeIndex, IList<string> nouns)
         {
+            SetState(completed, activeIndex, nouns, false);
+        }
+
+        public void SetState(int completed, int activeIndex, IList<string> nouns, bool rewardChestReady)
+        {
             _completed = Math.Max(0, Math.Min(3, completed));
             _activeIndex = activeIndex < 0 ? -1 : Math.Max(0, Math.Min(2, activeIndex));
+            _rewardChestReady = rewardChestReady && _completed >= 3;
             _nouns = nouns == null ? new List<string>() : nouns.ToList();
-            _travelTarget = _completed >= 3 ? 4f : Math.Max(_completed, _activeIndex < 0 ? _completed : _activeIndex + 1);
+            _travelTarget = _rewardChestReady ? 4f : Math.Max(_completed, _activeIndex < 0 ? _completed : _activeIndex + 1);
             if (IsHandleCreated && Math.Abs(_travelTarget - _travelVisual) > 0.025f) _travelTimer.Start();
 
             var parts = new List<string> { "Bắt đầu đã xong" };
@@ -176,10 +183,12 @@ namespace WAHUKidsLearn
                 var name = i < _nouns.Count ? _nouns[i] : "chặng " + (i + 1);
                 parts.Add(name + " " + VisualStateText(GetCheckpointVisualState(i)));
             }
-            parts.Add("Rương sao " + (_completed >= 3 ? "sẵn sàng" : "đang khóa"));
+            parts.Add("Rương sao " + (_rewardChestReady ? "sẵn sàng" : "đang khóa"));
             AccessibleDescription = string.Join("; ", parts) + ".";
             Invalidate();
         }
+
+        public bool RewardChestReady { get { return _rewardChestReady; } }
 
         public RescueCheckpointVisualState GetCheckpointVisualState(int zeroBasedIndex)
         {
@@ -293,7 +302,7 @@ namespace WAHUKidsLearn
             }
 
             var chestX = left + step * 4f;
-            if (_completed >= 3)
+            if (_rewardChestReady)
             {
                 using (var glow = new SolidBrush(Color.FromArgb(64, ChildVisualTheme.Sun)))
                     e.Graphics.FillEllipse(glow, chestX - 15, centerY - 14, 30, 28);
@@ -301,7 +310,7 @@ namespace WAHUKidsLearn
             var chestRect = new RectangleF(chestX - 13, centerY - 11, 26, 22);
             if (!GameAssetLibrary.DrawContain(e.Graphics, "03_Rescue/rescue_reward_chest_closed.png", chestRect))
             {
-                using (var b = new SolidBrush(_completed >= 3 ? ChildVisualTheme.Sun : Color.FromArgb(202, 205, 199)))
+                using (var b = new SolidBrush(_rewardChestReady ? ChildVisualTheme.Sun : Color.FromArgb(202, 205, 199)))
                     e.Graphics.FillRectangle(b, chestRect);
             }
 

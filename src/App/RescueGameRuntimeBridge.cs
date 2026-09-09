@@ -151,10 +151,12 @@ namespace WAHUKidsLearn
             {
                 try
                 {
-                    var transition = _rewards.ReadTransition(after.SessionId, _rewardSnapshot, false);
+                    var previousReward = _rewardSnapshot;
+                    var transition = _rewards.ReadTransition(after.SessionId, previousReward, false);
                     _rewardSnapshot = transition.Snapshot;
-                    if (transition.Signal == RescueRewardSignal.CheckpointStarEarned)
-                        TryAudio(delegate { return _audioHooks.PlayCheckpointStar(); });
+                    var gardenItemNew = HasNewGardenItem(previousReward, transition.Snapshot);
+                    TryAudio(delegate { return _audioHooks.PlayRewardFeedback(
+                        transition.NewlyEarnedCheckpointStars, transition.FinalChestNewlyUnlocked, gardenItemNew); });
                 }
                 catch { }
             }
@@ -228,15 +230,24 @@ namespace WAHUKidsLearn
             if (!_rescuePresentationActive) return;
             try
             {
-                var transition = _rewards.ReadTransition(sessionId, _rewardSnapshot, true);
+                var previousReward = _rewardSnapshot;
+                var transition = _rewards.ReadTransition(sessionId, previousReward, true);
                 _rewardSnapshot = transition.Snapshot;
-                if (transition.Signal == RescueRewardSignal.MissionComplete)
-                {
-                    TryAudio(delegate { return _audioHooks.PlayMissionComplete(); });
-                    TryAudio(delegate { return _audioHooks.PlayGardenUnlock(); });
-                }
+                var gardenItemNew = HasNewGardenItem(previousReward, transition.Snapshot);
+                TryAudio(delegate { return _audioHooks.PlayRewardFeedback(
+                    transition.NewlyEarnedCheckpointStars, transition.FinalChestNewlyUnlocked, gardenItemNew); });
             }
             catch { }
+        }
+
+        private static bool HasNewGardenItem(RescueRewardSnapshot previous, RescueRewardSnapshot current)
+        {
+            if (current == null || current.UnlockedGardenItemIds == null || current.UnlockedGardenItemIds.Count == 0) return false;
+            if (previous == null || previous.UnlockedGardenItemIds == null || previous.UnlockedGardenItemIds.Count == 0) return true;
+            var before = new HashSet<string>(previous.UnlockedGardenItemIds, StringComparer.Ordinal);
+            foreach (var item in current.UnlockedGardenItemIds)
+                if (!string.IsNullOrWhiteSpace(item) && !before.Contains(item)) return true;
+            return false;
         }
 
         private void TryAudio(Func<AudioPlaybackResult> action)

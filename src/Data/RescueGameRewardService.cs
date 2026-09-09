@@ -230,11 +230,13 @@ WHERE child_id=@child
   AND reward_type=@type
   AND reward_id=@reward
   AND source_event='session_completed'
-  AND source_ref=@session;";
+  AND source_ref=@session
+  AND source_key=@sourceKey;";
                 command.Parameters.AddWithValue("@child", childId);
                 command.Parameters.AddWithValue("@type", GameWorldRewardService.RewardType);
                 command.Parameters.AddWithValue("@reward", GameWorldRewardService.RewardId);
                 command.Parameters.AddWithValue("@session", sessionId);
+                command.Parameters.AddWithValue("@sourceKey", GameWorldRewardService.SourceKeyForSession(sessionId));
                 return Convert.ToInt32(command.ExecuteScalar(), CultureInfo.InvariantCulture) > 0;
             }
         }

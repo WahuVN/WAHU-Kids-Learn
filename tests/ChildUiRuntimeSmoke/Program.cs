@@ -1828,9 +1828,9 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
             {
                 var nouns = new List<string> { "Mốc một", "Mốc hai", "Mốc ba" };
                 var setJourneyState = journey.GetType().GetMethod("SetState", BindingFlags.Instance | BindingFlags.Public,
-                    null, new[] { typeof(int), typeof(int), typeof(IList<string>) }, null);
+                    null, new[] { typeof(int), typeof(int), typeof(IList<string>), typeof(bool) }, null);
                 A(setJourneyState != null, "rescue_journey_state_setter_available");
-                setJourneyState.Invoke(journey, new object[] { 0, 0, nouns });
+                setJourneyState.Invoke(journey, new object[] { 0, 0, nouns, false });
                 A(journey.AccessibleDescription.IndexOf("Bắt đầu đã xong", StringComparison.OrdinalIgnoreCase) >= 0 &&
                   journey.AccessibleDescription.IndexOf("Mốc một đang làm", StringComparison.OrdinalIgnoreCase) >= 0 &&
                   journey.AccessibleDescription.IndexOf("Mốc hai đang khóa", StringComparison.OrdinalIgnoreCase) >= 0 &&
@@ -1838,19 +1838,25 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                     "rescue_journey_start_active_locked_chest_states");
                 RenderAndAssert(journey, 560, 36, "rescue_journey_checkpoint1_active");
 
-                setJourneyState.Invoke(journey, new object[] { 1, 0, nouns });
+                setJourneyState.Invoke(journey, new object[] { 1, 0, nouns, false });
                 A(journey.AccessibleDescription.IndexOf("Mốc một đã xong", StringComparison.OrdinalIgnoreCase) >= 0 &&
                   journey.AccessibleDescription.IndexOf("Mốc hai sẵn sàng", StringComparison.OrdinalIgnoreCase) >= 0,
                     "rescue_journey_completed_and_available_states");
-                setJourneyState.Invoke(journey, new object[] { 1, 1, nouns });
+                setJourneyState.Invoke(journey, new object[] { 1, 1, nouns, false });
                 A(journey.AccessibleDescription.IndexOf("Mốc hai đang làm", StringComparison.OrdinalIgnoreCase) >= 0,
                     "rescue_journey_available_promotes_to_active");
                 RenderAndAssert(journey, 560, 36, "rescue_journey_checkpoint2_active");
 
-                setJourneyState.Invoke(journey, new object[] { 3, 2, nouns });
+                setJourneyState.Invoke(journey, new object[] { 3, 2, nouns, false });
                 A(journey.AccessibleDescription.IndexOf("Mốc ba đã xong", StringComparison.OrdinalIgnoreCase) >= 0 &&
-                  journey.AccessibleDescription.IndexOf("Rương sao sẵn sàng", StringComparison.OrdinalIgnoreCase) >= 0,
-                    "rescue_journey_chest_unlocks_after_three");
+                  journey.AccessibleDescription.IndexOf("Rương sao đang khóa", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                  !Get<bool>(journey, "RewardChestReady"),
+                    "rescue_journey_three_checkpoints_preterminal_keeps_chest_locked");
+                RenderAndAssert(journey, 560, 36, "rescue_journey_preterminal_chest_locked");
+                setJourneyState.Invoke(journey, new object[] { 3, 2, nouns, true });
+                A(journey.AccessibleDescription.IndexOf("Rương sao sẵn sàng", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                  Get<bool>(journey, "RewardChestReady"),
+                    "rescue_journey_durable_terminal_unlocks_chest");
                 RenderAndAssert(journey, 560, 36, "rescue_journey_complete_chest");
             }
         }
@@ -2001,6 +2007,9 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                     A(rewardSnapshot != null && !string.IsNullOrWhiteSpace(Get<string>(rewardSnapshot, "SessionId")) &&
                       Get<int>(rewardSnapshot, "CheckpointStars") == 0,
                         "learner_shell_rescue_bridge_ai4_reward_projection_initialized");
+                    var bridgeJourney = GetField<Control>(bridgePage, "_eventProgress");
+                    A(bridgeJourney != null && !Get<bool>(bridgeJourney, "RewardChestReady"),
+                        "learner_shell_rescue_bridge_chest_starts_locked_from_durable_reward");
                     var supportMethod = rescueBridge.GetType().GetMethod("CurrentSupportDecision", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
                     var supportDecision = supportMethod == null ? null : supportMethod.Invoke(rescueBridge, null);
                     A(supportDecision != null && !string.IsNullOrWhiteSpace(Get<string>(supportDecision, "SupportVi")),

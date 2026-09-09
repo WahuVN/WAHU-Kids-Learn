@@ -855,7 +855,9 @@ namespace WAHUKidsLearn
             _progress.Visible = false;
             _eventProgress.Visible = true;
             var activeIndex = safeCompleted >= target ? target - 1 : Math.Max(0, Math.Min(target - 1, questionNumber - 1));
-            _eventProgress.SetState(safeCompleted, activeIndex, _eventPresentation.CheckpointNounsVi);
+            var rewardChestReady = _rescueBridge != null && _rescueBridge.RewardSnapshot != null &&
+                _rescueBridge.RewardSnapshot.FinalChestUnlocked;
+            _eventProgress.SetState(safeCompleted, activeIndex, _eventPresentation.CheckpointNounsVi, rewardChestReady);
             _progressText.Text = safeCompleted >= target ? target + " / " + target + " chặng đã xong" : "Chặng " + (activeIndex + 1) + " / " + target + (retry ? " • thử lại" : string.Empty);
         }
 

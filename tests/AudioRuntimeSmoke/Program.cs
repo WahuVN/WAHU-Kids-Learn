@@ -124,6 +124,13 @@ namespace WAHU.AudioRuntimeSmoke
                 var gardenReward = hooks.PlayRewardFeedback(1, true, true);
                 Assert(gardenReward.Played && gardenReward.DurationMs > 390 && gardenReward.DurationMs < 410,
                     "rescue_reward_bridge_terminal_garden_cue_wins_over_checkpoint");
+
+                audio.Stop();
+                File.Delete(Path.Combine(cueRoot, RescueGameAudioHooks.GardenUnlockFile));
+                var gardenFallback = hooks.PlayRewardFeedback(0, true, true);
+                Assert(gardenFallback.Played && gardenFallback.DurationMs > 790,
+                    "rescue_reward_bridge_falls_back_to_completion_when_garden_asset_missing");
+                File.Copy(shortGardenWav, Path.Combine(cueRoot, RescueGameAudioHooks.GardenUnlockFile), true);
                 audio.Stop();
 
                 var musicDisabled = hooks.TryStartMissionMusic();

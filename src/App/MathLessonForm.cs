@@ -177,7 +177,7 @@ namespace WAHUKidsLearn
                 Visible = _eventPresentation != null
             };
             if (_eventPresentation != null)
-                _eventCheckpointStrip.SetState(0, 0, _eventPresentation.CheckpointNounsVi);
+                _eventCheckpointStrip.SetState(0, 0, _eventPresentation.CheckpointNounsVi, false);
             progressHost.Controls.Add(_eventCheckpointStrip);
             _eventCheckpointStrip.BringToFront();
             root.Controls.Add(progressHost, 0, 1);
@@ -722,7 +722,8 @@ namespace WAHUKidsLearn
             }
 
             var activeIndex = safeCompleted >= target ? target - 1 : Math.Max(0, Math.Min(target - 1, questionNumber - 1));
-            _eventCheckpointStrip.SetState(safeCompleted, activeIndex, _eventPresentation.CheckpointNounsVi);
+            var rewardChestReady = _eventState != null && _eventState.IsComplete && safeCompleted >= target;
+            _eventCheckpointStrip.SetState(safeCompleted, activeIndex, _eventPresentation.CheckpointNounsVi, rewardChestReady);
             var nounIndex = afterAnswer ? Math.Max(0, safeCompleted - 1) : activeIndex;
             var noun = _eventPresentation.CheckpointName(nounIndex);
             _progressText.Text = safeCompleted >= target
