@@ -78,11 +78,11 @@ $msbuild = Find-FirstExisting @(
 if (-not $msbuild) { throw 'Không tìm thấy MSBuild.' }
 
 Write-Host "[1/15] Restore + rebuild solution net48/x86 bằng $msbuild"
-& $msbuild 'WAHUKidsLearn.sln' /restore /m /t:Rebuild "/p:Configuration=$Configuration" /p:Platform=x86 /v:minimal /nologo
+& $msbuild 'WAHUKidsLearn.sln' /restore /m /t:Rebuild "/p:Configuration=$Configuration" /p:Platform=x86 /p:RestoreLockedMode=true /v:minimal /nologo
 if ($LASTEXITCODE -ne 0) { throw "MSBuild fail: $LASTEXITCODE" }
 
 Write-Host '[1b/15] Build Child UI render smoke x86'
-& $msbuild 'tests\ChildUiRuntimeSmoke\WAHU.ChildUiRuntimeSmoke.csproj' /restore /t:Rebuild "/p:Configuration=$Configuration" /p:Platform=x86 /v:minimal /nologo
+& $msbuild 'tests\ChildUiRuntimeSmoke\WAHU.ChildUiRuntimeSmoke.csproj' /restore /t:Rebuild "/p:Configuration=$Configuration" /p:Platform=x86 /p:RestoreLockedMode=true /v:minimal /nologo
 if ($LASTEXITCODE -ne 0) { throw "Child UI smoke build fail: $LASTEXITCODE" }
 
 $preflightSmoke = Join-Path $root "tests\SetupPreflightSmoke\bin\$Configuration\WAHU.SetupPreflight.Smoke.exe"
@@ -200,7 +200,7 @@ $dotnet = (Get-Command dotnet -ErrorAction SilentlyContinue).Source
 if (-not $dotnet) { throw 'Không tìm thấy dotnet CLI để build MathSessionPersistenceRuntimeSmoke.' }
 $mathPersistenceProject = Join-Path $root 'tests\MathSessionPersistenceRuntimeSmoke\WAHU.MathSessionPersistenceRuntimeSmoke.csproj'
 Require-File $mathPersistenceProject
-& $dotnet build $mathPersistenceProject -c $Configuration '-p:Platform=x86' --nologo
+& $dotnet build $mathPersistenceProject -c $Configuration '-p:Platform=x86' '-p:RestoreLockedMode=true' --nologo
 if ($LASTEXITCODE -ne 0) { throw "Math persistence smoke build fail: $LASTEXITCODE" }
 $mathPersistenceSmoke = Join-Path $root "tests\MathSessionPersistenceRuntimeSmoke\bin\x86\$Configuration\net48\WAHU.MathSessionPersistenceRuntimeSmoke.exe"
 Require-File $mathPersistenceSmoke
