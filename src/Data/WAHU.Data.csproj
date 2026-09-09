@@ -27,6 +27,7 @@
     <Compile Include="LearnerSessionService.cs" />
     <Compile Include="BehaviorDecisionAuditService.cs" />
     <Compile Include="GameWorldRewardService.cs" />
+    <Compile Include="RescueGameRewardService.cs" />
     <Compile Include="MathRoadmapService.cs" />
     <Compile Include="MathLessonProgressStore.cs" />
     <Compile Include="MathSessionRuntimeService.cs" />
