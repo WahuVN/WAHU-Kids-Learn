@@ -32,8 +32,13 @@ namespace WAHU.MathRescueGameplayRuntimeSmoke
 
                 TestHeadlessThreeCheckpointJourney(root, schemaPath, templatePath, eventPath);
                 TestTransitionRaceAndDoubleSubmit(root, schemaPath, templatePath, eventPath);
+                TestMultiThreadTransitionStress(root, schemaPath, templatePath, eventPath);
                 TestExactRepairResumeToken(root, schemaPath, templatePath, eventPath);
-                TestReplayAfterCompleted(root, schemaPath, templatePath, eventPath);
+                TestResumeTokenPhaseMatrix(root, schemaPath, templatePath, eventPath);
+                TestTamperedResumeTokenFailsClosed(root, schemaPath, templatePath, eventPath);
+                TestObserverFailureCannotPoisonGameplay(root, schemaPath, templatePath, eventPath);
+                TestPublicBoundaryMutationIsolation(root, schemaPath, templatePath, eventPath);
+                TestTerminalAndReplayLifecycle(root, schemaPath, templatePath, eventPath);
 
                 Console.WriteLine("MATH_RESCUE_GAMEPLAY_RUNTIME_SMOKE_PASS assertions=" + _assertions);
                 return 0;
@@ -200,6 +205,91 @@ namespace WAHU.MathRescueGameplayRuntimeSmoke
             }
         }
 
+        private static void TestMultiThreadTransitionStress(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string eventPath)
+        {
+            const int workers = 12;
+            var database = NewDatabase(Path.Combine(root, "multi-thread-transition-stress.db"), schemaPath);
+            using (var game = NewGame(database, templatePath, eventPath, 91004))
+            {
+                var start = game.Start("Parallel transition stress");
+                AssertRaceWinner(workers, delegate { game.AcknowledgeIntro(); }, "stress_intro_ack");
+
+                for (var checkpoint = 1; checkpoint <= 3; checkpoint++)
+                {
+                    AssertRaceWinner(workers, delegate { game.BeginQuestion(); }, "stress_begin_checkpoint_" + checkpoint);
+                    var active = game.CurrentState;
+                    A(active.Phase == MathRescueGameplayPhase.QUESTION_ACTIVE &&
+                      active.CurrentCheckpoint == checkpoint && active.CurrentQuestion != null,
+                        "stress_checkpoint_" + checkpoint + "_has_one_active_question");
+                    var question = active.CurrentQuestion;
+
+                    if (checkpoint == 2)
+                    {
+                        var wrongAnswer = WrongAnswer(question);
+                        AssertRaceWinner(workers,
+                            delegate { game.SubmitAnswerAt(wrongAnswer, 0, "stress", DateTime.UtcNow, 900); },
+                            "stress_wrong_submit_checkpoint_2");
+                        A(game.CurrentState.Phase == MathRescueGameplayPhase.ANSWER_FEEDBACK &&
+                          game.CurrentState.RetryPending && !game.CurrentState.CanAnswer,
+                            "stress_wrong_submit_leaves_single_retry_feedback");
+                        AssertRaceWinner(workers, delegate { game.AdvanceAfterFeedback(); }, "stress_enter_repair_checkpoint_2");
+                        A(game.CurrentState.Phase == MathRescueGameplayPhase.REPAIR && game.CurrentState.CanAnswer,
+                            "stress_repair_phase_is_single_and_answerable");
+                        AssertRaceWinner(workers,
+                            delegate { game.SubmitRepairAnswerAt(question.CorrectAnswerDisplay, 0, "stress", DateTime.UtcNow, 950); },
+                            "stress_repair_submit_checkpoint_2");
+                    }
+                    else
+                    {
+                        AssertRaceWinner(workers,
+                            delegate { game.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "stress", DateTime.UtcNow, 900); },
+                            "stress_correct_submit_checkpoint_" + checkpoint);
+                    }
+
+                    A(game.CurrentState.Phase == MathRescueGameplayPhase.ANSWER_FEEDBACK && !game.CurrentState.CanAnswer,
+                        "stress_checkpoint_" + checkpoint + "_feedback_closes_answer_gate");
+                    AssertRaceWinner(workers, delegate { game.AdvanceAfterFeedback(); },
+                        "stress_checkpoint_complete_" + checkpoint);
+                    A(game.CurrentState.Phase == MathRescueGameplayPhase.CHECKPOINT_COMPLETE &&
+                      game.CurrentState.Progress.CompletedCheckpoints == checkpoint,
+                        "stress_checkpoint_" + checkpoint + "_progress_committed_once");
+                    AssertRaceWinner(workers, delegate { game.AdvanceCheckpoint(); },
+                        "stress_advance_checkpoint_" + checkpoint);
+                    AssertRaceWinner(workers, delegate { game.ContinueAfterCheckpoint(); },
+                        "stress_continue_checkpoint_" + checkpoint);
+
+                    if (checkpoint < 3)
+                    {
+                        A(game.CurrentState.Phase == MathRescueGameplayPhase.CHECKPOINT_READY &&
+                          game.CurrentState.CurrentCheckpoint == checkpoint + 1,
+                            "stress_checkpoint_" + checkpoint + "_continues_once_to_next_ready");
+                    }
+                    else
+                    {
+                        A(game.CurrentState.Phase == MathRescueGameplayPhase.GAME_COMPLETE &&
+                          game.CurrentState.Completed && game.CurrentState.Progress.CompletedCheckpoints == 3,
+                            "stress_terminal_transition_has_one_game_complete_winner");
+                    }
+                }
+
+                A(Count(database, "SELECT count(*) FROM attempt WHERE session_id=@session;", "@session", start.State.SessionId) == 4,
+                    "stress_twelve_way_races_persist_exactly_three_questions_plus_one_retry_attempt");
+            }
+        }
+
+        private static void AssertRaceWinner(int workers, Action action, string name)
+        {
+            int succeeded;
+            int invalid;
+            Exception unexpected;
+            RunManyWayRace(workers, action, out succeeded, out invalid, out unexpected);
+            A(unexpected == null && succeeded == 1 && invalid == workers - 1,
+                name + "_one_winner_rest_rejected");
+        }
         private static void TestExactRepairResumeToken(
             string root,
             string schemaPath,
@@ -267,49 +357,455 @@ namespace WAHU.MathRescueGameplayRuntimeSmoke
             }
         }
 
-        private static void TestReplayAfterCompleted(
+        private static void TestResumeTokenPhaseMatrix(
             string root,
             string schemaPath,
             string templatePath,
             string eventPath)
         {
-            var database = NewDatabase(Path.Combine(root, "replay-after-completed.db"), schemaPath);
-            string firstSessionId;
+            var database = NewDatabase(Path.Combine(root, "resume-phase-matrix.db"), schemaPath);
+            MathRescueGameplayResumeToken token;
+            string sessionId;
+            string questionId;
 
-            using (var first = NewGame(database, templatePath, eventPath, 91004))
+            using (var game = NewGame(database, templatePath, eventPath, 92001))
             {
-                var start = first.Start("Bé rescue replay lần một");
-                firstSessionId = start.State.SessionId;
-                first.AcknowledgeIntro();
-                CompleteCorrectCheckpoint(first, 1);
-                CompleteCorrectCheckpoint(first, 2);
-                var completed = CompleteCorrectCheckpoint(first, 3);
-                A(completed != null && completed.Completion != null && completed.State.Completed &&
-                  completed.State.Phase == MathRescueGameplayPhase.GAME_COMPLETE,
-                    "first_completed_run_reaches_game_complete_before_replay");
-                A(Count(database, "SELECT count(*) FROM attempt WHERE session_id=@session;", "@session", firstSessionId) == 3,
-                    "first_completed_run_persists_exactly_three_attempts");
+                var start = game.Start("Bé resume phase matrix");
+                sessionId = start.State.SessionId;
+                var suspended = game.SuspendForBreak("matrix_intro");
+                token = CloneToken(suspended.ResumeToken);
+                A(token.Phase == MathRescueGameplayPhase.INTRO && token.CompletedCheckpointCount == 0,
+                    "resume_matrix_captures_intro");
             }
 
-            using (var replay = NewGame(database, templatePath, eventPath, 91005))
+            using (var game = NewGame(database, templatePath, eventPath, 1))
             {
-                var start = replay.Start("Bé rescue replay lần hai");
-                A(!start.Learning.Session.ResumedExistingSession &&
-                  !string.Equals(start.State.SessionId, firstSessionId, StringComparison.Ordinal) &&
-                  start.State.Phase == MathRescueGameplayPhase.INTRO &&
-                  start.State.Progress.CompletedCheckpoints == 0 && !start.State.Completed,
-                    "completed_game_can_start_fresh_replay_session");
-
-                replay.AcknowledgeIntro();
-                CompleteCorrectCheckpoint(replay, 1);
-                CompleteCorrectCheckpoint(replay, 2);
-                var completedAgain = CompleteCorrectCheckpoint(replay, 3);
-                A(completedAgain != null && completedAgain.Completion != null && completedAgain.State.Completed &&
-                  completedAgain.State.Phase == MathRescueGameplayPhase.GAME_COMPLETE,
-                    "fresh_replay_can_complete_all_three_checkpoints_again");
-                A(Count(database, "SELECT count(*) FROM attempt WHERE session_id=@session;", "@session", start.State.SessionId) == 3,
-                    "fresh_replay_persists_attempts_only_in_new_session");
+                var resumed = game.Resume("Bé resume phase matrix", token);
+                A(resumed.State.Phase == MathRescueGameplayPhase.INTRO && resumed.State.SessionId == sessionId,
+                    "resume_matrix_restores_intro");
+                game.AcknowledgeIntro();
+                token = CloneToken(game.SuspendForBreak("matrix_ready").ResumeToken);
+                A(token.Phase == MathRescueGameplayPhase.CHECKPOINT_READY && token.CurrentQuestion == null,
+                    "resume_matrix_captures_checkpoint_ready");
             }
+
+            using (var game = NewGame(database, templatePath, eventPath, 2))
+            {
+                var resumed = game.Resume("Bé resume phase matrix", token);
+                A(resumed.State.Phase == MathRescueGameplayPhase.CHECKPOINT_READY && resumed.State.CurrentCheckpoint == 1,
+                    "resume_matrix_restores_checkpoint_ready");
+                var active = game.BeginQuestion();
+                questionId = active.CurrentQuestion.QuestionId;
+                token = CloneToken(game.SuspendForBreak("matrix_question_active").ResumeToken);
+                A(token.Phase == MathRescueGameplayPhase.QUESTION_ACTIVE &&
+                  token.CurrentQuestion != null && token.CurrentQuestion.QuestionId == questionId,
+                    "resume_matrix_captures_question_active");
+            }
+
+            using (var game = NewGame(database, templatePath, eventPath, 3))
+            {
+                var resumed = game.Resume("Bé resume phase matrix", token);
+                A(resumed.State.Phase == MathRescueGameplayPhase.QUESTION_ACTIVE && resumed.State.CanAnswer &&
+                  resumed.State.CurrentQuestion.QuestionId == questionId,
+                    "resume_matrix_restores_question_active");
+                var wrong = game.SubmitAnswerAt(
+                    WrongAnswer(resumed.State.CurrentQuestion), 0, "matrix", DateTime.UtcNow, 900);
+                A(wrong.State.Phase == MathRescueGameplayPhase.ANSWER_FEEDBACK && wrong.State.RetryPending,
+                    "resume_matrix_reaches_retry_feedback");
+                token = CloneToken(game.SuspendForBreak("matrix_retry_feedback").ResumeToken);
+                A(token.Phase == MathRescueGameplayPhase.ANSWER_FEEDBACK && token.RetryPending &&
+                  token.FeedbackState == MathRescueFeedbackState.TRY_AGAIN,
+                    "resume_matrix_captures_retry_feedback");
+            }
+
+            using (var game = NewGame(database, templatePath, eventPath, 4))
+            {
+                var resumed = game.Resume("Bé resume phase matrix", token);
+                A(resumed.State.Phase == MathRescueGameplayPhase.ANSWER_FEEDBACK && resumed.State.RetryPending &&
+                  resumed.State.CurrentQuestion.QuestionId == questionId,
+                    "resume_matrix_restores_retry_feedback");
+                var repair = game.AdvanceAfterFeedback();
+                A(repair.Phase == MathRescueGameplayPhase.REPAIR && repair.CanAnswer,
+                    "resume_matrix_advances_to_repair");
+                token = CloneToken(game.SuspendForBreak("matrix_repair").ResumeToken);
+                A(token.Phase == MathRescueGameplayPhase.REPAIR && token.RetryPending &&
+                  token.FeedbackState == MathRescueFeedbackState.REPAIR,
+                    "resume_matrix_captures_repair");
+            }
+
+            using (var game = NewGame(database, templatePath, eventPath, 5))
+            {
+                var resumed = game.Resume("Bé resume phase matrix", token);
+                A(resumed.State.Phase == MathRescueGameplayPhase.REPAIR && resumed.State.CanAnswer &&
+                  resumed.State.CurrentQuestion.QuestionId == questionId,
+                    "resume_matrix_restores_repair");
+                var repaired = game.SubmitRepairAnswerAt(
+                    resumed.State.CurrentQuestion.CorrectAnswerDisplay, 0, "matrix", DateTime.UtcNow, 980);
+                A(repaired.State.Phase == MathRescueGameplayPhase.ANSWER_FEEDBACK &&
+                  repaired.State.AnswerState == MathRescueAnswerState.CORRECT && !repaired.State.RetryPending,
+                    "resume_matrix_reaches_final_feedback");
+                token = CloneToken(game.SuspendForBreak("matrix_final_feedback").ResumeToken);
+                A(token.Phase == MathRescueGameplayPhase.ANSWER_FEEDBACK && !token.RetryPending &&
+                  token.FeedbackState == MathRescueFeedbackState.CORRECT,
+                    "resume_matrix_captures_final_feedback");
+            }
+
+            using (var game = NewGame(database, templatePath, eventPath, 6))
+            {
+                var resumed = game.Resume("Bé resume phase matrix", token);
+                A(resumed.State.Phase == MathRescueGameplayPhase.ANSWER_FEEDBACK &&
+                  resumed.State.AnswerState == MathRescueAnswerState.CORRECT &&
+                  resumed.State.Progress.CompletedCheckpoints == 1,
+                    "resume_matrix_restores_final_feedback");
+                var checkpointComplete = game.AdvanceAfterFeedback();
+                A(checkpointComplete.Phase == MathRescueGameplayPhase.CHECKPOINT_COMPLETE &&
+                  checkpointComplete.CurrentQuestion == null,
+                    "resume_matrix_advances_to_checkpoint_complete");
+                token = CloneToken(game.SuspendForBreak("matrix_checkpoint_complete").ResumeToken);
+                A(token.Phase == MathRescueGameplayPhase.CHECKPOINT_COMPLETE &&
+                  token.CompletedCheckpointCount == 1 && token.CurrentQuestion == null,
+                    "resume_matrix_captures_checkpoint_complete");
+            }
+
+            using (var game = NewGame(database, templatePath, eventPath, 7))
+            {
+                var resumed = game.Resume("Bé resume phase matrix", token);
+                A(resumed.State.Phase == MathRescueGameplayPhase.CHECKPOINT_COMPLETE &&
+                  resumed.State.Progress.CompletedCheckpoints == 1,
+                    "resume_matrix_restores_checkpoint_complete");
+                var next = game.AdvanceCheckpoint();
+                A(next.Phase == MathRescueGameplayPhase.NEXT_CHECKPOINT && next.AnswerState == MathRescueAnswerState.NONE,
+                    "resume_matrix_advances_to_next_checkpoint_phase");
+                token = CloneToken(game.SuspendForBreak("matrix_next_checkpoint").ResumeToken);
+                A(token.Phase == MathRescueGameplayPhase.NEXT_CHECKPOINT &&
+                  token.CompletedCheckpointCount == 1 && token.CurrentCheckpoint == 1,
+                    "resume_matrix_captures_next_checkpoint");
+            }
+
+            using (var game = NewGame(database, templatePath, eventPath, 8))
+            {
+                var resumed = game.Resume("Bé resume phase matrix", token);
+                A(resumed.State.Phase == MathRescueGameplayPhase.NEXT_CHECKPOINT &&
+                  resumed.State.Progress.CompletedCheckpoints == 1,
+                    "resume_matrix_restores_next_checkpoint");
+                var continued = game.ContinueAfterCheckpoint();
+                A(continued.State.Phase == MathRescueGameplayPhase.CHECKPOINT_READY &&
+                  continued.State.CurrentCheckpoint == 2,
+                    "resume_matrix_continues_deterministically_to_checkpoint_two");
+                game.SuspendForBreak("matrix_cleanup");
+            }
+        }
+
+        private static void TestTamperedResumeTokenFailsClosed(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string eventPath)
+        {
+            var database = NewDatabase(Path.Combine(root, "tampered-repair-token.db"), schemaPath);
+            MathRescueGameplayResumeToken repairToken;
+            string sessionId;
+            string questionId;
+            using (var game = NewGame(database, templatePath, eventPath, 92002))
+            {
+                var start = game.Start("Bé tampered repair token");
+                sessionId = start.State.SessionId;
+                game.AcknowledgeIntro();
+                var question = game.BeginQuestion().CurrentQuestion;
+                questionId = question.QuestionId;
+                game.SubmitAnswerAt(WrongAnswer(question), 0, "tamper", DateTime.UtcNow, 910);
+                game.AdvanceAfterFeedback();
+                repairToken = CloneToken(game.SuspendForBreak("tamper_repair_fixture").ResumeToken);
+            }
+
+            var badRepairToken = CloneToken(repairToken);
+            badRepairToken.Phase = MathRescueGameplayPhase.CHECKPOINT_COMPLETE;
+            var rejected = false;
+            using (var game = NewGame(database, templatePath, eventPath, 999))
+            {
+                try { game.Resume("Bé tampered repair token", badRepairToken); }
+                catch (InvalidOperationException) { rejected = true; }
+            }
+            A(rejected, "tampered_repair_token_is_rejected");
+            A(Count(database,
+                "SELECT count(*) FROM session WHERE id=@session AND state IN ('started','active') AND ended_at_utc IS NULL;",
+                "@session", sessionId) == 1 &&
+              Count(database, "SELECT count(*) FROM math_session_runtime WHERE session_id=@session;", "@session", sessionId) == 1,
+                "tampered_repair_token_keeps_durable_session_resumable");
+
+            using (var game = NewGame(database, templatePath, eventPath, 1000))
+            {
+                var recovered = game.Start("Bé tampered repair token");
+                A(recovered.Learning.Session.ResumedExistingSession &&
+                  recovered.State.Phase == MathRescueGameplayPhase.REPAIR && recovered.State.RetryPending &&
+                  recovered.State.CurrentQuestion != null && recovered.State.CurrentQuestion.QuestionId == questionId,
+                    "durable_learning_recovers_exact_repair_after_bad_token");
+                game.SuspendForBreak("tamper_repair_cleanup");
+            }
+
+            var finalDatabase = NewDatabase(Path.Combine(root, "tampered-final-feedback-token.db"), schemaPath);
+            MathRescueGameplayResumeToken finalToken;
+            string finalSessionId;
+            using (var game = NewGame(finalDatabase, templatePath, eventPath, 92003))
+            {
+                var start = game.Start("Bé tampered final token");
+                finalSessionId = start.State.SessionId;
+                game.AcknowledgeIntro();
+                var question = game.BeginQuestion().CurrentQuestion;
+                game.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "tamper", DateTime.UtcNow, 920);
+                finalToken = CloneToken(game.SuspendForBreak("tamper_final_fixture").ResumeToken);
+                A(finalToken.Phase == MathRescueGameplayPhase.ANSWER_FEEDBACK &&
+                  finalToken.CompletedCheckpointCount == 1 && finalToken.CurrentQuestion != null,
+                    "tampered_final_fixture_has_final_feedback_token");
+            }
+
+            var badFinalToken = CloneToken(finalToken);
+            badFinalToken.CurrentQuestion.ContentQuestionId = "__tampered_content_question__";
+            rejected = false;
+            using (var game = NewGame(finalDatabase, templatePath, eventPath, 1001))
+            {
+                try { game.Resume("Bé tampered final token", badFinalToken); }
+                catch (InvalidOperationException) { rejected = true; }
+            }
+            A(rejected, "tampered_final_feedback_question_is_rejected");
+            A(Count(finalDatabase,
+                "SELECT count(*) FROM session WHERE id=@session AND state IN ('started','active') AND ended_at_utc IS NULL;",
+                "@session", finalSessionId) == 1,
+                "tampered_final_feedback_keeps_durable_session_active");
+
+            using (var game = NewGame(finalDatabase, templatePath, eventPath, 1002))
+            {
+                var recovered = game.Start("Bé tampered final token");
+                A(recovered.Learning.Session.ResumedExistingSession &&
+                  recovered.State.Phase == MathRescueGameplayPhase.CHECKPOINT_COMPLETE &&
+                  recovered.State.Progress.CompletedCheckpoints == 1,
+                    "durable_learning_recovers_checkpoint_complete_after_bad_final_token");
+                game.SuspendForBreak("tamper_final_cleanup");
+            }
+        }
+
+        private static void TestObserverFailureCannotPoisonGameplay(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string eventPath)
+        {
+            var database = NewDatabase(Path.Combine(root, "observer-failure.db"), schemaPath);
+            using (var game = NewGame(database, templatePath, eventPath, 92004))
+            {
+                var delivered = 0;
+                var reentryRejected = 0;
+                game.StateChanged += delegate { throw new Exception("synthetic UI observer failure"); };
+                game.StateChanged += delegate(object sender, MathRescueGameplayStateChangedEventArgs args)
+                {
+                    delivered++;
+                    if (args.Reason == "start")
+                    {
+                        try { game.AcknowledgeIntro(); }
+                        catch (InvalidOperationException) { reentryRejected++; }
+                    }
+                };
+
+                var start = game.Start("Bé observer failure");
+                A(start.State.Phase == MathRescueGameplayPhase.INTRO && game.CurrentState.Phase == MathRescueGameplayPhase.INTRO,
+                    "observer_failure_does_not_advance_or_fail_start");
+                A(delivered == 1 && reentryRejected == 1,
+                    "observer_failure_isolated_and_synchronous_reentry_rejected");
+
+                game.AcknowledgeIntro();
+                var question = game.BeginQuestion().CurrentQuestion;
+                var answer = game.SubmitAnswerAt(question.CorrectAnswerDisplay, 0, "observer", DateTime.UtcNow, 900);
+                A(answer.Learning.Learning.IsCorrect && answer.State.Phase == MathRescueGameplayPhase.ANSWER_FEEDBACK,
+                    "observer_failure_does_not_poison_answer_transition");
+                A(delivered == 4,
+                    "later_observer_still_receives_every_transition_after_throwing_subscriber");
+                A(Count(database, "SELECT count(*) FROM attempt WHERE session_id=@session;", "@session", start.State.SessionId) == 1,
+                    "observer_failure_cannot_duplicate_or_rollback_durable_attempt");
+                game.SuspendForBreak("observer_cleanup");
+            }
+        }
+
+        private static void TestPublicBoundaryMutationIsolation(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string eventPath)
+        {
+            var database = NewDatabase(Path.Combine(root, "public-boundary-mutation.db"), schemaPath);
+            using (var game = NewGame(database, templatePath, eventPath, 92007))
+            {
+                var laterObserverStartOk = false;
+                var laterObserverQuestionOk = false;
+                game.StateChanged += delegate(object sender, MathRescueGameplayStateChangedEventArgs args)
+                {
+                    args.Reason = "tampered_reason";
+                    if (args.Current == null) return;
+                    args.Current.Phase = MathRescueGameplayPhase.GAME_COMPLETE;
+                    if (args.Current.Progress != null) args.Current.Progress.CompletedCheckpoints = 99;
+                    if (args.Current.CurrentQuestion != null) args.Current.CurrentQuestion.PromptVi = "tampered_question";
+                    if (args.Current.EventState != null)
+                    {
+                        args.Current.EventState.SessionId = "tampered_session";
+                        if (args.Current.EventState.Action != null) args.Current.EventState.Action.Action = "tampered_action";
+                    }
+                };
+                game.StateChanged += delegate(object sender, MathRescueGameplayStateChangedEventArgs args)
+                {
+                    if (args.Reason == "start")
+                        laterObserverStartOk = args.Current != null && args.Current.Phase == MathRescueGameplayPhase.INTRO &&
+                            args.Current.Progress != null && args.Current.Progress.CompletedCheckpoints == 0;
+                    if (args.Reason == "question_started")
+                        laterObserverQuestionOk = args.Current != null &&
+                            args.Current.Phase == MathRescueGameplayPhase.QUESTION_ACTIVE &&
+                            args.Current.CurrentQuestion != null && args.Current.CurrentQuestion.PromptVi != "tampered_question";
+                };
+
+                var start = game.Start("Boundary mutation child");
+                var sessionId = start.State.SessionId;
+                var eventId = start.State.EventId;
+                var selectedFirst = start.Learning.Session.SelectedContentQuestionIds[0];
+                var completionCopy = start.Learning.Event == null ? null : start.Learning.Event.CompletionVi;
+
+                start.State.Phase = MathRescueGameplayPhase.GAME_COMPLETE;
+                start.State.Progress.CompletedCheckpoints = 77;
+                start.State.EventState.SessionId = "mutated_state_session";
+                if (start.State.EventState.Action != null) start.State.EventState.Action.Action = "mutated_state_action";
+                start.Learning.Session.SessionId = "mutated_learning_session";
+                start.Learning.Session.SelectedContentQuestionIds[0] = "mutated_selected_question";
+                if (start.Learning.Event != null)
+                {
+                    start.Learning.Event.CompletionVi = "mutated_completion_copy";
+                    start.Learning.Event.CheckpointNounsVi[0] = "mutated_checkpoint_copy";
+                }
+                if (start.Learning.EventState.Action != null) start.Learning.EventState.Action.Action = "mutated_learning_action";
+
+                var afterStartMutation = game.CurrentState;
+                A(laterObserverStartOk && afterStartMutation.Phase == MathRescueGameplayPhase.INTRO &&
+                  afterStartMutation.SessionId == sessionId && afterStartMutation.EventId == eventId &&
+                  afterStartMutation.Progress.CompletedCheckpoints == 0,
+                    "public_start_and_event_subscriber_mutation_cannot_poison_core_snapshot");
+                A(afterStartMutation.EventState.SessionId == sessionId &&
+                  afterStartMutation.EventState.SelectedContentQuestionIds[0] == selectedFirst &&
+                  (afterStartMutation.EventState.Action == null || afterStartMutation.EventState.Action.Action != "mutated_learning_action"),
+                    "public_learning_start_nested_objects_are_defensively_detached");
+
+                game.AcknowledgeIntro();
+                var activeResult = game.BeginQuestion();
+                var questionId = activeResult.CurrentQuestion.QuestionId;
+                var prompt = activeResult.CurrentQuestion.PromptVi;
+                activeResult.CurrentQuestion.PromptVi = "mutated_returned_question";
+                if (activeResult.CurrentQuestion.ChoiceTexts != null && activeResult.CurrentQuestion.ChoiceTexts.Count > 0)
+                    activeResult.CurrentQuestion.ChoiceTexts[0] = "mutated_choice";
+                var activeCore = game.CurrentState;
+                A(laterObserverQuestionOk && activeCore.Phase == MathRescueGameplayPhase.QUESTION_ACTIVE &&
+                  activeCore.CurrentQuestion.QuestionId == questionId && activeCore.CurrentQuestion.PromptVi == prompt,
+                    "returned_question_and_first_subscriber_mutation_do_not_affect_later_state");
+
+                var answer = game.SubmitAnswerAt(activeCore.CurrentQuestion.CorrectAnswerDisplay, 0, "boundary", DateTime.UtcNow, 900);
+                if (answer.Learning.Learning.Behavior != null && answer.Learning.Learning.Behavior.Actions != null)
+                    answer.Learning.Learning.Behavior.Actions.Add("mutated_behavior_action");
+                if (answer.Learning.EventState.Action != null) answer.Learning.EventState.Action.Action = "mutated_answer_action";
+                answer.State.AnswerState = MathRescueAnswerState.WRONG;
+                answer.State.Progress.CompletedCheckpoints = 88;
+                var answerCore = game.CurrentState;
+                A(answerCore.Phase == MathRescueGameplayPhase.ANSWER_FEEDBACK &&
+                  answerCore.AnswerState == MathRescueAnswerState.CORRECT &&
+                  answerCore.Progress.CompletedCheckpoints == 1 &&
+                  (answerCore.EventState.Action == null || answerCore.EventState.Action.Action != "mutated_answer_action"),
+                    "answer_result_mutation_cannot_poison_committed_gameplay_or_event_action");
+
+                game.AdvanceAfterFeedback();
+                game.AdvanceCheckpoint();
+                game.ContinueAfterCheckpoint();
+                CompleteCorrectCheckpoint(game, 2);
+                var final = CompleteCorrectCheckpoint(game, 3);
+                A(final.Completion != null && final.State.Phase == MathRescueGameplayPhase.GAME_COMPLETE,
+                    "boundary_mutation_fixture_reaches_terminal_state");
+
+                final.Completion.LearningSummary.Attempts = 999;
+                if (final.Completion.LearningSummary.GardenUnlockedItemIds != null)
+                    final.Completion.LearningSummary.GardenUnlockedItemIds.Add("mutated_reward_item");
+                final.State.CompletionSummary.Attempts = 998;
+                final.State.Phase = MathRescueGameplayPhase.IDLE;
+                if (final.State.EventState.Action != null) final.State.EventState.Action.Action = "mutated_terminal_action";
+
+                var terminalCore = game.CurrentState;
+                A(terminalCore.Phase == MathRescueGameplayPhase.GAME_COMPLETE && terminalCore.Completed &&
+                  terminalCore.CompletionSummary != null && terminalCore.CompletionSummary.Attempts == 3 &&
+                  terminalCore.Progress.CompletedCheckpoints == 3,
+                    "completion_result_and_snapshot_mutation_cannot_rewrite_terminal_core_state");
+                A(terminalCore.FeedbackVi == completionCopy &&
+                  (terminalCore.EventState.Action == null || terminalCore.EventState.Action.Action != "mutated_terminal_action"),
+                    "start_event_definition_and_terminal_event_action_are_isolated_from_public_mutation");
+                A(Count(database, "SELECT count(*) FROM attempt WHERE session_id=@session;", "@session", sessionId) == 3,
+                    "public_object_mutation_never_changes_durable_attempt_count");
+            }
+        }
+        private static void TestTerminalAndReplayLifecycle(
+            string root,
+            string schemaPath,
+            string templatePath,
+            string eventPath)
+        {
+            var database = NewDatabase(Path.Combine(root, "terminal-replay-lifecycle.db"), schemaPath);
+            string completedSessionId;
+            using (var game = NewGame(database, templatePath, eventPath, 92005))
+            {
+                var start = game.Start("Bé terminal replay");
+                completedSessionId = start.State.SessionId;
+
+                var duplicateStartRejected = false;
+                try { game.Start("Bé terminal replay"); }
+                catch (InvalidOperationException) { duplicateStartRejected = true; }
+                A(duplicateStartRejected && game.CurrentState.Phase == MathRescueGameplayPhase.INTRO,
+                    "same_gameplay_coordinator_rejects_duplicate_start_without_state_change");
+
+                game.AcknowledgeIntro();
+                var afterOne = CompleteCorrectCheckpoint(game, 1);
+                A(afterOne.Completion == null && afterOne.State.Phase == MathRescueGameplayPhase.CHECKPOINT_READY &&
+                  afterOne.State.CurrentCheckpoint == 2,
+                    "terminal_replay_fixture_completes_checkpoint_one");
+                var afterTwo = CompleteCorrectCheckpoint(game, 2);
+                A(afterTwo.Completion == null && afterTwo.State.CurrentCheckpoint == 3,
+                    "terminal_replay_fixture_completes_checkpoint_two");
+                var final = CompleteCorrectCheckpoint(game, 3);
+                A(final.Completion != null && final.State.Phase == MathRescueGameplayPhase.GAME_COMPLETE &&
+                  final.State.Completed && final.State.Progress.CompletedCheckpoints == 3,
+                    "terminal_replay_fixture_reaches_game_complete");
+
+                var duplicateCompleteRejected = false;
+                try { game.ContinueAfterCheckpoint(); }
+                catch (InvalidOperationException) { duplicateCompleteRejected = true; }
+                var terminalSuspendRejected = false;
+                try { game.SuspendForBreak("should_not_suspend_completed_game"); }
+                catch (InvalidOperationException) { terminalSuspendRejected = true; }
+                A(duplicateCompleteRejected && terminalSuspendRejected &&
+                  game.CurrentState.Phase == MathRescueGameplayPhase.GAME_COMPLETE,
+                    "game_complete_is_terminal_for_transition_and_suspend_apis");
+                A(Count(database, "SELECT count(*) FROM attempt WHERE session_id=@session;", "@session", completedSessionId) == 3,
+                    "terminal_rejections_do_not_append_learning_attempts");
+            }
+
+            using (var replay = NewGame(database, templatePath, eventPath, 92006))
+            {
+                var start = replay.Start("Bé terminal replay");
+                A(!start.Learning.Session.ResumedExistingSession && start.State.SessionId != completedSessionId,
+                    "replay_after_completed_game_creates_new_session");
+                A(start.State.Phase == MathRescueGameplayPhase.INTRO &&
+                  start.State.Progress.CompletedCheckpoints == 0 && start.State.CurrentCheckpoint == 1 &&
+                  !start.State.Completed,
+                    "replay_after_completed_game_restarts_from_intro_zero_of_three");
+                A(Count(database,
+                    "SELECT count(*) FROM session WHERE id=@session AND state='completed' AND ended_at_utc IS NOT NULL;",
+                    "@session", completedSessionId) == 1,
+                    "replay_does_not_reopen_or_mutate_completed_session");
+                replay.SuspendForBreak("replay_cleanup");
+            }
+        }
+
+        private static MathRescueGameplayResumeToken CloneToken(MathRescueGameplayResumeToken token)
+        {
+            return Json.Deserialize<MathRescueGameplayResumeToken>(Json.Serialize(token));
         }
 
         private static MathRescueGameplayTransitionResult CompleteCorrectCheckpoint(
@@ -329,6 +825,53 @@ namespace WAHU.MathRescueGameplayRuntimeSmoke
             return game.ContinueAfterCheckpoint();
         }
 
+        private static void RunManyWayRace(
+            int workers,
+            Action action,
+            out int succeeded,
+            out int invalid,
+            out Exception unexpected)
+        {
+            if (workers < 2) throw new ArgumentOutOfRangeException("workers");
+            var start = new ManualResetEvent(false);
+            var threads = new List<Thread>();
+            var successCount = 0;
+            var invalidCount = 0;
+            Exception unexpectedError = null;
+            var unexpectedGate = new object();
+            ThreadStart body = delegate
+            {
+                start.WaitOne();
+                try
+                {
+                    action();
+                    Interlocked.Increment(ref successCount);
+                }
+                catch (InvalidOperationException)
+                {
+                    Interlocked.Increment(ref invalidCount);
+                }
+                catch (Exception ex)
+                {
+                    lock (unexpectedGate)
+                    {
+                        if (unexpectedError == null) unexpectedError = ex;
+                    }
+                }
+            };
+            for (var i = 0; i < workers; i++)
+            {
+                var thread = new Thread(body);
+                threads.Add(thread);
+                thread.Start();
+            }
+            start.Set();
+            foreach (var thread in threads) thread.Join();
+            start.Dispose();
+            succeeded = successCount;
+            invalid = invalidCount;
+            unexpected = unexpectedError;
+        }
         private static void RunTwoWayRace(Action action, out int succeeded, out int invalid, out Exception unexpected)
         {
             var start = new ManualResetEvent(false);

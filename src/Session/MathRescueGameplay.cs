@@ -123,6 +123,9 @@ namespace WAHU.Session
     /// </summary>
     public sealed class MathRescueGameplayCoordinator : IDisposable
     {
+        [ThreadStatic]
+        private static MathRescueGameplayCoordinator _stateChangedObserverSource;
+
         private readonly object _gate = new object();
         private readonly MathGameEventCoordinator _game;
         private MathRescueGameplayPhase _phase = MathRescueGameplayPhase.IDLE;
@@ -185,7 +188,8 @@ namespace WAHU.Session
                 EnsureNotDisposedLocked();
                 RequirePhaseLocked(MathRescueGameplayPhase.IDLE);
                 var previous = BuildSnapshotLocked();
-                _start = _game.Start(displayName);
+                var learningStart = _game.Start(displayName);
+                _start = CloneGameEventStartResult(learningStart);
                 _started = true;
                 _paused = false;
                 _completion = null;
@@ -219,7 +223,7 @@ namespace WAHU.Session
                 var current = BuildSnapshotLocked();
                 result = new MathRescueGameplayStartResult
                 {
-                    Learning = _start,
+                    Learning = CloneGameEventStartResult(_start),
                     State = current,
                     ResumedFromGameplayToken = restoredFromToken
                 };
@@ -307,7 +311,7 @@ namespace WAHU.Session
                 _feedbackVi = learning.Learning.FeedbackVi;
                 _phase = MathRescueGameplayPhase.ANSWER_FEEDBACK;
                 var current = BuildSnapshotLocked();
-                result = new MathRescueGameplayAnswerResult { Learning = learning, State = current };
+                result = new MathRescueGameplayAnswerResult { Learning = CloneGameEventAnswerResult(learning), State = current };
                 change = NewChange(previous, current, repair ? "repair_answer_submitted" : "answer_submitted");
             }
             Publish(change);
@@ -366,7 +370,7 @@ namespace WAHU.Session
                 var eventState = _game.CurrentState;
                 if (eventState.CompletedCheckpointCount >= MathSessionCoordinator.TargetedLessonQuestionCount)
                 {
-                    _completion = _game.Complete();
+                    _completion = CloneGameEventCompletionResult(_game.Complete());
                     _phase = MathRescueGameplayPhase.GAME_COMPLETE;
                     _currentCheckpoint = MathSessionCoordinator.TargetedLessonQuestionCount;
                     _feedbackState = MathRescueFeedbackState.GAME_COMPLETE;
@@ -381,7 +385,7 @@ namespace WAHU.Session
                     ResetFeedbackLocked();
                 }
                 var current = BuildSnapshotLocked();
-                result = new MathRescueGameplayTransitionResult { Completion = _completion, State = current };
+                result = new MathRescueGameplayTransitionResult { Completion = CloneGameEventCompletionResult(_completion), State = current };
                 change = NewChange(previous, current,
                     _phase == MathRescueGameplayPhase.GAME_COMPLETE ? "game_completed" : "next_checkpoint_ready");
             }
@@ -405,7 +409,7 @@ namespace WAHU.Session
                 var current = BuildSnapshotLocked();
                 result = new MathRescueGameplaySuspendResult
                 {
-                    LearningSummary = summary,
+                    LearningSummary = CloneMathSessionSummary(summary),
                     ResumeToken = token,
                     State = current
                 };
@@ -503,6 +507,8 @@ namespace WAHU.Session
             if (token.RetryPending != _start.Session.RetryPending)
                 throw new InvalidOperationException("Rescue gameplay resume token retry state does not match durable learning progress.");
 
+            ValidateResumeTokenPhaseLocked(token);
+
             var requiresOpenQuestion = token.Phase == MathRescueGameplayPhase.QUESTION_ACTIVE ||
                 token.Phase == MathRescueGameplayPhase.REPAIR ||
                 (token.Phase == MathRescueGameplayPhase.ANSWER_FEEDBACK && token.LastAnswerCanRetry);
@@ -530,6 +536,113 @@ namespace WAHU.Session
             _feedbackState = token.FeedbackState;
             _feedbackVi = token.FeedbackVi;
             _lastAnswerCanRetry = token.LastAnswerCanRetry;
+        }
+
+        private void ValidateResumeTokenPhaseLocked(MathRescueGameplayResumeToken token)
+        {
+            var completed = token.CompletedCheckpointCount;
+            var checkpoint = token.CurrentCheckpoint;
+            var nextCheckpoint = completed + 1;
+            var hasQuestion = token.CurrentQuestion != null;
+
+            switch (token.Phase)
+            {
+                case MathRescueGameplayPhase.INTRO:
+                    RequireResumeTokenInvariant(completed == 0 && checkpoint == 1 && !hasQuestion &&
+                        token.AnswerState == MathRescueAnswerState.NONE &&
+                        token.FeedbackState == MathRescueFeedbackState.NONE &&
+                        !token.LastAnswerCanRetry && !token.RetryPending,
+                        "intro state is inconsistent");
+                    break;
+
+                case MathRescueGameplayPhase.CHECKPOINT_READY:
+                    RequireResumeTokenInvariant(completed < MathSessionCoordinator.TargetedLessonQuestionCount &&
+                        checkpoint == nextCheckpoint && !hasQuestion &&
+                        token.AnswerState == MathRescueAnswerState.NONE &&
+                        token.FeedbackState == MathRescueFeedbackState.NONE &&
+                        !token.LastAnswerCanRetry && !token.RetryPending,
+                        "checkpoint-ready state is inconsistent");
+                    break;
+
+                case MathRescueGameplayPhase.QUESTION_ACTIVE:
+                    RequireResumeTokenInvariant(completed < MathSessionCoordinator.TargetedLessonQuestionCount &&
+                        checkpoint == nextCheckpoint && hasQuestion &&
+                        token.AnswerState == MathRescueAnswerState.NONE &&
+                        token.FeedbackState == MathRescueFeedbackState.NONE &&
+                        !token.LastAnswerCanRetry && !token.RetryPending,
+                        "question-active state is inconsistent");
+                    break;
+
+                case MathRescueGameplayPhase.ANSWER_FEEDBACK:
+                    RequireResumeTokenInvariant(hasQuestion && token.AnswerState != MathRescueAnswerState.NONE,
+                        "answer-feedback state requires the answered question and answer state");
+                    if (token.RetryPending)
+                    {
+                        RequireResumeTokenInvariant(checkpoint == nextCheckpoint &&
+                            token.AnswerState == MathRescueAnswerState.WRONG &&
+                            token.FeedbackState == MathRescueFeedbackState.TRY_AGAIN &&
+                            token.LastAnswerCanRetry,
+                            "retry feedback state is inconsistent");
+                    }
+                    else
+                    {
+                        RequireResumeTokenInvariant(completed > 0 && checkpoint == completed &&
+                            !token.LastAnswerCanRetry &&
+                            ((token.AnswerState == MathRescueAnswerState.CORRECT &&
+                              token.FeedbackState == MathRescueFeedbackState.CORRECT) ||
+                             (token.AnswerState == MathRescueAnswerState.WRONG &&
+                              token.FeedbackState == MathRescueFeedbackState.CHECKPOINT_COMPLETE)),
+                            "final answer-feedback state is inconsistent");
+                        ValidateFinalizedTokenQuestionLocked(token);
+                    }
+                    break;
+
+                case MathRescueGameplayPhase.REPAIR:
+                    RequireResumeTokenInvariant(completed < MathSessionCoordinator.TargetedLessonQuestionCount &&
+                        checkpoint == nextCheckpoint && hasQuestion && token.RetryPending &&
+                        token.AnswerState == MathRescueAnswerState.WRONG &&
+                        token.FeedbackState == MathRescueFeedbackState.REPAIR &&
+                        token.LastAnswerCanRetry,
+                        "repair state is inconsistent");
+                    break;
+
+                case MathRescueGameplayPhase.CHECKPOINT_COMPLETE:
+                    RequireResumeTokenInvariant(completed > 0 && checkpoint == completed && !hasQuestion &&
+                        token.FeedbackState == MathRescueFeedbackState.CHECKPOINT_COMPLETE &&
+                        !token.LastAnswerCanRetry && !token.RetryPending,
+                        "checkpoint-complete state is inconsistent");
+                    break;
+
+                case MathRescueGameplayPhase.NEXT_CHECKPOINT:
+                    RequireResumeTokenInvariant(completed > 0 && checkpoint == completed && !hasQuestion &&
+                        token.AnswerState == MathRescueAnswerState.NONE &&
+                        token.FeedbackState == MathRescueFeedbackState.NONE &&
+                        !token.LastAnswerCanRetry && !token.RetryPending,
+                        "next-checkpoint state is inconsistent");
+                    break;
+
+                default:
+                    throw new InvalidOperationException("Rescue gameplay resume token contains an unsupported phase.");
+            }
+        }
+
+        private void ValidateFinalizedTokenQuestionLocked(MathRescueGameplayResumeToken token)
+        {
+            var selected = _start == null || _start.Session == null
+                ? null
+                : _start.Session.SelectedContentQuestionIds;
+            if (selected == null || token.CurrentCheckpoint < 1 || token.CurrentCheckpoint > selected.Count)
+                throw new InvalidOperationException("Rescue gameplay resume token cannot prove the finalized checkpoint question.");
+            var expectedContentQuestionId = selected[token.CurrentCheckpoint - 1];
+            if (token.CurrentQuestion == null ||
+                !string.Equals(token.CurrentQuestion.ContentQuestionId, expectedContentQuestionId, StringComparison.Ordinal))
+                throw new InvalidOperationException("Rescue gameplay resume token finalized question does not match the durable selected set.");
+        }
+
+        private static void RequireResumeTokenInvariant(bool condition, string detail)
+        {
+            if (!condition)
+                throw new InvalidOperationException("Rescue gameplay resume token " + detail + ".");
         }
 
         private MathRescueGameplayResumeToken BuildResumeTokenLocked()
@@ -581,8 +694,8 @@ namespace WAHU.Session
                 Paused = _paused,
                 Resumable = _started && !completed,
                 RetryPending = eventState != null && eventState.RetryPending,
-                EventState = eventState,
-                CompletionSummary = _completion == null ? null : _completion.LearningSummary
+                EventState = CloneGameEventState(eventState),
+                CompletionSummary = _completion == null ? null : CloneMathSessionSummary(_completion.LearningSummary)
             };
         }
 
@@ -597,6 +710,8 @@ namespace WAHU.Session
         private void EnsureInteractiveLocked()
         {
             EnsureNotDisposedLocked();
+            if (ReferenceEquals(_stateChangedObserverSource, this))
+                throw new InvalidOperationException("StateChanged observers cannot drive rescue gameplay transitions synchronously.");
             if (!_started) throw new InvalidOperationException("Rescue gameplay has not started.");
             if (_paused) throw new InvalidOperationException("Rescue gameplay is paused and must be resumed by a new coordinator.");
             if (_phase == MathRescueGameplayPhase.GAME_COMPLETE)
@@ -619,15 +734,336 @@ namespace WAHU.Session
             MathRescueGameplaySnapshot current,
             string reason)
         {
-            return new MathRescueGameplayStateChangedEventArgs { Previous = previous, Current = current, Reason = reason };
+            return new MathRescueGameplayStateChangedEventArgs
+            {
+                Previous = CloneGameplaySnapshot(previous),
+                Current = CloneGameplaySnapshot(current),
+                Reason = reason
+            };
         }
 
         private void Publish(MathRescueGameplayStateChangedEventArgs change)
         {
             var handler = StateChanged;
-            if (handler != null && change != null) handler(this, change);
+            if (handler == null || change == null) return;
+            foreach (EventHandler<MathRescueGameplayStateChangedEventArgs> subscriber in handler.GetInvocationList())
+            {
+                var previousSource = _stateChangedObserverSource;
+                _stateChangedObserverSource = this;
+                try { subscriber(this, CloneStateChangedEventArgs(change)); }
+                catch
+                {
+                    // State transitions and durable learning have already succeeded. Presentation/reward
+                    // observers are downstream consumers and must not make callers retry a committed transition.
+                }
+                finally
+                {
+                    _stateChangedObserverSource = previousSource;
+                }
+            }
         }
 
+        private static MathRescueGameplayStateChangedEventArgs CloneStateChangedEventArgs(MathRescueGameplayStateChangedEventArgs source)
+        {
+            if (source == null) return null;
+            return new MathRescueGameplayStateChangedEventArgs
+            {
+                Reason = source.Reason,
+                Previous = CloneGameplaySnapshot(source.Previous),
+                Current = CloneGameplaySnapshot(source.Current)
+            };
+        }
+
+        private static MathRescueGameplaySnapshot CloneGameplaySnapshot(MathRescueGameplaySnapshot source)
+        {
+            if (source == null) return null;
+            return new MathRescueGameplaySnapshot
+            {
+                Phase = source.Phase,
+                SessionId = source.SessionId,
+                EventId = source.EventId,
+                CurrentCheckpoint = source.CurrentCheckpoint,
+                CurrentQuestion = CloneQuestion(source.CurrentQuestion),
+                Progress = source.Progress == null ? null : new MathRescueProgressSnapshot
+                {
+                    CompletedCheckpoints = source.Progress.CompletedCheckpoints,
+                    TotalCheckpoints = source.Progress.TotalCheckpoints,
+                    Fraction = source.Progress.Fraction
+                },
+                AnswerState = source.AnswerState,
+                FeedbackState = source.FeedbackState,
+                FeedbackVi = source.FeedbackVi,
+                CanAnswer = source.CanAnswer,
+                Completed = source.Completed,
+                Paused = source.Paused,
+                Resumable = source.Resumable,
+                RetryPending = source.RetryPending,
+                EventState = CloneGameEventState(source.EventState),
+                CompletionSummary = CloneMathSessionSummary(source.CompletionSummary)
+            };
+        }
+        private static MathGameEventStartResult CloneGameEventStartResult(MathGameEventStartResult source)
+        {
+            if (source == null) return null;
+            return new MathGameEventStartResult
+            {
+                Session = CloneMathSessionStartResult(source.Session),
+                Event = CloneGameEventDefinition(source.Event),
+                EventState = CloneGameEventState(source.EventState)
+            };
+        }
+
+        private static MathSessionStartResult CloneMathSessionStartResult(MathSessionStartResult source)
+        {
+            if (source == null) return null;
+            return new MathSessionStartResult
+            {
+                SessionId = source.SessionId,
+                ChildId = source.ChildId,
+                DisplayName = source.DisplayName,
+                RecoveredDanglingSessions = source.RecoveredDanglingSessions,
+                TargetQuestionCount = source.TargetQuestionCount,
+                CompletedQuestionCount = source.CompletedQuestionCount,
+                ResumedExistingSession = source.ResumedExistingSession,
+                RestoredOpenQuestion = source.RestoredOpenQuestion,
+                DiscardedCorruptOpenQuestion = source.DiscardedCorruptOpenQuestion,
+                SessionMode = source.SessionMode,
+                TargetLessonId = source.TargetLessonId,
+                TargetLessonTitleVi = source.TargetLessonTitleVi,
+                SelectedContentQuestionIds = source.SelectedContentQuestionIds == null ? null : source.SelectedContentQuestionIds.ToList(),
+                LessonAccess = CloneMathLessonAccessSnapshot(source.LessonAccess),
+                RetryPending = source.RetryPending,
+                CurrentAttemptIndex = source.CurrentAttemptIndex
+            };
+        }
+
+        private static MathLessonAccessSnapshot CloneMathLessonAccessSnapshot(MathLessonAccessSnapshot source)
+        {
+            if (source == null) return null;
+            return new MathLessonAccessSnapshot
+            {
+                LessonId = source.LessonId,
+                SkillId = source.SkillId,
+                TitleVi = source.TitleVi,
+                IsUnlocked = source.IsUnlocked,
+                IsCompleted = source.IsCompleted,
+                StartedCount = source.StartedCount,
+                CompletedCount = source.CompletedCount,
+                LastScorePercent = source.LastScorePercent,
+                BestScorePercent = source.BestScorePercent,
+                PrerequisiteLessonIds = source.PrerequisiteLessonIds == null ? null : source.PrerequisiteLessonIds.ToList(),
+                UnsatisfiedPrerequisiteLessonIds = source.UnsatisfiedPrerequisiteLessonIds == null ? null : source.UnsatisfiedPrerequisiteLessonIds.ToList()
+            };
+        }
+
+        private static MathGameEventDefinition CloneGameEventDefinition(MathGameEventDefinition source)
+        {
+            if (source == null) return null;
+            return new MathGameEventDefinition
+            {
+                Id = source.Id,
+                Kind = source.Kind,
+                TitleVi = source.TitleVi,
+                IntroVi = source.IntroVi,
+                CompletionVi = source.CompletionVi,
+                TargetLessonId = source.TargetLessonId,
+                TargetSkillId = source.TargetSkillId,
+                QuestionCount = source.QuestionCount,
+                CheckpointNounsVi = source.CheckpointNounsVi == null ? null : source.CheckpointNounsVi.ToList(),
+                Theme = source.Theme,
+                RepairCopyVi = source.RepairCopyVi,
+                BreakCopyVi = source.BreakCopyVi,
+                RewardPresentation = source.RewardPresentation
+            };
+        }
+
+        private static MathGameEventState CloneGameEventState(MathGameEventState source)
+        {
+            if (source == null) return null;
+            return new MathGameEventState
+            {
+                EventPresentationAvailable = source.EventPresentationAvailable,
+                FallbackToLessonPresentation = source.FallbackToLessonPresentation,
+                EventId = source.EventId,
+                SessionId = source.SessionId,
+                TargetLessonId = source.TargetLessonId,
+                TargetSkillId = source.TargetSkillId,
+                SelectedContentQuestionIds = source.SelectedContentQuestionIds == null ? null : source.SelectedContentQuestionIds.ToList(),
+                CompletedCheckpointCount = source.CompletedCheckpointCount,
+                TotalCheckpointCount = source.TotalCheckpointCount,
+                CurrentCheckpointNumber = source.CurrentCheckpointNumber,
+                CurrentCheckpointNounVi = source.CurrentCheckpointNounVi,
+                RetryPending = source.RetryPending,
+                IsComplete = source.IsComplete,
+                Action = CloneGameEventAction(source.Action)
+            };
+        }
+
+        private static MathGameEventAction CloneGameEventAction(MathGameEventAction source)
+        {
+            if (source == null) return null;
+            return new MathGameEventAction
+            {
+                BehaviorState = source.BehaviorState,
+                Action = source.Action,
+                MinimizeInterruptions = source.MinimizeInterruptions,
+                UseSmallCue = source.UseSmallCue,
+                UseRepair = source.UseRepair,
+                OfferBreak = source.OfferBreak,
+                SuggestPositiveClose = source.SuggestPositiveClose,
+                PreserveCheckpoint = source.PreserveCheckpoint
+            };
+        }
+
+        private static MathGameEventAnswerResult CloneGameEventAnswerResult(MathGameEventAnswerResult source)
+        {
+            if (source == null) return null;
+            return new MathGameEventAnswerResult
+            {
+                Learning = CloneMathAnswerOutcome(source.Learning),
+                EventState = CloneGameEventState(source.EventState)
+            };
+        }
+
+        private static MathAnswerOutcome CloneMathAnswerOutcome(MathAnswerOutcome source)
+        {
+            if (source == null) return null;
+            return new MathAnswerOutcome
+            {
+                IsCorrect = source.IsCorrect,
+                CorrectAnswer = source.CorrectAnswer,
+                CorrectAnswerDisplay = source.CorrectAnswerDisplay,
+                HintLevel = source.HintLevel,
+                FeedbackVi = source.FeedbackVi,
+                Behavior = CloneBehaviorDecision(source.Behavior),
+                Mastery = CloneMasteryUpdate(source.Mastery),
+                Review = CloneReviewUpdate(source.Review),
+                Error = CloneMathErrorClassification(source.Error),
+                OfferBreak = source.OfferBreak,
+                SuggestPositiveEnd = source.SuggestPositiveEnd,
+                CompletedQuestionCount = source.CompletedQuestionCount,
+                TargetQuestionCount = source.TargetQuestionCount,
+                AttemptIndex = source.AttemptIndex,
+                QuestionCompleted = source.QuestionCompleted,
+                CanRetry = source.CanRetry,
+                IsRetry = source.IsRetry,
+                IndependentSuccess = source.IndependentSuccess
+            };
+        }
+
+        private static BehaviorDecision CloneBehaviorDecision(BehaviorDecision source)
+        {
+            if (source == null) return null;
+            return new BehaviorDecision
+            {
+                State = source.State,
+                CandidateState = source.CandidateState,
+                Confidence = source.Confidence,
+                Evidence = source.Evidence == null ? null : source.Evidence.ToList(),
+                Actions = source.Actions == null ? null : source.Actions.ToList(),
+                StateChanged = source.StateChanged,
+                ProtectMasteryFromNegativeUpdate = source.ProtectMasteryFromNegativeUpdate,
+                TriggerPrerequisiteRepair = source.TriggerPrerequisiteRepair,
+                RecentAttemptCount = source.RecentAttemptCount,
+                DistinctRecentSkillCount = source.DistinctRecentSkillCount,
+                RecentAccuracy = source.RecentAccuracy,
+                ResponseTimeToPersonalMedianRatio = source.ResponseTimeToPersonalMedianRatio
+            };
+        }
+
+        private static MasteryUpdate CloneMasteryUpdate(MasteryUpdate source)
+        {
+            if (source == null) return null;
+            return new MasteryUpdate
+            {
+                ScoreBefore = source.ScoreBefore,
+                ScoreAfter = source.ScoreAfter,
+                Delta = source.Delta,
+                ConfidenceAfter = source.ConfidenceAfter,
+                AttemptsCount = source.AttemptsCount,
+                IndependentSuccessCount = source.IndependentSuccessCount,
+                HintedSuccessCount = source.HintedSuccessCount,
+                TransferSuccessCount = source.TransferSuccessCount,
+                LearningState = source.LearningState,
+                EventType = source.EventType,
+                Reasons = source.Reasons == null ? null : source.Reasons.ToList()
+            };
+        }
+
+        private static ReviewUpdate CloneReviewUpdate(ReviewUpdate source)
+        {
+            if (source == null) return null;
+            return new ReviewUpdate
+            {
+                DueAtUtc = source.DueAtUtc,
+                IntervalDays = source.IntervalDays,
+                Reason = source.Reason
+            };
+        }
+
+        private static MathErrorClassification CloneMathErrorClassification(MathErrorClassification source)
+        {
+            if (source == null) return null;
+            return new MathErrorClassification
+            {
+                ErrorType = source.ErrorType,
+                Confidence = source.Confidence,
+                Evidence = source.Evidence == null ? null : source.Evidence.ToList()
+            };
+        }
+
+        private static MathGameEventCompletionResult CloneGameEventCompletionResult(MathGameEventCompletionResult source)
+        {
+            if (source == null) return null;
+            return new MathGameEventCompletionResult
+            {
+                LearningSummary = CloneMathSessionSummary(source.LearningSummary),
+                EventState = CloneGameEventState(source.EventState)
+            };
+        }
+
+        private static MathSessionSummary CloneMathSessionSummary(MathSessionSummary source)
+        {
+            if (source == null) return null;
+            return new MathSessionSummary
+            {
+                Attempts = source.Attempts,
+                AnswerAttempts = source.AnswerAttempts,
+                Correct = source.Correct,
+                IndependentCorrect = source.IndependentCorrect,
+                HintedCorrect = source.HintedCorrect,
+                RetriedQuestions = source.RetriedQuestions,
+                RetriedCorrect = source.RetriedCorrect,
+                Wrong = source.Wrong,
+                DistinctSkills = source.DistinctSkills,
+                FinalBehaviorState = source.FinalBehaviorState,
+                StartedAtUtc = source.StartedAtUtc,
+                EndedAtUtc = source.EndedAtUtc,
+                GardenGrowthSteps = source.GardenGrowthSteps,
+                GardenUnlockMessage = source.GardenUnlockMessage,
+                GardenUnlockedItemIds = source.GardenUnlockedItemIds == null ? null : source.GardenUnlockedItemIds.ToList(),
+                SessionsUntilNextGardenMilestone = source.SessionsUntilNextGardenMilestone,
+                NextGardenMilestoneItemId = source.NextGardenMilestoneItemId,
+                SessionMode = source.SessionMode,
+                TargetLessonId = source.TargetLessonId,
+                LessonCompleted = source.LessonCompleted,
+                LessonScorePercent = source.LessonScorePercent,
+                LessonBestScorePercent = source.LessonBestScorePercent,
+                MasteryChanges = source.MasteryChanges == null ? null : source.MasteryChanges.Select(x => x == null ? null : new MathSkillMasteryChange
+                {
+                    SkillId = x.SkillId,
+                    ScoreBefore = x.ScoreBefore,
+                    ScoreAfter = x.ScoreAfter,
+                    Delta = x.Delta
+                }).ToList(),
+                ImprovedSkillCount = source.ImprovedSkillCount,
+                TargetSkillMasteryBefore = source.TargetSkillMasteryBefore,
+                TargetSkillMasteryAfter = source.TargetSkillMasteryAfter,
+                TargetSkillMasteryDelta = source.TargetSkillMasteryDelta,
+                NextLessonId = source.NextLessonId,
+                NextLessonTitleVi = source.NextLessonTitleVi
+            };
+        }
         private static MathQuestion CloneQuestion(MathQuestion source)
         {
             if (source == null) return null;

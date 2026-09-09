@@ -101,8 +101,32 @@ namespace WAHU.Learning
         public string Reason { get; set; }
     }
 
+    public sealed class MathQuickRescueErrorSupportDecision
+    {
+        public int CheckpointNumber { get; set; }
+        public string ErrorId { get; set; }
+        public bool KnownError { get; set; }
+        public string CueVi { get; set; }
+        public string RepairVi { get; set; }
+        public int RecommendedHintLevel { get; set; }
+        public bool UseRepair { get; set; }
+        public bool OfferBreak { get; set; }
+        public string RecommendedCopyVi { get; set; }
+        public string Reason { get; set; }
+    }
+
     public sealed class MathQuickRescueContentSource
     {
+        private static readonly HashSet<string> AllowedVariants = new HashSet<string>(StringComparer.Ordinal)
+        {
+            "support", "transfer"
+        };
+
+        private static readonly HashSet<string> AllowedPreferredVariants = new HashSet<string>(StringComparer.Ordinal)
+        {
+            "any", "support", "transfer"
+        };
+
         private readonly JavaScriptSerializer _json = new JavaScriptSerializer
         {
             MaxJsonLength = 1024 * 1024,
@@ -147,6 +171,45 @@ namespace WAHU.Learning
             };
             Validate(pack);
             return pack;
+        }
+
+        public MathQuickRescueLearningPack Load(string path, IEnumerable<MathQuestion> authoredQuestions)
+        {
+            var pack = Load(path);
+            ValidateAgainstAuthoredQuestions(pack, authoredQuestions);
+            return pack;
+        }
+
+        public static void ValidateAgainstAuthoredQuestions(MathQuickRescueLearningPack pack, IEnumerable<MathQuestion> authoredQuestions)
+        {
+            if (pack == null) throw new ArgumentNullException("pack");
+            if (authoredQuestions == null) throw new ArgumentNullException("authoredQuestions");
+
+            var byId = new Dictionary<string, MathQuestion>(StringComparer.Ordinal);
+            foreach (var question in authoredQuestions)
+            {
+                if (question == null || string.IsNullOrWhiteSpace(question.ContentQuestionId))
+                    throw new InvalidDataException("Authored Math question used for Quick Rescue validation has no stable content id.");
+                if (byId.ContainsKey(question.ContentQuestionId))
+                    throw new InvalidDataException("Duplicate authored Math content id while validating Quick Rescue: " + question.ContentQuestionId);
+                byId.Add(question.ContentQuestionId, question);
+            }
+
+            foreach (var checkpoint in pack.Checkpoints ?? new List<MathQuickRescueCheckpoint>())
+            {
+                foreach (var option in checkpoint.QuestionOptions ?? new List<MathQuickRescueQuestionOption>())
+                {
+                    MathQuestion question;
+                    if (!byId.TryGetValue(option.QuestionId, out question))
+                        throw new InvalidDataException("Quick Rescue references missing authored Math question: " + option.QuestionId);
+                    if (!string.Equals(question.LessonId, pack.TargetLessonId, StringComparison.Ordinal))
+                        throw new InvalidDataException("Quick Rescue authored question lesson mismatch: " + option.QuestionId);
+                    if (!string.Equals(question.SkillId, pack.TargetSkillId, StringComparison.Ordinal))
+                        throw new InvalidDataException("Quick Rescue authored question skill mismatch: " + option.QuestionId);
+                    if (!string.Equals(question.Difficulty, checkpoint.Difficulty, StringComparison.Ordinal))
+                        throw new InvalidDataException("Quick Rescue authored question difficulty mismatch: " + option.QuestionId);
+                }
+            }
         }
 
         private static MathQuickRescueCheckpoint MapCheckpoint(CheckpointDto dto)
@@ -219,15 +282,23 @@ namespace WAHU.Learning
                     throw new InvalidDataException("Quick Rescue checkpoint child-facing copy is incomplete.");
                 if (checkpoint.QuestionOptions == null || checkpoint.QuestionOptions.Count < 2)
                     throw new InvalidDataException("Quick Rescue checkpoint needs at least two question options for anti-repeat.");
+                var checkpointVariants = new HashSet<string>(StringComparer.Ordinal);
                 foreach (var option in checkpoint.QuestionOptions)
                 {
                     if (string.IsNullOrWhiteSpace(option.QuestionId) || string.IsNullOrWhiteSpace(option.Variant))
                         throw new InvalidDataException("Quick Rescue question option invalid.");
+                    if (!AllowedVariants.Contains(option.Variant))
+                        throw new InvalidDataException("Quick Rescue question option declares unsupported variant: " + option.Variant);
+                    checkpointVariants.Add(option.Variant);
                     if (!questionIds.Add(option.QuestionId)) throw new InvalidDataException("Quick Rescue question id reused across checkpoints: " + option.QuestionId);
                 }
+                if (!checkpointVariants.Contains("support") || !checkpointVariants.Contains("transfer"))
+                    throw new InvalidDataException("Quick Rescue checkpoint must expose both support and transfer variants.");
                 if (checkpoint.CommonErrors == null || checkpoint.CommonErrors.Count < 2 || checkpoint.CommonErrors.Any(x =>
                     string.IsNullOrWhiteSpace(x.Id) || string.IsNullOrWhiteSpace(x.CueVi) || string.IsNullOrWhiteSpace(x.RepairVi)))
                     throw new InvalidDataException("Quick Rescue checkpoint requires at least two complete common-error repairs.");
+                if (checkpoint.CommonErrors.Select(x => x.Id).Distinct(StringComparer.OrdinalIgnoreCase).Count() != checkpoint.CommonErrors.Count)
+                    throw new InvalidDataException("Quick Rescue checkpoint common-error ids must be unique.");
             }
 
             var expectedStates = Enum.GetNames(typeof(BehaviorState));
@@ -238,14 +309,29 @@ namespace WAHU.Learning
             foreach (var rule in pack.AdaptiveRules)
             {
                 if (rule.HintLevel < 0 || rule.HintLevel > 2) throw new InvalidDataException("Quick Rescue adaptive hint level out of range.");
-                if (string.IsNullOrWhiteSpace(rule.PreferredVariant)) throw new InvalidDataException("Quick Rescue adaptive preferred variant missing.");
+                if (string.IsNullOrWhiteSpace(rule.PreferredVariant) || !AllowedPreferredVariants.Contains(rule.PreferredVariant))
+                    throw new InvalidDataException("Quick Rescue adaptive preferred variant is invalid: " + rule.PreferredVariant);
             }
+
+            var ready = pack.GetRule(BehaviorState.READY);
+            if (ready == null || !ready.SelectQuestion || ready.OfferBreak || ready.UseRepair || ready.HintLevel != 0 ||
+                !string.Equals(ready.PreferredVariant, "support", StringComparison.Ordinal))
+                throw new InvalidDataException("READY Quick Rescue rule must prefer confidence-first support with zero hint.");
+            var flow = pack.GetRule(BehaviorState.FLOW_LIKELY);
+            if (flow == null || !flow.SelectQuestion || !flow.MinimalFeedback || flow.HintLevel != 0)
+                throw new InvalidDataException("FLOW Quick Rescue rule must keep play moving with minimal feedback.");
+            var bored = pack.GetRule(BehaviorState.BORED_OR_UNDERCHALLENGED);
+            if (bored == null || !bored.SelectQuestion || !string.Equals(bored.PreferredVariant, "transfer", StringComparison.Ordinal) || bored.HintLevel != 0 || bored.UseRepair)
+                throw new InvalidDataException("BORED Quick Rescue rule must prefer transfer without extra scaffold.");
+            var strained = pack.GetRule(BehaviorState.STRAINED);
+            if (strained == null || !strained.SelectQuestion || !string.Equals(strained.PreferredVariant, "support", StringComparison.Ordinal) || strained.HintLevel < 1 || strained.UseRepair)
+                throw new InvalidDataException("STRAINED Quick Rescue rule must prefer support with a small hint.");
             var fatigue = pack.GetRule(BehaviorState.FATIGUED_LIKELY);
             if (fatigue == null || !fatigue.OfferBreak || fatigue.SelectQuestion)
                 throw new InvalidDataException("Fatigued Quick Rescue rule must offer a break and not select another question.");
             var frustration = pack.GetRule(BehaviorState.FRUSTRATED_LIKELY);
-            if (frustration == null || !frustration.UseRepair || frustration.HintLevel < 2)
-                throw new InvalidDataException("Frustrated Quick Rescue rule must use repair with strong support.");
+            if (frustration == null || !string.Equals(frustration.PreferredVariant, "support", StringComparison.Ordinal) || !frustration.UseRepair || frustration.HintLevel < 2)
+                throw new InvalidDataException("Frustrated Quick Rescue rule must use support + repair with strong support.");
         }
 
         private static IList<string> Copy(IList<string> values)
@@ -334,27 +420,35 @@ namespace WAHU.Learning
                 };
             }
 
+            var explicitRepair = HasExplicitRepair(behavior);
+            var preferredVariant = explicitRepair ? "support" : rule.PreferredVariant;
             var options = checkpoint.QuestionOptions.ToList();
             var recent = NormalizeRecent(recentContentQuestionIds, pack.AntiRepeat.RecentQuestionWindow);
             var unseen = options.Where(x => !recent.Contains(x.QuestionId, StringComparer.Ordinal)).ToList();
             var eligible = unseen.Count > 0 ? unseen : options;
-            if (!string.Equals(rule.PreferredVariant, "any", StringComparison.Ordinal))
-            {
-                var preferred = eligible.Where(x => string.Equals(x.Variant, rule.PreferredVariant, StringComparison.Ordinal)).ToList();
-                if (preferred.Count > 0) eligible = preferred;
-            }
+
+            // Anti-repeat is a hard child-UX guard. When every option was seen recently,
+            // prefer the least-recently-seen question first; adaptive variant preference
+            // only breaks ties so a state change cannot force the exact same prompt again.
             if (unseen.Count == 0 && recent.Count > 0)
             {
                 var oldestIndex = eligible.Min(x => LastIndexOf(recent, x.QuestionId));
                 var oldest = eligible.Where(x => LastIndexOf(recent, x.QuestionId) == oldestIndex).ToList();
                 if (oldest.Count > 0) eligible = oldest;
             }
+            if (!string.Equals(preferredVariant, "any", StringComparison.Ordinal))
+            {
+                var preferred = eligible.Where(x => string.Equals(x.Variant, preferredVariant, StringComparison.Ordinal)).ToList();
+                if (preferred.Count > 0) eligible = preferred;
+            }
 
             eligible = eligible.OrderBy(x => x.QuestionId, StringComparer.Ordinal).ToList();
             var selected = eligible[PositiveMod(StableHash(seed, checkpoint.Number, state.ToString()), eligible.Count)];
+            var useRepair = rule.UseRepair || explicitRepair;
             var hintLevel = Math.Max(0, Math.Min(2, rule.HintLevel));
+            if (useRepair) hintLevel = Math.Max(2, hintLevel);
             var support = hintLevel >= 2 ? checkpoint.HintLevel2Vi : hintLevel == 1 ? checkpoint.HintLevel1Vi : pack.Feedback.ReadyVi;
-            if (rule.UseRepair) support = checkpoint.RepairVi;
+            if (useRepair) support = checkpoint.RepairVi;
 
             return new MathQuickRescueContentDecision
             {
@@ -363,12 +457,84 @@ namespace WAHU.Learning
                 QuestionId = selected.QuestionId,
                 Variant = selected.Variant,
                 RecommendedHintLevel = hintLevel,
-                UseRepair = rule.UseRepair,
+                UseRepair = useRepair,
                 OfferBreak = rule.OfferBreak,
                 MinimalFeedback = rule.MinimalFeedback,
                 SupportVi = support,
-                Reason = "behavior_" + state + ":" + rule.PreferredVariant + (unseen.Count > 0 ? ":unseen" : ":repeat_fallback")
+                Reason = "behavior_" + state + ":" + preferredVariant + (unseen.Count > 0 ? ":unseen" : ":repeat_fallback") + (explicitRepair ? ":explicit_repair" : string.Empty)
             };
+        }
+
+        public MathQuickRescueErrorSupportDecision ResolveErrorSupport(
+            MathQuickRescueLearningPack pack,
+            int oneBasedCheckpoint,
+            BehaviorObservation observation,
+            BehaviorDecision behavior)
+        {
+            return ResolveErrorSupport(pack, oneBasedCheckpoint, observation == null ? null : observation.ErrorType, behavior);
+        }
+
+        public MathQuickRescueErrorSupportDecision ResolveErrorSupport(
+            MathQuickRescueLearningPack pack,
+            int oneBasedCheckpoint,
+            string errorType,
+            BehaviorDecision behavior)
+        {
+            if (pack == null) throw new ArgumentNullException("pack");
+            var checkpoint = pack.GetCheckpoint(oneBasedCheckpoint);
+            if (checkpoint == null) throw new ArgumentOutOfRangeException("oneBasedCheckpoint");
+            var state = behavior == null ? BehaviorState.READY : behavior.State;
+            var rule = pack.GetRule(state);
+            if (rule == null) throw new InvalidOperationException("Quick Rescue adaptive rule missing for " + state + ".");
+
+            var normalizedError = string.IsNullOrWhiteSpace(errorType) ? null : errorType.Trim();
+            var known = checkpoint.CommonErrors == null ? null : checkpoint.CommonErrors.FirstOrDefault(x =>
+                string.Equals(x.Id, normalizedError, StringComparison.OrdinalIgnoreCase));
+
+            if (rule.OfferBreak && !rule.SelectQuestion)
+            {
+                return new MathQuickRescueErrorSupportDecision
+                {
+                    CheckpointNumber = checkpoint.Number,
+                    ErrorId = known == null ? normalizedError : known.Id,
+                    KnownError = known != null,
+                    CueVi = known == null ? null : known.CueVi,
+                    RepairVi = known == null ? checkpoint.RepairVi : known.RepairVi,
+                    RecommendedHintLevel = 0,
+                    UseRepair = false,
+                    OfferBreak = true,
+                    RecommendedCopyVi = pack.Feedback.BreakVi,
+                    Reason = "behavior_" + state + ":offer_break"
+                };
+            }
+
+            var explicitRepair = HasExplicitRepair(behavior);
+            var hintLevel = Math.Max(1, Math.Min(2, rule.HintLevel));
+            var useRepair = rule.UseRepair || explicitRepair || state == BehaviorState.FRUSTRATED_LIKELY;
+            var cue = known == null ? checkpoint.HintLevel1Vi : known.CueVi;
+            var repair = known == null ? checkpoint.RepairVi : known.RepairVi;
+            return new MathQuickRescueErrorSupportDecision
+            {
+                CheckpointNumber = checkpoint.Number,
+                ErrorId = known == null ? normalizedError : known.Id,
+                KnownError = known != null,
+                CueVi = cue,
+                RepairVi = repair,
+                RecommendedHintLevel = useRepair ? Math.Max(2, hintLevel) : hintLevel,
+                UseRepair = useRepair,
+                OfferBreak = rule.OfferBreak,
+                RecommendedCopyVi = useRepair ? repair : cue,
+                Reason = known == null
+                    ? "behavior_" + state + ":generic_error_support"
+                    : "behavior_" + state + ":common_error_" + known.Id
+            };
+        }
+
+        private static bool HasExplicitRepair(BehaviorDecision decision)
+        {
+            return decision != null &&
+                (decision.TriggerPrerequisiteRepair ||
+                 (decision.Actions != null && decision.Actions.Any(x => string.Equals(x, "prerequisite_repair", StringComparison.Ordinal))));
         }
 
         private static List<string> NormalizeRecent(IEnumerable<string> values, int window)
