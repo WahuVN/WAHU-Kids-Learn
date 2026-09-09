@@ -136,8 +136,12 @@ namespace WAHUKidsLearn
         private readonly Timer _travelTimer;
         private float _travelVisual;
         private float _travelTarget;
+        private int _pulseTicks;
+        private int _pulseFrame;
 
-        public QuickRescueCheckpointStrip()
+        public QuickRescueCheckpointStrip() : this(null) { }
+
+        public QuickRescueCheckpointStrip(RuntimePerformanceSettings performance)
         {
             SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint |
                      ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw, true);
@@ -146,19 +150,20 @@ namespace WAHUKidsLearn
             _activeIndex = 0;
             _travelVisual = 0f;
             _travelTarget = 1f;
-            _travelTimer = new Timer { Interval = 50 };
+            _travelTimer = new Timer { Interval = GameArtMotionPolicy.IntervalFor(performance, 40) };
             _travelTimer.Tick += delegate
             {
                 var delta = _travelTarget - _travelVisual;
-                if (Math.Abs(delta) < 0.025f)
+                var traveling = Math.Abs(delta) >= 0.025f;
+                if (traveling) _travelVisual += delta * 0.42f;
+                else _travelVisual = _travelTarget;
+
+                if (_pulseTicks > 0)
                 {
-                    _travelVisual = _travelTarget;
-                    _travelTimer.Stop();
+                    _pulseTicks--;
+                    _pulseFrame++;
                 }
-                else
-                {
-                    _travelVisual += delta * 0.42f;
-                }
+                if (!traveling && _pulseTicks <= 0) _travelTimer.Stop();
                 if (Visible) Invalidate();
             };
         }
@@ -170,12 +175,16 @@ namespace WAHUKidsLearn
 
         public void SetState(int completed, int activeIndex, IList<string> nouns, bool rewardChestReady)
         {
+            var previousCompleted = _completed;
+            var previousChestReady = _rewardChestReady;
             _completed = Math.Max(0, Math.Min(3, completed));
             _activeIndex = activeIndex < 0 ? -1 : Math.Max(0, Math.Min(2, activeIndex));
             _rewardChestReady = rewardChestReady && _completed >= 3;
             _nouns = nouns == null ? new List<string>() : nouns.ToList();
             _travelTarget = _rewardChestReady ? 4f : Math.Max(_completed, _activeIndex < 0 ? _completed : _activeIndex + 1);
-            if (IsHandleCreated && Math.Abs(_travelTarget - _travelVisual) > 0.025f) _travelTimer.Start();
+            if (_completed > previousCompleted) BeginPulse(10);
+            if (_rewardChestReady && !previousChestReady) BeginPulse(16);
+            if (IsHandleCreated && (Math.Abs(_travelTarget - _travelVisual) > 0.025f || _pulseTicks > 0)) _travelTimer.Start();
 
             var parts = new List<string> { "Bắt đầu đã xong" };
             for (var i = 0; i < 3; i++)
@@ -189,6 +198,23 @@ namespace WAHUKidsLearn
         }
 
         public bool RewardChestReady { get { return _rewardChestReady; } }
+        internal bool AnimationRunning { get { return _travelTimer.Enabled; } }
+        internal int AnimationIntervalMs { get { return _travelTimer.Interval; } }
+
+        private void BeginPulse(int ticks)
+        {
+            _pulseTicks = Math.Max(_pulseTicks, Math.Max(0, ticks));
+            _pulseFrame = 0;
+        }
+
+        private float PulseStrength
+        {
+            get
+            {
+                if (_pulseTicks <= 0) return 0f;
+                return (float)((Math.Sin(_pulseFrame * Math.PI / 4d) + 1d) * 0.5d);
+            }
+        }
 
         public RescueCheckpointVisualState GetCheckpointVisualState(int zeroBasedIndex)
         {
@@ -215,7 +241,7 @@ namespace WAHUKidsLearn
         protected override void OnHandleCreated(EventArgs e)
         {
             base.OnHandleCreated(e);
-            if (Math.Abs(_travelTarget - _travelVisual) > 0.025f) _travelTimer.Start();
+            if (Math.Abs(_travelTarget - _travelVisual) > 0.025f || _pulseTicks > 0) _travelTimer.Start();
         }
 
         protected override void OnHandleDestroyed(EventArgs e)
@@ -235,6 +261,7 @@ namespace WAHUKidsLearn
             base.OnPaint(e);
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             var centerY = Math.Max(10, Height / 2);
+            var pulse = PulseStrength;
             var left = Math.Max(14, Math.Min(24, Width / 18));
             var right = Math.Max(left + 100, Width - left);
             var step = Math.Max(22f, (right - left) / 4f);
@@ -271,8 +298,9 @@ namespace WAHUKidsLearn
                 var marker = new RectangleF(x - 11, centerY - 11, 22, 22);
                 if (state == RescueCheckpointVisualState.Active)
                 {
-                    using (var glow = new SolidBrush(Color.FromArgb(58, ChildVisualTheme.Sun)))
-                        e.Graphics.FillEllipse(glow, x - 14, centerY - 14, 28, 28);
+                    var glowPad = 3f + 2f * pulse;
+                    using (var glow = new SolidBrush(Color.FromArgb((int)(58 + 48 * pulse), ChildVisualTheme.Sun)))
+                        e.Graphics.FillEllipse(glow, x - 11 - glowPad, centerY - 11 - glowPad, 22 + glowPad * 2, 22 + glowPad * 2);
                 }
                 if (state == RescueCheckpointVisualState.Locked)
                 {
@@ -304,14 +332,22 @@ namespace WAHUKidsLearn
             var chestX = left + step * 4f;
             if (_rewardChestReady)
             {
-                using (var glow = new SolidBrush(Color.FromArgb(64, ChildVisualTheme.Sun)))
-                    e.Graphics.FillEllipse(glow, chestX - 15, centerY - 14, 30, 28);
+                var chestGlow = 2f + 3f * pulse;
+                using (var glow = new SolidBrush(Color.FromArgb((int)(64 + 92 * pulse), ChildVisualTheme.Sun)))
+                    e.Graphics.FillEllipse(glow, chestX - 13 - chestGlow, centerY - 11 - chestGlow, 26 + chestGlow * 2, 22 + chestGlow * 2);
             }
             var chestRect = new RectangleF(chestX - 13, centerY - 11, 26, 22);
             if (!GameAssetLibrary.DrawContain(e.Graphics, "03_Rescue/rescue_reward_chest_closed.png", chestRect))
             {
                 using (var b = new SolidBrush(_rewardChestReady ? ChildVisualTheme.Sun : Color.FromArgb(202, 205, 199)))
                     e.Graphics.FillRectangle(b, chestRect);
+            }
+            if (_rewardChestReady)
+            {
+                var starSize = 8f + 3f * pulse;
+                if (!GameAssetLibrary.DrawContain(e.Graphics, "11_Rewards/reward_happy_star.png",
+                    new RectangleF(chestX - starSize / 2, centerY - 20 - starSize / 2, starSize, starSize)))
+                    RescueHeroArtControl.DrawStar(e.Graphics, chestX, centerY - 19, starSize / 2, ChildVisualTheme.Sun, ChildVisualTheme.PeachStrong);
             }
 
             var travelX = left + step * Math.Max(0f, Math.Min(4f, _travelVisual));

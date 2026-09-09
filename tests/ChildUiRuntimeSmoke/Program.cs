@@ -220,6 +220,16 @@ namespace WAHU.ChildUiRuntimeSmoke
                 {
                     Invoke(completion, "SetProgress", 3, "garden_flower_patch", 3, "garden_lantern");
                     RenderAndAssert(completion, (int)(620 * scale), (int)(100 * scale), "completion_reward_scale_" + scale);
+                    Invoke(completion, "SetRescueRewardState", true, false);
+                    A(Get<bool>(completion, "RescueRewardMode") && !Get<bool>(completion, "RewardChestReady") &&
+                      completion.AccessibleDescription.IndexOf("đang chờ đồng bộ", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "completion_rescue_preterminal_keeps_reward_chest_locked");
+                    RenderAndAssert(completion, (int)(620 * scale), (int)(100 * scale), "completion_rescue_locked_scale_" + scale);
+                    Invoke(completion, "SetRescueRewardState", true, true);
+                    A(Get<bool>(completion, "RewardChestReady") &&
+                      completion.AccessibleDescription.IndexOf("rương sao đã mở", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "completion_rescue_durable_reward_opens_chest");
+                    RenderAndAssert(completion, (int)(620 * scale), (int)(100 * scale), "completion_rescue_open_scale_" + scale);
                 }
             }
         }
@@ -2078,6 +2088,55 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                     Invoke(bridgeRouter, "GoBack");
                     Application.DoEvents();
                     File.WriteAllBytes(bridgeEventCatalogPath, bridgeEventCatalogBytes);
+
+                    // Resume the same durable Rescue session and complete all three checkpoints through
+                    // the production single-window bridge. The completion UI must read the chest from
+                    // AI4 durable reward state, not infer it from 3/3 gameplay alone.
+                    Set(bridgeShellContext, "RequestedLessonId", bridgeLessonId);
+                    Set(bridgeShellContext, "RequestedEvent", selectedShellEvent);
+                    Invoke(shell, "NavigateToRouteName", "LessonPlay");
+                    Application.DoEvents();
+                    var completedBridgePage = Get<Control>(shell, "CurrentPageControl");
+                    var completedBridge = GetField<object>(completedBridgePage, "_rescueBridge");
+                    var ensureQuestion = completedBridge.GetType().GetMethod("EnsureQuestionActive",
+                        BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                    var submitBridge = completedBridge.GetType().GetMethod("Submit",
+                        BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                    A(ensureQuestion != null && submitBridge != null,
+                        "learner_shell_rescue_completion_bridge_methods_available");
+                    for (var checkpoint = 0; checkpoint < 3; checkpoint++)
+                    {
+                        var state = ensureQuestion.Invoke(completedBridge, null);
+                        var activeQuestion = Get<MathQuestion>(state, "CurrentQuestion");
+                        A(activeQuestion != null && !string.IsNullOrWhiteSpace(activeQuestion.CorrectAnswerDisplay),
+                            "learner_shell_rescue_completion_has_question_" + checkpoint);
+                        submitBridge.Invoke(completedBridge, new object[]
+                        {
+                            activeQuestion.CorrectAnswerDisplay, 0, "smoke", DateTime.UtcNow, 450 + checkpoint * 50
+                        });
+                    }
+                    var terminalBridgeState = ensureQuestion.Invoke(completedBridge, null);
+                    A(Convert.ToString(Get<object>(terminalBridgeState, "Phase")) == "GAME_COMPLETE",
+                        "learner_shell_rescue_completion_reaches_game_complete");
+                    Invoke(completedBridgePage, "CompleteSession");
+                    Application.DoEvents();
+                    var terminalReward = Get<object>(completedBridge, "RewardSnapshot");
+                    var terminalJourney = GetField<Control>(completedBridgePage, "_eventProgress");
+                    var terminalVisual = GetField<Control>(completedBridgePage, "_completionVisual");
+                    A(Get<bool>(completedBridgePage, "IsFinished") && terminalReward != null &&
+                      Get<int>(terminalReward, "CheckpointStars") == 3 && Get<bool>(terminalReward, "FinalChestUnlocked"),
+                        "learner_shell_rescue_completion_durable_reward_unlocks_final_chest");
+                    A(Get<bool>(terminalJourney, "RewardChestReady") && Get<bool>(terminalVisual, "RescueRewardMode") &&
+                      Get<bool>(terminalVisual, "RewardChestReady"),
+                        "learner_shell_rescue_completion_ui_projects_durable_chest_state");
+                    A(GetField<Label>(completedBridgePage, "_prompt").Text == "Cứu hộ thành công!" &&
+                      GetField<Label>(completedBridgePage, "_progressText").Text.IndexOf("rương sao đã mở", StringComparison.OrdinalIgnoreCase) >= 0,
+                        "learner_shell_rescue_completion_polished_success_copy");
+                    RenderFormAndAssert(shell, 900, 640, "learner_shell_rescue_completion_min_window");
+                    Invoke(bridgeRouter, "GoBack");
+                    Application.DoEvents();
+                    A(string.Equals(Get<string>(shell, "CurrentRouteName"), "RescueMap", StringComparison.Ordinal),
+                        "learner_shell_rescue_completion_returns_to_map");
 
                     var firstLessonId = "m2_ls_num_count_read_write_0_1000";
                     var shellContext = GetField<object>(shell, "_context");
@@ -3977,6 +4036,26 @@ END;");
                 MotionFpsCap = 30,
                 DecorativeMotionAllowedOutsideLearningFocus = true
             };
+
+            var journeyType = appAssembly.GetType("WAHUKidsLearn.QuickRescueCheckpointStrip", true);
+            var journeyCtor = journeyType.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                null, new[] { typeof(RuntimePerformanceSettings) }, null);
+            A(journeyCtor != null, "rescue_journey_accepts_runtime_performance_settings");
+            using (var normalJourney = (Control)journeyCtor.Invoke(new object[] { normal }))
+            using (var lowJourney = (Control)journeyCtor.Invoke(new object[] { low }))
+            {
+                A(Get<int>(normalJourney, "AnimationIntervalMs") == 40,
+                    "rescue_journey_normal_profile_targets_25fps_transition_motion");
+                A(Get<int>(lowJourney, "AnimationIntervalMs") >= 56,
+                    "rescue_journey_low_profile_respects_motion_fps_cap");
+                normalJourney.Size = new Size(560, 36);
+                normalJourney.CreateControl();
+                var setJourneyState = journeyType.GetMethod("SetState", BindingFlags.Instance | BindingFlags.Public, null,
+                    new[] { typeof(int), typeof(int), typeof(IList<string>), typeof(bool) }, null);
+                setJourneyState.Invoke(normalJourney, new object[] { 3, 2, new List<string> { "Mốc 1", "Mốc 2", "Mốc 3" }, true });
+                A(Get<bool>(normalJourney, "AnimationRunning"),
+                    "rescue_journey_terminal_transition_runs_one_shot_pulse");
+            }
 
             var heroType = appAssembly.GetType("WAHUKidsLearn.RescueHeroArtControl", true);
             var heroCtor = heroType.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,

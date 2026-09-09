@@ -1976,6 +1976,8 @@ namespace WAHUKidsLearn
         private string _unlockedItemId;
         private int _sessionsUntilNext;
         private string _nextItemId;
+        private bool _rescueRewardMode;
+        private bool _rewardChestReady;
 
         public LessonCompletionVisual()
         {
@@ -1996,6 +1998,18 @@ namespace WAHUKidsLearn
             Invalidate();
         }
 
+        public void SetRescueRewardState(bool rescueRewardMode, bool rewardChestReady)
+        {
+            _rescueRewardMode = rescueRewardMode;
+            _rewardChestReady = rescueRewardMode && rewardChestReady;
+            AccessibleName = _rescueRewardMode ? "Kết quả nhiệm vụ cứu hộ" : "Tiến bộ khu vườn sau nhiệm vụ";
+            AccessibleDescription = BuildDescription();
+            Invalidate();
+        }
+
+        internal bool RescueRewardMode { get { return _rescueRewardMode; } }
+        internal bool RewardChestReady { get { return _rewardChestReady; } }
+
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
@@ -2003,22 +2017,37 @@ namespace WAHUKidsLearn
             g.SmoothingMode = SmoothingMode.AntiAlias;
             var iconSize = Math.Min(58, Math.Max(38, Height - 16));
             var icon = new Rectangle(16, (Height - iconSize) / 2, iconSize, iconSize);
-            using (var circle = new SolidBrush(Color.FromArgb(224, 242, 220))) g.FillEllipse(circle, icon);
-            DrawRewardIcon(g, icon, _unlockedItemId);
+            using (var circle = new SolidBrush(_rescueRewardMode ? Color.FromArgb(255, 244, 204) : Color.FromArgb(224, 242, 220))) g.FillEllipse(circle, icon);
+            var drewRescueReward = false;
+            if (_rescueRewardMode)
+            {
+                var asset = _rewardChestReady
+                    ? "13_MissionIllustrations/mission_18_reward_chest.png"
+                    : "03_Rescue/rescue_reward_chest_closed.png";
+                drewRescueReward = GameAssetLibrary.DrawContain(g, asset, icon);
+            }
+            if (!drewRescueReward) DrawRewardIcon(g, icon, _unlockedItemId);
 
             var textLeft = icon.Right + 16;
             var titleRect = new Rectangle(textLeft, 6, Math.Max(20, Width - textLeft - 10), 25);
             var detailRect = new Rectangle(textLeft, 31, Math.Max(20, Width - textLeft - 10), Math.Max(22, Height - 34));
-            var title = string.IsNullOrWhiteSpace(_unlockedItemId)
-                ? "Khu vườn lớn thêm 1 bước"
-                : "Mở khóa: " + ItemName(_unlockedItemId);
+            var title = _rescueRewardMode
+                ? (_rewardChestReady ? "Rương sao đã mở!" : "Đã hoàn thành 3 chặng")
+                : (string.IsNullOrWhiteSpace(_unlockedItemId)
+                    ? "Khu vườn lớn thêm 1 bước"
+                    : "Mở khóa: " + ItemName(_unlockedItemId));
             ChildVisualTheme.DrawTextWithOwnedFont(g, title, ChildVisualTheme.Font(11f, FontStyle.Bold), titleRect,
                 ChildVisualTheme.Ink, TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
 
             var next = _sessionsUntilNext > 0 && !string.IsNullOrWhiteSpace(_nextItemId)
                 ? "Còn " + _sessionsUntilNext + " nhiệm vụ hoàn thành để tới " + ItemName(_nextItemId) + "."
                 : "Các mốc khu vườn hiện tại đã được mở đủ.";
-            ChildVisualTheme.DrawTextWithOwnedFont(g, "Vườn: " + _growthSteps + " bước · " + next,
+            var detail = _rescueRewardMode
+                ? (_rewardChestReady
+                    ? "3 sao đã được ghi nhận an toàn · Vườn: " + _growthSteps + " bước · " + next
+                    : "Tiến độ đã lưu an toàn · Rương sao đang chờ đồng bộ phần thưởng.")
+                : "Vườn: " + _growthSteps + " bước · " + next;
+            ChildVisualTheme.DrawTextWithOwnedFont(g, detail,
                 ChildVisualTheme.Font(9.5f), detailRect, ChildVisualTheme.MutedInk,
                 TextFormatFlags.Left | TextFormatFlags.Top | TextFormatFlags.WordBreak | TextFormatFlags.EndEllipsis);
         }
@@ -2063,6 +2092,10 @@ namespace WAHUKidsLearn
 
         private string BuildDescription()
         {
+            if (_rescueRewardMode)
+                return _rewardChestReady
+                    ? "Nhiệm vụ cứu hộ hoàn thành, ba sao đã được ghi nhận và rương sao đã mở an toàn."
+                    : "Nhiệm vụ cứu hộ đã hoàn thành ba chặng; tiến độ đã lưu, rương sao đang chờ đồng bộ phần thưởng.";
             var unlocked = string.IsNullOrWhiteSpace(_unlockedItemId) ? "khu vườn lớn thêm một bước" : "mở khóa " + ItemName(_unlockedItemId);
             var next = _sessionsUntilNext > 0 && !string.IsNullOrWhiteSpace(_nextItemId)
                 ? ", còn " + _sessionsUntilNext + " nhiệm vụ tới " + ItemName(_nextItemId) : string.Empty;
