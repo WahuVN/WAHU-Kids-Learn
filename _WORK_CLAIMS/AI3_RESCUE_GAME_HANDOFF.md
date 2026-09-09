@@ -131,3 +131,43 @@ Gate wave 3:
 - Existing `BehaviorRuntimeSmoke`: `15/15 assertions PASS`.
 
 LIVE note: `origin/main` đã tiến tới `9c19e95` (`feat(ui): chuyển learner flow sang single-window native`) trong lúc wave 3 chạy. Commit này chỉ chạm `src/App/**` + Child UI smoke, không overlap file AI3; cherry-pick AI3 lên current main vẫn là đường tích hợp an toàn.
+
+
+## Wave 4 — confidence-first semantic + authored bank production integration
+
+Audit semantic 6 câu authored phát hiện checkpoint 1 từng gắn ngược `support/transfer`: câu `_01` có bẫy `0 chục` (507) khó hơn câu `_04` (825) nhưng lại được gắn `support`. Đồng thời READY dùng `preferred_variant=any`, nên câu đầu chưa được bảo đảm là câu dễ nhất dù task yêu cầu tạo cảm giác “mình làm được”.
+
+Đã sửa/khóa:
+
+1. Pack `1.0.1`: READY bắt buộc `preferred_variant=support`.
+2. Checkpoint 1: `_04` = `support`, `_01` = `transfer`; checkpoint 2–3 được audit ngữ nghĩa và giữ nguyên vì support/transfer đã đúng độ khó thực tế.
+3. Validator runtime fail-closed nếu READY không còn confidence-first support + zero hint.
+4. Smoke test không còn dựng `MathQuestion` giả cho cross-validation. Test compile linked **chính** `src/Session/MathAuthoredQuestionSource.cs` và load bank production 402 câu, không kéo `WAHU.Data`/SQLite.
+5. Xác minh target lesson có đúng 6 câu và pack Rescue phủ đủ cả 6 ID; missing ID / sai lesson / sai difficulty đều bị reject.
+6. Manifest hash sau semantic fix: `F2F26A61E1D5CA6B57966548842DF56AFC88CC88AEC29910F5ADF8D5E9FDEFBF`.
+
+## Wave 5 — taxonomy bridge + exhaustive adaptive matrix
+
+Classifier production cho authored question dùng `TemplateId=authored:<id>`, nên nhiều câu sai hợp lệ chỉ được phân loại rộng là `UNKNOWN`; input malformed là `INPUT_FORMAT_ERROR`. AI3 không sửa classifier core ngoài scope và không giả vờ suy ra subtype chi tiết.
+
+Đã khóa:
+
+1. Thêm overload `ResolveErrorSupport(pack, checkpoint, BehaviorObservation, BehaviorDecision)` để content layer tiêu thụ trực tiếp `BehaviorObservation.ErrorType`.
+2. `UNKNOWN` / taxonomy rộng giữ `KnownError=false` và dùng hint/repair checkpoint an toàn; không promote giả thành common-error subtype.
+3. Nếu upstream thật sự cung cấp common-error ID cụ thể, cue/repair chi tiết vẫn được dùng.
+4. Explicit `prerequisite_repair` trên taxonomy rộng vẫn nâng lên checkpoint repair level 2; FATIGUED vẫn override về break/no-pressure.
+5. Thêm ma trận runtime: **3 checkpoint × 6 BehaviorState × 64 seed**, cộng anti-repeat/LRU/determinism và classifier bridge.
+
+Gate cuối trong scope AI3:
+
+- Quick Rescue runtime: `6419/6419 assertions PASS`.
+- Quick Rescue Release/x86 build: `0 warning, 0 error`.
+- `MathContentDataSmoke`: `100/100 PASS` (riêng Quick Rescue `10/10`).
+- `BehaviorRuntimeSmoke`: `15/15 PASS`.
+- `MathEngineRuntimeSmoke`: `72/72 PASS`.
+- `MathDataEngineRuntimeSmoke`: `138/138 PASS`.
+- `ContentRuntimeSmoke`: `21/21 PASS`.
+- `git diff --check`: PASS.
+- `LearningSessionRuntimeSmoke` vẫn dừng đúng blocker đã biết ở `WAHU.Data`: 49 lỗi thiếu `System.Data.SQLite` / `SQLiteConnection` / `SQLiteTransaction`. Không có lỗi mới trong `WAHU.Learning` trước điểm đó; persistence nằm ngoài ownership AI3.
+
+LIVE integration note: `origin/main` hiện ở `8cd3f94` (`docs(ui): chốt release 0.1.94 single-window`), tiến 2 commit so với base branch AI3. Hai commit LIVE này thuộc UI/docs và không overlap nội dung/adaptive AI3; cherry-pick wave AI3 vẫn là đường tích hợp phù hợp.

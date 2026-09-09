@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using WAHU.Content;
 using WAHU.Learning;
+using WAHU.Session;
 
 namespace WAHU.QuickRescueLearningRuntimeSmoke
 {
@@ -26,12 +27,15 @@ namespace WAHU.QuickRescueLearningRuntimeSmoke
             Assert(pack.GetCheckpoint(2).Difficulty == "medium", "checkpoint2_medium");
             Assert(pack.GetCheckpoint(3).Difficulty == "application", "checkpoint3_application");
 
-            TestAuthoredQuestionCrossValidation(source, path, pack);
+            TestAuthoredQuestionCrossValidation(source, path, pack, root);
+            TestProductionClassifierFallback(pack, selector, root);
             TestMalformedPackFailsClosed(source, path);
 
             var ready = selector.Select(pack, 1, Decision(BehaviorState.READY), new string[0], 42);
             Assert(!string.IsNullOrWhiteSpace(ready.QuestionId), "ready_selects_question");
             Assert(ready.Difficulty == "basic", "first_question_confidence_basic");
+            Assert(ready.Variant == "support", "ready_starts_with_confidence_support_variant");
+            Assert(ready.QuestionId == FindVariant(pack.GetCheckpoint(1), "support").QuestionId, "ready_starts_with_easiest_authored_option");
             Assert(ready.RecommendedHintLevel == 0 && !ready.UseRepair && !ready.OfferBreak, "ready_no_forced_support");
 
             var readyAgain = selector.Select(pack, 1, Decision(BehaviorState.READY), new string[0], 42);
@@ -70,6 +74,7 @@ namespace WAHU.QuickRescueLearningRuntimeSmoke
             Assert(fatigued.SupportVi == pack.Feedback.BreakVi, "fatigue_uses_safe_break_copy");
 
             TestHardAntiRepeatBeforeAdaptivePreference(pack, selector);
+            TestAdaptiveMatrix(pack, selector);
             TestCommonErrorSupport(pack, selector);
 
             var allRecent = new List<string>();
@@ -82,39 +87,87 @@ namespace WAHU.QuickRescueLearningRuntimeSmoke
             Console.WriteLine("QUICK_RESCUE_LEARNING_RUNTIME_SMOKE_PASS assertions=" + _assertions);
         }
 
-        private static void TestAuthoredQuestionCrossValidation(MathQuickRescueContentSource source, string path, MathQuickRescueLearningPack pack)
+        private static void TestAuthoredQuestionCrossValidation(MathQuickRescueContentSource source, string path, MathQuickRescueLearningPack pack, string root)
         {
-            var authored = new List<MathQuestion>();
+            var bankPath = Path.Combine(root, "content_packs", "math_grade2_v1", "question_bank_v1.json");
+            var authoredBank = new MathAuthoredQuestionSource().Load(bankPath);
+            Assert(authoredBank.Questions != null && authoredBank.Questions.Count == 402, "production_authored_bank_loads_402_questions");
+
+            var targetLessonQuestions = authoredBank.ForLesson(pack.TargetLessonId);
+            Assert(targetLessonQuestions.Count == 6, "rescue_target_lesson_has_exact_six_authored_questions");
+            var referenced = new HashSet<string>(StringComparer.Ordinal);
             foreach (var checkpoint in pack.Checkpoints)
-            {
                 foreach (var option in checkpoint.QuestionOptions)
-                {
-                    authored.Add(new MathQuestion
-                    {
-                        ContentQuestionId = option.QuestionId,
-                        LessonId = pack.TargetLessonId,
-                        SkillId = pack.TargetSkillId,
-                        Difficulty = checkpoint.Difficulty
-                    });
-                }
-            }
+                    referenced.Add(option.QuestionId);
+            Assert(referenced.Count == 6, "rescue_pack_references_six_unique_authored_questions");
+            foreach (var question in targetLessonQuestions)
+                Assert(referenced.Contains(question.ContentQuestionId), "rescue_pack_covers_entire_target_lesson_bank_" + question.ContentQuestionId);
 
-            MathQuickRescueContentSource.ValidateAgainstAuthoredQuestions(pack, authored);
-            Assert(true, "authored_reference_cross_validation_passes");
-            var loadedWithRefs = source.Load(path, authored);
-            Assert(loadedWithRefs.CheckpointCount == pack.CheckpointCount, "load_with_authored_validation_passes");
+            MathQuickRescueContentSource.ValidateAgainstAuthoredQuestions(pack, authoredBank.Questions);
+            Assert(true, "production_authored_reference_cross_validation_passes");
+            var loadedWithRefs = source.Load(path, authoredBank.Questions);
+            Assert(loadedWithRefs.CheckpointCount == pack.CheckpointCount, "load_with_production_authored_validation_passes");
 
-            var missing = new List<MathQuestion>(authored);
-            missing.RemoveAt(missing.Count - 1);
+            var missing = new List<MathQuestion>(authoredBank.Questions);
+            var missingId = pack.GetCheckpoint(3).QuestionOptions[1].QuestionId;
+            missing.RemoveAll(x => x != null && string.Equals(x.ContentQuestionId, missingId, StringComparison.Ordinal));
+            Assert(missing.Count == authoredBank.Questions.Count - 1, "negative_fixture_removes_exact_referenced_question");
             AssertInvalidData(delegate { MathQuickRescueContentSource.ValidateAgainstAuthoredQuestions(pack, missing); }, "missing_authored_question_rejected");
 
-            var wrongDifficulty = CloneQuestions(authored);
-            wrongDifficulty[0].Difficulty = "application";
+            var wrongDifficulty = CloneQuestions(authoredBank.Questions);
+            var firstId = pack.GetCheckpoint(1).QuestionOptions[0].QuestionId;
+            foreach (var question in wrongDifficulty)
+            {
+                if (!string.Equals(question.ContentQuestionId, firstId, StringComparison.Ordinal)) continue;
+                question.Difficulty = "application";
+                break;
+            }
             AssertInvalidData(delegate { MathQuickRescueContentSource.ValidateAgainstAuthoredQuestions(pack, wrongDifficulty); }, "authored_difficulty_mismatch_rejected");
 
-            var wrongLesson = CloneQuestions(authored);
-            wrongLesson[0].LessonId = "other_lesson";
+            var wrongLesson = CloneQuestions(authoredBank.Questions);
+            foreach (var question in wrongLesson)
+            {
+                if (!string.Equals(question.ContentQuestionId, firstId, StringComparison.Ordinal)) continue;
+                question.LessonId = "other_lesson";
+                break;
+            }
             AssertInvalidData(delegate { MathQuickRescueContentSource.ValidateAgainstAuthoredQuestions(pack, wrongLesson); }, "authored_lesson_mismatch_rejected");
+        }
+
+        private static void TestProductionClassifierFallback(MathQuickRescueLearningPack pack, MathQuickRescueAdaptiveSelector selector, string root)
+        {
+            var bankPath = Path.Combine(root, "content_packs", "math_grade2_v1", "question_bank_v1.json");
+            var bank = new MathAuthoredQuestionSource().Load(bankPath);
+            var classifier = new MathErrorClassifierV1();
+
+            var mediumAuthored = bank.FindContentQuestion("m2_q_num_count_read_write_0_1000_05");
+            var mediumRuntime = MathAuthoredQuestionSource.CreateRuntimeInstance(mediumAuthored);
+            var textError = classifier.Classify(mediumRuntime, "sáu trăm ba mươi");
+            Assert(textError != null && textError.ErrorType == "UNKNOWN", "authored_text_wrong_answer_classifier_is_broad_unknown");
+            var textObservation = new BehaviorObservation { ErrorType = textError.ErrorType, SkillId = mediumRuntime.SkillId };
+            var textSupport = selector.ResolveErrorSupport(pack, 2, textObservation, Decision(BehaviorState.STRAINED));
+            Assert(!textSupport.KnownError && textSupport.ErrorId == "UNKNOWN", "broad_classifier_error_is_not_falsely_promoted_to_specific_subtype");
+            Assert(textSupport.RecommendedCopyVi == pack.GetCheckpoint(2).HintLevel1Vi, "broad_classifier_error_uses_checkpoint_safe_fallback");
+
+            var basicAuthored = bank.FindContentQuestion("m2_q_num_count_read_write_0_1000_04");
+            var basicRuntime = MathAuthoredQuestionSource.CreateRuntimeInstance(basicAuthored);
+            var numericError = classifier.Classify(basicRuntime, "824");
+            Assert(numericError != null && numericError.ErrorType == "UNKNOWN", "authored_numeric_wrong_answer_classifier_is_broad_unknown");
+            var malformedError = classifier.Classify(basicRuntime, "abc");
+            Assert(malformedError != null && malformedError.ErrorType == "INPUT_FORMAT_ERROR", "authored_malformed_answer_classifier_is_input_format");
+            var malformedSupport = selector.ResolveErrorSupport(pack, 1, new BehaviorObservation { ErrorType = malformedError.ErrorType }, Decision(BehaviorState.READY));
+            Assert(!malformedSupport.KnownError && malformedSupport.RecommendedCopyVi == pack.GetCheckpoint(1).HintLevel1Vi,
+                "input_format_error_uses_safe_checkpoint_fallback_without_inventing_math_subtype");
+
+            var exactError = pack.GetCheckpoint(3).CommonErrors[0];
+            var exactSupport = selector.ResolveErrorSupport(pack, 3, new BehaviorObservation { ErrorType = exactError.Id }, Decision(BehaviorState.STRAINED));
+            Assert(exactSupport.KnownError && exactSupport.ErrorId == exactError.Id, "behavior_observation_exact_common_error_uses_specific_support");
+            Assert(exactSupport.RecommendedCopyVi == exactError.CueVi, "behavior_observation_exact_common_error_uses_specific_cue");
+
+            var broadDomainSupport = selector.ResolveErrorSupport(pack, 3, new BehaviorObservation { ErrorType = "NUMBER_READ_WRITE_ERROR" }, RepairDecision(BehaviorState.STRAINED));
+            Assert(!broadDomainSupport.KnownError && broadDomainSupport.UseRepair && broadDomainSupport.RecommendedHintLevel == 2,
+                "broad_domain_error_with_explicit_repair_uses_checkpoint_repair_without_fake_subtype");
+            Assert(broadDomainSupport.RecommendedCopyVi == pack.GetCheckpoint(3).RepairVi, "broad_domain_error_repair_copy_is_checkpoint_specific");
         }
 
         private static void TestMalformedPackFailsClosed(MathQuickRescueContentSource source, string productionPath)
@@ -157,6 +210,63 @@ namespace WAHU.QuickRescueLearningRuntimeSmoke
             var boredLru = selector.Select(pack, 2, Decision(BehaviorState.BORED_OR_UNDERCHALLENGED), new[] { support.QuestionId, transfer.QuestionId }, 99);
             Assert(boredLru.QuestionId == support.QuestionId, "anti_repeat_beats_recent_transfer_preference");
             Assert(boredLru.RecommendedHintLevel == 0, "lru_support_does_not_invent_bored_hint");
+        }
+
+        private static void TestAdaptiveMatrix(MathQuickRescueLearningPack pack, MathQuickRescueAdaptiveSelector selector)
+        {
+            var states = new[]
+            {
+                BehaviorState.READY,
+                BehaviorState.FLOW_LIKELY,
+                BehaviorState.BORED_OR_UNDERCHALLENGED,
+                BehaviorState.STRAINED,
+                BehaviorState.FRUSTRATED_LIKELY,
+                BehaviorState.FATIGUED_LIKELY
+            };
+
+            for (var checkpointNumber = 1; checkpointNumber <= 3; checkpointNumber++)
+            {
+                var checkpoint = pack.GetCheckpoint(checkpointNumber);
+                var support = FindVariant(checkpoint, "support");
+                var transfer = FindVariant(checkpoint, "transfer");
+                for (var seed = 0; seed < 64; seed++)
+                {
+                    foreach (var state in states)
+                    {
+                        var decision = selector.Select(pack, checkpointNumber, Decision(state), new string[0], seed);
+                        Assert(decision.CheckpointNumber == checkpointNumber, "matrix_checkpoint_identity");
+                        Assert(decision.Difficulty == checkpoint.Difficulty, "matrix_pacing_never_changes_checkpoint_difficulty");
+                        if (state == BehaviorState.FATIGUED_LIKELY)
+                        {
+                            Assert(decision.OfferBreak && string.IsNullOrWhiteSpace(decision.QuestionId), "matrix_fatigue_never_selects_question");
+                            Assert(!decision.UseRepair && decision.RecommendedHintLevel == 0, "matrix_fatigue_never_forces_repair");
+                            continue;
+                        }
+
+                        Assert(decision.QuestionId == support.QuestionId || decision.QuestionId == transfer.QuestionId, "matrix_selection_stays_inside_checkpoint_pool");
+                        if (state == BehaviorState.READY || state == BehaviorState.STRAINED || state == BehaviorState.FRUSTRATED_LIKELY)
+                            Assert(decision.QuestionId == support.QuestionId, "matrix_support_states_prefer_support_without_recent_history");
+                        if (state == BehaviorState.BORED_OR_UNDERCHALLENGED)
+                            Assert(decision.QuestionId == transfer.QuestionId, "matrix_bored_prefers_transfer_without_recent_history");
+                        if (state == BehaviorState.READY || state == BehaviorState.FLOW_LIKELY || state == BehaviorState.BORED_OR_UNDERCHALLENGED)
+                            Assert(decision.RecommendedHintLevel == 0 && !decision.UseRepair, "matrix_low_support_states_do_not_force_hint_or_repair");
+                        if (state == BehaviorState.STRAINED)
+                            Assert(decision.RecommendedHintLevel == 1 && !decision.UseRepair, "matrix_strained_uses_hint1_only");
+                        if (state == BehaviorState.FRUSTRATED_LIKELY)
+                            Assert(decision.RecommendedHintLevel == 2 && decision.UseRepair, "matrix_frustrated_uses_hint2_repair");
+
+                        var repeat = selector.Select(pack, checkpointNumber, Decision(state), new string[0], seed);
+                        Assert(repeat.QuestionId == decision.QuestionId && repeat.Variant == decision.Variant, "matrix_same_seed_state_is_deterministic");
+                    }
+                }
+
+                var supportRecent = selector.Select(pack, checkpointNumber, Decision(BehaviorState.STRAINED), new[] { support.QuestionId }, 7);
+                Assert(supportRecent.QuestionId == transfer.QuestionId, "matrix_unseen_transfer_beats_support_preference");
+                var transferRecent = selector.Select(pack, checkpointNumber, Decision(BehaviorState.BORED_OR_UNDERCHALLENGED), new[] { transfer.QuestionId }, 7);
+                Assert(transferRecent.QuestionId == support.QuestionId, "matrix_unseen_support_beats_transfer_preference");
+                var bothRecent = selector.Select(pack, checkpointNumber, Decision(BehaviorState.READY), new[] { support.QuestionId, transfer.QuestionId }, 7);
+                Assert(bothRecent.QuestionId == support.QuestionId, "matrix_lru_repeat_fallback_picks_oldest_question");
+            }
         }
 
         private static void TestCommonErrorSupport(MathQuickRescueLearningPack pack, MathQuickRescueAdaptiveSelector selector)

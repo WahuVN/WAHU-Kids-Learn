@@ -25,7 +25,7 @@
   "adaptive_rules": [
     {
       "state": "READY",
-      "preferred_variant": "any",
+      "preferred_variant": "support",
       "hint_level": 0,
       "use_repair": false,
       "offer_break": false,
@@ -87,11 +87,11 @@
       "question_options": [
         {
           "question_id": "m2_q_num_count_read_write_0_1000_01",
-          "variant": "support"
+          "variant": "transfer"
         },
         {
           "question_id": "m2_q_num_count_read_write_0_1000_04",
-          "variant": "transfer"
+          "variant": "support"
         }
       ],
       "hint_level_1_vi": "Con nhìn lần lượt ba hàng: trăm, chục, rồi đơn vị nhé.",

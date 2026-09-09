@@ -40,6 +40,7 @@ class QuickRescueLearningContentSmoke(unittest.TestCase):
         manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
         self.assertEqual("math_grade2_quick_rescue_learning_v1", manifest["pack_id"])
         self.assertEqual("VERIFIED", manifest["status"])
+        self.assertEqual("1.0.1", manifest["version"])
         self.assertEqual(1, len(manifest["files"]))
         self.assertEqual("learning_content_v1.json", manifest["files"][0]["path"])
         actual = hashlib.sha256(RESCUE.read_bytes()).hexdigest().upper()
@@ -80,6 +81,11 @@ class QuickRescueLearningContentSmoke(unittest.TestCase):
         self.assertEqual("basic", first["difficulty"])
         self.assertIn("vị trí", first["goal_vi"].casefold())
         self.assertTrue(all(self.q_by_id[x["question_id"]]["difficulty"] == "basic" for x in first["question_options"]))
+        variants = {x["variant"]: x["question_id"] for x in first["question_options"]}
+        self.assertEqual("m2_q_num_count_read_write_0_1000_04", variants["support"])
+        self.assertEqual("m2_q_num_count_read_write_0_1000_01", variants["transfer"])
+        self.assertNotIn("0 chục", self.q_by_id[variants["support"]]["prompt_vi"].casefold())
+        self.assertIn("0 chục", self.q_by_id[variants["transfer"]]["prompt_vi"].casefold())
 
     def test_each_checkpoint_has_two_level_hints_repair_and_common_error_content(self):
         for checkpoint in self.pack["checkpoints"]:
@@ -100,6 +106,7 @@ class QuickRescueLearningContentSmoke(unittest.TestCase):
             "STRAINED", "FRUSTRATED_LIKELY", "FATIGUED_LIKELY"
         }, set(rules))
         self.assertEqual(0, rules["READY"]["hint_level"])
+        self.assertEqual("support", rules["READY"]["preferred_variant"])
         self.assertTrue(rules["FLOW_LIKELY"]["minimal_feedback"])
         self.assertEqual("transfer", rules["BORED_OR_UNDERCHALLENGED"]["preferred_variant"])
         self.assertGreaterEqual(rules["STRAINED"]["hint_level"], 1)

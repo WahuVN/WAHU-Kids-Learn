@@ -314,8 +314,9 @@ namespace WAHU.Learning
             }
 
             var ready = pack.GetRule(BehaviorState.READY);
-            if (ready == null || !ready.SelectQuestion || ready.OfferBreak || ready.UseRepair || ready.HintLevel != 0)
-                throw new InvalidDataException("READY Quick Rescue rule must keep normal zero-hint play.");
+            if (ready == null || !ready.SelectQuestion || ready.OfferBreak || ready.UseRepair || ready.HintLevel != 0 ||
+                !string.Equals(ready.PreferredVariant, "support", StringComparison.Ordinal))
+                throw new InvalidDataException("READY Quick Rescue rule must prefer confidence-first support with zero hint.");
             var flow = pack.GetRule(BehaviorState.FLOW_LIKELY);
             if (flow == null || !flow.SelectQuestion || !flow.MinimalFeedback || flow.HintLevel != 0)
                 throw new InvalidDataException("FLOW Quick Rescue rule must keep play moving with minimal feedback.");
@@ -462,6 +463,15 @@ namespace WAHU.Learning
                 SupportVi = support,
                 Reason = "behavior_" + state + ":" + preferredVariant + (unseen.Count > 0 ? ":unseen" : ":repeat_fallback") + (explicitRepair ? ":explicit_repair" : string.Empty)
             };
+        }
+
+        public MathQuickRescueErrorSupportDecision ResolveErrorSupport(
+            MathQuickRescueLearningPack pack,
+            int oneBasedCheckpoint,
+            BehaviorObservation observation,
+            BehaviorDecision behavior)
+        {
+            return ResolveErrorSupport(pack, oneBasedCheckpoint, observation == null ? null : observation.ErrorType, behavior);
         }
 
         public MathQuickRescueErrorSupportDecision ResolveErrorSupport(
