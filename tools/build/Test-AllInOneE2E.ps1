@@ -66,6 +66,8 @@ try {
         'config\install_manifest_v1.json',
         'data\schema\006_attempt_commit_key_immutability.sql',
         'content_packs\math_grade2_v1\question_bank_v1.json',
+        'content_packs\math_quick_rescue_v1\manifest.json',
+        'content_packs\math_quick_rescue_v1\learning_content_v1.json',
         'Assets\Generated\Ready\ASSET_SELECTION_MANIFEST.json'
     )) {
         Assert (Test-Path -LiteralPath (Join-Path $extractRoot $rel) -PathType Leaf) "All-in-One payload missing: $rel"

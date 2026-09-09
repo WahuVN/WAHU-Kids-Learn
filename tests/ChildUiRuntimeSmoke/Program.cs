@@ -51,6 +51,7 @@ namespace WAHU.ChildUiRuntimeSmoke
             TestAllAuthoredAnswerSurfaces(appAssembly);
             TestTargetedLessonUiFlow(appAssembly);
             TestFirstFiveLessonsDeepUiFlow(appAssembly);
+            TestRescueJourneyVisualStates(appAssembly);
             TestQuickRescuePlayableUiFlow(appAssembly);
             TestHomeGardenRewardSelfHeal(appAssembly);
             TestExpandedPoolTargetedUiFlow(appAssembly);
@@ -1821,6 +1822,39 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
             }
         }
 
+        private static void TestRescueJourneyVisualStates(Assembly appAssembly)
+        {
+            using (var journey = CreateInternalControl(appAssembly, "WAHUKidsLearn.QuickRescueCheckpointStrip"))
+            {
+                var nouns = new List<string> { "Mốc một", "Mốc hai", "Mốc ba" };
+                var setJourneyState = journey.GetType().GetMethod("SetState", BindingFlags.Instance | BindingFlags.Public,
+                    null, new[] { typeof(int), typeof(int), typeof(IList<string>) }, null);
+                A(setJourneyState != null, "rescue_journey_state_setter_available");
+                setJourneyState.Invoke(journey, new object[] { 0, 0, nouns });
+                A(journey.AccessibleDescription.IndexOf("Bắt đầu đã xong", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                  journey.AccessibleDescription.IndexOf("Mốc một đang làm", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                  journey.AccessibleDescription.IndexOf("Mốc hai đang khóa", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                  journey.AccessibleDescription.IndexOf("Rương sao đang khóa", StringComparison.OrdinalIgnoreCase) >= 0,
+                    "rescue_journey_start_active_locked_chest_states");
+                RenderAndAssert(journey, 560, 36, "rescue_journey_checkpoint1_active");
+
+                setJourneyState.Invoke(journey, new object[] { 1, 0, nouns });
+                A(journey.AccessibleDescription.IndexOf("Mốc một đã xong", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                  journey.AccessibleDescription.IndexOf("Mốc hai sẵn sàng", StringComparison.OrdinalIgnoreCase) >= 0,
+                    "rescue_journey_completed_and_available_states");
+                setJourneyState.Invoke(journey, new object[] { 1, 1, nouns });
+                A(journey.AccessibleDescription.IndexOf("Mốc hai đang làm", StringComparison.OrdinalIgnoreCase) >= 0,
+                    "rescue_journey_available_promotes_to_active");
+                RenderAndAssert(journey, 560, 36, "rescue_journey_checkpoint2_active");
+
+                setJourneyState.Invoke(journey, new object[] { 3, 2, nouns });
+                A(journey.AccessibleDescription.IndexOf("Mốc ba đã xong", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                  journey.AccessibleDescription.IndexOf("Rương sao sẵn sàng", StringComparison.OrdinalIgnoreCase) >= 0,
+                    "rescue_journey_chest_unlocks_after_three");
+                RenderAndAssert(journey, 560, 36, "rescue_journey_complete_chest");
+            }
+        }
+
         private static void TestQuickRescuePlayableUiFlow(Assembly appAssembly)
         {
             var repo = Directory.GetCurrentDirectory();
@@ -1833,6 +1867,16 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                 var runtimePath = Path.Combine(runtimeContent, name);
                 runtimeFiles[runtimePath] = File.Exists(runtimePath) ? File.ReadAllBytes(runtimePath) : null;
                 File.Copy(Path.Combine(sourceContent, name), runtimePath, true);
+            }
+
+            var sourceRescueContent = Path.Combine(repo, "content_packs", "math_quick_rescue_v1");
+            var runtimeRescueContent = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "content_packs", "math_quick_rescue_v1");
+            Directory.CreateDirectory(runtimeRescueContent);
+            foreach (var name in new[] { "manifest.json", "learning_content_v1.json" })
+            {
+                var runtimePath = Path.Combine(runtimeRescueContent, name);
+                runtimeFiles[runtimePath] = File.Exists(runtimePath) ? File.ReadAllBytes(runtimePath) : null;
+                File.Copy(Path.Combine(sourceRescueContent, name), runtimePath, true);
             }
 
             var tempRoot = Path.Combine(Path.GetTempPath(), "wahu-child-ui-quick-rescue-" + Guid.NewGuid().ToString("N"));
@@ -1931,6 +1975,62 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                     RenderFormAndAssert(shell, 900, 640, "learner_shell_rescue_map_min_window");
                     RenderFormAndAssert(shell, 1180, 760, "learner_shell_rescue_map_default_window");
                     RenderFormAndAssert(shell, 1125, 800, "learner_shell_rescue_map_125pct_window");
+
+                    var bridgeShellContext = GetField<object>(shell, "_context");
+                    var bridgeRouter = GetField<object>(shell, "_router");
+                    var selectedShellEvent = GetField<object>(activePage, "_selectedEvent");
+                    A(selectedShellEvent != null, "learner_shell_rescue_bridge_has_selected_event");
+                    var bridgeLessonId = Get<string>(selectedShellEvent, "TargetLessonId");
+                    Set(bridgeShellContext, "RequestedLessonId", bridgeLessonId);
+                    Set(bridgeShellContext, "RequestedEvent", selectedShellEvent);
+                    Invoke(shell, "NavigateToRouteName", "LessonPlay");
+                    Application.DoEvents();
+                    var bridgePage = Get<Control>(shell, "CurrentPageControl");
+                    A(bridgePage != null && string.Equals(Get<string>(shell, "CurrentPageTypeName"), "LessonPlayPage", StringComparison.Ordinal),
+                        "learner_shell_rescue_bridge_enters_native_lesson_play");
+                    var rescueBridge = GetField<object>(bridgePage, "_rescueBridge");
+                    A(rescueBridge != null && Get<bool>(bridgePage, "HasActiveSession"),
+                        "learner_shell_rescue_bridge_is_runtime_owner");
+                    var gameplayState = Get<object>(rescueBridge, "CurrentState");
+                    A(gameplayState != null && Convert.ToString(Get<object>(gameplayState, "Phase")) == "QUESTION_ACTIVE" &&
+                      Get<object>(gameplayState, "CurrentQuestion") != null,
+                        "learner_shell_rescue_bridge_ai1_question_active");
+                    var rewardSnapshot = Get<object>(rescueBridge, "RewardSnapshot");
+                    A(rewardSnapshot != null && !string.IsNullOrWhiteSpace(Get<string>(rewardSnapshot, "SessionId")) &&
+                      Get<int>(rewardSnapshot, "CheckpointStars") == 0,
+                        "learner_shell_rescue_bridge_ai4_reward_projection_initialized");
+                    var supportMethod = rescueBridge.GetType().GetMethod("CurrentSupportDecision", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                    var supportDecision = supportMethod == null ? null : supportMethod.Invoke(rescueBridge, null);
+                    A(supportDecision != null && !string.IsNullOrWhiteSpace(Get<string>(supportDecision, "SupportVi")),
+                        "learner_shell_rescue_bridge_ai3_support_is_live");
+                    RenderFormAndAssert(shell, 900, 640, "learner_shell_rescue_play_min_window");
+                    Invoke(bridgeRouter, "GoBack");
+                    Application.DoEvents();
+                    A(string.Equals(Get<string>(shell, "CurrentRouteName"), "RescueMap", StringComparison.Ordinal),
+                        "learner_shell_rescue_bridge_back_returns_map");
+                    var bridgeSuspended = new MathSessionRuntimeService(shellDatabase).LoadLatestResumable(shellLearner.ChildId);
+                    A(bridgeSuspended != null && string.Equals(bridgeSuspended.TargetLessonId, bridgeLessonId, StringComparison.Ordinal),
+                        "learner_shell_rescue_bridge_suspends_durable_session");
+
+                    var bridgeEventCatalogPath = Path.Combine(runtimeContent, "game_events_v1.json");
+                    var bridgeEventCatalogBytes = File.ReadAllBytes(bridgeEventCatalogPath);
+                    File.Delete(bridgeEventCatalogPath);
+                    Set(bridgeShellContext, "RequestedLessonId", bridgeLessonId);
+                    Set(bridgeShellContext, "RequestedEvent", selectedShellEvent);
+                    Invoke(shell, "NavigateToRouteName", "LessonPlay");
+                    Application.DoEvents();
+                    var fallbackBridgePage = Get<Control>(shell, "CurrentPageControl");
+                    var fallbackBridge = GetField<object>(fallbackBridgePage, "_rescueBridge");
+                    A(fallbackBridge != null && GetField<object>(fallbackBridgePage, "_eventPresentation") == null,
+                        "learner_shell_rescue_bridge_missing_catalog_falls_back_to_lesson_presentation");
+                    A(Get<object>(fallbackBridge, "RewardSnapshot") == null,
+                        "learner_shell_rescue_bridge_missing_catalog_disables_rescue_reward_projection");
+                    var fallbackSupport = supportMethod.Invoke(fallbackBridge, null);
+                    A(fallbackSupport == null,
+                        "learner_shell_rescue_bridge_missing_catalog_disables_rescue_adaptive_support");
+                    Invoke(bridgeRouter, "GoBack");
+                    Application.DoEvents();
+                    File.WriteAllBytes(bridgeEventCatalogPath, bridgeEventCatalogBytes);
 
                     var firstLessonId = "m2_ls_num_count_read_write_0_1000";
                     var shellContext = GetField<object>(shell, "_context");

@@ -119,55 +119,197 @@ namespace WAHUKidsLearn
         }
     }
 
+    internal enum RescueCheckpointVisualState
+    {
+        Locked,
+        Available,
+        Active,
+        Completed
+    }
+
     internal sealed class QuickRescueCheckpointStrip : Control
     {
         private int _completed;
         private int _activeIndex;
         private IList<string> _nouns = new List<string>();
+        private readonly Timer _travelTimer;
+        private float _travelVisual;
+        private float _travelTarget;
 
         public QuickRescueCheckpointStrip()
         {
             SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint |
                      ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw, true);
-            Height = 24;
-            AccessibleName = "Ba chặng nhiệm vụ cứu hộ";
+            Height = 32;
+            AccessibleName = "Bản đồ hành trình nhiệm vụ cứu hộ";
+            _activeIndex = 0;
+            _travelVisual = 0f;
+            _travelTarget = 1f;
+            _travelTimer = new Timer { Interval = 50 };
+            _travelTimer.Tick += delegate
+            {
+                var delta = _travelTarget - _travelVisual;
+                if (Math.Abs(delta) < 0.025f)
+                {
+                    _travelVisual = _travelTarget;
+                    _travelTimer.Stop();
+                }
+                else
+                {
+                    _travelVisual += delta * 0.42f;
+                }
+                if (Visible) Invalidate();
+            };
         }
 
         public void SetState(int completed, int activeIndex, IList<string> nouns)
         {
             _completed = Math.Max(0, Math.Min(3, completed));
-            _activeIndex = Math.Max(0, Math.Min(2, activeIndex));
+            _activeIndex = activeIndex < 0 ? -1 : Math.Max(0, Math.Min(2, activeIndex));
             _nouns = nouns == null ? new List<string>() : nouns.ToList();
-            var parts = new List<string>();
+            _travelTarget = _completed >= 3 ? 4f : Math.Max(_completed, _activeIndex < 0 ? _completed : _activeIndex + 1);
+            if (IsHandleCreated && Math.Abs(_travelTarget - _travelVisual) > 0.025f) _travelTimer.Start();
+
+            var parts = new List<string> { "Bắt đầu đã xong" };
             for (var i = 0; i < 3; i++)
             {
                 var name = i < _nouns.Count ? _nouns[i] : "chặng " + (i + 1);
-                var state = i < _completed ? "đã xong" : (i == _activeIndex && _completed < 3 ? "đang làm" : "chưa làm");
-                parts.Add(name + " " + state);
+                parts.Add(name + " " + VisualStateText(GetCheckpointVisualState(i)));
             }
+            parts.Add("Rương sao " + (_completed >= 3 ? "sẵn sàng" : "đang khóa"));
             AccessibleDescription = string.Join("; ", parts) + ".";
             Invalidate();
+        }
+
+        public RescueCheckpointVisualState GetCheckpointVisualState(int zeroBasedIndex)
+        {
+            var index = Math.Max(0, Math.Min(2, zeroBasedIndex));
+            if (_completed >= 3 || index < _completed) return RescueCheckpointVisualState.Completed;
+            if (index == _activeIndex && index >= _completed) return RescueCheckpointVisualState.Active;
+            if (index == _completed) return RescueCheckpointVisualState.Available;
+            return RescueCheckpointVisualState.Locked;
+        }
+
+        internal float TravelVisualPosition { get { return _travelVisual; } }
+
+        private static string VisualStateText(RescueCheckpointVisualState state)
+        {
+            switch (state)
+            {
+                case RescueCheckpointVisualState.Completed: return "đã xong";
+                case RescueCheckpointVisualState.Active: return "đang làm";
+                case RescueCheckpointVisualState.Available: return "sẵn sàng";
+                default: return "đang khóa";
+            }
+        }
+
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            if (Math.Abs(_travelTarget - _travelVisual) > 0.025f) _travelTimer.Start();
+        }
+
+        protected override void OnHandleDestroyed(EventArgs e)
+        {
+            _travelTimer.Stop();
+            base.OnHandleDestroyed(e);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) _travelTimer.Dispose();
+            base.Dispose(disposing);
         }
 
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            var centerY = Math.Max(8, Height / 2);
-            var left = Math.Max(18, Width / 8);
-            var right = Math.Max(left + 40, Width - left);
-            var step = Math.Max(24, (right - left) / 2);
-            using (var line = new Pen(Color.FromArgb(207, 216, 203), 4f))
-                e.Graphics.DrawLine(line, left, centerY, left + step * 2, centerY);
+            var centerY = Math.Max(10, Height / 2);
+            var left = Math.Max(14, Math.Min(24, Width / 18));
+            var right = Math.Max(left + 100, Width - left);
+            var step = Math.Max(22f, (right - left) / 4f);
+            var routeEnd = left + step * 4f;
+            using (var line = new Pen(Color.FromArgb(205, 213, 207), 3.2f))
+            {
+                line.StartCap = System.Drawing.Drawing2D.LineCap.Round;
+                line.EndCap = System.Drawing.Drawing2D.LineCap.Round;
+                e.Graphics.DrawLine(line, left, centerY, routeEnd, centerY);
+            }
+            if (_completed > 0)
+            {
+                using (var line = new Pen(Color.FromArgb(93, 171, 111), 3.4f))
+                {
+                    line.StartCap = System.Drawing.Drawing2D.LineCap.Round;
+                    line.EndCap = System.Drawing.Drawing2D.LineCap.Round;
+                    e.Graphics.DrawLine(line, left, centerY, left + step * Math.Min(3, _completed), centerY);
+                }
+            }
+
+            var startRect = new RectangleF(left - 11, centerY - 11, 22, 22);
+            if (!GameAssetLibrary.DrawContain(e.Graphics, "03_Rescue/rescue_start_marker.png", startRect))
+            {
+                using (var b = new SolidBrush(ChildVisualTheme.MintStrong)) e.Graphics.FillEllipse(b, startRect);
+                using (var font = ChildVisualTheme.Font(7.2f, FontStyle.Bold))
+                    TextRenderer.DrawText(e.Graphics, "S", font, Rectangle.Round(startRect), Color.White,
+                        TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
+            }
+
             for (var i = 0; i < 3; i++)
             {
-                var x = left + step * i;
-                var done = i < _completed;
-                var active = !done && i == _activeIndex && _completed < 3;
-                var fillColor = done ? ChildVisualTheme.MintStrong : (active ? ChildVisualTheme.Sun : Color.FromArgb(226, 231, 221));
-                using (var fill = new SolidBrush(fillColor)) e.Graphics.FillEllipse(fill, x - 8, centerY - 8, 16, 16);
-                using (var border = new Pen(active ? Color.FromArgb(183, 143, 52) : Color.FromArgb(173, 187, 169), 2f))
-                    e.Graphics.DrawEllipse(border, x - 8, centerY - 8, 16, 16);
+                var x = left + step * (i + 1);
+                var state = GetCheckpointVisualState(i);
+                var marker = new RectangleF(x - 11, centerY - 11, 22, 22);
+                if (state == RescueCheckpointVisualState.Active)
+                {
+                    using (var glow = new SolidBrush(Color.FromArgb(58, ChildVisualTheme.Sun)))
+                        e.Graphics.FillEllipse(glow, x - 14, centerY - 14, 28, 28);
+                }
+                if (state == RescueCheckpointVisualState.Locked)
+                {
+                    using (var fill = new SolidBrush(Color.FromArgb(229, 232, 228))) e.Graphics.FillEllipse(fill, marker);
+                    using (var border = new Pen(Color.FromArgb(174, 181, 176), 1.4f)) e.Graphics.DrawEllipse(border, marker);
+                }
+                else
+                {
+                    var asset = state == RescueCheckpointVisualState.Completed
+                        ? "02_GameEffects/fx_checkpoint_done.png"
+                        : (state == RescueCheckpointVisualState.Active
+                            ? "03_Rescue/rescue_checkpoint_active.png"
+                            : "03_Rescue/rescue_checkpoint_idle.png");
+                    if (!GameAssetLibrary.DrawContain(e.Graphics, asset, marker))
+                    {
+                        var fillColor = state == RescueCheckpointVisualState.Active ? ChildVisualTheme.Sun
+                            : (state == RescueCheckpointVisualState.Completed ? ChildVisualTheme.MintStrong : Color.White);
+                        using (var fill = new SolidBrush(fillColor)) e.Graphics.FillEllipse(fill, marker);
+                        using (var border = new Pen(state == RescueCheckpointVisualState.Available ? ChildVisualTheme.MintStrong : Color.FromArgb(173, 187, 169), 1.8f))
+                            e.Graphics.DrawEllipse(border, marker);
+                    }
+                }
+                using (var font = ChildVisualTheme.Font(7.2f, FontStyle.Bold))
+                    TextRenderer.DrawText(e.Graphics, (i + 1).ToString(), font, Rectangle.Round(marker),
+                        state == RescueCheckpointVisualState.Completed ? Color.White : ChildVisualTheme.Ink,
+                        TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
+            }
+
+            var chestX = left + step * 4f;
+            if (_completed >= 3)
+            {
+                using (var glow = new SolidBrush(Color.FromArgb(64, ChildVisualTheme.Sun)))
+                    e.Graphics.FillEllipse(glow, chestX - 15, centerY - 14, 30, 28);
+            }
+            var chestRect = new RectangleF(chestX - 13, centerY - 11, 26, 22);
+            if (!GameAssetLibrary.DrawContain(e.Graphics, "03_Rescue/rescue_reward_chest_closed.png", chestRect))
+            {
+                using (var b = new SolidBrush(_completed >= 3 ? ChildVisualTheme.Sun : Color.FromArgb(202, 205, 199)))
+                    e.Graphics.FillRectangle(b, chestRect);
+            }
+
+            var travelX = left + step * Math.Max(0f, Math.Min(4f, _travelVisual));
+            var bunny = new RectangleF(travelX - 15, centerY - 21, 30, 24);
+            if (!GameAssetLibrary.DrawContain(e.Graphics, "03_Rescue/rescue_bunny_walk.png", bunny))
+            {
+                using (var b = new SolidBrush(ChildVisualTheme.PeachStrong)) e.Graphics.FillEllipse(b, travelX - 5, centerY - 12, 10, 10);
             }
         }
     }

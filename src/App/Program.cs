@@ -286,7 +286,7 @@ namespace WAHUKidsLearn
         {
             var validator = new ContentPackValidator();
             var contentRoot = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "content_packs");
-            var required = new[] { "math_grade2_v1", "english_grade2_v1" };
+            var required = new[] { "math_grade2_v1", "english_grade2_v1", "math_quick_rescue_v1" };
             var verified = 0;
             foreach (var directory in required)
             {

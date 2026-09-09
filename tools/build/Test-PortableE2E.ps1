@@ -83,6 +83,8 @@ try {
         'content_packs\math_grade2_v1\question_bank_v1.json',
         'content_packs\math_grade2_v1\game_events_v1.json',
         'content_packs\english_grade2_v1\manifest.json',
+        'content_packs\math_quick_rescue_v1\manifest.json',
+        'content_packs\math_quick_rescue_v1\learning_content_v1.json',
         'config\runtime_defaults_v1.json',
         'config\database_runtime_v1.json',
         'config\paths_v1.json'
@@ -119,7 +121,7 @@ try {
         'migration_version=6',
         'pre_migration_backup=none',
         'integrity=ok',
-        'foreign_key_issues=0','verified_content_packs=2','performance_profile=','performance_motion_fps_cap=','performance_max_animated_regions=','performance_image_cache_mb=','performance_audio_cache_mb=','performance_evidence=','parent_pin_configured=False'
+        'foreign_key_issues=0','verified_content_packs=3','performance_profile=','performance_motion_fps_cap=','performance_max_animated_regions=','performance_image_cache_mb=','performance_audio_cache_mb=','performance_evidence=','parent_pin_configured=False'
     )) {
         Assert ($text.Contains($needle)) "portable report missing: $needle"
     }

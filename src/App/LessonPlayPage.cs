@@ -15,6 +15,7 @@ namespace WAHUKidsLearn
         private readonly Action _back;
         private MathSessionCoordinator _coordinator;
         private MathGameEventCoordinator _gameEventCoordinator;
+        private RescueGameRuntimeBridge _rescueBridge;
         private MathQuickRescueEventPresentation _eventPresentation;
         private MathGameEventState _eventState;
         private MathQuestion _question;
@@ -24,6 +25,7 @@ namespace WAHUKidsLearn
         private bool _retryPending;
         private bool _submitting;
         private bool _completeOnNext;
+        private bool _breakOnNext;
         private bool _finished;
         private bool _suspendOnLeave;
         private DateTime _questionShownAtUtc;
@@ -75,7 +77,7 @@ namespace WAHUKidsLearn
         }
 
         internal string LoadedLessonId { get { return _loadedLessonId; } }
-        internal bool HasActiveSession { get { return _coordinator != null && _coordinator.IsActive; } }
+        internal bool HasActiveSession { get { return (_rescueBridge != null && _rescueBridge.IsInteractive) || (_coordinator != null && _coordinator.IsActive); } }
         internal bool IsFinished { get { return _finished; } }
         internal int HintLevel { get { return _hintLevel; } }
         internal bool RetryPending { get { return _retryPending; } }
@@ -90,12 +92,15 @@ namespace WAHUKidsLearn
                 return;
             }
 
-            if (_coordinator != null && _coordinator.IsActive && !_finished &&
-                string.Equals(_loadedLessonId, requested, StringComparison.Ordinal))
+            if (!_finished && string.Equals(_loadedLessonId, requested, StringComparison.Ordinal))
             {
-                _suspendOnLeave = true;
-                FocusCurrentInput();
-                return;
+                if ((_rescueBridge != null && _rescueBridge.IsInteractive) ||
+                    (_coordinator != null && _coordinator.IsActive))
+                {
+                    _suspendOnLeave = true;
+                    FocusCurrentInput();
+                    return;
+                }
             }
 
             StartSession(requested, _context.RequestedEvent);
@@ -103,12 +108,14 @@ namespace WAHUKidsLearn
 
         public override void OnNavigatedFrom()
         {
-            if (!_suspendOnLeave || _finished || _coordinator == null || !_coordinator.IsActive) return;
+            if (!_suspendOnLeave || _finished) return;
             try
             {
-                if (_gameEventCoordinator != null)
+                if (_rescueBridge != null && _rescueBridge.IsInteractive)
+                    _rescueBridge.SuspendForBreak("learner_shell_navigation");
+                else if (_gameEventCoordinator != null && _coordinator != null && _coordinator.IsActive)
                     _gameEventCoordinator.SuspendForBreak("learner_shell_navigation");
-                else
+                else if (_coordinator != null && _coordinator.IsActive)
                     _coordinator.Suspend("learner_shell_navigation");
             }
             catch { }
@@ -119,16 +126,18 @@ namespace WAHUKidsLearn
         {
             if (disposing)
             {
-                if (!_finished && _coordinator != null && _coordinator.IsActive)
+                if (!_finished)
                 {
                     try
                     {
-                        if (_gameEventCoordinator != null) _gameEventCoordinator.SuspendForBreak("learner_shell_dispose");
-                        else _coordinator.Suspend("learner_shell_dispose");
+                        if (_rescueBridge != null && _rescueBridge.IsInteractive) _rescueBridge.SuspendForBreak("learner_shell_dispose");
+                        else if (_gameEventCoordinator != null && _coordinator != null && _coordinator.IsActive) _gameEventCoordinator.SuspendForBreak("learner_shell_dispose");
+                        else if (_coordinator != null && _coordinator.IsActive) _coordinator.Suspend("learner_shell_dispose");
                     }
                     catch { }
                 }
-                if (_gameEventCoordinator != null) _gameEventCoordinator.Dispose();
+                if (_rescueBridge != null) _rescueBridge.Dispose();
+                else if (_gameEventCoordinator != null) _gameEventCoordinator.Dispose();
                 else if (_coordinator != null) _coordinator.Dispose();
             }
             base.Dispose(disposing);
@@ -441,6 +450,7 @@ namespace WAHUKidsLearn
             _retryPending = false;
             _submitting = false;
             _completeOnNext = false;
+            _breakOnNext = false;
             _finished = false;
             _suspendOnLeave = true;
             _pauseButton.Visible = true;
@@ -458,22 +468,18 @@ namespace WAHUKidsLearn
                 if (_eventPresentation != null)
                 {
                     var eventPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "content_packs", "math_grade2_v1", "game_events_v1.json");
-                    _gameEventCoordinator = new MathGameEventCoordinator(_context.LearningDatabase, templatePath, eventPath, profile, seed,
-                        _eventPresentation.Id, lessonId);
-                    var eventStarted = _gameEventCoordinator.Start("Bé học");
-                    _coordinator = _gameEventCoordinator.LearningSession;
-                    _eventState = eventStarted.EventState;
+                    var learningContentPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "content_packs", "math_quick_rescue_v1", "learning_content_v1.json");
+                    var audioRoot = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "audio", "rescue");
+                    _rescueBridge = new RescueGameRuntimeBridge(_context.LearningDatabase, templatePath, eventPath, profile, seed,
+                        _eventPresentation.Id, lessonId, learningContentPath, audioRoot);
+                    var rescueStarted = _rescueBridge.Start("Bé học");
+                    var eventStarted = rescueStarted.Learning;
+                    _eventState = rescueStarted.State.EventState;
                     started = eventStarted.Session;
                     if (eventStarted.Event == null || _eventState == null || _eventState.FallbackToLessonPresentation)
-                    {
-                        // Keep the event coordinator alive: its LearningSession owns the durable runtime that
-                        // was already started. Only presentation falls back to lesson mode, matching the legacy UI.
                         _eventPresentation = null;
-                    }
                     else
-                    {
                         _eventPresentation = MathQuickRescueEventPresentation.FromDefinition(eventStarted.Event);
-                    }
                 }
                 else
                 {
@@ -495,13 +501,31 @@ namespace WAHUKidsLearn
 
         private void ShowNextQuestion(MathSessionStartResult started)
         {
-            if (_finished || _coordinator == null || !_coordinator.IsActive) return;
+            if (_finished || (_rescueBridge == null && (_coordinator == null || !_coordinator.IsActive))) return;
             try
             {
-                _question = _coordinator.NextQuestion();
+                MathRescueGameplaySnapshot rescueState = null;
+                if (_rescueBridge != null)
+                {
+                    rescueState = _rescueBridge.EnsureQuestionActive();
+                    if (rescueState.Completed)
+                    {
+                        _finished = true;
+                        _suspendOnLeave = false;
+                        ShowCompletion(rescueState.CompletionSummary);
+                        return;
+                    }
+                    _question = rescueState.CurrentQuestion;
+                    _eventState = rescueState.EventState;
+                    _retryPending = rescueState.Phase == MathRescueGameplayPhase.REPAIR;
+                }
+                else
+                {
+                    _question = _coordinator.NextQuestion();
+                    if (_gameEventCoordinator != null) _eventState = _gameEventCoordinator.CurrentState;
+                }
                 if (_question == null) { CompleteSession(); return; }
                 _questionShownAtUtc = DateTime.UtcNow;
-                if (_gameEventCoordinator != null) _eventState = _gameEventCoordinator.CurrentState;
                 _hintLevel = 0;
                 _submitting = false;
                 _completeOnNext = false;
@@ -517,14 +541,30 @@ namespace WAHUKidsLearn
                 _hintButton.Text = "Gợi ý";
                 _nextButton.Visible = false;
                 _pauseButton.Visible = true;
-                var summary = _coordinator.Summary;
-                var number = summary.Attempts + 1;
+                var completedForUi = rescueState == null ? _coordinator.Summary.Attempts : rescueState.Progress.CompletedCheckpoints;
+                var number = completedForUi + 1;
                 _sceneLabel.Text = _eventPresentation == null
                     ? "CÂU " + number + " • BÀI TOÁN"
                     : "CHẶNG " + number + " • " + _eventPresentation.CheckpointName(Math.Max(0, number - 1));
-                UpdateProgress(summary.Attempts, number, _retryPending, false);
+                UpdateProgress(completedForUi, number, _retryPending, false);
                 ApplyPromptTypography(_question.PromptVi);
                 ConfigureAnswerInput(_question);
+                if (_rescueBridge != null)
+                {
+                    var decision = _rescueBridge.CurrentSupportDecision();
+                    if (decision != null && !string.IsNullOrWhiteSpace(decision.SupportVi))
+                    {
+                        _support.Text = decision.SupportVi;
+                        if (decision.RecommendedHintLevel > 0)
+                        {
+                            _hintLevel = Math.Max(_hintLevel, Math.Min(2, decision.RecommendedHintLevel));
+                            _instructionVisual.SetQuestion(_question, _hintLevel);
+                            if (UsesInteractiveAnswer(_question)) _interactiveAnswer.SetHintLevel(_hintLevel);
+                            _hintButton.Text = _hintLevel < 2 ? "Gợi ý thêm" : "Đã xem đủ gợi ý";
+                            _hintButton.Enabled = _hintLevel < 2;
+                        }
+                    }
+                }
                 if (started != null)
                 {
                     if (started.ResumedExistingSession)
@@ -632,6 +672,14 @@ namespace WAHUKidsLearn
 
         private MathAnswerOutcome SubmitCurrent(string answer, string inputMode)
         {
+            if (_rescueBridge != null)
+            {
+                var rescueNow = DateTime.UtcNow;
+                var rescueResponseMs = (int)Math.Min(int.MaxValue, Math.Max(0, (rescueNow - (_questionShownAtUtc == default(DateTime) ? rescueNow : _questionShownAtUtc)).TotalMilliseconds));
+                var outcome = _rescueBridge.Submit(answer, _hintLevel, inputMode, rescueNow, rescueResponseMs);
+                _eventState = _rescueBridge.CurrentState.EventState;
+                return outcome;
+            }
             if (_coordinator == null) throw new InvalidOperationException("Math session is not ready.");
             if (_gameEventCoordinator == null)
                 return _retryPending
@@ -775,7 +823,8 @@ namespace WAHUKidsLearn
             UpdateProgress(outcome.CompletedQuestionCount, outcome.CompletedQuestionCount, false, true);
             _hintButton.Visible = false;
             _nextButton.Visible = true;
-            _completeOnNext = outcome.SuggestPositiveEnd || outcome.CompletedQuestionCount >= outcome.TargetQuestionCount;
+            _breakOnNext = _rescueBridge != null && outcome.SuggestPositiveEnd && outcome.CompletedQuestionCount < outcome.TargetQuestionCount;
+            _completeOnNext = outcome.CompletedQuestionCount >= outcome.TargetQuestionCount || (_rescueBridge == null && outcome.SuggestPositiveEnd);
             _nextButton.Text = outcome.SuggestPositiveEnd ? "Nghỉ ở đây" : (outcome.CompletedQuestionCount >= outcome.TargetQuestionCount ? "Xem kết quả" : "Câu tiếp theo");
             _nextButton.Focus();
         }
@@ -813,6 +862,7 @@ namespace WAHUKidsLearn
         private void HandleNext()
         {
             if (_finished) { _back(); return; }
+            if (_breakOnNext) { PauseAndBack(); return; }
             if (_completeOnNext) CompleteSession();
             else ShowNextQuestion();
         }
@@ -823,7 +873,12 @@ namespace WAHUKidsLearn
             try
             {
                 MathSessionSummary summary;
-                if (_gameEventCoordinator != null && _coordinator != null && _coordinator.IsActive)
+                if (_rescueBridge != null)
+                {
+                    summary = _rescueBridge.CompleteGame();
+                    _eventState = _rescueBridge.CurrentState.EventState;
+                }
+                else if (_gameEventCoordinator != null && _coordinator != null && _coordinator.IsActive)
                 {
                     var completion = _gameEventCoordinator.Complete();
                     _eventState = completion.EventState;
@@ -909,7 +964,9 @@ namespace WAHUKidsLearn
             if (_finished) { _back(); return; }
             try
             {
-                if (_gameEventCoordinator != null && _coordinator != null && _coordinator.IsActive)
+                if (_rescueBridge != null && _rescueBridge.IsInteractive)
+                    _rescueBridge.SuspendForBreak("child_requested_break");
+                else if (_gameEventCoordinator != null && _coordinator != null && _coordinator.IsActive)
                     _gameEventCoordinator.SuspendForBreak("child_requested_break");
                 else if (_coordinator != null && _coordinator.IsActive)
                     _coordinator.Suspend("child_requested_stop");
@@ -964,7 +1021,12 @@ namespace WAHUKidsLearn
 
         private void ShowFatal(string message)
         {
-            try { if (_coordinator != null && _coordinator.IsActive) _coordinator.Abort("runtime_ui_error"); } catch { }
+            try
+            {
+                if (_rescueBridge != null && _rescueBridge.IsInteractive) _rescueBridge.SuspendForBreak("runtime_ui_error");
+                else if (_coordinator != null && _coordinator.IsActive) _coordinator.Abort("runtime_ui_error");
+            }
+            catch { }
             _finished = true;
             _suspendOnLeave = false;
             _question = null;
@@ -990,6 +1052,11 @@ namespace WAHUKidsLearn
 
         private void DisposeCoordinator()
         {
+            if (_rescueBridge != null)
+            {
+                _rescueBridge.Dispose();
+                _rescueBridge = null;
+            }
             if (_gameEventCoordinator != null)
             {
                 _gameEventCoordinator.Dispose();
