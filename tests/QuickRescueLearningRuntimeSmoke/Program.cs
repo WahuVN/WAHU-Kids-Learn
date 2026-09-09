@@ -26,7 +26,7 @@ namespace WAHU.QuickRescueLearningRuntimeSmoke
             Assert(pack.GetCheckpoint(2).Difficulty == "medium", "checkpoint2_medium");
             Assert(pack.GetCheckpoint(3).Difficulty == "application", "checkpoint3_application");
 
-            TestAuthoredQuestionCrossValidation(pack);
+            TestAuthoredQuestionCrossValidation(source, path, pack);
             TestMalformedPackFailsClosed(source, path);
 
             var ready = selector.Select(pack, 1, Decision(BehaviorState.READY), new string[0], 42);
@@ -50,6 +50,11 @@ namespace WAHU.QuickRescueLearningRuntimeSmoke
             Assert(strained.RecommendedHintLevel == 1 && !strained.UseRepair, "strained_small_hint_only");
             Assert(strained.SupportVi == pack.GetCheckpoint(2).HintLevel1Vi, "strained_uses_checkpoint_hint1");
 
+            var earlyRepair = selector.Select(pack, 2, RepairDecision(BehaviorState.STRAINED), new string[0], 9);
+            Assert(earlyRepair.UseRepair && earlyRepair.RecommendedHintLevel == 2, "explicit_behavior_repair_escalates_before_frustrated_state");
+            Assert(earlyRepair.SupportVi == pack.GetCheckpoint(2).RepairVi, "explicit_behavior_repair_uses_checkpoint_repair_copy");
+            Assert(earlyRepair.Reason.Contains("explicit_repair"), "explicit_behavior_repair_is_auditable");
+
             var frustrated = selector.Select(pack, 3, Decision(BehaviorState.FRUSTRATED_LIKELY), new string[0], 9);
             Assert(frustrated.Variant == "support", "frustrated_prefers_support_variant");
             Assert(frustrated.RecommendedHintLevel == 2 && frustrated.UseRepair, "frustrated_uses_repair");
@@ -58,9 +63,10 @@ namespace WAHU.QuickRescueLearningRuntimeSmoke
             var flow = selector.Select(pack, 2, Decision(BehaviorState.FLOW_LIKELY), new string[0], 9);
             Assert(flow.MinimalFeedback && !flow.UseRepair, "flow_minimizes_interruptions");
 
-            var fatigued = selector.Select(pack, 3, Decision(BehaviorState.FATIGUED_LIKELY), new string[0], 9);
+            var fatigued = selector.Select(pack, 3, RepairDecision(BehaviorState.FATIGUED_LIKELY), new string[0], 9);
             Assert(fatigued.OfferBreak, "fatigue_offers_break");
             Assert(string.IsNullOrWhiteSpace(fatigued.QuestionId), "fatigue_does_not_push_next_question");
+            Assert(!fatigued.UseRepair && fatigued.RecommendedHintLevel == 0, "fatigue_overrides_explicit_repair_signal");
             Assert(fatigued.SupportVi == pack.Feedback.BreakVi, "fatigue_uses_safe_break_copy");
 
             TestHardAntiRepeatBeforeAdaptivePreference(pack, selector);
@@ -76,7 +82,7 @@ namespace WAHU.QuickRescueLearningRuntimeSmoke
             Console.WriteLine("QUICK_RESCUE_LEARNING_RUNTIME_SMOKE_PASS assertions=" + _assertions);
         }
 
-        private static void TestAuthoredQuestionCrossValidation(MathQuickRescueLearningPack pack)
+        private static void TestAuthoredQuestionCrossValidation(MathQuickRescueContentSource source, string path, MathQuickRescueLearningPack pack)
         {
             var authored = new List<MathQuestion>();
             foreach (var checkpoint in pack.Checkpoints)
@@ -95,6 +101,8 @@ namespace WAHU.QuickRescueLearningRuntimeSmoke
 
             MathQuickRescueContentSource.ValidateAgainstAuthoredQuestions(pack, authored);
             Assert(true, "authored_reference_cross_validation_passes");
+            var loadedWithRefs = source.Load(path, authored);
+            Assert(loadedWithRefs.CheckpointCount == pack.CheckpointCount, "load_with_authored_validation_passes");
 
             var missing = new List<MathQuestion>(authored);
             missing.RemoveAt(missing.Count - 1);
@@ -125,6 +133,10 @@ namespace WAHU.QuickRescueLearningRuntimeSmoke
                     "\"state\": \"STRAINED\",\n      \"preferred_variant\": \"support\",\n      \"hint_level\": 1",
                     "\"state\": \"STRAINED\",\n      \"preferred_variant\": \"support\",\n      \"hint_level\": 0"));
                 AssertInvalidData(delegate { source.Load(badAdaptive); }, "strained_zero_hint_rule_rejected");
+
+                var duplicateError = Path.Combine(root, "duplicate-error.json");
+                File.WriteAllText(duplicateError, original.Replace("\"id\": \"zero_place_omitted\"", "\"id\": \"place_value_shift\""));
+                AssertInvalidData(delegate { source.Load(duplicateError); }, "duplicate_common_error_id_rejected");
             }
             finally
             {
@@ -161,11 +173,15 @@ namespace WAHU.QuickRescueLearningRuntimeSmoke
             Assert(repair.KnownError && repair.UseRepair && repair.RecommendedHintLevel == 2, "frustrated_error_gets_specific_repair");
             Assert(repair.RecommendedCopyVi == known.RepairVi, "frustrated_error_uses_common_error_repair_copy");
 
+            var earlyRepair = selector.ResolveErrorSupport(pack, 1, known.Id, RepairDecision(BehaviorState.READY));
+            Assert(earlyRepair.UseRepair && earlyRepair.RecommendedHintLevel == 2, "explicit_repair_escalates_common_error_support");
+            Assert(earlyRepair.RecommendedCopyVi == known.RepairVi, "explicit_repair_uses_specific_common_error_repair");
+
             var generic = selector.ResolveErrorSupport(pack, 1, "unknown_error", Decision(BehaviorState.STRAINED));
             Assert(!generic.KnownError && generic.RecommendedHintLevel == 1, "unknown_error_falls_back_to_checkpoint_hint");
             Assert(generic.RecommendedCopyVi == checkpoint.HintLevel1Vi, "unknown_error_generic_copy_is_safe");
 
-            var fatigue = selector.ResolveErrorSupport(pack, 1, known.Id, Decision(BehaviorState.FATIGUED_LIKELY));
+            var fatigue = selector.ResolveErrorSupport(pack, 1, known.Id, RepairDecision(BehaviorState.FATIGUED_LIKELY));
             Assert(fatigue.OfferBreak && !fatigue.UseRepair && fatigue.RecommendedHintLevel == 0, "fatigue_overrides_error_repair_pressure");
             Assert(fatigue.RecommendedCopyVi == pack.Feedback.BreakVi, "fatigue_error_path_uses_break_copy");
         }
@@ -204,6 +220,17 @@ namespace WAHU.QuickRescueLearningRuntimeSmoke
         private static BehaviorDecision Decision(BehaviorState state)
         {
             return new BehaviorDecision { State = state, CandidateState = state, Actions = new List<string>() };
+        }
+
+        private static BehaviorDecision RepairDecision(BehaviorState state)
+        {
+            return new BehaviorDecision
+            {
+                State = state,
+                CandidateState = state,
+                TriggerPrerequisiteRepair = true,
+                Actions = new List<string> { "prerequisite_repair" }
+            };
         }
 
         private static string FindProjectRoot()

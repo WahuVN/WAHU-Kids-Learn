@@ -110,3 +110,24 @@ Gate wave 2:
 - Full `MathContentDataSmoke`: `100/100 PASS`.
 - Existing `BehaviorRuntimeSmoke`: `15/15 assertions PASS`.
 - `git diff --check`: PASS.
+
+## Wave 3 — BehaviorController explicit repair integration
+
+Audit tiếp phát hiện `BehaviorDecision.TriggerPrerequisiteRepair` / action `prerequisite_repair` có thể xuất hiện **trước** khi hysteresis chuyển state sang `FRUSTRATED_LIKELY`. Content selector vì vậy không được chỉ nhìn `BehaviorState`.
+
+Đã khóa:
+
+1. `Select(...)` nhận explicit repair signal từ cả boolean `TriggerPrerequisiteRepair` và action list; ưu tiên `support`, nâng hint lên level 2 và dùng checkpoint repair copy.
+2. `ResolveErrorSupport(...)` cũng nhận explicit repair: common error đã biết dùng repair riêng của error; lỗi lạ dùng checkpoint repair.
+3. `FATIGUED_LIKELY` được xử lý trước explicit repair, nên break/no-next-question luôn thắng repair pressure.
+4. Thêm overload `Load(path, authoredQuestions)` để consumer có đường load + cross-validate authored refs trong một call, giảm nguy cơ quên validation.
+5. Runtime validator bắt duplicate common-error ID không phân biệt hoa/thường.
+
+Gate wave 3:
+
+- Quick Rescue runtime smoke: `52/52 assertions PASS`.
+- Quick Rescue runtime Release/x86 build: `0 warning, 0 error`.
+- Full `MathContentDataSmoke`: `100/100 PASS`.
+- Existing `BehaviorRuntimeSmoke`: `15/15 assertions PASS`.
+
+LIVE note: `origin/main` đã tiến tới `9c19e95` (`feat(ui): chuyển learner flow sang single-window native`) trong lúc wave 3 chạy. Commit này chỉ chạm `src/App/**` + Child UI smoke, không overlap file AI3; cherry-pick AI3 lên current main vẫn là đường tích hợp an toàn.

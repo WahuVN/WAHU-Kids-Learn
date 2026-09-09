@@ -173,6 +173,13 @@ namespace WAHU.Learning
             return pack;
         }
 
+        public MathQuickRescueLearningPack Load(string path, IEnumerable<MathQuestion> authoredQuestions)
+        {
+            var pack = Load(path);
+            ValidateAgainstAuthoredQuestions(pack, authoredQuestions);
+            return pack;
+        }
+
         public static void ValidateAgainstAuthoredQuestions(MathQuickRescueLearningPack pack, IEnumerable<MathQuestion> authoredQuestions)
         {
             if (pack == null) throw new ArgumentNullException("pack");
@@ -290,6 +297,8 @@ namespace WAHU.Learning
                 if (checkpoint.CommonErrors == null || checkpoint.CommonErrors.Count < 2 || checkpoint.CommonErrors.Any(x =>
                     string.IsNullOrWhiteSpace(x.Id) || string.IsNullOrWhiteSpace(x.CueVi) || string.IsNullOrWhiteSpace(x.RepairVi)))
                     throw new InvalidDataException("Quick Rescue checkpoint requires at least two complete common-error repairs.");
+                if (checkpoint.CommonErrors.Select(x => x.Id).Distinct(StringComparer.OrdinalIgnoreCase).Count() != checkpoint.CommonErrors.Count)
+                    throw new InvalidDataException("Quick Rescue checkpoint common-error ids must be unique.");
             }
 
             var expectedStates = Enum.GetNames(typeof(BehaviorState));
@@ -410,6 +419,8 @@ namespace WAHU.Learning
                 };
             }
 
+            var explicitRepair = HasExplicitRepair(behavior);
+            var preferredVariant = explicitRepair ? "support" : rule.PreferredVariant;
             var options = checkpoint.QuestionOptions.ToList();
             var recent = NormalizeRecent(recentContentQuestionIds, pack.AntiRepeat.RecentQuestionWindow);
             var unseen = options.Where(x => !recent.Contains(x.QuestionId, StringComparer.Ordinal)).ToList();
@@ -424,17 +435,19 @@ namespace WAHU.Learning
                 var oldest = eligible.Where(x => LastIndexOf(recent, x.QuestionId) == oldestIndex).ToList();
                 if (oldest.Count > 0) eligible = oldest;
             }
-            if (!string.Equals(rule.PreferredVariant, "any", StringComparison.Ordinal))
+            if (!string.Equals(preferredVariant, "any", StringComparison.Ordinal))
             {
-                var preferred = eligible.Where(x => string.Equals(x.Variant, rule.PreferredVariant, StringComparison.Ordinal)).ToList();
+                var preferred = eligible.Where(x => string.Equals(x.Variant, preferredVariant, StringComparison.Ordinal)).ToList();
                 if (preferred.Count > 0) eligible = preferred;
             }
 
             eligible = eligible.OrderBy(x => x.QuestionId, StringComparer.Ordinal).ToList();
             var selected = eligible[PositiveMod(StableHash(seed, checkpoint.Number, state.ToString()), eligible.Count)];
+            var useRepair = rule.UseRepair || explicitRepair;
             var hintLevel = Math.Max(0, Math.Min(2, rule.HintLevel));
+            if (useRepair) hintLevel = Math.Max(2, hintLevel);
             var support = hintLevel >= 2 ? checkpoint.HintLevel2Vi : hintLevel == 1 ? checkpoint.HintLevel1Vi : pack.Feedback.ReadyVi;
-            if (rule.UseRepair) support = checkpoint.RepairVi;
+            if (useRepair) support = checkpoint.RepairVi;
 
             return new MathQuickRescueContentDecision
             {
@@ -443,11 +456,11 @@ namespace WAHU.Learning
                 QuestionId = selected.QuestionId,
                 Variant = selected.Variant,
                 RecommendedHintLevel = hintLevel,
-                UseRepair = rule.UseRepair,
+                UseRepair = useRepair,
                 OfferBreak = rule.OfferBreak,
                 MinimalFeedback = rule.MinimalFeedback,
                 SupportVi = support,
-                Reason = "behavior_" + state + ":" + rule.PreferredVariant + (unseen.Count > 0 ? ":unseen" : ":repeat_fallback")
+                Reason = "behavior_" + state + ":" + preferredVariant + (unseen.Count > 0 ? ":unseen" : ":repeat_fallback") + (explicitRepair ? ":explicit_repair" : string.Empty)
             };
         }
 
@@ -485,8 +498,9 @@ namespace WAHU.Learning
                 };
             }
 
+            var explicitRepair = HasExplicitRepair(behavior);
             var hintLevel = Math.Max(1, Math.Min(2, rule.HintLevel));
-            var useRepair = rule.UseRepair || state == BehaviorState.FRUSTRATED_LIKELY;
+            var useRepair = rule.UseRepair || explicitRepair || state == BehaviorState.FRUSTRATED_LIKELY;
             var cue = known == null ? checkpoint.HintLevel1Vi : known.CueVi;
             var repair = known == null ? checkpoint.RepairVi : known.RepairVi;
             return new MathQuickRescueErrorSupportDecision
@@ -504,6 +518,13 @@ namespace WAHU.Learning
                     ? "behavior_" + state + ":generic_error_support"
                     : "behavior_" + state + ":common_error_" + known.Id
             };
+        }
+
+        private static bool HasExplicitRepair(BehaviorDecision decision)
+        {
+            return decision != null &&
+                (decision.TriggerPrerequisiteRepair ||
+                 (decision.Actions != null && decision.Actions.Any(x => string.Equals(x, "prerequisite_repair", StringComparison.Ordinal))));
         }
 
         private static List<string> NormalizeRecent(IEnumerable<string> values, int window)
