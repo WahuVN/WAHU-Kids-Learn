@@ -286,7 +286,7 @@ namespace WAHU.TypingHudRuntimeSmoke
             var client = parent.ClientRectangle;
             foreach (Control child in parent.Controls)
             {
-                
+
                 A(child.Width > 0 && child.Height > 0, name + "_positive_" + child.GetType().Name);
                 var bounds = child.Bounds;
                 A(bounds.Right >= client.Left - 2 && bounds.Bottom >= client.Top - 2 &&
