@@ -532,7 +532,7 @@ namespace WAHUKidsLearn
         private void ResizeLessonNodes()
         {
             if (_lessonFlow == null) return;
-            var width = Math.Max(220, _lessonFlow.ClientSize.Width - _lessonFlow.Padding.Horizontal - 24);
+            var width = ChildWindowSizing.AvailableVerticalFlowChildWidth(_lessonFlow, 8, 220);
             foreach (Control control in _lessonFlow.Controls)
                 if (control is Button || control is Label) control.Width = width;
         }
