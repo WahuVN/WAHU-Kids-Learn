@@ -65,6 +65,7 @@ namespace WAHU.ChildUiRuntimeSmoke
             TestInteractiveSegmentAnswer(appAssembly);
             TestGameArtMotionPolicy(appAssembly);
             TestProductionGameAssets(appAssembly);
+            TestLayoutSafetyPrimitives(appAssembly);
             TestBasicControls(appAssembly);
 
             if (!string.IsNullOrWhiteSpace(_captureDirectory))
@@ -1956,9 +1957,15 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                     A(string.Equals(Get<string>(shell, "CurrentRouteName"), "Home", StringComparison.Ordinal) &&
                       string.Equals(Get<string>(shell, "CurrentLayoutProfileName"), "Compact", StringComparison.Ordinal),
                         "learner_shell_home_starts_compact_single_window_route");
+                    RenderFormAndAssert(shell, 1024, 768, "learner_shell_home_1024x768_window");
+                    A(string.Equals(Get<string>(shell, "CurrentLayoutProfileName"), "Standard", StringComparison.Ordinal),
+                        "learner_shell_1024x768_uses_standard_profile");
                     RenderFormAndAssert(shell, 1180, 760, "learner_shell_home_default_window");
                     A(string.Equals(Get<string>(shell, "CurrentLayoutProfileName"), "Standard", StringComparison.Ordinal),
                         "learner_shell_default_window_uses_standard_profile");
+                    RenderFormAndAssert(shell, 1366, 768, "learner_shell_home_1366x768_window");
+                    A(string.Equals(Get<string>(shell, "CurrentLayoutProfileName"), "Wide", StringComparison.Ordinal),
+                        "learner_shell_1366x768_uses_wide_profile");
                     RenderFormAndAssert(shell, 1125, 800, "learner_shell_home_125pct_window");
                     var homePage = Get<Control>(shell, "CurrentPageControl");
                     A(FindButtonContaining(homePage, "Khu vườn") == null,
@@ -1976,7 +1983,9 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                     A(embeddedTyping != null && !embeddedTyping.TopLevel && embeddedTyping.Parent == typingPage,
                         "learner_shell_typing_space_uses_embedded_non_top_level_form");
                     RenderFormAndAssert(shell, 900, 640, "learner_shell_typing_space_min_window");
+                    RenderFormAndAssert(shell, 1024, 768, "learner_shell_typing_space_1024x768_window");
                     RenderFormAndAssert(shell, 1180, 760, "learner_shell_typing_space_default_window");
+                    RenderFormAndAssert(shell, 1366, 768, "learner_shell_typing_space_1366x768_window");
                     var typingRouter = GetField<object>(shell, "_router");
                     Invoke(typingRouter, "GoBack");
                     Application.DoEvents();
@@ -1994,7 +2003,9 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                     A(!(activePage is Form) && activePage.Parent == shellHost,
                         "learner_shell_math_world_stays_inside_single_top_level_window");
                     RenderFormAndAssert(shell, 900, 640, "learner_shell_math_world_min_window");
+                    RenderFormAndAssert(shell, 1024, 768, "learner_shell_math_world_1024x768_window");
                     RenderFormAndAssert(shell, 1180, 760, "learner_shell_math_world_default_window");
+                    RenderFormAndAssert(shell, 1366, 768, "learner_shell_math_world_1366x768_window");
                     RenderFormAndAssert(shell, 1125, 800, "learner_shell_math_world_125pct_window");
                     var continueButton = FindButtonContaining(activePage, "Tiếp tục bài đang học");
                     if (continueButton != null)
@@ -2007,7 +2018,9 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                     A(Get<int>(activePage, "EventCount") == 5 && !string.IsNullOrWhiteSpace(Get<string>(activePage, "SelectedEventId")),
                         "learner_shell_rescue_map_loads_five_authored_events");
                     RenderFormAndAssert(shell, 900, 640, "learner_shell_rescue_map_min_window");
+                    RenderFormAndAssert(shell, 1024, 768, "learner_shell_rescue_map_1024x768_window");
                     RenderFormAndAssert(shell, 1180, 760, "learner_shell_rescue_map_default_window");
+                    RenderFormAndAssert(shell, 1366, 768, "learner_shell_rescue_map_1366x768_window");
                     RenderFormAndAssert(shell, 1125, 800, "learner_shell_rescue_map_125pct_window");
 
                     var bridgeShellContext = GetField<object>(shell, "_context");
@@ -2169,7 +2182,9 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                       Get<bool>(activePage, "HasActiveSession") && !string.IsNullOrWhiteSpace(Get<string>(activePage, "CurrentContentQuestionId")),
                         "learner_shell_lesson_play_starts_real_targeted_session");
                     RenderFormAndAssert(shell, 900, 640, "learner_shell_lesson_play_min_window");
+                    RenderFormAndAssert(shell, 1024, 768, "learner_shell_lesson_play_1024x768_window");
                     RenderFormAndAssert(shell, 1180, 760, "learner_shell_lesson_play_default_window");
+                    RenderFormAndAssert(shell, 1366, 768, "learner_shell_lesson_play_1366x768_window");
                     RenderFormAndAssert(shell, 1125, 800, "learner_shell_lesson_play_125pct_window");
                     A(shellHost.Controls.Count == 5 && shellHost.Controls.Cast<Control>().All(x => !(x is Form)),
                         "learner_shell_caches_five_pages_without_extra_top_level_forms");
@@ -4389,6 +4404,129 @@ END;");
             }
         }
 
+        private static void TestLayoutSafetyPrimitives(Assembly appAssembly)
+        {
+            const string longVietnamese = "Nhiệm vụ hôm nay đang cần con luyện lại phép trừ có nhớ";
+
+            using (var button = CreateInternalControl(appAssembly, "WAHUKidsLearn.ChildActionButton"))
+            {
+                A(!Get<bool>(button, "AllowTextEllipsis"),
+                    "layout_safety_primary_action_does_not_ellipsis_by_default");
+                button.Text = longVietnamese;
+                button.Font = new Font("Segoe UI", 10f, FontStyle.Bold, GraphicsUnit.Point);
+                RenderAndAssert(button, 300, 64, "layout_safety_long_vietnamese_action_wraps");
+            }
+
+            var sizingType = appAssembly.GetType("WAHUKidsLearn.ChildWindowSizing", true);
+            var applyDefaults = sizingType.GetMethod("ApplyLearnerWindowDefaults",
+                BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            A(applyDefaults != null, "layout_safety_window_defaults_available");
+            using (var form = new Form
+            {
+                FormBorderStyle = FormBorderStyle.Sizable,
+                StartPosition = FormStartPosition.Manual
+            })
+            {
+                applyDefaults.Invoke(null, new object[] { form, new Size(1024, 768), new Size(900, 640) });
+                form.CreateControl();
+                form.Size = form.MinimumSize;
+                form.PerformLayout();
+                A(form.ClientSize.Width >= 900 && form.ClientSize.Height >= 640,
+                    "layout_safety_minimum_size_preserves_minimum_client_area");
+            }
+
+            var availableFlowWidth = sizingType.GetMethod("AvailableVerticalFlowChildWidth",
+                BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            A(availableFlowWidth != null, "layout_safety_vertical_flow_width_helper_available");
+            using (var flow = new FlowLayoutPanel
+            {
+                AutoScroll = true,
+                FlowDirection = FlowDirection.TopDown,
+                WrapContents = false,
+                Padding = new Padding(10),
+                Size = new Size(320, 120)
+            })
+            {
+                flow.Controls.Add(new Panel { Size = new Size(260, 320), Margin = new Padding(4) });
+                CreateAndLayoutTree(flow);
+                var width = (int)availableFlowWidth.Invoke(null, new object[] { flow, 8, 120 });
+                A(width >= 120, "layout_safety_vertical_flow_width_keeps_minimum");
+                A(width <= flow.ClientSize.Width - flow.Padding.Horizontal - 8,
+                    "layout_safety_vertical_flow_width_stays_inside_viewport");
+                if (flow.VerticalScroll.Visible)
+                    A(width <= flow.ClientSize.Width - flow.Padding.Horizontal - SystemInformation.VerticalScrollBarWidth - 8,
+                        "layout_safety_vertical_flow_width_reserves_scrollbar");
+            }
+
+            using (var split = CreateInternalControl(appAssembly, "WAHUKidsLearn.ChildArtTextCardLayout"))
+            {
+                Set(split, "MinimumArtWidth", 150);
+                Set(split, "MaximumArtWidth", 260);
+                split.Size = new Size(760, 240);
+                CreateAndLayoutTree(split);
+                var art = Get<Panel>(split, "ArtHost");
+                var content = Get<Panel>(split, "ContentHost");
+                A(art.Width >= 150 && art.Width <= 260, "layout_safety_art_host_respects_width_bounds");
+                var hostIntersection = Rectangle.Intersect(art.Bounds, content.Bounds);
+                A(hostIntersection.Width <= 1 || hostIntersection.Height <= 1,
+                    "layout_safety_art_and_content_hosts_do_not_overlap");
+                A(art.Right <= content.Left, "layout_safety_art_stays_left_of_content");
+
+                foreach (var resize in new[] { new Size(180, 120), new Size(320, 160), new Size(900, 300) })
+                {
+                    split.Size = resize;
+                    CreateAndLayoutTree(split);
+                    A(art.Width >= 0 && art.Height >= 0 && content.Width >= 0 && content.Height >= 0,
+                        "layout_safety_art_text_resize_never_negative_" + resize.Width + "x" + resize.Height);
+                    A(art.Right <= content.Left + 1,
+                        "layout_safety_art_text_resize_stays_separated_" + resize.Width + "x" + resize.Height);
+                }
+            }
+
+            var assetLibraryType = appAssembly.GetType("WAHUKidsLearn.GameAssetLibrary", true);
+            var hasAsset = assetLibraryType.GetMethod("HasAsset", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            A(hasAsset != null && (bool)hasAsset.Invoke(null, new object[] { "10_UIIcons/icon_reward.png" }),
+                "layout_safety_reference_icon_available");
+            foreach (var iconSize in new[] { 24, 32, 48, 96 })
+            {
+                using (var icon = CreateInternalControl(appAssembly, "WAHUKidsLearn.ChildAssetIconControl"))
+                {
+                    Set(icon, "AssetPath", "10_UIIcons/icon_reward.png");
+                    RenderAndAssert(icon, iconSize, iconSize, "layout_safety_icon_" + iconSize + "px");
+                }
+            }
+
+            var assetSource = File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "src", "App", "GameAssetLibrary.cs"));
+            var containStart = assetSource.IndexOf("public static bool DrawContain", StringComparison.Ordinal);
+            var coverStart = assetSource.IndexOf("public static bool DrawCover", StringComparison.Ordinal);
+            A(containStart >= 0 && coverStart > containStart, "layout_safety_draw_contain_source_range_found");
+            var containSource = assetSource.Substring(containStart, coverStart - containStart);
+            A(containSource.IndexOf("SetClip(bounds)", StringComparison.Ordinal) >= 0,
+                "layout_safety_draw_contain_clips_to_art_bounds");
+
+            var profileType = appAssembly.GetType("WAHUKidsLearn.LearnerLayoutProfileResolver", true);
+            var resolve = profileType.GetMethod("Resolve", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            A(resolve != null, "layout_safety_profile_resolver_available");
+            var logical900x640At125 = resolve.Invoke(null, new object[] { new Size(1125, 800), 120 }).ToString();
+            var logical1024x768At125 = resolve.Invoke(null, new object[] { new Size(1280, 960), 120 }).ToString();
+            var logical1180x760At125 = resolve.Invoke(null, new object[] { new Size(1475, 950), 120 }).ToString();
+            var logical1366x768At125 = resolve.Invoke(null, new object[] { new Size(1708, 960), 120 }).ToString();
+            var logical900x640At150 = resolve.Invoke(null, new object[] { new Size(1350, 960), 144 }).ToString();
+            var logical1180x760At150 = resolve.Invoke(null, new object[] { new Size(1770, 1140), 144 }).ToString();
+            A(string.Equals(logical900x640At125, "Compact", StringComparison.Ordinal),
+                "layout_safety_125dpi_900x640_resolves_compact");
+            A(string.Equals(logical1024x768At125, "Standard", StringComparison.Ordinal),
+                "layout_safety_125dpi_1024x768_resolves_standard");
+            A(string.Equals(logical1180x760At125, "Standard", StringComparison.Ordinal),
+                "layout_safety_125dpi_1180x760_resolves_standard");
+            A(string.Equals(logical1366x768At125, "Wide", StringComparison.Ordinal),
+                "layout_safety_125dpi_1366x768_resolves_wide");
+            A(string.Equals(logical900x640At150, "Compact", StringComparison.Ordinal),
+                "layout_safety_150dpi_900x640_resolves_compact");
+            A(string.Equals(logical1180x760At150, "Standard", StringComparison.Ordinal),
+                "layout_safety_150dpi_1180x760_resolves_standard");
+        }
+
         private static void TestBasicControls(Assembly appAssembly)
         {
             using (var button = CreateInternalControl(appAssembly, "WAHUKidsLearn.AnswerChoiceButton"))
@@ -4539,7 +4677,11 @@ END;");
 
         private static void RenderFormAndAssert(Form form, int width, int height, string name)
         {
-            A(width >= form.MinimumSize.Width && height >= form.MinimumSize.Height, name + "_meets_minimum_size");
+            var chromeWidth = Math.Max(0, form.Width - form.ClientSize.Width);
+            var chromeHeight = Math.Max(0, form.Height - form.ClientSize.Height);
+            var minimumClientWidth = Math.Max(0, form.MinimumSize.Width - chromeWidth);
+            var minimumClientHeight = Math.Max(0, form.MinimumSize.Height - chromeHeight);
+            A(width >= minimumClientWidth && height >= minimumClientHeight, name + "_meets_minimum_client_size");
             form.ClientSize = new Size(width, height);
             CreateAndLayoutTree(form);
             A(form.Controls.Count > 0, name + "_has_root_control");
