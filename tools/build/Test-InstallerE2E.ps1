@@ -190,6 +190,14 @@ try {
     $sentinel = Join-Path $dataDir 'data\e2e-preserve-sentinel.txt'
     'do-not-delete-by-installer-or-uninstaller' | Set-Content -LiteralPath $sentinel -Encoding ASCII
 
+    # Simulate obsolete immutable application payload left by an older version.
+    $staleGameDir = Join-Path $appDir 'Assets\Generated\GameV2\99_obsolete_e2e'
+    New-Item -ItemType Directory -Force -Path $staleGameDir | Out-Null
+    $staleGameFile = Join-Path $staleGameDir 'stale.png'
+    'obsolete-game-asset' | Set-Content -LiteralPath $staleGameFile -Encoding ASCII
+    $staleReadyReadme = Join-Path $appDir 'Assets\Generated\Ready\README_VI.txt'
+    'obsolete-readme' | Set-Content -LiteralPath $staleReadyReadme -Encoding UTF8
+
     # Simulate Parent Mode turning startup off. An update/reinstall must preserve that preference.
     Remove-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -Name 'WAHU Kids Learn' -ErrorAction Stop
     $runDisabledBeforeReinstall = (Get-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -Name 'WAHU Kids Learn' -ErrorAction SilentlyContinue).'WAHU Kids Learn'
@@ -202,6 +210,12 @@ try {
     Assert (Test-Path -LiteralPath $sentinel) 'sentinel lost on reinstall'
     $result.db_sha256_after_reinstall = (Get-FileHash -Algorithm SHA256 -LiteralPath $dbPath).Hash
     Assert ($result.db_sha256_before_reinstall -eq $result.db_sha256_after_reinstall) 'reinstall modified learner DB unexpectedly'
+    Assert (-not (Test-Path -LiteralPath $staleGameFile)) 'reinstall left obsolete GameV2 payload behind'
+    Assert (-not (Test-Path -LiteralPath $staleReadyReadme)) 'reinstall left obsolete Ready README behind'
+    $installedGameV2PngCount = @(Get-ChildItem -LiteralPath (Join-Path $appDir 'Assets\Generated\GameV2') -Recurse -File -Filter '*.png').Count
+    Assert ($installedGameV2PngCount -eq 22) "reinstall GameV2 PNG count mismatch: $installedGameV2PngCount"
+    $result.obsolete_app_payload_cleaned_on_reinstall = $true
+    $result.typing_gamev2_png_count_after_reinstall = $installedGameV2PngCount
     $runAfterDisabledReinstall = (Get-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -Name 'WAHU Kids Learn' -ErrorAction SilentlyContinue).'WAHU Kids Learn'
     Assert ([string]::IsNullOrWhiteSpace($runAfterDisabledReinstall)) 'reinstall/update re-enabled startup against Parent preference'
     $result.startup_disabled_preserved_on_reinstall = $true

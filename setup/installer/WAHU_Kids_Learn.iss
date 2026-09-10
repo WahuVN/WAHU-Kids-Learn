@@ -46,6 +46,13 @@ SetupLogging=yes
 ; after version/license review. App-specific strings below are already Vietnamese.
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
+[InstallDelete]
+; The program tree is immutable application payload. Remove the generated GameV2
+; subtree before every install/upgrade so assets removed by a newer release cannot
+; linger indefinitely. Learner data is stored separately under %LOCALAPPDATA%\WAHU Kids Learn.
+Type: filesandordirs; Name: "{app}\Assets\Generated\GameV2"
+Type: files; Name: "{app}\Assets\Generated\Ready\README_VI.txt"
+
 [Files]
 Source: "{#PublishDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 #ifdef Net48Redist

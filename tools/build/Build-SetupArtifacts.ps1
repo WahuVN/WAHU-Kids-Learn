@@ -495,6 +495,12 @@ $iscc = Find-FirstExisting @(
     'C:\Program Files (x86)\Inno Setup 7\ISCC.exe'
 )
 $installerPath = Join-Path $root "build\installer\WAHU-Kids-Learn-Setup-win7-x86-$AppVersion.exe"
+$installerDefinition = Join-Path $root 'setup\installer\WAHU_Kids_Learn.iss'
+$installerDefinitionText = Get-Content -Raw -LiteralPath $installerDefinition
+foreach ($requiredInstallerCleanup in @('[InstallDelete]','Type: filesandordirs; Name: "{app}\Assets\Generated\GameV2"','Type: files; Name: "{app}\Assets\Generated\Ready\README_VI.txt"')) {
+    if (-not $installerDefinitionText.Contains($requiredInstallerCleanup)) { throw "Installer immutable-payload cleanup guard missing: $requiredInstallerCleanup" }
+}
+Write-Host 'INSTALLER_UPGRADE_CLEANUP_DEFINITION_GATE_PASS'
 if ($CompileInstaller -or $RequireInstaller) {
     if (-not $iscc) {
         if ($RequireInstaller) { throw 'Không tìm thấy ISCC.exe.' }
