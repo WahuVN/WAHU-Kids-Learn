@@ -82,6 +82,7 @@ try {
         'WAHU.Performance.dll',
         'WAHU.Session.dll',
         'WAHU.Data.dll',
+        'WAHU.TypingSpace.Integration.dll',
         'WAHU.Updater.exe',
         'System.Data.SQLite.dll',
         'e_sqlite3.dll',
@@ -99,6 +100,11 @@ try {
         'content_packs\english_grade2_v1\manifest.json',
         'content_packs\math_quick_rescue_v1\manifest.json',
         'content_packs\math_quick_rescue_v1\learning_content_v1.json',
+        'content_packs\typing_space_grade2_v1\typing_content_v1.json',
+        'Assets\Generated\GameV2\02_game_effects_v2\icon_typing.png',
+        'Assets\Generated\GameV2\20_typing_space_scene\typing_space_background_deep.png',
+        'Assets\Generated\GameV2\21_typing_space_combat\ship_player_idle.png',
+        'Assets\Generated\GameV2\21_typing_space_combat\typing_boss_core.png',
         'WAHU.SetupPreflight.exe'
     )
     foreach ($rel in $required) { Assert (Test-Path -LiteralPath (Join-Path $appDir $rel)) "installed payload missing: $rel" }

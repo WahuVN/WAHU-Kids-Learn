@@ -85,11 +85,17 @@ Write-Host '[1b/15] Build Child UI render smoke x86'
 & $msbuild 'tests\ChildUiRuntimeSmoke\WAHU.ChildUiRuntimeSmoke.csproj' /restore /t:Rebuild "/p:Configuration=$Configuration" /p:Platform=x86 /p:RestoreLockedMode=true /v:minimal /nologo
 if ($LASTEXITCODE -ne 0) { throw "Child UI smoke build fail: $LASTEXITCODE" }
 
+$typingFormProject = Join-Path $root 'tests\TypingSpaceFormRuntimeSmoke\WAHU.TypingSpaceFormRuntimeSmoke.csproj'
+Require-File $typingFormProject
+& $msbuild $typingFormProject /t:Build /p:Configuration=$Configuration /p:Platform=x86 /m:1 /nologo /v:minimal
+if ($LASTEXITCODE -ne 0) { throw "Typing Space form smoke build fail: $LASTEXITCODE" }
+
 $preflightSmoke = Join-Path $root "tests\SetupPreflightSmoke\bin\$Configuration\WAHU.SetupPreflight.Smoke.exe"
 $behaviorSmoke = Join-Path $root "tests\BehaviorRuntimeSmoke\bin\$Configuration\WAHU.BehaviorRuntimeSmoke.exe"
 $learningSessionSmoke = Join-Path $root "tests\LearningSessionRuntimeSmoke\bin\$Configuration\WAHU.LearningSessionRuntimeSmoke.exe"
 $motionSmoke = Join-Path $root "tests\MotionRuntimeSmoke\bin\$Configuration\WAHU.MotionRuntimeSmoke.exe"
 $childUiSmoke = Join-Path $root "tests\ChildUiRuntimeSmoke\bin\$Configuration\WAHU.ChildUiRuntimeSmoke.exe"
+$typingFormSmoke = Join-Path $root "tests\TypingSpaceFormRuntimeSmoke\bin\$Configuration\WAHU.TypingSpaceFormRuntimeSmoke.exe"
 $contentSmoke = Join-Path $root "tests\ContentRuntimeSmoke\bin\$Configuration\WAHU.ContentRuntimeSmoke.exe"
 $securitySmoke = Join-Path $root "tests\SecurityRuntimeSmoke\bin\$Configuration\WAHU.SecurityRuntimeSmoke.exe"
 $audioSmoke = Join-Path $root "tests\AudioRuntimeSmoke\bin\$Configuration\WAHU.AudioRuntimeSmoke.exe"
@@ -106,6 +112,7 @@ Require-File $behaviorSmoke
 Require-File $learningSessionSmoke
 Require-File $motionSmoke
 Require-File $childUiSmoke
+Require-File $typingFormSmoke
 Require-File $contentSmoke
 Require-File $securitySmoke
 Require-File $audioSmoke
@@ -132,6 +139,9 @@ $motionAssertions = Invoke-SmokeWithAssertions -Name 'Motion runtime smoke' -Pat
 
 Write-Host '[5b/15] Child UI GDI+ render smoke (100% + 125%)'
 $childUiAssertions = Invoke-SmokeWithAssertions -Name 'Child UI runtime smoke' -Path $childUiSmoke -PassPrefix 'CHILD_UI_RUNTIME_SMOKE_PASS'
+
+Write-Host '[5c/15] Typing Space form/reward/layout smoke'
+$typingFormAssertions = Invoke-SmokeWithAssertions -Name 'Typing Space form runtime smoke' -Path $typingFormSmoke -PassPrefix 'TYPING_SPACE_FORM_RUNTIME_SMOKE_PASS'
 
 Write-Host '[6/15] Content runtime + secure import smoke'
 $contentAssertions = Invoke-SmokeWithAssertions -Name 'Content runtime smoke' -Path $contentSmoke -PassPrefix 'CONTENT_RUNTIME_SMOKE_PASS'
@@ -226,6 +236,7 @@ $runtimeFiles = @(
     'WAHU.Performance.dll',
     'WAHU.Session.dll',
     'WAHU.Data.dll',
+    'WAHU.TypingSpace.Integration.dll',
     'System.Data.SQLite.dll',
     'e_sqlite3.dll'
 )
@@ -261,6 +272,16 @@ Copy-Item -Path (Join-Path $appAssetReady '*') -Destination $publishAssetReady -
 & $productionAssetGate -Mode Tree -Path $publishAssetReady -ExpectedManifestSha256 $productionAssetManifestSha256
 Write-Host "PRODUCTION_ASSET_STAGE_GATE_PASS png_count=$productionAssetPngCount manifest_sha256=$productionAssetManifestSha256"
 
+$appGameV2 = Join-Path $appOut 'Assets\Generated\GameV2'
+$typingGameV2PngCount = if (Test-Path -LiteralPath $appGameV2) { @(Get-ChildItem -LiteralPath $appGameV2 -Recurse -File -Filter *.png).Count } else { 0 }
+if ($typingGameV2PngCount -ne 22) { throw "Typing GameV2 payload expected 22 PNG, found $typingGameV2PngCount." }
+$publishGameV2 = Join-Path $publish 'Assets\Generated\GameV2'
+New-Item -ItemType Directory -Force -Path $publishGameV2 | Out-Null
+Copy-Item -Path (Join-Path $appGameV2 '*') -Destination $publishGameV2 -Recurse -Force
+$publishedTypingGameV2PngCount = @(Get-ChildItem -LiteralPath $publishGameV2 -Recurse -File -Filter *.png).Count
+if ($publishedTypingGameV2PngCount -ne $typingGameV2PngCount) { throw "Typing GameV2 stage mismatch: source=$typingGameV2PngCount publish=$publishedTypingGameV2PngCount." }
+Write-Host "TYPING_GAMEV2_STAGE_GATE_PASS png_count=$publishedTypingGameV2PngCount"
+
 $dirs = @('config','policies','content_packs','curriculum','assets','data\schema')
 foreach ($d in $dirs) { New-Item -ItemType Directory -Force -Path (Join-Path $publish $d) | Out-Null }
 Copy-Item 'setup\config\*.json' (Join-Path $publish 'config') -Force
@@ -276,7 +297,7 @@ Copy-Item 'assets\verified_vectors' (Join-Path $publish 'assets') -Recurse -Forc
 Copy-Item 'data\schema\*.sql' (Join-Path $publish 'data\schema') -Force
 
 # Hard deployment guards: these must be in the actual staged installer payload.
-foreach ($name in @('WAHU.Learning.dll','WAHU.Motion.dll','WAHU.Content.dll','WAHU.Audio.dll','WAHU.Security.dll','WAHU.Performance.dll','WAHU.Session.dll','WAHU.Data.dll','WAHU.Updater.exe','System.Data.SQLite.dll','e_sqlite3.dll','data\schema\001_initial.sql','data\schema\002_attempt_immutability.sql','data\schema\003_math_attempt_idempotency_runtime.sql','data\schema\004_math_lesson_progress.sql','data\schema\005_math_runtime_pack_identity.sql','data\schema\006_attempt_commit_key_immutability.sql','content_packs\math_grade2_v1\verified_templates_v1.json','content_packs\math_grade2_v1\lesson_catalog_v1.json','content_packs\math_grade2_v1\question_bank_v1.json','content_packs\math_grade2_v1\game_events_v1.json')) {
+foreach ($name in @('WAHU.Learning.dll','WAHU.Motion.dll','WAHU.Content.dll','WAHU.Audio.dll','WAHU.Security.dll','WAHU.Performance.dll','WAHU.Session.dll','WAHU.Data.dll','WAHU.TypingSpace.Integration.dll','WAHU.Updater.exe','System.Data.SQLite.dll','e_sqlite3.dll','data\schema\001_initial.sql','data\schema\002_attempt_immutability.sql','data\schema\003_math_attempt_idempotency_runtime.sql','data\schema\004_math_lesson_progress.sql','data\schema\005_math_runtime_pack_identity.sql','data\schema\006_attempt_commit_key_immutability.sql','content_packs\math_grade2_v1\verified_templates_v1.json','content_packs\math_grade2_v1\lesson_catalog_v1.json','content_packs\math_grade2_v1\question_bank_v1.json','content_packs\math_grade2_v1\game_events_v1.json','content_packs\typing_space_grade2_v1\typing_content_v1.json','Assets\Generated\GameV2\02_game_effects_v2\icon_typing.png','Assets\Generated\GameV2\20_typing_space_scene\typing_space_background_deep.png','Assets\Generated\GameV2\21_typing_space_combat\ship_player_idle.png','Assets\Generated\GameV2\21_typing_space_combat\typing_boss_core.png')) {
     Require-File (Join-Path $publish $name)
 }
 
