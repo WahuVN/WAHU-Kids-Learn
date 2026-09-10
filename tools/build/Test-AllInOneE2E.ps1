@@ -61,6 +61,7 @@ try {
         'WAHUKidsLearn.exe',
         'WAHUKidsLearn.exe.config',
         'WAHU.Data.dll',
+        'WAHU.TypingSpace.Integration.dll',
         'System.Data.SQLite.dll',
         'e_sqlite3.dll',
         'config\install_manifest_v1.json',
@@ -68,6 +69,11 @@ try {
         'content_packs\math_grade2_v1\question_bank_v1.json',
         'content_packs\math_quick_rescue_v1\manifest.json',
         'content_packs\math_quick_rescue_v1\learning_content_v1.json',
+        'content_packs\typing_space_grade2_v1\typing_content_v1.json',
+        'Assets\Generated\GameV2\02_game_effects_v2\icon_typing.png',
+        'Assets\Generated\GameV2\20_typing_space_scene\typing_space_background_deep.png',
+        'Assets\Generated\GameV2\21_typing_space_combat\ship_player_idle.png',
+        'Assets\Generated\GameV2\21_typing_space_combat\typing_boss_core.png',
         'Assets\Generated\Ready\ASSET_SELECTION_MANIFEST.json'
     )) {
         Assert (Test-Path -LiteralPath (Join-Path $extractRoot $rel) -PathType Leaf) "All-in-One payload missing: $rel"
@@ -75,6 +81,9 @@ try {
     $productionArtEvidence = Assert-ProductionArtPayload $extractRoot
     $result.production_art_png_count = [int]$productionArtEvidence.png_count
     $result.production_art_manifest_sha256 = [string]$productionArtEvidence.manifest_sha256
+    $typingGameV2PngCount = @(Get-ChildItem -LiteralPath (Join-Path $extractRoot 'Assets\Generated\GameV2') -Recurse -File -Filter '*.png').Count
+    Assert ($typingGameV2PngCount -eq 22) "All-in-One Typing GameV2 PNG count mismatch: $typingGameV2PngCount"
+    $result.typing_gamev2_png_count = $typingGameV2PngCount
 
     Assert (-not (Get-ChildItem -LiteralPath $extractRoot -Filter 'unins*.exe' -File -ErrorAction SilentlyContinue)) 'Portable All-in-One unexpectedly created an uninstaller.'
     Assert (-not (Test-Path -LiteralPath (Join-Path $extractRoot 'UserData'))) 'All-in-One payload unexpectedly contains learner UserData before first boot.'
