@@ -175,6 +175,8 @@ namespace WAHUKidsLearn
                     return new RescueMapPage(_context, delegate(LearnerRoute next) { _router.Navigate(next); });
                 case LearnerRoute.LessonPlay:
                     return new LessonPlayPage(_context, delegate { _router.GoBack(); });
+                case LearnerRoute.TypingSpace:
+                    return new TypingSpacePage(_context, delegate { _router.GoBack(); });
                 default:
                     throw new NotSupportedException("Unknown learner route: " + route + ".");
             }

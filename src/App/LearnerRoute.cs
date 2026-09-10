@@ -5,6 +5,7 @@ namespace WAHUKidsLearn
         Home = 0,
         MathWorld = 1,
         RescueMap = 2,
-        LessonPlay = 3
+        LessonPlay = 3,
+        TypingSpace = 4
     }
 }

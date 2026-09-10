@@ -50,6 +50,11 @@ namespace WAHUKidsLearn
             get { return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Generated", "Ready"); }
         }
 
+        public static string GameV2RootPath
+        {
+            get { return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Generated", "GameV2"); }
+        }
+
         public static long CacheBudgetBytes
         {
             get { lock (Sync) return _cacheBudgetBytes; }
@@ -286,11 +291,20 @@ namespace WAHUKidsLearn
             fullPath = null;
             try
             {
-                var root = Path.GetFullPath(RootPath).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
                 var normalized = NormalizeCacheKey(relativePath).Replace('/', Path.DirectorySeparatorChar).TrimStart(Path.DirectorySeparatorChar);
+                var root = Path.GetFullPath(RootPath).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
                 var candidate = Path.GetFullPath(Path.Combine(root, normalized));
                 if (!candidate.StartsWith(root, StringComparison.OrdinalIgnoreCase)) return false;
-                fullPath = candidate;
+                if (File.Exists(candidate))
+                {
+                    fullPath = candidate;
+                    return true;
+                }
+
+                var gameRoot = Path.GetFullPath(GameV2RootPath).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+                var gameCandidate = Path.GetFullPath(Path.Combine(gameRoot, normalized));
+                if (!gameCandidate.StartsWith(gameRoot, StringComparison.OrdinalIgnoreCase)) return false;
+                fullPath = gameCandidate;
                 return true;
             }
             catch

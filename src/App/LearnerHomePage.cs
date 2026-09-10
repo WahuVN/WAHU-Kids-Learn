@@ -16,6 +16,7 @@ namespace WAHUKidsLearn
         private Label _missionSummary;
         private ChildActionButton _primaryMissionButton;
         private ChildActionButton _mathWorldButton;
+        private ChildActionButton _typingSpaceButton;
         private ChildCard _gardenCard;
         private GardenWorldControl _garden;
         private Label _gardenProgress;
@@ -169,9 +170,10 @@ namespace WAHUKidsLearn
             _heroCard.Controls.Add(_heroLayout);
             _root.Controls.Add(_heroCard, 0, 1);
 
-            var bottom = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1, Margin = Padding.Empty };
-            bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 42));
-            bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 58));
+            var bottom = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, RowCount = 1, Margin = Padding.Empty };
+            bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30));
+            bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30));
+            bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40));
             bottom.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
             _mathWorldButton = BuildBottomButton("Học theo bài", "10_UIIcons/icon_math.png", ChildVisualTheme.Sky, ChildVisualTheme.SkyStrong);
@@ -179,6 +181,13 @@ namespace WAHUKidsLearn
             _mathWorldButton.Click += delegate { _navigate(LearnerRoute.MathWorld); };
             _mathWorldButton.Enabled = _context.IsLearnerReady;
             bottom.Controls.Add(_mathWorldButton, 0, 0);
+
+            _typingSpaceButton = BuildBottomButton("Gõ phím Việt – Anh", "02_game_effects_v2/icon_typing.png",
+                Color.FromArgb(205, 229, 247), ChildVisualTheme.SkyStrong);
+            _typingSpaceButton.AccessibleName = "Mở Phi thuyền gõ phím Việt Anh";
+            _typingSpaceButton.Click += delegate { _navigate(LearnerRoute.TypingSpace); };
+            _typingSpaceButton.Enabled = _context.IsLearnerReady;
+            bottom.Controls.Add(_typingSpaceButton, 1, 0);
 
             _gardenCard = new ChildCard
             {
@@ -228,7 +237,7 @@ namespace WAHUKidsLearn
             };
             gardenLayout.Controls.Add(_gardenProgress, 1, 1);
             _gardenCard.Controls.Add(gardenLayout);
-            bottom.Controls.Add(_gardenCard, 1, 0);
+            bottom.Controls.Add(_gardenCard, 2, 0);
 
             _root.Controls.Add(bottom, 0, 2);
             Controls.Add(_root);

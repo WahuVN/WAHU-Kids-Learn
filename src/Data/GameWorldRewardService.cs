@@ -30,6 +30,7 @@ namespace WAHU.Data
         public const string RewardType = "garden_growth";
         public const string RewardId = "growth_step";
         public const string SourceKeyPrefix = "garden_growth:session:";
+        public const string TypingSourceKeyPrefix = "garden_growth:typing-space:";
         private readonly LearningDatabase _database;
 
         private static readonly KeyValuePair<int, string>[] Milestones =
@@ -124,7 +125,7 @@ WHERE child_id=@child AND reward_type=@type AND reward_id=@reward
                 // Milestones follow canonical Garden rewards, not merely completed sessions.
                 // This prevents an outage with several missing reward rows from unlocking future
                 // milestones when only the first missing reward is repaired.
-                var growthSteps = CountCanonicalGrowthSteps(connection, transaction, childId);
+                var growthSteps = CountGardenGrowthSteps(connection, transaction, childId);
                 foreach (var milestone in Milestones)
                 {
                     if (growthSteps < milestone.Key) continue;
@@ -141,6 +142,64 @@ VALUES(@child,@item,@utc,0);";
                 }
             });
             return SnapshotResult(childId, created, unlocked);
+        }
+
+        public bool GrantTypingSpaceCompletion(string childId, string completionId)
+        {
+            Require(childId, "childId");
+            Require(completionId, "completionId");
+            var sourceKey = SourceKeyForTypingCompletion(completionId);
+            var created = false;
+            _database.Writes.Execute((connection, transaction) =>
+            {
+                using (var reward = connection.CreateCommand())
+                {
+                    reward.Transaction = transaction;
+                    reward.CommandText = @"INSERT OR IGNORE INTO reward_event(
+id,child_id,reward_type,reward_id,source_event,source_ref,source_key,created_at_utc)
+VALUES(@id,@child,@type,@reward,'typing_space_completed',@ref,@key,@utc);";
+                    reward.Parameters.AddWithValue("@id", "reward-" + Guid.NewGuid().ToString("N"));
+                    reward.Parameters.AddWithValue("@child", childId);
+                    reward.Parameters.AddWithValue("@type", RewardType);
+                    reward.Parameters.AddWithValue("@reward", RewardId);
+                    reward.Parameters.AddWithValue("@ref", completionId);
+                    reward.Parameters.AddWithValue("@key", sourceKey);
+                    reward.Parameters.AddWithValue("@utc", DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture));
+                    created = reward.ExecuteNonQuery() == 1;
+                }
+
+                using (var verifyReward = connection.CreateCommand())
+                {
+                    verifyReward.Transaction = transaction;
+                    verifyReward.CommandText = @"SELECT count(*) FROM reward_event
+WHERE child_id=@child AND reward_type=@type AND reward_id=@reward
+  AND source_event='typing_space_completed' AND source_ref=@ref AND source_key=@key;";
+                    verifyReward.Parameters.AddWithValue("@child", childId);
+                    verifyReward.Parameters.AddWithValue("@type", RewardType);
+                    verifyReward.Parameters.AddWithValue("@reward", RewardId);
+                    verifyReward.Parameters.AddWithValue("@ref", completionId);
+                    verifyReward.Parameters.AddWithValue("@key", sourceKey);
+                    if (Convert.ToInt32(verifyReward.ExecuteScalar(), CultureInfo.InvariantCulture) != 1)
+                        throw new InvalidOperationException("Typing Space reward source key conflicts with non-canonical reward data.");
+                }
+
+                var growthSteps = CountGardenGrowthSteps(connection, transaction, childId);
+                foreach (var milestone in Milestones)
+                {
+                    if (growthSteps < milestone.Key) continue;
+                    using (var item = connection.CreateCommand())
+                    {
+                        item.Transaction = transaction;
+                        item.CommandText = @"INSERT OR IGNORE INTO inventory(child_id,item_id,unlocked_at_utc,equipped)
+VALUES(@child,@item,@utc,0);";
+                        item.Parameters.AddWithValue("@child", childId);
+                        item.Parameters.AddWithValue("@item", milestone.Value);
+                        item.Parameters.AddWithValue("@utc", DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture));
+                        item.ExecuteNonQuery();
+                    }
+                }
+            });
+            return created;
         }
 
         public int ReconcileMissingCompletedMathSessionRewards(string childId)
@@ -194,7 +253,7 @@ ORDER BY s.started_at_utc,s.id;";
             {
                 var progress = new GameWorldProgress
                 {
-                    GrowthSteps = CountCanonicalGrowthSteps(connection, null, childId),
+                    GrowthSteps = CountGardenGrowthSteps(connection, null, childId),
                     CompletedMathSessions = Count(connection,
                         @"SELECT count(*) FROM session s
 WHERE s.child_id=@child AND s.state='completed' AND s.planned_subject='math'
@@ -231,6 +290,12 @@ WHERE s.child_id=@child AND s.state='completed' AND s.planned_subject='math'
             return SourceKeyPrefix + sessionId;
         }
 
+        public static string SourceKeyForTypingCompletion(string completionId)
+        {
+            Require(completionId, "completionId");
+            return TypingSourceKeyPrefix + completionId;
+        }
+
         private static void PopulateNextMilestone(GameWorldProgress progress)
         {
             if (progress == null) return;
@@ -251,7 +316,7 @@ WHERE s.child_id=@child AND s.state='completed' AND s.planned_subject='math'
         {
             _database.Writes.Execute((connection, transaction) =>
             {
-                var growthSteps = CountCanonicalGrowthSteps(connection, transaction, childId);
+                var growthSteps = CountGardenGrowthSteps(connection, transaction, childId);
                 foreach (var milestone in Milestones)
                 {
                     using (var command = connection.CreateCommand())
@@ -276,19 +341,23 @@ VALUES(@child,@item,@utc,0);";
             });
         }
 
-        private static int CountCanonicalGrowthSteps(System.Data.SQLite.SQLiteConnection connection,
+        private static int CountGardenGrowthSteps(System.Data.SQLite.SQLiteConnection connection,
             System.Data.SQLite.SQLiteTransaction transaction, string childId)
         {
             using (var command = connection.CreateCommand())
             {
                 if (transaction != null) command.Transaction = transaction;
                 command.CommandText = @"SELECT count(*) FROM reward_event r
-JOIN session s ON s.id=r.source_ref AND s.child_id=r.child_id
 WHERE r.child_id=@child AND r.reward_type='garden_growth' AND r.reward_id='growth_step'
-  AND r.source_event='session_completed' AND r.source_key='garden_growth:session:' || s.id
-  AND s.state='completed' AND s.planned_subject='math'
-  AND EXISTS (SELECT 1 FROM attempt a WHERE a.session_id=s.id AND a.child_id=s.child_id AND a.subject='math' AND a.answered_at_utc IS NOT NULL);";
+  AND ((r.source_event='session_completed' AND r.source_key=@mathPrefix || r.source_ref
+        AND EXISTS (SELECT 1 FROM session s WHERE s.id=r.source_ref AND s.child_id=r.child_id
+                    AND s.state='completed' AND s.planned_subject='math'
+                    AND EXISTS (SELECT 1 FROM attempt a WHERE a.session_id=s.id AND a.child_id=s.child_id
+                                AND a.subject='math' AND a.answered_at_utc IS NOT NULL)))
+       OR (r.source_event='typing_space_completed' AND r.source_key=@typingPrefix || r.source_ref));";
                 command.Parameters.AddWithValue("@child", childId);
+                command.Parameters.AddWithValue("@mathPrefix", SourceKeyPrefix);
+                command.Parameters.AddWithValue("@typingPrefix", TypingSourceKeyPrefix);
                 return Convert.ToInt32(command.ExecuteScalar(), CultureInfo.InvariantCulture);
             }
         }

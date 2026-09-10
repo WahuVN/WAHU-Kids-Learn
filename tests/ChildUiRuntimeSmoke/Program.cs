@@ -1965,6 +1965,24 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                         "learner_shell_home_has_no_dead_garden_button");
                     A(CountControlsOfType(shell, typeof(TabControl)) == 0,
                         "learner_shell_home_has_no_tab_control");
+
+                    Invoke(shell, "NavigateToRouteName", "TypingSpace");
+                    Application.DoEvents();
+                    A(string.Equals(Get<string>(shell, "CurrentRouteName"), "TypingSpace", StringComparison.Ordinal) &&
+                      string.Equals(Get<string>(shell, "CurrentPageTypeName"), "TypingSpacePage", StringComparison.Ordinal),
+                        "learner_shell_routes_home_to_typing_space_inside_shell");
+                    var typingPage = Get<Control>(shell, "CurrentPageControl");
+                    var embeddedTyping = GetField<Form>(typingPage, "_embedded");
+                    A(embeddedTyping != null && !embeddedTyping.TopLevel && embeddedTyping.Parent == typingPage,
+                        "learner_shell_typing_space_uses_embedded_non_top_level_form");
+                    RenderFormAndAssert(shell, 900, 640, "learner_shell_typing_space_min_window");
+                    RenderFormAndAssert(shell, 1180, 760, "learner_shell_typing_space_default_window");
+                    var typingRouter = GetField<object>(shell, "_router");
+                    Invoke(typingRouter, "GoBack");
+                    Application.DoEvents();
+                    A(string.Equals(Get<string>(shell, "CurrentRouteName"), "Home", StringComparison.Ordinal),
+                        "learner_shell_typing_space_back_returns_home");
+
                     Invoke(shell, "NavigateToRouteName", "MathWorld");
                     Application.DoEvents();
                     A(string.Equals(Get<string>(shell, "CurrentRouteName"), "MathWorld", StringComparison.Ordinal),
@@ -2153,8 +2171,8 @@ BEGIN SELECT RAISE(ABORT,'home injected reward failure'); END;");
                     RenderFormAndAssert(shell, 900, 640, "learner_shell_lesson_play_min_window");
                     RenderFormAndAssert(shell, 1180, 760, "learner_shell_lesson_play_default_window");
                     RenderFormAndAssert(shell, 1125, 800, "learner_shell_lesson_play_125pct_window");
-                    A(shellHost.Controls.Count == 4 && shellHost.Controls.Cast<Control>().All(x => !(x is Form)),
-                        "learner_shell_caches_exactly_four_native_pages_without_extra_forms");
+                    A(shellHost.Controls.Count == 5 && shellHost.Controls.Cast<Control>().All(x => !(x is Form)),
+                        "learner_shell_caches_five_pages_without_extra_top_level_forms");
                     A(CountControlsOfType(shell, typeof(TabControl)) == 0,
                         "learner_shell_all_routes_have_no_tab_control");
 

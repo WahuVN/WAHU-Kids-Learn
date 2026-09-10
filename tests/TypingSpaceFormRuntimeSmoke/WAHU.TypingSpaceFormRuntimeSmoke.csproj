@@ -1,0 +1,37 @@
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProjectGuid>{A1E7F9C2-7D53-4E1A-9B0B-6D4A7C8F2E31}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>WAHU.TypingSpaceFormRuntimeSmoke</RootNamespace>
+    <AssemblyName>WAHU.TypingSpaceFormRuntimeSmoke</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' "><DebugSymbols>true</DebugSymbols><DebugType>full</DebugType><Optimize>false</Optimize><OutputPath>bin\Debug\</OutputPath><DefineConstants>DEBUG;TRACE</DefineConstants><PlatformTarget>x86</PlatformTarget><Prefer32Bit>true</Prefer32Bit></PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' "><DebugType>pdbonly</DebugType><Optimize>true</Optimize><OutputPath>bin\Release\</OutputPath><DefineConstants>TRACE</DefineConstants><PlatformTarget>x86</PlatformTarget><Prefer32Bit>true</Prefer32Bit></PropertyGroup>
+  <ItemGroup><Reference Include="System" /><Reference Include="System.Core" /><Reference Include="System.Drawing" /><Reference Include="System.Windows.Forms" /></ItemGroup>
+  <ItemGroup><Compile Include="Program.cs" /></ItemGroup>
+  <ItemGroup>
+    <Content Include="..\..\src\App\Assets\Generated\Ready\**\*">
+      <Link>Assets\Generated\Ready\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\src\App\Assets\Generated\GameV2\**\*">
+      <Link>Assets\Generated\GameV2\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\content_packs\typing_space_grade2_v1\typing_content_v1.json">
+      <Link>content_packs\typing_space_grade2_v1\typing_content_v1.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\App\WAHUKidsLearn.csproj"><Project>{2B22CA28-446A-4B9E-A79C-AF61F7CD501C}</Project><Name>WAHUKidsLearn</Name></ProjectReference>
+    <ProjectReference Include="..\..\src\Data\WAHU.Data.csproj"><Project>{492526A2-1C03-4D76-A9E9-D2A57AB46028}</Project><Name>WAHU.Data</Name></ProjectReference>
+    <ProjectReference Include="..\..\src\TypingSpaceIntegration\WAHU.TypingSpace.Integration.csproj"><Project>{D1A3E2CF-0A0E-4D37-9F7A-7FB01B4A1001}</Project><Name>WAHU.TypingSpace.Integration</Name></ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

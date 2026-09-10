@@ -62,8 +62,8 @@ namespace WAHU.TypingSpace
         {
             if (Phase == GamePhase.Paused || Phase == GamePhase.Complete || Phase == GamePhase.Intro || CurrentTarget == null) return false;
             if (input == null) throw new ArgumentNullException("input");
-            var key = (input.NormalizedKey ?? string.Empty).Trim();
-            if (key.Length == 0) return false;
+            var key = input.NormalizedKey ?? string.Empty;
+            if (key.Length == 0 || key == "\r" || key == "\n" || key == "\t") return false;
             var candidate = _typed + key;
             var prefixMatch = CurrentTarget.AcceptedInputs.Any(x => x.StartsWith(candidate, StringComparison.OrdinalIgnoreCase));
             if (!prefixMatch)
