@@ -65,6 +65,47 @@ namespace WAHUKidsLearn
         {
             using (font) TextRenderer.DrawText(graphics, text, font, bounds, color, flags);
         }
+
+        public static int MeasureWrappedTextHeight(string text, Font font, int width)
+        {
+            if (font == null || width <= 0 || string.IsNullOrEmpty(text)) return 0;
+            var measured = TextRenderer.MeasureText(text, font, new Size(width, 4096),
+                TextFormatFlags.WordBreak | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
+            return measured.Height;
+        }
+
+        public static void DrawFittedText(Graphics graphics, string text, Font baseFont, Rectangle bounds, Color color,
+            TextFormatFlags flags, float minimumPointSize, bool allowEllipsis)
+        {
+            if (graphics == null || baseFont == null || bounds.Width <= 0 || bounds.Height <= 0 || string.IsNullOrEmpty(text)) return;
+            var drawFlags = flags | TextFormatFlags.NoPrefix;
+            var minSize = Math.Max(8f, Math.Min(baseFont.SizeInPoints, minimumPointSize));
+            Font fitted = null;
+            try
+            {
+                var candidate = baseFont;
+                var size = baseFont.SizeInPoints;
+                while (size > minSize + 0.01f)
+                {
+                    var measured = TextRenderer.MeasureText(text, candidate, new Size(Math.Max(1, bounds.Width), 4096),
+                        (drawFlags | TextFormatFlags.WordBreak) & ~TextFormatFlags.EndEllipsis);
+                    if (measured.Width <= bounds.Width && measured.Height <= bounds.Height) break;
+
+                    if (fitted != null) fitted.Dispose();
+                    size = Math.Max(minSize, size - 0.5f);
+                    fitted = new Font(baseFont.FontFamily, size, baseFont.Style, GraphicsUnit.Point);
+                    candidate = fitted;
+                }
+
+                if (allowEllipsis) drawFlags |= TextFormatFlags.EndEllipsis;
+                else drawFlags &= ~TextFormatFlags.EndEllipsis;
+                TextRenderer.DrawText(graphics, text, candidate, bounds, color, drawFlags);
+            }
+            finally
+            {
+                if (fitted != null) fitted.Dispose();
+            }
+        }
     }
 
     internal sealed class ChildSceneLayout : TableLayoutPanel
@@ -74,6 +115,12 @@ namespace WAHUKidsLearn
             SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint |
                      ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw, true);
             BackColor = ChildVisualTheme.Cream;
+        }
+
+        protected override void OnLayout(LayoutEventArgs levent)
+        {
+            base.OnLayout(levent);
+            ChildLayoutDiagnostics.TraceAbnormalBounds(this);
         }
 
         protected override void OnPaintBackground(PaintEventArgs e)
@@ -98,7 +145,7 @@ namespace WAHUKidsLearn
     {
         public Color CardColor { get; set; } = ChildVisualTheme.Card;
         public Color BorderColor { get; set; } = ChildVisualTheme.Line;
-        public int Radius { get; set; } = 22;
+        public int Radius { get; set; } = LearnerDesignTokens.RadiusCard;
         public bool ShowShadow { get; set; } = true;
 
         public ChildCard()
@@ -130,12 +177,147 @@ namespace WAHUKidsLearn
         }
     }
 
+    internal sealed class ChildArtTextCardLayout : TableLayoutPanel
+    {
+        private int _minimumArtWidth = LearnerDesignTokens.ArtMinimumWidth;
+        private int _maximumArtWidth = LearnerDesignTokens.ArtMaximumWidth;
+        private int _minimumContentWidth = LearnerDesignTokens.ContentMinimumWidth;
+        private int _preferredArtPercent = LearnerDesignTokens.ArtPreferredPercent;
+
+        public Panel ArtHost { get; private set; }
+        public Panel ContentHost { get; private set; }
+
+        public int MinimumArtWidth
+        {
+            get { return _minimumArtWidth; }
+            set { _minimumArtWidth = Math.Max(0, value); NormalizeBounds(); ApplyArtWidth(); }
+        }
+
+        public int MaximumArtWidth
+        {
+            get { return _maximumArtWidth; }
+            set { _maximumArtWidth = Math.Max(0, value); NormalizeBounds(); ApplyArtWidth(); }
+        }
+
+        public int MinimumContentWidth
+        {
+            get { return _minimumContentWidth; }
+            set { _minimumContentWidth = Math.Max(0, value); ApplyArtWidth(); }
+        }
+
+        public int PreferredArtPercent
+        {
+            get { return _preferredArtPercent; }
+            set { _preferredArtPercent = Math.Max(15, Math.Min(55, value)); ApplyArtWidth(); }
+        }
+
+        public ChildArtTextCardLayout()
+        {
+            SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint |
+                     ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw, true);
+            ColumnCount = 2;
+            RowCount = 1;
+            Margin = Padding.Empty;
+            Padding = Padding.Empty;
+            ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, _minimumArtWidth));
+            ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
+            RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
+
+            ArtHost = new Panel
+            {
+                Dock = DockStyle.Fill,
+                Margin = Padding.Empty,
+                Padding = new Padding(LearnerDesignTokens.SpaceS),
+                BackColor = Color.Transparent
+            };
+            ContentHost = new Panel
+            {
+                Dock = DockStyle.Fill,
+                Margin = Padding.Empty,
+                Padding = new Padding(LearnerDesignTokens.SpaceL),
+                BackColor = Color.Transparent
+            };
+            Controls.Add(ArtHost, 0, 0);
+            Controls.Add(ContentHost, 1, 0);
+            ApplyArtWidth();
+        }
+
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            ApplyArtWidth();
+        }
+
+        protected override void OnPaddingChanged(EventArgs e)
+        {
+            base.OnPaddingChanged(e);
+            ApplyArtWidth();
+        }
+
+        private void NormalizeBounds()
+        {
+            if (_maximumArtWidth < _minimumArtWidth) _maximumArtWidth = _minimumArtWidth;
+        }
+
+        private void ApplyArtWidth()
+        {
+            if (ColumnStyles.Count < 2) return;
+            var available = Math.Max(0, ClientSize.Width - Padding.Horizontal);
+            var maxByContent = Math.Max(0, available - _minimumContentWidth);
+            var upper = Math.Min(_maximumArtWidth, maxByContent);
+            var lower = Math.Min(_minimumArtWidth, upper);
+            var desired = (int)Math.Round(available * (_preferredArtPercent / 100.0));
+            var artWidth = Math.Max(lower, Math.Min(upper, desired));
+            ColumnStyles[0].SizeType = SizeType.Absolute;
+            ColumnStyles[0].Width = artWidth;
+            ColumnStyles[1].SizeType = SizeType.Percent;
+            ColumnStyles[1].Width = 100f;
+        }
+    }
+
+    internal static class ChildLayoutDiagnostics
+    {
+        [System.Diagnostics.Conditional("DEBUG")]
+        public static void TraceAbnormalBounds(Control root)
+        {
+            if (root == null || root.Width <= 0 || root.Height <= 0) return;
+            TraceRecursive(root);
+        }
+
+        private static void TraceRecursive(Control parent)
+        {
+            var client = parent.ClientRectangle;
+            var scrollable = parent as ScrollableControl;
+            var allowScroll = scrollable != null && scrollable.AutoScroll;
+            var visible = new System.Collections.Generic.List<Control>();
+            foreach (Control child in parent.Controls)
+            {
+                if (!child.Visible) continue;
+                visible.Add(child);
+                if (!allowScroll && client.Width > 0 && client.Height > 0 && !client.Contains(child.Bounds))
+                    System.Diagnostics.Debug.WriteLine("[UI-BOUNDS] " + parent.GetType().Name + " -> " + child.GetType().Name + " " + child.Bounds);
+                TraceRecursive(child);
+            }
+
+            if (!(parent is TableLayoutPanel) && !(parent is FlowLayoutPanel)) return;
+            for (var i = 0; i < visible.Count; i++)
+                for (var j = i + 1; j < visible.Count; j++)
+                {
+                    var overlap = Rectangle.Intersect(visible[i].Bounds, visible[j].Bounds);
+                    if (overlap.Width > 1 && overlap.Height > 1)
+                        System.Diagnostics.Debug.WriteLine("[UI-OVERLAP] " + parent.GetType().Name + " -> " + visible[i].GetType().Name + " / " + visible[j].GetType().Name + " " + overlap);
+                }
+        }
+    }
+
     internal class ChildActionButton : Button
     {
         private bool _hover;
         private bool _pressed;
         private string _iconAssetPath;
         private int _iconSize = 26;
+        private bool _allowTextEllipsis;
+        private float _minimumTextPointSize = 8.5f;
 
         public Color FillColor { get; set; } = ChildVisualTheme.MintStrong;
         public Color HoverColor { get; set; } = Color.FromArgb(92, 155, 104);
@@ -148,8 +330,18 @@ namespace WAHUKidsLearn
         public float BorderThickness { get; set; } = 1f;
         public bool ShowDepth { get; set; } = true;
         public int Depth { get; set; } = 4;
-        public int Radius { get; set; } = 18;
+        public int Radius { get; set; } = LearnerDesignTokens.RadiusButton;
         public string BadgeText { get; set; }
+        public bool AllowTextEllipsis
+        {
+            get { return _allowTextEllipsis; }
+            set { if (_allowTextEllipsis == value) return; _allowTextEllipsis = value; Invalidate(); }
+        }
+        public float MinimumTextPointSize
+        {
+            get { return _minimumTextPointSize; }
+            set { _minimumTextPointSize = Math.Max(8f, Math.Min(18f, value)); Invalidate(); }
+        }
         public string IconAssetPath
         {
             get { return _iconAssetPath; }
@@ -243,9 +435,10 @@ namespace WAHUKidsLearn
                     textRect.X = textLeft;
                 }
             }
-            TextRenderer.DrawText(pevent.Graphics, Text, Font, textRect,
+            ChildVisualTheme.DrawFittedText(pevent.Graphics, Text, Font, textRect,
                 Enabled ? TextColor : DisabledTextColor,
-                AlignmentFlags(TextAlign) | TextFormatFlags.EndEllipsis | TextFormatFlags.WordBreak | TextFormatFlags.NoPrefix);
+                AlignmentFlags(TextAlign) | TextFormatFlags.WordBreak,
+                MinimumTextPointSize, AllowTextEllipsis);
 
             if (!string.IsNullOrWhiteSpace(BadgeText))
             {

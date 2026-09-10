@@ -139,18 +139,20 @@ namespace WAHUKidsLearn
                 var image = GetLocked(relativePath);
                 if (image == null) return false;
                 var target = Fit(image.Size, bounds);
-                var oldInterpolation = g.InterpolationMode;
-                var oldPixelOffset = g.PixelOffsetMode;
+                var state = g.Save();
                 try
                 {
+                    // Even contain targets can bleed a sub-pixel past their logical host when
+                    // bicubic interpolation samples edge pixels. Clip every decorative asset
+                    // to the host so artwork can never paint over adjacent text.
+                    g.SetClip(bounds);
                     g.InterpolationMode = InterpolationMode.HighQualityBicubic;
                     g.PixelOffsetMode = PixelOffsetMode.HighQuality;
                     g.DrawImage(image, target);
                 }
                 finally
                 {
-                    g.InterpolationMode = oldInterpolation;
-                    g.PixelOffsetMode = oldPixelOffset;
+                    g.Restore(state);
                 }
                 return true;
             }

@@ -20,6 +20,10 @@ namespace WAHUKidsLearn
         public const int TouchMinimum = 48;
         public const int TouchPrimary = 56;
         public const int ContentMaxWidth = 1180;
+        public const int ContentMinimumWidth = 220;
+        public const int ArtMinimumWidth = 144;
+        public const int ArtMaximumWidth = 320;
+        public const int ArtPreferredPercent = 34;
 
         public static Padding PagePadding(LearnerLayoutProfile profile)
         {
